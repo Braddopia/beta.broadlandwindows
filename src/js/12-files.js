@@ -122,6 +122,6 @@ function setCover(u){const d=DL.find(x=>x.url==u);if(!d)return;S.covers=S.covers
     if(o.img)S.covers[u]=SAFE.url(o.img);else delete S.covers[u];audit('Brochure cover set',d.title,o.img||'automatic')})}
 
 /* logos that ship inside the app, listed in the Brand And Print Assets table */
-const BUILTIN=()=>[['full','Broadland logo, full colour','broadland-logo-full-colour.webp'],['fullDark','Broadland logo, for dark backgrounds','broadland-logo-dark-background.webp'],['emblem','Sun and stork emblem','broadland-sun-emblem.webp'],['blue','Text logo, blue','broadland-logo-blue.png'],['white','Text logo, white','broadland-logo-white.png']]
+const BUILTIN=()=>[['full','Broadland logo, full colour','broadland-logo-full-colour.webp'],['fullDark','Broadland text logo, white (dark mode)','broadland-logo-dark-background.webp'],['emblem','Sun and stork emblem','broadland-sun-emblem.webp'],['blue','Text logo, blue','broadland-logo-blue.png'],['white','Text logo, white','broadland-logo-white.png']]
   .map(([key,name,file])=>({key,name,file,cat:'Brand Asset',src:LOGO_SRC[key],size:Math.round((LOGO_SRC[key].length-30)*.75)}));
 function builtinOpen(k){const src=LOGO_SRC[k];if(!src)return;const w=window.open('','_blank');if(!w)return;w.document.write(`<title>Logo</title><body style="margin:0;display:grid;place-items:center;min-height:100vh;background:${/white|Dark/.test(k)?'#012b59':'#fff'}"><img src="${src}" style="max-width:90vw;max-height:90vh">`);w.document.close()}
