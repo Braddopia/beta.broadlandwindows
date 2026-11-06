@@ -1,10 +1,10 @@
-# Broadland CRM v19.1
+# Broadland Windows CRM v19.2
 
-**To use:** open `dist/broadland-crm-v19.1.html` (a single self-contained file, just like v18).
+**To use:** open `dist/Broadland-Windows-CRM-v19.2.html` (a single self-contained file, just like v18).
 It reads the same browser storage as v18, so existing data carries over.
 
 ## Editing
-Change files in `src/`, then run `python3 build.py` to rebuild `dist/broadland-crm-v19.1.html`.
+Change files in `src/`, then run `python3 build.py` to rebuild `dist/Broadland-Windows-CRM-v19.2.html`.
 
 ```
 src/index.html        page skeleton (sidebar, top bar, dialogs)

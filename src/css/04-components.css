@@ -44,13 +44,17 @@
 .panel>h2{display:flex;justify-content:space-between;align-items:center;gap:.5rem;flex-wrap:wrap}
 .two{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,21rem),1fr));gap:var(--gap)}
 .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,10.5rem),1fr));gap:.7rem;margin-bottom:1.1rem}
-.kpi{padding:.65rem .85rem;text-align:left;border-left:4px solid var(--blue)!important;transition:transform .2s}
+.kpi{padding:.85rem 1rem;text-align:left;border-left:4px solid var(--blue)!important;transition:transform .2s}
 button.kpi,.kpi.lnk{cursor:pointer}
 button.kpi:hover,.kpi.lnk:hover{transform:translateY(-2px)}
 .kpi.on{background:var(--blue-bg)}
 .kpi.warn{border-left-color:var(--yellow)!important}.kpi.bad{border-left-color:var(--red)!important}
-.kpi small{display:block;color:var(--muted);font-size:.76rem}
-.kpi b{font:600 1.3rem var(--head);color:var(--navy)}
+.kpi small{display:block;color:var(--muted);font-size:.8rem}
+.kpi b{display:block;font:600 clamp(1.5rem,1.9vw,2.4rem)/1.15 var(--head);color:var(--navy);margin-top:.15rem}
+.kpis.big{grid-template-columns:repeat(auto-fit,minmax(min(100%,13rem),1fr));gap:1rem}
+.kpis.big .kpi{padding:1rem 1.2rem;border-left-width:6px!important}
+.kpis.big .kpi small{font-size:clamp(.85rem,.9vw,1.2rem);font-weight:500}
+.kpis.big .kpi b{font-size:clamp(2.2rem,3.2vw,4.4rem);line-height:1.1}
 .ksub{display:block;font-size:.7rem;color:var(--muted);margin-top:.1rem}
 .row{display:flex;justify-content:space-between;align-items:center;gap:.75rem;padding:.55rem 0;border-bottom:1px solid var(--line)}
 .row:last-child{border-bottom:0}
@@ -144,6 +148,7 @@ body[data-theme=dark] .selbar{background:#0f2a4d}
 .mb{position:relative;width:min(64rem,96vw);max-height:92dvh;overflow:auto;padding:1.3rem 1.4rem 0;border-radius:20px;background:var(--card);color:var(--ink);box-shadow:var(--sh-lg);animation:pop .28s cubic-bezier(.2,.8,.3,1)}
 .mb.lg{width:min(76rem,96vw)}
 .mb.sm{width:min(30rem,96vw)}
+.mb.md{width:min(46rem,96vw)}
 .mb.xl{width:min(82rem,96vw);height:min(92dvh,62rem);display:flex;flex-direction:column;padding:0}
 .mb>h2:first-child{padding-right:2rem}
 .mx{position:absolute;top:.8rem;right:.8rem;width:2rem;height:2rem;border:0;border-radius:50%;background:var(--card2);cursor:pointer;font-size:1.2rem;line-height:1;z-index:3}

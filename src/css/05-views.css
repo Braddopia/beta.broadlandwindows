@@ -191,3 +191,29 @@ body.lv .lvg{flex:1;min-height:0;grid-template-rows:repeat(2,minmax(0,1fr))}
 .sup-t{margin-top:1rem;box-shadow:none}
 @media(max-width:1100px){.sup-b{grid-template-columns:1fr 1fr}.sup-b>.sup-c:last-child{grid-column:1/-1}}
 @media(max-width:600px){.sup-b{grid-template-columns:1fr}}
+
+/* suppliers: compact cards that expand into the full detail panel */
+.sups{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,20rem),1fr));gap:var(--gap);align-items:start}
+.sup.open{grid-column:1/-1;animation:pop .25s}
+.supc{display:flex;flex-direction:column;gap:.75rem;width:100%;text-align:left;cursor:pointer;color:var(--ink);font:inherit;transition:transform .15s,border-color .15s}
+.supc:hover{transform:translateY(-2px);border-color:var(--blue)!important}
+.supc-h{display:flex;align-items:center;gap:.5rem}.supc-h b{font:600 1.05rem var(--head);color:var(--navy)}
+.supc .chev{margin-left:auto;color:var(--muted)}.supc .chev svg{width:1.1rem;height:1.1rem}
+.supc-i{display:grid;grid-template-columns:1fr 1fr;gap:.45rem .8rem;font-size:.84rem}.supc-i small{display:block;font-size:.68rem;color:var(--muted)}
+.supc-k{display:flex;gap:.35rem;flex-wrap:wrap}
+
+/* brand */
+.brand{padding:.2rem .2rem .9rem}
+.brand .lg{width:100%;max-height:5.6rem;object-fit:contain}
+#splash .spl{display:flex;flex-direction:column;align-items:center;gap:1.2rem;animation:spLogo .9s cubic-bezier(.2,.8,.2,1) both}
+#splash .spl .lg-e{width:min(130px,30vw);filter:drop-shadow(0 10px 40px rgba(255,208,2,.45))}
+#splash .spl .lg-w{width:min(320px,70vw);animation:none;filter:none}
+#splash .spl span{color:#cfe0f7;font-size:.8rem;letter-spacing:.2em;text-transform:uppercase}
+.hero{padding-right:clamp(1.4rem,16vw,12rem)}
+.hero::after{right:clamp(.6rem,2vw,2rem);top:50%;transform:translateY(-50%);width:clamp(80px,10vw,150px);height:clamp(80px,10vw,150px);border-radius:50%;background:var(--hero-emblem) center/contain no-repeat;opacity:1}
+.hero .rate{display:flex;gap:1.2rem;flex-wrap:wrap;margin-top:.7rem;font-size:.8rem;color:#cfe0f7}.hero .rate b{color:#ffd002}
+@media(max-width:600px){.hero::after{opacity:.25}}
+
+.kpis.big .kpi b.lg{font-size:clamp(1.6rem,2.1vw,3.2rem)}
+.kpi b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hero::after{top:.8rem;bottom:.8rem;height:auto;width:auto;aspect-ratio:1/1;transform:none}

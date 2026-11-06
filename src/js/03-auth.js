@@ -84,7 +84,7 @@ function editProfile(){
    <div class="ff"><label for="p_allow">Holiday allowance ${adm?'':lk('Admin only')}</label><input id="p_allow" type="number" min="0" max="60" value="${esc(m.allow??'')}" ${adm?'':'readonly'}></div>
   </div>
   ${m.id?'':'<p class="warn">Your name is not linked to a staff record yet. An administrator can add you under Staff.</p>'}
-  <div class="mact"><button class="btn ghost l" onclick="swRole()">${svg(IC.switch)}Switch account</button><button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn" onclick="saveProfile()">Save details</button></div>`)}
+  <div class="mact"><button class="btn ghost l" onclick="swRole()">${svg(IC.switch)}Switch account</button><button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn" onclick="saveProfile()">Save details</button></div>`,'md')}
 function saveProfile(){
   const v=i=>SAFE.text(($('#'+i)||{}).value,i=='p_sig'?400:120),p=S.profile,m=me();
   const name=v('p_name');if(name.length<2){toast('Please enter your name');return}

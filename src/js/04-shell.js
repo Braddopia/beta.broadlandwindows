@@ -8,8 +8,8 @@ const UI={
   mov:{f:'all',sort:'',dir:1,page:1,per:50},
   cal:{m:'month',o:0,sd:null,ly:{fit:1,svc:1,del:1,hol:1}},
   hol:{m:0,v:'tl'}, rep:{t:'summary'}, fin:{t:'debtors',pm:0},
-  del:{f:'out',s:'all',v:'board'}, files:{cat:'all',az:0,list:0,ssq:'',page:1,per:50},
-  con:{f:'all'}, nc:{t:'All'}, audit:{page:1,per:50}
+  del:{f:'out',s:'all',v:'list'}, files:{cat:'all',az:0,list:0,ssq:'',page:1,per:50},
+  con:{f:'all'}, sup:{open:''}, nc:{t:'All'}, audit:{page:1,per:50}
 };
 function setUI(path,val){const p=path.split('.');let o=UI;for(let i=0;i<p.length-1;i++)o=o[p[i]];o[p[p.length-1]]=val;if(p.length==2&&p[1]!='page'&&'page' in UI[p[0]])UI[p[0]].page=1;render()}
 function togUI(path){const p=path.split('.');let o=UI;for(let i=0;i<p.length-1;i++)o=o[p[i]];const k=p[p.length-1];o[k]=o[k]?0:1;render()}
@@ -149,16 +149,16 @@ function closeFpop(){const p=$('#fpop');if(p)p.classList.remove('open')}
 document.addEventListener('mousedown',e=>{if(!e.target.closest('#fpop,.fbtn'))closeFpop()});
 
 /* ---- theme + logos ---- */
-const LOGO_SRC={blue:ASSETS.logoBlue,white:ASSETS.logoWhite,hd:ASSETS.logoWhiteHd};
+const LOGO_SRC={blue:ASSETS.logoBlue,white:ASSETS.logoWhite,full:ASSETS.logoFull,fullDark:ASSETS.logoFullDark,emblem:ASSETS.emblem,icon:ASSETS.emblemIcon};
 function setTh(t){document.body.dataset.theme=t;try{localStorage.setItem('bb_theme',t)}catch(e){}
-  $('#thb').innerHTML=svg(t=='dark'?IC.sun:IC.moon);$$('.lg-auto').forEach(i=>i.src=t=='dark'?LOGO_SRC.white:LOGO_SRC.blue)}
+  $('#thb').innerHTML=svg(t=='dark'?IC.sun:IC.moon);$$('.lg-auto').forEach(i=>i.src=t=='dark'?LOGO_SRC.fullDark:LOGO_SRC.full)}
 
 /* ---- top bar wiring ---- */
 function sbSync(){$('#sb').classList.toggle('has',!!$('#q').value)}
 (function shell(){
   $('#mnb').innerHTML=svg(IC.menu);$('#sbIc').outerHTML=svg(IC.search);$('#bell').insertAdjacentHTML('afterbegin',svg(IC.bell));
   $('#nwb').innerHTML=svg(IC.plus)+'<span>New</span>';$('#scanBtn').innerHTML=svg(IC.scan)+'<span>Scan barcode</span>';
-  $$('.lg-w').forEach(i=>i.src=LOGO_SRC.white);
+  $$('.lg-w').forEach(i=>i.src=LOGO_SRC.white);$$('.lg-e').forEach(i=>i.src=LOGO_SRC.emblem);$('#fav').href=LOGO_SRC.icon;document.documentElement.style.setProperty('--hero-emblem','url("'+LOGO_SRC.emblem+'")');
   let th='light';try{th=localStorage.getItem('bb_theme')||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light')}catch(e){}setTh(th);
   $('#thb').onclick=()=>setTh(document.body.dataset.theme=='dark'?'light':'dark');
   $('#mnb').onclick=()=>document.body.classList.add('sopen');$('#scrim').onclick=()=>document.body.classList.remove('sopen');
