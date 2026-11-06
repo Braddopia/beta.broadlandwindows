@@ -213,3 +213,37 @@ body.lv .lvg{flex:1;min-height:0;grid-template-rows:repeat(2,minmax(0,1fr))}
 
 .stars{display:inline-flex;gap:1px;vertical-align:-2px}.stars svg{width:.95em;height:.95em}
 .hero .rate a{color:inherit;text-decoration:none}.hero .rate a:hover{text-decoration:underline}
+
+/* dark mode: the real full-colour logo on a white badge (no recolouring) */
+body[data-theme=dark] .brand{background:#fff;border-radius:14px;padding:.6rem .5rem;margin:0 0 .9rem;box-shadow:0 4px 16px rgba(0,0,0,.35)}
+body[data-theme=dark] .brand .lg{width:88%}
+.sup-pop .sup-h{padding-right:2.6rem}
+.sup-pop{animation:fade .25s}
+
+/* ---- motion ---- */
+.main.enter tbody tr{animation:rowIn .35s ease-out backwards}
+.main.enter tbody tr:nth-child(1){animation-delay:.04s}.main.enter tbody tr:nth-child(2){animation-delay:.07s}.main.enter tbody tr:nth-child(3){animation-delay:.1s}
+.main.enter tbody tr:nth-child(4){animation-delay:.13s}.main.enter tbody tr:nth-child(5){animation-delay:.16s}.main.enter tbody tr:nth-child(6){animation-delay:.19s}
+.main.enter tbody tr:nth-child(7){animation-delay:.22s}.main.enter tbody tr:nth-child(8){animation-delay:.25s}.main.enter tbody tr:nth-child(n+9){animation-delay:.28s}
+@keyframes rowIn{from{opacity:0;transform:translateX(-6px)}to{opacity:1;transform:none}}
+.main.enter .supc,.main.enter .frow,.main.enter .nrow,.main.enter .row{animation:up .4s cubic-bezier(.2,.7,.2,1) backwards;animation-delay:calc(var(--i,0)*35ms + 80ms)}
+.main.enter .tag{animation:tagPop .35s .2s backwards}
+@keyframes tagPop{0%{transform:scale(.7);opacity:0}70%{transform:scale(1.06)}100%{transform:none;opacity:1}}
+.nav svg{transition:transform .2s cubic-bezier(.3,1.4,.5,1)}.nav:hover svg{transform:translateX(2px) scale(1.08)}
+.panel,.kpi,.supc,.bc,.dcard{transition:transform .2s,box-shadow .2s,border-color .2s}
+.panel:hover{box-shadow:0 2px 4px rgba(1,43,89,.06),0 10px 26px rgba(1,43,89,.09)}
+.kpi:hover{transform:translateY(-2px)}
+.btn,.mini,.chip{transition:transform .12s,background .15s,color .15s,border-color .15s,box-shadow .15s}
+.btn:hover{box-shadow:0 6px 16px rgba(3,78,162,.22)}
+.chip:hover{border-color:var(--blue);color:var(--blue)}.chip.on:hover{color:#fff}
+.ie-f fieldset{animation:up .35s cubic-bezier(.2,.7,.2,1) backwards}
+.ie-f fieldset:nth-child(2){animation-delay:.05s}.ie-f fieldset:nth-child(3){animation-delay:.1s}.ie-f fieldset:nth-child(4){animation-delay:.15s}.ie-f fieldset:nth-child(5){animation-delay:.2s}
+.ie-main img{animation:fade .3s}
+.menu.open{animation:pop .18s ease-out}
+.fpop.open{animation:pop .18s ease-out}
+.bar i,.bar2 i{transform-origin:left}
+.hero{animation:heroIn .6s cubic-bezier(.2,.7,.2,1) backwards}
+@keyframes heroIn{from{opacity:0;transform:translateY(-8px) scale(.99)}to{opacity:1;transform:none}}
+.live{will-change:box-shadow}
+
+.cc{min-width:0}.ci a,.ci b,.ci div{overflow-wrap:anywhere}
