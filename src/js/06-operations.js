@@ -2,7 +2,7 @@
    06 · Operations: factory floor, deliveries, suppliers,
         Hallmark feed, Smart Orders import
    ========================================================================== */
-const HM_URL='https://hallmarkpod.azurewebsites.net/cust/statusview?custid=8ACED097-5D20-47BB-8EE7-CBAAF9B4EA2D';
+const HM_URL='';   /* set the supplier's status page under Suppliers > Edit > Website */
 const ORDDONE=/complete|despatch|dispatch|deliver|cancel/i;
 const sups=()=>S.suppliers;
 const SUPN=cur=>['',...new Set([...sups().map(x=>x.name),cur||''].filter(Boolean))];
@@ -132,7 +132,7 @@ function editSup(i){const x=i==null?{}:S.suppliers[i]||{};
 function delSup(i){const x=S.suppliers[i];if(!x||!confirm('Delete '+x.name+'? Items keep the name.'))return;S.suppliers.splice(i,1);audit('Supplier deleted',x.name,'');store();closeModal();render()}
 
 /* ---------------- Hallmark feed ---------------- */
-const HMSNAP=[['ORD20203366-1','BAYFIELD HALL 1023550','Country Solid','2026-11-03',1,1],['ORD20203265-1','WILLIAMS 1023565','Esprit 2','2026-10-30',1,1],['ORD20373512-1','NINHAM 1023569','Cottage Tortola 1','2026-11-17',0,0],['ORD20333981-1','OLIVER 1023562','Cottage Uracco 1 Centre','2026-11-03',1,1],['ORD20158657-1','GARDINER 1023561','Snipe 1','2026-10-29',1,0],['ORD20266281-1','HART 1023540','Stable Cottage Catalina 1','2026-11-06',1,0],['DB273175','BROCHURE','Ancillaries','2026-11-05',1,0]];
+const HMSNAP=[];   /* no sample orders in the public build */
 function seedHM(){if(S.hmSeeded||S.deliveries.some(d=>d.hm))return;S.hmSeeded=1;const td=today(),nm=hmS().name;HMSNAP.forEach(([j,ref,desc,due,qc,pod])=>S.deliveries.push({id:'H-'+j,supplier:nm,items:desc+', '+j,contract:ref,due,status:pod?'Received':qc&&due<td?'In transit':'Due',stage:pod?'Delivered':qc?'QC Done':'In Production',hm:1}));store()}
 const toIso=d=>d?d.split('/').reverse().join('-'):'';
 function parseHM(txt){const t=String(txt).replace(/\s+/g,' ').slice(0,2e6),out=[];out.pageTotal=+((t.match(/\bJobs\s+(\d+)/)||[])[1]||0)||null;
@@ -144,9 +144,10 @@ function importHM(txt,quiet,src){const J=parseHM(txt);if(!J.length){if(!quiet)to
   const td=today(),nm=hmS().name;J.forEach(j=>{const ex=S.deliveries.find(d=>d.id==j.id),st=(ex&&ex.status=='Received')||j.pod?'Received':j.qc&&j.due<td?'In transit':'Due',o={id:j.id,supplier:nm,items:j.items,contract:j.contract,due:j.due,status:st,stage:j.stage,ms:j.ms,hm:1};if(ex)Object.assign(ex,o);else S.deliveries.push(o)});
   S.hmSync=Date.now();S.hmInfo={t:Date.now(),src:src||'paste',n:J.length,total:J.pageTotal};store();if(!(quiet&&$('.ov.open')))render();if(!quiet)toast('Hallmark: '+J.length+' jobs read'+(J.pageTotal&&J.pageTotal!=J.length?' (page says '+J.pageTotal+')':''));return true}
 async function syncHM(quiet){const h=hmS(),tries=[[SAFE.url(h.feed)||'hallmark.php','relay'],[SAFE.url(h.url)||HM_URL,'direct']];if(location.protocol=='file:')tries.shift();
-  for(const[u,src]of tries){try{const r=await fetch(u,{cache:'no-store',credentials:'omit'});if(!r.ok)continue;const d=new DOMParser().parseFromString(await r.text(),'text/html');if(importHM(d.body.textContent,quiet,src))return true}catch(e){}}
+  if(!tries.some(([u])=>u)){if(!quiet)toast('Add the supplier status page under Suppliers > Edit first');return false}
+  for(const[u,src]of tries.filter(([u])=>u)){try{const r=await fetch(u,{cache:'no-store',credentials:'omit'});if(!r.ok)continue;const d=new DOMParser().parseFromString(await r.text(),'text/html');if(importHM(d.body.textContent,quiet,src))return true}catch(e){}}
   S.hmInfo=Object.assign(S.hmInfo||{},{fail:Date.now()});if(!quiet)hmPaste();return false}
-function hmPaste(){openModal(`<h2>Import Hallmark Jobs</h2><p class="muted">Your browser blocks reading the Hallmark page directly. Open it, press Ctrl+A then Ctrl+C, and paste it here. For automatic sync, upload the hallmark.php relay file next to this dashboard.</p><p><a class="btn ghost sm" href="${esc(SAFE.url(hmS().url)||HM_URL)}" target="_blank" rel="noopener noreferrer">Open Hallmark Page</a></p><div class="ff"><textarea id="hmt" rows="8" placeholder="Paste Hallmark page text here"></textarea></div><div class="mact"><button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn" onclick="importHM($('#hmt').value);closeModal()">Import</button></div>`)}
+function hmPaste(){openModal(`<h2>Import Hallmark Jobs</h2><p class="muted">Your browser blocks reading the Hallmark page directly. Open it, press Ctrl+A then Ctrl+C, and paste it here. For automatic sync, upload the hallmark.php relay file next to this dashboard.</p>${SAFE.url(hmS().url)?`<p><a class="btn ghost sm" href="${esc(SAFE.url(hmS().url))}" target="_blank" rel="noopener noreferrer">Open Supplier Page</a></p>`:''}<div class="ff"><textarea id="hmt" rows="8" placeholder="Paste Hallmark page text here"></textarea></div><div class="mact"><button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn" onclick="importHM($('#hmt').value);closeModal()">Import</button></div>`)}
 
 /* ---------------- Smart Orders import (CSV with column mapping) ---------------- */
 const OF=[['ref','Order number'],['cust','Customer'],['desc','Product'],['due','Due date'],['status','Status'],['sup','Supplier (optional)']];
