@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#012b59">
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https:; media-src 'self' blob:; object-src 'none'; base-uri 'none'; form-action 'none'">
+<title>Broadland CRM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;600;700&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
+<!-- @@CSS@@ -->
+</head>
+<body>
+<div id="splash"><img class="lg-w" alt="Broadland"></div>
+
+<div class="app">
+  <!-- ===== Sidebar ===== -->
+  <aside class="side" aria-label="Main menu">
+    <div class="brand"><img class="lg lg-auto" alt="Broadland Windows, Doors &amp; Garden Rooms"></div>
+    <nav id="nav"></nav>
+    <div class="who">
+      <button class="me" id="meBtn" type="button" title="Edit my details" aria-label="Edit my details">
+        <span class="av2" id="av"></span>
+        <div><b id="whoN"></b><span id="whoR"></span></div>
+      </button>
+    </div>
+    <button class="acct" id="acct" type="button" aria-label="Switch account"></button>
+  </aside>
+  <div class="scrim" id="scrim"></div>
+
+  <div class="wrap">
+    <!-- ===== Top bar ===== -->
+    <header class="top">
+      <button class="ib" id="mnb" type="button" aria-label="Open menu"></button>
+      <label class="sb" id="sb"><span id="sbIc"></span><input id="q" type="search" placeholder="Search this page" aria-label="Search" autocomplete="off" maxlength="80"><kbd>/</kbd><button type="button" class="clr" id="qClr" aria-label="Clear search">&times;</button></label>
+      <button class="ib" id="bell" type="button" aria-label="Notifications"><span class="bn" id="bellN"></span></button>
+      <button class="ib" id="thb" type="button" aria-label="Light or dark mode" title="Light or dark mode"></button>
+      <div class="nw">
+        <button class="btn" id="nwb" type="button" aria-haspopup="true"></button>
+        <div class="menu" id="nwm" role="menu">
+          <button data-a="lead" data-v="leads">New lead</button>
+          <button data-a="call" data-v="service">New service call</button>
+          <button data-a="contact" data-v="contacts">New contact</button>
+          <button data-a="stock" data-v="stock">Add stock</button>
+          <button data-a="request" data-v="stock">Request stock</button>
+          <button data-a="hol" data-v="holidays">Book holiday</button>
+          <button data-a="doc" data-v="reports">Guarantee certificate</button>
+          <button data-a="files" data-v="downloads">Browse files</button>
+        </div>
+      </div>
+      <button class="btn scan" id="scanBtn" type="button"></button>
+    </header>
+    <div class="adminbar" id="adminbar"></div>
+    <div class="secbar" id="secbar"></div>
+    <main class="main" id="main" tabindex="-1"></main>
+  </div>
+</div>
+
+<!-- ===== Overlays ===== -->
+<div class="ov" id="modal" role="dialog" aria-modal="true"><div class="mb" id="mbox"></div></div>
+<div class="ov" id="scanner" role="dialog" aria-modal="true" aria-label="Scan barcode"><div class="mb">
+  <h2>Scan Barcode</h2>
+  <div class="vwrap"><video id="vid" playsinline muted></video><div class="ret"></div></div>
+  <p id="scanMsg" class="muted" style="margin:0"></p>
+  <div class="mf"><input id="manual" placeholder="Or type the code" maxlength="64" autocomplete="off"><button class="btn" id="manualGo" type="button">Use code</button></div>
+  <div class="mact"><button class="btn ghost" id="scanClose" type="button" style="width:100%">Close</button></div>
+</div></div>
+<div id="ncbg"></div>
+<aside id="nc" class="nc" aria-label="Notification Centre"></aside>
+<div class="fpop" id="fpop" role="dialog" aria-label="Sort and filter"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<datalist id="locs"></datalist><datalist id="itemCodes"></datalist>
+
+<!-- @@JS@@ -->
+</body>
+</html>

@@ -1,0 +1,48 @@
+/* ==========================================================================
+   02 · Base, typography, motion
+   ========================================================================== */
+*{box-sizing:border-box}
+html{font-size:clamp(13px,.22vw + 10.4px,16.5px);-webkit-text-size-adjust:100%}
+@media(min-width:2200px){html{font-size:clamp(16.5px,.45vw + 6px,22px)}}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--ink);font:400 1rem/1.45 var(--body);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--yellow);outline-offset:1px}
+img{max-width:100%}
+a{color:var(--blue)}
+
+/* House style: Title Case labels. URLs, emails, codes and typed text are left alone. */
+body,body *{text-transform:capitalize}
+input,textarea,code,kbd,.nocap,.nocap *,a[href^="mailto"],a[href^="http"],a[href^="tel"]{text-transform:none!important}
+
+h1{font:600 1.35rem var(--head);margin:0;letter-spacing:-.015em;color:var(--navy)}
+h2{font:600 1rem var(--head);margin:0 0 .7rem;color:var(--navy)}
+h3{font:600 .92rem var(--head);margin:1rem 0 .35rem;color:var(--navy)}
+b,strong{font-weight:600}
+.muted{color:var(--muted)}
+.empty{color:var(--muted);font-size:.85rem;margin:.5rem 0}
+.warn{color:var(--red);font-size:.88rem}
+code{font:500 .76rem ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--card2);border-radius:5px;padding:.1rem .35rem}
+.num{font-variant-numeric:tabular-nums}
+
+/* scrollbars: thin, unobtrusive */
+*{scrollbar-width:thin;scrollbar-color:rgba(90,110,140,.35) transparent}
+::-webkit-scrollbar{width:8px;height:8px}::-webkit-scrollbar-thumb{background:rgba(90,110,140,.35);border-radius:8px}::-webkit-scrollbar-track{background:transparent}
+
+/* motion */
+@keyframes up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes pop{from{opacity:0;transform:scale(.96) translateY(10px)}to{opacity:1;transform:none}}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+@keyframes grow{from{width:0}}
+@keyframes grow2{from{transform:scaleY(0)}}
+@keyframes tin{from{opacity:0;transform:translate(-50%,16px)}to{opacity:1;transform:translate(-50%,0)}}
+@keyframes wave{0%,60%,100%{transform:rotate(0)}10%,30%,50%{transform:rotate(16deg)}20%,40%{transform:rotate(-10deg)}}
+@keyframes spLogo{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:none}}
+@keyframes spOut{to{opacity:0;visibility:hidden}}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(31,191,117,.6)}100%{box-shadow:0 0 0 .8rem rgba(31,191,117,0)}}
+@keyframes navIn{from{opacity:0;transform:translateX(-12px)}to{opacity:1;transform:none}}
+@keyframes sc{from{top:10%}to{top:90%}}
+@keyframes hintOut{0%,70%{opacity:.9}100%{opacity:0}}
+.main.enter .kpi,.main.enter .panel,.main.enter .col,.main.enter .cc,.main.enter .bc,.main.enter .hero,.main.enter .dlane{animation:up .45s cubic-bezier(.2,.7,.2,1) backwards;animation-delay:calc(var(--i,0)*35ms)}
+body.ready .side .nav{animation:navIn .45s cubic-bezier(.2,.7,.2,1) backwards;animation-delay:calc(var(--n,0)*30ms + 200ms)}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-delay:0s!important;transition-duration:.01ms!important}#splash{display:none}}
