@@ -592,19 +592,15 @@ body.lv .lvg{flex:1;min-height:0;grid-template-rows:repeat(2,minmax(0,1fr))}
 
 /* brand */
 .brand{padding:.2rem .2rem .9rem}
-.brand .lg{width:100%;max-height:5.6rem;object-fit:contain}
-#splash .spl{display:flex;flex-direction:column;align-items:center;gap:1.2rem;animation:spLogo .9s cubic-bezier(.2,.8,.2,1) both}
-#splash .spl .lg-e{width:min(130px,30vw);filter:drop-shadow(0 10px 40px rgba(255,208,2,.45))}
-#splash .spl .lg-w{width:min(320px,70vw);animation:none;filter:none}
-#splash .spl span{color:#cfe0f7;font-size:.8rem;letter-spacing:.2em;text-transform:uppercase}
-.hero{padding-right:clamp(1.4rem,16vw,12rem)}
-.hero::after{right:clamp(.6rem,2vw,2rem);top:50%;transform:translateY(-50%);width:clamp(80px,10vw,150px);height:clamp(80px,10vw,150px);border-radius:50%;background:var(--hero-emblem) center/contain no-repeat;opacity:1}
+.brand{display:flex;justify-content:center}
+.brand .lg{width:82%;max-height:4.4rem;object-fit:contain}
 .hero .rate{display:flex;gap:1.2rem;flex-wrap:wrap;margin-top:.7rem;font-size:.8rem;color:#cfe0f7}.hero .rate b{color:#ffd002}
-@media(max-width:600px){.hero::after{opacity:.25}}
 
 .kpis.big .kpi b.lg{font-size:clamp(1.6rem,2.1vw,3.2rem)}
 .kpi b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.hero::after{top:.8rem;bottom:.8rem;height:auto;width:auto;aspect-ratio:1/1;transform:none}
+
+.stars{display:inline-flex;gap:1px;vertical-align:-2px}.stars svg{width:.95em;height:.95em}
+.hero .rate a{color:inherit;text-decoration:none}.hero .rate a:hover{text-decoration:underline}
 
 /* ==========================================================================
    06 · Adaptive layout
@@ -697,7 +693,7 @@ body.lv .lvg{flex:1;min-height:0;grid-template-rows:repeat(2,minmax(0,1fr))}
 </style>
 </head>
 <body>
-<div id="splash"><div class="spl"><img class="lg-e" alt=""><img class="lg-w" alt="Broadland Windows CRM"><span>Customer &amp; Stock Manager</span></div></div>
+<div id="splash"><img class="lg-w" alt="Broadland Windows CRM"></div>
 
 <div class="app">
   <!-- ===== Sidebar ===== -->
@@ -837,6 +833,12 @@ function sha256(str){
     for(let i=0;i<8;i++)H[i]=(H[i]+h[i])|0}
   return H.map(x=>(x>>>0).toString(16).padStart(8,'0')).join('')}
 
+/* ---- star rating: full, half and empty stars (works in reports too: inline SVG with its own colours) ---- */
+function stars(score,col='#ffd002',off='rgba(255,255,255,.28)'){const s=Math.max(0,Math.min(5,Math.round((+score||0)*2)/2));let h='';
+  for(let i=1;i<=5;i++){const f=s>=i?1:s>=i-.5?.5:0,id='h'+Math.random().toString(36).slice(2,7);
+    h+=`<svg viewBox="0 0 24 24" aria-hidden="true"><defs><linearGradient id="${id}"><stop offset="${f*100}%" stop-color="${col}"/><stop offset="${f*100}%" stop-color="${off}"/></linearGradient></defs><path fill="url(#${id})" d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6-4.9-4.6 6.6-.8z"/></svg>`}
+  return `<span class="stars" role="img" aria-label="${s} out of 5 stars">${h}</span>`}
+
 /* ---- icons (24px stroke icons) ---- */
 const svg=(p,cls='')=>`<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${p}"/></svg>`;
 const IC={
@@ -940,6 +942,8 @@ const ikey=r=>[r.item,r.length,r.cInName,r.cOutName].map(v=>{v=String(v||'').tri
   S.items.slice().reverse().forEach(r=>{if(r.type!='request')return;
     if(!r.reqStatus)r.reqStatus=r.cleared?'Cleared':'Pending';
     if(!r.ord)r.ord='P'+String(++S.seq.pend).padStart(4,'0')});
+  /* public review scores shown on the overview and customer documents (admin can update) */
+  S.brand=S.brand||{};S.brand.tp=S.brand.tp||{score:4.5,count:'',url:'https://uk.trustpilot.com/review/broadlandwindows.co.uk'};S.brand.g=S.brand.g||{score:4.5,count:'',url:''};
   /* profile: who is using this browser */
   if(!S.profile){const u=S.staff.find(s=>s.name=='Demo User')||S.staff[0]||{};S.profile={sid:u.id||'',name:u.name||'Demo User',email:u.email||'',phone:u.phone||'',mobile:'',emergency:'',signature:'',notes:''}}
   /* security: per-install salt and hashed PINs (default 1234 until changed) */
@@ -1272,11 +1276,20 @@ function vHome(){
   cfg.beta=cfg.admin;const C=cfg[R]||cfg.staff;
   const allow=m?m.allow:0,used=m?sum(S.hols.filter(h=>h.sid==m.id&&h.status=='Approved'),h=>h.days):0,pend=m?sum(S.hols.filter(h=>h.sid==m.id&&h.status=='Pending'),h=>h.days):0,nxt=m?S.hols.filter(h=>h.sid==m.id&&h.status!='Rejected'&&h.to>=td).sort((a,b)=>a.from.localeCompare(b.from))[0]:null;
   const holP=`<div class="panel"><h2><span>My Holiday</span><span class="acts"><button class="btn sm" onclick="bookMine()">Book Holiday</button>${canSee('holidays')?`<button class="mini" ${A('go','holidays')}>Holiday Planner</button>`:''}</span></h2>${m?`<div class="hl"><div class="big"><b>${allow-used}</b><small>Days Left</small></div><div><b>${used}</b><small>Booked</small></div><div><b>${pend}</b><small>Pending</small></div><div><b>${allow}</b><small>Allowance</small></div></div><div class="bar2"><i style="width:${allow?Math.min(100,Math.round(100*(used+pend)/allow)):0}%"></i></div><p class="muted" style="margin:.5rem 0 0">${nxt?`Next: ${fd(nxt.from)} to ${fd(nxt.to)}, ${nxt.days} days, ${esc(nxt.status)}`:'No holiday booked yet.'}</p>`:'<p class="empty">Your name is not in the staff list yet, so there is no allowance to show.</p>'}</div>`;
-  return `<div class="hero"><span class="rt">${esc(RL[R]||'Team Member')}</span><h1>Welcome back, ${esc(first)} <span class="wave">👋</span></h1><p>${greet()}. It's ${new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'})}. ${C.s}</p><div class="rate"><span><b>★★★★½</b> 4.5 on Trustpilot</span><span><b>★★★★½</b> 4.5 on Google</span></div></div>
+  return `<div class="hero"><span class="rt">${esc(RL[R]||'Team Member')}</span><h1>Welcome back, ${esc(first)} <span class="wave">👋</span></h1><p>${greet()}. It's ${new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'})}. ${C.s}</p>${ratingsH()}</div>
   <div class="kpis big">${C.k.map(k=>canSee(k[3])?`<button class="kpi ${k[2]}" ${A('go',k[3])}><small>${k[0]}</small><b class="${String(k[1]).length>5?'lg':''}">${k[1]}</b></button>`:`<div class="kpi ${k[2]}"><small>${k[0]}</small><b class="${String(k[1]).length>5?'lg':''}">${k[1]}</b></div>`).join('')}</div>
   <div class="two">${holP}${C.p.join('')}</div>`}
 function bookMine(){const m=me();if(!m){toast('Your name is not in the staff list yet');return}holBook(m.id);if(!ISOWN()){const s=$('#hs');if(s){[...s.options].forEach(o=>{if(o.value!=m.id)o.remove()});s.disabled=true}}}
 const prTag=p=>`<span class="tag ${p=='Urgent'?'r':p=='Normal'?'y':'n'}">${esc(p)}</span>`;
+
+/* review scores (Trustpilot / Google): figures set by an admin in Admin Console > Reviews */
+function ratingsH(){const r=(x,n)=>{const u=SAFE.url(x.url),t=`${stars(x.score)} <b>${(+x.score).toFixed(1)}</b> on ${n}${x.count?' <span>('+esc(x.count)+' reviews)</span>':''}`;return u?`<a href="${esc(u)}" target="_blank" rel="noopener noreferrer">${t}</a>`:`<span>${t}</span>`};
+  return `<div class="rate">${r(S.brand.tp,'Trustpilot')}${r(S.brand.g,'Google')}</div>`}
+function editRatings(){if(!need(ISOWN,'Review scores'))return;const b=S.brand;
+  form('Review Scores',[{k:'tps',l:'Trustpilot score (0 to 5)',t:'number',max:5,dp:1},{k:'tpc',l:'Trustpilot review count',max:12},{k:'tpu',l:'Trustpilot page link',w:'full',max:300},{k:'gs',l:'Google score (0 to 5)',t:'number',max:5,dp:1},{k:'gc',l:'Google review count',max:12},{k:'gu',l:'Google reviews link',w:'full',max:300}],
+    {tps:b.tp.score,tpc:b.tp.count,tpu:b.tp.url,gs:b.g.score,gc:b.g.count,gu:b.g.url},o=>{
+    if((o.tpu&&!SAFE.url(o.tpu))||(o.gu&&!SAFE.url(o.gu))){toast('Links must start with https://');return false}
+    b.tp={score:o.tps,count:o.tpc,url:o.tpu};b.g={score:o.gs,count:o.gc,url:o.gu};audit('Review scores updated','Brand',o.tps+' / '+o.gs)},false,'md')}
 
 /* ==========================================================================
    06 · Operations: factory floor, deliveries, suppliers,
@@ -1892,7 +1905,7 @@ h2.sec,h3{font:400 13pt Georgia,serif;color:#012b59;margin:8mm 0 3mm;break-after
 .dt th{text-align:left;padding:2.2mm 3mm;font-weight:600;color:#012b59;background:#f5f8fd}.dt td{padding:2.2mm 3mm;border-bottom:.3mm dotted #c9d3e2}
 .bl{display:grid;grid-template-columns:36mm 1fr 22mm;gap:1.4mm 3mm;align-items:center}.pb{height:2.6mm;background:#eef2f8;border-radius:2mm;overflow:hidden}.pb i{display:block;height:100%;background:#034ea2}
 .ty{margin:12mm 0 0;padding:6mm 7mm;border-radius:4mm;background:#012b59;color:#fff;display:grid;grid-template-columns:1fr auto;gap:6mm;align-items:center;break-inside:avoid}
-.ty b{display:block;font:400 13pt Georgia,serif;color:#ffd002;margin-bottom:1mm}.ty p{margin:0;font-size:8.8pt;opacity:.9}.ty .ct{text-align:right;font-size:8.5pt;line-height:1.7}.ty .rv{grid-column:1/-1;display:flex;gap:6mm;flex-wrap:wrap;padding-top:3mm;border-top:.3mm solid rgba(255,255,255,.2);font-size:8pt}.ty .rv i{font-style:normal;color:#ffd002;letter-spacing:.05em}.ty .rv b{color:#fff}
+.ty b{display:block;font:400 13pt Georgia,serif;color:#ffd002;margin-bottom:1mm}.ty p{margin:0;font-size:8.8pt;opacity:.9}.ty .ct{text-align:right;font-size:8.5pt;line-height:1.7}.ty .rv{grid-column:1/-1;display:flex;gap:6mm;flex-wrap:wrap;padding-top:3mm;border-top:.3mm solid rgba(255,255,255,.2);font-size:8pt}.ty .rv span{display:inline-flex;align-items:center;gap:1.5mm}.stars{display:inline-flex;gap:.3mm}.stars svg{width:3.4mm;height:3.4mm}.ty .rv b{color:#fff}
 .sg{display:grid;grid-template-columns:1fr 1fr;gap:14mm;margin-top:14mm;break-inside:avoid}.sg div{border-top:.3mm solid #0c1a2e;padding-top:1.5mm;font-size:8pt;color:#56657d}
 .ft{border-top:.3mm solid #dfe6f0}`;
 
@@ -1911,7 +1924,7 @@ function printDoc(t,sub,rows,ph,o){o=o||{};rows=(rows||[]).filter(Boolean);ph=(p
     ?`<header class="lh"><img src="${LOGO_SRC.full}" alt="Broadland Windows"><h1 class="tl">${esc(t)}</h1>${sub?`<p class="st">${esc(sub)}</p>`:''}</header>
       <div class="pf"><div class="who"><small>Prepared for</small><b>${esc(o.customer.name||'Customer')}</b>${o.customer.address?`<br>${esc(o.customer.address)}`:''}</div><div class="doc"><small>${esc(o.kind||'Document')}</small><span><i>Date</i>${date}</span><span><i>Reference</i>${esc(ref)}</span>${o.customer.contact?`<span><i>Your contact</i>${esc(o.customer.contact)}</span>`:''}</div></div>
       <div class="c">${body}${o.sign?'<div class="sg"><div>Customer signature</div><div>For Broadland Windows</div></div>':''}
-      <div class="ty"><div><b>Thank you for choosing Broadland Windows</b><p>${esc(o.thanks||'If you have any questions about this document, our team is always happy to help.')}</p></div><div class="ct">${esc(CO.tel)}<br>${esc(CO.em)}<br>${esc(CO.web)}</div><div class="rv"><span><i>★★★★½</i> 4.5 on Trustpilot</span><span><i>★★★★½</i> 4.5 on Google</span><span>Design your own door at <b>broadlandwindows.co.uk/build-your-own</b></span></div></div></div>`
+      <div class="ty"><div><b>Thank you for choosing Broadland Windows</b><p>${esc(o.thanks||'If you have any questions about this document, our team is always happy to help.')}</p></div><div class="ct">${esc(CO.tel)}<br>${esc(CO.em)}<br>${esc(CO.web)}</div><div class="rv"><span>${stars(S.brand.tp.score)} ${(+S.brand.tp.score).toFixed(1)} on Trustpilot</span><span>${stars(S.brand.g.score)} ${(+S.brand.g.score).toFixed(1)} on Google</span><span>Design your own door at <b>broadlandwindows.co.uk/build-your-own</b></span></div></div></div>`
     :`<div class="top"><img src="${LOGO_SRC.blue}" alt="Broadland"><span class="int">Internal · not for customers</span></div>
       <div class="hero"><div><span class="chip">${esc(o.kind||'Report')}</span><h1>${esc(t)}</h1>${sub?`<p>${esc(sub)}</p>`:''}</div><div class="mg"><div><b>Reference</b>${esc(ref)}</div><div><b>Date</b>${date}</div><div><b>Prepared by</b>${esc(USER)}</div><div><b>Account</b>${esc(ROLES[ROLE].n)}</div></div></div>
       <div class="c">${body}${o.sign?'<div class="sg"><div>Prepared by</div><div>Checked by</div><div>Date</div></div>':''}${o.barcode?`<div class="bcode">${c39(o.barcode,48)}<div>${esc(String(o.barcode).toUpperCase())}</div><small>Scan to look up in Broadland CRM</small></div>`:''}</div>`;
@@ -2102,7 +2115,7 @@ function vFiles(){const F=UI.files,cats=['all',...new Set(DL.map(d=>d.cat))],rc=
    <div class="upl"><input placeholder="Search" value="${esc(F.ssq)}" maxlength="60" ${AC('oninput','ssqSet','this.value')} id="ssqI" style="min-width:min(16rem,100%)"></div>
    ${fhead('Manual','Range','Size')}<div class="flist">${pg.rows.map(m=>`<div class="frow"><b>${esc(m.t)}</b><span class="tag">${esc(m.f)}</span><span class="sz">${esc(m.s)}</span><span class="acts"><a class="mini pri" href="${esc(m.u)}" target="_blank" rel="noopener noreferrer">Open</a><button class="mini" ${A('dlf',m.u)}>Download</button><button class="mini" ${A('copyText',m.u)}>Copy link</button></span></div>`).join('')||'<p class="empty">No manuals match.</p>'}</div>${pagerH('files',pg,'manuals')}</div>
   <div class="panel" style="margin-top:1rem"><h2>Other Content</h2><div class="upl"><select id="mcat" aria-label="Category">${MC.map(c=>`<option>${c}</option>`).join('')}</select><label class="btn sm" style="cursor:pointer">Upload files<input type="file" multiple hidden onchange="manUp(this)"></label><span class="muted">Stored on this device only</span></div>${fhead('File','Category','Size')}<div id="mans" class="flist">Loading</div></div>
-  <div class="panel" style="margin-top:1rem"><h2>Brand And Print Assets</h2><div class="upl"><label class="btn sm" style="cursor:pointer">Upload files<input type="file" multiple hidden ${AC('onchange','manUp','this','Brand Asset')}></label><a class="mini" href="${LOGO_SRC.full}" download="broadland-logo-full-colour.webp">Full colour logo</a><a class="mini" href="${LOGO_SRC.emblem}" download="broadland-sun-emblem.webp">Sun emblem</a><a class="mini" href="${LOGO_SRC.blue}" download="broadland-logo-blue.png">Text logo (blue)</a><a class="mini" href="${LOGO_SRC.white}" download="broadland-logo-white.png">Text logo (white)</a><span class="muted">Stored on this device only</span></div>${fhead('File','Category','Size')}<div id="assets" class="flist">Loading</div></div>`}
+  <div class="panel" style="margin-top:1rem"><h2>Brand And Print Assets</h2><div class="upl"><label class="btn sm" style="cursor:pointer">Upload files<input type="file" multiple hidden ${AC('onchange','manUp','this','Brand Asset')}></label><span class="muted">Stored on this device only</span></div>${fhead('File','Category','Size')}<div id="assets" class="flist">Loading</div></div>`}
 function ssqSet(v){UI.files.ssq=SAFE.text(v,60);UI.files.page=1;render();const i=$('#ssqI');if(i){i.focus();i.setSelectionRange(i.value.length,i.value.length)}}
 function recent(u,t){try{localStorage.setItem(RK,JSON.stringify([{u,t},...ldRecent().filter(x=>x.u!=u)].slice(0,6)))}catch(e){}}
 function dlf(u){u=SAFE.url(u);if(!u)return;const n=decodeURIComponent(u.split('/').pop().split('?')[0])||'download';fetch(u,{credentials:'omit'}).then(r=>{if(!r.ok)throw 0;return r.blob()}).then(b=>download(n,b)).catch(()=>{window.open(u,'_blank','noopener');toast('Opened in a new tab to save')})}
@@ -2124,7 +2137,7 @@ async function loadMan(){const m=$('#mans'),a=$('#assets');if(!m&&!a)return;
     const row=f=>`<div class="frow"><b>${esc(f.name)}</b><span class="tag">${esc(tc(f.cat))}</span><span class="sz">${kb(f.size)}</span><span class="acts"><button class="mini pri" ${A('manDl',f.id)}>Download</button><button class="mini" ${A('manOpen',f.id)}>Open</button><button class="mini" ${A('manRen',f.id)}>Rename</button><button class="mini del" ${A('manDel',f.id)}>Delete</button></span></div>`;
     const fl=f=>!q||(f.name+' '+f.cat).toLowerCase().includes(q);
     if(m)m.innerHTML=MF.filter(f=>!/^brand asset$/i.test(f.cat)&&fl(f)).map(row).join('')||'<p class="empty">No files yet. Upload manuals, fitting guides, spec sheets and anything else the team needs.</p>';
-    if(a)a.innerHTML=MF.filter(f=>/^brand asset$/i.test(f.cat)&&fl(f)).map(row).join('')||'<p class="empty">No brand or print assets yet. Upload logos, cards and artwork.</p>'}
+    if(a)a.innerHTML=BUILTIN().filter(fl).map(b=>`<div class="frow"><b>${esc(b.name)}</b><span class="tag g">Built-in</span><span class="sz">${kb(b.size)}</span><span class="acts"><a class="mini pri" href="${b.src}" download="${esc(b.file)}">Download</a><button class="mini" ${A('builtinOpen',b.key)}>Open</button></span></div>`).join('')+(MF.filter(f=>/^brand asset$/i.test(f.cat)&&fl(f)).map(row).join('')||'<p class="empty" style="margin-top:.6rem">No uploaded brand or print assets yet. Upload cards and artwork above.</p>')}
   catch(e){[m,a].forEach(el=>el&&(el.innerHTML='<p class="empty">File storage is not available in this browser.</p>'))}}
 
 /* set a brochure cover: paste the image address from the website (right-click the cover > Copy image address) */
@@ -2132,6 +2145,11 @@ function setCover(u){const d=DL.find(x=>x.url==u);if(!d)return;S.covers=S.covers
   form('Cover Image: '+d.title,[{k:'img',l:'Image address (https://...)',w:'full',max:400,hint:'On broadlandwindows.co.uk/brochures right-click the cover, choose Copy image address, and paste it here. Leave blank to use the automatic cover.'}],{img:S.covers[u]||''},o=>{
     if(o.img&&!SAFE.url(o.img)){toast('That needs to be an https:// image address');return false}
     if(o.img)S.covers[u]=SAFE.url(o.img);else delete S.covers[u];audit('Brochure cover set',d.title,o.img||'automatic')})}
+
+/* logos that ship inside the app, listed in the Brand And Print Assets table */
+const BUILTIN=()=>[['full','Broadland logo, full colour','broadland-logo-full-colour.webp'],['fullDark','Broadland logo, for dark backgrounds','broadland-logo-dark-background.webp'],['emblem','Sun and stork emblem','broadland-sun-emblem.webp'],['blue','Text logo, blue','broadland-logo-blue.png'],['white','Text logo, white','broadland-logo-white.png']]
+  .map(([key,name,file])=>({key,name,file,cat:'Brand Asset',src:LOGO_SRC[key],size:Math.round((LOGO_SRC[key].length-30)*.75)}));
+function builtinOpen(k){const src=LOGO_SRC[k];if(!src)return;const w=window.open('','_blank');if(!w)return;w.document.write(`<title>Logo</title><body style="margin:0;display:grid;place-items:center;min-height:100vh;background:${/white|Dark/.test(k)?'#012b59':'#fff'}"><img src="${src}" style="max-width:90vw;max-height:90vh">`);w.document.close()}
 
 /* ==========================================================================
    13 · Finance (admin/finance) and Admin console (owner accounts)
@@ -2172,6 +2190,7 @@ function vAdmin(){if(!ISOWN())return '';
     <div class="row"><span>Browser storage used<br><small class="muted">${ph} product photos stored</small></span><b>${kb(size)} of about 5 MB</b></div>
     <div class="bar"><i style="width:${Math.min(100,size/5e6*100)}%;${size>4e6?'background:var(--red)':''}"></i></div>
     <div class="acts" style="margin-top:.8rem"><button class="mini pri" onclick="chPin()">Change PINs</button><button class="mini" onclick="backupDl()">Download backup</button><label class="mini" style="cursor:pointer">Restore backup<input type="file" accept=".json,application/json" hidden onchange="backupLoad(this)"></label></div></div>
+   <div class="panel"><h2><span>Reviews</span><button class="mini pri" onclick="editRatings()">Update scores</button></h2><div class="row"><span>Trustpilot</span><span>${stars(S.brand.tp.score,'#e0a800','#d9e1ee')} <b>${(+S.brand.tp.score).toFixed(1)}</b></span></div><div class="row"><span>Google</span><span>${stars(S.brand.g.score,'#e0a800','#d9e1ee')} <b>${(+S.brand.g.score).toFixed(1)}</b></span></div><p class="muted" style="font-size:.8rem;margin:.5rem 0 0">Shown on the overview and on customer documents.</p></div>
    <div class="panel"><h2>Quick Actions</h2><div class="acts" style="gap:.5rem"><button class="btn ghost" ${A('go','finance')}>Finance</button><button class="btn ghost" ${A('go','staff')}>Staff</button><button class="btn ghost" ${A('go','holidays')}>Holidays</button><button class="btn ghost" ${A('go','reports')}>Reports</button><button class="btn ghost" ${A('setRole','staff')}>Leave admin mode</button></div></div>
   </div>
   <div class="panel" style="margin-top:1rem;padding:0"><h2 style="padding:1rem 1.1rem 0"><span>Audit Trail <span class="muted" style="font:500 .78rem var(--body)">who changed what, and when</span></span><span class="acts"><button class="mini" onclick="auditCsv()">Export CSV</button></span></h2>

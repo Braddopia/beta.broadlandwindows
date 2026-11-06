@@ -75,6 +75,12 @@ function sha256(str){
     for(let i=0;i<8;i++)H[i]=(H[i]+h[i])|0}
   return H.map(x=>(x>>>0).toString(16).padStart(8,'0')).join('')}
 
+/* ---- star rating: full, half and empty stars (works in reports too: inline SVG with its own colours) ---- */
+function stars(score,col='#ffd002',off='rgba(255,255,255,.28)'){const s=Math.max(0,Math.min(5,Math.round((+score||0)*2)/2));let h='';
+  for(let i=1;i<=5;i++){const f=s>=i?1:s>=i-.5?.5:0,id='h'+Math.random().toString(36).slice(2,7);
+    h+=`<svg viewBox="0 0 24 24" aria-hidden="true"><defs><linearGradient id="${id}"><stop offset="${f*100}%" stop-color="${col}"/><stop offset="${f*100}%" stop-color="${off}"/></linearGradient></defs><path fill="url(#${id})" d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6-4.9-4.6 6.6-.8z"/></svg>`}
+  return `<span class="stars" role="img" aria-label="${s} out of 5 stars">${h}</span>`}
+
 /* ---- icons (24px stroke icons) ---- */
 const svg=(p,cls='')=>`<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${p}"/></svg>`;
 const IC={

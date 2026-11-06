@@ -63,6 +63,8 @@ const ikey=r=>[r.item,r.length,r.cInName,r.cOutName].map(v=>{v=String(v||'').tri
   S.items.slice().reverse().forEach(r=>{if(r.type!='request')return;
     if(!r.reqStatus)r.reqStatus=r.cleared?'Cleared':'Pending';
     if(!r.ord)r.ord='P'+String(++S.seq.pend).padStart(4,'0')});
+  /* public review scores shown on the overview and customer documents (admin can update) */
+  S.brand=S.brand||{};S.brand.tp=S.brand.tp||{score:4.5,count:'',url:'https://uk.trustpilot.com/review/broadlandwindows.co.uk'};S.brand.g=S.brand.g||{score:4.5,count:'',url:''};
   /* profile: who is using this browser */
   if(!S.profile){const u=S.staff.find(s=>s.name=='Demo User')||S.staff[0]||{};S.profile={sid:u.id||'',name:u.name||'Demo User',email:u.email||'',phone:u.phone||'',mobile:'',emergency:'',signature:'',notes:''}}
   /* security: per-install salt and hashed PINs (default 1234 until changed) */
