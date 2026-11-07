@@ -50,13 +50,13 @@ function go(v){
   if(!canSee(v)||(v=='admin'&&!ISOWN())){pendView=v;swRole();return}
   view=v;q='';$('#q').value='';sbSync();render()}
 
-function render(){
+function render(soft){
   if(!canSee(view)||(view=='admin'&&!ISOWN()))view=HOME();
   const V=VIEWS[view];
   $('#nav').innerHTML=navHtml(badges());
   let h;try{h=V.fn()}catch(e){console.error(e);h=`<div class="panel"><h2>Something Went Wrong</h2><p class="muted">${esc(e.message)}</p></div>`}
-  const m=$('#main');m.innerHTML=h;
-  document.body.classList.toggle('lv',view=='live');
+  const m=$('#main');if(soft&&view==lastView)morph(m,h);else m.innerHTML=h;
+  document.body.classList.toggle('lv',view=='live');document.body.classList.toggle('vmsg',view=='messages');
   requestAnimationFrame(()=>$$('#main .kpi>b').forEach(b=>b.style.setProperty('--n',Math.max(2,b.textContent.trim().length))));
   document.body.classList.toggle('isadm',ISADM());
   shellSync();
@@ -99,6 +99,16 @@ function askGo(){const f=ASK;ASK=null;closeModal();if(f)f()}
 function closeModal(){$('#modal').classList.remove('open');const a=document.activeElement;if(a&&a!==document.body&&!a.closest('#modal'))a.blur()}
 $('#modal').addEventListener('mousedown',e=>{if(e.target.id=='modal')closeModal()});
 
+/* update the page in place: only the parts that changed are replaced, so glass panels are not rebuilt */
+function morph(el,html){const t=document.createElement('template');t.innerHTML=html;morphKids(el,t.content)}
+function morphKids(a,b){const X=[...a.childNodes],Y=[...b.childNodes];
+  for(let i=0;i<Math.max(X.length,Y.length);i++){const an=X[i],bn=Y[i];
+    if(!bn){an.remove();continue}if(!an){a.appendChild(bn);continue}
+    if(an.nodeType!=bn.nodeType||an.nodeName!=bn.nodeName||/^(INPUT|SELECT|TEXTAREA|CANVAS|VIDEO|IFRAME)$/.test(an.nodeName)){a.replaceChild(bn,an);continue}
+    if(an.nodeType!=1){if(an.nodeValue!==bn.nodeValue)an.nodeValue=bn.nodeValue;continue}
+    if(an.isEqualNode(bn))continue;
+    [...an.attributes].forEach(x=>{if(!bn.hasAttribute(x.name))an.removeAttribute(x.name)});[...bn.attributes].forEach(x=>{if(an.getAttribute(x.name)!==x.value)an.setAttribute(x.name,x.value)});
+    morphKids(an,bn)}}
 /* ---- generic form ----
    field: {k,l,t:text|number|date|select|area|colour|password|email|tel, o:[options], req, pos, ro, w:'full', scan, list, max, min, dp, hint} */
 let tmp=null,tmpDraw=null;
@@ -215,7 +225,7 @@ function sbSync(){$('#sb').classList.toggle('has',!!$('#q').value)}
   $('#mnb').onclick=()=>document.body.classList.add('sopen');$('#scrim').onclick=()=>document.body.classList.remove('sopen');
   $('#meBtn').onclick=editProfile;$('#acct').onclick=swRole;$('#bell').onclick=()=>ncToggle(true);$('#ncbg').onclick=()=>ncToggle(false);
   $('#scanBtn').onclick=()=>scan(found);
-  $('#q').addEventListener('input',e=>{q=SAFE.text(e.target.value,80).toLowerCase();Object.values(UI).forEach(s=>{if(s&&typeof s=='object'&&'page' in s)s.page=1});sbSync();render()});
+  $('#q').addEventListener('input',e=>{q=SAFE.text(e.target.value,80).toLowerCase();Object.values(UI).forEach(s=>{if(s&&typeof s=='object'&&'page' in s)s.page=1});sbSync();clearTimeout(render.q);render.q=setTimeout(()=>render(true),120)});
   $('#qClr').onclick=()=>{$('#q').value='';q='';sbSync();render();$('#q').focus()};
   $('#nwb').onclick=e=>{e.stopPropagation();$('#nwm').classList.toggle('open')};
   document.addEventListener('click',()=>$('#nwm').classList.remove('open'));
@@ -223,6 +233,7 @@ function sbSync(){$('#sb').classList.toggle('has',!!$('#q').value)}
   $('#manualGo').onclick=()=>got($('#manual').value);$('#manual').onkeydown=e=>{if(e.key=='Enter')got(e.target.value)};$('#scanClose').onclick=stopScan;
   document.addEventListener('keydown',e=>{
     if(e.key=='Escape'){closeModal();stopScan();ncToggle(false);closeFpop();document.body.classList.remove('sopen');if(document.body.classList.contains('tv'))toggleTV()}
+    if((e.key=='Enter'||e.key==' ')&&e.target.dataset&&e.target.dataset.rc){e.preventDefault();e.target.click()}
     if(e.key=='/'&&!/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)&&!$('.ov.open')){e.preventDefault();$('#q').focus()}});
 })();
 

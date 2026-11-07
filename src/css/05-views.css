@@ -923,3 +923,41 @@ div.svc{cursor:default}
 .svc .muted{flex:1 1 100%;order:5}.svc-go{order:6;margin-left:auto}
 .svc>span:nth-child(3){flex:0 0 auto;order:0}
 .svc>span.muted{flex:1 1 100%;order:5}
+
+/* Messages: the page stays still; only the chat list and the conversation scroll */
+body.vmsg .main{overflow:hidden;display:flex;flex-direction:column;padding-bottom:.75rem}
+body.vmsg .main>*{flex:0 0 auto}
+body.vmsg .main>.msn{flex:1 1 auto;height:auto!important;min-height:0}
+.msn-l,.msn-r{min-height:0}.msn-list{flex:1;min-height:0}
+/* rows and cards that open when clicked */
+.clk-r{cursor:pointer}
+tr.clk-r:hover>td{background:var(--hover)}
+.dcard.clk-r:hover,.cc2.clk-r:hover,.nrow.clk-r:hover{border-color:var(--blue)}
+.clk-r:focus-visible{outline:2px solid var(--blue);outline-offset:-2px}
+/* review card: each site centred in its column */
+.rva{align-items:center;text-align:center}
+.kpi.rvall>small{text-align:center}
+/* contact cards: the number sits right next to its label */
+.cpl{min-width:0;margin-right:.1rem;padding:.05rem .45rem;border-radius:6px;background:var(--card2);font-size:.72rem}
+.azbar span{opacity:.45}.azbar button{font-weight:700;color:var(--blue)}
+.azbar span{color:var(--muted)!important}
+
+/* ==== one look for every popup: titles, labels, boxes, buttons and section cards ==== */
+.mb>h2,.mb>.pf h2{font:600 1.35rem var(--head);color:var(--navy);margin:0 0 1rem;padding-right:2.5rem}
+.mb .grid{gap:.95rem 1.1rem}
+.mb .ff label,.mb .dfm label,.wz-b .ff label{font:600 .92rem var(--body);color:var(--ink);margin-bottom:.35rem}
+.mb .ff input,.mb .ff select,.mb .ff textarea,.mb .dfm input,.mb .dfm select,.mb .dfm textarea,.cphr input,.cphr select,.cform .ff input,.cform .ff select,.cform .ff textarea{min-height:2.8rem;padding:.55rem .8rem;font-size:1rem;border:1.5px solid #b9c6d8;border-radius:10px;background:#fff;color:var(--ink)}
+.mb .ff textarea,.mb .dfm textarea{min-height:5rem}
+.mb .ff input:focus,.mb .ff select:focus,.mb .ff textarea:focus,.mb .dfm input:focus,.mb .dfm select:focus,.mb .dfm textarea:focus,.cphr input:focus,.cphr select:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(3,78,162,.18)}
+.mb .ff input[readonly]{background:var(--card2);color:var(--muted)}
+body[data-theme=dark] .mb .ff input,body[data-theme=dark] .mb .ff select,body[data-theme=dark] .mb .ff textarea,body[data-theme=dark] .mb .dfm input,body[data-theme=dark] .mb .dfm select,body[data-theme=dark] .mb .dfm textarea,body[data-theme=dark] .cphr input,body[data-theme=dark] .cphr select{background:#11161f;border-color:#3a4352}
+.mb .ff .hint{font-size:.84rem}
+.mb .mact{gap:.5rem}
+.mb .mact .btn{min-height:2.7rem;padding:.55rem 1.15rem;font-size:.97rem;border-radius:11px}
+.mb .mx{width:2.4rem;height:2.4rem;font-size:1.3rem;border-radius:50%}
+/* section cards inside popups share one heading style */
+.mb .rg h4,.mb .cform h3{font:600 1.05rem var(--head);text-transform:none;letter-spacing:0;color:var(--navy)}
+.mb .rg{border-radius:14px}
+/* page headers: the same gap under every title */
+.main>.head{margin-bottom:.9rem}
+.main>.head+.subbar,.main>.head+.sg2,.main>.head+.chips{margin-top:0}

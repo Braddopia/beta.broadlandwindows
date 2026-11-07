@@ -11,6 +11,8 @@ const $$=s=>[...document.querySelectorAll(s)];
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 /* Safe inline handler: A('openContract',id) -> onclick="openContract(&quot;2402318&quot;)".
    Arguments are JSON-encoded then HTML-escaped, so names/ids containing quotes can't break out. */
+/* click anywhere on a row or card to open it (buttons, links and boxes inside keep their own job) */
+const RC=(fn,...a)=>`tabindex="0" data-rc="1" onclick="${esc("if(event.target.closest('button,a,input,select,textarea,label,summary'))return;"+fn+'('+a.map(x=>JSON.stringify(x===undefined?null:x)).join(',')+')')}"`;
 const A=(fn,...a)=>`onclick="${esc(fn+'('+a.map(x=>JSON.stringify(x===undefined?null:x)).join(',')+')')}"`;
 const AC=(ev,fn,...a)=>`${ev}="${esc(fn+'('+a.map(x=>x==='this'||x==='this.value'||x==='this.checked'?x:JSON.stringify(x===undefined?null:x)).join(',')+')')}"`;
 
