@@ -10,7 +10,7 @@
 <link rel="icon" id="fav" type="image/png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;600;700&family=Figtree:wght@400;500;600&family=Archivo:wdth,wght@62..125,500..800&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;600;700&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 /* Broadland Windows CRM v19.2 */
 /* ==========================================================================
@@ -1156,6 +1156,12 @@ body[data-theme=dark] #gate{background:radial-gradient(900px 600px at 0% 0%,rgba
 .azr{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr) minmax(0,1fr) auto;gap:.4rem;margin-bottom:.4rem}.azr input,.azr select{padding:.45rem .55rem;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);min-width:0}
 @media(max-width:700px){.azr{grid-template-columns:1fr 1fr}}
 
+/* number tiles: long amounts shrink to fit instead of being cut off */
+.kpi{container-type:inline-size}
+.kpi b{font-size:min(clamp(1.5rem,1.9vw,2.4rem),calc(90cqi / (var(--n,3) * .62)))}
+.kpis.big .kpi b{font-size:min(2.6rem,calc(90cqi / (var(--n,3) * .62)))}
+.fl .kpi b{font-size:min(4.2rem,calc(90cqi / (var(--n,2) * .62)))}
+
 /* ==========================================================================
    06 · Adaptive layout
    Breakpoints: 1400 (laptop) · 1100 (small laptop / tablet landscape)
@@ -1244,92 +1250,6 @@ body[data-theme=dark] #gate{background:radial-gradient(900px 600px at 0% 0%,rgba
   .nav{height:2.6rem}
   .ptb input[type=checkbox]{width:1.3rem;height:1.3rem}
 }
-
-/* ==========================================================================
-   07 · "Frame & Glass" (trial on Overview, Leads and Floor Boards: body.fg)
-   Panels are drawn like glazed units: a white frame, a thin bead, frosted
-   glass inside. Archivo (wide, like van signage) for headings and numbers,
-   Atkinson Hyperlegible for reading. Anthracite RAL 7016 in dark mode.
-   ========================================================================== */
-body.fg{
-  --fg-navy:#012b59; --fg-blue:#034ea2; --fg-sun:#ffd002;
-  --fg-glass:rgba(232,241,250,.62); --fg-frame:#f7f9fc; --fg-bead:rgba(1,43,89,.13);
-  --fg-ink:#13233a; --fg-quiet:#55657b;
-  --fg-sign:"Archivo","Bricolage Grotesque",sans-serif;
-  --fg-read:"Atkinson Hyperlegible",Figtree,system-ui,sans-serif;
-  background:#e3ebf5;
-}
-body.fg[data-theme=dark]{
-  --fg-glass:rgba(56,62,66,.62); --fg-frame:#4a5156; --fg-bead:rgba(0,0,0,.35);
-  --fg-ink:#eef1f3; --fg-quiet:#b3bcc3; --fg-navy:#f2f5f7; --fg-blue:#8fbcf5;
-  background:#2c3134;
-}
-body.fg #main{font-family:var(--fg-read);color:var(--fg-ink)}
-
-/* a glazed unit: outer frame edge, bead, glass. Flat: it sits in the wall, it doesn't float */
-body.fg #main .panel,body.fg #main .kpi,body.fg #main .tw{
-  background:var(--fg-glass);border:1px solid #fff!important;border-radius:5px;
-  box-shadow:inset 0 0 0 6px var(--fg-frame),inset 0 0 0 7px var(--fg-bead)!important;
-  -webkit-backdrop-filter:blur(14px) saturate(140%);backdrop-filter:blur(14px) saturate(140%);
-  transition:none;animation:none}
-body.fg[data-theme=dark] #main .panel,body.fg[data-theme=dark] #main .kpi,body.fg[data-theme=dark] #main .tw{border-color:#5d656a!important}
-body.fg #main .panel{padding:1.15rem 1.3rem}
-body.fg #main .panel:hover{box-shadow:inset 0 0 0 6px var(--fg-frame),inset 0 0 0 7px var(--fg-bead)!important}
-
-/* headings: wide and plain, with a transom bar under panel titles */
-body.fg #main h1{font:700 1.7rem/1.1 var(--fg-sign);font-stretch:112%;letter-spacing:-.01em;color:var(--fg-navy)}
-body.fg #main .panel>h2{font:650 1.02rem/1.2 var(--fg-sign);font-stretch:105%;color:var(--fg-navy);padding-bottom:.55rem;margin-bottom:.6rem;border-bottom:2px solid var(--fg-bead)}
-
-/* number tiles: signage. The state shows as the colour of the bead */
-body.fg #main .kpi{border-left:1px solid #fff!important;padding:1rem 1.15rem .95rem}
-body.fg #main .kpi small{font:400 .86rem var(--fg-read);color:var(--fg-quiet)}
-body.fg #main .kpi b{font:800 clamp(1.8rem,2.4vw,2.7rem)/1.05 var(--fg-sign);font-stretch:125%;color:var(--fg-navy);letter-spacing:-.01em;margin-top:.3rem}
-body.fg #main .kpi.warn{box-shadow:inset 0 0 0 6px var(--fg-frame),inset 0 0 0 9px var(--fg-sun)!important}
-body.fg #main .kpi.bad{box-shadow:inset 0 0 0 6px var(--fg-frame),inset 0 0 0 9px #c83a3a!important}
-body.fg #main .kpi .ksub{font-family:var(--fg-read);color:var(--fg-quiet)}
-body.fg #main .kpis{gap:.9rem}
-
-/* overview welcome: a shop fascia. Solid navy board, sun-yellow edge, wide lettering */
-body.fg #main .hero{background:#012b59;border-radius:5px;border:0;border-top:6px solid var(--fg-sun);padding:1.4rem 1.6rem 1.3rem;animation:none}
-body.fg #main .hero::after{display:none}
-body.fg #main .hero h1{font:800 clamp(1.7rem,3vw,2.5rem)/1.05 var(--fg-sign);font-stretch:118%;color:#fff;letter-spacing:-.01em}
-body.fg #main .hero h1 .wave{display:none}
-body.fg #main .hero p{font-family:var(--fg-read);color:#d6e3f3;font-size:1rem;max-width:60ch}
-body.fg #main .hero .rt{background:transparent;border:1px solid rgba(255,255,255,.35);border-radius:3px;font-family:var(--fg-read)}
-body.fg #main .hero-cz{border-radius:4px}
-
-/* tables and lists: plain rows inside the unit, divided like glazing bars */
-body.fg #main .tw thead tr{background:transparent}
-body.fg #main .tw th{font:600 .8rem var(--fg-sign);font-stretch:105%;color:var(--fg-quiet);border-bottom:2px solid var(--fg-bead);padding-top:.9rem}
-body.fg #main .tw td{border-bottom:1px solid var(--fg-bead)}
-body.fg #main .tw tbody tr:last-child td{border-bottom:0}
-body.fg #main .tw table{margin:6px;width:calc(100% - 12px)}
-body.fg #main .lref{font:700 .9rem var(--fg-sign);font-stretch:100%;letter-spacing:.02em}
-body.fg #main .row,body.fg #main .nrow{border-color:var(--fg-bead)}
-body.fg #main .tag{border-radius:3px}
-
-/* the filter bar is a sill under the main bar */
-body.fg #main .subbar{border-radius:5px;background:var(--fg-glass);border:1px solid #fff;box-shadow:inset 0 -3px 0 var(--fg-bead)}
-body.fg #main .views .chip{border-radius:3px}
-
-/* floor boards: the big numbers are the point, readable across the factory */
-body.fg #main .fl .kpi b{font-size:clamp(2.6rem,4.4vw,4.6rem);font-stretch:125%}
-body.fg #main .clk{font:800 clamp(2.4rem,4vw,4.4rem)/1 var(--fg-sign);font-stretch:118%;font-variant-numeric:tabular-nums;color:var(--fg-navy)}
-body.fg #main .bar2,body.fg #main .bar{border-radius:2px}body.fg #main .bar2 i,body.fg #main .bar i{border-radius:2px}
-
-/* one load moment only: the overview fascia slides its lettering in */
-@media (prefers-reduced-motion:no-preference){body.fg #main.enter .hero h1{animation:fgIn .5s cubic-bezier(.2,.7,.2,1) backwards}}
-@keyframes fgIn{from{opacity:0;transform:translateX(-12px)}}
-body.fg #main.enter .kpi,body.fg #main.enter .panel{animation:none}
-
-/* numbers shrink to fit their tile instead of being cut off */
-body.fg #main .kpi{container-type:inline-size;position:relative}
-body.fg #main .kpi b{font-size:min(2.7rem,calc(92cqi / (var(--n,3) * .74)));overflow:visible;text-overflow:clip}
-body.fg #main .fl .kpi b{font-size:min(4.6rem,calc(92cqi / (var(--n,2) * .74)))}
-/* state shows as a short sill along the bottom of the frame, not a box around it */
-body.fg #main .kpi.warn,body.fg #main .kpi.bad{box-shadow:inset 0 0 0 6px var(--fg-frame),inset 0 0 0 7px var(--fg-bead)!important}
-body.fg #main .kpi.warn::after,body.fg #main .kpi.bad::after{content:"";position:absolute;left:7px;right:7px;bottom:7px;height:4px;background:var(--fg-sun)}
-body.fg #main .kpi.bad::after{background:#c83a3a}
 </style>
 </head>
 <body>
@@ -1778,9 +1698,7 @@ function render(){
   let h;try{h=V.fn()}catch(e){console.error(e);h=`<div class="panel"><h2>Something Went Wrong</h2><p class="muted">${esc(e.message)}</p></div>`}
   const m=$('#main');m.innerHTML=h;
   document.body.classList.toggle('lv',view=='live');
-  /* "Frame & Glass" design, trialled on a few pages first */
-  let fgOn=true;try{fgOn=localStorage.getItem('bb_fg')!=='0'}catch(e){}document.body.classList.toggle('fg',fgOn&&['home','leads','live'].includes(view));
-  requestAnimationFrame(()=>{if(document.body.classList.contains('fg'))$$('#main .kpi b').forEach(b=>b.style.setProperty('--n',Math.max(2,b.textContent.trim().length)))});
+  requestAnimationFrame(()=>$$('#main .kpi b').forEach(b=>b.style.setProperty('--n',Math.max(2,b.textContent.trim().length))));
   document.body.classList.toggle('isadm',ISADM());
   shellSync();
   $$('#main .kpi,#main .panel,#main .col,#main .bc,#main .cc,#main .dlane,#main .supc').forEach((e,i)=>e.style.setProperty('--i',Math.min(i,14)));
@@ -3189,7 +3107,7 @@ function vAdmin(){if(!ISOWN())return '';
     <div class="acts" style="margin-top:.8rem"><button class="mini pri" onclick="chPin()">Change PINs</button><button class="mini" onclick="backupDl()">Download backup</button><label class="mini" style="cursor:pointer">Restore backup<input type="file" accept=".json,application/json" hidden onchange="backupLoad(this)"></label></div></div>
    <div class="panel"><h2><span>Reviews</span><button class="mini pri" onclick="editRatings()">Update scores</button></h2><div class="row"><span>Trustpilot</span><span>${stars(S.brand.tp.score,'#e0a800','#d9e1ee')} <b>${(+S.brand.tp.score).toFixed(1)}</b></span></div><div class="row"><span>Google</span><span>${stars(S.brand.g.score,'#e0a800','#d9e1ee')} <b>${(+S.brand.g.score).toFixed(1)}</b></span></div><p class="muted" style="font-size:.8rem;margin:.5rem 0 0">Shown on the overview and on customer documents.</p></div>
    ${authPanel()}
-   <div class="panel"><h2>Testing Tools</h2><label class="tsw"><input type="checkbox" ${tourTest()?'checked':''} ${AC('onchange','tourToggle','this.checked')}><span>Show the welcome tour every time the site opens</span></label><p class="muted" style="font-size:.82rem;margin:.4rem 0 .7rem">For testing. Turn it off before the team starts using the site, so the tour only shows once per browser.</p><button class="btn ghost sm" onclick="startTour()">Start the tour now</button><label class="tsw" style="margin-top:.9rem"><input type="checkbox" ${(()=>{try{return localStorage.getItem('bb_fg')!=='0'}catch(e){return true}})()?'checked':''} onchange="try{localStorage.setItem('bb_fg',this.checked?'1':'0')}catch(e){};toast(this.checked?'New look on for Overview, Leads and Floor Boards':'Back to the old look')"><span>New "Frame &amp; Glass" look on Overview, Leads and Floor Boards</span></label></div>
+   <div class="panel"><h2>Testing Tools</h2><label class="tsw"><input type="checkbox" ${tourTest()?'checked':''} ${AC('onchange','tourToggle','this.checked')}><span>Show the welcome tour every time the site opens</span></label><p class="muted" style="font-size:.82rem;margin:.4rem 0 .7rem">For testing. Turn it off before the team starts using the site, so the tour only shows once per browser.</p><button class="btn ghost sm" onclick="startTour()">Start the tour now</button></div>
    <div class="panel"><h2>Quick Actions</h2><div class="acts" style="gap:.5rem"><button class="btn ghost" ${A('go','finance')}>Finance</button><button class="btn ghost" ${A('go','staff')}>Staff</button><button class="btn ghost" ${A('go','holidays')}>Holidays</button><button class="btn ghost" ${A('go','reports')}>Reports</button><button class="btn ghost" ${A('setRole','staff')}>Leave admin mode</button></div></div>
   </div>
   <div class="panel" style="margin-top:1rem;padding:0"><h2 style="padding:1rem 1.1rem 0"><span>Audit Trail <span class="muted" style="font:500 .78rem var(--body)">who changed what, and when</span></span><span class="acts"><button class="mini" onclick="auditCsv()">Export CSV</button></span></h2>

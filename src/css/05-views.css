@@ -765,3 +765,9 @@ body[data-theme=dark] #gate{background:radial-gradient(900px 600px at 0% 0%,rgba
 .gate-pin{margin-top:1.3rem;border:0;background:none;color:var(--muted);font-size:.8rem;cursor:pointer;text-decoration:underline}
 .azr{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr) minmax(0,1fr) auto;gap:.4rem;margin-bottom:.4rem}.azr input,.azr select{padding:.45rem .55rem;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);min-width:0}
 @media(max-width:700px){.azr{grid-template-columns:1fr 1fr}}
+
+/* number tiles: long amounts shrink to fit instead of being cut off */
+.kpi{container-type:inline-size}
+.kpi b{font-size:min(clamp(1.5rem,1.9vw,2.4rem),calc(90cqi / (var(--n,3) * .62)))}
+.kpis.big .kpi b{font-size:min(2.6rem,calc(90cqi / (var(--n,3) * .62)))}
+.fl .kpi b{font-size:min(4.2rem,calc(90cqi / (var(--n,2) * .62)))}
