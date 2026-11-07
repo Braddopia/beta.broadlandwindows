@@ -660,8 +660,7 @@ th.ac,td.ac{background:rgba(255,255,255,.88)}body[data-theme=dark] th.ac,body[da
 .sups{display:flex;flex-direction:column;gap:.8rem}
 .supw{position:relative;display:grid;grid-template-columns:3.2rem minmax(13rem,1.25fr) minmax(12rem,1.1fr) minmax(13rem,1.2fr) minmax(16rem,1.6fr) auto;align-items:center;gap:1.2rem;width:100%;padding:1rem 1.2rem 1rem 1.4rem;text-align:left;font:inherit;color:var(--ink);cursor:pointer;overflow:hidden;transition:transform .2s,box-shadow .2s}
 .supw::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--sc)}
-.supw:hover{border-color:var(--sc)!important;box-shadow:0 0 0 1px var(--sc),0 10px 28px rgba(1,43,89,.12)}
-.supw::before{transition:width .2s}.supw:hover::before{width:8px}
+.supw:hover{box-shadow:0 10px 28px rgba(1,43,89,.12)}
 .supw small{display:block;font-size:.68rem;color:var(--muted);letter-spacing:.03em}
 .supw-av{display:grid;place-items:center;width:3.2rem;height:3.2rem;border-radius:14px;background:var(--sc);color:#fff;font:700 1.05rem var(--head);box-shadow:0 6px 16px rgba(1,43,89,.18)}
 .supw-id b{font:600 1.08rem var(--head);color:var(--navy)}.supw-id small{margin-top:.2rem;font-size:.78rem}
@@ -674,7 +673,7 @@ th.ac,td.ac{background:rgba(255,255,255,.88)}body[data-theme=dark] th.ac,body[da
 .supw-st>span.w{background:var(--amber-bg);border-color:#e0c34d}.supw-st>span.x{background:var(--red-bg);border-color:#e3a0a0}
 .supw-st b{font:600 .98rem var(--head);color:var(--navy);white-space:nowrap}
 .supw-go{display:inline-flex;align-items:center;gap:.2rem;padding:.45rem .8rem;border-radius:10px;background:var(--btn);color:#fff;font-size:.8rem;font-weight:500;transition:gap .2s}
-.supw-go svg{width:.95rem;height:.95rem}.supw:hover .supw-go{gap:.45rem}
+.supw-go svg{width:.95rem;height:.95rem}
 @media(max-width:1350px){.supw{grid-template-columns:3.2rem minmax(0,1fr) minmax(0,1fr) auto;row-gap:.9rem}.supw-hl{grid-column:2/3}.supw-st{grid-column:3/5}}
 @media(max-width:700px){.supw{grid-template-columns:3rem minmax(0,1fr);gap:.8rem}.supw-ct,.supw-hl,.supw-st{grid-column:1/-1}.supw-go{grid-column:1/-1;justify-content:center}}
 
@@ -781,6 +780,26 @@ body[data-theme=dark] .lc,body[data-theme=dark] .dcard{background:rgba(255,255,2
 .mb.full{background:rgba(244,247,252,.94);-webkit-backdrop-filter:blur(34px) saturate(160%);backdrop-filter:blur(34px) saturate(160%)}
 body[data-theme=dark] .mb.full{background:rgba(16,20,28,.95)}
 .mb.full .rg{background:rgba(255,255,255,.7)}body[data-theme=dark] .mb.full .rg{background:rgba(255,255,255,.035)}
+
+/* lead record: tucked-away extras, dependent address rows */
+details.more{padding:.6rem 1rem}details.more>summary{cursor:pointer;font:600 .74rem var(--head);text-transform:uppercase;letter-spacing:.08em;color:var(--blue);list-style:none;padding:.15rem 0}
+details.more>summary::before{content:"+ ";}details.more[open]>summary::before{content:"- "}details.more[open]>summary{margin-bottom:.35rem}
+.rf[hidden]{display:none}
+.fl-own{display:inline-flex;align-items:center;gap:.4rem;font-size:.8rem;color:var(--muted)}
+/* supplier popup: info first */
+.sp2 .rw-b{padding:1.4rem 1.6rem}
+.sinfo{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,22rem),1fr));gap:1.2rem 1.6rem;align-items:start}
+.sinfo .rg{padding:1rem 1.2rem}.sinfo .si{font-size:.98rem;padding:.55rem 0}.sinfo .si b{font-weight:500}
+.sinfo .rg h4{font-size:.78rem}
+.smini{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;margin-top:1.2rem;padding:.7rem 1rem;border-radius:12px;background:rgba(1,43,89,.04);border:1px solid var(--line);font-size:.84rem}
+body[data-theme=dark] .smini{background:rgba(255,255,255,.03)}
+.smini b{font-weight:600}.smini .sep{width:1px;height:1rem;background:var(--line)}
+.smini details{flex-basis:100%}.smini summary{cursor:pointer;color:var(--blue);font-weight:500;padding:.3rem 0}
+.snote{white-space:pre-wrap;font-size:.95rem;line-height:1.5;margin:0}
+/* popups: near-solid so the page behind never makes them hard to read */
+.mb{background:rgba(246,248,252,.96)!important}
+body[data-theme=dark] .mb{background:rgba(17,21,30,.97)!important}
+.mact{background:inherit;-webkit-backdrop-filter:none;backdrop-filter:none}
 
 /* ==========================================================================
    06 · Adaptive layout
@@ -894,7 +913,7 @@ body[data-theme=dark] .mb.full{background:rgba(16,20,28,.95)}
     <!-- ===== Top bar ===== -->
     <header class="top">
       <button class="ib" id="mnb" type="button" aria-label="Open menu"></button>
-      <label class="sb" id="sb"><span id="sbIc"></span><input id="q" type="search" placeholder="Search this page" aria-label="Search" autocomplete="off" maxlength="80"><kbd>/</kbd><button type="button" class="clr" id="qClr" aria-label="Clear search">&times;</button></label>
+      <label class="sb" id="sb"><span id="sbIc"></span><input id="q" type="search" placeholder="Search" aria-label="Search" autocomplete="off" maxlength="80"><kbd>/</kbd><button type="button" class="clr" id="qClr" aria-label="Clear search">&times;</button></label>
       <button class="ib" id="bell" type="button" aria-label="Notifications"><span class="bn" id="bellN"></span></button>
       <button class="ib" id="thb" type="button" aria-label="Light or dark mode" title="Light or dark mode"></button>
       <div class="nw">
@@ -1322,7 +1341,6 @@ function shellSync(){
   const sec=$('#secbar'),dp=ISOWN()&&Object.values(S.sec.pins).some(p=>p.def);
   sec.classList.toggle('on',!!(dp||!window.isSecureContext));
   sec.textContent=!window.isSecureContext?'This page is not on a secure (https) connection: the camera scanner and some protections will not work.':dp?'Some accounts still use the default PIN 1234. Change them in Admin console.':'';
-  if(shellSync.v!=view){shellSync.v=view;const SAY=['Search','Search… what are you after?','Search… names, codes, refs','Search… type to find it fast','Search… let\'s find it','Search anything'];$('#q').placeholder=SAY[Math.floor(Math.random()*SAY.length)]}
   $$('#nwm button').forEach(b=>b.style.display=canSee(b.dataset.v)?'':'none');
   const c=ncCount(),bn=$('#bellN');bn.textContent=c>99?'99+':c;bn.style.display=c?'':'none';
   if($('#nc').classList.contains('open'))ncDraw();
@@ -1334,7 +1352,7 @@ function toast(t){const e=$('#toast');e.textContent=t;e.style.display='block';cl
 
 /* ---- modal ---- */
 function openModal(h,size){const b=$('#mbox');b.className='mb'+(size?' '+size:'');b.innerHTML=h;$('#modal').classList.add('open');b.scrollTop=0;
-  setTimeout(()=>{const f=b.querySelector('input:not([readonly]):not([type=hidden]):not([type=checkbox]),select,textarea');if(f&&matchMedia('(pointer:fine)').matches)f.focus({preventScroll:true})},60)}
+  if(size!='full')setTimeout(()=>{const f=b.querySelector('input:not([readonly]):not([type=hidden]):not([type=checkbox]),select,textarea');if(f&&matchMedia('(pointer:fine)').matches)f.focus({preventScroll:true})},60)}
 function closeModal(){$('#modal').classList.remove('open')}
 $('#modal').addEventListener('mousedown',e=>{if(e.target.id=='modal')closeModal()});
 
@@ -1442,7 +1460,7 @@ function wzDraw(){const W=WZ,st=W.steps[W.st],last=W.st==W.steps.length-1;
    <div class="stp wz">${W.steps.map((x,i)=>`<span class="${i<=W.st?'on':''} ${i<=W.seen||W.edit?'go':''}" ${i<=W.seen||W.edit?A('wzGo',i):''}><i>${i<W.st?'&#10003;':i+1}</i>${esc(x.t)}</span>`).join('')}</div>
    <p class="muted wz-d">Step ${W.st+1} of ${W.steps.length}: ${esc(st.d||'')}</p>
    <div class="wz-b">${st.review?rev():`<div class="grid">${st.f.map(f=>fieldH(f,W.v)).join('')}</div>`}</div>
-   <div class="mact">${W.del?`<button class="btn ghost l" style="color:var(--red)" onclick="WZ.del()">Delete</button>`:''}${W.st?'<button class="btn ghost" onclick="wzStep(-1)">Back</button>':'<button class="btn ghost" onclick="closeModal()">Cancel</button>'}${W.edit&&!last?'<button class="btn ghost" onclick="wzSave()">Save now</button>':''}${last?'<button class="btn green" onclick="wzSave()">Save supplier</button>':'<button class="btn" onclick="wzStep(1)">Next</button>'}</div>`,'md');
+   <div class="mact">${W.del?`<button class="btn ghost l" style="color:var(--red)" onclick="WZ.del()">Delete</button>`:''}${W.st?'<button class="btn ghost" onclick="wzStep(-1)">Back</button>':'<button class="btn ghost" onclick="closeModal()">Cancel</button>'}${W.edit&&!last?'<button class="btn ghost" onclick="wzSave()">Save now</button>':''}${last?`<button class="btn green" onclick="wzSave()">${esc(W.saveLabel||'Save')}</button>`:'<button class="btn" onclick="wzStep(1)">Next</button>'}</div>`,'md');
   const f=$('#mbox .wz-b input:not([readonly]),#mbox .wz-b textarea');if(f&&matchMedia('(pointer:fine)').matches)setTimeout(()=>f.focus(),80)}
 function wzRead(){const st=WZ.steps[WZ.st];if(st.review)return true;const o=readFields(st.f);if(!o)return false;Object.assign(WZ.v,o);const e=WZ.check&&WZ.check(WZ.st,WZ.v);if(e){toast(e);return false}return true}
 function wzStep(d){if(d>0&&!wzRead())return;if(d<0){const st=WZ.steps[WZ.st];if(!st.review){const o={};st.f.forEach(f=>{const e=$('#f_'+f.k);if(e)o[f.k]=e.value});Object.assign(WZ.v,o)}}
@@ -1607,20 +1625,23 @@ function vSuppliers(){const Ad=ISADM(),all=sups(),P=products();
   return `<div class="head"><div><h1>Suppliers</h1><span class="muted">${all.length} suppliers linked to ${tot.lines} stock lines</span></div><div class="tools"><button class="btn sm" onclick="editSup()">Add Supplier</button></div></div>
   <div class="kpis"><div class="kpi"><small>Suppliers</small><b>${all.length}</b></div><div class="kpi"><small>Lines Linked</small><b>${tot.lines}</b></div><button class="kpi ${tot.none?'warn':''}" onclick="UI.inv.f='nosup';UI.inv.v='products';go('stock')"><small>Lines Without Supplier</small><b>${tot.none}</b></button><div class="kpi ${tot.re?'bad':''}"><small>Lines To Reorder</small><b>${tot.re}</b></div><button class="kpi" ${A('go','deliveries')}><small>Deliveries Due</small><b>${tot.del}</b></button></div>
   <div class="sups">${cards||'<p class="empty">No suppliers match.</p>'}</div>`}
-function supOpen(n){const x=S.suppliers.find(s=>s.name==n);if(!x)return;openModal(`<button class="mx" onclick="closeModal()" aria-label="Close">&times;</button>`+supFull(x),'xl sp')}
 /* full supplier details, shown in a popup */
-function supFull(x){const Ad=ISADM(),i=S.suppliers.indexOf(x),s=supStats(x),url=SAFE.url(x.url),so=supOrders(x),need=[...s.out,...s.low];
-  const info=(l,v)=>v?`<div class="si"><span>${l}</span><b>${v}</b></div>`:'';
-    return `<div class="sup-pop"><div class="sup-h"><div><h2>${esc(x.name)}${x.hm?' <span class="tag">Live Feed</span>':''}</h2><span class="muted">${x.account?'Account '+esc(x.account):'No account number set'}${x.terms?' · '+esc(x.terms):''}</span></div>
-      <div class="acts"><button class="mini pri" ${A('supReorder',i)} ${need.length?'':'disabled'}>Request low items${need.length?' ('+need.length+')':''}</button><button class="mini" ${A('editDel',null,x.name)}>New Delivery</button>${url?`<a class="mini" href="${esc(url)}" target="_blank" rel="noopener noreferrer">Website</a>`:''}${x.hm?'<button class="mini" onclick="syncHM()">Sync</button>':''}<button class="mini" ${A('editSup',i)}>Edit</button></div></div>
-     <div class="sup-b">
-      <div class="sup-c"><h3>Account</h3>${info('Account No.',esc(x.account||''))}${info('Payment Terms',esc(x.terms||''))}${info('Minimum Order',x.minOrder?money(x.minOrder):'')}${info('Lead Time',x.lead?x.lead+' days':'')}${info('Delivery Days',esc(x.days||''))}${!x.account&&!x.terms&&!x.minOrder&&!x.lead?'<p class="empty">No account details yet. Click Edit to add them.</p>':''}</div>
-      <div class="sup-c"><h3>Contacts</h3>${info('Main Contact',esc([x.contact,x.role].filter(Boolean).join(', ')))}${[x.phone,...lines(x.phones)].filter(Boolean).map((n,j)=>info(j?'Phone '+(j+1):'Phone',telA(n))).join('')}${[x.email,...lines(x.emails)].filter(Boolean).map((e,j)=>info(j?'Email '+(j+1):'Email',mailA(e))).join('')}${info('Orders Email',x.orderEmail?mailA(x.orderEmail):'')}${info('Alt. Contact',esc(x.altContact||''))}${info('Address',esc(x.address||''))}${!x.contact&&!x.phone&&!x.email?'<p class="empty">No contact details yet.</p>':''}</div>
-      <div class="sup-c"><h3>Inventory</h3><div class="sup-k"><div><small>Lines</small><b>${s.L.length}</b></div><div><small>Units</small><b>${s.units}</b></div>${Ad?`<div><small>Stock Value</small><b>${m0(s.value)}</b></div>`:''}<div class="${s.low.length?'w':''}"><small>Low</small><b>${s.low.length}</b></div><div class="${s.out.length?'x':''}"><small>Out</small><b>${s.out.length}</b></div><div class="${s.req.length?'w':''}"><small>Requests</small><b>${s.req.length}</b></div><div class="${s.od.length?'x':''}"><small>Deliveries Due</small><b>${s.D.length}${s.od.length?` <span style="font-size:.7em">(${s.od.length} late)</span>`:''}</b></div>${so.length?`<div><small>Open Orders</small><b>${so.filter(o=>!ORDDONE.test(o.status)).length}</b></div>`:''}</div></div>
-     </div>
-     ${s.L.length?`<div class="tw sup-t"><table><thead><tr><th>ID</th><th>Item</th><th class="c-sm">Length / Colours</th><th class="n">Stock</th><th class="n c-sm">Reorder</th><th class="n c-md">Cost</th><th class="ac">Status</th></tr></thead><tbody>${s.L.slice().sort((a,b)=>a.stock-b.stock).map(r=>{const t=stt(r);return `<tr><td><code>${esc(r.pid)}</code></td><td><b>${esc(r.item)}</b></td><td class="c-sm">${esc([r.length!='-'?r.length:'',colTxt(r)!='-'?colTxt(r):''].filter(Boolean).join(', ')||'-')}</td><td class="n">${r.stock} ${esc(unitOf(r))}</td><td class="n c-sm">${ro(r)}</td><td class="n c-md">${money(r.cost)}</td><td class="ac"><div class="acts r"><span class="tag fw ${t[1]}">${t[0]=='OK'?'In Stock':t[0]}</span>${t[0]!='OK'?`<button class="mini pri" ${A('stockForm','request',r.pid)}>Request</button>`:''}<button class="mini" ${A('viewItem',r.pid)}>View</button></div></td></tr>`}).join('')}</tbody></table></div>${s.L.length?`<p class="muted" style="margin:.5rem 0 0">${s.L.length} lines, lowest stock first. <a href="#" ${A('supInv',x.name)}>Open in Inventory</a></p>`:''}`:'<p class="empty" style="margin-top:.8rem">No inventory linked to this supplier yet. Set the supplier on an item to link it.</p>'}
-    </div>`}
-
+/* supplier popup: who they are and how to reach them first; stock kept small */
+function supOpen(n){const x=S.suppliers.find(s=>s.name==n);if(!x)return;const i=S.suppliers.indexOf(x),s=supStats(x),url=SAFE.url(x.url),Ad=ISADM(),need=[...s.out,...s.low];
+  const row=(l,v)=>v?`<div class="si"><span>${l}</span><b>${v}</b></div>`:'';
+  const phones=[x.phone,...lines(x.phones)].filter(Boolean),emails=[x.email,...lines(x.emails)].filter(Boolean);
+  const box=(t,h,empty)=>`<section class="rg"><h4>${t}</h4>${h||`<p class="empty">${empty}</p>`}</section>`;
+  openModal(`<div class="rw sp2"><div class="rw-bar"><button class="rb1" ${A('editSup',i)}>Edit supplier</button><button class="rb1" ${A('editDel',null,x.name)}>New delivery</button>${need.length?`<button class="rb1 go" ${A('supReorder',i)}>Request low items (${need.length})</button>`:''}${url?`<a class="rb1" href="${esc(url)}" target="_blank" rel="noopener noreferrer" style="text-decoration:none">Website</a>`:''}${x.hm?'<button class="rb1" onclick="syncHM()">Sync feed</button>':''}<span class="rw-sp"></span><button class="rb1 ic" onclick="closeModal()" aria-label="Close">&times;</button></div>
+   <div class="rw-h"><div><small>Supplier${x.hm?' · Live Feed':''}</small><h2>${esc(x.name)}</h2></div><div class="rw-hk">${x.account?`<span><small>Account</small><b>${esc(x.account)}</b></span>`:''}${x.lead?`<span><small>Lead Time</small><b>${x.lead} days</b></span>`:''}</div></div>
+   <div class="rw-b"><div class="sinfo">
+    ${box('Contacts',row('Main contact',esc([x.contact,x.role].filter(Boolean).join(', ')))+phones.map((p,j)=>row(j?'Phone '+(j+1):'Phone',telA(p))).join('')+emails.map((e,j)=>row(j?'Email '+(j+1):'Email',mailA(e))).join('')+row('Orders email',x.orderEmail?mailA(x.orderEmail):'')+row('Alternative contact',esc(x.altContact||'')),'No contact details yet. Click Edit supplier to add them.')}
+    ${box('Account',row('Account number',esc(x.account||''))+row('Payment terms',esc(x.terms||''))+row('Minimum order',x.minOrder?money(x.minOrder):'')+row('Lead time',x.lead?x.lead+' days':'')+row('Delivery days',esc(x.days||'')),'No account details yet.')}
+    ${box('Address And Web',(x.address?`<p class="snote">${esc(x.address)}</p>`:'')+row('Website',url?`<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${esc(url.replace(/^https?:\/\//,''))}</a>`:''),'No address yet.')}
+    ${box('Notes',x.notes?`<p class="snote">${esc(x.notes)}</p>`:'','No notes yet.')}
+   </div>
+   <div class="smini"><b>Stock</b><span>${s.L.length} lines</span><span class="sep"></span><span>${s.units} units</span>${Ad?`<span class="sep"></span><span>${m0(s.value)}</span>`:''}<span class="sep"></span><span class="${need.length?'warn':''}" style="font-size:inherit">${s.low.length} low, ${s.out.length} out</span><span class="sep"></span><span>${s.req.length} requests</span><span class="sep"></span><span>${s.D.length} deliveries due${s.od.length?` (${s.od.length} late)`:''}</span>
+    ${s.L.length?`<details><summary>Show stock lines</summary><div class="tw" style="box-shadow:none;margin-top:.4rem"><table><thead><tr><th>ID</th><th>Item</th><th class="c-sm">Length / Colours</th><th class="n">Stock</th><th class="n c-md">Cost</th><th class="ac">Status</th></tr></thead><tbody>${s.L.slice().sort((a,b)=>a.stock-b.stock).map(r=>{const t=stt(r);return `<tr><td><code>${esc(r.pid)}</code></td><td><b>${esc(r.item)}</b></td><td class="c-sm">${esc([r.length!='-'?r.length:'',colTxt(r)!='-'?colTxt(r):''].filter(Boolean).join(', ')||'-')}</td><td class="n">${r.stock} ${esc(unitOf(r))}</td><td class="n c-md">${money(r.cost)}</td><td class="ac"><div class="acts r"><span class="tag fw ${t[1]}">${t[0]=='OK'?'In Stock':t[0]}</span>${t[0]!='OK'?`<button class="mini pri" ${A('stockForm','request',r.pid)}>Request</button>`:''}</div></td></tr>`}).join('')}</tbody></table></div></details>`:''}</div>
+   </div></div>`,'full')}
 function supInv(n){event&&event.preventDefault();Object.assign(UI.inv,{v:'products',sup:n,f:'all',page:1});go('stock')}
 function supReorder(i){const x=S.suppliers[i];if(!x)return;const s=supStats(x),need=[...s.out,...s.low].filter(r=>!s.req.some(q=>q.pid==r.pid));
   if(!need.length){toast('Everything low already has a request');return}
@@ -1630,7 +1651,7 @@ function supReorder(i){const x=S.suppliers[i];if(!x)return;const s=supStats(x),n
 function supDetail(i){const x=S.suppliers[i];if(!x)return;const s=supStats(x),so=supOrders(x);
   openModal(`<button class="mx" onclick="closeModal()" aria-label="Close">&times;</button><h2>${esc(x.name)}</h2><p class="muted" style="margin-top:-.4rem">${x.account?'Account '+esc(x.account):''}${x.terms?' · '+esc(x.terms):''}</p><h3>Items Supplied (${s.L.length})</h3>${s.L.map(r=>`<div class="row"><span><b>${esc(r.item)}</b> <span class="muted">${esc(r.length)}, ${esc(colTxt(r))}</span></span><span class="acts"><span class="tag ${r.stock<=0?'r':isLow(r)?'y':'g'}">${r.stock} ${esc(unitOf(r))}</span><button class="mini" ${A('stockForm','request',r.pid)}>Request</button></span></div>`).join('')||'<p class="empty">No items linked yet. Set the supplier on an item.</p>'}<h3>Open Requests</h3>${s.req.map(r=>`<div class="row"><span>${ordTag(r)} ${r.qty} ${esc(unitOf(r))} x ${esc(r.item)}</span>${reqTag(r)}</div>`).join('')||'<p class="empty">None.</p>'}<h3>Open Deliveries</h3>${s.D.map(d=>`<div class="row"><span><b>${esc(d.items)}</b><br><span class="muted">${esc(d.contract||'-')}</span></span>${dTag(d)}</div>`).join('')||'<p class="empty">Nothing outstanding.</p>'}${so.length?'<h3>Imported Orders</h3>'+so.map(o=>`<div class="row"><span><b>${esc(o.ref)}</b> ${esc(o.customer)}<br><span class="muted">${esc(o.desc)}${o.due?', due '+fd(o.due):''}</span></span><span class="tag">${esc(o.status||'-')}</span></div>`).join(''):''}<div class="mact"><button class="btn ghost" ${A('editSup',i)}>Edit</button><button class="btn ghost" ${A('editDel',null,x.name)}>New Delivery</button><button class="btn" onclick="closeModal()">Close</button></div>`,'lg')}
 function editSup(i){const x=i==null?{}:S.suppliers[i]||{};
-  wizard({title:i==null?'Add Supplier':'Edit '+x.name,v:{...x},edit:i!=null,steps:[
+  wizard({saveLabel:'Save supplier',title:i==null?'Add Supplier':'Edit '+x.name,v:{...x},edit:i!=null,steps:[
     {t:'Company',d:'Who is the supplier?',f:[{k:'name',l:'Supplier name',req:1,max:60,w:'full'},{k:'url',l:'Website or status page',max:300,w:'full',hint:'Optional. Must start with https://'},{k:'address',l:'Address',t:'area',max:300,w:'full'}]},
     {t:'Account',d:'Your account with them',f:[{k:'account',l:'Our account number',max:40},{k:'terms',l:'Payment terms',max:60,hint:'e.g. 30 days end of month'},{k:'minOrder',l:'Minimum order (£)',t:'number',max:1e6},{k:'lead',l:'Lead time (days)',t:'number',max:365,dp:0},{k:'days',l:'Delivery days',max:60,hint:'e.g. Tue and Thu'}]},
     {t:'Contacts',d:'Who you speak to',f:[{k:'contact',l:'Main contact name',max:60},{k:'role',l:'Their role',max:60},{k:'phone',l:'Main phone',t:'tel',max:30},{k:'email',l:'Main email',t:'email'},{k:'orderEmail',l:'Orders / accounts email',t:'email'},{k:'altContact',l:'Alternative contact (name and number)',max:120}]},
@@ -2474,14 +2495,14 @@ const staffNames=()=>['',...new Set(S.staff.map(s=>s.name))];
 const CUSTF=[
   {k:'title',l:'Title',t:'select',o:['','Mr','Mrs','Miss','Ms','Mr & Mrs','Dr','Company'],g:'Customer'},
   {k:'name',l:'Customer / contact name',req:1,g:'Customer'},{k:'company',l:'Company',g:'Customer'},
-  {k:'salutation',l:'Salutation (Dear ...)',g:'Customer'},{k:'addrType',l:'Address type',t:'select',o:['Home','Business'],g:'Customer'},
-  {k:'prefContact',l:'Preferred contact',t:'select',o:['','Mobile','Home phone','Work phone','Email','Post'],g:'Customer'},
+  {k:'salutation',adv:1,l:'Salutation (Dear ...)',g:'Customer'},{k:'addrType',adv:1,l:'Address type',t:'select',o:['Home','Business'],g:'Customer'},
+  {k:'prefContact',adv:1,l:'Preferred contact',t:'select',o:['','Mobile','Home phone','Work phone','Email','Post'],g:'Customer'},
   {k:'mob1',l:'Mobile 1',t:'tel',max:30,g:'Phone Numbers'},{k:'mob2',l:'Mobile 2',t:'tel',max:30,g:'Phone Numbers'},
   {k:'home1',l:'Home 1',t:'tel',max:30,g:'Phone Numbers'},{k:'home2',l:'Home 2',t:'tel',max:30,g:'Phone Numbers'},{k:'work',l:'Work',t:'tel',max:30,g:'Phone Numbers'},
   {k:'email1',l:'Email 1',t:'email',g:'Email'},{k:'email2',l:'Email 2',t:'email',g:'Email'},
   {k:'homeAddr',l:'Home address',t:'area',max:300,g:'Home Address'},{k:'town',l:'Town',g:'Home Address'},{k:'homePc',l:'Postcode',max:10,g:'Home Address'},
-  {k:'invSame',l:'Invoice address',t:'select',o:['Same as home','Different'],g:'Invoice Address'},{k:'invAddr',l:'Invoice address',t:'area',max:300,g:'Invoice Address'},{k:'invPc',l:'Postcode',max:10,g:'Invoice Address'},
-  {k:'siteSame',l:'Site / installation address',t:'select',o:['Same as home','Different'],g:'Site Address'},{k:'siteAddr',l:'Site address',t:'area',max:300,g:'Site Address'},{k:'sitePc',l:'Postcode',max:10,g:'Site Address'},{k:'siteAccess',l:'Access / parking notes',max:200,g:'Site Address'}];
+  {k:'invSame',l:'Invoice to',t:'select',o:['Same as home','Different'],g:'Invoice Address'},{k:'invAddr',dep:'invSame',l:'Invoice address',t:'area',max:300,g:'Invoice Address'},{k:'invPc',dep:'invSame',l:'Postcode',max:10,g:'Invoice Address'},
+  {k:'siteSame',l:'Installation at',t:'select',o:['Same as home','Different'],g:'Site Address'},{k:'siteAddr',dep:'siteSame',l:'Site address',t:'area',max:300,g:'Site Address'},{k:'sitePc',dep:'siteSame',l:'Postcode',max:10,g:'Site Address'},{k:'siteAccess',dep:'siteSame',l:'Access / parking notes',max:200,g:'Site Address'}];
 const GDPRF=[{k:'gdprEmail',l:'Marketing by email',t:'select',o:YN},{k:'gdprSms',l:'Marketing by text',t:'select',o:YN},{k:'gdprPhone',l:'Marketing by phone',t:'select',o:YN},{k:'gdprPost',l:'Marketing by post',t:'select',o:YN},{k:'gdprDate',l:'Consent date',t:'date'},{k:'gdprHow',l:'How consent was given',max:100},{k:'gdprNotes',l:'Data notes',t:'area',max:500}];
 const CUSTK=[...CUSTF,...GDPRF].map(f=>f.k);
 /* move old single phone/email/address fields into the new structure */
@@ -2500,9 +2521,13 @@ function rfH(f,v){const val=v[f.k]??'',id='f_'+f.k;let c;
   else if(f.t=='select')c=`<select id="${id}">${f.o.map(o=>`<option value="${esc(o)}" ${String(o)==String(val)?'selected':''}>${esc(o||'-')}</option>`).join('')}</select>`;
   else if(f.t=='area')c=`<textarea id="${id}" rows="${f.rows||2}" maxlength="${f.max||2000}">${esc(val)}</textarea>`;
   else c=`<input id="${id}" type="${f.t=='number'?'number':f.t=='date'?'date':f.t=='time'?'time':f.t=='email'?'email':f.t=='tel'?'tel':'text'}" ${f.t=='number'?'step="any" min="0" inputmode="decimal"':`maxlength="${f.max||120}"`} value="${esc(val)}" ${f.list?`list="${f.list}"`:''} autocomplete="off">`;
-  return `<label class="rf ${f.t=='area'?'ta':''}"><span>${esc(f.l)}${f.req?' *':''}</span>${c}</label>`}
+  const hid=f.dep&&(v[f.dep]||'Same as home')!='Different';
+  if(['invSame','siteSame'].includes(f.k))c=c.replace('<select ','<select onchange="recDep(this)" ');
+  return `<label class="rf ${f.t=='area'?'ta':''}" ${f.dep?`data-dep="${f.dep}"`:''} ${hid?'hidden':''}><span>${esc(f.l)}${f.req?' *':''}</span>${c}</label>`}
 const grpH=(t,fs,v)=>`<section class="rg"><h4>${esc(t)}</h4>${fs.map(f=>rfH(f,v)).join('')}</section>`;
-const byGroup=(fs,v)=>{const g={};fs.forEach(f=>(g[f.g]=g[f.g]||[]).push(f));return Object.entries(g).map(([t,x])=>grpH(t,x,v)).join('')};
+const byGroup=(fs,v)=>{const g={},adv=fs.filter(f=>f.adv);fs.filter(f=>!f.adv).forEach(f=>(g[f.g]=g[f.g]||[]).push(f));
+  return Object.entries(g).map(([t,x])=>grpH(t,x,v)).join('')+(adv.length?`<details class="rg more"><summary>More details <span class="muted">(${adv.length})</span></summary>${adv.map(f=>rfH(f,v)).join('')}</details>`:'')};
+function recDep(sel){const k=sel.id.slice(2);$$(`#mbox [data-dep="${k}"]`).forEach(r=>r.hidden=sel.value!='Different')}
 
 /* ---- record window ---- */
 let RW=null;const RTAB={lead:'details',contract:'details'};
@@ -2547,15 +2572,15 @@ function lineDel(i){RW.v.lines=readLines();RW.v.lines.splice(i,1);recRedraw('pro
 
 /* ======================= LEAD record ======================= */
 const LEADF=W=>[
-  {k:'id',l:'Lead number',ro:1,g:'Lead'},{k:'created',l:'Lead date',t:'date',g:'Lead'},{k:'officeRef',l:'Office reference',g:'Lead'},
-  {k:'takenBy',l:'Taken by',t:'select',o:staffNames(),g:'Lead'},{k:'branch',l:'Sales area / branch',t:'select',o:['',...BRANCHES],g:'Lead'},{k:'owner',l:'Salesperson',t:'select',o:OWNERS(),g:'Lead'},
-  {k:'stage',l:'Stage',t:'select',o:STAGES,g:'Lead'},{k:'prob',l:'Win chance (%)',t:'number',max:100,dp:0,g:'Lead'},
-  {k:'source',l:'Lead source',t:'select',o:SOURCES,g:'Source And Interest'},{k:'subSource',l:'Sub source',g:'Source And Interest'},{k:'subSubSource',l:'Sub sub source',g:'Source And Interest'},
-  {k:'productType',l:'Product type',t:'select',o:PTYPES,g:'Source And Interest'},{k:'interest1',l:'Product interest 1',g:'Source And Interest'},{k:'interest2',l:'Product interest 2',g:'Source And Interest'},
+  {k:'id',l:'Lead number',ro:1,g:'Lead'},{k:'created',l:'Lead date',t:'date',g:'Lead'},{k:'officeRef',adv:1,l:'Office reference',g:'Lead'},
+  {k:'takenBy',adv:1,l:'Taken by',t:'select',o:staffNames(),g:'Lead'},{k:'branch',l:'Sales area / branch',t:'select',o:['',...BRANCHES],g:'Lead'},{k:'owner',l:'Salesperson',t:'select',o:OWNERS(),g:'Lead'},
+  {k:'stage',l:'Stage',t:'select',o:STAGES,g:'Lead'},{k:'prob',adv:1,l:'Win chance (%)',t:'number',max:100,dp:0,g:'Lead'},
+  {k:'source',l:'Lead source',t:'select',o:SOURCES,g:'Source And Interest'},{k:'subSource',l:'Sub source',g:'Source And Interest'},{k:'subSubSource',adv:1,l:'Sub sub source',g:'Source And Interest'},
+  {k:'productType',l:'Product type',t:'select',o:PTYPES,g:'Source And Interest'},{k:'interest1',l:'Product interest 1',g:'Source And Interest'},{k:'interest2',adv:1,l:'Product interest 2',g:'Source And Interest'},
   {k:'product',l:'Work wanted',t:'area',max:300,g:'Source And Interest'},{k:'value',l:'Net value (£)',t:'number',g:'Source And Interest'},
-  {k:'quoteType',l:'Quote type',t:'select',o:['','Email','Post','In person'],g:'Result'},{k:'payMethod',l:'Payment method',t:'select',o:['','Cash','Bank transfer','Card','Finance','Cheque'],g:'Result'},
-  {k:'result',l:'Result',t:'select',o:RESULTS,g:'Result'},{k:'resultDate',l:'Result date',t:'date',g:'Result'},{k:'followup',l:'Next action date',t:'date',g:'Result'},{k:'next',l:'Next action',g:'Result'},
-  {k:'showroom',l:'Showroom visit',t:'select',o:YN,g:'Result'},{k:'notified',l:'Salesperson notified',t:'select',o:YN,g:'Result'},{k:'frameInfo',l:'Frame info',g:'Result'},{k:'customCat',l:'Custom category',g:'Result'}];
+  {k:'quoteType',adv:1,l:'Quote type',t:'select',o:['','Email','Post','In person'],g:'Result'},{k:'payMethod',adv:1,l:'Payment method',t:'select',o:['','Cash','Bank transfer','Card','Finance','Cheque'],g:'Result'},
+  {k:'result',l:'Result',t:'select',o:RESULTS,g:'Result'},{k:'resultDate',adv:1,l:'Result date',t:'date',g:'Result'},{k:'followup',l:'Next action date',t:'date',g:'Result'},{k:'next',l:'Next action',g:'Result'},
+  {k:'showroom',adv:1,l:'Showroom visit',t:'select',o:YN,g:'Result'},{k:'notified',adv:1,l:'Salesperson notified',t:'select',o:YN,g:'Result'},{k:'frameInfo',adv:1,l:'Frame info',g:'Result'},{k:'customCat',adv:1,l:'Custom category',g:'Result'}];
 const APPTF=[{k:'apptDate',l:'Appointment date',t:'date'},{k:'apptTime',l:'Appointment time',t:'time'},{k:'demoDate',l:'Demo date',t:'date'}];
 const nextAppt=l=>[l.apptDate,...(l.appts||[]).map(a=>a.d)].filter(Boolean).sort().find(d=>d>=today())||'';
 REC.lead={label:'Lead',
@@ -2621,7 +2646,17 @@ function recDelivery(){if(!recSave(false))return;const id=RW.id;closeModal();edi
 
 /* ---- entry points used across the app ---- */
 function openLead(id){recOpen('lead',id)}
-function editLead(id){recOpen('lead',id||null)}
+function editLead(id){if(id)recOpen('lead',id);else leadWizard()}
+function leadWizard(){const id=nextLeadId();
+  wizard({title:'New Lead '+id,saveLabel:'Create lead',v:{title:'',source:'Website',owner:USER,siteSame:'Same as home',productType:''},steps:[
+    {t:'Customer',d:'Who is the customer?',f:[{k:'title',l:'Title',t:'select',o:['','Mr','Mrs','Miss','Ms','Mr & Mrs','Dr','Company']},{k:'name',l:'Name',req:1},{k:'mob1',l:'Mobile',t:'tel',max:30},{k:'home1',l:'Home phone',t:'tel',max:30},{k:'email1',l:'Email',t:'email',w:'full'},{k:'company',l:'Company (if business)',w:'full'}]},
+    {t:'Address',d:'Where are they?',f:[{k:'homeAddr',l:'Address',t:'area',w:'full',max:300},{k:'town',l:'Town'},{k:'homePc',l:'Postcode',max:10}]},
+    {t:'Enquiry',d:'What do they want?',f:[{k:'productType',l:'Product type',t:'select',o:PTYPES},{k:'source',l:'How did they find us?',t:'select',o:SOURCES},{k:'product',l:'Work wanted',t:'area',w:'full',max:300},{k:'value',l:'Rough value (£)',t:'number'},{k:'owner',l:'Salesperson',t:'select',o:OWNERS()}]},
+    {t:'Next Step',d:'What happens next?',f:[{k:'apptDate',l:'Appointment date',t:'date'},{k:'apptTime',l:'Appointment time',t:'time'},{k:'next',l:'Next action',w:'full',hint:'e.g. Call back Tuesday, send brochure'},{k:'followup',l:'Next action date',t:'date'}]},
+    {t:'Review',d:'Check and create',review:1}],
+    check:(st,v)=>{if(st==0&&!v.name)return 'Please enter the customer name';if(st==0&&!v.mob1&&!v.home1&&!v.email1)return 'Add at least one phone number or email'},
+    save:v=>{const lid=nextLeadId(),l={...v,id:lid,stage:'New',created:today(),takenBy:USER,invSame:'Same as home',addrType:v.company?'Business':'Home',log:[{d:today(),t:'Lead created',by:USER}],appts:[],chk:{}};
+      custCompat(l);S.leads.push(l);audit('Lead added',lid,l.name);toast(lid+' created. Open it any time to add more.')}})}
 function openContract(id){recOpen('contract',id)}
 function editContract(id){recOpen('contract',id||null)}
 
@@ -2632,7 +2667,7 @@ function leadList(){const U=UI.lead,td=today(),tm=addDays(1),yd=addDays(-1),[ws,
     unassigned:l=>isOpen(l)&&(!l.owner||l.owner=='Unassigned'||!ap(l).length),nores:l=>ap(l).some(d=>d<td)&&!l.result&&isOpen(l),due:l=>isOpen(l)&&l.followup&&l.followup<=td,won:l=>l.stage=='Won',lost:l=>l.stage=='Lost',all:()=>true}[U.f]||(()=>true);
   const val={id:l=>l.id,created:l=>l.created||'',name:l=>l.name,town:l=>addrOf(l),pc:l=>l.homePc||'',tel:telOf,email:mailOf,owner:l=>l.owner||'~',source:l=>l.source,value:l=>+l.value,followup:l=>l.followup||'9999',stage:l=>STAGES.indexOf(l.stage),appt:l=>nextAppt(l)||'9999'}[U.sort]||(l=>l.id);
   return S.leads.filter(l=>V(l)&&(U.src=='all'||l.source==U.src)&&(U.own=='all'||(l.owner||'Unassigned')==U.own)&&hit(l)).sort((a,b)=>cmp(val(a),val(b))*U.dir||cmp(a.id,b.id))}
-const LVIEWS=[['live','All Live'],['web','Web Leads'],['today',"Today's Appointments"],['tom',"Tomorrow's"],['yest',"Yesterday's"],['week','This Week'],['unassigned','Unassigned / Unappointed'],['nores','Result Missing'],['due','Next Action Due'],['won','Won, To Convert'],['lost','Lost'],['all','All']];
+const LVIEWS=[['live','Active Leads'],['due','Next Action Due'],['won','Won, To Convert'],['lost','Lost'],['all','All Leads']];
 function vLeads(){const U=UI.lead,td=today(),open=S.leads.filter(l=>!['Won','Lost'].includes(l.stage)),pipe=sum(open,l=>l.value),wt=sum(open,l=>l.value*leadProb(l)/100),due=open.filter(l=>l.followup&&l.followup<=td),A2=allLeads(),won=A2.filter(l=>l.stage=='Won').length,lost=A2.filter(l=>l.stage=='Lost').length,ready=S.leads.filter(l=>l.stage=='Won');
   const L=leadList(),pg=paginate(U,L),cnt=k=>{const f=U.f;U.f=k;const n=leadList().length;U.f=f;return n};
   const sel=(k,arr,all)=>`<select class="fsel" ${AC('onchange','setUI','lead.'+k,'this.value')}><option value="all">${all}</option>${arr.map(x=>`<option ${U[k]==x?'selected':''}>${esc(x)}</option>`).join('')}</select>`;
@@ -2642,7 +2677,7 @@ function vLeads(){const U=UI.lead,td=today(),open=S.leads.filter(l=>!['Won','Los
   const board=`<div class="kan">${STAGES.map(s=>{const B=L.filter(l=>l.stage==s);return `<div class="col"><div class="colh"><b>${s}</b><span>${B.length} leads, ${m0(sum(B,l=>l.value))}</span></div>${B.map(l=>`<div class="lc"><div class="lt"><b ${A('openLead',l.id)} title="Open lead">${esc(l.name)} <small class="muted">${esc(l.id)}</small></b><span>${m0(l.value)}</span></div><p>${esc(l.product)}</p><p class="muted">${esc(l.town||'')}, via ${esc(l.source)}</p><p class="muted">${esc(l.next||'No next action set')}</p><div class="lb"><button class="mini" aria-label="Move back" ${A('mvLead',l.id,-1)}>&lsaquo;</button><button class="mini" aria-label="Move forward" ${A('mvLead',l.id,1)}>&rsaquo;</button><button class="mini" ${A('openLead',l.id)}>Open</button>${s=='Won'&&canSee('contracts')?`<button class="mini pri" ${A('convertLead',l.id)}>Convert</button>`:''}</div></div>`).join('')||'<p class="empty">Nothing here.</p>'}</div>`}).join('')}</div>`;
   return `<div class="head"><div><h1>Leads</h1><span class="muted">${esc((LVIEWS.find(x=>x[0]==U.f)||['','All'])[1])}: ${L.length} records</span></div><div class="tools">${tog}<span class="vs"></span><button class="mini" onclick="leadCsv()">Export CSV</button><button class="btn" onclick="editLead()">New lead</button></div></div>
   <div class="kpis"><button class="kpi" ${A('setUI','lead.f','live')}><small>Open Leads</small><b>${open.length}</b></button><div class="kpi"><small>Pipeline Value</small><b>${m0(pipe)}</b></div><div class="kpi"><small>Weighted Pipeline</small><b>${m0(wt)}</b><span class="ksub">Value x win chance</span></div><button class="kpi ${due.length?'warn':''}" ${A('setUI','lead.f','due')}><small>Next Action Due</small><b>${due.length}</b></button><button class="kpi ${ready.length?'warn':''}" ${A('setUI','lead.f','won')}><small>Won, To Convert</small><b>${ready.length}</b></button><div class="kpi"><small>Conversion Rate</small><b>${pc(won,won+lost)}</b><span class="ksub">${won} won, ${lost} lost</span></div></div>
-  <div class="views">${LVIEWS.map(([k,t])=>`<button class="chip ${U.f==k?'on':''}" ${A('setUI','lead.f',k)}>${esc(t)} <i>${cnt(k)}</i></button>`).join('')}<span class="vs"></span>${sel('src',SOURCES,'All sources')}${sel('own',OWNERS(),'All salespeople')}</div>
+  <div class="views">${LVIEWS.map(([k,t])=>`<button class="chip ${U.f==k?'on':''}" ${A('setUI','lead.f',k)}>${esc(t)} <i>${cnt(k)}</i></button>`).join('')}<span class="vs"></span><label class="fl-own">Salesperson ${sel('own',OWNERS(),'Everyone')}</label></div>
   ${U.v=='board'?board:list}`}
 
 function ctrList(){const U=UI.ctr,[ws,we]=weekRange(),nws=iso(new Date(new Date(ws+'T00:00').getTime()+7*864e5)),nwe=iso(new Date(new Date(we+'T00:00').getTime()+7*864e5));

@@ -16,14 +16,14 @@ const staffNames=()=>['',...new Set(S.staff.map(s=>s.name))];
 const CUSTF=[
   {k:'title',l:'Title',t:'select',o:['','Mr','Mrs','Miss','Ms','Mr & Mrs','Dr','Company'],g:'Customer'},
   {k:'name',l:'Customer / contact name',req:1,g:'Customer'},{k:'company',l:'Company',g:'Customer'},
-  {k:'salutation',l:'Salutation (Dear ...)',g:'Customer'},{k:'addrType',l:'Address type',t:'select',o:['Home','Business'],g:'Customer'},
-  {k:'prefContact',l:'Preferred contact',t:'select',o:['','Mobile','Home phone','Work phone','Email','Post'],g:'Customer'},
+  {k:'salutation',adv:1,l:'Salutation (Dear ...)',g:'Customer'},{k:'addrType',adv:1,l:'Address type',t:'select',o:['Home','Business'],g:'Customer'},
+  {k:'prefContact',adv:1,l:'Preferred contact',t:'select',o:['','Mobile','Home phone','Work phone','Email','Post'],g:'Customer'},
   {k:'mob1',l:'Mobile 1',t:'tel',max:30,g:'Phone Numbers'},{k:'mob2',l:'Mobile 2',t:'tel',max:30,g:'Phone Numbers'},
   {k:'home1',l:'Home 1',t:'tel',max:30,g:'Phone Numbers'},{k:'home2',l:'Home 2',t:'tel',max:30,g:'Phone Numbers'},{k:'work',l:'Work',t:'tel',max:30,g:'Phone Numbers'},
   {k:'email1',l:'Email 1',t:'email',g:'Email'},{k:'email2',l:'Email 2',t:'email',g:'Email'},
   {k:'homeAddr',l:'Home address',t:'area',max:300,g:'Home Address'},{k:'town',l:'Town',g:'Home Address'},{k:'homePc',l:'Postcode',max:10,g:'Home Address'},
-  {k:'invSame',l:'Invoice address',t:'select',o:['Same as home','Different'],g:'Invoice Address'},{k:'invAddr',l:'Invoice address',t:'area',max:300,g:'Invoice Address'},{k:'invPc',l:'Postcode',max:10,g:'Invoice Address'},
-  {k:'siteSame',l:'Site / installation address',t:'select',o:['Same as home','Different'],g:'Site Address'},{k:'siteAddr',l:'Site address',t:'area',max:300,g:'Site Address'},{k:'sitePc',l:'Postcode',max:10,g:'Site Address'},{k:'siteAccess',l:'Access / parking notes',max:200,g:'Site Address'}];
+  {k:'invSame',l:'Invoice to',t:'select',o:['Same as home','Different'],g:'Invoice Address'},{k:'invAddr',dep:'invSame',l:'Invoice address',t:'area',max:300,g:'Invoice Address'},{k:'invPc',dep:'invSame',l:'Postcode',max:10,g:'Invoice Address'},
+  {k:'siteSame',l:'Installation at',t:'select',o:['Same as home','Different'],g:'Site Address'},{k:'siteAddr',dep:'siteSame',l:'Site address',t:'area',max:300,g:'Site Address'},{k:'sitePc',dep:'siteSame',l:'Postcode',max:10,g:'Site Address'},{k:'siteAccess',dep:'siteSame',l:'Access / parking notes',max:200,g:'Site Address'}];
 const GDPRF=[{k:'gdprEmail',l:'Marketing by email',t:'select',o:YN},{k:'gdprSms',l:'Marketing by text',t:'select',o:YN},{k:'gdprPhone',l:'Marketing by phone',t:'select',o:YN},{k:'gdprPost',l:'Marketing by post',t:'select',o:YN},{k:'gdprDate',l:'Consent date',t:'date'},{k:'gdprHow',l:'How consent was given',max:100},{k:'gdprNotes',l:'Data notes',t:'area',max:500}];
 const CUSTK=[...CUSTF,...GDPRF].map(f=>f.k);
 /* move old single phone/email/address fields into the new structure */
@@ -42,9 +42,13 @@ function rfH(f,v){const val=v[f.k]??'',id='f_'+f.k;let c;
   else if(f.t=='select')c=`<select id="${id}">${f.o.map(o=>`<option value="${esc(o)}" ${String(o)==String(val)?'selected':''}>${esc(o||'-')}</option>`).join('')}</select>`;
   else if(f.t=='area')c=`<textarea id="${id}" rows="${f.rows||2}" maxlength="${f.max||2000}">${esc(val)}</textarea>`;
   else c=`<input id="${id}" type="${f.t=='number'?'number':f.t=='date'?'date':f.t=='time'?'time':f.t=='email'?'email':f.t=='tel'?'tel':'text'}" ${f.t=='number'?'step="any" min="0" inputmode="decimal"':`maxlength="${f.max||120}"`} value="${esc(val)}" ${f.list?`list="${f.list}"`:''} autocomplete="off">`;
-  return `<label class="rf ${f.t=='area'?'ta':''}"><span>${esc(f.l)}${f.req?' *':''}</span>${c}</label>`}
+  const hid=f.dep&&(v[f.dep]||'Same as home')!='Different';
+  if(['invSame','siteSame'].includes(f.k))c=c.replace('<select ','<select onchange="recDep(this)" ');
+  return `<label class="rf ${f.t=='area'?'ta':''}" ${f.dep?`data-dep="${f.dep}"`:''} ${hid?'hidden':''}><span>${esc(f.l)}${f.req?' *':''}</span>${c}</label>`}
 const grpH=(t,fs,v)=>`<section class="rg"><h4>${esc(t)}</h4>${fs.map(f=>rfH(f,v)).join('')}</section>`;
-const byGroup=(fs,v)=>{const g={};fs.forEach(f=>(g[f.g]=g[f.g]||[]).push(f));return Object.entries(g).map(([t,x])=>grpH(t,x,v)).join('')};
+const byGroup=(fs,v)=>{const g={},adv=fs.filter(f=>f.adv);fs.filter(f=>!f.adv).forEach(f=>(g[f.g]=g[f.g]||[]).push(f));
+  return Object.entries(g).map(([t,x])=>grpH(t,x,v)).join('')+(adv.length?`<details class="rg more"><summary>More details <span class="muted">(${adv.length})</span></summary>${adv.map(f=>rfH(f,v)).join('')}</details>`:'')};
+function recDep(sel){const k=sel.id.slice(2);$$(`#mbox [data-dep="${k}"]`).forEach(r=>r.hidden=sel.value!='Different')}
 
 /* ---- record window ---- */
 let RW=null;const RTAB={lead:'details',contract:'details'};
@@ -89,15 +93,15 @@ function lineDel(i){RW.v.lines=readLines();RW.v.lines.splice(i,1);recRedraw('pro
 
 /* ======================= LEAD record ======================= */
 const LEADF=W=>[
-  {k:'id',l:'Lead number',ro:1,g:'Lead'},{k:'created',l:'Lead date',t:'date',g:'Lead'},{k:'officeRef',l:'Office reference',g:'Lead'},
-  {k:'takenBy',l:'Taken by',t:'select',o:staffNames(),g:'Lead'},{k:'branch',l:'Sales area / branch',t:'select',o:['',...BRANCHES],g:'Lead'},{k:'owner',l:'Salesperson',t:'select',o:OWNERS(),g:'Lead'},
-  {k:'stage',l:'Stage',t:'select',o:STAGES,g:'Lead'},{k:'prob',l:'Win chance (%)',t:'number',max:100,dp:0,g:'Lead'},
-  {k:'source',l:'Lead source',t:'select',o:SOURCES,g:'Source And Interest'},{k:'subSource',l:'Sub source',g:'Source And Interest'},{k:'subSubSource',l:'Sub sub source',g:'Source And Interest'},
-  {k:'productType',l:'Product type',t:'select',o:PTYPES,g:'Source And Interest'},{k:'interest1',l:'Product interest 1',g:'Source And Interest'},{k:'interest2',l:'Product interest 2',g:'Source And Interest'},
+  {k:'id',l:'Lead number',ro:1,g:'Lead'},{k:'created',l:'Lead date',t:'date',g:'Lead'},{k:'officeRef',adv:1,l:'Office reference',g:'Lead'},
+  {k:'takenBy',adv:1,l:'Taken by',t:'select',o:staffNames(),g:'Lead'},{k:'branch',l:'Sales area / branch',t:'select',o:['',...BRANCHES],g:'Lead'},{k:'owner',l:'Salesperson',t:'select',o:OWNERS(),g:'Lead'},
+  {k:'stage',l:'Stage',t:'select',o:STAGES,g:'Lead'},{k:'prob',adv:1,l:'Win chance (%)',t:'number',max:100,dp:0,g:'Lead'},
+  {k:'source',l:'Lead source',t:'select',o:SOURCES,g:'Source And Interest'},{k:'subSource',l:'Sub source',g:'Source And Interest'},{k:'subSubSource',adv:1,l:'Sub sub source',g:'Source And Interest'},
+  {k:'productType',l:'Product type',t:'select',o:PTYPES,g:'Source And Interest'},{k:'interest1',l:'Product interest 1',g:'Source And Interest'},{k:'interest2',adv:1,l:'Product interest 2',g:'Source And Interest'},
   {k:'product',l:'Work wanted',t:'area',max:300,g:'Source And Interest'},{k:'value',l:'Net value (£)',t:'number',g:'Source And Interest'},
-  {k:'quoteType',l:'Quote type',t:'select',o:['','Email','Post','In person'],g:'Result'},{k:'payMethod',l:'Payment method',t:'select',o:['','Cash','Bank transfer','Card','Finance','Cheque'],g:'Result'},
-  {k:'result',l:'Result',t:'select',o:RESULTS,g:'Result'},{k:'resultDate',l:'Result date',t:'date',g:'Result'},{k:'followup',l:'Next action date',t:'date',g:'Result'},{k:'next',l:'Next action',g:'Result'},
-  {k:'showroom',l:'Showroom visit',t:'select',o:YN,g:'Result'},{k:'notified',l:'Salesperson notified',t:'select',o:YN,g:'Result'},{k:'frameInfo',l:'Frame info',g:'Result'},{k:'customCat',l:'Custom category',g:'Result'}];
+  {k:'quoteType',adv:1,l:'Quote type',t:'select',o:['','Email','Post','In person'],g:'Result'},{k:'payMethod',adv:1,l:'Payment method',t:'select',o:['','Cash','Bank transfer','Card','Finance','Cheque'],g:'Result'},
+  {k:'result',l:'Result',t:'select',o:RESULTS,g:'Result'},{k:'resultDate',adv:1,l:'Result date',t:'date',g:'Result'},{k:'followup',l:'Next action date',t:'date',g:'Result'},{k:'next',l:'Next action',g:'Result'},
+  {k:'showroom',adv:1,l:'Showroom visit',t:'select',o:YN,g:'Result'},{k:'notified',adv:1,l:'Salesperson notified',t:'select',o:YN,g:'Result'},{k:'frameInfo',adv:1,l:'Frame info',g:'Result'},{k:'customCat',adv:1,l:'Custom category',g:'Result'}];
 const APPTF=[{k:'apptDate',l:'Appointment date',t:'date'},{k:'apptTime',l:'Appointment time',t:'time'},{k:'demoDate',l:'Demo date',t:'date'}];
 const nextAppt=l=>[l.apptDate,...(l.appts||[]).map(a=>a.d)].filter(Boolean).sort().find(d=>d>=today())||'';
 REC.lead={label:'Lead',
@@ -163,7 +167,17 @@ function recDelivery(){if(!recSave(false))return;const id=RW.id;closeModal();edi
 
 /* ---- entry points used across the app ---- */
 function openLead(id){recOpen('lead',id)}
-function editLead(id){recOpen('lead',id||null)}
+function editLead(id){if(id)recOpen('lead',id);else leadWizard()}
+function leadWizard(){const id=nextLeadId();
+  wizard({title:'New Lead '+id,saveLabel:'Create lead',v:{title:'',source:'Website',owner:USER,siteSame:'Same as home',productType:''},steps:[
+    {t:'Customer',d:'Who is the customer?',f:[{k:'title',l:'Title',t:'select',o:['','Mr','Mrs','Miss','Ms','Mr & Mrs','Dr','Company']},{k:'name',l:'Name',req:1},{k:'mob1',l:'Mobile',t:'tel',max:30},{k:'home1',l:'Home phone',t:'tel',max:30},{k:'email1',l:'Email',t:'email',w:'full'},{k:'company',l:'Company (if business)',w:'full'}]},
+    {t:'Address',d:'Where are they?',f:[{k:'homeAddr',l:'Address',t:'area',w:'full',max:300},{k:'town',l:'Town'},{k:'homePc',l:'Postcode',max:10}]},
+    {t:'Enquiry',d:'What do they want?',f:[{k:'productType',l:'Product type',t:'select',o:PTYPES},{k:'source',l:'How did they find us?',t:'select',o:SOURCES},{k:'product',l:'Work wanted',t:'area',w:'full',max:300},{k:'value',l:'Rough value (£)',t:'number'},{k:'owner',l:'Salesperson',t:'select',o:OWNERS()}]},
+    {t:'Next Step',d:'What happens next?',f:[{k:'apptDate',l:'Appointment date',t:'date'},{k:'apptTime',l:'Appointment time',t:'time'},{k:'next',l:'Next action',w:'full',hint:'e.g. Call back Tuesday, send brochure'},{k:'followup',l:'Next action date',t:'date'}]},
+    {t:'Review',d:'Check and create',review:1}],
+    check:(st,v)=>{if(st==0&&!v.name)return 'Please enter the customer name';if(st==0&&!v.mob1&&!v.home1&&!v.email1)return 'Add at least one phone number or email'},
+    save:v=>{const lid=nextLeadId(),l={...v,id:lid,stage:'New',created:today(),takenBy:USER,invSame:'Same as home',addrType:v.company?'Business':'Home',log:[{d:today(),t:'Lead created',by:USER}],appts:[],chk:{}};
+      custCompat(l);S.leads.push(l);audit('Lead added',lid,l.name);toast(lid+' created. Open it any time to add more.')}})}
 function openContract(id){recOpen('contract',id)}
 function editContract(id){recOpen('contract',id||null)}
 
@@ -174,7 +188,7 @@ function leadList(){const U=UI.lead,td=today(),tm=addDays(1),yd=addDays(-1),[ws,
     unassigned:l=>isOpen(l)&&(!l.owner||l.owner=='Unassigned'||!ap(l).length),nores:l=>ap(l).some(d=>d<td)&&!l.result&&isOpen(l),due:l=>isOpen(l)&&l.followup&&l.followup<=td,won:l=>l.stage=='Won',lost:l=>l.stage=='Lost',all:()=>true}[U.f]||(()=>true);
   const val={id:l=>l.id,created:l=>l.created||'',name:l=>l.name,town:l=>addrOf(l),pc:l=>l.homePc||'',tel:telOf,email:mailOf,owner:l=>l.owner||'~',source:l=>l.source,value:l=>+l.value,followup:l=>l.followup||'9999',stage:l=>STAGES.indexOf(l.stage),appt:l=>nextAppt(l)||'9999'}[U.sort]||(l=>l.id);
   return S.leads.filter(l=>V(l)&&(U.src=='all'||l.source==U.src)&&(U.own=='all'||(l.owner||'Unassigned')==U.own)&&hit(l)).sort((a,b)=>cmp(val(a),val(b))*U.dir||cmp(a.id,b.id))}
-const LVIEWS=[['live','All Live'],['web','Web Leads'],['today',"Today's Appointments"],['tom',"Tomorrow's"],['yest',"Yesterday's"],['week','This Week'],['unassigned','Unassigned / Unappointed'],['nores','Result Missing'],['due','Next Action Due'],['won','Won, To Convert'],['lost','Lost'],['all','All']];
+const LVIEWS=[['live','Active Leads'],['due','Next Action Due'],['won','Won, To Convert'],['lost','Lost'],['all','All Leads']];
 function vLeads(){const U=UI.lead,td=today(),open=S.leads.filter(l=>!['Won','Lost'].includes(l.stage)),pipe=sum(open,l=>l.value),wt=sum(open,l=>l.value*leadProb(l)/100),due=open.filter(l=>l.followup&&l.followup<=td),A2=allLeads(),won=A2.filter(l=>l.stage=='Won').length,lost=A2.filter(l=>l.stage=='Lost').length,ready=S.leads.filter(l=>l.stage=='Won');
   const L=leadList(),pg=paginate(U,L),cnt=k=>{const f=U.f;U.f=k;const n=leadList().length;U.f=f;return n};
   const sel=(k,arr,all)=>`<select class="fsel" ${AC('onchange','setUI','lead.'+k,'this.value')}><option value="all">${all}</option>${arr.map(x=>`<option ${U[k]==x?'selected':''}>${esc(x)}</option>`).join('')}</select>`;
@@ -184,7 +198,7 @@ function vLeads(){const U=UI.lead,td=today(),open=S.leads.filter(l=>!['Won','Los
   const board=`<div class="kan">${STAGES.map(s=>{const B=L.filter(l=>l.stage==s);return `<div class="col"><div class="colh"><b>${s}</b><span>${B.length} leads, ${m0(sum(B,l=>l.value))}</span></div>${B.map(l=>`<div class="lc"><div class="lt"><b ${A('openLead',l.id)} title="Open lead">${esc(l.name)} <small class="muted">${esc(l.id)}</small></b><span>${m0(l.value)}</span></div><p>${esc(l.product)}</p><p class="muted">${esc(l.town||'')}, via ${esc(l.source)}</p><p class="muted">${esc(l.next||'No next action set')}</p><div class="lb"><button class="mini" aria-label="Move back" ${A('mvLead',l.id,-1)}>&lsaquo;</button><button class="mini" aria-label="Move forward" ${A('mvLead',l.id,1)}>&rsaquo;</button><button class="mini" ${A('openLead',l.id)}>Open</button>${s=='Won'&&canSee('contracts')?`<button class="mini pri" ${A('convertLead',l.id)}>Convert</button>`:''}</div></div>`).join('')||'<p class="empty">Nothing here.</p>'}</div>`}).join('')}</div>`;
   return `<div class="head"><div><h1>Leads</h1><span class="muted">${esc((LVIEWS.find(x=>x[0]==U.f)||['','All'])[1])}: ${L.length} records</span></div><div class="tools">${tog}<span class="vs"></span><button class="mini" onclick="leadCsv()">Export CSV</button><button class="btn" onclick="editLead()">New lead</button></div></div>
   <div class="kpis"><button class="kpi" ${A('setUI','lead.f','live')}><small>Open Leads</small><b>${open.length}</b></button><div class="kpi"><small>Pipeline Value</small><b>${m0(pipe)}</b></div><div class="kpi"><small>Weighted Pipeline</small><b>${m0(wt)}</b><span class="ksub">Value x win chance</span></div><button class="kpi ${due.length?'warn':''}" ${A('setUI','lead.f','due')}><small>Next Action Due</small><b>${due.length}</b></button><button class="kpi ${ready.length?'warn':''}" ${A('setUI','lead.f','won')}><small>Won, To Convert</small><b>${ready.length}</b></button><div class="kpi"><small>Conversion Rate</small><b>${pc(won,won+lost)}</b><span class="ksub">${won} won, ${lost} lost</span></div></div>
-  <div class="views">${LVIEWS.map(([k,t])=>`<button class="chip ${U.f==k?'on':''}" ${A('setUI','lead.f',k)}>${esc(t)} <i>${cnt(k)}</i></button>`).join('')}<span class="vs"></span>${sel('src',SOURCES,'All sources')}${sel('own',OWNERS(),'All salespeople')}</div>
+  <div class="views">${LVIEWS.map(([k,t])=>`<button class="chip ${U.f==k?'on':''}" ${A('setUI','lead.f',k)}>${esc(t)} <i>${cnt(k)}</i></button>`).join('')}<span class="vs"></span><label class="fl-own">Salesperson ${sel('own',OWNERS(),'Everyone')}</label></div>
   ${U.v=='board'?board:list}`}
 
 function ctrList(){const U=UI.ctr,[ws,we]=weekRange(),nws=iso(new Date(new Date(ws+'T00:00').getTime()+7*864e5)),nwe=iso(new Date(new Date(we+'T00:00').getTime()+7*864e5));

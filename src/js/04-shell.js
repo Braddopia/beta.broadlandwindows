@@ -72,7 +72,6 @@ function shellSync(){
   const sec=$('#secbar'),dp=ISOWN()&&Object.values(S.sec.pins).some(p=>p.def);
   sec.classList.toggle('on',!!(dp||!window.isSecureContext));
   sec.textContent=!window.isSecureContext?'This page is not on a secure (https) connection: the camera scanner and some protections will not work.':dp?'Some accounts still use the default PIN 1234. Change them in Admin console.':'';
-  if(shellSync.v!=view){shellSync.v=view;const SAY=['Search','Search… what are you after?','Search… names, codes, refs','Search… type to find it fast','Search… let\'s find it','Search anything'];$('#q').placeholder=SAY[Math.floor(Math.random()*SAY.length)]}
   $$('#nwm button').forEach(b=>b.style.display=canSee(b.dataset.v)?'':'none');
   const c=ncCount(),bn=$('#bellN');bn.textContent=c>99?'99+':c;bn.style.display=c?'':'none';
   if($('#nc').classList.contains('open'))ncDraw();
@@ -84,7 +83,7 @@ function toast(t){const e=$('#toast');e.textContent=t;e.style.display='block';cl
 
 /* ---- modal ---- */
 function openModal(h,size){const b=$('#mbox');b.className='mb'+(size?' '+size:'');b.innerHTML=h;$('#modal').classList.add('open');b.scrollTop=0;
-  setTimeout(()=>{const f=b.querySelector('input:not([readonly]):not([type=hidden]):not([type=checkbox]),select,textarea');if(f&&matchMedia('(pointer:fine)').matches)f.focus({preventScroll:true})},60)}
+  if(size!='full')setTimeout(()=>{const f=b.querySelector('input:not([readonly]):not([type=hidden]):not([type=checkbox]),select,textarea');if(f&&matchMedia('(pointer:fine)').matches)f.focus({preventScroll:true})},60)}
 function closeModal(){$('#modal').classList.remove('open')}
 $('#modal').addEventListener('mousedown',e=>{if(e.target.id=='modal')closeModal()});
 
@@ -192,7 +191,7 @@ function wzDraw(){const W=WZ,st=W.steps[W.st],last=W.st==W.steps.length-1;
    <div class="stp wz">${W.steps.map((x,i)=>`<span class="${i<=W.st?'on':''} ${i<=W.seen||W.edit?'go':''}" ${i<=W.seen||W.edit?A('wzGo',i):''}><i>${i<W.st?'&#10003;':i+1}</i>${esc(x.t)}</span>`).join('')}</div>
    <p class="muted wz-d">Step ${W.st+1} of ${W.steps.length}: ${esc(st.d||'')}</p>
    <div class="wz-b">${st.review?rev():`<div class="grid">${st.f.map(f=>fieldH(f,W.v)).join('')}</div>`}</div>
-   <div class="mact">${W.del?`<button class="btn ghost l" style="color:var(--red)" onclick="WZ.del()">Delete</button>`:''}${W.st?'<button class="btn ghost" onclick="wzStep(-1)">Back</button>':'<button class="btn ghost" onclick="closeModal()">Cancel</button>'}${W.edit&&!last?'<button class="btn ghost" onclick="wzSave()">Save now</button>':''}${last?'<button class="btn green" onclick="wzSave()">Save supplier</button>':'<button class="btn" onclick="wzStep(1)">Next</button>'}</div>`,'md');
+   <div class="mact">${W.del?`<button class="btn ghost l" style="color:var(--red)" onclick="WZ.del()">Delete</button>`:''}${W.st?'<button class="btn ghost" onclick="wzStep(-1)">Back</button>':'<button class="btn ghost" onclick="closeModal()">Cancel</button>'}${W.edit&&!last?'<button class="btn ghost" onclick="wzSave()">Save now</button>':''}${last?`<button class="btn green" onclick="wzSave()">${esc(W.saveLabel||'Save')}</button>`:'<button class="btn" onclick="wzStep(1)">Next</button>'}</div>`,'md');
   const f=$('#mbox .wz-b input:not([readonly]),#mbox .wz-b textarea');if(f&&matchMedia('(pointer:fine)').matches)setTimeout(()=>f.focus(),80)}
 function wzRead(){const st=WZ.steps[WZ.st];if(st.review)return true;const o=readFields(st.f);if(!o)return false;Object.assign(WZ.v,o);const e=WZ.check&&WZ.check(WZ.st,WZ.v);if(e){toast(e);return false}return true}
 function wzStep(d){if(d>0&&!wzRead())return;if(d<0){const st=WZ.steps[WZ.st];if(!st.review){const o={};st.f.forEach(f=>{const e=$('#f_'+f.k);if(e)o[f.k]=e.value});Object.assign(WZ.v,o)}}

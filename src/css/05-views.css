@@ -272,8 +272,7 @@ th.ac,td.ac{background:rgba(255,255,255,.88)}body[data-theme=dark] th.ac,body[da
 .sups{display:flex;flex-direction:column;gap:.8rem}
 .supw{position:relative;display:grid;grid-template-columns:3.2rem minmax(13rem,1.25fr) minmax(12rem,1.1fr) minmax(13rem,1.2fr) minmax(16rem,1.6fr) auto;align-items:center;gap:1.2rem;width:100%;padding:1rem 1.2rem 1rem 1.4rem;text-align:left;font:inherit;color:var(--ink);cursor:pointer;overflow:hidden;transition:transform .2s,box-shadow .2s}
 .supw::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--sc)}
-.supw:hover{border-color:var(--sc)!important;box-shadow:0 0 0 1px var(--sc),0 10px 28px rgba(1,43,89,.12)}
-.supw::before{transition:width .2s}.supw:hover::before{width:8px}
+.supw:hover{box-shadow:0 10px 28px rgba(1,43,89,.12)}
 .supw small{display:block;font-size:.68rem;color:var(--muted);letter-spacing:.03em}
 .supw-av{display:grid;place-items:center;width:3.2rem;height:3.2rem;border-radius:14px;background:var(--sc);color:#fff;font:700 1.05rem var(--head);box-shadow:0 6px 16px rgba(1,43,89,.18)}
 .supw-id b{font:600 1.08rem var(--head);color:var(--navy)}.supw-id small{margin-top:.2rem;font-size:.78rem}
@@ -286,7 +285,7 @@ th.ac,td.ac{background:rgba(255,255,255,.88)}body[data-theme=dark] th.ac,body[da
 .supw-st>span.w{background:var(--amber-bg);border-color:#e0c34d}.supw-st>span.x{background:var(--red-bg);border-color:#e3a0a0}
 .supw-st b{font:600 .98rem var(--head);color:var(--navy);white-space:nowrap}
 .supw-go{display:inline-flex;align-items:center;gap:.2rem;padding:.45rem .8rem;border-radius:10px;background:var(--btn);color:#fff;font-size:.8rem;font-weight:500;transition:gap .2s}
-.supw-go svg{width:.95rem;height:.95rem}.supw:hover .supw-go{gap:.45rem}
+.supw-go svg{width:.95rem;height:.95rem}
 @media(max-width:1350px){.supw{grid-template-columns:3.2rem minmax(0,1fr) minmax(0,1fr) auto;row-gap:.9rem}.supw-hl{grid-column:2/3}.supw-st{grid-column:3/5}}
 @media(max-width:700px){.supw{grid-template-columns:3rem minmax(0,1fr);gap:.8rem}.supw-ct,.supw-hl,.supw-st{grid-column:1/-1}.supw-go{grid-column:1/-1;justify-content:center}}
 
@@ -393,3 +392,23 @@ body[data-theme=dark] .lc,body[data-theme=dark] .dcard{background:rgba(255,255,2
 .mb.full{background:rgba(244,247,252,.94);-webkit-backdrop-filter:blur(34px) saturate(160%);backdrop-filter:blur(34px) saturate(160%)}
 body[data-theme=dark] .mb.full{background:rgba(16,20,28,.95)}
 .mb.full .rg{background:rgba(255,255,255,.7)}body[data-theme=dark] .mb.full .rg{background:rgba(255,255,255,.035)}
+
+/* lead record: tucked-away extras, dependent address rows */
+details.more{padding:.6rem 1rem}details.more>summary{cursor:pointer;font:600 .74rem var(--head);text-transform:uppercase;letter-spacing:.08em;color:var(--blue);list-style:none;padding:.15rem 0}
+details.more>summary::before{content:"+ ";}details.more[open]>summary::before{content:"- "}details.more[open]>summary{margin-bottom:.35rem}
+.rf[hidden]{display:none}
+.fl-own{display:inline-flex;align-items:center;gap:.4rem;font-size:.8rem;color:var(--muted)}
+/* supplier popup: info first */
+.sp2 .rw-b{padding:1.4rem 1.6rem}
+.sinfo{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,22rem),1fr));gap:1.2rem 1.6rem;align-items:start}
+.sinfo .rg{padding:1rem 1.2rem}.sinfo .si{font-size:.98rem;padding:.55rem 0}.sinfo .si b{font-weight:500}
+.sinfo .rg h4{font-size:.78rem}
+.smini{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;margin-top:1.2rem;padding:.7rem 1rem;border-radius:12px;background:rgba(1,43,89,.04);border:1px solid var(--line);font-size:.84rem}
+body[data-theme=dark] .smini{background:rgba(255,255,255,.03)}
+.smini b{font-weight:600}.smini .sep{width:1px;height:1rem;background:var(--line)}
+.smini details{flex-basis:100%}.smini summary{cursor:pointer;color:var(--blue);font-weight:500;padding:.3rem 0}
+.snote{white-space:pre-wrap;font-size:.95rem;line-height:1.5;margin:0}
+/* popups: near-solid so the page behind never makes them hard to read */
+.mb{background:rgba(246,248,252,.96)!important}
+body[data-theme=dark] .mb{background:rgba(17,21,30,.97)!important}
+.mact{background:inherit;-webkit-backdrop-filter:none;backdrop-filter:none}
