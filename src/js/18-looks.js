@@ -3,14 +3,14 @@
    Page Background and Greeting Box pattern are separate choices.
    Styles live in css/07-looks.css.
    ========================================================================== */
-const LOOK_BG=[['glow','Soft Glow'],['aurora','Aurora'],['plain','Plain']];
-const LOOK_HERO=[['none','None'],['contour','Contour Lines'],['dots','Dot Grid'],['blueprint','Blueprint'],['leaded','Leaded Light']];
+const LOOK_BG=[['aurora','Aurora'],['glow','Soft Glow'],['plain','Plain']];
+const LOOK_HERO=[['contour','Contour Lines'],['dots','Dot Grid'],['blueprint','Blueprint'],['leaded','Leaded Light'],['none','None']];
 const lsGet=k=>{try{return localStorage.getItem(k)}catch(e){return null}},lsSet=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}};
 function lookNow(){
   /* older versions kept one choice under 'bb_look': move it to the right place */
   const old=lsGet('bb_look');if(old){if(LOOK_HERO.some(l=>l[0]==old))lsSet('bb_hero',old);if(old=='aurora')lsSet('bb_bg','aurora');try{localStorage.removeItem('bb_look')}catch(e){}}
   const bg=lsGet('bb_bg'),hero=lsGet('bb_hero');
-  return{bg:LOOK_BG.some(l=>l[0]==bg)?bg:'glow',hero:LOOK_HERO.some(l=>l[0]==hero)?hero:'contour'}}
+  return{bg:LOOK_BG.some(l=>l[0]==bg)?bg:'aurora',hero:LOOK_HERO.some(l=>l[0]==hero)?hero:'contour'}}
 function setLook(kind,k){const L=kind=='bg'?LOOK_BG:LOOK_HERO;if(!L.some(l=>l[0]==k))return;
   document.body.dataset[kind]=k;lsSet(kind=='bg'?'bb_bg':'bb_hero',k);
   $$(`#lookPop .lkb[data-kind="${kind}"]`).forEach(b=>{const on=b.dataset.k==k;b.classList.toggle('on',on);b.setAttribute('aria-pressed',on)})}

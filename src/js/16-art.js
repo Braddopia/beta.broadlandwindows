@@ -37,5 +37,5 @@ function tourDraw(){const o=$('#tour');if(!o)return;const s=TOUR[TI],el=s.sel&&$
   const b=o.querySelector('.tbtn .btn:last-child');if(b)b.focus()}
 document.addEventListener('keydown',e=>{const o=$('#tour');if(!o||!o.classList.contains('open'))return;if(e.key=='Escape')endTour();else if(e.key=='ArrowRight')tourGo(1);else if(e.key=='ArrowLeft')tourGo(-1)});
 addEventListener('resize',()=>{const o=$('#tour');if(o&&o.classList.contains('open'))tourDraw()});
-function tourBoot(){const b=document.createElement('button');b.className='ib';b.id='helpBtn';b.type='button';b.title='Show the tour';b.setAttribute('aria-label','Show the tour');b.innerHTML=svg('M9.1 9a3 3 0 015.8 1c0 2-3 3-3 3M12 17h.01M12 22a10 10 0 100-20 10 10 0 000 20z');b.onclick=startTour;const t=$('#thb');if(t)t.before(b);
+function tourBoot(){const b=document.createElement('button');b.className='ib';b.id='helpBtn';b.type='button';b.title='Show the tour';b.setAttribute('aria-label','Show the tour');b.innerHTML=svg('M9.1 9a3 3 0 015.8 1c0 2-3 3-3 3M12 17h.01M12 22a10 10 0 100-20 10 10 0 000 20z');b.onclick=startTour;const t=$('#thb');if(t)t.after(b);
   let seen=false;try{seen=localStorage.getItem('bb_tour_seen')=='1'}catch(e){}if(tourTest()||!seen)setTimeout(startTour,1600)}

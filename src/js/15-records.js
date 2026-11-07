@@ -52,12 +52,22 @@ function rfH(f,v){const val=v[f.k]??'',id='f_'+f.k;let c;
 /* each group reads as a plain question; fields marked adv fold away under "More details" */
 const GQ={'Customer':'Who Is The Customer?','Phone Numbers':'How Can We Phone Them?','Email':'Their Email Address','Home Address':'Where Do They Live?','Invoice Address':'Where Should The Invoice Go?','Site Address':'Where Is The Work Being Done?',
   'Lead':'About This Lead','Source And Interest':'How They Found Us And What They Want','Result':'What Happens Next','Next Visit':'The Next Visit'};
-const grpH=(t,fs,v)=>{const main=fs.filter(f=>!f.adv),adv=fs.filter(f=>f.adv),open=adv.some(f=>String(v[f.k]??'').trim());
-  return `<section class="rg fg"><h4>${esc(GQ[t]||t)}${fs.some(f=>f.any)?'<small class="anyh">Fill in at least one number *</small>':''}</h4>${main.map(f=>rfH(f,v)).join('')}${adv.length?`<details class="rmore"${open?' open':''}><summary>More details <span>(${adv.length})</span></summary><div class="rmore-b">${adv.map(f=>rfH(f,v)).join('')}</div></details>`:''}</section>`};
+const DEFV={invSame:'Same as home',siteSame:'Same as home'};
+const fval=(f,v)=>String(v[f.k]??DEFV[f.k]??'').trim();
+/* a section is finished when its required boxes are filled (and, for phones, at least one number) */
+function grpDone(fs,v){const vis=fs.filter(f=>!(f.dep&&(v[f.dep]||'Same as home')!='Different'));
+  if(!vis.some(f=>f.req||f.any||DEFV[f.k]))return false;
+  return vis.filter(f=>f.req).every(f=>fval(f,v))&&(!vis.some(f=>f.any)||vis.some(f=>f.any&&fval(f,v)))&&vis.some(f=>fval(f,v))}
+const grpSum=(fs,v)=>fs.filter(f=>!f.adv&&!(f.dep&&(v[f.dep]||'Same as home')!='Different')).map(f=>fval(f,v)).filter(Boolean).slice(0,4).join(' · ');
+const grpH=(t,fs,v)=>{const main=fs.filter(f=>!f.adv),adv=fs.filter(f=>f.adv),open=adv.some(f=>String(v[f.k]??'').trim()),shut=RW&&!RW.isNew&&grpDone(fs,v);
+  return `<section class="rg fg ${shut?'shut done':''}"><h4><button type="button" class="rg-t" onclick="grpToggle(this)" aria-expanded="${!shut}">${shut?'<i class="rg-ok" aria-hidden="true">&#10003;</i>':''}<span>${esc(GQ[t]||t)}</span>${shut?`<small class="rg-sum nocap">${esc(grpSum(fs,v))}</small><em class="rg-ch">Change</em>`:''}</button>${fs.some(f=>f.any)&&!shut?'<small class="anyh">Fill in at least one number *</small>':''}</h4>${main.map(f=>rfH(f,v)).join('')}${adv.length?`<details class="rmore"${open?' open':''}><summary>More details <span>(${adv.length})</span></summary><div class="rmore-b">${adv.map(f=>rfH(f,v)).join('')}</div></details>`:''}</section>`};
+function grpToggle(b){const g=b.closest('.rg');if(!g.classList.contains('done'))return;const s=g.classList.toggle('shut');b.setAttribute('aria-expanded',!s);if(!s){const f=g.querySelector('input:not([readonly]),select,textarea');if(f)f.focus()}}
 const byGroup=(fs,v)=>{const g={};fs.forEach(f=>(g[f.g]=g[f.g]||[]).push(f));return Object.entries(g).map(([t,x])=>grpH(t,x,v)).join('')};
 function recDep(sel){const k=sel.id.slice(2);$$(`#mbox [data-dep="${k}"]`).forEach(r=>r.hidden=sel.value!='Different')}
 
 /* ---- record window ---- */
+/* steps that are nice to have: never the reason a record opens part-way through */
+const REC_OPTIONAL=['notes','docs','calls','gdpr','appts','deliveries'];
 let RW=null;const RTAB={lead:'customer',contract:'customer'};
 /* the record is worked through as steps, in the order the job happens */
 const RSTEPS={lead:['customer','details','appts','survey','check','notes','docs','gdpr'],contract:['customer','details','survey','products','finance','fitting','deliveries','check','notes','docs','calls','gdpr']};
@@ -69,15 +79,16 @@ function recOpen(kind,id){const D=REC[kind],r=id?D.get(id):null;if(id&&!r)return
   const ord=RSTEPS[kind],tabs=D.tabs(W).sort((a,b)=>ord.indexOf(a.k)-ord.indexOf(b.k)),tab=tabs.some(t=>t.k==RTAB[kind])?RTAB[kind]:tabs[0].k,pos=W.list.indexOf(W.id);W.steps=tabs.map(t=>t.k);
   const nm=k=>(RNAME[kind]||{})[k]||tabs.find(t=>t.k==k).t,hint=k=>{const h=RHINT[k];return typeof h=='object'?h[kind]:h||''};
   openModal(`<div class="rw">
-   <div class="rw-bar"><button class="rb1 sv" onclick="recSave(false)">Save</button>${W.isNew?'':D.actions(W)}<span class="rw-sp"></span>
+   <div class="rw-bar"><button class="rb1 sv" onclick="recSave(false)">${svg('M5 12l5 5L20 7')}Save</button>${W.isNew?'':D.actions(W)}<span class="rw-sp"></span>
     ${W.isNew||W.list.length<2?'':`<button class="rb1" title="Save this one and open the previous ${esc(D.label.toLowerCase())}" ${A('recNav',-1)} ${pos<=0?'disabled':''}>&lsaquo; Previous</button><span class="rw-pos">${esc(D.label)} ${pos+1} of ${W.list.length}</span><button class="rb1" title="Save this one and open the next ${esc(D.label.toLowerCase())}" ${A('recNav',1)} ${pos>=W.list.length-1?'disabled':''}>Next &rsaquo;</button>`}
-    <button class="rb1 cl" onclick="recClose()">Close &times;</button></div>
-   <div class="rw-h"><div><small>${esc(D.label)}${W.isNew?' · New':''}</small><h2>${esc(D.heading(W))}</h2></div><div class="rw-hk">${D.headStats(W)}</div></div>
+    <button class="rb1 cl" onclick="recClose()">${svg('M6 6l12 12M18 6L6 18')}Close</button></div>
+   <div class="rw-h"><div><small>${esc(D.label)}${W.isNew?' · New':''}</small><h2>${esc(D.heading(W))}</h2>${W.isNew?'':`<div class="rw-hc">${telOf(W.v)?`<a class="nocap" href="tel:${esc(telOf(W.v).replace(/[^\d+]/g,''))}">${svg('M5 4h4l2 5-2.5 1.5a11 11 0 005 5L15 13l5 2v4a2 2 0 01-2 2A16 16 0 013 6a2 2 0 012-2')}${esc(telOf(W.v))}</a>`:''}${mailOf(W.v)?`<a class="nocap" href="mailto:${esc(mailOf(W.v))}">${svg('M4 6h16v12H4zM4 7l8 6 8-6')}${esc(mailOf(W.v))}</a>`:''}${W.v.town?`<span>${svg('M12 21s-7-6-7-11a7 7 0 0114 0c0 5-7 11-7 11zM12 12a2 2 0 100-4 2 2 0 000 4z')}${esc(W.v.town)}</span>`:''}</div>`}</div><div class="rw-hk">${D.headStats(W)}</div></div>
    <div class="rw-x"><aside class="rw-rail"><div class="rw-cust" id="rwCust"></div><div class="rw-prog"><span id="rwPct"></span><i><b id="rwBar"></b></i></div>
      <ol class="rw-steps">${tabs.map((t,i)=>`<li><button type="button" data-t="${t.k}" class="${t.k==tab?'on':''}" ${A('recTab',t.k)}><i>${i+1}</i><span><b>${esc(nm(t.k))}</b><small data-st="${t.k}"></small></span></button></li>`).join('')}</ol></aside>
     <div class="rw-main"><div class="rw-b">${tabs.map((t,i)=>`<div class="rw-p ${t.k==tab?'on':''}" data-t="${t.k}" role="tabpanel"><div class="rw-sh"><small>Step ${i+1} of ${tabs.length}</small><h3>${esc(nm(t.k))}</h3><p>${esc(hint(t.k))}</p>${t.k=='customer'||t.k=='details'?'<p class="rw-req">Boxes marked * must be filled in.</p>':''}</div>${t.h(W)}</div>`).join('')}</div>
      <div class="rw-foot"><button type="button" class="btn ghost" id="rwPrev" onclick="recStep(-1)"></button><span class="rw-sp"></span><button type="button" class="btn ghost" onclick="recSave(false)">Save</button><button type="button" class="btn" id="rwNext" onclick="recStep(1)"></button></div></div></div></div>`,'full');
-  W.nm=nm;recThumbs();recDocs();recFoot();recRail();$('#mbox .rw-x').addEventListener('input',()=>{RW.dirty=1;clearTimeout(recRail.t);recRail.t=setTimeout(recRail,250)});$('#mbox .rw-x').addEventListener('change',e=>{RW.dirty=1;const c=e.target;if(c.classList&&c.classList.contains('rck')){const w=c.parentElement.querySelector('.ck-w');if(w)w.textContent=c.checked?'Done today by '+USER:''}recRail()});
+  W.nm=nm;recThumbs();recDocs();recFoot();recRail();
+  if(!W.isNew){const todo=W.steps.find(k=>{const b=$(`#mbox .rw-steps button[data-t="${k}"]`);return b&&!b.classList.contains('ok')&&!REC_OPTIONAL.includes(k)});recTab(todo||W.steps[0])}$('#mbox .rw-x').addEventListener('input',()=>{RW.dirty=1;clearTimeout(recRail.t);recRail.t=setTimeout(recRail,250)});$('#mbox .rw-x').addEventListener('change',e=>{RW.dirty=1;const c=e.target;if(c.classList&&c.classList.contains('rck')){const w=c.parentElement.querySelector('.ck-w');if(w)w.textContent=c.checked?'Done today by '+USER:''}recRail()});
   drawThumbs()}
 function recTab(k){RTAB[RW.kind]=k;$$('#mbox .rw-steps button').forEach(b=>b.classList.toggle('on',b.dataset.t==k));$$('#mbox .rw-p').forEach(p=>p.classList.toggle('on',p.dataset.t==k));$('#mbox .rw-b').scrollTop=0;recFoot();recRail();const b=$(`#mbox .rw-steps button[data-t="${k}"]`);if(b&&b.scrollIntoView)b.scrollIntoView({block:'nearest',inline:'nearest'})}
 function recStep(d){const S2=RW.steps,i=S2.indexOf(RTAB[RW.kind]);if(d>0&&i==S2.length-1){recSave(true);return}const n=S2[i+d];if(n)recTab(n)}
@@ -216,7 +227,7 @@ REC.lead={label:'Lead',
   blank:()=>({id:nextLeadId(),created:today(),stage:'New',source:'Website',owner:USER,takenBy:USER,invSame:'Same as home',siteSame:'Same as home',addrType:'Home',log:[],appts:[],chk:{}}),
   heading:W=>`${W.v.id}  ${[W.v.title,W.v.name].filter(Boolean).join(' ')||'New lead'}${W.v.company?' · '+W.v.company:''}`,
   headStats:W=>`${leadTag(W.v.stage||'New')}<span><small>Net Value</small><b>${m0(W.v.value)}</b></span><span><small>Next Action</small><b>${W.v.followup?fd(W.v.followup):'-'}</b></span>`,
-  actions:W=>`<button class="rb1" ${A('reportCust','lead',W.id)}>Customer sheet</button>${canSee('contracts')&&W.v.stage!='Lost'?`<button class="rb1 go" ${A('recConvert')}>Convert to contract</button>`:''}${ISOWN()?`<button class="rb1" ${A('delLead',W.id)}>Delete</button>`:''}`,
+  actions:W=>`<button class="rb1" ${A('reportCust','lead',W.id)}>${svg(IC.reports)}Customer sheet</button>${canSee('contracts')&&W.v.stage!='Lost'?`<button class="rb1 go" ${A('recConvert')}>${svg('M5 12h14M13 6l6 6-6 6')}Convert to contract</button>`:''}${ISOWN()?`<button class="rb1 dl" ${A('delLead',W.id)}>${svg('M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3')}Delete</button>`:''}`,
   fields:W=>[...LEADF(W),...CUSTF,...GDPRF,...APPTF,{k:'notes',l:'Notes',t:'area'}],
   tabs:W=>[{k:'details',t:'Details',h:W=>`<div class="rcols">${byGroup(LEADF(W),W.v)}</div>`},
     {k:'customer',t:'Customer',h:W=>`<div class="rcols">${byGroup(CUSTF,W.v)}</div>`},
@@ -250,7 +261,7 @@ REC.contract={label:'Contract',
   blank:()=>({id:nid('C',S.contracts),cdate:today(),stage:'Deposit due',fitter:FIT[0],contractType:CTYPES[0],soldBy:USER,createdBy:USER,invSame:'Same as home',siteSame:'Same as home',addrType:'Home',pay:[],chk:{},lines:[],log:[]}),
   heading:W=>`${W.v.id}  ${[W.v.title,W.v.name].filter(Boolean).join(' ')||'New contract'}${W.v.company?' · '+W.v.company:''}`,
   headStats:W=>`${stTag(W.v.stage||'Deposit due')}${W.v.flash?`<span class="flash">${esc(W.v.flash)}</span>`:''}<span><small>Value</small><b>${m0(W.v.value)}</b></span><span><small>Balance</small><b>${m0((+W.v.value||0)-(+W.v.paid||0))}</b></span><span><small>Fit</small><b>${W.v.fit?fd(W.v.fit):'-'}</b></span>`,
-  actions:W=>`<button class="rb1" ${A('reportContract',W.id)}>Reports</button><button class="rb1" ${A('recCall')}>Service call</button>${ISOWN()?`<button class="rb1" ${A('del','contracts',W.id)}>Delete</button>`:''}`,
+  actions:W=>`<button class="rb1" ${A('reportContract',W.id)}>${svg(IC.reports)}Reports</button><button class="rb1" ${A('recCall')}>${svg(IC.service)}Service call</button>${ISOWN()?`<button class="rb1 dl" ${A('del','contracts',W.id)}>${svg('M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3')}Delete</button>`:''}`,
   fields:W=>[...CDETF(W),...CUSTF,...GDPRF,...CFINF(),...CFITF(),{k:'notes',l:'Notes',t:'area'}],
   tabs:W=>{const calls=S.calls.filter(c=>c.contract==W.v.id),dels=S.deliveries.filter(d=>d.contract==W.v.id);return[
     {k:'details',t:'Details',h:W=>`<div class="rcols">${byGroup(CDETF(W),W.v)}</div>`},

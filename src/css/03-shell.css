@@ -89,3 +89,7 @@ body.tv .main{padding:clamp(1.2rem,2vw,2.4rem) clamp(1.4rem,2.6vw,3.2rem)}
 body.tv .lvg{gap:1.1rem}
 body.tv .fl-head .acts{display:none}
 body.tv .main::after{content:"Press Esc Or Double-Click To Exit Full Screen";position:fixed;bottom:.8rem;left:50%;transform:translateX(-50%);font-size:.72rem;color:var(--muted);animation:hintOut 6s forwards;pointer-events:none}
+
+/* top bar: a thin divider between the main actions and the small icon buttons */
+.tsep{width:1px;height:1.6rem;background:var(--line);margin:0 .15rem;flex:0 0 auto}
+@media(max-width:800px){.tsep{display:none}}

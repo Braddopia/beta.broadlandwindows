@@ -115,7 +115,7 @@ function form(title,fields,v,cb,photos,size){
 /* read + validate form fields; returns null (and focuses the field) when invalid */
 /* show a problem next to the box itself (and still as a message at the bottom) */
 function fieldErr(e,msg){toast(msg);const w=e.closest('.rf,.ff');if(w){w.classList.add('err');let m=w.querySelector('.ferr');if(!m){m=document.createElement('em');m.className='ferr';w.appendChild(m)}m.textContent=msg;
-    const d=w.closest('details');if(d)d.open=true;const clr=()=>{w.classList.remove('err');m.remove();e.removeEventListener('input',clr);e.removeEventListener('change',clr)};e.addEventListener('input',clr);e.addEventListener('change',clr)}
+    const d=w.closest('details');if(d)d.open=true;const sg=w.closest('.rg.shut');if(sg)sg.classList.remove('shut');const clr=()=>{w.classList.remove('err');m.remove();e.removeEventListener('input',clr);e.removeEventListener('change',clr)};e.addEventListener('input',clr);e.addEventListener('change',clr)}
   const p=e.closest('.rw-p');if(p&&!p.classList.contains('on')&&typeof recTab=='function')recTab(p.dataset.t);e.focus();if(e.scrollIntoView)e.scrollIntoView({block:'center'})}
 function readFields(fields){const o={};
   for(const f of fields){const e=$('#f_'+f.k);if(!e)continue;const raw=(e.value||'').trim(),lab=f.l.replace(/ \(.*\)/,'');
