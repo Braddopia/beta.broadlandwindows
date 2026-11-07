@@ -1302,6 +1302,22 @@ body[data-theme=dark] .mb .rg{background:#1a202b}
 .dtb tr.dgrp td{background:var(--card2);padding:.55rem .8rem;font-size:.9rem}
 .dtb tr.dgrp b{color:var(--navy)}
 
+/* My Details: just a lock next to admin-only labels, centred on the text */
+.ff label:has(.lockd){display:inline-flex;align-items:center;gap:.35rem}
+.lockd{display:inline-grid;place-items:center;width:1.15rem;height:1.15rem;border-radius:50%;background:var(--card2);color:var(--muted)}
+.lockd svg{width:.72rem;height:.72rem}
+.ff input[readonly]{font-family:inherit}
+/* link buttons start with capitals like every other button (plain web links stay as typed) */
+a.btn[href],a.mini[href],a.rb1[href]{text-transform:capitalize!important}
+/* years of service box on My Calendar */
+div.svc{cursor:default}
+.svc{grid-template-columns:auto auto auto 1fr auto}
+@media(max-width:600px){.svc{grid-template-columns:1fr 1fr 1fr}.svc .muted,.svc-go{grid-column:1/-1}}
+.svc{display:flex!important;flex-wrap:wrap;align-items:flex-end;gap:.5rem 1.4rem}
+.svc .muted{flex:1 1 100%;order:5}.svc-go{order:6;margin-left:auto}
+.svc>span:nth-child(3){flex:0 0 auto;order:0}
+.svc>span.muted{flex:1 1 100%;order:5}
+
 /* ==========================================================================
    06 · Adaptive layout
    Breakpoints: 1400 (laptop) · 1100 (small laptop / tablet landscape)
@@ -1594,25 +1610,25 @@ function stars(score,col='#ffd002',off='rgba(255,255,255,.28)'){const s=Math.max
 /* ---- icons (24px stroke icons) ---- */
 const svg=(p,cls='')=>`<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${p}"/></svg>`;
 const IC={
-  home:'M3 11l9-8 9 8M5 10v10h5v-6h4v6h5V10',
+  home:'M3 10.5L12 3l9 7.5M5.5 9v11a1 1 0 001 1H10v-6h4v6h3.5a1 1 0 001-1V9',
   layout:'M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z',
-  messages:'M4 5h16v11H8l-4 4zM8 9h8M8 12h5',
-  live:'M3 12h4l3-8 4 16 3-8h4',
-  deliveries:'M3 7h11v9H3zM14 10h4l3 3v3h-7zM7.5 19a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM17.5 19a1.5 1.5 0 100-3 1.5 1.5 0 000 3z',
+  messages:'M21 11.5a8.5 8.5 0 01-12.3 7.6L3.5 20.5l1.4-4.7A8.5 8.5 0 1121 11.5zM8.5 11.5h.01M12.5 11.5h.01M16.5 11.5h.01',
+  live:'M3 4.5h18v12H3zM8 21h8M12 16.5V21M6.5 11h2.5l1.5-3 2.5 6 1.5-3h3',
+  deliveries:'M2 6h12v10H2zM14 9h4.5l3.5 3.5V16h-8M6 19.5a2 2 0 100-4 2 2 0 000 4zM18 19.5a2 2 0 100-4 2 2 0 000 4z',
   /* factory / warehouse */
   suppliers:'M2 21h20M3 21V11l5 3v-3l5 3v-3l5 3V4h3v17M7 17h2M12 17h2M17 17h2',
-  leads:'M3 5h18l-7 8v6l-4 2v-8z',
-  contracts:'M6 3h9l4 4v14H6zM14 3v5h5M9 13h7M9 17h7',
-  fitting:'M4 5h16v15H4zM4 10h16M9 3v4M15 3v4',
+  leads:'M10 11a4 4 0 100-8 4 4 0 000 8zM3 21c.6-3.8 3.4-6 7-6 1.3 0 2.5.3 3.6.8M18.5 14v7M15 17.5h7',
+  contracts:'M14 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8zM14 3v5h5M8.5 17c1.2-1.5 2.1-2.4 2.9-2.4.9 0 .7 2.4 1.6 2.4.8 0 1.4-1 2.5-1',
+  fitting:'M4 6.5a2 2 0 012-2h12a2 2 0 012 2V19a2 2 0 01-2 2H6a2 2 0 01-2-2zM4 10h16M8 2.5v4M16 2.5v4M8 14h2M14 14h2M8 17.5h2',
   service:'M14.7 6.3a4 4 0 005 5L11 20a2.1 2.1 0 01-3-3l8.7-8.7a4 4 0 01-2-2z',
   stock:'M3 7l9-4 9 4v10l-9 4-9-4zM3 7l9 4 9-4M12 11v10',
-  contacts:'M5 3h13a2 2 0 012 2v14a2 2 0 01-2 2H5zM9 3v18M13 9h4M13 13h4',
+  contacts:'M6 3h12a2 2 0 012 2v14a2 2 0 01-2 2H6zM3.5 7.5h3M3.5 12h3M3.5 16.5h3M13 11a2.2 2.2 0 100-4.4 2.2 2.2 0 000 4.4zM9.4 16.5c.4-1.8 1.8-2.9 3.6-2.9s3.2 1.1 3.6 2.9',
   staff:'M9 11a3.5 3.5 0 100-7 3.5 3.5 0 000 7zM2.5 20c.4-3.4 3.2-5.5 6.5-5.5s6.1 2.1 6.5 5.5M16 4.3a3.5 3.5 0 010 6.4M18.5 14.8c1.8.8 2.8 2.6 3 5.2',
-  holidays:'M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6L7 7M17 17l1.4 1.4M5.6 18.4L7 17M17 7l1.4-1.4M12 8a4 4 0 100 8 4 4 0 000-8z',
-  reports:'M4 20V10M10 20V4M16 20v-7M22 20H2',
+  holidays:'M17.8 19.2L16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z',
+  reports:'M4 20.5h16M7 16.5v-5M12 16.5v-9M17 16.5v-7',
   /* files: folder with a document */
   downloads:'M3 6a2 2 0 012-2h4l2 2h8a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2zM9 13h6M9 16h4',
-  finance:'M12 2v20M17 6H9.5a3 3 0 000 6h5a3 3 0 010 6H6',
+  finance:'M16.5 6.8A3.6 3.6 0 0010 8.9v6c0 2-.8 3.6-2.5 5.1H18M7 13h7',
   admin:'M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6zM9 12l2 2 4-4',
   /* single person: head centred over shoulders */
   user:'M12 12a4 4 0 100-8 4 4 0 000 8zM4.5 21c.6-3.9 3.6-6 7.5-6s6.9 2.1 7.5 6',
@@ -1829,7 +1845,7 @@ function setPin(k){
 
 /* ---- my details: name, contact info. Job role, team, start date are admin-only ---- */
 function editProfile(){
-  const p=S.profile,m=me()||{},adm=ISOWN(),lk=t=>`<span class="lockd">${svg(IC.lock)}${t}</span>`;
+  const p=S.profile,m=me()||{},adm=ISOWN(),lk=t=>`<span class="lockd" title="${esc(t)}" aria-label="${esc(t)}">${svg(IC.lock)}</span>`;
   openModal(`<button class="mx" onclick="closeModal()" aria-label="Close">&times;</button><div class="pf"><span class="av2">${esc(initials(p.name))}</span><div><h2 style="margin:0">My Details</h2><span class="muted">${esc(ROLES[ROLE].n)} account</span></div></div>
   <div class="grid">
    <div class="ff"><label for="p_name">Display name *</label><input id="p_name" maxlength="60" value="${esc(p.name)}"></div>
@@ -2132,7 +2148,7 @@ function vHome(){
     staff:{k:[['Next Fitting',fits[0]?fd(fits[0].fit):'None','','fitting'],['Open Service Calls',oc.length,urgent?'bad':'','service'],['Deliveries Due Today',dToday,dToday?'warn':'','deliveries'],['Low Stock Lines',low.length,low.length?'warn':'','stock']],p:[fitsP,callsP,delP],s:`${dToday} deliveries due today and ${oc.length} open service calls.`}};
   cfg.beta=cfg.admin;const C=cfg[R]||cfg.staff;
   const allow=m?allowTot(m):0,used=m?hu(m):0,pend=m?sum(S.hols.filter(h=>h.sid==m.id&&h.status=='Pending'),h=>h.days):0,nxt=m?S.hols.filter(h=>h.sid==m.id&&h.status!='Rejected'&&h.to>=td).sort((a,b)=>a.from.localeCompare(b.from))[0]:null;
-  const holP=`<div class="panel"><h2><span>My Holiday</span><span class="acts"><button class="btn sm" onclick="bookMine()">Book Holiday</button>${canSee('holidays')?`<button class="mini" ${A('go','holidays')}>Holiday Planner</button>`:canSee('fitting')?`<button class="mini" ${A('go','fitting')}>My Calendar</button>`:''}</span></h2>${m?`<div class="hl"><div class="big"><b>${allow-used}</b><small>Days Left</small></div><div><b>${used}</b><small>Booked</small></div><div><b>${pend}</b><small>Pending</small></div><div><b>${allow}</b><small>Allowance</small></div></div><div class="hbar2"><div class="bar2"><i style="width:${allow?Math.min(100,Math.round(100*(used+pend)/allow)):0}%"></i></div><small>${used+pend} of ${allow} days used</small></div><p class="muted" style="margin:.5rem 0 0">${nxt?`Next: ${fd(nxt.from)} to ${fd(nxt.to)}, ${nxt.days} days, ${esc(nxt.status)}`:'No holiday booked yet.'}</p><button type="button" class="svc" ${A('go',canSee('holidays')?'holidays':'fitting')} title="Open your holidays"><span><small>Years Of Service</small><b>${m.start?svcYears(m):'-'}</b></span><span><small>Service Days</small><b>${svcExtra(m)?'+'+svcExtra(m):'0'}</b></span><span class="muted">${m.start?(svcYears(m)>=15?'Maximum service days reached':(5-svcYears(m)%5)+' year'+(5-svcYears(m)%5==1?'':'s')+' to the next extra day'):'Start date not set'}</span><span class="svc-go">${canSee('holidays')?'Holiday planner':'My calendar'} &rarr;</span></button>`:'<p class="empty">Your name is not in the staff list yet, so there is no allowance to show.</p>'}</div>`;
+  const holP=`<div class="panel"><h2><span>My Holiday</span><span class="acts"><button class="btn sm" onclick="bookMine()">Book Holiday</button>${canSee('holidays')?`<button class="mini" ${A('go','holidays')}>Holiday Planner</button>`:canSee('fitting')?`<button class="mini" ${A('go','fitting')}>My Calendar</button>`:''}</span></h2>${m?`<div class="hl"><div class="big"><b>${allow-used}</b><small>Days Left</small></div><div><b>${used}</b><small>Booked</small></div><div><b>${pend}</b><small>Pending</small></div><div><b>${allow}</b><small>Allowance</small></div></div><div class="hbar2"><div class="bar2"><i style="width:${allow?Math.min(100,Math.round(100*(used+pend)/allow)):0}%"></i></div><small>${used+pend} of ${allow} days used</small></div><p class="muted" style="margin:.5rem 0 0">${nxt?`Next: ${fd(nxt.from)} to ${fd(nxt.to)}, ${nxt.days} days, ${esc(nxt.status)}`:'No holiday booked yet.'}</p>${svcBox(m,true)}`:'<p class="empty">Your name is not in the staff list yet, so there is no allowance to show.</p>'}</div>`;
   /* widgets: every tile and panel the person may see; they choose which show and in what order */
   const KP={leads:['Open Leads',open.length,'','leads'],pipe:['Pipeline Value',m0(pipe),'','leads'],live:['Live Contracts',m0(sum(live,c=>c.value)),'','contracts'],bal:['Balance To Collect',m0(bal),'warn','contracts'],calls:['Open Service Calls',oc.length,urgent?'bad':'','service'],req:['Stock Requests',reqP,reqP?'warn':'','stock'],
     nfit:['Next Fitting',fits[0]?fd(fits[0].fit):'None','','fitting'],fitwk:['Fittings This Week',fitWk,'','fitting'],dtoday:['Deliveries Due Today',dToday,dToday?'warn':'','deliveries'],dover:['Overdue Deliveries',dOver,dOver?'bad':'','deliveries'],low:['Low Stock Lines',low.length,low.length?'warn':'','stock'],out:['Out Of Stock',out,out?'bad':'','stock'],
@@ -2167,6 +2183,10 @@ function dashReset(){LAY[DZ.w].reset();store();closeModal();render();toast('Back
 function bookMine(){const m=me();if(!m){toast('Your name is not in the staff list yet');return}holBook(m.id);if(!ISOWN()){const s=$('#hs');if(s){[...s.options].forEach(o=>{if(o.value!=m.id)o.remove()});s.disabled=true}}}
 const prTag=p=>`<span class="tag ${p=='Urgent'?'r':p=='Normal'?'y':'n'}">${esc(p)}</span>`;
 
+/* years of service and the extra holiday days they earn (overview and My Calendar) */
+function svcBox(m,link){const y=svcYears(m),x=svcExtra(m),tip=m.start?(y>=15?'Maximum service days reached':(5-y%5)+' year'+(5-y%5==1?'':'s')+' to the next extra day'):'Start date not set';
+  const inner=`<span><small>Years Of Service</small><b>${m.start?y:'-'}</b></span><span><small>Service Days</small><b>${x?'+'+x:'0'}</b></span><span><small>Started</small><b>${m.start?new Date(m.start+'T00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'-'}</b></span><span class="muted">${tip}</span>`;
+  return link?`<button type="button" class="svc" ${A('go',canSee('holidays')?'holidays':'fitting')} title="Open your holidays">${inner}<span class="svc-go">${canSee('holidays')?'Holiday planner':'My calendar'} &rarr;</span></button>`:`<div class="svc">${inner}</div>`}
 /* review scores (Trustpilot / Google): figures set by an admin in Admin Console > Reviews */
 function ratingsH(){const r=(x,n)=>{const u=SAFE.url(x.url),t=`${stars(x.score)} <b>${(+x.score).toFixed(1)}</b> on ${n}${x.count?' <span>('+esc(x.count)+' reviews)</span>':''}`;return u?`<a href="${esc(u)}" target="_blank" rel="noopener noreferrer">${t}</a>`:`<span>${t}</span>`};
   return `<div class="rate">${r(S.brand.tp,'Trustpilot')}${r(S.brand.g,'Google')}</div>`}
@@ -2632,7 +2652,7 @@ function calCells(days,full){const td=today();return days.map(({k,d,out})=>{cons
   return `<div class="dc2 ${out?'out':''} ${k==td?'today':''} ${k==UI.cal.sd?'sel':''} ${isWk(k)?'':'we'} ${bh?'bh':''}" ${A('setUI','cal.sd',k)}><span class="dn">${d}</span>${bh?`<span class="more">${esc(bh)}</span>`:''}<div class="evs">${sh.map(x=>`<span class="ce ${x.c}" title="${esc(x.s)}" onclick="event.stopPropagation();${esc(x.f[0]+'('+x.f.slice(1).map(a=>JSON.stringify(a)).join(',')+')')}">${esc(x.t)}</span>`).join('')}${!full&&e.length>3?`<span class="more">+${e.length-3} more</span>`:''}</div></div>`}).join('')}
 const dRange=(s,n)=>{const a=[];for(let i=0;i<n;i++){const x=new Date(s);x.setDate(x.getDate()+i);a.push({k:iso(x),d:x.getDate(),out:false,x})}return a};
 function calMine(){const m=me();if(!m)return '<div class="panel" style="margin-top:1rem"><p class="empty">Your name is not in the staff list yet.</p></div>';const td=today(),H=S.hols.filter(h=>h.sid==m.id&&h.to>=td).sort((a,b)=>a.from.localeCompare(b.from)),J=S.contracts.filter(c=>c.fit&&c.fit>=td&&c.stage!='Complete'&&forPerson(m,c.fitter)).sort((a,b)=>a.fit.localeCompare(b.fit));
-  return `<div class="two" style="margin-top:1rem"><div class="panel"><h2><span>My Holidays</span><button class="btn sm" onclick="bookMine()">Book holiday</button></h2>${H.map(h=>`<div class="row"><span><b>${fd(h.from)} to ${fd(h.to)}</b><br><span class="muted">${h.days} working day${h.days==1?'':'s'}${h.note?', '+esc(h.note):''}</span></span>${holTag(h)}</div>`).join('')||emptyArt('holiday','No holiday booked yet.')}<p class="muted" style="margin:.6rem 0 0">${allowTot(m)-hu(m)} of ${allowTot(m)} days left this year.</p></div>
+  return `<div class="two" style="margin-top:1rem"><div class="panel"><h2><span>My Holidays</span><button class="btn sm" onclick="bookMine()">Book holiday</button></h2>${H.map(h=>`<div class="row"><span><b>${fd(h.from)} to ${fd(h.to)}</b><br><span class="muted">${h.days} working day${h.days==1?'':'s'}${h.note?', '+esc(h.note):''}</span></span>${holTag(h)}</div>`).join('')||emptyArt('holiday','No holiday booked yet.')}<p class="muted" style="margin:.6rem 0 0">${allowTot(m)-hu(m)} of ${allowTot(m)} days left this year.</p>${svcBox(m,false)}</div>
   <div class="panel"><h2>My Jobs</h2>${J.map(c=>`<div class="row"><span><b>${fd(c.fit)}</b> ${esc(c.name)}<br><span class="muted">${esc(c.product)}, ${esc(c.town||'')}</span></span></div>`).join('')||emptyArt('done','No fittings booked for you.')}</div></div>`}
 function vCalendar(){const n=new Date(),C=UI.cal,M=C.m,o=C.o,WD=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(d=>`<div class="dh">${d}</div>`).join('');let title,grid;
   if(M=='month'){const b=new Date(n.getFullYear(),n.getMonth()+o,1),off=(b.getDay()+6)%7,dim=new Date(b.getFullYear(),b.getMonth()+1,0).getDate(),wks=Math.ceil((off+dim)/7),days=dRange(new Date(b.getFullYear(),b.getMonth(),1-off),wks*7).map(x=>({...x,out:x.x.getMonth()!=b.getMonth()}));title=b.toLocaleDateString('en-GB',{month:'long',year:'numeric'});grid=`<div class="cm">${WD}${calCells(days,false)}</div>`}
@@ -3313,7 +3333,7 @@ function cover(d){const H=s=>Math.abs([...s].reduce((a,c)=>a*31+c.charCodeAt(0)|
 function vFiles(){const F=UI.files,cats=['all',...new Set(DL.map(d=>d.cat))],rc=ldRecent();const HID=S.fileHide||{};let L=DL.filter(d=>!HID[d.url]&&(F.cat=='all'||d.cat==F.cat)&&hit(d));if(F.az)L=L.slice().sort((a,b)=>a.title.localeCompare(b.title));
   const ssq=F.ssq.toLowerCase(),ML=SSM.filter(m=>!HID[m.u]&&(m.t+' '+m.f).toLowerCase().includes(ssq)&&hit(m)),pg=paginate(F,ML);
   const fhead=(a,b,c)=>`<div class="frow fhead"><span>${a}</span><span>${b}</span><span>${c}</span><span></span></div>`;
-  return `<div class="head"><div><h1>Files</h1><span class="muted">${L.length} of ${DL.length} brochures from <span class="nocap">broadlandwindows.co.uk</span></span></div><div class="tools"><button class="btn ghost" onclick="copyText(DL.map(d=>d.title+': '+d.url).join('\\n'))">Copy all links</button><a class="btn" href="https://www.broadlandwindows.co.uk/brochures/" target="_blank" rel="noopener noreferrer">Brochure website</a></div></div>
+  return `<div class="head"><div><h1>Files</h1><span class="muted">${L.length} of ${DL.length} brochures from <span class="nocap">broadlandwindows.co.uk</span></span></div><div class="tools"><button class="btn ghost" onclick="copyText(DL.map(d=>d.title+': '+d.url).join('\\n'))">Copy all links</button><a class="btn" href="https://www.broadlandwindows.co.uk/brochures/" target="_blank" rel="noopener noreferrer">Brochure Website</a></div></div>
   <div class="chips">${cats.map(c=>`<button class="chip ${F.cat==c?'on':''}" ${A('setUI','files.cat',c)}>${c=='all'?'All brochures':esc(c)}</button>`).join('')}<span class="vs"></span><button class="chip ${F.az?'on':''}" ${A('togUI','files.az')}>Sort A to Z</button><button class="chip ${F.list?'on':''}" ${A('togUI','files.list')}>List view</button></div>
   ${rc.length?`<div class="panel" style="margin-bottom:1rem"><h2>Recently Opened</h2>${rc.map(x=>`<div class="row"><span>${esc(x.t)}</span><a class="mini pri" href="${esc(SAFE.url(x.u))}" target="_blank" rel="noopener noreferrer">Open</a></div>`).join('')}</div>`:''}
   <div class="book ${F.list?'lst':''}">${L.map(d=>`<div class="bc" style="position:relative"><div class="cvw">${cover(d)}<img src="${esc(coverUrl(d))}" alt="${esc(d.title)} cover" loading="lazy" referrerpolicy="no-referrer" data-alt="${esc(coverAlt(d))}" onerror="coverNext(this)"></div><button class="mini covb" ${A('setCover',d.url)}>Set cover</button><div class="bb"><b>${esc(d.title)}</b><span class="tag n" style="align-self:flex-start">${esc(d.cat)}</span><div class="acts"><a class="mini pri" href="${esc(d.url)}" target="_blank" rel="noopener noreferrer" ${A('recent',d.url,d.title)}>Open</a><button class="mini" ${A('dlf',d.url)}>Download</button><a class="mini" href="mailto:?subject=${encodeURIComponent('Broadland brochure: '+d.title)}&amp;body=${encodeURIComponent(d.url)}">Email</a>${ISOWN()?`<button class="mini del" ${A('fileHide',d.url,d.title)}>Remove</button>`:''}</div></div></div>`).join('')||emptyArt('files','No brochures match.')}</div>
@@ -4000,7 +4020,11 @@ const SRCH=[
   ['contacts','Contact Book',()=>S.contacts,c=>[c.co||c.name,[c.co?c.name:'',c.type,c.phone].filter(Boolean).join(' · ')],c=>editContact(c.id)],
   ['suppliers','Suppliers',()=>S.suppliers.map((x,i)=>({...x,_i:i})),x=>[x.name,[x.account,x.contact,x.phone].filter(Boolean).join(' · ')],x=>editSup(x._i)],
   ['stock','Inventory',()=>products(),r=>[r.item||r.pid,['Stock ID '+r.pid,r.supplier,r.loc].filter(Boolean).join(' · ')],r=>viewItem(r.pid)],
-  ['staff','Staff',()=>S.staff,s=>[s.name,[s.role,s.team].filter(Boolean).join(' · ')],s=>editStaff(s.id)]];
+  ['staff','Staff',()=>S.staff,s=>[s.name,[s.role,s.team].filter(Boolean).join(' · ')],s=>editStaff(s.id)],
+  ['downloads','Files And Manuals',()=>{const H=S.fileHide||{};return[...DL.filter(d=>!H[d.url]).map(d=>({t:d.title,s:'Brochure · '+d.cat,u:d.url})),...SSM.filter(m=>!H[m.u]).map(m=>({t:m.t,s:'Manual · '+m.f,u:m.u})),...MF.filter(f=>!/^brand asset$/i.test(f.cat)).map(f=>({t:f.name,s:'File · '+tc(f.cat),id:f.id}))]},
+    f=>[f.t,f.s],f=>{if(f.id){manOpen(f.id);return}const u=SAFE.url(f.u);if(u)window.open(u,'_blank','noopener,noreferrer')}]];
+/* uploaded files live in the browser database: read them once so they can be found from any page */
+function srchFiles(){if(srchFiles.done||MF.length)return;srchFiles.done=1;try{fx('readonly',s=>s.getAll()).then(r=>{MF=(r||[]).filter(f=>!f.ref).sort((x,y)=>y.time-x.time)}).catch(()=>{})}catch(e){}}
 let SR=[],SRi=0;
 function srchRun(raw){const box=$('#sres');if(!box)return;const query=String(raw||'').trim().toLowerCase();SR=[];SRi=0;
   if(query.length<2){box.classList.remove('open');box.innerHTML='';return}
@@ -4016,7 +4040,7 @@ function srchClose(clear){const box=$('#sres');if(box)box.classList.remove('open
   const box=document.createElement('div');box.id='sres';box.setAttribute('role','listbox');box.setAttribute('aria-label','Search results');document.body.appendChild(box); /* not inside the glass top bar: its blur would offset a fixed box */
   inp.setAttribute('aria-controls','sres');
   inp.addEventListener('input',()=>srchRun(inp.value));
-  inp.addEventListener('focus',()=>{if(inp.value.trim().length>1)srchRun(inp.value)});
+  inp.addEventListener('focus',()=>{srchFiles();if(inp.value.trim().length>1)srchRun(inp.value)});
   inp.addEventListener('keydown',e=>{if(!box.classList.contains('open'))return;
     if(e.key=='ArrowDown'||e.key=='ArrowUp'){e.preventDefault();SRi=(SRi+(e.key=='ArrowDown'?1:-1)+SR.length)%Math.max(SR.length,1);srchMark();const on=$('#sres .sri.on');on&&on.scrollIntoView({block:'nearest'})}
     else if(e.key=='Enter'&&SR[SRi]){e.preventDefault();SR[SRi]()}

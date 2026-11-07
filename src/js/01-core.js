@@ -86,25 +86,25 @@ function stars(score,col='#ffd002',off='rgba(255,255,255,.28)'){const s=Math.max
 /* ---- icons (24px stroke icons) ---- */
 const svg=(p,cls='')=>`<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${p}"/></svg>`;
 const IC={
-  home:'M3 11l9-8 9 8M5 10v10h5v-6h4v6h5V10',
+  home:'M3 10.5L12 3l9 7.5M5.5 9v11a1 1 0 001 1H10v-6h4v6h3.5a1 1 0 001-1V9',
   layout:'M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z',
-  messages:'M4 5h16v11H8l-4 4zM8 9h8M8 12h5',
-  live:'M3 12h4l3-8 4 16 3-8h4',
-  deliveries:'M3 7h11v9H3zM14 10h4l3 3v3h-7zM7.5 19a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM17.5 19a1.5 1.5 0 100-3 1.5 1.5 0 000 3z',
+  messages:'M21 11.5a8.5 8.5 0 01-12.3 7.6L3.5 20.5l1.4-4.7A8.5 8.5 0 1121 11.5zM8.5 11.5h.01M12.5 11.5h.01M16.5 11.5h.01',
+  live:'M3 4.5h18v12H3zM8 21h8M12 16.5V21M6.5 11h2.5l1.5-3 2.5 6 1.5-3h3',
+  deliveries:'M2 6h12v10H2zM14 9h4.5l3.5 3.5V16h-8M6 19.5a2 2 0 100-4 2 2 0 000 4zM18 19.5a2 2 0 100-4 2 2 0 000 4z',
   /* factory / warehouse */
   suppliers:'M2 21h20M3 21V11l5 3v-3l5 3v-3l5 3V4h3v17M7 17h2M12 17h2M17 17h2',
-  leads:'M3 5h18l-7 8v6l-4 2v-8z',
-  contracts:'M6 3h9l4 4v14H6zM14 3v5h5M9 13h7M9 17h7',
-  fitting:'M4 5h16v15H4zM4 10h16M9 3v4M15 3v4',
+  leads:'M10 11a4 4 0 100-8 4 4 0 000 8zM3 21c.6-3.8 3.4-6 7-6 1.3 0 2.5.3 3.6.8M18.5 14v7M15 17.5h7',
+  contracts:'M14 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8zM14 3v5h5M8.5 17c1.2-1.5 2.1-2.4 2.9-2.4.9 0 .7 2.4 1.6 2.4.8 0 1.4-1 2.5-1',
+  fitting:'M4 6.5a2 2 0 012-2h12a2 2 0 012 2V19a2 2 0 01-2 2H6a2 2 0 01-2-2zM4 10h16M8 2.5v4M16 2.5v4M8 14h2M14 14h2M8 17.5h2',
   service:'M14.7 6.3a4 4 0 005 5L11 20a2.1 2.1 0 01-3-3l8.7-8.7a4 4 0 01-2-2z',
   stock:'M3 7l9-4 9 4v10l-9 4-9-4zM3 7l9 4 9-4M12 11v10',
-  contacts:'M5 3h13a2 2 0 012 2v14a2 2 0 01-2 2H5zM9 3v18M13 9h4M13 13h4',
+  contacts:'M6 3h12a2 2 0 012 2v14a2 2 0 01-2 2H6zM3.5 7.5h3M3.5 12h3M3.5 16.5h3M13 11a2.2 2.2 0 100-4.4 2.2 2.2 0 000 4.4zM9.4 16.5c.4-1.8 1.8-2.9 3.6-2.9s3.2 1.1 3.6 2.9',
   staff:'M9 11a3.5 3.5 0 100-7 3.5 3.5 0 000 7zM2.5 20c.4-3.4 3.2-5.5 6.5-5.5s6.1 2.1 6.5 5.5M16 4.3a3.5 3.5 0 010 6.4M18.5 14.8c1.8.8 2.8 2.6 3 5.2',
-  holidays:'M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6L7 7M17 17l1.4 1.4M5.6 18.4L7 17M17 7l1.4-1.4M12 8a4 4 0 100 8 4 4 0 000-8z',
-  reports:'M4 20V10M10 20V4M16 20v-7M22 20H2',
+  holidays:'M17.8 19.2L16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z',
+  reports:'M4 20.5h16M7 16.5v-5M12 16.5v-9M17 16.5v-7',
   /* files: folder with a document */
   downloads:'M3 6a2 2 0 012-2h4l2 2h8a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2zM9 13h6M9 16h4',
-  finance:'M12 2v20M17 6H9.5a3 3 0 000 6h5a3 3 0 010 6H6',
+  finance:'M16.5 6.8A3.6 3.6 0 0010 8.9v6c0 2-.8 3.6-2.5 5.1H18M7 13h7',
   admin:'M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6zM9 12l2 2 4-4',
   /* single person: head centred over shoulders */
   user:'M12 12a4 4 0 100-8 4 4 0 000 8zM4.5 21c.6-3.9 3.6-6 7.5-6s6.9 2.1 7.5 6',

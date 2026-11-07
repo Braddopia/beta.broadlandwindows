@@ -907,3 +907,19 @@ body[data-theme=dark] .mb .rg{background:#1a202b}
 /* deliveries list grouped by when due */
 .dtb tr.dgrp td{background:var(--card2);padding:.55rem .8rem;font-size:.9rem}
 .dtb tr.dgrp b{color:var(--navy)}
+
+/* My Details: just a lock next to admin-only labels, centred on the text */
+.ff label:has(.lockd){display:inline-flex;align-items:center;gap:.35rem}
+.lockd{display:inline-grid;place-items:center;width:1.15rem;height:1.15rem;border-radius:50%;background:var(--card2);color:var(--muted)}
+.lockd svg{width:.72rem;height:.72rem}
+.ff input[readonly]{font-family:inherit}
+/* link buttons start with capitals like every other button (plain web links stay as typed) */
+a.btn[href],a.mini[href],a.rb1[href]{text-transform:capitalize!important}
+/* years of service box on My Calendar */
+div.svc{cursor:default}
+.svc{grid-template-columns:auto auto auto 1fr auto}
+@media(max-width:600px){.svc{grid-template-columns:1fr 1fr 1fr}.svc .muted,.svc-go{grid-column:1/-1}}
+.svc{display:flex!important;flex-wrap:wrap;align-items:flex-end;gap:.5rem 1.4rem}
+.svc .muted{flex:1 1 100%;order:5}.svc-go{order:6;margin-left:auto}
+.svc>span:nth-child(3){flex:0 0 auto;order:0}
+.svc>span.muted{flex:1 1 100%;order:5}

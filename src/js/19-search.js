@@ -17,7 +17,11 @@ const SRCH=[
   ['contacts','Contact Book',()=>S.contacts,c=>[c.co||c.name,[c.co?c.name:'',c.type,c.phone].filter(Boolean).join(' · ')],c=>editContact(c.id)],
   ['suppliers','Suppliers',()=>S.suppliers.map((x,i)=>({...x,_i:i})),x=>[x.name,[x.account,x.contact,x.phone].filter(Boolean).join(' · ')],x=>editSup(x._i)],
   ['stock','Inventory',()=>products(),r=>[r.item||r.pid,['Stock ID '+r.pid,r.supplier,r.loc].filter(Boolean).join(' · ')],r=>viewItem(r.pid)],
-  ['staff','Staff',()=>S.staff,s=>[s.name,[s.role,s.team].filter(Boolean).join(' · ')],s=>editStaff(s.id)]];
+  ['staff','Staff',()=>S.staff,s=>[s.name,[s.role,s.team].filter(Boolean).join(' · ')],s=>editStaff(s.id)],
+  ['downloads','Files And Manuals',()=>{const H=S.fileHide||{};return[...DL.filter(d=>!H[d.url]).map(d=>({t:d.title,s:'Brochure · '+d.cat,u:d.url})),...SSM.filter(m=>!H[m.u]).map(m=>({t:m.t,s:'Manual · '+m.f,u:m.u})),...MF.filter(f=>!/^brand asset$/i.test(f.cat)).map(f=>({t:f.name,s:'File · '+tc(f.cat),id:f.id}))]},
+    f=>[f.t,f.s],f=>{if(f.id){manOpen(f.id);return}const u=SAFE.url(f.u);if(u)window.open(u,'_blank','noopener,noreferrer')}]];
+/* uploaded files live in the browser database: read them once so they can be found from any page */
+function srchFiles(){if(srchFiles.done||MF.length)return;srchFiles.done=1;try{fx('readonly',s=>s.getAll()).then(r=>{MF=(r||[]).filter(f=>!f.ref).sort((x,y)=>y.time-x.time)}).catch(()=>{})}catch(e){}}
 let SR=[],SRi=0;
 function srchRun(raw){const box=$('#sres');if(!box)return;const query=String(raw||'').trim().toLowerCase();SR=[];SRi=0;
   if(query.length<2){box.classList.remove('open');box.innerHTML='';return}
@@ -33,7 +37,7 @@ function srchClose(clear){const box=$('#sres');if(box)box.classList.remove('open
   const box=document.createElement('div');box.id='sres';box.setAttribute('role','listbox');box.setAttribute('aria-label','Search results');document.body.appendChild(box); /* not inside the glass top bar: its blur would offset a fixed box */
   inp.setAttribute('aria-controls','sres');
   inp.addEventListener('input',()=>srchRun(inp.value));
-  inp.addEventListener('focus',()=>{if(inp.value.trim().length>1)srchRun(inp.value)});
+  inp.addEventListener('focus',()=>{srchFiles();if(inp.value.trim().length>1)srchRun(inp.value)});
   inp.addEventListener('keydown',e=>{if(!box.classList.contains('open'))return;
     if(e.key=='ArrowDown'||e.key=='ArrowUp'){e.preventDefault();SRi=(SRi+(e.key=='ArrowDown'?1:-1)+SR.length)%Math.max(SR.length,1);srchMark();const on=$('#sres .sri.on');on&&on.scrollIntoView({block:'nearest'})}
     else if(e.key=='Enter'&&SR[SRi]){e.preventDefault();SR[SRi]()}

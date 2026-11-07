@@ -65,7 +65,7 @@ function setPin(k){
 
 /* ---- my details: name, contact info. Job role, team, start date are admin-only ---- */
 function editProfile(){
-  const p=S.profile,m=me()||{},adm=ISOWN(),lk=t=>`<span class="lockd">${svg(IC.lock)}${t}</span>`;
+  const p=S.profile,m=me()||{},adm=ISOWN(),lk=t=>`<span class="lockd" title="${esc(t)}" aria-label="${esc(t)}">${svg(IC.lock)}</span>`;
   openModal(`<button class="mx" onclick="closeModal()" aria-label="Close">&times;</button><div class="pf"><span class="av2">${esc(initials(p.name))}</span><div><h2 style="margin:0">My Details</h2><span class="muted">${esc(ROLES[ROLE].n)} account</span></div></div>
   <div class="grid">
    <div class="ff"><label for="p_name">Display name *</label><input id="p_name" maxlength="60" value="${esc(p.name)}"></div>
