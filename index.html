@@ -893,6 +893,61 @@ body[data-theme=dark] #cpop{background:rgba(22,27,38,.97);border-color:rgba(255,
 .cp-none{margin-top:.55rem;width:100%;border:1px dashed var(--line);background:none;border-radius:9px;padding:.4rem;font-size:.78rem;color:var(--muted);cursor:pointer}
 .ie-view .cbtn{pointer-events:none}
 
+.cp-g{grid-template-columns:repeat(5,minmax(0,1fr))}.cp-s{min-width:0}.cp-s span{max-width:100%}
+#cpop{width:20.5rem}
+.cp-nm{font-size:.78rem;margin-top:.4rem;min-height:1.1rem;color:var(--ink)}.cp-nm b{color:var(--navy)}
+.cp-sug{display:flex;flex-direction:column;gap:.15rem;margin-top:.3rem;max-height:9rem;overflow:auto}.cp-sug:empty{display:none}
+.cp-sug button{display:flex;align-items:center;gap:.45rem;border:0;background:none;text-align:left;padding:.3rem .35rem;border-radius:7px;font-size:.8rem;color:var(--ink);cursor:pointer}
+.cp-sug button:hover{background:var(--blue-bg)}.cp-sug i{width:1.1rem;height:1.1rem;border-radius:50%;flex:0 0 auto;box-shadow:inset 0 0 0 1px rgba(0,0,0,.15)}
+.cp-hx input{font:500 .85rem var(--body)}
+
+/* holiday planner: spreadsheet look */
+.xls{background:#fff;color:#13233a;border-radius:14px;border:1px solid #cfe0f5;padding:.9rem .9rem 0;box-shadow:0 6px 24px -12px rgba(1,43,89,.25);text-transform:none}
+.xls *{text-transform:none}
+body[data-theme=dark] .xls{filter:brightness(.92)}
+.xl-yr{text-align:center;font:500 1.3rem/1 Arial,Helvetica,sans-serif;margin:.1rem 0 .6rem;color:#13233a}
+.xl-body{display:grid;grid-template-columns:minmax(0,1fr) 15rem;gap:1rem;align-items:start}
+@media(max-width:1100px){.xl-body{grid-template-columns:1fr}}
+.xl-title{border:1px solid #1e88e5;background:#e8ebf1;text-align:center;font:500 1.05rem Arial,Helvetica,sans-serif;padding:.3rem;margin:.9rem 0 .15rem}
+.xl-main>.xl-title:first-child,.xl-side>.xl-title:first-child{margin-top:0}
+.xl-scroll{overflow-x:auto}
+.xl-g{border-collapse:collapse;font:11.5px/1.25 Arial,Helvetica,sans-serif;width:100%}
+.xl-g th,.xl-g td{border:1px solid #1e88e5;padding:0;text-align:center;height:1.45rem;min-width:1.65rem}
+.xl-g tr.wk th{border:0;font-weight:400;font-size:10.5px;text-align:left;height:1.1rem;background:none}
+.xl-g tr.xh th{background:#2f8ff0;color:#fff;font-weight:400;font-size:10.5px;border-color:#2f8ff0;height:1.15rem}
+.xl-g tr.xh th.we{background:#2f8ff0}
+.xl-g tr.xh th.tdh{background:#ffd002;color:#013}
+.xl-g th.nmh{min-width:9rem}.xl-g th.tot{min-width:4.6rem;line-height:1.15}
+.xl-g td.nm{text-align:left;background:#e8ebf1;white-space:nowrap;padding:0 .4rem 0 0;min-width:9rem}
+.xl-g td.nm .rm{display:inline-block;min-width:1.7rem;text-align:right;padding-right:.3rem;color:#13233a;font-size:10.5px}
+.xl-g td{cursor:pointer;font-size:10.5px}.xl-g td.we{background:#e3e6ea}
+.xl-g td:not(.nm):not(.tot):hover{outline:2px solid #034ea2;outline-offset:-2px}
+.xl-g td.td{box-shadow:inset 0 0 0 2px #ffd002}
+.xl-g td.pd{background:repeating-linear-gradient(45deg,#c9e6ad 0 4px,#fff 4px 8px)}
+.xl-g td.tot{background:#e8ebf1;cursor:default}
+.xl-db th{font-size:10px!important;line-height:1.15;padding:.25rem .2rem!important;height:3rem!important;min-width:3.6rem}
+.xl-db td{cursor:default;height:1.7rem;min-width:3rem}.xl-db td.pk{background:#f3dcf6}
+.xl-side{position:sticky;top:.5rem}
+.xl-ct{border-collapse:collapse;width:100%;font:11.5px Arial,Helvetica,sans-serif}
+.xl-ct th{background:#2f8ff0;color:#fff;font-weight:400;padding:.45rem .2rem;border:1px solid #2f8ff0}
+.xl-ct td{border:1px solid #1e88e5;text-align:center;padding:.12rem .2rem}
+.xl-ct tbody tr{cursor:pointer}.xl-ct tbody tr:hover td{filter:brightness(.95)}
+.xl-ct tr.on td{box-shadow:inset 0 0 0 2px #013b7a;font-weight:700}
+.xl-tip{font:11px/1.4 Arial,sans-serif;color:#44546a;margin:.5rem 0 .2rem}
+.xl-info{border:1px solid #1e88e5;font:11px/1.45 Arial,sans-serif;text-align:center}.xl-info p{margin:0;padding:.45rem .5rem}.xl-info p+p{border-top:1px solid #1e88e5}
+.xl-upd{border:1px solid #1e88e5;font:10.5px Arial,sans-serif;text-align:center;padding:.2rem;margin:.5rem 0 0}
+.xl-tabs{display:flex;gap:2px;overflow-x:auto;margin:1rem -.9rem 0;padding:0 .6rem;background:#eef1f5;border-top:1px solid #d5dbe4;border-radius:0 0 14px 14px}
+.xl-tabs button{border:0;background:none;font:12px Arial,Helvetica,sans-serif;color:#44546a;padding:.5rem .8rem;white-space:nowrap;cursor:pointer;border-bottom:3px solid transparent}
+.xl-tabs button:hover{background:#e2e7ee}.xl-tabs button.on{background:#fff;color:#107c41;font-weight:700;border-bottom-color:#107c41}
+.xls th{position:static!important;white-space:normal}
+.xls thead tr{background:none}
+.xl-g tr.xh th,.xl-g tr.xh th.we,.xl-ct th{background:#2f8ff0!important;color:#fff!important;text-align:center;padding:0 .1rem}
+.xl-g tr.xh th.tdh{background:#ffd002!important;color:#013!important}
+.xl-db tr.xh th[style]{color:#13233a!important}
+.xl-g tr.wk th{background:none!important;color:#13233a;padding:0 .2rem}
+.xl-g td.nm{padding-left:.25rem}.xl-db td.nm{padding-left:.45rem}
+.xl-db td:last-child{min-width:3.4rem;padding:0 .2rem}.xl-db th:last-child{min-width:3.4rem}
+
 /* ==========================================================================
    06 · Adaptive layout
    Breakpoints: 1400 (laptop) · 1100 (small laptop / tablet landscape)
@@ -1479,28 +1534,39 @@ function colourField(f,v){const base=f.k.slice(0,-4),hx=SAFE.hex(v[base]||'#8a8a
 function pickC(k,n,h){$('#f_'+k).value=n;$('#f_'+k+'_hex').value=h;const b=$('#cb_'+k);if(b)b.style.background=h}
 function pickHex(k){const e=$('#f_'+k);if(!e.value)e.value='Custom'}
 /* ---- colour picker: window and door finishes first, then any colour ---- */
-const FINISH=[['White (RAL 9016)','#f1f0ea'],['Cream (RAL 9001)','#e9e0c8'],['Agate Grey (RAL 7038)','#b5b8b1'],['Light Grey (RAL 7035)','#c5c7c4'],['Slate Grey (RAL 7015)','#51565c'],['Anthracite Grey (RAL 7016)','#383e42'],['Basalt Grey (RAL 7012)','#575d5e'],['Black (RAL 9005)','#0e0e10'],['Black Brown (RAL 8022)','#1e1a1a'],['Chartwell Green','#a9bba5'],['Fir Green (RAL 6009)','#27352a'],['Pebble Grey (RAL 7032)','#b8b799'],['Steel Blue (RAL 5011)','#1a2b3c'],['Ruby Red (RAL 3003)','#7b1c20'],['Golden Oak','#b5752f'],['Irish Oak','#8a5a33'],['Rosewood','#5a2a1f'],['Light Oak','#c79a5c'],['Gold','#c9a24b'],['Silver','#b9b9b9']];
+/* RAL Classic: [number, name, screen colour] (screen colours are close, not exact: always check a real swatch) */
+const RAL=`1000|Green beige|BEBD7F;1001|Beige|C2B078;1002|Sand yellow|C6A664;1003|Signal yellow|E5BE01;1004|Golden yellow|CDA434;1005|Honey yellow|A98307;1006|Maize yellow|E4A010;1007|Daffodil yellow|DC9D00;1011|Brown beige|8A6642;1012|Lemon yellow|C7B446;1013|Oyster white|EAE6CA;1014|Ivory|E1CC4F;1015|Light ivory|E6D690;1016|Sulfur yellow|EDFF21;1017|Saffron yellow|F5D033;1018|Zinc yellow|F8F32B;1019|Grey beige|9E9764;1020|Olive yellow|999950;1021|Rape yellow|F3DA0B;1023|Traffic yellow|FAD201;1024|Ochre yellow|AEA04B;1026|Luminous yellow|FFFF00;1027|Curry|9D9101;1028|Melon yellow|F4A900;1032|Broom yellow|D6AE01;1033|Dahlia yellow|F3A505;1034|Pastel yellow|EFA94A;1035|Pearl beige|6A5D4D;1036|Pearl gold|705335;1037|Sun yellow|F39F18;2000|Yellow orange|ED760E;2001|Red orange|C93C20;2002|Vermilion|CB2821;2003|Pastel orange|FF7514;2004|Pure orange|F44611;2005|Luminous orange|FF2301;2007|Luminous bright orange|FFA420;2008|Bright red orange|F75E25;2009|Traffic orange|F54021;2010|Signal orange|D84B20;2011|Deep orange|EC7C26;2012|Salmon orange|E55137;2013|Pearl orange|C35831;3000|Flame red|AF2B1E;3001|Signal red|A52019;3002|Carmine red|A2231D;3003|Ruby red|9B111E;3004|Purple red|75151E;3005|Wine red|5E2129;3007|Black red|412227;3009|Oxide red|642424;3011|Brown red|781F19;3012|Beige red|C1876B;3013|Tomato red|A12312;3014|Antique pink|D36E70;3015|Light pink|EA899A;3016|Coral red|B32821;3017|Rose|E63244;3018|Strawberry red|D53032;3020|Traffic red|CC0605;3022|Salmon pink|D95030;3024|Luminous red|F80000;3026|Luminous bright red|FE0000;3027|Raspberry red|C51D34;3028|Pure red|CB3234;3031|Orient red|B32428;3032|Pearl ruby red|721422;3033|Pearl pink|B44C43;4001|Red lilac|6D3F5B;4002|Red violet|922B3E;4003|Heather violet|DE4C8A;4004|Claret violet|641C34;4005|Blue lilac|6C4675;4006|Traffic purple|A03472;4007|Purple violet|4A192C;4008|Signal violet|924E7D;4009|Pastel violet|A18594;4010|Telemagenta|CF3476;4011|Pearl violet|8673A1;4012|Pearl blackberry|6C6874;5000|Violet blue|354D73;5001|Green blue|1F3438;5002|Ultramarine blue|20214F;5003|Sapphire blue|1D1E33;5004|Black blue|18171C;5005|Signal blue|1E2460;5007|Brilliant blue|3E5F8A;5008|Grey blue|26252D;5009|Azure blue|025669;5010|Gentian blue|0E294B;5011|Steel blue|231A24;5012|Light blue|3B83BD;5013|Cobalt blue|1E213D;5014|Pigeon blue|606E8C;5015|Sky blue|2271B3;5017|Traffic blue|063971;5018|Turquoise blue|3F888F;5019|Capri blue|1B5583;5020|Ocean blue|1D334A;5021|Water blue|256D7B;5022|Night blue|252850;5023|Distant blue|49678D;5024|Pastel blue|5D9B9B;5025|Pearl gentian blue|2A6478;5026|Pearl night blue|102C54;6000|Patina green|316650;6001|Emerald green|287233;6002|Leaf green|2D572C;6003|Olive green|424632;6004|Blue green|1F3A3D;6005|Moss green|2F4538;6006|Grey olive|3E3B32;6007|Bottle green|343B29;6008|Brown green|39352A;6009|Fir green|31372B;6010|Grass green|35682D;6011|Reseda green|587246;6012|Black green|343E40;6013|Reed green|6C7156;6014|Yellow olive|47402E;6015|Black olive|3B3C36;6016|Turquoise green|1E5945;6017|May green|4C9141;6018|Yellow green|57A639;6019|Pastel green|BDECB6;6020|Chrome green|2E3A23;6021|Pale green|89AC76;6022|Olive drab|25221B;6024|Traffic green|308446;6025|Fern green|3D642D;6026|Opal green|015D52;6027|Light green|84C3BE;6028|Pine green|2C5545;6029|Mint green|20603D;6032|Signal green|317F43;6033|Mint turquoise|497E76;6034|Pastel turquoise|7FB5B5;6035|Pearl green|1C542D;6036|Pearl opal green|193737;6037|Pure green|008F39;6038|Luminous green|00BB2D;7000|Squirrel grey|78858B;7001|Silver grey|8A9597;7002|Olive grey|7E7B52;7003|Moss grey|6C7059;7004|Signal grey|969992;7005|Mouse grey|646B63;7006|Beige grey|6D6552;7008|Khaki grey|6A5F31;7009|Green grey|4D5645;7010|Tarpaulin grey|4C514A;7011|Iron grey|434B4D;7012|Basalt grey|4E5754;7013|Brown grey|464531;7015|Slate grey|434750;7016|Anthracite grey|293133;7021|Black grey|23282B;7022|Umbra grey|332F2C;7023|Concrete grey|686C5E;7024|Graphite grey|474A51;7026|Granite grey|2F353B;7030|Stone grey|8B8C7A;7031|Blue grey|474B4E;7032|Pebble grey|B8B799;7033|Cement grey|7D8471;7034|Yellow grey|8F8B66;7035|Light grey|D7D7D7;7036|Platinum grey|7F7679;7037|Dusty grey|7D7F7D;7038|Agate grey|B5B8B1;7039|Quartz grey|6C6960;7040|Window grey|9DA1AA;7042|Traffic grey A|8D948D;7043|Traffic grey B|4E5452;7044|Silk grey|CAC4B0;7045|Telegrey 1|909090;7046|Telegrey 2|82898F;7047|Telegrey 4|D0D0D0;7048|Pearl mouse grey|898176;8000|Green brown|826C34;8001|Ochre brown|955F20;8002|Signal brown|6C3B2A;8003|Clay brown|734222;8004|Copper brown|8E402A;8007|Fawn brown|59351F;8008|Olive brown|6F4F28;8011|Nut brown|5B3A29;8012|Red brown|592321;8014|Sepia brown|382C1E;8015|Chestnut brown|633A34;8016|Mahogany brown|4C2F27;8017|Chocolate brown|45322E;8019|Grey brown|403A3A;8022|Black brown|212121;8023|Orange brown|A65E2E;8024|Beige brown|79553D;8025|Pale brown|755C48;8028|Terra brown|4E3B31;8029|Pearl copper|763C28;9001|Cream|FDF4E3;9002|Grey white|E7EBDA;9003|Signal white|F4F4F4;9004|Signal black|282828;9005|Jet black|0A0A0A;9006|White aluminium|A5A5A5;9007|Grey aluminium|8F8F8F;9010|Pure white|FFFFFF;9011|Graphite black|1C1C1C;9016|Traffic white|F6F6F6;9017|Traffic black|1E1E1E;9018|Papyrus white|D7D7D7;9022|Pearl light grey|9C9C9C;9023|Pearl dark grey|828282`.split(';').map(x=>{const[n,m,h]=x.split('|');return[n,m,'#'+h.toLowerCase()]});
+const ralLabel=r=>r[1].replace(/\b\w/g,c=>c.toUpperCase())+' (RAL '+r[0]+')';
+const ralNear=hx=>{const c=x=>[1,3,5].map(i=>parseInt(x.slice(i,i+2),16)),a=c(hx);let b=null,bd=1e9;RAL.forEach(r=>{const q=c(r[2]),d=2*(a[0]-q[0])**2+4*(a[1]-q[1])**2+3*(a[2]-q[2])**2;if(d<bd){bd=d;b=r}});return b};
+const ralFind=q=>{q=String(q||'').trim().toLowerCase().replace(/^ral\s*/,'');if(!q)return[];return RAL.filter(r=>r[0].startsWith(q)||r[1].toLowerCase().includes(q)).slice(0,6)};
+const FIN_RAL=['9016','9001','7038','7035','7015','7016','7012','9005','8022','6009','7032','3003','5011'].map(n=>RAL.find(r=>r[0]==n));
+const FINISH=[...FIN_RAL.map(r=>[ralLabel(r),r[2]]),['Chartwell Green','#a9bba5'],['Golden Oak','#b5752f'],['Irish Oak','#8a5a33'],['Rosewood','#5a2a1f'],['Light Oak','#c79a5c'],['Gold','#c9a24b'],['Silver','#b9b9b9']];
 let CP={k:'',h:0,s:0,v:0};
 const hsv2hex=(h,s,v)=>{const f=n=>{const k=(n+h/60)%6;return v-v*s*Math.max(0,Math.min(k,4-k,1))};return '#'+[f(5),f(3),f(1)].map(x=>Math.round(x*255).toString(16).padStart(2,'0')).join('')};
 const hex2hsv=x=>{const n=parseInt(x.slice(1),16),r=(n>>16&255)/255,g=(n>>8&255)/255,b=(n&255)/255,mx=Math.max(r,g,b),d=mx-Math.min(r,g,b);let h=0;if(d){h=mx==r?((g-b)/d)%6:mx==g?(b-r)/d+2:(r-g)/d+4;h*=60;if(h<0)h+=360}return{h,s:mx?d/mx:0,v:mx}};
 function cpOpen(k){let p=$('#cpop');if(!p){p=document.createElement('div');p.id='cpop';document.body.appendChild(p);
     document.addEventListener('mousedown',e=>{const q=$('#cpop');if(q&&q.classList.contains('open')&&!e.target.closest('#cpop,.cbtn'))q.classList.remove('open')})}
   if(p.classList.contains('open')&&CP.k==k){p.classList.remove('open');return}
-  const hx=SAFE.hex($('#f_'+k+'_hex').value);CP={k,...hex2hsv(hx)};const cur=($('#f_'+k).value||'').toLowerCase();
+  const hx=SAFE.hex($('#f_'+k+'_hex').value);CP={k,...hex2hsv(hx),ral:null};const cur=($('#f_'+k).value||'').toLowerCase();
   p.innerHTML=`<div class="cp-h"><b>Pick a colour</b><button type="button" class="cp-x" aria-label="Close" onclick="$('#cpop').classList.remove('open')">&times;</button></div>
-   <small class="cp-l">Window and door finishes</small><div class="cp-g">${FINISH.map(([n,h])=>`<button type="button" class="cp-s ${cur==n.toLowerCase()?'on':''}" title="${esc(n)}" ${A('cpPick',n,h)}><i style="background:${h}"></i><span>${esc(n.replace(/ \(RAL \d+\)/,''))}</span></button>`).join('')}</div>
+   <small class="cp-l">Window and door finishes</small><div class="cp-g">${FINISH.map(([n,h])=>`<button type="button" class="cp-s ${cur==n.toLowerCase()?'on':''}" title="${esc(n)}" ${A('cpPick',n,h)}><i style="background:${h}"></i><span>${esc((/RAL \d+/.exec(n)||[n])[0])}</span></button>`).join('')}</div>
    <small class="cp-l">Any colour</small><div class="cp-sv" id="cpSv"><i id="cpKnob"></i></div><input type="range" class="cp-hue" id="cpHue" min="0" max="359" value="${Math.round(CP.h)}" oninput="cpHue(this.value)" aria-label="Hue">
-   <div class="cp-row"><span class="cp-pv" id="cpPv"></span><label class="cp-hx">Hex<input id="cpHex" maxlength="7" value="${hx}" oninput="cpHexIn(this.value)" class="nocap"></label><button type="button" class="btn sm" onclick="cpUse()">Use colour</button></div>
+   <div class="cp-row"><span class="cp-pv" id="cpPv"></span><label class="cp-hx">RAL<input id="cpRal" maxlength="30" placeholder="7016 or anthracite" oninput="cpRalIn(this.value)" autocomplete="off"></label><button type="button" class="btn sm" onclick="cpUse()">Use colour</button></div>
+   <div class="cp-nm" id="cpNm"></div><div class="cp-sug" id="cpSug"></div>
    <button type="button" class="cp-none" ${A('cpPick','','#8a8a8a')}>No colour</button>`;
   p.classList.add('open');const b=$('#cb_'+k).getBoundingClientRect();
   p.style.left=Math.max(8,Math.min(innerWidth-p.offsetWidth-8,b.right-p.offsetWidth))+'px';p.style.top=Math.max(8,Math.min(innerHeight-p.offsetHeight-8,b.bottom+8))+'px';
   const sv=$('#cpSv'),drag=e=>{const r=sv.getBoundingClientRect();CP.s=Math.max(0,Math.min(1,(e.clientX-r.left)/r.width));CP.v=1-Math.max(0,Math.min(1,(e.clientY-r.top)/r.height));cpDraw(true)};
-  sv.addEventListener('pointerdown',e=>{sv.setPointerCapture(e.pointerId);drag(e);sv.onpointermove=drag});sv.addEventListener('pointerup',()=>{sv.onpointermove=null});cpDraw(false)}
-function cpDraw(setHex){const hx=hsv2hex(CP.h,CP.s,CP.v),sv=$('#cpSv');if(!sv)return;sv.style.background=`linear-gradient(to top,#000,transparent),linear-gradient(to right,#fff,hsl(${CP.h},100%,50%))`;
-  const k=$('#cpKnob');k.style.left=CP.s*100+'%';k.style.top=(1-CP.v)*100+'%';k.style.background=hx;$('#cpPv').style.background=hx;if(setHex)$('#cpHex').value=hx}
+  sv.addEventListener('pointerdown',e=>{sv.setPointerCapture(e.pointerId);drag(e);sv.onpointermove=drag});sv.addEventListener('pointerup',()=>{sv.onpointermove=null});cpDraw(false);const m=/RAL (\d{4})/.exec($('#f_'+k).value||'');const cr=m&&RAL.find(r=>r[0]==m[1]);if(cr)cpSet(cr)}
+function cpDraw(setHex){const hx=hsv2hex(CP.h,CP.s,CP.v),sv=$('#cpSv');if(!sv)return;if(setHex)CP.ral=ralNear(hx);sv.style.background=`linear-gradient(to top,#000,transparent),linear-gradient(to right,#fff,hsl(${CP.h},100%,50%))`;
+  const k=$('#cpKnob');k.style.left=CP.s*100+'%';k.style.top=(1-CP.v)*100+'%';k.style.background=hx;cpShow(setHex)}
+function cpShow(fill){const r=CP.ral;$('#cpPv').style.background=r?r[2]:'#ccc';$('#cpNm').innerHTML=r?`<b>RAL ${esc(r[0])}</b> ${esc(r[1])}<span class="muted"> · closest match</span>`:'';if(fill&&r)$('#cpRal').value=r[0];$('#cpSug').innerHTML=''}
 function cpHue(v){CP.h=+v;cpDraw(true)}
-function cpHexIn(v){if(/^#[0-9a-f]{6}$/i.test(v)){Object.assign(CP,hex2hsv(v));$('#cpHue').value=Math.round(CP.h);cpDraw(false)}}
-function cpUse(){const hx=SAFE.hex($('#cpHex').value),n=$('#f_'+CP.k);pickC(CP.k,n.value&&![...FINISH,...PRE].some(f=>f[0].toLowerCase()==n.value.toLowerCase())?n.value:'Custom',hx);$('#cpop').classList.remove('open')}
+function cpSet(r){CP.ral=r;Object.assign(CP,hex2hsv(r[2]));$('#cpHue').value=Math.round(CP.h);cpDraw(false);$('#cpNm').innerHTML=`<b>RAL ${esc(r[0])}</b> ${esc(r[1])}`;$('#cpRal').value=r[0]}
+function cpRalIn(v){const L=ralFind(v),ex=L.find(r=>r[0]==String(v).trim().replace(/^ral\s*/i,''));if(ex){cpSet(ex);$('#cpSug').innerHTML='';return}
+  $('#cpSug').innerHTML=L.map(r=>`<button type="button" ${A('cpSugPick',r[0])}><i style="background:${r[2]}"></i>${esc(r[0])} ${esc(r[1])}</button>`).join('')||(v.trim()?'<span class="muted">No RAL colour matches</span>':'')}
+function cpSugPick(n){const r=RAL.find(x=>x[0]==n);if(r){cpSet(r);$('#cpSug').innerHTML=''}}
+function cpUse(){const r=CP.ral||ralNear(hsv2hex(CP.h,CP.s,CP.v));pickC(CP.k,ralLabel(r),r[2]);$('#cpop').classList.remove('open')}
 function cpPick(n,h){pickC(CP.k,n,h);$('#cpop').classList.remove('open')}
 function scanInto(id){scan(c=>{const e=$('#'+id);if(e){e.value=c;e.dispatchEvent(new Event('input'))}})}
 
@@ -1962,7 +2028,7 @@ function vCalendar(){const n=new Date(),C=UI.cal,M=C.m,o=C.o,WD=['Mon','Tue','We
 
 
 /* ---------------- holiday chart (same codes and rules as the office spreadsheet) ---------------- */
-const HCODES=[['H','Holiday',1,'#7cbc44'],['H1','Half day (morning)',.5,'#add58a'],['H2','Half day (afternoon)',.5,'#add58a'],['S','Sickness',0,'#f7a19a'],['M','Maternity / paternity',0,'#fcc79b'],['C','Compassionate',0,'#cccccc'],['A','Absent',0,'#cccccc'],['B','Bank holiday',0,'#cccccc'],['N','Non working day',0,'#cccccc'],['U','Voluntary unpaid',0,'#eaf7a9']];
+const HCODES=[['H','Holiday',1,'#7cbc44'],['H1','Half Day (Morning)',.5,'#add58a'],['H2','Half Day (Afternoon)',.5,'#add58a'],['S','Sickness',0,'#f7a19a'],['M','Maternity/Paternity',0,'#fcc79b'],['C','Compassionate',0,'#f3a6f3'],['A','Absent',0,'#f6e39b'],['B','Bank Holiday',0,'#a8dcc0'],['N','Non Working Day',0,'#a8cff2'],['U','Voluntary Unpaid',0,'#eaf7a9']];
 const HC=Object.fromEntries(HCODES.map(c=>[c[0],c]));
 (function holV2(){let ch=0;if(!S.abs){S.abs={'U-5':{'2026-11-02':'S','2026-11-03':'S'},'U-4':{'2026-11-13':'H1'},'U-7':{'2026-11-20':'N'}};ch=1}if(!S.shut){S.shut={};ch=1}
   if(!S.hol25){S.staff.forEach(s=>{if(s.allow==28||s.allow==33||s.allow==null)s.allow=25});S.hol25=1;ch=1}if(ch)store()})();
@@ -1977,24 +2043,6 @@ function absCode(s,k){const m=(S.abs[s.id]||{})[k];if(m!==undefined)return m;if(
 function yearCounts(s,y){const c={},d=new Date(y,0,1);while(d.getFullYear()==y){const x=absCode(s,iso(d));if(x&&HC[x])c[x]=(c[x]||0)+1;d.setDate(d.getDate()+1)}return c}
 const bookedDays=(s,y)=>{const c=yearCounts(s,y);return sum(HCODES,h=>(c[h[0]]||0)*h[2])};
 const HGRP=['Factory','Fitters','Office','Salespeople'];
-function holChart(){const H=UI.hol,y=H.y,mo=H.cm,dim=new Date(y,mo+1,0).getDate(),td=today(),Ad=ISOWN(),mine=me();
-  const keys=Array.from({length:dim},(_,i)=>y+'-'+pad(mo+1)+'-'+pad(i+1));
-  const wk=[];let w=1;keys.forEach((k,i)=>{if(i&&new Date(k+'T00:00').getDay()==1)w++;wk.push(w)});const wspan=[];wk.forEach(n=>{const l=wspan[wspan.length-1];if(l&&l[0]==n)l[1]++;else wspan.push([n,1])});
-  const cell=(s,k)=>{const c=absCode(s,k),def=HC[c],we=!isWk(k),can=Ad||(mine&&mine.id==s.id&&!c&&!we);
-    return `<td class="hcd ${we?'we':''} ${k==td?'td':''} ${c=='P'?'pd':''}" ${def?`style="background:${def[3]}"`:''} title="${esc(s.name)}, ${fd(k)}${def?': '+esc(def[1]):c=='P'?': requested':''}" ${can?(Ad?A('hcPaint',s.id,k):A('holBook',s.id,k)):''}>${c=='P'?'?':esc(c)}</td>`};
-  const mtot=s=>sum(keys,k=>{const c=HC[absCode(s,k)];return c?c[2]:0});
-  const grp=HGRP.map(g=>[g,S.staff.filter(s=>(s.cat||'Office')==g)]).filter(x=>x[1].length);
-  const legend=`<div class="hcl">${HCODES.map(c=>`<button class="hcb ${H.brush==c[0]?'on':''}" ${Ad?A('setUI','hol.brush',H.brush==c[0]?'':c[0]):'disabled'}><i style="background:${c[3]}">${c[0]}</i>${esc(c[1])}${c[2]?` <small>${c[2]==1?'1 day':'½ day'}</small>`:''}</button>`).join('')}${Ad?`<button class="hcb ${H.brush=='X'?'on':''}" ${A('setUI','hol.brush',H.brush=='X'?'':'X')}><i style="background:#fff">✕</i>Clear</button>`:''}</div>
-   <p class="muted" style="margin:.2rem 0 .8rem;font-size:.82rem">${Ad?(H.brush?`Painting <b>${esc(H.brush=='X'?'Clear':HC[H.brush][1])}</b>: click days to set it, click again to remove.`:'Pick a code above, then click days on the chart to fill them in.'):'Click an empty weekday on your own row to request holiday.'} Bank holidays and the Christmas shutdown fill in by themselves. ? = waiting for approval.</p>`;
-  const months=`<div class="views">${[...Array(12)].map((_,i)=>`<button class="chip ${i==mo?'on':''}" ${A('setUI','hol.cm',i)}>${new Date(y,i,1).toLocaleDateString('en-GB',{month:'short'})}</button>`).join('')}</div>`;
-  const tbl=`<div class="tw hcw"><table class="hc"><thead><tr><th class="nm" rowspan="3">${new Date(y,mo,1).toLocaleDateString('en-GB',{month:'long',year:'numeric'})}</th>${wspan.map(([n,c])=>`<th colspan="${c}" class="wkh">Week ${n}</th>`).join('')}<th rowspan="3" class="n">Days</th></tr>
-    <tr>${keys.map(k=>`<th class="${isWk(k)?'':'we'} ${BH[k]?'bh':''} ${k==td?'td':''}" title="${esc(BH[k]||'')}">${+k.slice(8)}</th>`).join('')}</tr><tr>${keys.map(k=>`<th class="dw ${isWk(k)?'':'we'}">${new Date(k+'T00:00').toLocaleDateString('en-GB',{weekday:'short'}).slice(0,2)}</th>`).join('')}</tr></thead>
-    <tbody>${grp.map(([g,L])=>`<tr class="hg"><td colspan="${dim+2}">${esc(g)}</td></tr>${L.map(s=>`<tr><td class="nm"><b>${esc(s.name)}</b><small>${allowTot(s)-hu(s,y)} of ${allowTot(s)} left</small></td>${keys.map(k=>cell(s,k)).join('')}<td class="n"><b>${mtot(s)||''}</b></td></tr>`).join('')}`).join('')}</tbody></table></div>`;
-  const yc=Object.fromEntries(S.staff.map(s=>[s.id,yearCounts(s,y)])),n=(s,c)=>(yc[s.id][c]||0);
-  const summ=`<div class="tw" style="margin-top:1rem"><table><thead><tr><th>Name</th><th class="c-md">Started</th><th class="n c-sm">Years</th><th class="n">Base</th><th class="n c-sm">Service</th><th class="n c-sm">Pension</th><th class="n c-sm">Carried</th><th class="n">Total</th><th class="n">Booked</th><th class="n">Left</th><th class="n c-md">Half days</th><th class="n c-md">Sick</th><th class="n c-xl">Mat / Pat</th><th class="n c-xl">Compassionate</th><th class="n c-xl">Absent</th><th class="n c-xl">Unpaid</th>${Ad?'<th class="ac"></th>':''}</tr></thead><tbody>
-    ${grp.map(([g,L])=>`<tr class="hg"><td colspan="${Ad?17:16}">${esc(g)}</td></tr>`+L.map(s=>{const t=allowTot(s),b=hu(s,y),l=t-b;return `<tr><td><b>${esc(s.name)}</b></td><td class="c-md">${s.start?fd(s.start)+' '+s.start.slice(0,4):'-'}</td><td class="n c-sm">${svcYears(s)}</td><td class="n">${+s.allow||0}</td><td class="n c-sm">${svcExtra(s)?'+'+svcExtra(s):'-'}</td><td class="n c-sm">${+s.pension?'+'+s.pension:'-'}</td><td class="n c-sm">${+s.carry?'+'+s.carry:'-'}</td><td class="n"><b>${t}</b></td><td class="n">${b}</td><td class="n"><b style="color:${l<0?'var(--red)':l<=3?'#b26b00':'var(--green,#12794c)'}">${l}</b></td><td class="n c-md">${n(s,'H1')+n(s,'H2')||'-'}</td><td class="n c-md">${n(s,'S')||'-'}</td><td class="n c-xl">${n(s,'M')||'-'}</td><td class="n c-xl">${n(s,'C')||'-'}</td><td class="n c-xl">${n(s,'A')||'-'}</td><td class="n c-xl">${n(s,'U')||'-'}</td>${Ad?`<td class="ac"><button class="mini" ${A('editStaff',s.id)}>Edit</button></td>`:''}</tr>`}).join('')).join('')}</tbody></table></div>
-    <p class="muted" style="font-size:.8rem;margin:.5rem 0 0">Total = base (25 standard) + 1 day after 5, 10 and 15 years' service (3 max) + pension extra + days carried over. Booked includes the ${shutDays(y).length} Christmas shutdown days.</p>`;
-  return {legend,months,tbl,summ}}
 function hcPaint(sid,k){if(!need(ISOWN,'Editing the holiday chart'))return;const b=UI.hol.brush,s=S.staff.find(x=>x.id==sid);if(!s)return;if(!b){toast('Pick a code first, at the top of the chart');return}
   const m=S.abs[sid]=S.abs[sid]||{};
   if(b=='X'){delete m[k];if(absCode(s,k))m[k]=''}else if(absCode(s,k)==b){delete m[k];if(absCode(s,k)==b)m[k]=''}else m[k]=b;
@@ -2005,14 +2053,39 @@ function shutEdit(){if(!need(ISOWN,'Changing the Christmas shutdown'))return;con
 function shutSave(y){if(!need(ISOWN,'Changing the Christmas shutdown'))return;S.shut[y]=$$('#mbox .shd:checked').map(e=>SAFE.date(e.value)).filter(Boolean);audit('Christmas shutdown',String(y),S.shut[y].length+' days');store();closeModal();render()}
 function shutReset(y){if(!need(ISOWN,'Changing the Christmas shutdown'))return;delete S.shut[y];store();closeModal();render()}
 
+
+/* spreadsheet look: one sheet per month plus a Database sheet, tabs along the bottom */
+const MSHORT=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function holSheet(){const H=UI.hol,y=H.y,mo=H.cm,td=today(),Ad=ISOWN(),mine=me();
+  const grp=HGRP.map(g=>[g,S.staff.filter(s=>(s.cat||'Office')==g)]).filter(x=>x[1].length);
+  const last=(S.audit||[]).find(a=>/Holiday chart|Holiday approved|Christmas shutdown/i.test(a.a||''));
+  const side=`<aside class="xl-side"><div class="xl-title">Code Control</div><table class="xl-ct"><thead><tr><th>Absence Type</th><th>Code</th><th>Deduction</th></tr></thead><tbody>${HCODES.map(c=>`<tr class="${H.brush==c[0]?'on':''}" ${Ad?A('setUI','hol.brush',H.brush==c[0]?'':c[0]):''}><td>${esc(c[1])}</td><td style="background:${c[3]}"><b>${c[0]}</b></td><td>${c[2]}</td></tr>`).join('')}${Ad?`<tr class="${H.brush=='X'?'on':''}" ${A('setUI','hol.brush',H.brush=='X'?'':'X')}><td>Clear a day</td><td><b>✕</b></td><td></td></tr>`:''}</tbody></table>
+    <p class="xl-tip">${Ad?(H.brush?`Filling in <b>${esc(H.brush=='X'?'Clear':HC[H.brush][1])}</b>. Click days on the sheet. Click the code again to stop.`:'Click a code, then click days on the sheet to fill them in.'):'Click a free weekday on your own row to ask for holiday.'}</p>
+    <div class="xl-title">Useful Info</div><div class="xl-info"><p>After 5 years service = +1 holiday day<br>After 10 years service = +1 holiday day<br>After 15 years service = +1 holiday day<br>3 extra holiday days maximum</p><p>Standard allowance is 25 days. Booked includes the ${shutDays(y).length} Christmas shutdown days.</p><p>? = waiting for approval</p></div>
+    ${last?`<p class="xl-upd">Last updated by: ${esc(last.by||'')} ${new Date(last.at).toLocaleDateString('en-GB')}</p>`:''}</aside>`;
+  let main;
+  if(mo<12){const dim=new Date(y,mo+1,0).getDate(),keys=Array.from({length:dim},(_,i)=>y+'-'+pad(mo+1)+'-'+pad(i+1));
+    const wk=[];let w=1;keys.forEach((k,i)=>{if(i&&new Date(k+'T00:00').getDay()==1)w++;wk.push(w)});const ws=[];wk.forEach(n=>{const l=ws[ws.length-1];if(l&&l[0]==n)l[1]++;else ws.push([n,1])});
+    const cell=(s,k)=>{const c=absCode(s,k),def=HC[c],we=!isWk(k),can=Ad||(mine&&mine.id==s.id&&!c&&!we);
+      return `<td class="${we?'we':''} ${k==td?'td':''} ${c=='P'?'pd':''}" ${def?`style="background:${def[3]}"`:''} title="${esc(s.name)}, ${fd(k)}${def?': '+esc(def[1]):c=='P'?': waiting for approval':''}" ${can?(Ad?A('hcPaint',s.id,k):A('holBook',s.id,k)):''}>${c=='P'?'?':esc(c)}</td>`};
+    main=grp.map(([g,L])=>`<div class="xl-title">${esc(g)}</div><div class="xl-scroll"><table class="xl-g"><thead><tr class="wk"><th></th>${ws.map(([n,c])=>`<th colspan="${c}">Week ${n}</th>`).join('')}<th></th></tr>
+      <tr class="xh"><th rowspan="3" class="nmh"></th>${keys.map(k=>`<th class="${isWk(k)?'':'we'}">${MSHORT[mo]}</th>`).join('')}<th rowspan="3" class="tot">Holidays<br>This Month</th></tr>
+      <tr class="xh">${keys.map(k=>`<th class="${isWk(k)?'':'we'} ${k==td?'tdh':''}">${+k.slice(8)}</th>`).join('')}</tr><tr class="xh">${keys.map(k=>`<th class="${isWk(k)?'':'we'}">${new Date(k+'T00:00').toLocaleDateString('en-GB',{weekday:'short'})}</th>`).join('')}</tr></thead>
+      <tbody>${L.map(s=>`<tr><td class="nm"><span class="rm" title="Days left this year">${allowTot(s)-hu(s,y)}</span>${esc(s.name)}</td>${keys.map(k=>cell(s,k)).join('')}<td class="tot">${sum(keys,k=>{const c=HC[absCode(s,k)];return c?c[2]:0})}</td></tr>`).join('')}</tbody></table></div>`).join('')}
+  else{const yc=Object.fromEntries(S.staff.map(s=>[s.id,yearCounts(s,y)])),n=(s,c)=>yc[s.id][c]||0;
+    const hd=[['Base Allowance',''],['Pension Extra',''],['Service Extra',''],['Total Allowance',''],['Holiday Remaining','#e9c3ee'],['Years Service',''],['Holiday Booked INC. '+shutDays(y).length+' XMAS','#7cbc44'],['Half Day (Morning)','#add58a'],['Half Day (Afternoon)','#add58a'],['Sickness','#f7a19a'],['Maternity Paternity','#fcc79b'],['Compassionate','#f3a6f3'],['Absent','#f6e39b'],['Bank Holiday','#a8dcc0'],['Non Working Day','#a8cff2'],['Voluntary Unpaid','#eaf7a9'],['Carry Over '+(y-1),'']];
+    main=grp.map(([g,L])=>`<div class="xl-title">${esc(g)}</div><div class="xl-scroll"><table class="xl-g xl-db"><thead><tr class="xh"><th class="nmh"></th>${hd.map(([h,c])=>`<th ${c?`style="background:${c}!important;color:#13233a!important"`:''}>${esc(h)}</th>`).join('')}${Ad?'<th></th>':''}</tr></thead>
+      <tbody>${L.map(s=>{const b=hu(s,y);return `<tr><td class="nm">${esc(s.name)}</td><td>${+s.allow||0}</td><td>${+s.pension||''}</td><td>${svcExtra(s)||''}</td><td>${allowTot(s)}</td><td class="pk"><b>${allowTot(s)-b}</b></td><td>${s.start?svcYears(s):''}</td><td>${n(s,'H')}</td><td>${n(s,'H1')}</td><td>${n(s,'H2')}</td><td>${n(s,'S')}</td><td>${n(s,'M')}</td><td>${n(s,'C')}</td><td>${n(s,'A')}</td><td>${n(s,'B')}</td><td>${n(s,'N')}</td><td>${n(s,'U')}</td><td>${+s.carry||''}</td>${Ad?`<td><button class="mini" ${A('editStaff',s.id)}>Edit</button></td>`:''}</tr>`}).join('')}</tbody></table></div>`).join('')}
+  const tabs=`<div class="xl-tabs">${MSHORT.map((m,i)=>`<button class="${i==mo?'on':''}" ${A('setUI','hol.cm',i)}>${new Date(y,i,1).toLocaleDateString('en-GB',{month:'long'})} (${pad(i+1)})</button>`).join('')}<button class="${mo==12?'on':''}" ${A('setUI','hol.cm',12)}>Database</button></div>`;
+  return `<div class="xls"><div class="xl-yr">${y}</div><div class="xl-body"><div class="xl-main">${main}</div>${side}</div>${tabs}</div>`}
+
 /* ---------------- holiday planner ---------------- */
 function clashes(){const o=[];
   S.contracts.filter(c=>c.fit&&c.stage!='Complete').forEach(c=>S.staff.forEach(s=>{if(forPerson(s,c.fitter)&&holOn(s.id,c.fit))o.push(`${s.name} is off on ${fd(c.fit)} but ${c.fitter} has fitting #${c.id} (${c.name})`)}));
   S.calls.filter(c=>c.visit&&c.status!='Complete').forEach(c=>S.staff.forEach(s=>{if(forPerson(s,c.fitter)&&holOn(s.id,c.visit))o.push(`${s.name} is off on ${fd(c.visit)} but has service visit #${c.id}`)}));return o}
-function vHolidays(){if(UI.hol.v=='chart'){const H=UI.hol,c=holChart(),Ad=ISOWN(),pend=S.hols.filter(h=>h.status=='Pending'),td=today();
+function vHolidays(){if(UI.hol.v=='chart'){const H=UI.hol,Ad=ISOWN(),pend=S.hols.filter(h=>h.status=='Pending'),td=today();
     return `<div class="head"><h1>Holiday Planner</h1><div class="tools"><div class="seg">${[['chart','Chart'],['tl','Month'],['yr','Year']].map(([k,t])=>`<button class="${H.v==k?'on':''}" ${A('setUI','hol.v',k)}>${t}</button>`).join('')}</div><button class="btn ghost" aria-label="Previous year" ${A('setUI','hol.y',H.y-1)}>&lsaquo;</button><b style="min-width:3rem;text-align:center">${H.y}</b><button class="btn ghost" aria-label="Next year" ${A('setUI','hol.y',H.y+1)}>&rsaquo;</button>${Ad?'<button class="btn ghost" onclick="shutEdit()">Christmas shutdown</button>':''}<button class="btn" onclick="holBook()">Book holiday</button></div></div>
-    <div class="kpis">${[['Off today',S.staff.filter(s=>['H','H1','H2','S','M','C','A','U'].includes(absCode(s,td))).length],['Pending requests',pend.length],['Standard allowance','25 days'],['Christmas shutdown',shutDays(H.y).length+' days']].map(k=>`<div class="kpi"><small>${k[0]}</small><b>${k[1]}</b></div>`).join('')}</div>
-    ${c.months}${c.legend}${c.tbl}<h2 style="margin-top:1.4rem">Allowances ${H.y}</h2>${c.summ}
+    ${holSheet()}
     ${pend.length?`<div class="panel" style="margin-top:1rem"><h2>Waiting For Approval</h2>${pend.map(h=>`<div class="row"><span><b>${esc(staffName(h.sid))}</b> <span class="muted">${fd(h.from)} to ${fd(h.to)}, ${h.days} day${h.days==1?'':'s'}</span></span><span class="acts">${Ad?`<button class="mini pri" ${A('holSet',h.id,'Approved')}>Approve</button><button class="mini del" ${A('holSet',h.id,'Rejected')}>Reject</button>`:holTag(h)}</span></div>`).join('')}</div>`:''}`}
 const n=new Date(),H=UI.hol,b=new Date(n.getFullYear(),n.getMonth()+H.m,1),y=b.getFullYear(),mo=b.getMonth(),dim=new Date(y,mo+1,0).getDate(),td=today(),Ad=ISOWN(),pend=S.hols.filter(h=>h.status=='Pending'),cl=clashes();
   const off=S.staff.filter(s=>holOn(s.id,td)).length,booked=sum(S.hols.filter(h=>h.status=='Approved'),h=>h.days);
