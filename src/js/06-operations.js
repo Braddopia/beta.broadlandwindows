@@ -110,7 +110,7 @@ function vSuppliers(){const Ad=ISADM(),all=sups(),P=products();
   return `<div class="head"><div><h1>Suppliers</h1><span class="muted">${all.length} suppliers linked to ${tot.lines} stock lines</span></div><div class="tools"><button class="btn sm" onclick="editSup()">Add Supplier</button></div></div>
   <div class="kpis"><div class="kpi"><small>Suppliers</small><b>${all.length}</b></div><div class="kpi"><small>Lines Linked</small><b>${tot.lines}</b></div><button class="kpi ${tot.none?'warn':''}" onclick="UI.inv.f='nosup';UI.inv.v='products';go('stock')"><small>Lines Without Supplier</small><b>${tot.none}</b></button><div class="kpi ${tot.re?'bad':''}"><small>Lines To Reorder</small><b>${tot.re}</b></div><button class="kpi" ${A('go','deliveries')}><small>Deliveries Due</small><b>${tot.del}</b></button></div>
   <div class="sups">${cards||'<p class="empty">No suppliers match.</p>'}</div>`}
-function supOpen(n){const x=S.suppliers.find(s=>s.name==n);if(!x)return;openModal(`<button class="mx" onclick="closeModal()" aria-label="Close">&times;</button>`+supFull(x),'lg')}
+function supOpen(n){const x=S.suppliers.find(s=>s.name==n);if(!x)return;openModal(`<button class="mx" onclick="closeModal()" aria-label="Close">&times;</button>`+supFull(x),'xl sp')}
 /* full supplier details, shown in a popup */
 function supFull(x){const Ad=ISADM(),i=S.suppliers.indexOf(x),s=supStats(x),url=SAFE.url(x.url),so=supOrders(x),need=[...s.out,...s.low];
   const info=(l,v)=>v?`<div class="si"><span>${l}</span><b>${v}</b></div>`:'';

@@ -227,7 +227,6 @@ body.lv .lvg{flex:1;min-height:0;grid-template-rows:repeat(2,minmax(0,1fr))}
 .main.enter .supc,.main.enter .frow,.main.enter .nrow,.main.enter .row{animation:up .4s cubic-bezier(.2,.7,.2,1) backwards;animation-delay:calc(var(--i,0)*35ms + 80ms)}
 .main.enter .tag{animation:tagPop .35s .2s backwards}
 @keyframes tagPop{0%{transform:scale(.7);opacity:0}70%{transform:scale(1.06)}100%{transform:none;opacity:1}}
-.nav svg{transition:transform .2s cubic-bezier(.3,1.4,.5,1)}.nav:hover svg{transform:translateX(2px) scale(1.08)}
 .panel,.kpi,.supc,.bc,.dcard{transition:transform .2s,box-shadow .2s,border-color .2s}
 .panel:hover{box-shadow:0 2px 4px rgba(1,43,89,.06),0 10px 26px rgba(1,43,89,.09)}
 .kpi:hover{transform:translateY(-2px)}
@@ -273,7 +272,8 @@ th.ac,td.ac{background:rgba(255,255,255,.88)}body[data-theme=dark] th.ac,body[da
 .sups{display:flex;flex-direction:column;gap:.8rem}
 .supw{position:relative;display:grid;grid-template-columns:3.2rem minmax(13rem,1.25fr) minmax(12rem,1.1fr) minmax(13rem,1.2fr) minmax(16rem,1.6fr) auto;align-items:center;gap:1.2rem;width:100%;padding:1rem 1.2rem 1rem 1.4rem;text-align:left;font:inherit;color:var(--ink);cursor:pointer;overflow:hidden;transition:transform .2s,box-shadow .2s}
 .supw::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--sc)}
-.supw:hover{transform:translateY(-2px);box-shadow:0 14px 34px rgba(1,43,89,.14)}
+.supw:hover{border-color:var(--sc)!important;box-shadow:0 0 0 1px var(--sc),0 10px 28px rgba(1,43,89,.12)}
+.supw::before{transition:width .2s}.supw:hover::before{width:8px}
 .supw small{display:block;font-size:.68rem;color:var(--muted);letter-spacing:.03em}
 .supw-av{display:grid;place-items:center;width:3.2rem;height:3.2rem;border-radius:14px;background:var(--sc);color:#fff;font:700 1.05rem var(--head);box-shadow:0 6px 16px rgba(1,43,89,.18)}
 .supw-id b{font:600 1.08rem var(--head);color:var(--navy)}.supw-id small{margin-top:.2rem;font-size:.78rem}
@@ -296,3 +296,30 @@ th.ac,td.ac{background:rgba(255,255,255,.88)}body[data-theme=dark] th.ac,body[da
 .wz-d{margin:-.4rem 0 .9rem}
 .wz-b{animation:up .3s cubic-bezier(.2,.7,.2,1);min-height:12rem}
 .wz-r{padding:.3rem 0 .6rem}.wz-r h3{display:flex;justify-content:space-between;align-items:center;margin:.6rem 0 .3rem}
+
+/* sticky action column only where tables can scroll sideways; elsewhere it shares the table's glass */
+th.ac,td.ac{position:static;background:transparent!important}
+@media(max-width:1100px) and (min-width:601px){th.ac,td.ac{position:sticky;right:0;background:var(--card)!important}}
+
+/* supplier popup: large and readable */
+.mb.xl.sp{display:block;height:auto;max-height:94dvh;overflow:auto;width:min(96rem,96vw);padding:1.8rem 2rem 1.6rem}
+.mb.sp .sup-h h2{font-size:1.6rem}.mb.sp .sup-h .muted{font-size:1rem}
+.mb.sp .sup-h .acts .mini{height:2.3rem;padding:0 1rem;font-size:.86rem}
+.mb.sp .sup-b{gap:2rem;padding-top:1.2rem}
+.mb.sp .sup-c h3{font-size:.85rem;margin-bottom:.7rem}
+.mb.sp .si{font-size:1rem;padding:.6rem 0}
+.mb.sp .sup-k{grid-template-columns:repeat(3,minmax(0,1fr));gap:.7rem}
+.mb.sp .sup-k div{padding:.8rem .9rem}.mb.sp .sup-k small{font-size:.78rem}.mb.sp .sup-k b{font-size:1.6rem}
+.mb.sp table{font-size:.95rem}.mb.sp td,.mb.sp th{padding:.85rem 1rem}
+.mb.sp .mx{top:1.2rem;right:1.2rem;width:2.4rem;height:2.4rem}
+@media(max-width:1100px){.mb.sp .sup-b{grid-template-columns:1fr 1fr}}
+@media(max-width:700px){.mb.xl.sp{padding:1.2rem}.mb.sp .sup-b{grid-template-columns:1fr}}
+
+/* table header: one even band across the whole row (no per-cell shading over the glass) */
+th,th.ac{background:transparent!important}
+thead tr{background:rgba(1,43,89,.04)}
+body[data-theme=dark] thead tr{background:rgba(255,255,255,.035)}
+tbody tr:hover td,tbody tr:hover td.ac{background:rgba(3,78,162,.05)!important}
+body[data-theme=dark] tbody tr:hover td,body[data-theme=dark] tbody tr:hover td.ac{background:rgba(255,255,255,.04)!important}
+@media(max-width:1100px) and (min-width:601px){th.ac{position:sticky;right:0;background:var(--card)!important}}
+.mb.sp .mini{height:2.1rem;padding:0 .9rem;font-size:.84rem}.mb.sp .tag{font-size:.8rem;padding:.2rem .65rem}.mb.sp .tag.fw{width:6rem}.mb.sp code{font-size:.85rem}

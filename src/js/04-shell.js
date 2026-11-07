@@ -40,7 +40,8 @@ function badges(){const td=today();return{
   holidays:ISOWN()?S.hols.filter(h=>h.status=='Pending').length:0}}
 
 function navHtml(b){let n=0;return NG.map(([g,keys])=>{const ks=keys.filter(k=>canSee(k)&&(k!='admin'||ISOWN()));
-  return ks.length?`<div class="nl">${esc(g)}</div>`+ks.map(k=>`<button class="nav ${k==view?'on':''}" style="--n:${n++}" title="${esc(VIEWS[k].t)}" ${A('go',k)} ${k==view?'aria-current="page"':''}>${svg(IC[k])}<span>${esc(VIEWS[k].t)}</span>${b[k]?`<i>${b[k]}</i>`:''}</button>`).join(''):''}).join('')}
+  const gl=g=='Stock & People'&&!ks.some(k=>['staff','holidays','contacts'].includes(k))?'Stock':g;
+  return ks.length?`<div class="nl">${esc(gl)}</div>`+ks.map(k=>`<button class="nav ${k==view?'on':''}" style="--n:${n++}" title="${esc(VIEWS[k].t)}" ${A('go',k)} ${k==view?'aria-current="page"':''}>${svg(IC[k])}<span>${esc(VIEWS[k].t)}</span>${b[k]?`<i>${b[k]}</i>`:''}</button>`).join(''):''}).join('')}
 
 function go(v){
   document.body.classList.remove('sopen');closeFpop();
@@ -149,9 +150,9 @@ function closeFpop(){const p=$('#fpop');if(p)p.classList.remove('open')}
 document.addEventListener('mousedown',e=>{if(!e.target.closest('#fpop,.fbtn'))closeFpop()});
 
 /* ---- theme + logos ---- */
-const LOGO_SRC={blue:ASSETS.logoBlue,white:ASSETS.logoWhite,full:ASSETS.logoFull,fullDark:ASSETS.logoFullDark,emblem:ASSETS.emblem,icon:ASSETS.emblemIcon};
+const LOGO_SRC={blue:ASSETS.logoTextBlue,white:ASSETS.logoTextWhite,full:ASSETS.logoFull,textBlue:ASSETS.logoTextBlue,textWhite:ASSETS.logoTextWhite,emblem:ASSETS.emblem,icon:ASSETS.emblemIcon};
 function setTh(t){document.body.dataset.theme=t;try{localStorage.setItem('bb_theme',t)}catch(e){}
-  $('#thb').innerHTML=svg(t=='dark'?IC.sun:IC.moon);$$('.lg-auto').forEach(i=>i.src=t=='dark'?LOGO_SRC.fullDark:LOGO_SRC.full)}
+  $('#thb').innerHTML=svg(t=='dark'?IC.sun:IC.moon);$$('.lg-auto').forEach(i=>i.src=t=='dark'?LOGO_SRC.textWhite:LOGO_SRC.textBlue)}
 
 /* ---- top bar wiring ---- */
 function sbSync(){$('#sb').classList.toggle('has',!!$('#q').value)}

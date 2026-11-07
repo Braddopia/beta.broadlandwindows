@@ -10,7 +10,7 @@ const ROLES={
   sales:  {n:'Sales',             d:'Live analytics, inventory and files',v:FOCUS},
   stock:  {n:'Stock and warehouse',d:'Live analytics, inventory and files',v:FOCUS},
   fitter: {n:'Fitter',            d:'Live analytics, inventory and files',v:FOCUS},
-  staff:  {n:'Standard user',     d:'Overview, live analytics, inventory and files',v:FOCUS},
+  staff:  {n:'Standard user',     d:'Overview, leads, live analytics, inventory and files',v:[...FOCUS,'leads']},
   beta:   {n:'Beta (all features)',d:'Leads, contracts, finance, staff and everything else',v:'*'}};
 const RL={admin:'Administrator',finance:'Finance',sales:'Sales',stock:'Stock And Warehouse',fitter:'Fitter',staff:'Team Member',beta:'Beta Access'};
 const IDLE_MIN=30, PIN_TRIES=5, PIN_LOCK_S=60;
