@@ -25,6 +25,7 @@ src/js/12-files       Files page
 src/js/13-finance-admin  Finance, Admin console (PINs, audit log, backups)
 src/js/14-notify      Notification centre
 src/js/15-records     Full-screen lead and contract records, lead wizard, list views
+src/js/16-art         Illustrations, empty states, welcome tour
 src/js/99-boot        Start-up
 ```
 

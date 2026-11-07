@@ -87,6 +87,10 @@ function openModal(h,size){const b=$('#mbox');b.className='mb'+(size?' '+size:''
 const nxHid=(f,v)=>!!f.nx&&!String(v[f.nx]??'').trim()&&!String(v[f.k]??'').trim();
 document.addEventListener('input',e=>{const el=e.target;if(!el.id||!el.id.startsWith('f_'))return;const k=el.id.slice(2);
   $$(`#mbox [data-nx="${k}"]`).forEach(r=>{const own=r.querySelector('input,select,textarea');r.hidden=!el.value.trim()&&!(own&&own.value.trim())})});
+/* styled confirmation instead of the browser's own box */
+let ASK=null;
+function askYes(title,msg,okLabel,cb,danger){ASK=cb;openModal(`<div class="ask"><div class="ask-ic ${danger?'r':''}">${danger?'!':'?'}</div><h2>${esc(title)}</h2><p class="muted">${esc(msg)}</p></div><div class="mact"><button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn ${danger?'red':''}" onclick="askGo()">${esc(okLabel||'Yes')}</button></div>`,'sm')}
+function askGo(){const f=ASK;ASK=null;closeModal();if(f)f()}
 function closeModal(){$('#modal').classList.remove('open');const a=document.activeElement;if(a&&a!==document.body&&!a.closest('#modal'))a.blur()}
 $('#modal').addEventListener('mousedown',e=>{if(e.target.id=='modal')closeModal()});
 
