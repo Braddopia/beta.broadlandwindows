@@ -44,6 +44,7 @@ let S;
     try{localStorage.setItem(KEY+'_unreadable_'+Date.now(),raw)}catch(x){}
     setTimeout(()=>toast('Saved data could not be read. A copy was kept and demo data loaded.'),1800)}}
   if(!S||typeof S!='object'||!Array.isArray(S.items))S=seed();
+  window.__BOOT_AT=+S._saved||0;
 })();
 
 /* ---- migrate older versions, fill gaps ---- */
@@ -90,7 +91,12 @@ let SDB=null,storeSize=0;
 const sdb=()=>SDB||(SDB=new Promise((ok,no)=>{try{const r=indexedDB.open('bb_state',1);r.onupgradeneeded=()=>r.result.createObjectStore('s');r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)}catch(e){no(e)}}));
 const BC=typeof BroadcastChannel=='function'?new BroadcastChannel('bb_state'):null;
 function saveRaw(j){storeSize=j.length;
-  sdb().then(d=>{const t=d.transaction('s','readwrite');t.objectStore('s').put(j,KEY);t.oncomplete=()=>{BC&&BC.postMessage('saved')};t.onerror=()=>toast('Could not save. Export a backup from Admin Console.')}).catch(()=>{});
+  sdb().then(d=>{const t=d.transaction('s','readwrite'),os=t.objectStore('s');
+    /* the database answered late at start-up: never write over a newer copy we have not loaded */
+    if(window.__BOOT_MISS){const g=os.get(KEY);g.onsuccess=()=>{const v=g.result,m=/"_saved":(\d+)/.exec(typeof v=='string'?v.slice(-60):'');
+      if(m&&+m[1]>(window.__BOOT_AT||0)){t.abort();window.__bootReload();return}window.__BOOT_MISS=false;os.put(j,KEY)}}
+    else os.put(j,KEY);t.oncomplete=()=>{BC&&BC.postMessage('saved')};t.onerror=()=>toast('Could not save. Export a backup from Admin Console.')}).catch(()=>{});
+  if(window.__BOOT_MISS)return; /* wait until the database check above has passed */
   try{if(j.length<4.5e6)localStorage.setItem(KEY,j);else localStorage.removeItem(KEY)}catch(e){try{localStorage.removeItem(KEY)}catch(x){}}}
 function store(){try{delete S._saved;S._saved=Date.now();saveRaw(JSON.stringify(S))}catch(e){toast('Could not save: '+e.message)}}
 /* ask the browser to keep the data even when the disk is low */
