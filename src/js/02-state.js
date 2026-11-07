@@ -35,7 +35,10 @@ function seed(){
 /* ---- load ---- */
 let S;
 (function load(){
-  let raw=null;try{raw=localStorage.getItem(KEY)}catch(e){}
+  /* two copies may exist (browser database and localStorage): use the most recently saved one */
+  let raw=typeof window.__BOOT=='string'?window.__BOOT:null,ls=null;try{ls=localStorage.getItem(KEY)}catch(e){}window.__BOOT=null;
+  const at=j=>{const m=/"_saved":(\d+)/.exec(j?j.slice(-60):'');return m?+m[1]:0};
+  if(!raw||(ls&&at(ls)>at(raw)))raw=ls||raw;
   if(raw){try{S=JSON.parse(raw)}catch(e){
     /* never silently throw data away: keep the unreadable copy */
     try{localStorage.setItem(KEY+'_unreadable_'+Date.now(),raw)}catch(x){}
@@ -77,15 +80,21 @@ const ikey=r=>[r.item,r.length,r.cInName,r.cOutName].map(v=>{v=String(v||'').tri
 function pinHash(role,pin){return sha256(S.sec.salt+':'+role+':'+pin)}
 
 /* ---- the signed-in person ---- */
-Object.defineProperty(window,'USER',{get:()=>(S.profile&&S.profile.name)||'Unknown'});
-const me=()=>S.staff.find(s=>s.id==S.profile.sid)||S.staff.find(s=>s.name==USER);
+Object.defineProperty(window,'USER',{get:()=>(window.SSO&&SSO.name)||(S.profile&&S.profile.name)||'Unknown'});
+const me=()=>(window.SSO&&SSO.sid&&S.staff.find(s=>s.id==SSO.sid))||(!window.SSO&&S.staff.find(s=>s.id==S.profile.sid))||S.staff.find(s=>s.name==USER);
 
 /* ---- save ---- */
 let storeWarned=0;
-function store(){
-  try{const j=JSON.stringify(S);localStorage.setItem(KEY,j);
-    if(j.length>4.2e6&&Date.now()-storeWarned>6e5){storeWarned=Date.now();toast('Browser storage is nearly full ('+kb(j.length)+'). Remove some photos or export a backup.')}
-  }catch(e){toast('Browser storage is full. Remove some photos, then try again.')}}
+/* saving: the browser database (IndexedDB) is the main store; localStorage keeps a copy while it fits */
+let SDB=null,storeSize=0;
+const sdb=()=>SDB||(SDB=new Promise((ok,no)=>{try{const r=indexedDB.open('bb_state',1);r.onupgradeneeded=()=>r.result.createObjectStore('s');r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)}catch(e){no(e)}}));
+const BC=typeof BroadcastChannel=='function'?new BroadcastChannel('bb_state'):null;
+function saveRaw(j){storeSize=j.length;
+  sdb().then(d=>{const t=d.transaction('s','readwrite');t.objectStore('s').put(j,KEY);t.oncomplete=()=>{BC&&BC.postMessage('saved')};t.onerror=()=>toast('Could not save. Export a backup from Admin Console.')}).catch(()=>{});
+  try{if(j.length<4.5e6)localStorage.setItem(KEY,j);else localStorage.removeItem(KEY)}catch(e){try{localStorage.removeItem(KEY)}catch(x){}}}
+function store(){try{delete S._saved;S._saved=Date.now();saveRaw(JSON.stringify(S))}catch(e){toast('Could not save: '+e.message)}}
+/* ask the browser to keep the data even when the disk is low */
+try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}
 
 /* ---- audit trail: who changed what, when ---- */
 function audit(action,target,detail){
@@ -93,4 +102,5 @@ function audit(action,target,detail){
   if(S.audit.length>MAX_LOG)S.audit.length=MAX_LOG}
 
 /* ---- cross-tab sync ---- */
-window.addEventListener('storage',e=>{if(e.key==KEY&&e.newValue){try{const n=JSON.parse(e.newValue);if(n&&Array.isArray(n.items)){S=n;render()}}catch(x){}}});
+if(BC)BC.onmessage=()=>{sdb().then(d=>{const g=d.transaction('s','readonly').objectStore('s').get(KEY);g.onsuccess=()=>{try{const n=JSON.parse(g.result);if(n&&Array.isArray(n.items)&&!$('.ov.open')){S=n;render()}}catch(x){}}})};
+window.addEventListener('storage',e=>{if(!BC&&e.key==KEY&&e.newValue){try{const n=JSON.parse(e.newValue);if(n&&Array.isArray(n.items)){S=n;render()}}catch(x){}}});

@@ -24,7 +24,7 @@ function need(test,what){if(test())return true;toast((what||'That')+' needs an a
 /* ---- switching account ---- */
 let pendView=null;
 function swRole(){
-  openModal(`<h2>Switch Account</h2><div class="rl">${Object.entries(ROLES).map(([k,r])=>`<button class="rb ${k==ROLE?'on':''}" ${A('pickRole',k)}><b>${esc(r.n)}</b><span>${esc(r.d)}</span></button>`).join('')}</div><div class="mact"><button class="btn ghost" onclick="closeModal()">Cancel</button></div>`)}
+  openModal(`<h2>Switch Account</h2><div class="rl">${Object.entries(ROLES).map(([k,r])=>`<button class="rb ${k==ROLE?'on':''}" ${A('pickRole',k)}><b>${esc(r.n)}</b><span>${esc(r.d)}</span></button>`).join('')}</div><div class="mact">${window.SSO?`<button class="btn ghost l" style="color:var(--red)" onclick="ssoOut()">Sign out ${esc(SSO.email||USER)}</button>`:''}<button class="btn ghost" onclick="closeModal()">Cancel</button></div>`)}
 function pickRole(k){
   if(!ROLES[k])return;if(k=='staff'||k==ROLE){closeModal();setRole(k);return}
   openModal(`<h2>${esc(ROLES[k].n)} PIN</h2><div class="mf"><input id="pin" type="password" inputmode="numeric" autocomplete="off" maxlength="12" ${AC('onkeydown','pinKey','this')} data-r="${esc(k)}"><button class="btn" ${A('chkPin',k)}>Sign in</button></div><p class="muted" id="pinMsg" style="margin:0"></p><div class="mact"><button class="btn ghost" onclick="swRole()">Back</button></div>`,'sm');
@@ -49,7 +49,7 @@ function setRole(r){
 /* ---- idle timeout: privileged accounts drop back to Standard user ---- */
 let lastAct=Date.now();
 ['pointerdown','keydown','wheel','touchstart'].forEach(t=>addEventListener(t,()=>{lastAct=Date.now();if(ROLE!='staff'){try{sessionStorage.setItem('bb_role_at',Date.now())}catch(e){}}},{passive:true}));
-setInterval(()=>{if(ROLE!='staff'&&!document.body.classList.contains('tv')&&Date.now()-lastAct>IDLE_MIN*6e4){const was=ROLES[ROLE].n;closeModal();setRole('staff');toast('Signed out of '+was+' after '+IDLE_MIN+' minutes idle')}},30000);
+setInterval(()=>{if(!window.SSO&&ROLE!='staff'&&!document.body.classList.contains('tv')&&Date.now()-lastAct>IDLE_MIN*6e4){const was=ROLES[ROLE].n;closeModal();setRole('staff');toast('Signed out of '+was+' after '+IDLE_MIN+' minutes idle')}},30000);
 
 /* ---- PIN management (owner accounts) ---- */
 function chPin(){

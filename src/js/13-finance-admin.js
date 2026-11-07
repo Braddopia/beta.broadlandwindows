@@ -20,7 +20,7 @@ function editBill(id){if(!need(ISADM,'Bills'))return;const b=S.fin.find(x=>x.id=
 /* ---------------- admin console ---------------- */
 function vAdmin(){if(!ISOWN())return '';
   const td=today(),owed=sum(S.contracts,c=>Math.max(0,c.value-c.paid)),bills=S.fin.filter(b=>b.status=='Unpaid'),pr=sum(S.staff,x=>x.salary/12),pend=S.hols.filter(h=>h.status=='Pending'),od=bills.filter(b=>b.due<td),won=S.leads.filter(l=>l.stage=='Won').length,tot=S.leads.length||1,rev=sum(S.contracts,c=>c.value),paid=sum(S.contracts,c=>c.paid),reqs=S.items.filter(r=>r.type=='request'&&r.reqStatus=='Pending');
-  let size=0;try{size=(localStorage.getItem(KEY)||'').length}catch(e){}
+  let size=storeSize||JSON.stringify(S).length;
   const ph=Object.values(S.pphotos).reduce((a,x)=>a+x.length,0),defPins=Object.entries(S.sec.pins).filter(([,p])=>p.def).map(([k])=>ROLES[k].n);
   const AU=UI.audit,pg=paginate(AU,S.audit.filter(hit));
   return `<div class="head"><h1>Admin Console</h1><div class="tools"><button class="btn ghost" onclick="chPin()">Account PINs</button><button class="btn" ${A('go','finance')}>Open finance</button></div></div>
@@ -34,10 +34,11 @@ function vAdmin(){if(!ISOWN())return '';
     <div class="row"><span>Account PINs<br><small class="muted">${defPins.length?esc(defPins.join(', '))+' still on the default PIN':'All accounts have their own PIN'}</small></span>${defPins.length?'<span class="tag r">Action needed</span>':'<span class="tag g">OK</span>'}</div>
     <div class="row"><span>Idle sign-out<br><small class="muted">Privileged accounts return to Standard user after ${IDLE_MIN} minutes</small></span><span class="tag g">On</span></div>
     <div class="row"><span>Connection<br><small class="muted">${window.isSecureContext?'Secure (https or local file)':'Not secure: use https'}</small></span><span class="tag ${window.isSecureContext?'g':'r'}">${window.isSecureContext?'OK':'Check'}</span></div>
-    <div class="row"><span>Browser storage used<br><small class="muted">${ph} product photos stored</small></span><b>${kb(size)} of about 5 MB</b></div>
-    <div class="bar"><i style="width:${Math.min(100,size/5e6*100)}%;${size>4e6?'background:var(--red)':''}"></i></div>
+    <div class="row"><span>Browser storage used<br><small class="muted">${ph} product photos stored</small></span><b>${kb(size)} used</b></div>
+    <p class="muted" style="font-size:.78rem;margin:.2rem 0 0">Saved in the browser database on this device, room for hundreds of MB. Export a backup regularly.</p>
     <div class="acts" style="margin-top:.8rem"><button class="mini pri" onclick="chPin()">Change PINs</button><button class="mini" onclick="backupDl()">Download backup</button><label class="mini" style="cursor:pointer">Restore backup<input type="file" accept=".json,application/json" hidden onchange="backupLoad(this)"></label></div></div>
    <div class="panel"><h2><span>Reviews</span><button class="mini pri" onclick="editRatings()">Update scores</button></h2><div class="row"><span>Trustpilot</span><span>${stars(S.brand.tp.score,'#e0a800','#d9e1ee')} <b>${(+S.brand.tp.score).toFixed(1)}</b></span></div><div class="row"><span>Google</span><span>${stars(S.brand.g.score,'#e0a800','#d9e1ee')} <b>${(+S.brand.g.score).toFixed(1)}</b></span></div><p class="muted" style="font-size:.8rem;margin:.5rem 0 0">Shown on the overview and on customer documents.</p></div>
+   ${authPanel()}
    <div class="panel"><h2>Testing Tools</h2><label class="tsw"><input type="checkbox" ${tourTest()?'checked':''} ${AC('onchange','tourToggle','this.checked')}><span>Show the welcome tour every time the site opens</span></label><p class="muted" style="font-size:.82rem;margin:.4rem 0 .7rem">For testing. Turn it off before the team starts using the site, so the tour only shows once per browser.</p><button class="btn ghost sm" onclick="startTour()">Start the tour now</button></div>
    <div class="panel"><h2>Quick Actions</h2><div class="acts" style="gap:.5rem"><button class="btn ghost" ${A('go','finance')}>Finance</button><button class="btn ghost" ${A('go','staff')}>Staff</button><button class="btn ghost" ${A('go','holidays')}>Holidays</button><button class="btn ghost" ${A('go','reports')}>Reports</button><button class="btn ghost" ${A('setRole','staff')}>Leave admin mode</button></div></div>
   </div>
@@ -51,5 +52,4 @@ function backupLoad(inp){if(!need(ISOWN,'Restoring backups'))return;const f=inp.
     if(!confirm('Replace ALL current data with this backup? Your current data is kept as a safety copy in this browser.'))return;
     try{localStorage.setItem(KEY+'_before_restore',JSON.stringify(S))}catch(e){}
     n.sec=S.sec;delete n.__proto__;delete n.constructor;/* a backup never brings its own PINs */
-    try{localStorage.setItem(KEY,JSON.stringify(n))}catch(e){toast('Not enough browser storage to restore');return}
-    location.reload()})}
+    try{const j=JSON.stringify(n);sdb().then(d=>{const t=d.transaction('s','readwrite');t.objectStore('s').put(j,KEY);t.oncomplete=()=>{try{localStorage.removeItem(KEY)}catch(e){}location.reload()}}).catch(()=>toast('Could not restore here'))}catch(e){toast('Could not restore here')}})}

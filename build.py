@@ -29,7 +29,9 @@ def main():
     assert "</script" not in js.lower(), "a JS file contains </script>, which would break the page"
     html = (SRC / "index.html").read_text()
     html = html.replace("<!-- @@CSS@@ -->", f"<style>\n/* Broadland Windows CRM {VERSION} */\n{css}</style>")
-    html = html.replace("<!-- @@JS@@ -->", f"<script>\n{js}\n</script>")
+    loader = (SRC / "boot-loader.js").read_text()
+    assert "</script" not in loader.lower()
+    html = html.replace("<!-- @@JS@@ -->", f"<script type=\"text/plain\" id=\"appjs\">\n{js}\n</script>\n<script>\n{loader}\n</script>")
     DIST.mkdir(exist_ok=True)
     out = DIST / f"{NAME}-{VERSION}.html"
     out.write_text(html)
