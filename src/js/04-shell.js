@@ -9,14 +9,14 @@ const UI={
   cal:{m:'month',o:0,sd:null,ly:{fit:1,svc:1,del:1,hol:1}},
   hol:{m:0,v:'chart',cm:new Date().getMonth(),y:new Date().getFullYear(),brush:''}, rep:{t:'summary'}, fin:{t:'debtors',pm:0},
   del:{f:'out',s:'all',v:'list'}, files:{cat:'all',az:0,list:0,ssq:'',page:1,per:50},
-  con:{f:'all'}, staff:{c:'all'}, sup:{open:''}, lead:{v:'list',f:'live',src:'all',own:'all',sort:'id',dir:1,page:1,per:50}, ctr:{v:'list',f:'cur',sort:'id',dir:1,page:1,per:50}, nc:{t:'All'}, audit:{page:1,per:50}
+  con:{f:'all'}, msg:{box:'in',to:'Everyone'}, staff:{c:'all'}, sup:{open:''}, lead:{v:'list',f:'live',src:'all',own:'all',sort:'id',dir:1,page:1,per:50}, ctr:{v:'list',f:'cur',sort:'id',dir:1,page:1,per:50}, nc:{t:'All'}, audit:{page:1,per:50}
 };
 function setUI(path,val){const p=path.split('.');let o=UI;for(let i=0;i<p.length-1;i++)o=o[p[i]];o[p[p.length-1]]=val;if(p.length==2&&p[1]!='page'&&'page' in UI[p[0]])UI[p[0]].page=1;render()}
 function togUI(path){const p=path.split('.');let o=UI;for(let i=0;i<p.length-1;i++)o=o[p[i]];const k=p[p.length-1];o[k]=o[k]?0:1;render()}
 
 /* ---- views: key -> title, page function, optional after-render hook ---- */
 const VIEWS={
-  home:{t:'Overview',fn:vHome}, live:{t:'Factory Floor',fn:vLive,after:liveAfter},
+  home:{t:'Overview',fn:vHome}, messages:{t:'Messages',fn:vMessages}, live:{t:'Factory Floor',fn:vLive,after:liveAfter},
   deliveries:{t:'Deliveries',fn:vDeliveries}, suppliers:{t:'Suppliers',fn:vSuppliers},
   leads:{t:'Leads',fn:vLeads}, contracts:{t:'Contracts',fn:vContracts},
   fitting:{t:'Calendar',fn:vCalendar}, service:{t:'Service Calls',fn:vService},
@@ -25,12 +25,13 @@ const VIEWS={
   reports:{t:'Reports',fn:vReports}, downloads:{t:'Files',fn:vFiles,after:loadMan},
   finance:{t:'Finance',fn:vFinance}, admin:{t:'Admin Console',fn:vAdmin}
 };
-const NG=[['Workspace',['home']],['Sales',['leads','contracts']],['Operations',['live','deliveries','fitting','service']],['Stock & People',['stock','suppliers','contacts','staff','holidays']],['Insights',['reports','downloads']],['Admin',['finance','admin']]];
+const NG=[['Workspace',['home','messages']],['Sales',['leads','contracts']],['Operations',['live','deliveries','fitting','service']],['Stock & People',['stock','suppliers','contacts','staff','holidays']],['Insights',['reports','downloads']],['Admin',['finance','admin']]];
 let view=HOME(),q='',lastView='';
 
 const hit=o=>!q||Object.values(o).filter(v=>v!=null&&typeof v!='object').join(' ').toLowerCase().includes(q);
 
 function badges(){const td=today();return{
+  messages:msgUnread(),
   leads:S.leads.filter(l=>!['Won','Lost'].includes(l.stage)).length,
   service:S.calls.filter(c=>c.status!='Complete').length,
   fitting:S.contracts.filter(c=>c.fit&&c.stage!='Complete').length,
@@ -85,6 +86,7 @@ function openModal(h,size){const b=$('#mbox');b.className='mb'+(size?' '+size:''
   if(size!='full')setTimeout(()=>{const f=b.querySelector('input:not([readonly]):not([type=hidden]):not([type=checkbox]),select,textarea');if(f&&matchMedia('(pointer:fine)').matches)f.focus({preventScroll:true})},60)}
 /* "next" fields: Mobile 2 shows once Mobile 1 has something in it, and so on */
 const nxHid=(f,v)=>!!f.nx&&!String(v[f.nx]??'').trim()&&!String(v[f.k]??'').trim();
+document.addEventListener('change',e=>{const el=e.target;if(el.tagName=='SELECT'&&el.value===RANDOM_SP){const L=OWNERS().filter(x=>x!='Unassigned');const pick=L[Math.floor(Math.random()*L.length)]||'Unassigned';el.value=pick;toast('Picked at random: '+pick)}});
 document.addEventListener('input',e=>{const el=e.target;if(!el.id||!el.id.startsWith('f_'))return;const k=el.id.slice(2);
   $$(`#mbox [data-nx="${k}"]`).forEach(r=>{const own=r.querySelector('input,select,textarea');r.hidden=!el.value.trim()&&!(own&&own.value.trim())})});
 /* styled confirmation instead of the browser's own box */

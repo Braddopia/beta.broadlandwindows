@@ -3,10 +3,10 @@
    NOTE: this app runs entirely in the browser. These checks stop casual
    access and accidents; real protection of the data needs a server.
    ========================================================================== */
-const FOCUS=['home','live','deliveries','stock','suppliers','downloads'];
+const FOCUS=['home','messages','live','deliveries','stock','suppliers','downloads'];
 const ROLES={
   admin:  {n:'Administrator',     d:'Everything a standard user has, plus staff and holidays',v:[...FOCUS,'leads','contracts','staff','holidays']},
-  staff:  {n:'Standard user',     d:'Overview, leads, contracts, live analytics, inventory and files',v:[...FOCUS,'leads','contracts']},
+  staff:  {n:'Standard user',     d:'Overview, leads, contracts, live analytics, inventory and files',v:[...FOCUS,'leads','contracts','holidays']},
   beta:   {n:'Beta (all features)',d:'Leads, contracts, finance, staff and everything else',v:'*'}};
 const RL={admin:'Administrator',staff:'Team Member',beta:'Beta Access'};
 const IDLE_MIN=30, PIN_TRIES=5, PIN_LOCK_S=60;

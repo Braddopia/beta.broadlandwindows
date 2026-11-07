@@ -9,32 +9,36 @@ const BRANCHES=['Norwich','Cambridge','Great Yarmouth','North Norfolk','Suffolk'
 const PTYPES=['','Windows','Doors','Windows & Doors','Garden Room','Conservatory','Roof Lantern','Secondary Glazing','Commercial Aluminium','Roofline','Repairs','Other'];
 const CTYPES=['Domestic PVCu','Domestic Ali','Domestic Timber','Domestic Composite','Garden Room','Commercial','Service / Repair'];
 const RESULTS=['','Contract Awarded','Quote Pending','Thinking It Over','Lost - Price','Lost - Timing','Lost - Competitor','Not Interested','No Show'];
-const LEAD_CK=['Survey appointment booked','Home survey carried out','Colour and glass samples shown','Brochure given or sent','Payment and finance options explained','Showroom visit offered','Planning or listed building checked','Written quote sent','Follow-up call made after quote'];
+const LEAD_CK=LCKG.flatMap(g=>g[2]);
 const staffNames=()=>['',...new Set(S.staff.map(s=>s.name))];
 
 /* ---- customer information: same fields on leads and contracts ---- */
 const CUSTF=[
-  {k:'title',l:'Title',t:'select',o:['','Mr','Mrs','Miss','Ms','Mr & Mrs','Dr','Company'],g:'Customer'},
-  {k:'name',l:'Customer / contact name',req:1,g:'Customer'},{k:'company',l:'Company',g:'Customer'},
-  {k:'salutation',adv:1,l:'Salutation (Dear ...)',g:'Customer'},{k:'addrType',adv:1,l:'Address type',t:'select',o:['Home','Business'],g:'Customer'},
-  {k:'prefContact',adv:1,l:'Preferred contact',t:'select',o:['','Mobile','Home phone','Work phone','Email','Post'],g:'Customer'},
-  {k:'mob1',l:'Mobile 1',t:'tel',max:30,g:'Phone Numbers'},{k:'mob2',nx:'mob1',l:'Mobile 2',t:'tel',max:30,g:'Phone Numbers'},
-  {k:'home1',l:'Home 1',t:'tel',max:30,g:'Phone Numbers'},{k:'home2',nx:'home1',l:'Home 2',t:'tel',max:30,g:'Phone Numbers'},{k:'work',l:'Work',t:'tel',max:30,g:'Phone Numbers'},
-  {k:'email1',l:'Email 1',t:'email',g:'Email'},{k:'email2',nx:'email1',l:'Email 2',t:'email',g:'Email'},
-  {k:'homeAddr',l:'Home address',t:'area',max:300,g:'Home Address'},{k:'town',l:'Town',g:'Home Address'},{k:'homePc',l:'Postcode',max:10,g:'Home Address'},
-  {k:'invSame',l:'Invoice to',t:'select',o:['Same as home','Different'],g:'Invoice Address'},{k:'invAddr',dep:'invSame',l:'Invoice address',t:'area',max:300,g:'Invoice Address'},{k:'invPc',dep:'invSame',l:'Postcode',max:10,g:'Invoice Address'},
-  {k:'siteSame',l:'Installation at',t:'select',o:['Same as home','Different'],g:'Site Address'},{k:'siteAddr',dep:'siteSame',l:'Site address',t:'area',max:300,g:'Site Address'},{k:'sitePc',dep:'siteSame',l:'Postcode',max:10,g:'Site Address'},{k:'siteAccess',dep:'siteSame',l:'Access / parking notes',max:200,g:'Site Address'}];
+  {k:'title',l:'Title',t:'select',o:['','Mr','Mrs','Miss','Ms','Mr & Mrs','Dr','Company'],req:1,g:'Customer'},
+  {k:'name',l:'Customer / contact name',req:1,g:'Customer'},{k:'salutation',l:'Salutation (Dear ...)',g:'Customer'},{k:'company',l:'Company',g:'Customer'},
+  {k:'prefContact',l:'Preferred contact',t:'select',o:['','Mobile','Home phone','Work phone','Email','Post'],g:'Customer'},
+  {k:'mob1',l:'Mobile',t:'tel',max:30,g:'Phone Numbers'},{k:'mob2',nx:'mob1',l:'Mobile 2',t:'tel',max:30,g:'Phone Numbers'},{k:'mob3',nx:'mob2',l:'Mobile 3',t:'tel',max:30,g:'Phone Numbers'},
+  {k:'home1',l:'Home phone',t:'tel',max:30,g:'Phone Numbers'},{k:'home2',nx:'home1',l:'Home phone 2',t:'tel',max:30,g:'Phone Numbers'},{k:'home3',nx:'home2',l:'Home phone 3',t:'tel',max:30,g:'Phone Numbers'},
+  {k:'work',l:'Work phone',t:'tel',max:30,g:'Phone Numbers'},{k:'work2',nx:'work',l:'Work phone 2',t:'tel',max:30,g:'Phone Numbers'},{k:'work3',nx:'work2',l:'Work phone 3',t:'tel',max:30,g:'Phone Numbers'},
+  {k:'email1',l:'Email',t:'email',req:1,g:'Email'},{k:'email2',nx:'email1',l:'Email 2',t:'email',g:'Email'},{k:'email3',nx:'email2',l:'Email 3',t:'email',g:'Email'},
+  {k:'addrType',l:'Address type',t:'select',o:['Home','Business'],g:'Home Address'},{k:'homeAddr',l:'Address line 1',req:1,max:120,g:'Home Address'},{k:'homeAddr2',l:'Address line 2',max:120,g:'Home Address'},
+  {k:'town',l:'Town / city',req:1,max:60,g:'Home Address'},{k:'county',l:'County',max:60,g:'Home Address'},{k:'homePc',l:'Postcode',req:1,max:10,g:'Home Address'},
+  {k:'invSame',l:'Invoice to',t:'select',o:['Same as home','Different'],g:'Invoice Address'},{k:'invAddr',dep:'invSame',l:'Address line 1',max:120,g:'Invoice Address'},{k:'invAddr2',dep:'invSame',l:'Address line 2',max:120,g:'Invoice Address'},
+  {k:'invTown',dep:'invSame',l:'Town / city',max:60,g:'Invoice Address'},{k:'invCounty',dep:'invSame',l:'County',max:60,g:'Invoice Address'},{k:'invPc',dep:'invSame',l:'Postcode',max:10,g:'Invoice Address'},
+  {k:'siteSame',l:'Installation at',t:'select',o:['Same as home','Different'],g:'Site Address'},{k:'siteAddr',dep:'siteSame',l:'Address line 1',max:120,g:'Site Address'},{k:'siteAddr2',dep:'siteSame',l:'Address line 2',max:120,g:'Site Address'},
+  {k:'siteTown',dep:'siteSame',l:'Town / city',max:60,g:'Site Address'},{k:'siteCounty',dep:'siteSame',l:'County',max:60,g:'Site Address'},{k:'sitePc',dep:'siteSame',l:'Postcode',max:10,g:'Site Address'},{k:'siteAccess',l:'Access / parking notes',max:200,g:'Site Address'}];
 const GDPRF=[{k:'gdprEmail',l:'Marketing by email',t:'select',o:YN},{k:'gdprSms',l:'Marketing by text',t:'select',o:YN},{k:'gdprPhone',l:'Marketing by phone',t:'select',o:YN},{k:'gdprPost',l:'Marketing by post',t:'select',o:YN},{k:'gdprDate',l:'Consent date',t:'date'},{k:'gdprHow',l:'How consent was given',max:100},{k:'gdprNotes',l:'Data notes',t:'area',max:500}];
 const CUSTK=[...CUSTF,...GDPRF].map(f=>f.k);
 /* move old single phone/email/address fields into the new structure */
 (function migrateCustomers(){if(S.custV1)return;[...S.leads,...S.contracts].forEach(r=>{
   if(r.phone&&!r.mob1&&!r.home1){if(/^\s*07/.test(r.phone))r.mob1=r.phone;else r.home1=r.phone}
   if(r.email&&!r.email1)r.email1=r.email;if(r.address&&!r.homeAddr)r.homeAddr=r.address;r.invSame=r.invSame||'Same as home';r.siteSame=r.siteSame||'Same as home'});S.custV1=1;store()})();
-const telOf=r=>r.mob1||r.home1||r.work||r.mob2||r.home2||r.phone||'';
-const mailOf=r=>r.email1||r.email2||r.email||'';
-const addrOf=r=>[r.homeAddr||r.address,r.town].filter(Boolean).join(', ');
-const siteOf=r=>r.siteSame=='Different'&&r.siteAddr?[r.siteAddr,r.sitePc].filter(Boolean).join(' '):[addrOf(r),r.homePc].filter(Boolean).join(' ');
-function custCompat(r){r.phone=telOf(r);r.email=mailOf(r);r.address=r.siteSame=='Different'&&r.siteAddr?r.siteAddr:(r.homeAddr||'')}
+const PHONES=['mob1','mob2','mob3','home1','home2','home3','work','work2','work3'];
+const telOf=r=>PHONES.map(k=>r[k]).find(Boolean)||r.phone||'';
+const mailOf=r=>r.email1||r.email2||r.email3||r.email||'';
+const addrOf=r=>[r.homeAddr||r.address,r.homeAddr2,r.town,r.county].filter(Boolean).join(', ');
+const siteOf=r=>r.siteSame=='Different'&&r.siteAddr?[r.siteAddr,r.siteAddr2,r.siteTown,r.siteCounty,r.sitePc].filter(Boolean).join(', '):[addrOf(r),r.homePc].filter(Boolean).join(', ');
+function custCompat(r){r.phone=telOf(r);r.email=mailOf(r);r.address=r.siteSame=='Different'&&r.siteAddr?[r.siteAddr,r.siteAddr2].filter(Boolean).join(', '):[r.homeAddr,r.homeAddr2].filter(Boolean).join(', ')}
 
 /* ---- row-style field (label left, value right, edited in place) ---- */
 function rfH(f,v){const val=v[f.k]??'',id='f_'+f.k;let c;
@@ -46,7 +50,7 @@ function rfH(f,v){const val=v[f.k]??'',id='f_'+f.k;let c;
   if(['invSame','siteSame'].includes(f.k))c=c.replace('<select ','<select onchange="recDep(this)" ');
   return `<label class="rf ${f.t=='area'?'ta':''}" ${f.dep?`data-dep="${f.dep}"`:''} ${f.nx?`data-nx="${f.nx}"`:''} ${hid?'hidden':''}><span>${esc(f.l)}${f.req?' *':''}</span>${c}</label>`}
 const grpH=(t,fs,v)=>`<section class="rg"><h4>${esc(t)}</h4>${fs.map(f=>rfH(f,v)).join('')}</section>`;
-const byGroup=(fs,v)=>{const g={},adv=fs.filter(f=>f.adv);fs.filter(f=>!f.adv).forEach(f=>(g[f.g]=g[f.g]||[]).push(f));
+const byGroup=(fs,v)=>{const g={},adv=[];fs.forEach(f=>(g[f.g]=g[f.g]||[]).push(f));
   return Object.entries(g).map(([t,x])=>grpH(t,x,v)).join('')+(adv.length?`<details class="rg more"><summary>More details <span class="muted">(${adv.length})</span></summary>${adv.map(f=>rfH(f,v)).join('')}</details>`:'')};
 function recDep(sel){const k=sel.id.slice(2);$$(`#mbox [data-dep="${k}"]`).forEach(r=>r.hidden=sel.value!='Different')}
 
@@ -55,10 +59,10 @@ let RW=null;const RTAB={lead:'customer',contract:'customer'};
 /* the record is worked through as steps, in the order the job happens */
 const RSTEPS={lead:['customer','details','appts','survey','check','notes','docs','gdpr'],contract:['customer','details','survey','products','finance','fitting','deliveries','check','notes','docs','calls','gdpr']};
 const RNAME={lead:{details:'Enquiry'},contract:{details:'Contract'}};
-const RHINT={customer:'Who they are, how to reach them and where the work is.',details:{lead:'Where the enquiry came from, what they want and what happens next.',contract:'Contract type, stage and sales information.'},appts:'Survey and follow-up appointments.',survey:'Every window and door opening: sizes, type and glass.',products:'What is being supplied and fitted, with prices.',finance:'Contract value, payments and invoicing.',fitting:'Dates, fitting team and the details FENSA needs.',deliveries:'Supplier deliveries booked for this job.',check:'Tick each stage off as it is done.',notes:'General notes and a log of calls, emails and visits.',docs:'Photos from the survey and fitting, and any documents.',calls:'Service calls raised on this job.',gdpr:'Marketing consent and data notes.'};
+const RHINT={customer:'Who they are, how to reach them and where the work is.',details:{lead:'Where the enquiry came from, what they want and what happens next.',contract:'Contract type, stage and sales information.'},appts:'Book the visit, then send the customer a reminder by email or text, or add it to a calendar.',survey:'Every window and door opening: sizes, type and glass.',products:'What is being supplied and fitted, with prices.',finance:'Contract value, payments and invoicing.',fitting:'Dates, fitting team and the details FENSA needs.',deliveries:'Supplier deliveries booked for this job.',check:{lead:'The steps that turn an enquiry into a sale. Tick each one as you go.',contract:'Every stage from signed contract to guarantee. Ticks record who did it and when.'},notes:'General notes and a log of calls, emails and visits.',docs:'Photos from the survey and fitting, and any documents.',calls:'Service calls raised on this job.',gdpr:'Marketing consent and data notes.'};
 function recOpen(kind,id){const D=REC[kind],r=id?D.get(id):null;if(id&&!r)return;
   const W=RW={kind,id:r?r.id:null,isNew:!r,v:r?JSON.parse(JSON.stringify(r)):D.blank(),list:D.order()};
-  W.v.log=W.v.log||[];W.v.photos=(W.v.photos||[]).filter(SAFE.img);tmp=W.v.photos;tmpDraw=drawThumbs;
+  W.v.log=W.v.log||[];W.v.photos=(W.v.photos||[]).filter(SAFE.img);tmp=W.v.photos;tmpDraw=()=>{recThumbs();recRail()};
   const ord=RSTEPS[kind],tabs=D.tabs(W).sort((a,b)=>ord.indexOf(a.k)-ord.indexOf(b.k)),tab=tabs.some(t=>t.k==RTAB[kind])?RTAB[kind]:tabs[0].k,pos=W.list.indexOf(W.id);W.steps=tabs.map(t=>t.k);
   const nm=k=>(RNAME[kind]||{})[k]||tabs.find(t=>t.k==k).t,hint=k=>{const h=RHINT[k];return typeof h=='object'?h[kind]:h||''};
   openModal(`<div class="rw">
@@ -70,7 +74,7 @@ function recOpen(kind,id){const D=REC[kind],r=id?D.get(id):null;if(id&&!r)return
      <ol class="rw-steps">${tabs.map((t,i)=>`<li><button type="button" data-t="${t.k}" class="${t.k==tab?'on':''}" ${A('recTab',t.k)}><i>${i+1}</i><span><b>${esc(nm(t.k))}</b><small data-st="${t.k}"></small></span></button></li>`).join('')}</ol></aside>
     <div class="rw-main"><div class="rw-b">${tabs.map((t,i)=>`<div class="rw-p ${t.k==tab?'on':''}" data-t="${t.k}" role="tabpanel"><div class="rw-sh"><small>Step ${i+1} of ${tabs.length}</small><h3>${esc(nm(t.k))}</h3><p>${esc(hint(t.k))}</p></div>${t.h(W)}</div>`).join('')}</div>
      <div class="rw-foot"><button type="button" class="btn ghost" id="rwPrev" onclick="recStep(-1)"></button><span class="rw-sp"></span><button type="button" class="btn" id="rwNext" onclick="recStep(1)"></button></div></div></div></div>`,'full');
-  W.nm=nm;recFoot();recRail();$('#mbox .rw-x').addEventListener('input',()=>{clearTimeout(recRail.t);recRail.t=setTimeout(recRail,250)});$('#mbox .rw-x').addEventListener('change',()=>recRail());
+  W.nm=nm;recThumbs();recDocs();recFoot();recRail();$('#mbox .rw-x').addEventListener('input',()=>{clearTimeout(recRail.t);recRail.t=setTimeout(recRail,250)});$('#mbox .rw-x').addEventListener('change',e=>{const c=e.target;if(c.classList&&c.classList.contains('rck')){const w=c.parentElement.querySelector('.ck-w');if(w)w.textContent=c.checked?'Done today by '+USER:''}recRail()});
   drawThumbs()}
 function recTab(k){RTAB[RW.kind]=k;$$('#mbox .rw-steps button').forEach(b=>b.classList.toggle('on',b.dataset.t==k));$$('#mbox .rw-p').forEach(p=>p.classList.toggle('on',p.dataset.t==k));$('#mbox .rw-b').scrollTop=0;recFoot();recRail();const b=$(`#mbox .rw-steps button[data-t="${k}"]`);if(b&&b.scrollIntoView)b.scrollIntoView({block:'nearest',inline:'nearest'})}
 function recStep(d){const S2=RW.steps,i=S2.indexOf(RTAB[RW.kind]);if(d>0&&i==S2.length-1){recSave(true);return}const n=S2[i+d];if(n)recTab(n)}
@@ -87,15 +91,16 @@ function recRail(){if(!RW||!$('#rwCust'))return;const g=k=>{const e=$('#f_'+k);r
     finance:[val?(val-paid>0?m0(val-paid)+' to collect':'Paid in full'):'No value yet',val>0&&paid>=val],fitting:[g('fit')?'Fit '+fd(g('fit')):'No fit date',!!g('fit')],
     deliveries:[S.deliveries.filter(d=>d.contract==v.id).length+' booked',S.deliveries.some(d=>d.contract==v.id)&&S.deliveries.filter(d=>d.contract==v.id).every(d=>d.status=='Received')],
     check:[ckd+' of '+ck.length+' done',ck.length>0&&ckd==ck.length],notes:[log?log+' entr'+(log==1?'y':'ies'):g('notes')?'Notes added':'Nothing yet',!!(log||g('notes'))],
-    docs:[ph?ph+' photo'+(ph==1?'':'s'):'No photos',ph>0],calls:[S.calls.filter(c=>c.contract==v.id).length+' calls',false],gdpr:[g('gdprDate')?'Consent '+fd(g('gdprDate')):'Not recorded',!!g('gdprDate')]};
+    docs:[ph+' photo'+(ph==1?'':'s')+', '+(RW.docs||[]).length+' doc'+((RW.docs||[]).length==1?'':'s'),ph>0||(RW.docs||[]).length>0],calls:[S.calls.filter(c=>c.contract==v.id).length+' calls',false],gdpr:[g('gdprDate')?'Consent '+fd(g('gdprDate')):'Not recorded',!!g('gdprDate')]};
+  const ckt=$('#mbox .ck-top');if(ckt){ckt.querySelector(':scope>b').textContent=ckd+' of '+ck.length+' done';ckt.querySelector('i b').style.width=Math.round(100*ckd/(ck.length||1))+'%'}
   let done=0;RW.steps.forEach(k=>{const s=ST[k]||['',false],el=$(`#mbox small[data-st="${k}"]`);if(el)el.textContent=s[0];const b=$(`#mbox .rw-steps button[data-t="${k}"]`);if(b)b.classList.toggle('ok',!!s[1]);if(s[1])done++});
   const pc=Math.round(100*done/RW.steps.length);$('#rwPct').textContent=done+' of '+RW.steps.length+' steps complete';$('#rwBar').style.width=pc+'%';
   $('#rwCust').innerHTML=`<b>${esc([g('title'),g('name')].filter(Boolean).join(' ')||'New customer')}</b>${g('company')?`<span>${esc(g('company'))}</span>`:''}${tel?`<a class="nocap" href="tel:${esc(tel.replace(/[^\\d+]/g,''))}">${esc(tel)}</a>`:'<span class="muted">No phone yet</span>'}${em?`<a class="nocap" href="mailto:${esc(em)}">${esc(em)}</a>`:''}${ad?`<span class="muted">${esc(ad)}</span>`:''}`}
 function recRedraw(t){const D=REC[RW.kind],x=D.tabs(RW).find(z=>z.k==t),p=$(`#mbox .rw-p[data-t="${t}"]`);if(x&&p)p.innerHTML=x.h(RW);recRail()}
 function recRead(){const D=REC[RW.kind],o=readFields(D.fields(RW));if(!o)return null;
-  $$('#mbox .rck').forEach(c=>{(o.chk=o.chk||{})[c.dataset.k]=c.checked});
-  if($('#mbox .pl'))o.lines=readLines();if($('#mbox .op')||RW.v.openings)o.openings=$('#mbox .op')?readOps():RW.v.openings;o.photos=tmp.slice(0,MAX_PHOTOS);return o}
-function recSave(close){const D=REC[RW.kind],o=recRead();if(!o)return false;const e=D.check&&D.check(RW,o);if(e){toast(e);return false}
+  const at={...(RW.v.chkAt||{})};$$('#mbox .rck').forEach(c=>{const k=c.dataset.k;(o.chk=o.chk||{})[k]=c.checked;if(c.checked&&!at[k])at[k]={d:today(),by:USER};if(!c.checked)delete at[k]});o.chkAt=at;
+  o.phTags=(RW.v.phTags||[]).slice(0,MAX_PHOTOS);if($('#mbox .pl'))o.lines=readLines();if($('#mbox .op')||RW.v.openings)o.openings=$('#mbox .op')?readOps():RW.v.openings;o.photos=tmp.slice(0,MAX_PHOTOS);return o}
+function recSave(close){const D=REC[RW.kind],o=recRead();if(!o){const a=document.activeElement,p=a&&a.closest&&a.closest('.rw-p');if(p&&!p.classList.contains('on')){recTab(p.dataset.t);setTimeout(()=>a.focus(),30)}return false}const e=D.check&&D.check(RW,o);if(e){toast(e);if(/Customer step/.test(e))recTab('customer');return false}
   const id=D.save(RW,o);store();if(close){closeModal();render()}else{render();recOpen(RW.kind,id)}toast('Saved');return true}
 function recNav(d){const L=RW.list,i=L.indexOf(RW.id),n=d=='first'?0:d=='last'?L.length-1:i+d;if(n<0||n>=L.length)return;const kind=RW.kind;if(!recSave(false))return;recOpen(kind,L[n])}
 /* small inline lists inside a record */
@@ -103,11 +108,41 @@ function recAdd(list,fs,tab){const o={};for(const k of fs){const e=$('#ra_'+k);o
   RW.v[list]=RW.v[list]||[];RW.v[list].unshift({...o,by:USER,at:today()});RW.dirty=1;recRedraw(tab)}
 function recDel(list,i,tab){RW.v[list].splice(i,1);RW.dirty=1;recRedraw(tab)}
 function recClose(){if(RW&&RW.dirty&&!confirm('You have unsaved changes. Close without saving?'))return;closeModal()}
-const photoTab=()=>`<div class="rg wide"><h4>Photos And Documents</h4><div class="thumbs" id="thumbs"></div><div class="prow"><label class="btn ghost sm">Take photo<input type="file" accept="image/*" capture="environment" hidden onchange="addPh(this)"></label><label class="btn ghost sm">Upload photos<input type="file" accept="image/*" multiple hidden onchange="addPh(this)"></label><span class="muted" style="font-size:.78rem">Up to ${MAX_PHOTOS} photos</span></div></div>`;
+/* checklist shown as stages, with who ticked each item and when */
+const ckTab=(W,items)=>{const G=items===CK?CKG:LCKG,C=W.v.chk||{},T=W.v.chkAt||{},n=items.filter(k=>C[k]).length;
+  return `<div class="ckw"><div class="ck-top"><b>${n} of ${items.length} done</b><i><b style="width:${Math.round(100*n/(items.length||1))}%"></b></i></div><div class="ckg">${G.map(([t,d,L],gi)=>{const dn=L.filter(k=>C[k]).length;return `<section class="rg ck-s ${dn==L.length?'all':''}"><h4><span><i class="ck-n">${gi+1}</i>${esc(t)}</span><small>${dn} of ${L.length}</small></h4><p class="muted">${esc(d)}</p>${L.map(k=>`<label class="ck-i"><input type="checkbox" class="rck" data-k="${esc(k)}" ${C[k]?'checked':''}><span><b>${esc(k)}</b><small class="ck-w">${C[k]&&T[k]?'Done '+fd(T[k].d)+' by '+esc(T[k].by):C[k]?'Done':''}</small></span></label>`).join('')}</section>`}).join('')}</div></div>`};
+/* photos (with a tag each) and documents (stored on this device, type worked out from the file) */
+const PHTAGS=['Survey','Before','During','After','Damage','Other'];
+const DOCTYPES=['Quote','Contract','Survey','Drawing','Invoice','Certificate','Spreadsheet','Document','Photo','Other'];
+function docGuess(name,type){const n=String(name).toLowerCase(),x=(n.split('.').pop()||'');
+  if(/quote|quotation|estimate/.test(n))return 'Quote';if(/invoice|receipt/.test(n))return 'Invoice';if(/fensa|certificate|cert\b|guarantee|warranty/.test(n))return 'Certificate';
+  if(/survey|measure/.test(n))return 'Survey';if(/contract|agreement|terms/.test(n))return 'Contract';if(/drawing|plan|elevation/.test(n)||['dwg','dxf'].includes(x))return 'Drawing';
+  if(['xls','xlsx','csv','numbers'].includes(x)||/sheet|excel|csv/.test(type))return 'Spreadsheet';if(/^image\//.test(type)||['jpg','jpeg','png','heic','webp','gif'].includes(x))return 'Photo';
+  if(['pdf','doc','docx','txt','rtf','odt'].includes(x)||/pdf|word|text/.test(type))return 'Document';return 'Other'}
+const docIcon=t=>({Quote:'£',Invoice:'£',Certificate:'✓',Drawing:'⌗',Spreadsheet:'▦',Photo:'▣',Survey:'⌖',Contract:'✎'}[t]||'▤');
+const photoTab=W=>`<div class="rcols"><section class="rg wide"><h4><span>Photos</span><span class="acts"><label class="mini pri" style="cursor:pointer">Take photo<input type="file" accept="image/*" capture="environment" hidden onchange="addPh(this)"></label><label class="mini" style="cursor:pointer">Upload photos<input type="file" accept="image/*" multiple hidden onchange="addPh(this)"></label></span></h4><p class="muted" style="margin:.1rem 0 .6rem;font-size:.82rem">Up to ${MAX_PHOTOS} photos. Tag each one so survey, before and after shots are easy to find.</p><div class="thumbs rph" id="thumbs"></div></section>
+  <section class="rg wide"><h4><span>Documents</span><label class="mini pri" style="cursor:pointer">Upload documents<input type="file" multiple hidden onchange="recDocUp(this)"></label></h4><p class="muted" style="margin:.1rem 0 .6rem;font-size:.82rem">Quotes, drawings, certificates, invoices. The type is picked from the file name and format, and you can change it. Files are kept on this device.</p><div id="recDocs" class="rdocs">Loading</div></section></div>`;
+function recThumbs(){const t=$('#thumbs');if(!t)return;const T=RW.v.phTags=RW.v.phTags||[];while(T.length<tmp.length)T.push('Survey');T.length=tmp.length;
+  t.innerHTML=tmp.map((p,i)=>`<div class="th"><img src="${SAFE.img(p)}" alt="Photo ${i+1}"><button type="button" aria-label="Remove photo" ${A('recRmPh',i)}>&times;</button><select class="phtag" ${AC('onchange','recPhTag',i,'this.value')}>${PHTAGS.map(x=>`<option ${x==T[i]?'selected':''}>${x}</option>`).join('')}</select></div>`).join('')||emptyArt('survey','No photos yet.')}
+function recRmPh(i){tmp.splice(i,1);(RW.v.phTags||[]).splice(i,1);RW.dirty=1;recThumbs();recRail()}
+function recPhTag(i,v){RW.v.phTags=RW.v.phTags||[];RW.v.phTags[i]=PHTAGS.includes(v)?v:'Other';RW.dirty=1}
+const recRef=()=>RW.kind+':'+(RW.id||RW.v.id);
+async function recDocs(){const el=$('#recDocs');if(!el)return;try{const ref=recRef(),L=((await fx('readonly',s=>s.getAll()))||[]).filter(f=>f.ref==ref).sort((a,b)=>b.time-a.time);RW.docs=L;
+  el.innerHTML=L.map(f=>`<div class="rdoc"><span class="rdi">${esc(docIcon(f.cat))}</span><span class="rdn"><b>${esc(f.name)}</b><small>${kb(f.size)} · ${new Date(f.time).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})} · ${esc(f.by||'')}</small></span><select ${AC('onchange','recDocType',f.id,'this.value')}>${DOCTYPES.map(x=>`<option ${x==f.cat?'selected':''}>${x}</option>`).join('')}</select><span class="acts"><button class="mini" ${A('recDocOpen',f.id)}>Open</button><button class="mini" ${A('recDocDl',f.id)}>Download</button><button class="mini del" ${A('recDocDel',f.id)}>Remove</button></span></div>`).join('')||emptyArt('files','No documents yet.');
+  const sm=$('#mbox small[data-st="docs"]');if(sm)sm.textContent=tmp.length+' photo'+(tmp.length==1?'':'s')+', '+L.length+' doc'+(L.length==1?'':'s')}catch(e){el.innerHTML='<p class="empty">Document storage is not available in this browser.</p>'}}
+async function recDocUp(inp){if(RW.isNew){toast('Save the record first, then add documents');inp.value='';return}let n=0,skip=0;const ref=recRef();
+  try{for(const f of inp.files){if(f.size>MAX_UPLOAD){skip++;continue}await fx('readwrite',s=>s.put({id:uuid(),ref,name:SAFE.text(f.name,120),cat:docGuess(f.name,f.type),size:f.size,type:f.type,time:Date.now(),by:USER,blob:f}));n++}
+    inp.value='';if(n)audit('Document added',ref,n+' file(s)');store();toast(n+' added'+(skip?', '+skip+' too large':''));recDocs()}catch(e){toast('Document storage is not available here')}}
+async function recDocType(id,v){const f=(RW.docs||[]).find(x=>x.id==id);if(!f)return;f.cat=DOCTYPES.includes(v)?v:'Other';await fx('readwrite',s=>s.put(f));recDocs()}
+function recDocOpen(id){const f=(RW.docs||[]).find(x=>x.id==id);if(!f)return;if(/^(application\/pdf|image\/(png|jpe?g|gif|webp)|text\/plain)/.test(f.blob.type))window.open(URL.createObjectURL(f.blob),'_blank','noopener');else download(f.name,f.blob)}
+function recDocDl(id){const f=(RW.docs||[]).find(x=>x.id==id);if(f)download(f.name,f.blob)}
+function recDocDel(id){const f=(RW.docs||[]).find(x=>x.id==id);if(!f)return;const w=RW;if(!confirm('Remove '+f.name+'? It is deleted from this device.'))return;fx('readwrite',s=>s.delete(id)).then(()=>{audit('Document removed',recRef(),f.name);store();recDocs()})}
+/* when a lead becomes a contract, its documents move with it */
+async function docsMove(from,to){try{const L=((await fx('readonly',s=>s.getAll()))||[]).filter(f=>f.ref==from);for(const f of L){f.ref=to;await fx('readwrite',s=>s.put(f))}}catch(e){}}
 const logTab=(W,tab)=>`<div class="rcols"><section class="rg"><h4>Notes</h4>${rfH({k:'notes',l:'General notes',t:'area',rows:8},W.v)}</section>
   <section class="rg"><h4>Activity Log</h4><div class="radd"><select id="ra_t">${['Call','Email','Visit','Survey','Quote sent','Note'].map(x=>`<option>${x}</option>`).join('')}</select><input id="ra_n" placeholder="What happened" maxlength="300"><button class="mini pri" ${A('recAdd','log',['t','n'],tab)}>Add</button></div>
   ${W.v.log.map((e,i)=>`<div class="row"><span><b>${esc(e.t)}</b><br><span class="muted">${esc(e.n||'')}</span></span><span class="muted" style="text-align:right;white-space:nowrap">${fd(e.d||e.at)}<br>${esc(e.by||'')} <button class="mini del" ${A('recDel','log',i,tab)} aria-label="Remove">&times;</button></span></div>`).join('')||'<p class="empty">No activity yet.</p>'}</section></div>`;
-const ckTab=(W,items)=>`<div class="rg wide"><h4>Checklist, ${items.filter(k=>(W.v.chk||{})[k]).length} of ${items.length} done</h4><div class="rck-g">${items.map(k=>`<label class="rckl"><input type="checkbox" class="rck" data-k="${esc(k)}" ${(W.v.chk||{})[k]?'checked':''}><span>${esc(k)}</span></label>`).join('')}</div></div>`;
+const ckTabOld=(W,items)=>`<div class="rg wide"><h4>Checklist, ${items.filter(k=>(W.v.chk||{})[k]).length} of ${items.length} done</h4><div class="rck-g">${items.map(k=>`<label class="rckl"><input type="checkbox" class="rck" data-k="${esc(k)}" ${(W.v.chk||{})[k]?'checked':''}><span>${esc(k)}</span></label>`).join('')}</div></div>`;
 
 
 /* ---- survey schedule: one row per window or door opening ---- */
@@ -140,16 +175,34 @@ function lineDel(i){RW.v.lines=readLines();RW.v.lines.splice(i,1);RW.dirty=1;rec
 
 /* ======================= LEAD record ======================= */
 const LEADF=W=>[
-  {k:'id',l:'Lead number',ro:1,g:'Lead'},{k:'created',l:'Lead date',t:'date',g:'Lead'},{k:'officeRef',adv:1,l:'Office reference',g:'Lead'},
-  {k:'takenBy',adv:1,l:'Taken by',t:'select',o:staffNames(),g:'Lead'},{k:'branch',l:'Sales area / branch',t:'select',o:['',...BRANCHES],g:'Lead'},{k:'owner',l:'Salesperson',t:'select',o:OWNERS(),g:'Lead'},
+  {k:'id',l:ISOWN()?'Lead number (admin can change)':'Lead number',ro:!ISOWN(),max:5,g:'Lead'},{k:'created',l:'Lead date',t:'date',g:'Lead'},{k:'officeRef',adv:1,l:'Office reference',g:'Lead'},
+  {k:'takenBy',adv:1,l:'Taken by',t:'select',o:staffNames(),g:'Lead'},{k:'branch',l:'Sales area / branch',t:'select',o:['',...BRANCHES],g:'Lead'},{k:'owner',l:'Salesperson',t:'select',o:[...OWNERS(),RANDOM_SP],g:'Lead'},
   {k:'stage',l:'Stage',t:'select',o:STAGES,g:'Lead'},{k:'prob',adv:1,l:'Win chance (%)',t:'number',max:100,dp:0,g:'Lead'},
-  {k:'source',l:'Lead source',t:'select',o:SOURCES,g:'Source And Interest'},{k:'subSource',l:'Sub source',g:'Source And Interest'},{k:'subSubSource',adv:1,l:'Sub sub source',g:'Source And Interest'},
-  {k:'productType',l:'Product type',t:'select',o:PTYPES,g:'Source And Interest'},{k:'interest1',l:'Product interest 1',g:'Source And Interest'},{k:'interest2',adv:1,l:'Product interest 2',g:'Source And Interest'},
+  {k:'source',l:'Lead source',t:'select',o:SOURCES,req:1,g:'Source And Interest'},{k:'subSource',l:'Sub source',g:'Source And Interest'},{k:'subSubSource',adv:1,l:'Sub sub source',g:'Source And Interest'},
+  {k:'productType',l:'Product type',t:'select',o:PTYPES,req:1,g:'Source And Interest'},{k:'interest1',l:'Product interest 1',g:'Source And Interest'},{k:'interest2',adv:1,l:'Product interest 2',g:'Source And Interest'},
   {k:'product',l:'Work wanted',t:'area',max:300,g:'Source And Interest'},{k:'value',l:'Net value (£)',t:'number',g:'Source And Interest'},
   {k:'quoteType',adv:1,l:'Quote type',t:'select',o:['','Email','Post','In person'],g:'Result'},{k:'payMethod',adv:1,l:'Payment method',t:'select',o:['','Cash','Bank transfer','Card','Finance','Cheque'],g:'Result'},
   {k:'result',l:'Result',t:'select',o:RESULTS,g:'Result'},{k:'resultDate',adv:1,l:'Result date',t:'date',g:'Result'},{k:'followup',l:'Next action date',t:'date',g:'Result'},{k:'next',l:'Next action',g:'Result'},
   {k:'showroom',adv:1,l:'Showroom visit',t:'select',o:YN,g:'Result'},{k:'notified',adv:1,l:'Salesperson notified',t:'select',o:YN,g:'Result'},{k:'frameInfo',adv:1,l:'Frame info',g:'Result'},{k:'customCat',adv:1,l:'Custom category',g:'Result'}];
-const APPTF=[{k:'apptDate',l:'Appointment date',t:'date'},{k:'apptTime',l:'Appointment time',t:'time'},{k:'demoDate',l:'Demo date',t:'date'}];
+const ATYPES=['Home survey','Design consultation','Showroom visit','Measure up','Call back','Quote follow-up'],ASTAT=['Booked','Confirmed','Done','No show','Cancelled'];
+const APPTF=[{k:'apptType',l:'Visit type',t:'select',o:ATYPES,g:'Next Visit'},{k:'apptDate',l:'Date',t:'date',g:'Next Visit'},{k:'apptTime',l:'Time',t:'time',g:'Next Visit'},{k:'apptWith',l:'With',t:'select',o:['',...staffNames().filter(Boolean)],g:'Next Visit'},{k:'apptStatus',l:'Status',t:'select',o:ASTAT,g:'Next Visit'},{k:'apptNotes',l:'Notes for the visit',t:'area',max:300,g:'Next Visit'},{k:'demoDate',l:'Second visit date',t:'date',g:'Next Visit'}];
+/* the appointment as it is on screen (main, i<0) or from the list */
+function apptGet(i){const g=k=>{const e=$('#f_'+k);return e?e.value:(RW.v[k]||'')};if(i<0)return{ty:g('apptType')||'Home survey',d:g('apptDate'),tm:g('apptTime'),w:g('apptWith'),st:g('apptStatus')};const a=(RW.v.appts||[])[i]||{};return{ty:a.ty,d:a.d,tm:a.tm,w:a.w,st:a.st}}
+function apptCust(){const g=k=>{const e=$('#f_'+k);return String(e?e.value:(RW.v[k]||'')).trim()};return{nm:[g('title'),g('name')].filter(Boolean).join(' ')||'there',em:g('email1'),mob:g('mob1')||g('mob2')||g('mob3'),addr:siteOf({siteSame:g('siteSame'),siteAddr:g('siteAddr'),siteAddr2:g('siteAddr2'),siteTown:g('siteTown'),siteCounty:g('siteCounty'),sitePc:g('sitePc'),homeAddr:g('homeAddr'),homeAddr2:g('homeAddr2'),town:g('town'),county:g('county'),homePc:g('homePc')})}}
+const apptWhen=a=>a.d?new Date(a.d+'T00:00').toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'})+(a.tm?' at '+a.tm:''):'';
+function apptSend(i,how){const a=apptGet(i),c=apptCust();if(!a.d){toast('Set the date first');return}
+  const txt=`Hello ${c.nm}, this is a reminder of your ${String(a.ty||'appointment').toLowerCase()} with Broadland Windows on ${apptWhen(a)}${c.addr?' at '+c.addr:''}.${a.w?' '+a.w+' will be with you.':''} If you need to change it, please call ${CO.tel}.`;
+  if(how=='email'){if(!c.em){toast('Add the customer email on the Customer step');return}location.href='mailto:'+encodeURIComponent(c.em)+'?subject='+encodeURIComponent('Your Broadland Windows appointment, '+apptWhen(a))+'&body='+encodeURIComponent(txt+'\n\nKind regards,\nBroadland Windows')}
+  else if(how=='sms'){if(!c.mob){toast('Add a mobile number on the Customer step');return}location.href='sms:'+c.mob.replace(/[^\d+]/g,'')+'?&body='+encodeURIComponent(txt)}
+  else if(how=='copy')copyText(txt);
+  else if(how=='ics'){const p=n=>String(n).padStart(2,'0'),d=a.d.replace(/-/g,''),tm=(a.tm||'09:00').replace(':','')+'00',e=new Date(a.d+'T'+(a.tm||'09:00'));e.setHours(e.getHours()+1);const end=d+'T'+p(e.getHours())+p(e.getMinutes())+'00';
+    const ics=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Broadland Windows//CRM//EN','BEGIN:VEVENT','UID:'+uuid()+'@broadland-crm','DTSTAMP:'+new Date().toISOString().replace(/[-:]/g,'').slice(0,15)+'Z','DTSTART:'+d+'T'+tm,'DTEND:'+end,'SUMMARY:'+(a.ty||'Appointment')+': '+c.nm,'LOCATION:'+c.addr.replace(/[,;]/g,'\\$&'),'DESCRIPTION:'+(a.w?'With '+a.w:''),'END:VEVENT','END:VCALENDAR'].join('\r\n');
+    download('appointment-'+a.d+'.ics',new Blob([ics],{type:'text/calendar'}))}
+  if(how!='copy'){(RW.v.log=RW.v.log||[]).unshift({d:today(),t:how=='ics'?'Calendar file made':how=='sms'?'Text reminder':'Email reminder',n:(a.ty||'')+' '+apptWhen(a),by:USER});RW.dirty=1;recRedraw('notes')}}
+const apptBtns=i=>`<div class="apb"><button type="button" class="mini pri" ${A('apptSend',i,'email')}>Email reminder</button><button type="button" class="mini" ${A('apptSend',i,'sms')}>Text reminder</button><button type="button" class="mini" ${A('apptSend',i,'ics')}>Add to calendar</button><button type="button" class="mini" ${A('apptSend',i,'copy')}>Copy</button></div>`;
+const apptTab=W=>`<div class="rcols"><section class="rg"><h4>Next Visit</h4>${APPTF.map(f=>rfH(f,W.v)).join('')}${apptBtns(-1)}</section>
+  <section class="rg"><h4>Other Visits And Calls</h4><div class="radd"><select id="ra_ty">${ATYPES.map(x=>`<option>${x}</option>`).join('')}</select><input id="ra_d" type="date"><input id="ra_tm" type="time"><select id="ra_w">${staffNames().filter(Boolean).map(x=>`<option>${esc(x)}</option>`).join('')}</select><button class="mini pri" ${A('recAdd','appts',['ty','d','tm','w'],'appts')}>Book</button></div>
+  ${(W.v.appts||[]).map((a,i)=>`<div class="apc"><div class="apc-h"><span class="apc-d"><b>${a.d?new Date(a.d+'T00:00').getDate():'-'}</b><small>${a.d?new Date(a.d+'T00:00').toLocaleDateString('en-GB',{month:'short'}):''}</small></span><span><b>${esc(a.ty||'Visit')}</b><br><span class="muted">${a.d?esc(apptWhen(a)):'No date'}${a.w?' · '+esc(a.w):''}</span></span><button class="mini del" ${A('recDel','appts',i,'appts')} aria-label="Remove">&times;</button></div>${apptBtns(i)}</div>`).join('')||emptyArt('holiday','Nothing else booked yet.')}</section></div>`;
 const nextAppt=l=>[l.apptDate,...(l.appts||[]).map(a=>a.d)].filter(Boolean).sort().find(d=>d>=today())||'';
 REC.lead={label:'Lead',
   get:id=>S.leads.find(l=>l.id==id),order:()=>leadList().map(l=>l.id),
@@ -160,15 +213,16 @@ REC.lead={label:'Lead',
   fields:W=>[...LEADF(W),...CUSTF,...GDPRF,...APPTF,{k:'notes',l:'Notes',t:'area'}],
   tabs:W=>[{k:'details',t:'Details',h:W=>`<div class="rcols">${byGroup(LEADF(W),W.v)}</div>`},
     {k:'customer',t:'Customer',h:W=>`<div class="rcols">${byGroup(CUSTF,W.v)}</div>`},
-    {k:'appts',t:'Appointments',n:(W.v.appts||[]).length,h:W=>`<div class="rcols"><section class="rg">${'<h4>Main Appointment</h4>'+APPTF.map(f=>rfH(f,W.v)).join('')}</section><section class="rg"><h4>Other Appointments</h4><div class="radd"><input id="ra_d" type="date"><input id="ra_tm" type="time"><select id="ra_ty">${['Survey','Demo','Showroom','Call back','Measure'].map(x=>`<option>${x}</option>`).join('')}</select><select id="ra_w">${OWNERS().map(x=>`<option>${esc(x)}</option>`).join('')}</select><button class="mini pri" ${A('recAdd','appts',['d','tm','ty','w'],'appts')}>Add</button></div>${(W.v.appts||[]).map((a,i)=>`<div class="row"><span><b>${a.d?fd(a.d):'No date'} ${esc(a.tm||'')}</b> ${esc(a.ty||'')}<br><span class="muted">With ${esc(a.w||'-')}</span></span><button class="mini del" ${A('recDel','appts',i,'appts')}>&times;</button></div>`).join('')||'<p class="empty">No other appointments.</p>'}</section></div>`},
+    {k:'appts',t:'Appointments',n:(W.v.appts||[]).length,h:apptTab},
     {k:'survey',t:'Survey',n:(W.v.openings||[]).length,h:opsTab},
-    {k:'check',t:'Checklist',h:W=>ckTab(W,LEAD_CK)},
+    {k:'check',t:'Sales Steps',h:W=>ckTab(W,LEAD_CK)},
     {k:'notes',t:'Notes & Activity',n:W.v.log.length,h:W=>logTab(W,'notes')},
     {k:'docs',t:'Photos & Docs',n:(W.v.photos||[]).length,h:photoTab},
     {k:'gdpr',t:'GDPR',h:W=>`<div class="rcols">${grpH('Marketing Consent',GDPRF,W.v)}<section class="rg"><h4>About GDPR</h4><p class="muted" style="font-size:.85rem">Only market to customers who said yes. Record when and how consent was given. Customers can ask to see or delete their data at any time.</p></section></div>`}],
-  check:(W,o)=>{if(!o.name)return 'Customer name is needed (Customer tab)'},
+  check:(W,o)=>{if(!o.name)return 'Customer name is needed (Customer step)';if(!PHONES.some(k=>o[k]))return 'Add at least one phone number (Customer step)';
+    if(ISOWN()&&o.id&&o.id!=W.id){if(!/^L\d{4}$/.test(o.id))return 'Lead numbers look like L0001';if(S.leads.some(x=>x.id==o.id))return 'Lead number '+o.id+' is already used'}},
   save:(W,o)=>{const isNew=W.isNew,l=isNew?{id:nextLeadId(),log:[{d:today(),t:'Lead created',by:USER}]}:S.leads.find(x=>x.id==W.id);if(!l)return;
-    const a=l.stage;if(o.prob===0&&!($('#f_prob').value||'').trim())o.prob='';delete o.id;
+    const a=l.stage;if(o.prob===0&&!($('#f_prob').value||'').trim())o.prob='';const nid2=ISOWN()&&o.id&&/^L\d{4}$/.test(o.id)&&!S.leads.some(x=>x!==l&&x.id==o.id)?o.id:null;delete o.id;if(nid2&&nid2!=l.id){audit('Lead number changed',l.id,'to '+nid2);l.id=nid2}
     Object.assign(l,o,{log:W.v.log,appts:W.v.appts||[]});if(!isNew&&a!=o.stage)l.log.unshift({d:today(),t:'Stage: '+a+' to '+o.stage,by:USER});
     if(isNew){l.log=[...W.v.log,{d:today(),t:'Lead created',by:USER}];S.leads.push(l)}custCompat(l);audit(isNew?'Lead added':'Lead edited',l.id,l.name);return l.id}};
 function recConvert(){if(!recSave(false))return;const id=RW.id;closeModal();convertLead(id)}
@@ -178,7 +232,7 @@ const CDETF=W=>[
   {k:'id',l:'Contract number',ro:1,g:'Contract'},{k:'cdate',l:'Contract date',t:'date',g:'Contract'},{k:'officeRef',l:'Office ref 1',g:'Contract'},{k:'officeRef2',l:'Office ref 2',g:'Contract'},
   {k:'contractType',l:'Contract type',t:'select',o:CTYPES,g:'Contract'},{k:'supplyOnly',l:'Supply only',t:'select',o:YN,g:'Contract'},{k:'stage',l:'Stage',t:'select',o:CSTAGES,g:'Contract'},
   {k:'onHold',l:'On hold',t:'select',o:YN,g:'Contract'},{k:'cancelled',l:'Cancelled',t:'select',o:YN,g:'Contract'},{k:'product',l:'Work / products summary',t:'area',max:300,g:'Contract'},{k:'flash',l:'Flash note (shows in red)',max:160,g:'Contract'},
-  {k:'lead',l:'Lead number',ro:1,g:'Sales Information'},{k:'salesArea',l:'Sales area',t:'select',o:['',...BRANCHES],g:'Sales Information'},{k:'soldBy',l:'Salesperson',t:'select',o:OWNERS(),g:'Sales Information'},
+  {k:'lead',l:'Lead number',ro:1,g:'Sales Information'},{k:'salesArea',l:'Sales area',t:'select',o:['',...BRANCHES],g:'Sales Information'},{k:'soldBy',l:'Salesperson',t:'select',o:[...OWNERS(),RANDOM_SP],g:'Sales Information'},
   {k:'source',l:'Lead source',t:'select',o:['',...SOURCES],g:'Sales Information'},{k:'subSource',l:'Sub source',g:'Sales Information'},{k:'createdBy',l:'Created by',ro:1,g:'Sales Information'},{k:'approvals',l:'Contract approvals',g:'Sales Information'}];
 const CFINF=()=>[{k:'value',l:'Contract value (£)',t:'number',g:'Money'},{k:'paid',l:'Paid so far (£)',t:'number',g:'Money'},...(ISADM()?[{k:'cost',l:'Job cost (£)',t:'number',g:'Money'}]:[]),{k:'payMethod',l:'Payment method',t:'select',o:['','Cash','Bank transfer','Card','Finance','Cheque'],g:'Money'},{k:'invoiced',l:'Invoiced',t:'select',o:YN,g:'Invoice'},{k:'invoiceNo',l:'Invoice number',g:'Invoice'},{k:'invoiceDate',l:'Invoice date',t:'date',g:'Invoice'}];
 const CFITF=()=>[{k:'survey',l:'Survey date',t:'date',g:'Dates'},{k:'order',l:'Order date',t:'date',g:'Dates'},{k:'delDate',l:'Delivery date',t:'date',g:'Dates'},{k:'fit',l:'Fit date',t:'date',g:'Dates'},
@@ -196,7 +250,7 @@ REC.contract={label:'Contract',
     {k:'customer',t:'Customer',h:W=>`<div class="rcols">${byGroup(CUSTF,W.v)}</div>`},
     {k:'survey',t:'Survey',n:(W.v.openings||[]).length,h:opsTab},
     {k:'products',t:'Products',n:(W.v.lines||[]).length,h:linesTab},
-    {k:'check',t:'Checklist',h:W=>ckTab(W,CK)},
+    {k:'check',t:'Job Progress',h:W=>ckTab(W,CK)},
     {k:'finance',t:'Finance',h:W=>{const P=W.v.pay||[];return `<div class="rcols">${byGroup(CFINF(),W.v)}<section class="rg"><h4>Payments Received</h4>${ISADM()?`<div class="radd"><input id="ra_amt" type="number" step="any" min="0" placeholder="Amount £"><input id="ra_date" type="date" value="${today()}"><select id="ra_method">${['Bank transfer','Card','Cheque','Cash','Finance','Deposit'].map(x=>`<option>${x}</option>`).join('')}</select><button class="mini pri" onclick="recPay()">Add</button></div>`:''}${P.map((p,i)=>`<div class="row"><span>${fd(p.date)} <span class="muted">${esc(p.method)} ${esc(p.note||'')}</span></span><b>${money(p.amt)}</b></div>`).join('')||'<p class="empty">No payments logged.</p>'}<div class="row"><span><b>Balance</b></span><b>${money((+W.v.value||0)-(+W.v.paid||0))}</b></div></section></div>`}},
     {k:'deliveries',t:'Deliveries',n:dels.length,h:W=>`<div class="rg wide"><h4><span>Deliveries For This Job</span><button class="mini pri" ${A('recDelivery')}>New delivery</button></h4>${dels.map(d=>`<div class="row"><span><b>${esc(d.supplier)}</b> ${esc(d.items)}<br><span class="muted">Due ${fd(d.due)}${d.stage?', '+esc(d.stage):''}</span></span>${dTag(d)}</div>`).join('')||'<p class="empty">No deliveries linked to this contract number.</p>'}</div>`},
     {k:'fitting',t:'Fitting',h:W=>`<div class="rcols">${byGroup(CFITF(),W.v)}</div>`},
@@ -204,7 +258,7 @@ REC.contract={label:'Contract',
     {k:'docs',t:'Photos & Docs',n:(W.v.photos||[]).length,h:photoTab},
     {k:'calls',t:'Service Calls',n:calls.length,h:W=>`<div class="rg wide"><h4><span>Service Calls</span><button class="mini pri" ${A('recCall')}>New service call</button></h4>${calls.map(c=>`<div class="row"><span><b>${esc(c.id)}</b> ${esc(c.issue)}<br><span class="muted">${esc(c.status)}, ${c.visit?'visit '+fd(c.visit):'no visit booked'}, ${esc(c.fitter||'')}</span></span>${prTag(c.priority)}</div>`).join('')||'<p class="empty">No service calls for this contract.</p>'}</div>`},
     {k:'gdpr',t:'GDPR',h:W=>`<div class="rcols">${grpH('Marketing Consent',GDPRF,W.v)}</div>`}]},
-  check:(W,o)=>{if(!o.name)return 'Customer name is needed (Customer tab)';if(o.paid>o.value&&o.value>0&&!confirm('Paid is more than the contract value. Save anyway?'))return 'Not saved'},
+  check:(W,o)=>{if(!o.name)return 'Customer name is needed (Customer step)';if(!PHONES.some(k=>o[k]))return 'Add at least one phone number (Customer step)';if(o.paid>o.value&&o.value>0&&!confirm('Paid is more than the contract value. Save anyway?'))return 'Not saved'},
   save:(W,o)=>{const isNew=W.isNew,c=isNew?{id:W.v.id}:S.contracts.find(x=>x.id==W.id);if(!c)return;delete o.id;delete o.lead;delete o.createdBy;
     const np=(W.v.pay||[]).length-((c.pay||[]).length);if(np>0)audit('Payment recorded',c.id||W.v.id,np+' payment'+(np>1?'s':'')+', '+money(sum((W.v.pay||[]).slice(-np),x=>x.amt)));if(!ISADM())delete o.cost;Object.assign(c,o,{pay:W.v.pay||[],log:W.v.log||[],createdBy:c.createdBy||W.v.createdBy||USER});if(isNew){if(S.contracts.some(x=>x.id==c.id))c.id=nid('C',S.contracts);S.contracts.unshift(c)}
     custCompat(c);audit(isNew?'Contract added':'Contract edited',c.id,c.name);return c.id}};
@@ -219,12 +273,12 @@ function openLead(id){recOpen('lead',id)}
 function editLead(id){if(id)recOpen('lead',id);else leadWizard()}
 function leadWizard(){const id=nextLeadId();
   wizard({title:'New Lead '+id,saveLabel:'Create lead',v:{title:'',source:'Website',owner:USER,siteSame:'Same as home',productType:''},steps:[
-    {t:'Customer',d:'Who is the customer?',f:[{k:'title',l:'Title',t:'select',o:['','Mr','Mrs','Miss','Ms','Mr & Mrs','Dr','Company']},{k:'name',l:'Name',req:1},{k:'mob1',l:'Mobile',t:'tel',max:30},{k:'mob2',nx:'mob1',l:'Second mobile',t:'tel',max:30},{k:'home1',l:'Home phone',t:'tel',max:30},{k:'home2',nx:'home1',l:'Second home phone',t:'tel',max:30},{k:'email1',l:'Email',t:'email',w:'full'},{k:'email2',nx:'email1',l:'Second email',t:'email',w:'full'},{k:'company',l:'Company (if business)',w:'full'}]},
-    {t:'Address',d:'Where are they?',f:[{k:'homeAddr',l:'Address',t:'area',w:'full',max:300},{k:'town',l:'Town'},{k:'homePc',l:'Postcode',max:10}]},
-    {t:'Enquiry',d:'What do they want?',f:[{k:'productType',l:'Product type',t:'select',o:PTYPES},{k:'source',l:'How did they find us?',t:'select',o:SOURCES},{k:'product',l:'Work wanted',t:'area',w:'full',max:300},{k:'value',l:'Rough value (£)',t:'number'},{k:'owner',l:'Salesperson',t:'select',o:OWNERS()}]},
+    {t:'Customer',d:'Who is the customer?',f:[{k:'title',l:'Title',t:'select',o:['','Mr','Mrs','Miss','Ms','Mr & Mrs','Dr','Company'],req:1},{k:'name',l:'Name',req:1},{k:'mob1',l:'Mobile',t:'tel',max:30},{k:'mob2',nx:'mob1',l:'Second mobile',t:'tel',max:30},{k:'home1',l:'Home phone',t:'tel',max:30},{k:'mob3',nx:'mob2',l:'Third mobile',t:'tel',max:30},{k:'home2',nx:'home1',l:'Second home phone',t:'tel',max:30},{k:'home3',nx:'home2',l:'Third home phone',t:'tel',max:30},{k:'email1',l:'Email',t:'email',w:'full',req:1},{k:'email2',nx:'email1',l:'Second email',t:'email',w:'full'},{k:'email3',nx:'email2',l:'Third email',t:'email',w:'full'},{k:'company',l:'Company (if business)',w:'full'}]},
+    {t:'Address',d:'Where are they? Fill it in like a delivery address.',f:[{k:'homeAddr',l:'Address line 1',w:'full',max:120,req:1,hint:'House number or name and street'},{k:'homeAddr2',l:'Address line 2',w:'full',max:120},{k:'town',l:'Town / city',max:60,req:1},{k:'county',l:'County',max:60},{k:'homePc',l:'Postcode',max:10,req:1},{k:'addrType',l:'Address type',t:'select',o:['Home','Business']}]},
+    {t:'Enquiry',d:'What do they want?',f:[{k:'productType',l:'Product type',t:'select',o:PTYPES,req:1},{k:'source',l:'How did they find us?',t:'select',o:SOURCES,req:1},{k:'product',l:'Work wanted',t:'area',w:'full',max:300},{k:'value',l:'Rough value (£)',t:'number'},{k:'owner',l:'Salesperson',t:'select',o:[...OWNERS(),RANDOM_SP]}]},
     {t:'Next Step',d:'What happens next?',f:[{k:'apptDate',l:'Appointment date',t:'date'},{k:'apptTime',l:'Appointment time',t:'time'},{k:'next',l:'Next action',w:'full',hint:'e.g. Call back Tuesday, send brochure'},{k:'followup',l:'Next action date',t:'date'}]},
     {t:'Review',d:'Check and create',review:1}],
-    check:(st,v)=>{if(st==0&&!v.name)return 'Please enter the customer name';if(st==0&&!v.mob1&&!v.home1&&!v.email1)return 'Add at least one phone number or email'},
+    check:(st,v)=>{if(st==0&&!v.name)return 'Please enter the customer name';if(st==0&&!PHONES.some(k=>v[k]))return 'Add at least one phone number'},
     save:v=>{const lid=nextLeadId(),l={...v,id:lid,stage:'New',created:today(),takenBy:USER,invSame:'Same as home',addrType:v.company?'Business':'Home',log:[{d:today(),t:'Lead created',by:USER}],appts:[],chk:{}};
       custCompat(l);S.leads.push(l);audit('Lead added',lid,l.name);toast(lid+' created. Open it any time to add more.')}})}
 function openContract(id){recOpen('contract',id)}
@@ -259,6 +313,6 @@ function vContracts(){const U=UI.ctr,L=ctrList(),pg=paginate(U,L),tv=sum(L,c=>c.
   const tog=`<div class="seg2"><button class="${U.v=='list'?'on':''}" ${A('setUI','ctr.v','list')}>List</button><button class="${U.v=='board'?'on':''}" ${A('setUI','ctr.v','board')}>Board</button></div>`;
   const board=`<div class="kan" style="grid-template-columns:repeat(${CSTAGES.length},minmax(11rem,1fr))">${CSTAGES.map(s=>{const B=L.filter(c=>c.stage==s);return `<div class="col"><div class="colh"><b>${esc(s)}</b><span>${B.length}, ${m0(sum(B,c=>c.value))}</span></div>${B.map(c=>`<div class="lc"><div class="lt"><b ${A('openContract',c.id)}>${esc(c.name)} <small class="muted">${esc(c.id)}</small></b><span>${m0(c.value)}</span></div><p>${esc(c.product)}</p><p class="muted">${esc(c.town||'')}${c.fit?', fit '+fd(c.fit):''}</p>${c.value-c.paid>0?`<p class="muted">Balance ${m0(c.value-c.paid)}</p>`:'<p><span class="tag g">Paid</span></p>'}</div>`).join('')||'<p class="empty">Nothing here.</p>'}</div>`}).join('')}</div>`;
   const list=`<div class="tw"><table class="ptb abt"><thead><tr>${thS('ctr','id','Contract No')}${thS('ctr','name','Cust Name')}${thS('ctr','addr','Address','c-md')}${thS('ctr','sold','Sold By','c-sm')}${thS('ctr','office','Office Ref','c-xl')}${thS('ctr','site','Site Address','c-xl')}${thS('ctr','fit','Fit Date','c-sm')}${thS('ctr','value','Value','n')}${thS('ctr','bal','Balance','n c-sm')}<th class="ac"><span class="srt" ${A('sortBy','ctr','stage')} style="cursor:pointer">Stage${U.sort=='stage'?`<span class="ar">${U.dir>0?'▲':'▼'}</span>`:''}</span></th></tr></thead><tbody>
-   ${pg.rows.map(c=>`<tr ${A('openContract',c.id)} class="clk-r"><td><b class="lref">${esc(c.id)}</b>${c.lead?`<br><span class="muted" style="font-size:.7rem">From ${esc(c.lead)}</span>`:''}</td><td><b>${esc(c.name)}</b>${c.flash?`<br><span class="flash">${esc(c.flash)}</span>`:''}</td><td class="c-md wrapc">${esc(addrOf(c)||'-')}</td><td class="c-sm">${esc(c.soldBy||'-')}</td><td class="c-xl">${esc(c.officeRef||'')}</td><td class="c-xl wrapc">${esc(siteOf(c)||'-')}</td><td class="c-sm">${fd(c.fit)}</td><td class="n">${m0(c.value)}</td><td class="n c-sm">${m0(c.value-c.paid)}</td><td class="ac"><div class="acts r">${stTag(c.stage)}</div></td></tr>`).join('')||'<tr><td colspan="10" class="empty">'+emptyArt('house','No contracts in this view.')+'</td></tr>'}</tbody></table></div>${pagerH('ctr',pg,'contracts')}`;
+   ${pg.rows.map(c=>`<tr ${A('openContract',c.id)} class="clk-r"><td><b class="lref">${esc(c.id)}</b>${c.lead?`<br><span class="muted" style="font-size:.7rem">From ${esc(c.lead)}</span>`:''}</td><td><b>${esc(c.name)}</b>${c.flash?`<br><span class="flash">${esc(c.flash)}</span>`:''}</td><td class="c-md wrapc">${esc(addrOf(c)||'-')}</td><td class="c-sm">${esc(c.soldBy||'-')}</td><td class="c-xl">${esc(c.officeRef||'')}</td><td class="c-xl wrapc">${esc(siteOf(c)||'-')}</td><td class="c-sm">${fd(c.fit)}</td><td class="n">${m0(c.value)}</td><td class="n c-sm">${m0(c.value-c.paid)}</td><td class="ac"><div class="acts r">${stTag(c.stage)}</div></td></tr>`).join('')||'<tr><td colspan="10" class="empty">'+emptyArt('files','No contracts in this view.')+'</td></tr>'}</tbody></table></div>${pagerH('ctr',pg,'contracts')}`;
   return `<div class="subbar"><span class="sb-l">Show</span><div class="views">${CVIEWS.map(([k,t])=>`<button class="chip ${U.f==k?'on':''}" ${A('setUI','ctr.f',k)}>${esc(t)} <i>${cnt(k)}</i></button>`).join('')}</div><span class="sb-sp"></span>${tog}</div><div class="head"><div><h1>Contracts</h1><span class="muted">${esc((CVIEWS.find(x=>x[0]==U.f)||['','All'])[1])}: ${L.length} records, ${m0(tv)} total, ${m0(bal)} to collect</span></div><div class="tools"><button class="mini" onclick="contactList('contract')">Contact list</button><button class="btn" onclick="editContract()">New contract</button></div></div>
   ${ckpi(L)}${U.v=='board'?board:list}`}

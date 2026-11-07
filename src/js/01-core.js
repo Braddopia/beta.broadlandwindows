@@ -88,6 +88,7 @@ const svg=(p,cls='')=>`<svg class="${cls}" viewBox="0 0 24 24" fill="none" strok
 const IC={
   home:'M3 11l9-8 9 8M5 10v10h5v-6h4v6h5V10',
   layout:'M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z',
+  messages:'M4 5h16v11H8l-4 4zM8 9h8M8 12h5',
   live:'M3 12h4l3-8 4 16 3-8h4',
   deliveries:'M3 7h11v9H3zM14 10h4l3 3v3h-7zM7.5 19a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM17.5 19a1.5 1.5 0 100-3 1.5 1.5 0 000 3z',
   /* factory / warehouse */
