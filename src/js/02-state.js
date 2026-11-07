@@ -86,6 +86,8 @@ const ikey=r=>[r.item,r.length,r.cInName,r.cOutName].map(v=>{v=String(v||'').tri
     {src:'ReferenceLine',d:'2022-11-07',t:'Very happy with all the work undertaken by a professional, friendly team.'},
     {src:'ReferenceLine',d:'2022-10-10',t:'Very efficient, helpful, tidy. All surfaces cleaned and all old material taken away. Very professional at all times.'}];
   /* show the two new review tiles once on an office board someone already customised */
+  /* the four review tiles became one card */
+  if(!S.brand._rv3){S.brand._rv3=1;S.brand._rv2=1;const o=(S.boards||{}).office;if(o&&Array.isArray(o.k)){const i=o.k.findIndex(k=>['g','tp','tt','rl'].includes(k));o.k=o.k.filter(k=>!['g','tp','tt','rl'].includes(k));if(!o.k.includes('rv'))o.k.splice(i<0?0:i,0,'rv')}}
   if(!S.brand._rv2){S.brand._rv2=1;const o=(S.boards||{}).office;if(o&&Array.isArray(o.k))['tt','rl'].forEach(k=>{if(!o.k.includes(k))o.k.splice(Math.min(2,o.k.length),0,k)})}
   /* profile: who is using this browser */
   if(!S.profile){const u=S.staff.find(s=>s.name=='Demo User')||S.staff[0]||{};S.profile={sid:u.id||'',name:u.name||'Demo User',email:u.email||'',phone:u.phone||'',mobile:'',emergency:'',signature:'',notes:''}}

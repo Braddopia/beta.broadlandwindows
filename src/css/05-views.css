@@ -889,3 +889,21 @@ body[data-theme=dark] .mb .rg{background:#1a202b}
 .rb1.go{background:#12794c}.rb1.dl{background:rgba(191,52,52,.85)}.rb1.dl:hover{background:#bf3434}
 .rb1.cl{background:rgba(255,255,255,.2)}
 @media(max-width:700px){.rw-h h2{font-size:1.3rem}.rb1{min-height:2.3rem;padding:.45rem .7rem;font-size:.85rem}.rb1 svg{display:none}.rw-hc{font-size:.9rem}}
+
+/* office board: all review sites on one card */
+.kpi.rvall{grid-column:span 2;display:flex;flex-direction:column;gap:.5rem}
+.rvall-g{display:grid;grid-template-columns:repeat(4,1fr);gap:.4rem .9rem}
+.rva{display:flex;flex-direction:column;min-width:0}
+.rva span{font-size:.8rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kpi.rvall .rva b{font:700 1.9rem/1.1 var(--head);color:var(--navy);white-space:nowrap}
+.rva b i{font-style:normal;font-size:.9rem;font-weight:600;color:var(--muted);margin-left:.2rem}
+.rva em{font-style:normal;font-size:.76rem;color:var(--muted)}
+.fl .kpi.rvall .rva b{font-size:2.6rem}
+@media(max-width:900px){.kpi.rvall{grid-column:1/-1}.rvall-g{grid-template-columns:repeat(2,1fr)}}
+.kpi.rvall .rva b{overflow:visible;text-overflow:clip;font-size:1.7rem!important}
+.fl .kpi.rvall .rva b{font-size:2.1rem!important}
+.kpi.rvall{grid-column:span 2;min-width:0}
+
+/* deliveries list grouped by when due */
+.dtb tr.dgrp td{background:var(--card2);padding:.55rem .8rem;font-size:.9rem}
+.dtb tr.dgrp b{color:var(--navy)}

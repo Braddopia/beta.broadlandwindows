@@ -57,7 +57,7 @@ function render(){
   let h;try{h=V.fn()}catch(e){console.error(e);h=`<div class="panel"><h2>Something Went Wrong</h2><p class="muted">${esc(e.message)}</p></div>`}
   const m=$('#main');m.innerHTML=h;
   document.body.classList.toggle('lv',view=='live');
-  requestAnimationFrame(()=>$$('#main .kpi b').forEach(b=>b.style.setProperty('--n',Math.max(2,b.textContent.trim().length))));
+  requestAnimationFrame(()=>$$('#main .kpi>b').forEach(b=>b.style.setProperty('--n',Math.max(2,b.textContent.trim().length))));
   document.body.classList.toggle('isadm',ISADM());
   shellSync();
   $$('#main .kpi,#main .panel,#main .col,#main .bc,#main .cc,#main .dlane,#main .supc').forEach((e,i)=>e.style.setProperty('--i',Math.min(i,14)));
@@ -228,7 +228,7 @@ function sbSync(){$('#sb').classList.toggle('has',!!$('#q').value)}
 
 /* numbers in the tiles count up when a page opens */
 function countUp(){if(matchMedia('(prefers-reduced-motion:reduce)').matches)return;
-  $$('#main .kpi b').forEach(el=>{const t=el.textContent,m=t.match(/[\d,]+(\.\d+)?/);if(!m||t.length>14)return;
+  $$('#main .kpi>b').forEach(el=>{const t=el.textContent,m=t.match(/[\d,]+(\.\d+)?/);if(!m||t.length>14)return;
     const n=parseFloat(m[0].replace(/,/g,'')),dp=(m[1]||'').length-1,a=t.slice(0,m.index),b=t.slice(m.index+m[0].length),cm=m[0].includes(','),t0=performance.now();if(!(n>0))return;
     const f=x=>{const p=Math.min(1,(x-t0)/800),v=n*(1-Math.pow(1-p,3)),s=dp>0?v.toFixed(dp):Math.round(v);el.textContent=a+(cm?Number(s).toLocaleString('en-GB',{minimumFractionDigits:Math.max(0,dp),maximumFractionDigits:Math.max(0,dp)}):s)+b;if(p<1)requestAnimationFrame(f);else el.textContent=t};requestAnimationFrame(f)})}
 
