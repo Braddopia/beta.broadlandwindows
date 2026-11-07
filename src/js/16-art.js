@@ -14,7 +14,7 @@ const TOUR=[{art:'team',t:'Welcome to Broadland Windows CRM',d:'A quick look rou
   {sel:'#scanBtn',t:'Scan a barcode',d:'Use the camera to find a product or book stock in and out.'},
   {sel:'#bell',t:'Notifications',d:'Stock requests, low stock, deliveries due and FENSA reminders all land here.'},
   {sel:'#thb',t:'Light or dark',d:'Switch the look to suit the room. The factory screen works well in dark.'},
-  {sel:'#lookBtn',t:'Pick a background',d:'Choose a pattern for behind the glass: window panes, leaded light, contour lines and more.'},
+  {sel:'#lookBtn',t:'Change the look',d:'Pick the page background, and a pattern for the blue greeting box on the overview.'},
   {sel:'.hero-cz',page:'home',t:'Make the overview yours',d:'Choose which numbers and panels show on your dashboard, and in what order.'},
   {sel:'#meBtn',t:'Your details',d:'Update your phone and email, and check your holiday allowance.'},
   {sel:'#acct',t:'Switch account',d:'Sign in as an administrator with your PIN when you need more access. It signs you out again after 30 minutes idle.'},

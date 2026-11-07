@@ -28,7 +28,8 @@ const VIEWS={
 const NG=[['Workspace',['home','messages']],['Sales',['leads','contracts']],['Operations',['live','deliveries','fitting','service']],['Stock & People',['stock','suppliers','contacts','staff','holidays']],['Insights',['reports','downloads']],['Admin',['finance','admin']]];
 let view=HOME(),q='',lastView='';
 
-const hit=o=>!q||Object.values(o).filter(v=>v!=null&&typeof v!='object').join(' ').toLowerCase().includes(q);
+/* page filter: same matching as the top-bar search (19-search.js), so phone lists and spacing differences match too */
+const hit=o=>!q||srchMatch(srchText(o),q);
 
 function badges(){const td=today();return{
   messages:msgUnread(),
