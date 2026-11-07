@@ -96,8 +96,11 @@ function vMoves(tog){const M=UI.mov,Ad=ISADM();
   </tbody></table></div>${pagerH('mov',pg,'entries')}`}
 const byUid=u=>S.items.find(x=>x.uid==u);
 /* request numbers: P0001 while pending, then the next order number (0001, 0002...) once approved */
+/* next order / pending number: one above the highest already used, so numbers never repeat.
+   Approved order numbers also skip numbers used as Stock IDs, so 0001 can't mean two things. */
+function nextOrd(pre){const re=new RegExp('^'+pre+'(\\d+)$'),used=[...S.items.map(x=>re.exec(x.ord||'')).filter(Boolean).map(m=>+m[1]),...(pre?[]:S.items.filter(x=>/^\d{4,}$/.test(x.pid||'')).map(x=>+x.pid))],key=pre?'pend':'order',n=Math.max(+S.seq[key]||0,0,...used)+1;S.seq[key]=n;return pre+String(n).padStart(4,'0')}
 function reqApprove(u){if(!need(ISADM,'Approving requests'))return;const r=byUid(u);if(!r||r.reqStatus!='Pending')return;
-  r.pref=r.ord;r.ord=String(++S.seq.order).padStart(4,'0');r.reqStatus='Approved';r.flag=false;r.approvedBy=USER;r.approvedAt=Date.now();
+  r.pref=r.ord;r.ord=nextOrd('');r.reqStatus='Approved';r.flag=false;r.approvedBy=USER;r.approvedAt=Date.now();
   audit('Request approved',r.item,r.pref+' became order '+r.ord);store();render();toast('Approved: '+r.pref+' is now order '+r.ord)}
 function reqReject(u){if(!need(ISADM,'Rejecting requests'))return;const r=byUid(u);if(!r)return;r.reqStatus='Rejected';r.flag=false;audit('Request rejected',r.item,r.ord);store();render()}
 function reqReceive(u){const r=byUid(u);if(!r)return;stockForm('add',r.pid,{qty:r.qty,fromReq:u})}
@@ -175,7 +178,7 @@ function ieSave(){const mode=ieMode,o=readFields(ieFields());if(!o)return;
   const st=kind=='add'?cur+o.qty:kind=='remove'?Math.max(0,cur-o.qty):cur;
   const base={pid,item:o.item,unit:o.unit,length:o.length||'-',cInName:o.cInName||'-',cIn:o.cInNameHex,cOutName:o.cOutName||'-',cOut:o.cOutNameHex,cost:o.cost||(ex?ex.cost:0),location:o.location||(ex?ex.location:'-'),barcode:bc||(ex?ex.barcode:''),supplier:o.supplier||(ex?ex.supplier:''),reorder:o.reorder!=null&&kind!='remove'?o.reorder:(ex?ex.reorder:0),lead:o.lead||(ex?ex.lead:undefined),reorderQty:o.reorderQty||(ex&&ex.reorderQty),notes:o.notes||(ex&&ex.notes)};
   if(kind!='request')prodRows(pid).forEach(x=>{x.stock=st;['supplier','location','unit','lead','reorderQty','notes'].forEach(f=>{if(o[f])x[f]=o[f]});if(kind=='add'){x.reorder=base.reorder;if(o.cost)x.cost=o.cost}if(bc)x.barcode=bc});
-  const row=moveRow(base,kind,o.qty,st,kind=='request'?{reqStatus:'Pending',ord:'P'+String(++S.seq.pend).padStart(4,'0'),note:o.note}:{});
+  const row=moveRow(base,kind,o.qty,st,kind=='request'?{reqStatus:'Pending',ord:nextOrd('P'),note:o.note}:{});
   S.items.unshift(row);iePhotos(pid);
   if(iePre.fromReq){const q=byUid(iePre.fromReq);if(q){q.reqStatus='Cleared';q.cleared=true;q.receivedAt=Date.now()}}
   audit({add:'Stock added',remove:'Stock removed',request:'Stock requested'}[kind],o.item,o.qty+' '+o.unit+(row.ord?' '+row.ord:'')+' (stock '+st+')');

@@ -11,7 +11,7 @@ const UI={
   del:{f:'out',s:'all',v:'list'}, files:{cat:'all',az:0,list:0,ssq:'',page:1,per:50},
   con:{f:'all'}, board:'factory', msg:{box:'in',to:'Everyone'}, staff:{c:'all'}, sup:{open:''}, lead:{v:'list',f:'live',src:'all',own:'all',sort:'id',dir:1,page:1,per:50}, ctr:{v:'list',f:'cur',sort:'id',dir:1,page:1,per:50}, nc:{t:'All'}, audit:{page:1,per:50}
 };
-function setUI(path,val){const p=path.split('.');let o=UI;for(let i=0;i<p.length-1;i++)o=o[p[i]];o[p[p.length-1]]=val;if(p.length==2&&p[1]!='page'&&'page' in UI[p[0]])UI[p[0]].page=1;render()}
+function setUI(path,val){const p=path.split('.');let o=UI;for(let i=0;i<p.length-1;i++)o=o[p[i]];o[p[p.length-1]]=val;if(p.length==2&&p[1]!='page'&&UI[p[0]]&&typeof UI[p[0]]=='object'&&'page' in UI[p[0]])UI[p[0]].page=1;render()}
 function togUI(path){const p=path.split('.');let o=UI;for(let i=0;i<p.length-1;i++)o=o[p[i]];const k=p[p.length-1];o[k]=o[k]?0:1;render()}
 
 /* ---- views: key -> title, page function, optional after-render hook ---- */
@@ -209,7 +209,7 @@ function sbSync(){$('#sb').classList.toggle('has',!!$('#q').value)}
   $('#mnb').onclick=()=>document.body.classList.add('sopen');$('#scrim').onclick=()=>document.body.classList.remove('sopen');
   $('#meBtn').onclick=editProfile;$('#acct').onclick=swRole;$('#bell').onclick=()=>ncToggle(true);$('#ncbg').onclick=()=>ncToggle(false);
   $('#scanBtn').onclick=()=>scan(found);
-  $('#q').addEventListener('input',e=>{q=SAFE.text(e.target.value,80).toLowerCase();Object.values(UI).forEach(s=>{if('page' in s)s.page=1});sbSync();render()});
+  $('#q').addEventListener('input',e=>{q=SAFE.text(e.target.value,80).toLowerCase();Object.values(UI).forEach(s=>{if(s&&typeof s=='object'&&'page' in s)s.page=1});sbSync();render()});
   $('#qClr').onclick=()=>{$('#q').value='';q='';sbSync();render();$('#q').focus()};
   $('#nwb').onclick=e=>{e.stopPropagation();$('#nwm').classList.toggle('open')};
   document.addEventListener('click',()=>$('#nwm').classList.remove('open'));

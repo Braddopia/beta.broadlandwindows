@@ -1467,7 +1467,7 @@ let S;
 })();
 
 /* ---- migrate older versions, fill gaps ---- */
-function stkId(){return String(Math.max(0,...S.items.map(r=>/^\d{4}$/.test(r.pid)?+r.pid:0))+1).padStart(4,'0')}
+function stkId(){return String(Math.max(0,...S.items.map(r=>/^\d{4}$/.test(r.pid)?+r.pid:0),...S.items.map(r=>r.type=='request'&&/^\d{4,}$/.test(r.ord||'')?+r.ord:0))+1).padStart(4,'0')}
 const ikey=r=>[r.item,r.length,r.cInName,r.cOutName].map(v=>{v=String(v||'').trim().toLowerCase();return v=='-'?'':v}).join('|');
 (function migrate(){
   const s0=seed();
@@ -1624,7 +1624,7 @@ const UI={
   del:{f:'out',s:'all',v:'list'}, files:{cat:'all',az:0,list:0,ssq:'',page:1,per:50},
   con:{f:'all'}, board:'factory', msg:{box:'in',to:'Everyone'}, staff:{c:'all'}, sup:{open:''}, lead:{v:'list',f:'live',src:'all',own:'all',sort:'id',dir:1,page:1,per:50}, ctr:{v:'list',f:'cur',sort:'id',dir:1,page:1,per:50}, nc:{t:'All'}, audit:{page:1,per:50}
 };
-function setUI(path,val){const p=path.split('.');let o=UI;for(let i=0;i<p.length-1;i++)o=o[p[i]];o[p[p.length-1]]=val;if(p.length==2&&p[1]!='page'&&'page' in UI[p[0]])UI[p[0]].page=1;render()}
+function setUI(path,val){const p=path.split('.');let o=UI;for(let i=0;i<p.length-1;i++)o=o[p[i]];o[p[p.length-1]]=val;if(p.length==2&&p[1]!='page'&&UI[p[0]]&&typeof UI[p[0]]=='object'&&'page' in UI[p[0]])UI[p[0]].page=1;render()}
 function togUI(path){const p=path.split('.');let o=UI;for(let i=0;i<p.length-1;i++)o=o[p[i]];const k=p[p.length-1];o[k]=o[k]?0:1;render()}
 
 /* ---- views: key -> title, page function, optional after-render hook ---- */
@@ -1822,7 +1822,7 @@ function sbSync(){$('#sb').classList.toggle('has',!!$('#q').value)}
   $('#mnb').onclick=()=>document.body.classList.add('sopen');$('#scrim').onclick=()=>document.body.classList.remove('sopen');
   $('#meBtn').onclick=editProfile;$('#acct').onclick=swRole;$('#bell').onclick=()=>ncToggle(true);$('#ncbg').onclick=()=>ncToggle(false);
   $('#scanBtn').onclick=()=>scan(found);
-  $('#q').addEventListener('input',e=>{q=SAFE.text(e.target.value,80).toLowerCase();Object.values(UI).forEach(s=>{if('page' in s)s.page=1});sbSync();render()});
+  $('#q').addEventListener('input',e=>{q=SAFE.text(e.target.value,80).toLowerCase();Object.values(UI).forEach(s=>{if(s&&typeof s=='object'&&'page' in s)s.page=1});sbSync();render()});
   $('#qClr').onclick=()=>{$('#q').value='';q='';sbSync();render();$('#q').focus()};
   $('#nwb').onclick=e=>{e.stopPropagation();$('#nwm').classList.toggle('open')};
   document.addEventListener('click',()=>$('#nwm').classList.remove('open'));
@@ -2099,23 +2099,32 @@ function supInv(n){event&&event.preventDefault();Object.assign(UI.inv,{v:'produc
 function supReorder(i){const x=S.suppliers[i];if(!x)return;const s=supStats(x),need=[...s.out,...s.low].filter(r=>!s.req.some(q=>q.pid==r.pid));
   if(!need.length){toast('Everything low already has a request');return}
   if(!confirm('Create '+need.length+' stock request'+(need.length>1?'s':'')+' for '+x.name+'?'))return;
-  need.forEach(r=>{const q=r.reorderQty||Math.max(ro(r)*2-r.stock,1);S.items.unshift(moveRow(r,'request',q,r.stock,{reqStatus:'Pending',ord:'P'+String(++S.seq.pend).padStart(4,'0'),note:'Reorder from '+x.name}))});
+  need.forEach(r=>{const q=r.reorderQty||Math.max(ro(r)*2-r.stock,1);S.items.unshift(moveRow(r,'request',q,r.stock,{reqStatus:'Pending',ord:nextOrd('P'),note:'Reorder from '+x.name}))});
   audit('Reorder requested',x.name,need.length+' lines');store();render();toast(need.length+' requests sent for approval')}
 function supDetail(i){const x=S.suppliers[i];if(!x)return;const s=supStats(x),so=supOrders(x);
   openModal(`<button class="mx" onclick="closeModal()" aria-label="Close">&times;</button><h2>${esc(x.name)}</h2><p class="muted" style="margin-top:-.4rem">${x.account?'Account '+esc(x.account):''}${x.terms?' · '+esc(x.terms):''}</p><h3>Items Supplied (${s.L.length})</h3>${s.L.map(r=>`<div class="row"><span><b>${esc(r.item)}</b> <span class="muted">${esc(r.length)}, ${esc(colTxt(r))}</span></span><span class="acts"><span class="tag ${r.stock<=0?'r':isLow(r)?'y':'g'}">${r.stock} ${esc(unitOf(r))}</span><button class="mini" ${A('stockForm','request',r.pid)}>Request</button></span></div>`).join('')||'<p class="empty">No items linked yet. Set the supplier on an item.</p>'}<h3>Open Requests</h3>${s.req.map(r=>`<div class="row"><span>${ordTag(r)} ${r.qty} ${esc(unitOf(r))} x ${esc(r.item)}</span>${reqTag(r)}</div>`).join('')||'<p class="empty">None.</p>'}<h3>Open Deliveries</h3>${s.D.map(d=>`<div class="row"><span><b>${esc(d.items)}</b><br><span class="muted">${esc(d.contract||'-')}</span></span>${dTag(d)}</div>`).join('')||'<p class="empty">Nothing outstanding.</p>'}${so.length?'<h3>Imported Orders</h3>'+so.map(o=>`<div class="row"><span><b>${esc(o.ref)}</b> ${esc(o.customer)}<br><span class="muted">${esc(o.desc)}${o.due?', due '+fd(o.due):''}</span></span><span class="tag">${esc(o.status||'-')}</span></div>`).join(''):''}<div class="mact"><button class="btn ghost" ${A('editSup',i)}>Edit</button><button class="btn ghost" ${A('editDel',null,x.name)}>New Delivery</button><button class="btn" onclick="closeModal()">Close</button></div>`,'lg')}
-function editSup(i){const x=i==null?{}:S.suppliers[i]||{};
+/* a supplier is a Supplier contact in the contact book; details are kept in step both ways */
+const conOf=name=>S.contacts.find(c=>(c.co||'').trim().toLowerCase()==String(name||'').trim().toLowerCase());
+function supFromContact(oldCo,c){const s=S.suppliers.find(x=>x.name.toLowerCase()==String(oldCo||c.co).toLowerCase());if(!s)return;
+  if(c.co&&c.co!=s.name){const old=s.name;S.items.forEach(y=>{if(y.supplier==old)y.supplier=c.co});S.deliveries.forEach(y=>{if(y.supplier==old)y.supplier=c.co});(S.fin||[]).forEach(b=>{if(b.payee==old)b.payee=c.co});s.name=c.co}
+  if(c.name)s.contact=c.name;if(c.role)s.role=c.role;s.phone=c.phone||'';s.email=c.email||'';if(c.addr)s.address=c.addr;audit('Supplier updated from contact book',s.name,'')}
+function contactFromSup(oldName,s){const c=conOf(oldName)||conOf(s.name);if(!c)return;c.co=s.name;if(s.contact)c.name=s.contact;if(s.role)c.role=s.role;c.phone=s.phone||'';c.email=s.email||'';if(s.address)c.addr=s.address;c.type='Supplier'}
+(function supCon(){if(S.supCon)return;S.suppliers.forEach(s=>{if(!conOf(s.name))S.contacts.push({id:shortId('K'),co:s.name,name:s.contact||'',role:s.role||'',type:'Supplier',phone:s.phone||'',email:s.email||'',addr:s.address||''})});S.supCon=1;store()})();
+function editSup(i){if(i==null){const av=S.contacts.filter(c=>c.type=='Supplier'&&c.co&&!S.suppliers.some(s=>s.name.toLowerCase()==c.co.toLowerCase()));
+    if(!av.length){askYes('Add them to the contact book first','Suppliers are picked from the Contact Book, so their details stay the same everywhere. Add the company as a Supplier contact, then come back here.','Open contact book',()=>{go('contacts');setTimeout(()=>editContact(null,{type:'Supplier'}),60)});return}}
+  const x=i==null?{}:S.suppliers[i]||{},AV=S.contacts.filter(c=>c.type=='Supplier'&&c.co&&(i!=null||!S.suppliers.some(s=>s.name.toLowerCase()==c.co.toLowerCase()))).map(c=>c.co);
   wizard({saveLabel:'Save supplier',title:i==null?'Add Supplier':'Edit '+x.name,v:{...x},edit:i!=null,steps:[
-    {t:'Company',d:'Who is the supplier?',f:[{k:'name',l:'Supplier name',req:1,max:60,w:'full'},{k:'url',l:'Website or status page',max:300,w:'full',hint:'Optional. Must start with https://'},{k:'address',l:'Address',t:'area',max:300,w:'full'}]},
+    {t:'Company',d:i==null?'Pick the supplier from the contact book.':'Who is the supplier? Change the name in the contact book.',f:[i==null?{k:'name',l:'Supplier (from the contact book)',t:'select',o:['',...AV],req:1,w:'full'}:{k:'name',l:'Supplier name',ro:1,max:60,w:'full',hint:'Rename in the Contact Book'},{k:'url',l:'Website or status page',max:300,w:'full',hint:'Optional. Must start with https://'},{k:'address',l:'Address',t:'area',max:300,w:'full'}]},
     {t:'Account',d:'Your account with them',f:[{k:'account',l:'Our account number',max:40},{k:'terms',l:'Payment terms',max:60,hint:'e.g. 30 days end of month'},{k:'minOrder',l:'Minimum order (£)',t:'number',max:1e6},{k:'lead',l:'Lead time (days)',t:'number',max:365,dp:0},{k:'days',l:'Delivery days',max:60,hint:'e.g. Tue and Thu'}]},
     {t:'Contacts',d:'Who you speak to',f:[{k:'contact',l:'Main contact name',max:60},{k:'role',l:'Their role',max:60},{k:'phone',l:'Main phone',t:'tel',max:30},{k:'email',l:'Main email',t:'email'},{k:'orderEmail',l:'Orders / accounts email',t:'email'},{k:'altContact',l:'Alternative contact (name and number)',max:120}]},
     {t:'More Numbers',d:'Extra phone numbers and emails',f:[{k:'phones',l:'Other phone numbers (one per line)',t:'area',max:300,w:'full'},{k:'emails',l:'Other emails (one per line)',t:'area',max:600,w:'full'}]},
     {t:'Notes',d:'Anything else worth knowing',f:[{k:'notes',l:'Notes',t:'area',max:1000,w:'full'},{k:'feed',l:'Feed relay URL (optional, for live order feeds)',max:300,w:'full'}]},
     {t:'Review',d:'Check and save',review:1}],
-    check:(st,v)=>{if(st==0){if(!v.name)return 'A supplier name is needed';if(v.url&&!SAFE.url(v.url))return 'The website must be an https:// link';if(S.suppliers.some((s,j)=>j!==i&&s.name.toLowerCase()==v.name.toLowerCase()))return 'A supplier with that name already exists'}
+    check:(st,v)=>{if(st==0){if(!v.name)return 'Pick a supplier from the contact book';const cc=conOf(v.name);if(!cc)return 'That company is not in the contact book';if(i==null){if(!v.contact)v.contact=cc.name||'';if(!v.phone)v.phone=cc.phone||'';if(!v.email)v.email=cc.email||'';if(!v.address)v.address=cc.addr||'';if(!v.role)v.role=cc.role||''}if(v.url&&!SAFE.url(v.url))return 'The website must be an https:// link';if(S.suppliers.some((s,j)=>j!==i&&s.name.toLowerCase()==v.name.toLowerCase()))return 'A supplier with that name already exists'}
       if(st==3){const bad=lines(v.emails).find(e=>!SAFE.email(e));if(bad)return bad+' does not look like an email address'}},
     save:v=>{const keys=['name','url','address','account','terms','minOrder','lead','days','contact','role','phone','email','orderEmail','altContact','phones','emails','notes','feed'],o={};keys.forEach(k=>{if(v[k]!==undefined)o[k]=v[k]});
-      if(i==null){S.suppliers.push(o);audit('Supplier added',o.name,'');toast(o.name+' added')}
-      else{const old=x.name;Object.assign(x,o);if(old!=o.name){S.items.forEach(y=>{if(y.supplier==old)y.supplier=o.name});S.deliveries.forEach(y=>{if(y.supplier==old)y.supplier=o.name})}audit('Supplier edited',o.name,old!=o.name?'Renamed from '+old:'');toast('Saved')}},
+      if(i==null){S.suppliers.push(o);contactFromSup(o.name,o);audit('Supplier added',o.name,'');toast(o.name+' added')}
+      else{const old=x.name;Object.assign(x,o);contactFromSup(old,x);if(old!=o.name){S.items.forEach(y=>{if(y.supplier==old)y.supplier=o.name});S.deliveries.forEach(y=>{if(y.supplier==old)y.supplier=o.name})}audit('Supplier edited',o.name,old!=o.name?'Renamed from '+old:'');toast('Saved')}},
     del:i!=null?()=>delSup(i):null})}
 function delSup(i){const x=S.suppliers[i];if(!x)return;askYes('Delete '+x.name+'?','Stock items keep the supplier name. This cannot be undone.','Delete supplier',()=>{S.suppliers.splice(S.suppliers.indexOf(x),1);audit('Supplier deleted',x.name,'');store();render()},true)}
 
@@ -2275,8 +2284,8 @@ function vContacts(){const F=UI.con.f,L=S.contacts.filter(c=>(F=='all'||c.type==
   <div class="cbook">${L.map(c=>{const x=letter(c),hd=x!=last?(last=x,`<div class="az2" id="az-${x=='#'?'0':x}">${x}</div>`):'';return hd+card(c)}).join('')||emptyArt('team','No contacts match.')}</div>`}
 function azGo(x){const e=document.getElementById('az-'+(x=='#'?'0':x));if(e)e.scrollIntoView({behavior:'smooth',block:'start'})}
 function editContact(id,draft){const c=S.contacts.find(x=>x.id==id);
-  form(c?'Edit Contact':'New Contact',[{k:'co',l:'Company',w:'full',req:1},{k:'name',l:'Contact name'},{k:'role',l:'Role'},{k:'type',l:'Type',t:'select',o:CT},{k:'phone',l:'Phone',t:'tel',max:30},{k:'email',l:'Email',t:'email',w:'full'},{k:'addr',l:'Address / town',w:'full',max:200}],draft||c||{type:'Supplier'},o=>{const go=()=>{if(c)Object.assign(c,o);else S.contacts.push({id:shortId('K'),...o});audit(c?'Contact edited':'Contact added',o.co,'')};
-    if(!ISOWN()){setTimeout(()=>askYes(c?'Save changes to '+(c.co||'this contact')+'?':'Add '+o.co+' to the contact book?',c?'The contact details will be updated for everyone.':'Everyone will be able to see this contact.','Yes, save',()=>{go();store();render();toast('Contact saved')},false,()=>editContact(id,o)),0);return false}go()})}
+  form(c?'Edit Contact':'New Contact',[{k:'co',l:'Company',w:'full',req:1},{k:'name',l:'Contact name'},{k:'role',l:'Role'},{k:'type',l:'Type',t:'select',o:CT},{k:'phone',l:'Phone',t:'tel',max:30},{k:'email',l:'Email',t:'email',w:'full'},{k:'addr',l:'Address / town',w:'full',max:200}],draft||c||{type:'Supplier'},o=>{const go=()=>{const oldCo=c?c.co:o.co;if(c)Object.assign(c,o);else S.contacts.push({id:shortId('K'),...o});if((c||o).type=='Supplier'||S.suppliers.some(s=>s.name.toLowerCase()==String(oldCo).toLowerCase()))supFromContact(oldCo,c||o);audit(c?'Contact edited':'Contact added',o.co,'')};
+    if(!ISOWN()){setTimeout(()=>askYes(c?'Save changes to '+(c.co||'this contact')+'?':'Add '+o.co+' to the contact book?',c?'The contact details will be updated for everyone'+(S.suppliers.some(s=>s.name.toLowerCase()==String(c.co).toLowerCase())?', and on the supplier page too.':'.'):'Everyone will be able to see this contact.','Yes, save',()=>{go();store();render();toast('Contact saved')},false,()=>editContact(id,o)),0);return false}go()})}
 function impCust(){let n=0;S.contracts.forEach(c=>{if(!S.contacts.some(k=>k.co==c.name)){n++;S.contacts.push({id:shortId('K'),co:c.name,name:c.name,role:'Contract '+c.id,type:'Customer',phone:c.phone||'',email:c.email||'',addr:c.address||c.town})}});audit('Customers imported','Contact book',n+' added');store();render();toast(n+' customer'+(n==1?'':'s')+' added')}
 
 /* ==========================================================================
@@ -2526,8 +2535,11 @@ function vMoves(tog){const M=UI.mov,Ad=ISADM();
   </tbody></table></div>${pagerH('mov',pg,'entries')}`}
 const byUid=u=>S.items.find(x=>x.uid==u);
 /* request numbers: P0001 while pending, then the next order number (0001, 0002...) once approved */
+/* next order / pending number: one above the highest already used, so numbers never repeat.
+   Approved order numbers also skip numbers used as Stock IDs, so 0001 can't mean two things. */
+function nextOrd(pre){const re=new RegExp('^'+pre+'(\\d+)$'),used=[...S.items.map(x=>re.exec(x.ord||'')).filter(Boolean).map(m=>+m[1]),...(pre?[]:S.items.filter(x=>/^\d{4,}$/.test(x.pid||'')).map(x=>+x.pid))],key=pre?'pend':'order',n=Math.max(+S.seq[key]||0,0,...used)+1;S.seq[key]=n;return pre+String(n).padStart(4,'0')}
 function reqApprove(u){if(!need(ISADM,'Approving requests'))return;const r=byUid(u);if(!r||r.reqStatus!='Pending')return;
-  r.pref=r.ord;r.ord=String(++S.seq.order).padStart(4,'0');r.reqStatus='Approved';r.flag=false;r.approvedBy=USER;r.approvedAt=Date.now();
+  r.pref=r.ord;r.ord=nextOrd('');r.reqStatus='Approved';r.flag=false;r.approvedBy=USER;r.approvedAt=Date.now();
   audit('Request approved',r.item,r.pref+' became order '+r.ord);store();render();toast('Approved: '+r.pref+' is now order '+r.ord)}
 function reqReject(u){if(!need(ISADM,'Rejecting requests'))return;const r=byUid(u);if(!r)return;r.reqStatus='Rejected';r.flag=false;audit('Request rejected',r.item,r.ord);store();render()}
 function reqReceive(u){const r=byUid(u);if(!r)return;stockForm('add',r.pid,{qty:r.qty,fromReq:u})}
@@ -2605,7 +2617,7 @@ function ieSave(){const mode=ieMode,o=readFields(ieFields());if(!o)return;
   const st=kind=='add'?cur+o.qty:kind=='remove'?Math.max(0,cur-o.qty):cur;
   const base={pid,item:o.item,unit:o.unit,length:o.length||'-',cInName:o.cInName||'-',cIn:o.cInNameHex,cOutName:o.cOutName||'-',cOut:o.cOutNameHex,cost:o.cost||(ex?ex.cost:0),location:o.location||(ex?ex.location:'-'),barcode:bc||(ex?ex.barcode:''),supplier:o.supplier||(ex?ex.supplier:''),reorder:o.reorder!=null&&kind!='remove'?o.reorder:(ex?ex.reorder:0),lead:o.lead||(ex?ex.lead:undefined),reorderQty:o.reorderQty||(ex&&ex.reorderQty),notes:o.notes||(ex&&ex.notes)};
   if(kind!='request')prodRows(pid).forEach(x=>{x.stock=st;['supplier','location','unit','lead','reorderQty','notes'].forEach(f=>{if(o[f])x[f]=o[f]});if(kind=='add'){x.reorder=base.reorder;if(o.cost)x.cost=o.cost}if(bc)x.barcode=bc});
-  const row=moveRow(base,kind,o.qty,st,kind=='request'?{reqStatus:'Pending',ord:'P'+String(++S.seq.pend).padStart(4,'0'),note:o.note}:{});
+  const row=moveRow(base,kind,o.qty,st,kind=='request'?{reqStatus:'Pending',ord:nextOrd('P'),note:o.note}:{});
   S.items.unshift(row);iePhotos(pid);
   if(iePre.fromReq){const q=byUid(iePre.fromReq);if(q){q.reqStatus='Cleared';q.cleared=true;q.receivedAt=Date.now()}}
   audit({add:'Stock added',remove:'Stock removed',request:'Stock requested'}[kind],o.item,o.qty+' '+o.unit+(row.ord?' '+row.ord:'')+' (stock '+st+')');

@@ -44,7 +44,7 @@ let S;
 })();
 
 /* ---- migrate older versions, fill gaps ---- */
-function stkId(){return String(Math.max(0,...S.items.map(r=>/^\d{4}$/.test(r.pid)?+r.pid:0))+1).padStart(4,'0')}
+function stkId(){return String(Math.max(0,...S.items.map(r=>/^\d{4}$/.test(r.pid)?+r.pid:0),...S.items.map(r=>r.type=='request'&&/^\d{4,}$/.test(r.ord||'')?+r.ord:0))+1).padStart(4,'0')}
 const ikey=r=>[r.item,r.length,r.cInName,r.cOutName].map(v=>{v=String(v||'').trim().toLowerCase();return v=='-'?'':v}).join('|');
 (function migrate(){
   const s0=seed();
