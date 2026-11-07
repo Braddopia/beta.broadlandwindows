@@ -356,7 +356,7 @@ body[data-theme=dark] .selbar{background:#0f2a4d}
 .ff{min-width:0}
 .ff.full{grid-column:1/-1}
 .ff label,.dfm label{display:block;font-size:.78rem;color:var(--muted);margin-bottom:.25rem;font-weight:500}
-.ff input,.ff select,.ff textarea,.dfm input,.dfm select,.dfm textarea{width:100%;padding:.5rem .65rem;border:1px solid var(--line);border-radius:9px;background:var(--card2)}
+.ff input,.ff select,.ff textarea,.cphr input,.cphr select,.dfm input,.dfm select,.dfm textarea{width:100%;padding:.5rem .65rem;border:1px solid var(--line);border-radius:9px;background:var(--card2)}
 .ff input[readonly]{opacity:.8;font-family:ui-monospace,monospace}
 .ff .hint{display:block;font-size:.72rem;color:var(--muted);margin-top:.2rem}
 .ff .inl{display:flex;gap:.4rem}
@@ -1179,6 +1179,22 @@ body[data-theme=dark] #sres{background:#161b26;border-color:rgba(255,255,255,.1)
 .fl .rvq p{font-size:1.05rem}
 /* floor boards: up to 8 tiles share one row on wide screens */
 @media(min-width:1100px){.fl .kpis{grid-template-columns:repeat(auto-fit,minmax(min(100%,9.5rem),1fr))}}
+
+/* contact window */
+.cform{display:flex;flex-direction:column;gap:1rem}
+.cform section{padding:.9rem 1rem 1rem;border:1px solid var(--line);border-radius:14px;background:var(--card)}
+.cform h3{display:flex;align-items:baseline;gap:.5rem;margin:0 0 .7rem;font:600 .98rem var(--head);color:var(--navy)}
+.cform h3 small{font:500 .76rem var(--body);color:var(--muted)}
+.cform .grid{grid-template-columns:1fr 1fr}
+.cform .ff textarea{width:100%}
+.cphs{display:flex;flex-direction:column;gap:.5rem}
+.cphr{display:grid;grid-template-columns:minmax(8rem,11rem) 1fr 2.4rem;gap:.5rem;align-items:center}
+.cphr select,.cphr input{height:2.6rem}
+.cphx{height:2.4rem;width:2.4rem;border-radius:10px;border:1px solid var(--line);background:var(--card2);color:var(--muted);font-size:1.2rem;cursor:pointer}
+.cphx[hidden]{display:block;visibility:hidden}
+.cform .hint{margin:.5rem 0 0;font-size:.78rem;color:var(--muted)}
+.cpl{display:inline-block;min-width:5.6rem;color:var(--muted);font-size:.78rem;font-weight:600}
+@media(max-width:600px){.cform .grid{grid-template-columns:1fr}.cphr{grid-template-columns:7.5rem 1fr 2.4rem}}
 
 /* ==========================================================================
    06 · Adaptive layout
@@ -2213,13 +2229,15 @@ function vSuppliers(){const Ad=ISADM(),all=sups(),P=products();
 /* supplier popup: who they are and how to reach them first; stock kept small */
 function supOpen(n){const x=S.suppliers.find(s=>s.name==n);if(!x)return;const i=S.suppliers.indexOf(x),s=supStats(x),url=SAFE.url(x.url),Ad=ISADM(),need=[...s.out,...s.low];
   const row=(l,v)=>v?`<div class="si"><span>${l}</span><b>${v}</b></div>`:'';
-  const phones=[x.phone,...lines(x.phones)].filter(Boolean),emails=[x.email,...lines(x.emails)].filter(Boolean);
+  /* phone numbers come from the contact book, each with its label (Office, Accounts, Sales rep...) */
+  const cc=conOf(x.name),phones=cc?conPhones(cc):[x.phone,...lines(x.phones)].filter(Boolean).map((n,j)=>({t:j?'Phone '+(j+1):'Phone',n})),emails=[x.email,...lines(x.emails)].filter(Boolean);
   const box=(t,h,empty)=>`<section class="rg"><h4>${t}</h4>${h||`<p class="empty">${empty}</p>`}</section>`;
   openModal(`<div class="rw sp2"><div class="rw-bar"><button class="rb1" ${A('editSup',i)}>Edit supplier</button><button class="rb1" ${A('editDel',null,x.name)}>New delivery</button>${need.length?`<button class="rb1 go" ${A('supReorder',i)}>Request low items (${need.length})</button>`:''}${url?`<a class="rb1" href="${esc(url)}" target="_blank" rel="noopener noreferrer" style="text-decoration:none">Website</a>`:''}${x.hm?'<button class="rb1" onclick="syncHM()">Sync feed</button>':''}<span class="rw-sp"></span><button class="rb1 ic" onclick="closeModal()" aria-label="Close">&times;</button></div>
    <div class="rw-h"><div><small>Supplier${x.hm?' · Live Feed':''}</small><h2>${esc(x.name)}</h2></div><div class="rw-hk">${x.account?`<span><small>Account</small><b>${esc(x.account)}</b></span>`:''}${x.lead?`<span><small>Lead Time</small><b>${esc(x.lead)} days</b></span>`:''}</div></div>
    <div class="rw-b"><div class="sinfo">
-    ${box('Contacts',row('Main contact',esc([x.contact,x.role].filter(Boolean).join(', ')))+phones.map((p,j)=>row(j?'Phone '+(j+1):'Phone',telA(p))).join('')+emails.map((e,j)=>row(j?'Email '+(j+1):'Email',mailA(e))).join('')+row('Orders email',x.orderEmail?mailA(x.orderEmail):'')+row('Alternative contact',esc(x.altContact||'')),'No contact details yet. Click Edit supplier to add them.')}
-    ${box('Account',row('Account number',esc(x.account||''))+row('Payment terms',esc(x.terms||''))+row('Minimum order',x.minOrder?money(x.minOrder):'')+row('Lead time',x.lead?esc(x.lead)+' days':'')+row('Delivery days',esc(x.days||'')),'No account details yet.')}
+    ${box('Contacts',row('Main contact',esc([x.contact,x.role].filter(Boolean).join(', ')))+phones.map(p=>row(esc(p.t),telA(p.n))).join('')+emails.map((e,j)=>row(j?'Email '+(j+1):'Email',mailA(e))).join('')+row('Orders email',x.orderEmail?mailA(x.orderEmail):'')+row('Area sales rep',esc([x.rep,x.repTel].filter(Boolean).join(', ')))+row('Alternative contact',esc(x.altContact||'')),'No contact details yet. Click Edit supplier to add them.')}
+    ${box('Account',row('Account number',esc(x.account||''))+row('Payment terms',esc(x.terms||''))+row('Minimum order',x.minOrder?money(x.minOrder):'')+row('Lead time',x.lead?esc(x.lead)+' days':'')+row('Delivery days',esc(x.days||''))+row('How we pay',esc(x.payBy||''))+row('Credit limit',x.credit?money(x.credit):'')+row('Our discount',x.disc?esc(x.disc)+'%':'')+row('Free delivery over',x.carFree?money(x.carFree):'')+row('Delivery charge',x.carCost?money(x.carCost):'')+row('How we order',esc(x.orderBy||''))+row('Order cut-off',esc(x.cutoff||''))+row('Ordering portal',SAFE.url(x.portal)?`<a href="${esc(SAFE.url(x.portal))}" target="_blank" rel="noopener noreferrer">Open</a>`:''),'No account details yet.')}
+    ${box('Company And Quality',row('Supplies',esc(x.cat||''))+row('Brands',esc(x.brands||''))+row('VAT number',esc(x.vat||''))+row('Company number',esc(x.coNo||''))+row('Certificates',esc(x.certs||''))+row('Insurance expires',x.insExp?`<span class="${x.insExp<today()?'warn':''}">${fd(x.insExp)}${x.insExp<today()?' (expired)':''}</span>`:'')+row('Our rating',esc(x.rating||'')),'Nothing added yet.')}
     ${box('Address And Web',(x.address?`<p class="snote">${esc(x.address)}</p>`:'')+row('Website',url?`<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${esc(url.replace(/^https?:\/\//,''))}</a>`:''),'No address yet.')}
     ${box('Notes',x.notes?`<p class="snote">${esc(x.notes)}</p>`:'','No notes yet.')}
    </div>
@@ -2238,22 +2256,27 @@ function supDetail(i){const x=S.suppliers[i];if(!x)return;const s=supStats(x),so
 const conOf=name=>S.contacts.find(c=>(c.co||'').trim().toLowerCase()==String(name||'').trim().toLowerCase());
 function supFromContact(oldCo,c){const s=S.suppliers.find(x=>x.name.toLowerCase()==String(oldCo||c.co).toLowerCase());if(!s)return;
   if(c.co&&c.co!=s.name){const old=s.name;S.items.forEach(y=>{if(y.supplier==old)y.supplier=c.co});S.deliveries.forEach(y=>{if(y.supplier==old)y.supplier=c.co});(S.fin||[]).forEach(b=>{if(b.payee==old)b.payee=c.co});s.name=c.co}
-  if(c.name)s.contact=c.name;if(c.role)s.role=c.role;s.phone=c.phone||'';s.email=c.email||'';if(c.addr)s.address=c.addr;audit('Supplier updated from contact book',s.name,'')}
-function contactFromSup(oldName,s){const c=conOf(oldName)||conOf(s.name);if(!c)return;c.co=s.name;if(s.contact)c.name=s.contact;if(s.role)c.role=s.role;c.phone=s.phone||'';c.email=s.email||'';if(s.address)c.addr=s.address;c.type='Supplier'}
+  if(c.name)s.contact=c.name;if(c.role)s.role=c.role;s.phone=c.phone||'';s.email=c.email||'';if(c.email2)s.orderEmail=c.email2;if(c.web)s.url=c.web;if(c.addr)s.address=[c.addr,c.town,c.pc].filter(Boolean).join(', ');
+  {const ex=conPhones(c).slice(1);if(ex.length)s.phones=ex.map(p=>p.t+': '+p.n).join('\n')}audit('Supplier updated from contact book',s.name,'')}
+function contactFromSup(oldName,s){const c=conOf(oldName)||conOf(s.name);if(!c)return;c.co=s.name;if(s.contact)c.name=s.contact;if(s.role)c.role=s.role;c.email=s.email||'';if(s.orderEmail)c.email2=s.orderEmail;if(s.url)c.web=s.url;if(s.address&&s.address!=[c.addr,c.town,c.pc].filter(Boolean).join(', ')){c.addr=s.address;c.town='';c.pc=''}c.type='Supplier';
+  /* main phone from the supplier goes first in the contact's numbers; the other labelled numbers are kept */
+  const ph=conPhones(c);if(s.phone){if(ph.length)ph[0]={...ph[0],n:s.phone};else ph.push({t:'Office',n:s.phone})}c.phones=ph;c.phone=ph[0]?ph[0].n:''}
 (function supCon(){if(S.supCon)return;S.suppliers.forEach(s=>{if(!conOf(s.name))S.contacts.push({id:shortId('K'),co:s.name,name:s.contact||'',role:s.role||'',type:'Supplier',phone:s.phone||'',email:s.email||'',addr:s.address||''})});S.supCon=1;store()})();
+const SUPCAT=['Sealed units and glass','uPVC profiles','Aluminium systems','Timber','Composite doors','Hardware and locks','Roofs and conservatories','Sealants and fixings','Trims and cills','Other'];
 function editSup(i){if(i==null){const av=S.contacts.filter(c=>c.type=='Supplier'&&c.co&&!S.suppliers.some(s=>s.name.toLowerCase()==c.co.toLowerCase()));
     if(!av.length){askYes('Add them to the contact book first','Suppliers are picked from the Contact Book, so their details stay the same everywhere. Add the company as a Supplier contact, then come back here.','Open contact book',()=>{go('contacts');setTimeout(()=>editContact(null,{type:'Supplier'}),60)});return}}
   const x=i==null?{}:S.suppliers[i]||{},AV=S.contacts.filter(c=>c.type=='Supplier'&&c.co&&(i!=null||!S.suppliers.some(s=>s.name.toLowerCase()==c.co.toLowerCase()))).map(c=>c.co);
   wizard({saveLabel:'Save supplier',title:i==null?'Add Supplier':'Edit '+x.name,v:{...x},edit:i!=null,steps:[
-    {t:'Company',d:i==null?'Pick the supplier from the contact book.':'Who is the supplier? Change the name in the contact book.',f:[i==null?{k:'name',l:'Supplier (from the contact book)',t:'select',o:['',...AV],req:1,w:'full'}:{k:'name',l:'Supplier name',ro:1,max:60,w:'full',hint:'Rename in the Contact Book'},{k:'url',l:'Website or status page',max:300,w:'full',hint:'Optional. Must start with https://'},{k:'address',l:'Address',t:'area',max:300,w:'full'}]},
-    {t:'Account',d:'Your account with them',f:[{k:'account',l:'Our account number',max:40},{k:'terms',l:'Payment terms',max:60,hint:'e.g. 30 days end of month'},{k:'minOrder',l:'Minimum order (£)',t:'number',max:1e6},{k:'lead',l:'Lead time (days)',t:'number',max:365,dp:0},{k:'days',l:'Delivery days',max:60,hint:'e.g. Tue and Thu'}]},
-    {t:'Contacts',d:'Who you speak to',f:[{k:'contact',l:'Main contact name',max:60},{k:'role',l:'Their role',max:60},{k:'phone',l:'Main phone',t:'tel',max:30},{k:'email',l:'Main email',t:'email'},{k:'orderEmail',l:'Orders / accounts email',t:'email'},{k:'altContact',l:'Alternative contact (name and number)',max:120}]},
-    {t:'More Numbers',d:'Extra phone numbers and emails',f:[{k:'phones',l:'Other phone numbers (one per line)',t:'area',max:300,w:'full'},{k:'emails',l:'Other emails (one per line)',t:'area',max:600,w:'full'}]},
-    {t:'Notes',d:'Anything else worth knowing',f:[{k:'notes',l:'Notes',t:'area',max:1000,w:'full'},{k:'feed',l:'Feed relay URL (optional, for live order feeds)',max:300,w:'full'}]},
+    {t:'Company',d:i==null?'Pick the supplier from the contact book.':'Who is the supplier? Change the name in the contact book.',f:[i==null?{k:'name',l:'Supplier (from the contact book)',t:'select',o:['',...AV],req:1,w:'full'}:{k:'name',l:'Supplier name',ro:1,max:60,w:'full',hint:'Rename in the Contact Book'},{k:'cat',l:'What they supply',t:'select',o:['',...SUPCAT]},{k:'brands',l:'Brands or ranges',max:120,hint:'e.g. Rehau, Residence 9'},{k:'vat',l:'VAT number',max:20},{k:'coNo',l:'Company number',max:20},{k:'url',l:'Website or status page',max:300,w:'full',hint:'Optional. Must start with https://'},{k:'address',l:'Address',t:'area',max:300,w:'full'}]},
+    {t:'Account',d:'Your account with them',f:[{k:'account',l:'Our account number',max:40},{k:'terms',l:'Payment terms',max:60,hint:'e.g. 30 days end of month'},{k:'payBy',l:'How we pay',t:'select',o:['','BACS','Card','Direct debit','Pro forma','Cheque']},{k:'credit',l:'Credit limit (£)',t:'number',max:1e7},{k:'disc',l:'Our discount (%)',t:'number',max:100,dp:1},{k:'minOrder',l:'Minimum order (£)',t:'number',max:1e6},{k:'carFree',l:'Free delivery over (£)',t:'number',max:1e6},{k:'carCost',l:'Delivery charge (£)',t:'number',max:1e5}]},
+    {t:'Ordering',d:'How to place an order and when it comes',f:[{k:'orderBy',l:'How we order',t:'select',o:['','Email','Online portal','Phone','Rep visit','EDI']},{k:'portal',l:'Ordering portal link',max:300,hint:'Optional. Must start with https://'},{k:'cutoff',l:'Order cut-off time',t:'time'},{k:'lead',l:'Lead time (days)',t:'number',max:365,dp:0},{k:'days',l:'Delivery days',max:60,hint:'e.g. Tue and Thu'},{k:'orderEmail',l:'Orders / accounts email',t:'email'}]},
+    {t:'People',d:'Who you speak to. Phone numbers live in the Contact Book.',f:[{k:'contact',l:'Main contact name',max:60},{k:'role',l:'Their role',max:60},{k:'email',l:'Main email',t:'email'},{k:'rep',l:'Area sales rep',max:60},{k:'repTel',l:'Rep mobile',t:'tel',max:30},{k:'altContact',l:'Alternative contact (name and number)',max:120},{k:'emails',l:'Other emails (one per line)',t:'area',max:600,w:'full'}]},
+    {t:'Quality',d:'Standards and how they are doing',f:[{k:'certs',l:'Certificates',max:160,w:'full',hint:'e.g. BSI Kitemark, PAS 24, Secured by Design, FSC'},{k:'insExp',l:'Insurance expires',t:'date'},{k:'rating',l:'Our rating',t:'select',o:['','Excellent','Good','OK','Poor']},{k:'notes',l:'Notes',t:'area',max:1000,w:'full'},{k:'feed',l:'Feed relay URL (optional, for live order feeds)',max:300,w:'full'}]},
     {t:'Review',d:'Check and save',review:1}],
     check:(st,v)=>{if(st==0){if(!v.name)return 'Pick a supplier from the contact book';const cc=conOf(v.name);if(!cc)return 'That company is not in the contact book';if(i==null){if(!v.contact)v.contact=cc.name||'';if(!v.phone)v.phone=cc.phone||'';if(!v.email)v.email=cc.email||'';if(!v.address)v.address=cc.addr||'';if(!v.role)v.role=cc.role||''}if(v.url&&!SAFE.url(v.url))return 'The website must be an https:// link';if(S.suppliers.some((s,j)=>j!==i&&s.name.toLowerCase()==v.name.toLowerCase()))return 'A supplier with that name already exists'}
+      if(st==2&&v.portal&&!SAFE.url(v.portal))return 'The ordering portal must be an https:// link';
       if(st==3){const bad=lines(v.emails).find(e=>!SAFE.email(e));if(bad)return bad+' does not look like an email address'}},
-    save:v=>{const keys=['name','url','address','account','terms','minOrder','lead','days','contact','role','phone','email','orderEmail','altContact','phones','emails','notes','feed'],o={};keys.forEach(k=>{if(v[k]!==undefined)o[k]=v[k]});
+    save:v=>{const keys=['name','cat','brands','vat','coNo','url','address','account','terms','payBy','credit','disc','minOrder','carFree','carCost','orderBy','portal','cutoff','lead','days','contact','role','email','orderEmail','rep','repTel','altContact','emails','certs','insExp','rating','notes','feed'],o={};keys.forEach(k=>{if(v[k]!==undefined)o[k]=v[k]});
       if(i==null){S.suppliers.push(o);contactFromSup(o.name,o);audit('Supplier added',o.name,'');toast(o.name+' added')}
       else{const old=x.name;Object.assign(x,o);contactFromSup(old,x);if(old!=o.name){S.items.forEach(y=>{if(y.supplier==old)y.supplier=o.name});S.deliveries.forEach(y=>{if(y.supplier==old)y.supplier=o.name})}audit('Supplier edited',o.name,old!=o.name?'Renamed from '+old:'');toast('Saved')}},
     del:i!=null?()=>delSup(i):null})}
@@ -2408,16 +2431,53 @@ function reportCall(id,mode){const c=S.calls.find(x=>x.id==id);if(!c)return;
 function vContacts(){const F=UI.con.f,L=S.contacts.filter(c=>(F=='all'||c.type==F)&&hit(c)).sort((a,b)=>(a.co||a.name||'').localeCompare(b.co||b.name||'')),letter=c=>{const x=((c.co||c.name||'#').trim()[0]||'#').toUpperCase();return /[A-Z]/.test(x)?x:'#'};
   const have=new Set(L.map(letter)),AZ=[...'ABCDEFGHIJKLMNOPQRSTUVWXYZ','#'];let last='';
   const card=c=>`<div class="cc2"><div class="cc2-h"><span class="cav" style="--h:${[...(c.co||c.name||'?')].reduce((a,x)=>a+x.charCodeAt(0),0)%360}">${esc(initials(c.co||c.name))}</span><div><b>${esc(c.co||c.name)}</b><small>${esc([c.name&&c.name!=c.co?c.name:'',c.role].filter(Boolean).join(' · ')||' ')}</small></div><span class="tag">${esc(c.type||'')}</span></div>
-    <div class="cc2-b">${c.phone?`<a class="nocap" href="tel:${esc(c.phone.replace(/[^\d+]/g,''))}">${svg('M5 4h4l2 5-2.5 1.5a11 11 0 005 5L15 13l5 2v4a2 2 0 01-2 2A16 16 0 013 6a2 2 0 012-2')}${esc(c.phone)}</a>`:''}${c.email?`<a class="nocap" href="mailto:${esc(c.email)}">${svg('M4 6h16v12H4zM4 7l8 6 8-6')}${esc(c.email)}</a>`:''}${c.addr?`<span>${svg('M12 21s-7-6-7-11a7 7 0 0114 0c0 5-7 11-7 11zM12 12a2 2 0 100-4 2 2 0 000 4z')}${esc(c.addr)}</span>`:''}${!c.phone&&!c.email&&!c.addr?'<span class="muted">No details yet</span>':''}</div>
+    <div class="cc2-b">${conPhones(c).map(p=>`<a class="nocap" href="${esc(telHref(p.n))}">${svg('M5 4h4l2 5-2.5 1.5a11 11 0 005 5L15 13l5 2v4a2 2 0 01-2 2A16 16 0 013 6a2 2 0 012-2')}<span class="cpl">${esc(p.t)}</span>${esc(p.n)}</a>`).join('')}${c.email?`<a class="nocap" href="mailto:${esc(c.email)}">${svg('M4 6h16v12H4zM4 7l8 6 8-6')}${esc(c.email)}</a>`:''}${c.email2?`<a class="nocap" href="mailto:${esc(c.email2)}">${svg('M4 6h16v12H4zM4 7l8 6 8-6')}<span class="cpl">Accounts</span>${esc(c.email2)}</a>`:''}${c.addr||c.town||c.pc?`<span>${svg('M12 21s-7-6-7-11a7 7 0 0114 0c0 5-7 11-7 11zM12 12a2 2 0 100-4 2 2 0 000 4z')}${esc([c.addr,c.town,c.pc].filter(Boolean).join(', '))}</span>`:''}${!c.phone&&!c.email&&!c.addr?'<span class="muted">No details yet</span>':''}</div>
     <div class="cc2-f"><button class="mini" ${A('editContact',c.id)}>Edit</button>${ISOWN()?`<button class="mini del" ${A('del','contacts',c.id)}>Delete</button>`:''}</div></div>`;
   return `<div class="head"><div><h1>Contact Book</h1><span class="muted">${L.length} of ${S.contacts.length} contacts</span></div><div class="tools">${ISOWN()?'<button class="btn ghost" onclick="impCust()">Import customers</button>':''}<button class="btn" onclick="editContact()">New contact</button></div></div>
   <div class="subbar"><span class="sb-l">Show</span><div class="views">${['all',...CT].map(k=>`<button class="chip ${F==k?'on':''}" ${A('setUI','con.f',k)}>${k=='all'?'All':esc(k)} <i>${k=='all'?S.contacts.length:S.contacts.filter(c=>c.type==k).length}</i></button>`).join('')}</div></div>
   <div class="azbar">${AZ.map(x=>have.has(x)?`<button ${A('azGo',x)}>${x}</button>`:`<span>${x}</span>`).join('')}</div>
   <div class="cbook">${L.map(c=>{const x=letter(c),hd=x!=last?(last=x,`<div class="az2" id="az-${x=='#'?'0':x}">${x}</div>`):'';return hd+card(c)}).join('')||emptyArt('team','No contacts match.')}</div>`}
 function azGo(x){const e=document.getElementById('az-'+(x=='#'?'0':x));if(e)e.scrollIntoView({behavior:'smooth',block:'start'})}
-function editContact(id,draft){const c=S.contacts.find(x=>x.id==id);
-  form(c?'Edit Contact':'New Contact',[{k:'co',l:'Company',w:'full',req:1},{k:'name',l:'Contact name'},{k:'role',l:'Role'},{k:'type',l:'Type',t:'select',o:CT},{k:'phone',l:'Phone',t:'tel',max:30},{k:'email',l:'Email',t:'email',w:'full'},{k:'addr',l:'Address / town',w:'full',max:200}],draft||c||{type:'Supplier'},o=>{const go=()=>{const oldCo=c?c.co:o.co;if(c)Object.assign(c,o);else S.contacts.push({id:shortId('K'),...o});if((c||o).type=='Supplier'||S.suppliers.some(s=>s.name.toLowerCase()==String(oldCo).toLowerCase()))supFromContact(oldCo,c||o);audit(c?'Contact edited':'Contact added',o.co,'')};
-    if(!ISOWN()){setTimeout(()=>askYes(c?'Save changes to '+(c.co||'this contact')+'?':'Add '+o.co+' to the contact book?',c?'The contact details will be updated for everyone'+(S.suppliers.some(s=>s.name.toLowerCase()==String(c.co).toLowerCase())?', and on the supplier page too.':'.'):'Everyone will be able to see this contact.','Yes, save',()=>{go();store();render();toast('Contact saved')},false,()=>editContact(id,o)),0);return false}go()})}
+/* ---- contact window: tidy two-column layout, any number of labelled phone numbers ----
+   c.phones=[{t:'Office',n:'01632 ...'}]; c.phone mirrors the first one (used by lists, suppliers, search) */
+const CPH=['Office','Accounts','Sales rep','Direct DDI','Mobile','Orders','Out of hours','Fax'];
+const conPhones=c=>Array.isArray(c&&c.phones)&&c.phones.length?c.phones.filter(p=>p&&p.n):c&&c.phone?[{t:'Office',n:c.phone}]:[];
+const telHref=n=>'tel:'+String(n).replace(/[^\d+]/g,'');
+function cphRow(p){const t=p&&p.t||'';return `<div class="cphr"><select aria-label="Number type">${CPH.map(x=>`<option${x==t?' selected':''}>${esc(x)}</option>`).join('')}</select><input type="tel" inputmode="tel" maxlength="30" placeholder="Phone number" aria-label="Phone number" value="${esc(p&&p.n||'')}"><button type="button" class="cphx" title="Remove this number" aria-label="Remove this number">&times;</button></div>`}
+/* always one empty row at the end: the next box only appears once the last one is filled */
+function cphTidy(){const box=$('#cphs');if(!box)return;const rows=[...box.querySelectorAll('.cphr')];
+  rows.forEach((r,i)=>{if(i<rows.length-1&&!r.querySelector('input').value.trim()&&rows.length>1&&document.activeElement!=r.querySelector('input'))r.remove()});
+  const R=[...box.querySelectorAll('.cphr')],last=R[R.length-1];
+  if(!last||last.querySelector('input').value.trim()){const used=R.map(r=>r.querySelector('select').value);box.insertAdjacentHTML('beforeend',cphRow({t:CPH.find(x=>!used.includes(x))||'Office'}))}
+  [...box.querySelectorAll('.cphr')].forEach((r,i,a)=>{r.querySelector('.cphx').hidden=a.length<2||(i==a.length-1&&!r.querySelector('input').value.trim())})}
+function editContact(id,draft){const c=S.contacts.find(x=>x.id==id),v=draft||(c?{...c,phones:conPhones(c)}:{type:'Supplier',phones:[]});
+  const fld=(k,l,o={})=>`<div class="ff ${o.w||''}"><label for="c_${k}">${esc(l)}${o.req?' *':''}</label>${o.sel?`<select id="c_${k}">${o.sel.map(x=>`<option${x==(v[k]||'')?' selected':''}>${esc(x)}</option>`).join('')}</select>`:o.area?`<textarea id="c_${k}" rows="2" maxlength="${o.max||600}">${esc(v[k]||'')}</textarea>`:`<input id="c_${k}" type="${o.t||'text'}" maxlength="${o.max||120}" value="${esc(v[k]||'')}" autocomplete="off"${o.ph?` placeholder="${esc(o.ph)}"`:''}>`}</div>`;
+  openModal(`<button class="mx" onclick="closeModal()" aria-label="Close">&times;</button><h2>${c?'Edit Contact':'New Contact'}</h2>
+   <div class="cform">
+    <section><h3>Who</h3><div class="grid">${fld('co','Company',{req:1,max:80})}${fld('type','Type',{sel:CT})}${fld('name','Contact name',{max:60})}${fld('role','Job title',{max:60})}</div></section>
+    <section><h3>Phone Numbers <small>At least one *</small></h3><div id="cphs" class="cphs">${v.phones.map(cphRow).join('')}</div><p class="hint">Pick what each number is for. Another box appears when you fill one in.</p></section>
+    <section><h3>Email And Web</h3><div class="grid">${fld('email','Main email',{t:'email'})}${fld('email2','Accounts email',{t:'email'})}${fld('web','Website',{w:'full',max:200,ph:'https://'})}</div></section>
+    <section><h3>Address</h3><div class="grid">${fld('addr','Address',{w:'full',max:200})}${fld('town','Town',{max:60})}${fld('pc','Postcode',{max:10})}</div></section>
+    <section><h3>Notes</h3>${fld('notes','Notes',{area:1,w:'full'})}</section>
+   </div>
+   <div class="mact"><button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn" id="saveBtn">${c?'Save changes':'Add contact'}</button></div>`,'md');
+  const box=$('#cphs');cphTidy();
+  box.addEventListener('input',cphTidy);box.addEventListener('focusout',()=>setTimeout(cphTidy,0));
+  box.addEventListener('click',e=>{const x=e.target.closest('.cphx');if(!x)return;x.closest('.cphr').remove();cphTidy()});
+  $('#saveBtn').onclick=()=>{const g=k=>($('#c_'+k).value||'').trim(),o={co:SAFE.text(g('co'),80),type:CT.includes(g('type'))?g('type'):'Other',name:SAFE.text(g('name'),60),role:SAFE.text(g('role'),60),email:g('email').toLowerCase(),email2:g('email2').toLowerCase(),web:g('web').toLowerCase(),addr:SAFE.text(g('addr'),200),town:SAFE.text(g('town'),60),pc:SAFE.text(g('pc'),10).toUpperCase(),notes:SAFE.text(g('notes'),600)};
+    o.phones=[...$$('#cphs .cphr')].map(r=>({t:CPH.includes(r.querySelector('select').value)?r.querySelector('select').value:'Office',n:SAFE.text(r.querySelector('input').value,30)})).filter(p=>p.n);
+    const bad=(m,k)=>{toast(m);const e=k?$('#c_'+k):$('#cphs input');e&&e.focus();return false};
+    if(!o.co)return bad('Company is required','co');
+    if(!o.phones.length)return bad('Add at least one phone number');
+    const wrong=o.phones.find(p=>!/^[\d +()-]{6,30}$/.test(p.n)||(p.n.match(/\d/g)||[]).length<6);if(wrong)return bad(wrong.n+' does not look like a phone number');
+    if(o.email&&!SAFE.email(o.email))return bad('Main email does not look like an email address','email');
+    if(o.email2&&!SAFE.email(o.email2))return bad('Accounts email does not look like an email address','email2');
+    if(o.web&&!SAFE.url(o.web))return bad('The website must start with https://','web');
+    o.phone=o.phones[0].n;
+    const go=()=>{const oldCo=c?c.co:o.co;if(c)Object.assign(c,o);else S.contacts.push({id:shortId('K'),...o});if((c||o).type=='Supplier'||S.suppliers.some(s=>s.name.toLowerCase()==String(oldCo).toLowerCase()))supFromContact(oldCo,c||o);audit(c?'Contact edited':'Contact added',o.co,'')};
+    const done=()=>{store();closeModal();render();toast('Contact saved')};
+    if(!ISOWN()){closeModal();askYes(c?'Save changes to '+(c.co||'this contact')+'?':'Add '+o.co+' to the contact book?',c?'The contact details will be updated for everyone'+(S.suppliers.some(s=>s.name.toLowerCase()==String(c.co).toLowerCase())?', and on the supplier page too.':'.'):'Everyone will be able to see this contact.','Yes, save',()=>{go();done()},false,()=>editContact(id,o));return}
+    go();done()}}
 function impCust(){let n=0;S.contracts.forEach(c=>{if(!S.contacts.some(k=>k.co==c.name)){n++;S.contacts.push({id:shortId('K'),co:c.name,name:c.name,role:'Contract '+c.id,type:'Customer',phone:c.phone||'',email:c.email||'',addr:c.address||c.town})}});audit('Customers imported','Contact book',n+' added');store();render();toast(n+' customer'+(n==1?'':'s')+' added')}
 
 /* ==========================================================================

@@ -161,7 +161,7 @@ body[data-theme=dark] .selbar{background:#0f2a4d}
 .ff{min-width:0}
 .ff.full{grid-column:1/-1}
 .ff label,.dfm label{display:block;font-size:.78rem;color:var(--muted);margin-bottom:.25rem;font-weight:500}
-.ff input,.ff select,.ff textarea,.dfm input,.dfm select,.dfm textarea{width:100%;padding:.5rem .65rem;border:1px solid var(--line);border-radius:9px;background:var(--card2)}
+.ff input,.ff select,.ff textarea,.cphr input,.cphr select,.dfm input,.dfm select,.dfm textarea{width:100%;padding:.5rem .65rem;border:1px solid var(--line);border-radius:9px;background:var(--card2)}
 .ff input[readonly]{opacity:.8;font-family:ui-monospace,monospace}
 .ff .hint{display:block;font-size:.72rem;color:var(--muted);margin-top:.2rem}
 .ff .inl{display:flex;gap:.4rem}

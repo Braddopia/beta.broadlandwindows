@@ -110,14 +110,51 @@ function reportCall(id,mode){const c=S.calls.find(x=>x.id==id);if(!c)return;
 function vContacts(){const F=UI.con.f,L=S.contacts.filter(c=>(F=='all'||c.type==F)&&hit(c)).sort((a,b)=>(a.co||a.name||'').localeCompare(b.co||b.name||'')),letter=c=>{const x=((c.co||c.name||'#').trim()[0]||'#').toUpperCase();return /[A-Z]/.test(x)?x:'#'};
   const have=new Set(L.map(letter)),AZ=[...'ABCDEFGHIJKLMNOPQRSTUVWXYZ','#'];let last='';
   const card=c=>`<div class="cc2"><div class="cc2-h"><span class="cav" style="--h:${[...(c.co||c.name||'?')].reduce((a,x)=>a+x.charCodeAt(0),0)%360}">${esc(initials(c.co||c.name))}</span><div><b>${esc(c.co||c.name)}</b><small>${esc([c.name&&c.name!=c.co?c.name:'',c.role].filter(Boolean).join(' · ')||' ')}</small></div><span class="tag">${esc(c.type||'')}</span></div>
-    <div class="cc2-b">${c.phone?`<a class="nocap" href="tel:${esc(c.phone.replace(/[^\d+]/g,''))}">${svg('M5 4h4l2 5-2.5 1.5a11 11 0 005 5L15 13l5 2v4a2 2 0 01-2 2A16 16 0 013 6a2 2 0 012-2')}${esc(c.phone)}</a>`:''}${c.email?`<a class="nocap" href="mailto:${esc(c.email)}">${svg('M4 6h16v12H4zM4 7l8 6 8-6')}${esc(c.email)}</a>`:''}${c.addr?`<span>${svg('M12 21s-7-6-7-11a7 7 0 0114 0c0 5-7 11-7 11zM12 12a2 2 0 100-4 2 2 0 000 4z')}${esc(c.addr)}</span>`:''}${!c.phone&&!c.email&&!c.addr?'<span class="muted">No details yet</span>':''}</div>
+    <div class="cc2-b">${conPhones(c).map(p=>`<a class="nocap" href="${esc(telHref(p.n))}">${svg('M5 4h4l2 5-2.5 1.5a11 11 0 005 5L15 13l5 2v4a2 2 0 01-2 2A16 16 0 013 6a2 2 0 012-2')}<span class="cpl">${esc(p.t)}</span>${esc(p.n)}</a>`).join('')}${c.email?`<a class="nocap" href="mailto:${esc(c.email)}">${svg('M4 6h16v12H4zM4 7l8 6 8-6')}${esc(c.email)}</a>`:''}${c.email2?`<a class="nocap" href="mailto:${esc(c.email2)}">${svg('M4 6h16v12H4zM4 7l8 6 8-6')}<span class="cpl">Accounts</span>${esc(c.email2)}</a>`:''}${c.addr||c.town||c.pc?`<span>${svg('M12 21s-7-6-7-11a7 7 0 0114 0c0 5-7 11-7 11zM12 12a2 2 0 100-4 2 2 0 000 4z')}${esc([c.addr,c.town,c.pc].filter(Boolean).join(', '))}</span>`:''}${!c.phone&&!c.email&&!c.addr?'<span class="muted">No details yet</span>':''}</div>
     <div class="cc2-f"><button class="mini" ${A('editContact',c.id)}>Edit</button>${ISOWN()?`<button class="mini del" ${A('del','contacts',c.id)}>Delete</button>`:''}</div></div>`;
   return `<div class="head"><div><h1>Contact Book</h1><span class="muted">${L.length} of ${S.contacts.length} contacts</span></div><div class="tools">${ISOWN()?'<button class="btn ghost" onclick="impCust()">Import customers</button>':''}<button class="btn" onclick="editContact()">New contact</button></div></div>
   <div class="subbar"><span class="sb-l">Show</span><div class="views">${['all',...CT].map(k=>`<button class="chip ${F==k?'on':''}" ${A('setUI','con.f',k)}>${k=='all'?'All':esc(k)} <i>${k=='all'?S.contacts.length:S.contacts.filter(c=>c.type==k).length}</i></button>`).join('')}</div></div>
   <div class="azbar">${AZ.map(x=>have.has(x)?`<button ${A('azGo',x)}>${x}</button>`:`<span>${x}</span>`).join('')}</div>
   <div class="cbook">${L.map(c=>{const x=letter(c),hd=x!=last?(last=x,`<div class="az2" id="az-${x=='#'?'0':x}">${x}</div>`):'';return hd+card(c)}).join('')||emptyArt('team','No contacts match.')}</div>`}
 function azGo(x){const e=document.getElementById('az-'+(x=='#'?'0':x));if(e)e.scrollIntoView({behavior:'smooth',block:'start'})}
-function editContact(id,draft){const c=S.contacts.find(x=>x.id==id);
-  form(c?'Edit Contact':'New Contact',[{k:'co',l:'Company',w:'full',req:1},{k:'name',l:'Contact name'},{k:'role',l:'Role'},{k:'type',l:'Type',t:'select',o:CT},{k:'phone',l:'Phone',t:'tel',max:30},{k:'email',l:'Email',t:'email',w:'full'},{k:'addr',l:'Address / town',w:'full',max:200}],draft||c||{type:'Supplier'},o=>{const go=()=>{const oldCo=c?c.co:o.co;if(c)Object.assign(c,o);else S.contacts.push({id:shortId('K'),...o});if((c||o).type=='Supplier'||S.suppliers.some(s=>s.name.toLowerCase()==String(oldCo).toLowerCase()))supFromContact(oldCo,c||o);audit(c?'Contact edited':'Contact added',o.co,'')};
-    if(!ISOWN()){setTimeout(()=>askYes(c?'Save changes to '+(c.co||'this contact')+'?':'Add '+o.co+' to the contact book?',c?'The contact details will be updated for everyone'+(S.suppliers.some(s=>s.name.toLowerCase()==String(c.co).toLowerCase())?', and on the supplier page too.':'.'):'Everyone will be able to see this contact.','Yes, save',()=>{go();store();render();toast('Contact saved')},false,()=>editContact(id,o)),0);return false}go()})}
+/* ---- contact window: tidy two-column layout, any number of labelled phone numbers ----
+   c.phones=[{t:'Office',n:'01632 ...'}]; c.phone mirrors the first one (used by lists, suppliers, search) */
+const CPH=['Office','Accounts','Sales rep','Direct DDI','Mobile','Orders','Out of hours','Fax'];
+const conPhones=c=>Array.isArray(c&&c.phones)&&c.phones.length?c.phones.filter(p=>p&&p.n):c&&c.phone?[{t:'Office',n:c.phone}]:[];
+const telHref=n=>'tel:'+String(n).replace(/[^\d+]/g,'');
+function cphRow(p){const t=p&&p.t||'';return `<div class="cphr"><select aria-label="Number type">${CPH.map(x=>`<option${x==t?' selected':''}>${esc(x)}</option>`).join('')}</select><input type="tel" inputmode="tel" maxlength="30" placeholder="Phone number" aria-label="Phone number" value="${esc(p&&p.n||'')}"><button type="button" class="cphx" title="Remove this number" aria-label="Remove this number">&times;</button></div>`}
+/* always one empty row at the end: the next box only appears once the last one is filled */
+function cphTidy(){const box=$('#cphs');if(!box)return;const rows=[...box.querySelectorAll('.cphr')];
+  rows.forEach((r,i)=>{if(i<rows.length-1&&!r.querySelector('input').value.trim()&&rows.length>1&&document.activeElement!=r.querySelector('input'))r.remove()});
+  const R=[...box.querySelectorAll('.cphr')],last=R[R.length-1];
+  if(!last||last.querySelector('input').value.trim()){const used=R.map(r=>r.querySelector('select').value);box.insertAdjacentHTML('beforeend',cphRow({t:CPH.find(x=>!used.includes(x))||'Office'}))}
+  [...box.querySelectorAll('.cphr')].forEach((r,i,a)=>{r.querySelector('.cphx').hidden=a.length<2||(i==a.length-1&&!r.querySelector('input').value.trim())})}
+function editContact(id,draft){const c=S.contacts.find(x=>x.id==id),v=draft||(c?{...c,phones:conPhones(c)}:{type:'Supplier',phones:[]});
+  const fld=(k,l,o={})=>`<div class="ff ${o.w||''}"><label for="c_${k}">${esc(l)}${o.req?' *':''}</label>${o.sel?`<select id="c_${k}">${o.sel.map(x=>`<option${x==(v[k]||'')?' selected':''}>${esc(x)}</option>`).join('')}</select>`:o.area?`<textarea id="c_${k}" rows="2" maxlength="${o.max||600}">${esc(v[k]||'')}</textarea>`:`<input id="c_${k}" type="${o.t||'text'}" maxlength="${o.max||120}" value="${esc(v[k]||'')}" autocomplete="off"${o.ph?` placeholder="${esc(o.ph)}"`:''}>`}</div>`;
+  openModal(`<button class="mx" onclick="closeModal()" aria-label="Close">&times;</button><h2>${c?'Edit Contact':'New Contact'}</h2>
+   <div class="cform">
+    <section><h3>Who</h3><div class="grid">${fld('co','Company',{req:1,max:80})}${fld('type','Type',{sel:CT})}${fld('name','Contact name',{max:60})}${fld('role','Job title',{max:60})}</div></section>
+    <section><h3>Phone Numbers <small>At least one *</small></h3><div id="cphs" class="cphs">${v.phones.map(cphRow).join('')}</div><p class="hint">Pick what each number is for. Another box appears when you fill one in.</p></section>
+    <section><h3>Email And Web</h3><div class="grid">${fld('email','Main email',{t:'email'})}${fld('email2','Accounts email',{t:'email'})}${fld('web','Website',{w:'full',max:200,ph:'https://'})}</div></section>
+    <section><h3>Address</h3><div class="grid">${fld('addr','Address',{w:'full',max:200})}${fld('town','Town',{max:60})}${fld('pc','Postcode',{max:10})}</div></section>
+    <section><h3>Notes</h3>${fld('notes','Notes',{area:1,w:'full'})}</section>
+   </div>
+   <div class="mact"><button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn" id="saveBtn">${c?'Save changes':'Add contact'}</button></div>`,'md');
+  const box=$('#cphs');cphTidy();
+  box.addEventListener('input',cphTidy);box.addEventListener('focusout',()=>setTimeout(cphTidy,0));
+  box.addEventListener('click',e=>{const x=e.target.closest('.cphx');if(!x)return;x.closest('.cphr').remove();cphTidy()});
+  $('#saveBtn').onclick=()=>{const g=k=>($('#c_'+k).value||'').trim(),o={co:SAFE.text(g('co'),80),type:CT.includes(g('type'))?g('type'):'Other',name:SAFE.text(g('name'),60),role:SAFE.text(g('role'),60),email:g('email').toLowerCase(),email2:g('email2').toLowerCase(),web:g('web').toLowerCase(),addr:SAFE.text(g('addr'),200),town:SAFE.text(g('town'),60),pc:SAFE.text(g('pc'),10).toUpperCase(),notes:SAFE.text(g('notes'),600)};
+    o.phones=[...$$('#cphs .cphr')].map(r=>({t:CPH.includes(r.querySelector('select').value)?r.querySelector('select').value:'Office',n:SAFE.text(r.querySelector('input').value,30)})).filter(p=>p.n);
+    const bad=(m,k)=>{toast(m);const e=k?$('#c_'+k):$('#cphs input');e&&e.focus();return false};
+    if(!o.co)return bad('Company is required','co');
+    if(!o.phones.length)return bad('Add at least one phone number');
+    const wrong=o.phones.find(p=>!/^[\d +()-]{6,30}$/.test(p.n)||(p.n.match(/\d/g)||[]).length<6);if(wrong)return bad(wrong.n+' does not look like a phone number');
+    if(o.email&&!SAFE.email(o.email))return bad('Main email does not look like an email address','email');
+    if(o.email2&&!SAFE.email(o.email2))return bad('Accounts email does not look like an email address','email2');
+    if(o.web&&!SAFE.url(o.web))return bad('The website must start with https://','web');
+    o.phone=o.phones[0].n;
+    const go=()=>{const oldCo=c?c.co:o.co;if(c)Object.assign(c,o);else S.contacts.push({id:shortId('K'),...o});if((c||o).type=='Supplier'||S.suppliers.some(s=>s.name.toLowerCase()==String(oldCo).toLowerCase()))supFromContact(oldCo,c||o);audit(c?'Contact edited':'Contact added',o.co,'')};
+    const done=()=>{store();closeModal();render();toast('Contact saved')};
+    if(!ISOWN()){closeModal();askYes(c?'Save changes to '+(c.co||'this contact')+'?':'Add '+o.co+' to the contact book?',c?'The contact details will be updated for everyone'+(S.suppliers.some(s=>s.name.toLowerCase()==String(c.co).toLowerCase())?', and on the supplier page too.':'.'):'Everyone will be able to see this contact.','Yes, save',()=>{go();done()},false,()=>editContact(id,o));return}
+    go();done()}}
 function impCust(){let n=0;S.contracts.forEach(c=>{if(!S.contacts.some(k=>k.co==c.name)){n++;S.contacts.push({id:shortId('K'),co:c.name,name:c.name,role:'Contract '+c.id,type:'Customer',phone:c.phone||'',email:c.email||'',addr:c.address||c.town})}});audit('Customers imported','Contact book',n+' added');store();render();toast(n+' customer'+(n==1?'':'s')+' added')}
