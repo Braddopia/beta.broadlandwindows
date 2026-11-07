@@ -49,5 +49,6 @@ function backupLoad(inp){if(!need(ISOWN,'Restoring backups'))return;const f=inp.
     const ok=n&&typeof n=='object'&&['items','leads','contracts','calls','staff'].every(k=>Array.isArray(n[k]));if(!ok){toast('That file is not a Broadland CRM backup');return}
     if(!confirm('Replace ALL current data with this backup? Your current data is kept as a safety copy in this browser.'))return;
     try{localStorage.setItem(KEY+'_before_restore',JSON.stringify(S))}catch(e){}
+    n.sec=S.sec;delete n.__proto__;delete n.constructor;/* a backup never brings its own PINs */
     try{localStorage.setItem(KEY,JSON.stringify(n))}catch(e){toast('Not enough browser storage to restore');return}
     location.reload()})}

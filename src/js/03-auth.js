@@ -6,20 +6,16 @@
 const FOCUS=['home','live','deliveries','stock','suppliers','downloads'];
 const ROLES={
   admin:  {n:'Administrator',     d:'Everything a standard user has, plus staff and holidays',v:[...FOCUS,'leads','contracts','staff','holidays']},
-  finance:{n:'Finance',           d:'Live analytics, inventory and files',v:FOCUS},
-  sales:  {n:'Sales',             d:'Live analytics, inventory and files',v:FOCUS},
-  stock:  {n:'Stock and warehouse',d:'Live analytics, inventory and files',v:FOCUS},
-  fitter: {n:'Fitter',            d:'Live analytics, inventory and files',v:FOCUS},
   staff:  {n:'Standard user',     d:'Overview, leads, contracts, live analytics, inventory and files',v:[...FOCUS,'leads','contracts']},
   beta:   {n:'Beta (all features)',d:'Leads, contracts, finance, staff and everything else',v:'*'}};
-const RL={admin:'Administrator',finance:'Finance',sales:'Sales',stock:'Stock And Warehouse',fitter:'Fitter',staff:'Team Member',beta:'Beta Access'};
+const RL={admin:'Administrator',staff:'Team Member',beta:'Beta Access'};
 const IDLE_MIN=30, PIN_TRIES=5, PIN_LOCK_S=60;
 
 let ROLE='staff';
 try{const r=sessionStorage.getItem('bb_role'),at=+sessionStorage.getItem('bb_role_at')||0;if(ROLES[r]&&(r=='staff'||Date.now()-at<IDLE_MIN*6e4))ROLE=r}catch(e){}
 
 const canSee=k=>{const v=ROLES[ROLE].v;return v=='*'||v.includes(k)};
-const ISADM=()=>['admin','finance','beta'].includes(ROLE);   /* money + approvals */
+const ISADM=()=>['admin','beta'].includes(ROLE);   /* money + approvals */
 const ISOWN=()=>['admin','beta'].includes(ROLE);              /* people + settings */
 const HOME=()=>canSee('home')?'home':'live';
 /* guard for privileged actions: checked again inside the action, not just by hiding buttons */

@@ -83,6 +83,10 @@ function toast(t){if(document.body.classList.contains('tv'))return;const e=$('#t
 /* ---- modal ---- */
 function openModal(h,size){const b=$('#mbox');b.className='mb'+(size?' '+size:'');b.innerHTML=h;$('#modal').classList.add('open');b.scrollTop=0;
   if(size!='full')setTimeout(()=>{const f=b.querySelector('input:not([readonly]):not([type=hidden]):not([type=checkbox]),select,textarea');if(f&&matchMedia('(pointer:fine)').matches)f.focus({preventScroll:true})},60)}
+/* "next" fields: Mobile 2 shows once Mobile 1 has something in it, and so on */
+const nxHid=(f,v)=>!!f.nx&&!String(v[f.nx]??'').trim()&&!String(v[f.k]??'').trim();
+document.addEventListener('input',e=>{const el=e.target;if(!el.id||!el.id.startsWith('f_'))return;const k=el.id.slice(2);
+  $$(`#mbox [data-nx="${k}"]`).forEach(r=>{const own=r.querySelector('input,select,textarea');r.hidden=!el.value.trim()&&!(own&&own.value.trim())})});
 function closeModal(){$('#modal').classList.remove('open')}
 $('#modal').addEventListener('mousedown',e=>{if(e.target.id=='modal')closeModal()});
 
@@ -185,7 +189,7 @@ let WZ=null;
 function wizard(o){WZ={...o,st:0,seen:0};wzDraw()}
 function wzDraw(){const W=WZ,st=W.steps[W.st],last=W.st==W.steps.length-1;
   const lab=f=>{const val=W.v[f.k];return f.t=='number'?(val?val:''):val};
-  const rev=()=>W.steps.filter(x=>x.f).map(x=>`<div class="wz-r"><h3>${esc(x.t)} <button class="mini" ${A('wzGo',W.steps.indexOf(x))}>Change</button></h3>${x.f.map(f=>`<div class="si"><span>${esc(f.l.replace(/ \(.*\)/,''))}</span><b class="${f.t=='email'||/email|web|url/i.test(f.k)?'nocap':''}">${esc(lab(f))||'<span class="muted">-</span>'}</b></div>`).join('')}</div>`).join('');
+  const rev=()=>W.steps.filter(x=>x.f).map(x=>`<div class="wz-r"><h3>${esc(x.t)} <button class="mini" ${A('wzGo',W.steps.indexOf(x))}>Change</button></h3>${x.f.filter(f=>!(f.nx&&!W.v[f.k])).map(f=>`<div class="si"><span>${esc(f.l.replace(/ \(.*\)/,''))}</span><b class="${f.t=='email'||/email|web|url/i.test(f.k)?'nocap':''}">${esc(lab(f))||'<span class="muted">-</span>'}</b></div>`).join('')}</div>`).join('');
   openModal(`<button class="mx" onclick="closeModal()" aria-label="Close">&times;</button><h2>${esc(W.title)}</h2>
    <div class="stp wz">${W.steps.map((x,i)=>`<span class="${i<=W.st?'on':''} ${i<=W.seen||W.edit?'go':''}" ${i<=W.seen||W.edit?A('wzGo',i):''}><i>${i<W.st?'&#10003;':i+1}</i>${esc(x.t)}</span>`).join('')}</div>
    <p class="muted wz-d">Step ${W.st+1} of ${W.steps.length}: ${esc(st.d||'')}</p>

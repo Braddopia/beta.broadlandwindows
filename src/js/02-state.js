@@ -72,7 +72,7 @@ const ikey=r=>[r.item,r.length,r.cInName,r.cOutName].map(v=>{v=String(v||'').tri
   /* security: per-install salt and hashed PINs (default 1234 until changed) */
   S.sec=S.sec||{};S.sec.salt=S.sec.salt||uuid();
   S.sec.pins=S.sec.pins||{};
-  ['admin','finance','sales','stock','fitter','beta'].forEach(r=>{if(!S.sec.pins[r])S.sec.pins[r]={h:pinHash(r,'1234'),def:1}});
+  ['admin','beta'].forEach(r=>{if(!S.sec.pins[r])S.sec.pins[r]={h:pinHash(r,'1234'),def:1}});['finance','sales','stock','fitter'].forEach(r=>delete S.sec.pins[r]);
 })();
 function pinHash(role,pin){return sha256(S.sec.salt+':'+role+':'+pin)}
 

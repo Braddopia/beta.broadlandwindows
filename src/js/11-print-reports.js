@@ -26,6 +26,9 @@ h2.sec{margin:11mm 0 1mm;font:600 14pt "Segoe UI",Arial,sans-serif;color:#012b59
 .dg div{display:grid;grid-template-columns:38mm 1fr;gap:4mm;padding:2.1mm 0;border-bottom:.3mm solid #dfe6ef;break-inside:avoid}
 .dg span{color:#6b7a90;font-size:8.4pt}.dg b{font-weight:500}
 .dg.one{grid-template-columns:1fr}
+.gp{display:grid;grid-template-columns:1fr 1fr;column-gap:10mm}.gp section{break-inside:avoid}.gp .dg div{grid-template-columns:30mm 1fr}
+.call{margin:6mm 0 0;padding:3mm 4mm;border-left:1mm solid #ffd002;background:#fffbe6;font-size:8.8pt;break-inside:avoid}.call b{display:block;font-size:6.8pt;letter-spacing:.14em;text-transform:uppercase;color:#7a6200;margin-bottom:.8mm}
+.dt td.warn{color:#b42318;font-weight:700}
 .c>h2.sec:first-child{margin-top:7mm}
 .dt{width:100%;border-collapse:collapse;font-size:8.3pt}.dt thead{display:table-header-group}.dt tr{break-inside:avoid}
 .dt th{text-align:left;padding:2mm 2.5mm;font-size:6.9pt;letter-spacing:.09em;text-transform:uppercase;font-weight:700;color:#5a6a82;border-bottom:.5mm solid #012b59}
@@ -81,12 +84,12 @@ const PRINT_CUS=`.lh{display:flex;justify-content:space-between;align-items:cent
 /* rows: [[label,value]...]  empty values ('', '-', 'Not set', 'n/a') are left out.
    o: {kind, ref, kpis, money:{total,paid}, steps:[[label,date,done]], tables:[{t,h,r,foot}], sections:[{t,kpis,bars,tables}],
        pre, post, sign, barcode, customer:{name,address,contact} -> customer layout, thanks} */
-const blankV=v=>v==null||['','-','not set','n/a','none'].includes(String(v).trim().toLowerCase());
+const blankV=v=>v==null||['','-','not set','n/a','none','unassigned'].includes(String(v).trim().toLowerCase());
 function printDoc(t,sub,rows,ph,o){o=o||{};rows=(rows||[]).filter(r=>r&&!blankV(r[1]));ph=(ph||[]).filter(SAFE.img);const cus=!!o.customer;
   const w=window.open('','_blank');if(!w){toast('Allow pop-ups to open reports');return}
   const now=new Date(),date=now.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'}),ref=o.ref||'BW-'+iso(now).slice(2).replace(/-/g,'')+'-'+Math.random().toString(36).slice(2,6).toUpperCase();
   const isN=v=>typeof v=='number'||/^[£\-]?[\d,]+(\.\d+)?%?$/.test(String(v).trim());
-  const tb=x=>`<h3>${esc(x.t)}</h3><table class="dt"><thead><tr>${x.h.map((h,i)=>`<th class="${x.r.length&&isN(x.r[0][i])?'n':''}">${esc(h)}</th>`).join('')}</tr></thead><tbody>${x.r.map(r=>`<tr>${r.map(c=>`<td class="${isN(c)?'n':''}">${esc(c)}</td>`).join('')}</tr>`).join('')||`<tr><td colspan="${x.h.length}" class="e">Nothing to show</td></tr>`}</tbody>${x.foot?`<tfoot><tr>${x.foot.map(c=>`<td class="${isN(c)?'n':''}">${esc(c)}</td>`).join('')}</tr></tfoot>`:''}</table>`;
+  const tb=x=>`<h3>${esc(x.t)}</h3><table class="dt"><thead><tr>${x.h.map((h,i)=>`<th class="${x.r.length&&isN(x.r[0][i])?'n':''}">${esc(h)}</th>`).join('')}</tr></thead><tbody>${x.r.map(r=>`<tr>${r.map(c=>`<td class="${isN(c)?'n':''} ${/^Needs safety glass/.test(c)?'warn':''}">${esc(c)}</td>`).join('')}</tr>`).join('')||`<tr><td colspan="${x.h.length}" class="e">Nothing to show</td></tr>`}</tbody>${x.foot?`<tfoot><tr>${x.foot.map(c=>`<td class="${isN(c)?'n':''}">${esc(c)}</td>`).join('')}</tr></tfoot>`:''}</table>`;
   const figs=k=>k&&k.length?`<div class="figs" style="grid-template-columns:repeat(${k.length<=5?k.length:Math.ceil(k.length/2)},1fr)">${k.map(x=>`<div><small>${esc(x[0])}</small><b>${esc(x[1])}</b>${x[2]?`<i>${esc(x[2])}</i>`:''}</div>`).join('')}</div>`:'';
   const panel=(k,m)=>{if(!(k&&k.length)&&!m)return '';let pr='';if(m&&m.total>0){const pc=Math.max(0,Math.min(100,Math.round(100*m.paid/m.total)));pr=`<div class="prog"><div class="tr"><i style="width:${pc}%"></i></div><p><span>${pc}% paid</span><span>${pc>=100?'Paid in full':esc(money(m.total-m.paid))+' to pay'}</span></p></div>`}
     return `<div class="mesh"><div class="glass">${figs(k)}${pr}</div></div>`};
@@ -94,7 +97,9 @@ function printDoc(t,sub,rows,ph,o){o=o||{};rows=(rows||[]).filter(r=>r&&!blankV(
   const steps=s=>{if(!s||!s.length)return '';const last=s.map(x=>!!x[2]).lastIndexOf(true);return `<h3>${cus?'Your project':'Progress'}</h3><ol class="tl">${s.map((x,i)=>`<li class="${x[2]?'d':''} ${i==last+1?'now':''}"><b>${esc(x[0])}</b><span>${esc(x[1]||(x[2]?'Done':'To come'))}</span></li>`).join('')}</ol>`};
   const secs=(o.sections||[]).map(s=>`<h2 class="sec">${esc(s.t)}</h2>${s.kpis&&s.kpis.length?`<div style="margin-top:4mm">${panel(s.kpis)}</div>`:''}${(s.bars||[]).map(bars).join('')}${(s.tables||[]).map(tb).join('')}`).join('');
   const det=rows.length?`<h3>${cus?'The details':'Details'}</h3><div class="dg ${cus||rows.length<6?'one':''}">${rows.map(r=>`<div><span>${esc(r[0])}</span><b>${esc(r[1])}</b></div>`).join('')}</div>`:'';
-  const body=`${steps(o.steps)}${det}${o.pre||''}${(o.tables||[]).map(tb).join('')}${secs}${o.post||''}${ph.length?`<h3>Photos</h3><div class="ph">${ph.map((p,i)=>`<figure><img src="${p}"><figcaption>Photo ${i+1}</figcaption></figure>`).join('')}</div>`:''}`;
+  const grp=(o.groups||[]).map(g=>({t:g.t,r:g.r.filter(r=>r&&!blankV(r[1]))})).filter(g=>g.r.length);
+  const gps=grp.length?`<div class="gp">${grp.map(g=>`<section><h3>${esc(g.t)}</h3><div class="dg one">${g.r.map(r=>`<div><span>${esc(r[0])}</span><b>${esc(r[1])}</b></div>`).join('')}</div></section>`).join('')}</div>`:'';
+  const body=`${steps(o.steps)}${gps}${det}${o.pre||''}${(o.tables||[]).map(tb).join('')}${secs}${o.post||''}${ph.length?`<h3>Photos</h3><div class="ph">${ph.map((p,i)=>`<figure><img src="${p}"><figcaption>Photo ${i+1}</figcaption></figure>`).join('')}</div>`:''}`;
   const tp=S.brand.tp,g=S.brand.g;
   const page=cus
     ?`<header class="lh"><img src="${LOGO_SRC.full}" alt="Broadland Windows"><div class="co">${esc(CO.tel)}<br>${esc(CO.em)}<br>${esc(CO.web)}</div></header>
@@ -112,7 +117,7 @@ function printDoc(t,sub,rows,ph,o){o=o||{};rows=(rows||[]).filter(r=>r&&!blankV(
   w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${esc(t)}</title><style>${PRINT_BASE}${cus?PRINT_CUS:PRINT_INT}</style></head><body>
   <div class="tb"><button onclick="print()">Print or save as PDF</button><button onclick="close()">Close</button></div><div class="pg">${page}</div><footer class="ft">${foot}</footer></body></html>`);w.document.close()}
 /* choose customer or internal version */
-function docChoice(title,cus,int){openModal(`<h2>${esc(title)}</h2><div class="rl"><button class="rb" onclick="closeModal();${esc(cus)}"><b>Customer copy</b><span>Clean letterhead to send or hand to the customer. No internal costs or notes.</span></button><button class="rb" onclick="closeModal();${esc(int)}"><b>Internal sheet</b><span>Full details for the team, with reference barcode.</span></button></div><div class="mact"><button class="btn ghost" onclick="closeModal()">Cancel</button></div>`,'sm')}
+function docChoice(title,cus,int,more){openModal(`<h2>${esc(title)}</h2><div class="rl"><button class="rb" onclick="closeModal();${esc(cus)}"><b>Customer copy</b><span>Clean letterhead to send or hand to the customer. No internal costs or notes.</span></button><button class="rb" onclick="closeModal();${esc(int)}"><b>Internal sheet</b><span>Full details for the team, with reference barcode.</span></button>${(more||[]).map(m=>`<button class="rb" onclick="closeModal();${esc(m[2])}"><b>${esc(m[0])}</b><span>${esc(m[1])}</span></button>`).join('')}</div><div class="mact"><button class="btn ghost" onclick="closeModal()">Cancel</button></div>`,'sm')}
 function printTable(t,h,rows){printDoc(t,'',[],[],{tables:[{t,h,r:rows}]})}
 
 /* ---------------- stock reports ---------------- */

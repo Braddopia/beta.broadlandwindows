@@ -123,7 +123,7 @@ function ieFields(){const Ad=ISADM(),Own=ISOWN(),ed=ieMode=='edit',mv=!ed,r=(ieK
   ...(ieMode=='request'?[{k:'note',l:'Needed for (job, reason)',w:'full',max:160,sec:'n'}]:[{k:'notes',l:ed?'Notes':'Product notes',t:'area',w:'full',sec:'n'}])]}
 function fieldH(f,v){const val=v[f.k]??'';
   const inp=f.t=='colour'?colourField(f,v):f.t=='select'?`<select id="f_${f.k}" ${f.ro?'disabled':''}>${f.o.map(o=>`<option value="${esc(o)}" ${String(o)==String(val)?'selected':''}>${esc(o||'-')}</option>`).join('')}</select>`:f.t=='area'?`<textarea id="f_${f.k}" rows="3" maxlength="2000">${esc(val)}</textarea>`:`<input id="f_${f.k}" type="${f.t||'text'}" ${f.t=='number'?'step="any" min="0" inputmode="decimal"':`maxlength="${f.max||120}"`} value="${esc(val)}" ${f.ro?'readonly':''} ${f.list?`list="${f.list}"`:''} autocomplete="off">`;
-  return `<div class="ff ${f.w||''}"><label for="f_${f.k}">${esc(f.l)}${f.req?' *':''}</label>${inp}${f.hint?`<span class="hint">${esc(f.hint)}</span>`:''}</div>`}
+  return `<div class="ff ${f.w||''}" ${f.nx?`data-nx="${f.nx}"`:''} ${nxHid(f,v)?'hidden':''}><label for="f_${f.k}">${esc(f.l)}${f.req?' *':''}</label>${inp}${f.hint?`<span class="hint">${esc(f.hint)}</span>`:''}</div>`}
 function itemWindow(mode,k,pre){
   const r=(k&&prod(k))||null;if(mode=='edit'&&!r)return;
   ieMode=mode;ieKey=r?r.pid:null;iePre=pre||{};ieIdx=0;tmp=r?pphotos(r.pid).slice():[];tmpDraw=ieDraw;

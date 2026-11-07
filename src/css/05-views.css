@@ -446,3 +446,7 @@ body[data-theme=dark] .sb{background:rgba(255,255,255,.05)!important}
   body[data-theme=dark] .side,body[data-theme=dark] .top{background:#141a25!important}}
 body[data-theme=dark] .views .chip.on{background:#2a62c9;color:#fff}
 body[data-theme=dark] .pager select{background:rgba(255,255,255,.06);color:var(--ink)}
+
+/* survey schedule */
+.opt td{padding:.3rem .25rem}.opt select{padding:.35rem .4rem;border:1px solid var(--line);border-radius:7px;background:var(--card);font-size:.85rem;max-width:12rem}
+.opt input{min-width:0}.opt tr.warnr td{background:rgba(191,52,52,.07)}.opt tr.warnr td:first-child{box-shadow:inset 3px 0 0 var(--red)}

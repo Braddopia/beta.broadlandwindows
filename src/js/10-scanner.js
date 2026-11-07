@@ -3,7 +3,7 @@
    Scanned codes are validated, de-duplicated and logged.
    ========================================================================== */
 let scanCb=null,scanning=false,stream=null,reader=null,lastScan={c:'',t:0};
-function loadZX(){return new Promise((ok,no)=>{if(window.ZXing)return ok();const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js';s.crossOrigin='anonymous';s.referrerPolicy='no-referrer';s.onload=ok;s.onerror=no;document.head.appendChild(s)})}
+function loadZX(){return new Promise((ok,no)=>{if(window.ZXing)return ok();const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js';s.integrity='sha384-BzBxP10ZE72aitqj5UMmUsbKFliP/DZqA8Wq+BNNhlIJDGoEd1tpkMYXOg9+n6sB';s.crossOrigin='anonymous';s.referrerPolicy='no-referrer';s.onload=ok;s.onerror=no;document.head.appendChild(s)})}
 async function scan(cb){
   scanCb=cb;$('#scanner').classList.add('open');$('#manual').value='';$('#scanMsg').textContent='Point the camera at a barcode.';
   if(!window.isSecureContext||!navigator.mediaDevices){$('#scanMsg').textContent='The camera needs a secure (https) connection. You can still type the code below.';return}
