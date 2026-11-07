@@ -9,7 +9,7 @@ const UI={
   cal:{m:'month',o:0,sd:null,ly:{fit:1,svc:1,del:1,hol:1}},
   hol:{m:0,v:'tl'}, rep:{t:'summary'}, fin:{t:'debtors',pm:0},
   del:{f:'out',s:'all',v:'list'}, files:{cat:'all',az:0,list:0,ssq:'',page:1,per:50},
-  con:{f:'all'}, sup:{open:''}, lead:{v:'list',f:'live',src:'all',own:'all',sort:'id',dir:1,page:1,per:50}, ctr:{v:'list',f:'cur',sort:'id',dir:1,page:1,per:50}, nc:{t:'All'}, audit:{page:1,per:50}
+  con:{f:'all'}, staff:{c:'all'}, sup:{open:''}, lead:{v:'list',f:'live',src:'all',own:'all',sort:'id',dir:1,page:1,per:50}, ctr:{v:'list',f:'cur',sort:'id',dir:1,page:1,per:50}, nc:{t:'All'}, audit:{page:1,per:50}
 };
 function setUI(path,val){const p=path.split('.');let o=UI;for(let i=0;i<p.length-1;i++)o=o[p[i]];o[p[p.length-1]]=val;if(p.length==2&&p[1]!='page'&&'page' in UI[p[0]])UI[p[0]].page=1;render()}
 function togUI(path){const p=path.split('.');let o=UI;for(let i=0;i<p.length-1;i++)o=o[p[i]];const k=p[p.length-1];o[k]=o[k]?0:1;render()}
@@ -33,7 +33,6 @@ const hit=o=>!q||Object.values(o).filter(v=>v!=null&&typeof v!='object').join(' 
 function badges(){const td=today();return{
   leads:S.leads.filter(l=>!['Won','Lost'].includes(l.stage)).length,
   service:S.calls.filter(c=>c.status!='Complete').length,
-  live:S.deliveries.filter(x=>x.status=='Due'&&x.due<td).length,
   fitting:S.contracts.filter(c=>c.fit&&c.stage!='Complete').length,
   stock:S.items.filter(r=>r.type=='request'&&r.reqStatus=='Pending').length,
   staff:ISOWN()?S.hols.filter(h=>h.status=='Pending').length:0,
@@ -79,7 +78,7 @@ function shellSync(){
 }
 
 /* ---- toast ---- */
-function toast(t){const e=$('#toast');e.textContent=t;e.style.display='block';clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.display='none',3400)}
+function toast(t){if(document.body.classList.contains('tv'))return;const e=$('#toast');e.textContent=t;e.style.display='block';clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.display='none',3400)}
 
 /* ---- modal ---- */
 function openModal(h,size){const b=$('#mbox');b.className='mb'+(size?' '+size:'');b.innerHTML=h;$('#modal').classList.add('open');b.scrollTop=0;
@@ -92,7 +91,7 @@ $('#modal').addEventListener('mousedown',e=>{if(e.target.id=='modal')closeModal(
 let tmp=null,tmpDraw=null;
 function form(title,fields,v,cb,photos,size){
   v=v||{};tmp=photos?(v.photos||[]).filter(SAFE.img).slice():null;tmpDraw=drawThumbs;
-  const sel=f=>`<select id="f_${f.k}" ${f.ro?'disabled':''}>${f.o.map(o=>{const[val,lab]=Array.isArray(o)?o:[o,o||'-'];return `<option value="${esc(val)}"${String(val)==String(v[f.k]??'')?' selected':''}>${esc(lab)}</option>`}).join('')}</select>`;
+  const sel=f=>{const cur=v[f.k]??'',has=f.o.some(o=>String(Array.isArray(o)?o[0]:o)==String(cur));return `<select id="f_${f.k}" ${f.ro?'disabled':''}>${(cur!==''&&!has?[cur,...f.o]:f.o).map(o=>{const[val,lab]=Array.isArray(o)?o:[o,o||'-'];return `<option value="${esc(val)}"${String(val)==String(v[f.k]??'')?' selected':''}>${esc(lab)}</option>`}).join('')}</select>`};
   const inp=f=>f.t=='colour'?colourField(f,v):f.t=='select'?sel(f):f.t=='area'?`<textarea id="f_${f.k}" rows="3" maxlength="${f.max||2000}">${esc(v[f.k]||'')}</textarea>`
     :`<input id="f_${f.k}" type="${f.t||'text'}"${f.t=='number'?` step="any" min="${f.min??0}"${f.max?` max="${f.max}"`:''} inputmode="decimal"`:` maxlength="${f.max||120}"`} value="${esc(v[f.k]??'')}"${f.ro?' readonly':''}${f.list?` list="${f.list}"`:''} autocomplete="off">`;
   openModal(`<h2>${esc(title)}</h2><div class="grid">${fields.map(f=>`<div class="ff ${f.w||''}"><label for="f_${f.k}">${esc(f.l)}${f.req?' *':''}</label>${f.scan?`<div class="inl">${inp(f)}<button type="button" class="btn scan sm" ${A('scanInto','f_'+f.k)}>Scan</button></div>`:inp(f)}${f.hint?`<span class="hint">${esc(f.hint)}</span>`:''}</div>`).join('')}

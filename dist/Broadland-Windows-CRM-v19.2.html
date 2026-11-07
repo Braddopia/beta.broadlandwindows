@@ -801,6 +801,10 @@ body[data-theme=dark] .smini{background:rgba(255,255,255,.03)}
 body[data-theme=dark] .mb{background:rgba(17,21,30,.97)!important}
 .mact{background:inherit;-webkit-backdrop-filter:none;backdrop-filter:none}
 
+/* sidebar logo: more room above */
+.brand{padding:1.1rem .2rem 1rem}
+@media(max-height:760px) and (min-width:901px){.brand{padding:.8rem .2rem .7rem}}
+
 /* ==========================================================================
    06 · Adaptive layout
    Breakpoints: 1400 (laptop) · 1100 (small laptop / tablet landscape)
@@ -1084,6 +1088,8 @@ const STAGES=['New','Surveyed','Quoted','Won','Lost'];
 const CSTAGES=['Deposit due','Survey done','Ordered','Fitting booked','Fitted','Complete'];
 const SOURCES=['Website','Phone','Referral','Trade show','Facebook','Showroom'];
 const FIT=['Team A','Team B','Fitter A','Fitter B'];
+const SCATS=['Salespeople','Fitters','Office','Factory'];
+const guessCat=r=>/sales|surveyor|consultant|estimator/i.test(r)?'Salespeople':/fit|install/i.test(r)?'Fitters':/operative|production|factory|stock|warehouse|driver/i.test(r)?'Factory':'Office';
 const UNITS=['Each','Units','Pair','Single','PCS','Meters (M)'];
 const CT=['Supplier','Customer','Sub-contractor','Trade','Other'];
 const DS=['Due','In transit','Received'];
@@ -1102,7 +1108,7 @@ function seed(){
   calls:[{id:'S-0871',name:'Sample Customer I',town:'Norwich',contract:'2402311',issue:'Bifold handle stiff, one panel rubbing',priority:'Normal',status:'Open',visit:'2026-11-09',fitter:'Fitter A',notes:''},{id:'S-0870',name:'Sample Customer M',town:'Holt',contract:'2402204',issue:'Misted unit, kitchen window',priority:'Low',status:'Booked',visit:'2026-11-11',fitter:'Fitter B',notes:'Replacement unit ordered'},{id:'S-0869',name:'Sample Customer N',town:'Sheringham',contract:'2402187',issue:'Water ingress below patio door',priority:'Urgent',status:'Open',visit:'',fitter:'Team A',notes:''},{id:'S-0866',name:'Sample Customer O',town:'Wymondham',contract:'2402150',issue:'Replace lost door key set',priority:'Low',status:'Complete',visit:'2026-10-30',fitter:'Fitter A',notes:''}],
   contacts:[{id:'K-1',co:'Example Glass Ltd',name:'Contact One',role:'Account manager',type:'Supplier',phone:'01632 960 201',email:'sales@glass.example.com',addr:'Norwich'},{id:'K-2',co:'Example Aluminium Ltd',name:'Contact Two',role:'Sales office',type:'Supplier',phone:'01632 961 310',email:'orders@aluminium.example.com',addr:'Attleborough'},{id:'K-3',co:'Example Timber Ltd',name:'Contact Three',role:'Director',type:'Supplier',phone:'01632 962 118',email:'info@timber.example.com',addr:'North Walsham'},{id:'K-4',co:'Example Fitting Services',name:'Fitter A',role:'Lead fitter',type:'Sub-contractor',phone:'07700 900 312',email:'jobs@fitting.example.com',addr:'Norwich'},{id:'K-5',co:'Example Groundworks',name:'Contact Five',role:'Groundworks',type:'Trade',phone:'07700 900 845',email:'office@groundworks.example.com',addr:'Dereham'}],
   deliveries:[{id:'D-1',supplier:'Example Glass Ltd',items:'Sealed units x24',due:d(-1),status:'In transit',contract:'2402318'},{id:'D-2',supplier:'Example Aluminium Ltd',items:'Bifold frames x3',due:d(0),status:'Due',contract:'2402305'},{id:'D-3',supplier:'Example Timber Ltd',items:'Garden room kit 3m x 3m',due:d(0),status:'In transit',contract:'2402305'},{id:'D-4',supplier:'Example Glass Ltd',items:'Glass panels x12',due:d(2),status:'Due',contract:'2402299'},{id:'D-5',supplier:'Example Aluminium Ltd',items:'French doors x1',due:d(5),status:'Due',contract:'2402290'}],
-  staff:[P('U-1','Demo User','Director','','2012-04-02',33,62000),P('U-2','Fitter A','Lead fitter','Team A','2016-09-12',28,34000),P('U-3','Fitter B','Fitter','Team B','2019-03-04',28,31000),P('U-4','Stock Controller','Stock controller','','2020-06-15',28,29500),P('U-5','Operative 1','Production operative','','2021-01-11',28,27500),P('U-6','Operative 2','Production operative','','2022-05-03',28,27000),P('U-7','Operative 3','Production operative','','2023-02-20',28,26500),P('U-8','Operative 4','Production operative','','2024-08-05',28,26000)],
+  staff:[P('U-1','Demo User','Director','','2012-04-02',33,62000),P('U-2','Fitter A','Lead fitter','Team A','2016-09-12',28,34000),P('U-3','Fitter B','Fitter','Team B','2019-03-04',28,31000),P('U-4','Stock Controller','Stock controller','','2020-06-15',28,29500),P('U-5','Operative 1','Production operative','','2021-01-11',28,27500),P('U-6','Operative 2','Production operative','','2022-05-03',28,27000),P('U-7','Operative 3','Production operative','','2023-02-20',28,26500),P('U-8','Operative 4','Production operative','','2024-08-05',28,26000),P('U-9','Sales A','Sales consultant','','2023-09-04',28,30000),P('U-10','Office A','Office manager','','2018-01-08',28,29000)],
   hols:[{id:'H-1',sid:'U-2',from:'2026-11-23',to:'2026-11-27',days:5,status:'Approved'},{id:'H-2',sid:'U-3',from:'2026-12-21',to:'2026-12-31',days:7,status:'Pending'},{id:'H-3',sid:'U-4',from:'2026-08-03',to:'2026-08-14',days:10,status:'Approved'},{id:'H-4',sid:'U-5',from:'2026-12-24',to:'2026-12-24',days:1,status:'Pending'}],
   fin:[{id:'B-1',payee:'Example Glass Ltd',type:'Supplier',ref:'INV-8841',job:'2402318',amount:1840,due:d(-3),status:'Unpaid'},{id:'B-2',payee:'Example Aluminium Ltd',type:'Supplier',ref:'INV-5520',job:'2402305',amount:2310,due:d(6),status:'Unpaid'},{id:'B-3',payee:'Example Timber Ltd',type:'Supplier',ref:'INV-1207',job:'2402305',amount:6450,due:d(12),status:'Unpaid'},{id:'B-4',payee:'Example Groundworks',type:'Job cost',ref:'Garden room base',job:'2402305',amount:1200,due:d(2),status:'Unpaid'}]
 }}
@@ -1177,7 +1183,7 @@ window.addEventListener('storage',e=>{if(e.key==KEY&&e.newValue){try{const n=JSO
    ========================================================================== */
 const FOCUS=['home','live','deliveries','stock','suppliers','downloads'];
 const ROLES={
-  admin:  {n:'Administrator',     d:'Live analytics, inventory, holidays and files',v:[...FOCUS,'holidays']},
+  admin:  {n:'Administrator',     d:'Everything a standard user has, plus staff and holidays',v:[...FOCUS,'leads','contracts','staff','holidays']},
   finance:{n:'Finance',           d:'Live analytics, inventory and files',v:FOCUS},
   sales:  {n:'Sales',             d:'Live analytics, inventory and files',v:FOCUS},
   stock:  {n:'Stock and warehouse',d:'Live analytics, inventory and files',v:FOCUS},
@@ -1278,7 +1284,7 @@ const UI={
   cal:{m:'month',o:0,sd:null,ly:{fit:1,svc:1,del:1,hol:1}},
   hol:{m:0,v:'tl'}, rep:{t:'summary'}, fin:{t:'debtors',pm:0},
   del:{f:'out',s:'all',v:'list'}, files:{cat:'all',az:0,list:0,ssq:'',page:1,per:50},
-  con:{f:'all'}, sup:{open:''}, lead:{v:'list',f:'live',src:'all',own:'all',sort:'id',dir:1,page:1,per:50}, ctr:{v:'list',f:'cur',sort:'id',dir:1,page:1,per:50}, nc:{t:'All'}, audit:{page:1,per:50}
+  con:{f:'all'}, staff:{c:'all'}, sup:{open:''}, lead:{v:'list',f:'live',src:'all',own:'all',sort:'id',dir:1,page:1,per:50}, ctr:{v:'list',f:'cur',sort:'id',dir:1,page:1,per:50}, nc:{t:'All'}, audit:{page:1,per:50}
 };
 function setUI(path,val){const p=path.split('.');let o=UI;for(let i=0;i<p.length-1;i++)o=o[p[i]];o[p[p.length-1]]=val;if(p.length==2&&p[1]!='page'&&'page' in UI[p[0]])UI[p[0]].page=1;render()}
 function togUI(path){const p=path.split('.');let o=UI;for(let i=0;i<p.length-1;i++)o=o[p[i]];const k=p[p.length-1];o[k]=o[k]?0:1;render()}
@@ -1302,7 +1308,6 @@ const hit=o=>!q||Object.values(o).filter(v=>v!=null&&typeof v!='object').join(' 
 function badges(){const td=today();return{
   leads:S.leads.filter(l=>!['Won','Lost'].includes(l.stage)).length,
   service:S.calls.filter(c=>c.status!='Complete').length,
-  live:S.deliveries.filter(x=>x.status=='Due'&&x.due<td).length,
   fitting:S.contracts.filter(c=>c.fit&&c.stage!='Complete').length,
   stock:S.items.filter(r=>r.type=='request'&&r.reqStatus=='Pending').length,
   staff:ISOWN()?S.hols.filter(h=>h.status=='Pending').length:0,
@@ -1348,7 +1353,7 @@ function shellSync(){
 }
 
 /* ---- toast ---- */
-function toast(t){const e=$('#toast');e.textContent=t;e.style.display='block';clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.display='none',3400)}
+function toast(t){if(document.body.classList.contains('tv'))return;const e=$('#toast');e.textContent=t;e.style.display='block';clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.display='none',3400)}
 
 /* ---- modal ---- */
 function openModal(h,size){const b=$('#mbox');b.className='mb'+(size?' '+size:'');b.innerHTML=h;$('#modal').classList.add('open');b.scrollTop=0;
@@ -1361,7 +1366,7 @@ $('#modal').addEventListener('mousedown',e=>{if(e.target.id=='modal')closeModal(
 let tmp=null,tmpDraw=null;
 function form(title,fields,v,cb,photos,size){
   v=v||{};tmp=photos?(v.photos||[]).filter(SAFE.img).slice():null;tmpDraw=drawThumbs;
-  const sel=f=>`<select id="f_${f.k}" ${f.ro?'disabled':''}>${f.o.map(o=>{const[val,lab]=Array.isArray(o)?o:[o,o||'-'];return `<option value="${esc(val)}"${String(val)==String(v[f.k]??'')?' selected':''}>${esc(lab)}</option>`}).join('')}</select>`;
+  const sel=f=>{const cur=v[f.k]??'',has=f.o.some(o=>String(Array.isArray(o)?o[0]:o)==String(cur));return `<select id="f_${f.k}" ${f.ro?'disabled':''}>${(cur!==''&&!has?[cur,...f.o]:f.o).map(o=>{const[val,lab]=Array.isArray(o)?o:[o,o||'-'];return `<option value="${esc(val)}"${String(val)==String(v[f.k]??'')?' selected':''}>${esc(lab)}</option>`}).join('')}</select>`};
   const inp=f=>f.t=='colour'?colourField(f,v):f.t=='select'?sel(f):f.t=='area'?`<textarea id="f_${f.k}" rows="3" maxlength="${f.max||2000}">${esc(v[f.k]||'')}</textarea>`
     :`<input id="f_${f.k}" type="${f.t||'text'}"${f.t=='number'?` step="any" min="${f.min??0}"${f.max?` max="${f.max}"`:''} inputmode="decimal"`:` maxlength="${f.max||120}"`} value="${esc(v[f.k]??'')}"${f.ro?' readonly':''}${f.list?` list="${f.list}"`:''} autocomplete="off">`;
   openModal(`<h2>${esc(title)}</h2><div class="grid">${fields.map(f=>`<div class="ff ${f.w||''}"><label for="f_${f.k}">${esc(f.l)}${f.req?' *':''}</label>${f.scan?`<div class="inl">${inp(f)}<button type="button" class="btn scan sm" ${A('scanInto','f_'+f.k)}>Scan</button></div>`:inp(f)}${f.hint?`<span class="hint">${esc(f.hint)}</span>`:''}</div>`).join('')}
@@ -1714,7 +1719,11 @@ function del(k,id){if(k=='staff'&&!need(ISOWN,'Removing staff'))return;if(k=='fi
    Lead refs are L0001, L0002... A converted lead moves into its new contract
    (7-digit contract number) and leaves the lead list, so its L number is free
    to be given to the next new lead. */
-const OWNERS=()=>['Unassigned',...new Set([...S.staff.map(s=>s.name),...FIT])];
+/* staff categories (added after load so old saves get one too) */
+(function staffCats(){let ch=0;(S.staff||[]).forEach(s=>{if(!SCATS.includes(s.cat)){s.cat=guessCat(s.role||'');ch=1}});if(ch)store()})();
+const staffIn=c=>S.staff.filter(s=>s.cat==c).map(s=>s.name);
+const OWNERS=()=>{const s=staffIn('Salespeople');return['Unassigned',...new Set(s.length?s:S.staff.map(x=>x.name))]};
+const FITL=()=>[...new Set([...staffIn('Fitters'),...FIT])];
 const PROB={New:10,Surveyed:30,Quoted:55,Won:90,Lost:0};
 (function migrateLeads(){if(S.leadsV2)return;S.leadArchive=S.leadArchive||[];
   const conv=S.leads.filter(l=>l.contract);S.leadArchive.push(...conv.map(l=>({...l,convertedTo:(S.contracts.find(c=>c.lead==l.id)||{}).id||''})));
@@ -1731,7 +1740,7 @@ function leadNote(id){const l=S.leads.find(x=>x.id==id);form('Log Activity: '+l.
 function delLead(id){const l=S.leads.find(x=>x.id==id);if(!l||!confirm('Delete lead '+id+' ('+l.name+')?'))return;S.leads=S.leads.filter(x=>x.id!=id);audit('Lead deleted',id,l.name);store();closeModal();render()}
 /* convert: the lead becomes a contract with the next 7-digit number; its L number is freed */
 function convertLead(id){const l=S.leads.find(x=>x.id==id);if(!l)return;if(!canSee('contracts')){toast('Your account cannot create contracts');return}const cn=nid('C',S.contracts);
-  form('Convert '+l.id+' to Contract '+cn,[{k:'name',l:'Customer',req:1},{k:'phone',l:'Phone',t:'tel',max:30},{k:'email',l:'Email',t:'email'},{k:'address',l:'Installation address',w:'full',max:200},{k:'town',l:'Town'},{k:'product',l:'Product / work',w:'full',req:1},{k:'value',l:'Contract value (£)',t:'number',req:1,pos:1},{k:'paid',l:'Deposit paid (£)',t:'number'},{k:'stage',l:'Stage',t:'select',o:CSTAGES},{k:'fitter',l:'Fitter',t:'select',o:FIT},{k:'survey',l:'Survey date',t:'date'},{k:'fit',l:'Fit date',t:'date'},{k:'notes',l:'Contract notes',t:'area',w:'full'}],
+  form('Convert '+l.id+' to Contract '+cn,[{k:'name',l:'Customer',req:1},{k:'phone',l:'Phone',t:'tel',max:30},{k:'email',l:'Email',t:'email'},{k:'address',l:'Installation address',w:'full',max:200},{k:'town',l:'Town'},{k:'product',l:'Product / work',w:'full',req:1},{k:'value',l:'Contract value (£)',t:'number',req:1,pos:1},{k:'paid',l:'Deposit paid (£)',t:'number'},{k:'stage',l:'Stage',t:'select',o:CSTAGES},{k:'fitter',l:'Fitter',t:'select',o:FITL()},{k:'survey',l:'Survey date',t:'date'},{k:'fit',l:'Fit date',t:'date'},{k:'notes',l:'Contract notes',t:'area',w:'full'}],
     {...l,address:siteOf(l),paid:0,stage:'Deposit due',fitter:FIT[0],notes:'From lead '+l.id+(l.notes?'. '+l.notes:'')},o=>{
       const cust={};CUSTK.forEach(k=>{if(l[k]!=null&&l[k]!=='')cust[k]=l[k]});
       const c={id:nid('C',S.contracts),...cust,...o,email1:o.email||cust.email1,cdate:today(),soldBy:l.owner||USER,source:l.source,subSource:l.subSource,salesArea:l.branch,createdBy:USER,contractType:CTYPES[0],log:[{d:today(),t:'Contract created from lead '+l.id,by:USER}],lead:l.id,pay:[],photos:(l.photos||[]).slice(),chk:{'Quote signed':true},fromLead:{id:l.id,source:l.source,owner:l.owner,created:l.created,log:l.log||[]}};
@@ -1848,12 +1857,13 @@ function holEdit(id){const h=S.hols.find(x=>x.id==id);if(!h)return;const Ad=ISOW
 function holDel(id){const h=S.hols.find(x=>x.id==id);if(!h)return;if(!ISOWN()&&!(me()&&me().id==h.sid&&h.status=='Pending')){toast('Only an administrator can remove this');return}S.hols=S.hols.filter(x=>x.id!=id);audit('Holiday removed',staffName(h.sid),h.from+' to '+h.to);store();closeModal();render()}
 
 /* ---------------- staff ---------------- */
-function vStaff(){const td=today(),Ad=ISOWN(),L=S.staff.filter(hit),off=S.hols.filter(h=>h.status=='Approved'&&h.from<=td&&h.to>=td).length,pend=S.hols.filter(h=>h.status=='Pending');
+function vStaff(){const td=today(),Ad=ISOWN(),U=UI.staff,L=S.staff.filter(s=>hit(s)&&(U.c=='all'||s.cat==U.c)),off=S.hols.filter(h=>h.status=='Approved'&&h.from<=td&&h.to>=td).length,pend=S.hols.filter(h=>h.status=='Pending');
   return `<div class="head"><h1>Staff</h1><div class="tools">${Ad?'<button class="btn" onclick="editStaff()">Add staff member</button>':''}</div></div>
   <div class="kpis">${[['Headcount',S.staff.length],['On holiday today',off],['Holiday requests',pend.length],['Jobs on hand',sum(S.staff,s=>jobsOf(s).length)]].map(k=>`<div class="kpi"><small>${k[0]}</small><b>${k[1]}</b></div>`).join('')}</div>
-  <div class="tw"><table><thead><tr><th>Name</th><th class="c-sm">Contact</th><th class="c-md">Started</th><th>Holiday left</th><th class="n c-sm">Jobs</th><th class="n c-md">Open calls</th>${Ad?'<th class="n c-md">Salary</th>':''}<th class="ac"></th></tr></thead><tbody>${L.map(s=>{const left=s.allow-hu(s),p=Math.max(0,Math.round(100*left/(s.allow||1)));return `<tr><td><b>${esc(s.name)}</b><br><span class="muted">${esc(s.role)}${s.team?' &middot; '+esc(s.team):''}</span></td><td class="c-sm nocap"><a href="tel:${esc(s.phone)}">${esc(s.phone)}</a><br><a href="mailto:${esc(s.email)}">${esc(s.email)}</a></td><td class="c-md">${fd(s.start)}</td><td><b>${left}</b> of ${s.allow} days<div class="bar"><i style="width:${p}%"></i></div></td><td class="n c-sm">${jobsOf(s).length}</td><td class="n c-md">${callsOf(s).length}</td>${Ad?`<td class="n c-md">${m0(s.salary)}</td>`:''}<td class="ac"><div class="acts r"><button class="mini pri" ${A('holBook',s.id)}>Book holiday</button>${Ad?`<button class="mini" ${A('editStaff',s.id)}>Edit</button><button class="mini del" ${A('del','staff',s.id)}>Delete</button>`:''}</div></td></tr>`}).join('')||'<tr><td colspan="8" class="empty">No staff match.</td></tr>'}</tbody></table></div>`}
+  <div class="views">${[['all','All Staff'],...SCATS.map(c=>[c,c])].map(([k,n])=>`<button class="chip ${U.c==k?'on':''}" ${A('setUI','staff.c',k)}>${esc(n)} <i>${k=='all'?S.staff.length:S.staff.filter(s=>s.cat==k).length}</i></button>`).join('')}</div>
+  <div class="tw"><table><thead><tr><th>Name</th><th>Category</th><th class="c-sm">Contact</th><th class="c-md">Started</th><th>Holiday left</th><th class="n c-sm">Jobs</th><th class="n c-md">Open calls</th>${Ad?'<th class="n c-md">Salary</th>':''}<th class="ac"></th></tr></thead><tbody>${L.map(s=>{const left=s.allow-hu(s),p=Math.max(0,Math.round(100*left/(s.allow||1)));return `<tr><td><b>${esc(s.name)}</b><br><span class="muted">${esc(s.role)}${s.team?' &middot; '+esc(s.team):''}</span></td><td><span class="tag ${{Salespeople:'',Fitters:'g',Office:'',Factory:'y'}[s.cat]||''}">${esc(s.cat||'-')}</span></td><td class="c-sm nocap"><a href="tel:${esc(s.phone)}">${esc(s.phone)}</a><br><a href="mailto:${esc(s.email)}">${esc(s.email)}</a></td><td class="c-md">${fd(s.start)}</td><td><b>${left}</b> of ${s.allow} days<div class="bar"><i style="width:${p}%"></i></div></td><td class="n c-sm">${jobsOf(s).length}</td><td class="n c-md">${callsOf(s).length}</td>${Ad?`<td class="n c-md">${m0(s.salary)}</td>`:''}<td class="ac"><div class="acts r"><button class="mini pri" ${A('holBook',s.id)}>Book holiday</button>${Ad?`<button class="mini" ${A('editStaff',s.id)}>Edit</button><button class="mini del" ${A('del','staff',s.id)}>Delete</button>`:''}</div></td></tr>`}).join('')||'<tr><td colspan="9" class="empty">No staff match.</td></tr>'}</tbody></table></div>`}
 function editStaff(id){if(!need(ISOWN,'Editing staff'))return;const x=S.staff.find(u=>u.id==id);
-  form(x?'Edit '+x.name:'Add Staff Member',[{k:'name',l:'Name',req:1},{k:'role',l:'Job title'},{k:'team',l:'Team',t:'select',o:[['','None'],'Team A','Team B']},{k:'start',l:'Start date',t:'date'},{k:'phone',l:'Phone',t:'tel',max:30},{k:'email',l:'Email',t:'email'},{k:'allow',l:'Holiday allowance (days)',t:'number',max:60,dp:0},{k:'salary',l:'Annual salary (£)',t:'number',max:1e6}],x||{allow:28,team:''},o=>{if(x)Object.assign(x,o);else S.staff.push({id:shortId('U'),...o});audit(x?'Staff edited':'Staff added',o.name,'')})}
+  form(x?'Edit '+x.name:'Add Staff Member',[{k:'name',l:'Name',req:1},{k:'cat',l:'Category',t:'select',o:SCATS,req:1},{k:'role',l:'Job title'},{k:'team',l:'Team',t:'select',o:[['','None'],'Team A','Team B']},{k:'start',l:'Start date',t:'date'},{k:'phone',l:'Phone',t:'tel',max:30},{k:'email',l:'Email',t:'email'},{k:'allow',l:'Holiday allowance (days)',t:'number',max:60,dp:0},{k:'salary',l:'Annual salary (£)',t:'number',max:1e6}],x||{allow:28,team:'',cat:UI.staff.c!='all'?UI.staff.c:'Office'},o=>{if(x)Object.assign(x,o);else S.staff.push({id:shortId('U'),...o});audit(x?'Staff edited':'Staff added',o.name,'')})}
 
 /* ==========================================================================
    09 · Inventory
@@ -2518,7 +2528,7 @@ function custCompat(r){r.phone=telOf(r);r.email=mailOf(r);r.address=r.siteSame==
 /* ---- row-style field (label left, value right, edited in place) ---- */
 function rfH(f,v){const val=v[f.k]??'',id='f_'+f.k;let c;
   if(f.ro)c=`<input id="${id}" value="${esc(val)}" readonly tabindex="-1">`;
-  else if(f.t=='select')c=`<select id="${id}">${f.o.map(o=>`<option value="${esc(o)}" ${String(o)==String(val)?'selected':''}>${esc(o||'-')}</option>`).join('')}</select>`;
+  else if(f.t=='select')c=`<select id="${id}">${(val!==''&&!f.o.map(String).includes(String(val))?[val,...f.o]:f.o).map(o=>`<option value="${esc(o)}" ${String(o)==String(val)?'selected':''}>${esc(o||'-')}</option>`).join('')}</select>`;
   else if(f.t=='area')c=`<textarea id="${id}" rows="${f.rows||2}" maxlength="${f.max||2000}">${esc(val)}</textarea>`;
   else c=`<input id="${id}" type="${f.t=='number'?'number':f.t=='date'?'date':f.t=='time'?'time':f.t=='email'?'email':f.t=='tel'?'tel':'text'}" ${f.t=='number'?'step="any" min="0" inputmode="decimal"':`maxlength="${f.max||120}"`} value="${esc(val)}" ${f.list?`list="${f.list}"`:''} autocomplete="off">`;
   const hid=f.dep&&(v[f.dep]||'Same as home')!='Different';
@@ -2613,7 +2623,7 @@ const CDETF=W=>[
   {k:'source',l:'Lead source',t:'select',o:['',...SOURCES],g:'Sales Information'},{k:'subSource',l:'Sub source',g:'Sales Information'},{k:'createdBy',l:'Created by',ro:1,g:'Sales Information'},{k:'approvals',l:'Contract approvals',g:'Sales Information'}];
 const CFINF=()=>[{k:'value',l:'Contract value (£)',t:'number',g:'Money'},{k:'paid',l:'Paid so far (£)',t:'number',g:'Money'},...(ISADM()?[{k:'cost',l:'Job cost (£)',t:'number',g:'Money'}]:[]),{k:'payMethod',l:'Payment method',t:'select',o:['','Cash','Bank transfer','Card','Finance','Cheque'],g:'Money'},{k:'invoiced',l:'Invoiced',t:'select',o:YN,g:'Invoice'},{k:'invoiceNo',l:'Invoice number',g:'Invoice'},{k:'invoiceDate',l:'Invoice date',t:'date',g:'Invoice'}];
 const CFITF=()=>[{k:'survey',l:'Survey date',t:'date',g:'Dates'},{k:'order',l:'Order date',t:'date',g:'Dates'},{k:'delDate',l:'Delivery date',t:'date',g:'Dates'},{k:'fit',l:'Fit date',t:'date',g:'Dates'},
-  {k:'fitter',l:'Fitter / team',t:'select',o:FIT,g:'Team'},{k:'installMgr',l:'Installation manager',t:'select',o:staffNames(),g:'Team'},{k:'surveyor',l:'Assigned surveyor',t:'select',o:staffNames(),g:'Team'},{k:'fitNotes',l:'Fitting notes',t:'area',max:600,g:'Team'},
+  {k:'fitter',l:'Fitter / team',t:'select',o:FITL(),g:'Team'},{k:'installMgr',l:'Installation manager',t:'select',o:staffNames(),g:'Team'},{k:'surveyor',l:'Assigned surveyor',t:'select',o:staffNames(),g:'Team'},{k:'fitNotes',l:'Fitting notes',t:'area',max:600,g:'Team'},
   {k:'winCount',l:'Window count',t:'number',dp:0,g:'Info For FENSA'},{k:'doorCount',l:'Door count',t:'number',dp:0,g:'Info For FENSA'},{k:'conservatory',l:'Conservatory',t:'select',o:YN,g:'Info For FENSA'},{k:'roofline',l:'Roofline',t:'select',o:YN,g:'Info For FENSA'},{k:'fensaExported',l:'Exported to FENSA',t:'select',o:YN,g:'Info For FENSA'},{k:'fensaNA',l:'FENSA not required',t:'select',o:YN,g:'Info For FENSA'}];
 REC.contract={label:'Contract',
   get:id=>S.contracts.find(c=>c.id==id),order:()=>ctrList().map(c=>c.id),

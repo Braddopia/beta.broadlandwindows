@@ -39,7 +39,7 @@ function custCompat(r){r.phone=telOf(r);r.email=mailOf(r);r.address=r.siteSame==
 /* ---- row-style field (label left, value right, edited in place) ---- */
 function rfH(f,v){const val=v[f.k]??'',id='f_'+f.k;let c;
   if(f.ro)c=`<input id="${id}" value="${esc(val)}" readonly tabindex="-1">`;
-  else if(f.t=='select')c=`<select id="${id}">${f.o.map(o=>`<option value="${esc(o)}" ${String(o)==String(val)?'selected':''}>${esc(o||'-')}</option>`).join('')}</select>`;
+  else if(f.t=='select')c=`<select id="${id}">${(val!==''&&!f.o.map(String).includes(String(val))?[val,...f.o]:f.o).map(o=>`<option value="${esc(o)}" ${String(o)==String(val)?'selected':''}>${esc(o||'-')}</option>`).join('')}</select>`;
   else if(f.t=='area')c=`<textarea id="${id}" rows="${f.rows||2}" maxlength="${f.max||2000}">${esc(val)}</textarea>`;
   else c=`<input id="${id}" type="${f.t=='number'?'number':f.t=='date'?'date':f.t=='time'?'time':f.t=='email'?'email':f.t=='tel'?'tel':'text'}" ${f.t=='number'?'step="any" min="0" inputmode="decimal"':`maxlength="${f.max||120}"`} value="${esc(val)}" ${f.list?`list="${f.list}"`:''} autocomplete="off">`;
   const hid=f.dep&&(v[f.dep]||'Same as home')!='Different';
@@ -134,7 +134,7 @@ const CDETF=W=>[
   {k:'source',l:'Lead source',t:'select',o:['',...SOURCES],g:'Sales Information'},{k:'subSource',l:'Sub source',g:'Sales Information'},{k:'createdBy',l:'Created by',ro:1,g:'Sales Information'},{k:'approvals',l:'Contract approvals',g:'Sales Information'}];
 const CFINF=()=>[{k:'value',l:'Contract value (£)',t:'number',g:'Money'},{k:'paid',l:'Paid so far (£)',t:'number',g:'Money'},...(ISADM()?[{k:'cost',l:'Job cost (£)',t:'number',g:'Money'}]:[]),{k:'payMethod',l:'Payment method',t:'select',o:['','Cash','Bank transfer','Card','Finance','Cheque'],g:'Money'},{k:'invoiced',l:'Invoiced',t:'select',o:YN,g:'Invoice'},{k:'invoiceNo',l:'Invoice number',g:'Invoice'},{k:'invoiceDate',l:'Invoice date',t:'date',g:'Invoice'}];
 const CFITF=()=>[{k:'survey',l:'Survey date',t:'date',g:'Dates'},{k:'order',l:'Order date',t:'date',g:'Dates'},{k:'delDate',l:'Delivery date',t:'date',g:'Dates'},{k:'fit',l:'Fit date',t:'date',g:'Dates'},
-  {k:'fitter',l:'Fitter / team',t:'select',o:FIT,g:'Team'},{k:'installMgr',l:'Installation manager',t:'select',o:staffNames(),g:'Team'},{k:'surveyor',l:'Assigned surveyor',t:'select',o:staffNames(),g:'Team'},{k:'fitNotes',l:'Fitting notes',t:'area',max:600,g:'Team'},
+  {k:'fitter',l:'Fitter / team',t:'select',o:FITL(),g:'Team'},{k:'installMgr',l:'Installation manager',t:'select',o:staffNames(),g:'Team'},{k:'surveyor',l:'Assigned surveyor',t:'select',o:staffNames(),g:'Team'},{k:'fitNotes',l:'Fitting notes',t:'area',max:600,g:'Team'},
   {k:'winCount',l:'Window count',t:'number',dp:0,g:'Info For FENSA'},{k:'doorCount',l:'Door count',t:'number',dp:0,g:'Info For FENSA'},{k:'conservatory',l:'Conservatory',t:'select',o:YN,g:'Info For FENSA'},{k:'roofline',l:'Roofline',t:'select',o:YN,g:'Info For FENSA'},{k:'fensaExported',l:'Exported to FENSA',t:'select',o:YN,g:'Info For FENSA'},{k:'fensaNA',l:'FENSA not required',t:'select',o:YN,g:'Info For FENSA'}];
 REC.contract={label:'Contract',
   get:id=>S.contracts.find(c=>c.id==id),order:()=>ctrList().map(c=>c.id),

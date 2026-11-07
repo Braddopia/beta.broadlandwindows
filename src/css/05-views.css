@@ -412,3 +412,7 @@ body[data-theme=dark] .smini{background:rgba(255,255,255,.03)}
 .mb{background:rgba(246,248,252,.96)!important}
 body[data-theme=dark] .mb{background:rgba(17,21,30,.97)!important}
 .mact{background:inherit;-webkit-backdrop-filter:none;backdrop-filter:none}
+
+/* sidebar logo: more room above */
+.brand{padding:1.1rem .2rem 1rem}
+@media(max-height:760px) and (min-width:901px){.brand{padding:.8rem .2rem .7rem}}

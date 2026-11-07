@@ -9,7 +9,11 @@ function del(k,id){if(k=='staff'&&!need(ISOWN,'Removing staff'))return;if(k=='fi
    Lead refs are L0001, L0002... A converted lead moves into its new contract
    (7-digit contract number) and leaves the lead list, so its L number is free
    to be given to the next new lead. */
-const OWNERS=()=>['Unassigned',...new Set([...S.staff.map(s=>s.name),...FIT])];
+/* staff categories (added after load so old saves get one too) */
+(function staffCats(){let ch=0;(S.staff||[]).forEach(s=>{if(!SCATS.includes(s.cat)){s.cat=guessCat(s.role||'');ch=1}});if(ch)store()})();
+const staffIn=c=>S.staff.filter(s=>s.cat==c).map(s=>s.name);
+const OWNERS=()=>{const s=staffIn('Salespeople');return['Unassigned',...new Set(s.length?s:S.staff.map(x=>x.name))]};
+const FITL=()=>[...new Set([...staffIn('Fitters'),...FIT])];
 const PROB={New:10,Surveyed:30,Quoted:55,Won:90,Lost:0};
 (function migrateLeads(){if(S.leadsV2)return;S.leadArchive=S.leadArchive||[];
   const conv=S.leads.filter(l=>l.contract);S.leadArchive.push(...conv.map(l=>({...l,convertedTo:(S.contracts.find(c=>c.lead==l.id)||{}).id||''})));
@@ -26,7 +30,7 @@ function leadNote(id){const l=S.leads.find(x=>x.id==id);form('Log Activity: '+l.
 function delLead(id){const l=S.leads.find(x=>x.id==id);if(!l||!confirm('Delete lead '+id+' ('+l.name+')?'))return;S.leads=S.leads.filter(x=>x.id!=id);audit('Lead deleted',id,l.name);store();closeModal();render()}
 /* convert: the lead becomes a contract with the next 7-digit number; its L number is freed */
 function convertLead(id){const l=S.leads.find(x=>x.id==id);if(!l)return;if(!canSee('contracts')){toast('Your account cannot create contracts');return}const cn=nid('C',S.contracts);
-  form('Convert '+l.id+' to Contract '+cn,[{k:'name',l:'Customer',req:1},{k:'phone',l:'Phone',t:'tel',max:30},{k:'email',l:'Email',t:'email'},{k:'address',l:'Installation address',w:'full',max:200},{k:'town',l:'Town'},{k:'product',l:'Product / work',w:'full',req:1},{k:'value',l:'Contract value (£)',t:'number',req:1,pos:1},{k:'paid',l:'Deposit paid (£)',t:'number'},{k:'stage',l:'Stage',t:'select',o:CSTAGES},{k:'fitter',l:'Fitter',t:'select',o:FIT},{k:'survey',l:'Survey date',t:'date'},{k:'fit',l:'Fit date',t:'date'},{k:'notes',l:'Contract notes',t:'area',w:'full'}],
+  form('Convert '+l.id+' to Contract '+cn,[{k:'name',l:'Customer',req:1},{k:'phone',l:'Phone',t:'tel',max:30},{k:'email',l:'Email',t:'email'},{k:'address',l:'Installation address',w:'full',max:200},{k:'town',l:'Town'},{k:'product',l:'Product / work',w:'full',req:1},{k:'value',l:'Contract value (£)',t:'number',req:1,pos:1},{k:'paid',l:'Deposit paid (£)',t:'number'},{k:'stage',l:'Stage',t:'select',o:CSTAGES},{k:'fitter',l:'Fitter',t:'select',o:FITL()},{k:'survey',l:'Survey date',t:'date'},{k:'fit',l:'Fit date',t:'date'},{k:'notes',l:'Contract notes',t:'area',w:'full'}],
     {...l,address:siteOf(l),paid:0,stage:'Deposit due',fitter:FIT[0],notes:'From lead '+l.id+(l.notes?'. '+l.notes:'')},o=>{
       const cust={};CUSTK.forEach(k=>{if(l[k]!=null&&l[k]!=='')cust[k]=l[k]});
       const c={id:nid('C',S.contracts),...cust,...o,email1:o.email||cust.email1,cdate:today(),soldBy:l.owner||USER,source:l.source,subSource:l.subSource,salesArea:l.branch,createdBy:USER,contractType:CTYPES[0],log:[{d:today(),t:'Contract created from lead '+l.id,by:USER}],lead:l.id,pay:[],photos:(l.photos||[]).slice(),chk:{'Quote signed':true},fromLead:{id:l.id,source:l.source,owner:l.owner,created:l.created,log:l.log||[]}};

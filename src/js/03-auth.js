@@ -5,7 +5,7 @@
    ========================================================================== */
 const FOCUS=['home','live','deliveries','stock','suppliers','downloads'];
 const ROLES={
-  admin:  {n:'Administrator',     d:'Live analytics, inventory, holidays and files',v:[...FOCUS,'holidays']},
+  admin:  {n:'Administrator',     d:'Everything a standard user has, plus staff and holidays',v:[...FOCUS,'leads','contracts','staff','holidays']},
   finance:{n:'Finance',           d:'Live analytics, inventory and files',v:FOCUS},
   sales:  {n:'Sales',             d:'Live analytics, inventory and files',v:FOCUS},
   stock:  {n:'Stock and warehouse',d:'Live analytics, inventory and files',v:FOCUS},
