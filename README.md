@@ -5,11 +5,14 @@ It reads the same browser storage as v18, so existing data carries over.
 
 ## Editing
 Change files in `src/`, then run `python3 build.py` to rebuild `dist/Broadland-Windows-CRM-v19.2.html`.
+The build stops with a message if a placeholder is missing, an image asset is not a data URI, or
+(when Node is installed) any JavaScript has a syntax error.
 
 ```
 src/index.html        page skeleton (sidebar, top bar, dialogs)
 src/assets/           logos (base64)
 src/css/01-06         tokens, base, shell, components, pages, responsive breakpoints
+src/css/07-looks      background patterns (Looks) behind the glass
 src/js/01-core        helpers, escaping/validation, icons, SHA-256
 src/js/02-state       seed data, load + migrate, save, audit trail
 src/js/03-auth        accounts, PINs, idle sign-out, My Details
@@ -25,9 +28,11 @@ src/js/12-files       Files page
 src/js/13-finance-admin  Finance, Admin console (PINs, audit log, backups)
 src/js/14-notify      Notification centre
 src/js/15-records     Full-screen lead and contract records, lead wizard, list views
-src/js/16-art         Illustrations, empty states, welcome tour
+src/js/16-art         Pattern tiles for empty lists, welcome tour
 src/js/17-signin      Optional Google / Microsoft staff sign-in (Admin Console)
-src/boot-loader.js    Loads saved data from the browser database before the app starts
+src/js/18-looks       Background picker in the top bar (saved per device)
+src/boot-loader.js    Loads saved data from the browser database before the app starts;
+                      if the database is slow it starts anyway but never saves over newer data
 src/js/99-boot        Start-up
 ```
 

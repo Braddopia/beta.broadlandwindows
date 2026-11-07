@@ -1250,6 +1250,62 @@ body[data-theme=dark] #gate{background:radial-gradient(900px 600px at 0% 0%,rgba
   .nav{height:2.6rem}
   .ptb input[type=checkbox]{width:1.3rem;height:1.3rem}
 }
+
+/* ==========================================================================
+   07 · Looks: background patterns behind the glass (picked from the top bar)
+   Each pattern is drawn on one fixed layer behind the page, so the glass panels
+   blur it and text stays readable. The same pattern also decorates the overview
+   banner, empty lists and the tour (.lkp), and the picker swatches (.lk-<name>).
+   ========================================================================== */
+:root{--pc:rgba(3,78,162,.10);--pc2:rgba(3,78,162,.05);--pc3:rgba(3,78,162,.16);
+  --au1:rgba(3,78,162,.30);--au2:rgba(20,170,160,.20);--au3:rgba(255,208,2,.28)}
+body[data-theme=dark]{--pc:rgba(130,175,255,.08);--pc2:rgba(130,175,255,.04);--pc3:rgba(130,175,255,.12);
+  --au1:rgba(42,98,201,.38);--au2:rgba(20,150,140,.20);--au3:rgba(255,208,2,.10)}
+body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none}
+/* fade the pattern towards the bottom right so busy screens stay calm */
+body[data-look=panes]::before,body[data-look=leaded]::before,body[data-look=dots]::before,body[data-look=blueprint]::before{-webkit-mask-image:linear-gradient(160deg,#000 0%,rgba(0,0,0,.75) 45%,rgba(0,0,0,.3) 100%);mask-image:linear-gradient(160deg,#000 0%,rgba(0,0,0,.75) 45%,rgba(0,0,0,.3) 100%)}
+body[data-look=blueprint]{background-color:#e6eef9}
+body[data-theme=dark][data-look=blueprint]{background-color:#0a1220}
+/* pattern tiles: banner on the overview, empty lists, tour */
+.lkp{position:relative;isolation:isolate;overflow:hidden}
+.lkp::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none}
+.hero.lkp{--pc:rgba(255,255,255,.13);--pc2:rgba(255,255,255,.07);--pc3:rgba(255,255,255,.2);--au1:rgba(255,255,255,.16);--au2:rgba(20,200,190,.3);--au3:rgba(255,208,2,.3)}
+.hero.lkp::before{-webkit-mask-image:linear-gradient(100deg,transparent 25%,#000 75%);mask-image:linear-gradient(100deg,transparent 25%,#000 75%)}
+.pmed{display:grid;place-items:center;width:5.2rem;height:5.2rem;border-radius:22px;background:linear-gradient(145deg,var(--blue-bg),var(--card));border:1px solid var(--line);box-shadow:var(--sh);color:var(--blue);--pc:rgba(3,78,162,.18);--pc2:rgba(3,78,162,.08);--pc3:rgba(3,78,162,.26)}
+.pmed svg{width:1.9rem;height:1.9rem;padding:.65rem;box-sizing:content-box;border-radius:50%;background:var(--card);box-shadow:0 4px 14px rgba(1,43,89,.14)}
+body[data-theme=dark] .pmed{--pc:rgba(130,175,255,.16);--pc2:rgba(130,175,255,.08);--pc3:rgba(130,175,255,.22)}
+.lvg .emp .pmed{width:4rem;height:4rem}
+.tban{display:grid;place-items:center;height:7rem;margin:-.2rem 0 .7rem;border-radius:14px;background:linear-gradient(120deg,#012b59,#034ea2);color:#fff;--pc:rgba(255,255,255,.14);--pc2:rgba(255,255,255,.07);--pc3:rgba(255,255,255,.22);--au1:rgba(255,255,255,.16);--au2:rgba(20,200,190,.3);--au3:rgba(255,208,2,.3)}
+.tban svg{width:2.2rem;height:2.2rem;padding:.8rem;box-sizing:content-box;border-radius:50%;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.3)}
+/* picker */
+#lookPop{position:fixed;z-index:400;width:min(21rem,calc(100vw - 24px));padding:.9rem;border-radius:16px;background:rgba(250,251,254,.97);border:1px solid #fff;box-shadow:0 24px 60px -16px rgba(1,43,89,.45);display:none}
+body[data-theme=dark] #lookPop{background:rgba(22,27,38,.97);border-color:rgba(255,255,255,.1)}
+#lookPop.open{display:block}
+#lookPop h3{margin:0 0 .15rem;font:600 1rem var(--head);color:var(--navy)}
+#lookPop p{margin:0 0 .7rem;font-size:.78rem;color:var(--muted)}
+.lkg{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem}
+.lkb{display:flex;flex-direction:column;gap:.3rem;padding:.3rem;border-radius:12px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);font:600 .72rem var(--body);cursor:pointer;text-align:center}
+.lkb.on{border-color:var(--blue);box-shadow:0 0 0 2px var(--blue-bg)}
+.lkb i{display:block;height:3.2rem;border-radius:8px;background:var(--bg)}
+.lkb i{position:relative;overflow:hidden;isolation:isolate}.lkb i::before{content:"";position:absolute;inset:0;z-index:-1;border-radius:8px}
+
+body[data-look=panes]::before,body[data-look=panes] .lkp::before,.lkb.lk-panes i::before{background-image:linear-gradient(var(--pc) 1.5px,transparent 1.5px),linear-gradient(90deg,var(--pc) 1.5px,transparent 1.5px),linear-gradient(var(--pc2) 1px,transparent 1px),linear-gradient(90deg,var(--pc2) 1px,transparent 1px);background-size:168px 132px,168px 132px,84px 66px,84px 66px;background-position:-1px -1px}
+body[data-look=leaded]::before,body[data-look=leaded] .lkp::before,.lkb.lk-leaded i::before{background-image:repeating-linear-gradient(58deg,var(--pc) 0 1.2px,transparent 1.2px 30px),repeating-linear-gradient(-58deg,var(--pc) 0 1.2px,transparent 1.2px 30px)}
+body[data-look=contour]::before,body[data-look=contour] .lkp::before,.lkb.lk-contour i::before{background:var(--pc3);-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='192'%3E%3Cpath d='M0 8C66 1.0 133 1.0 200 8S333 15.0 400 8M0 24C66 11.2 133 11.2 200 24S333 36.8 400 24M0 40C66 29.9 133 29.9 200 40S333 50.1 400 40M0 56C66 53.1 133 53.1 200 56S333 58.9 400 56M0 72C66 70.3 133 70.3 200 72S333 73.7 400 72M0 88C66 79.7 133 79.7 200 88S333 96.3 400 88M0 104C66 91.0 133 91.0 200 104S333 117.0 400 104M0 120C66 111.1 133 111.1 200 120S333 128.9 400 120M0 136C66 134.0 133 134.0 200 136S333 138.0 400 136M0 152C66 149.6 133 149.6 200 152S333 154.4 400 152M0 168C66 158.5 133 158.5 200 168S333 177.5 400 168M0 184C66 171.1 133 171.1 200 184S333 196.9 400 184' fill='none' stroke='black' stroke-width='1.3'/%3E%3C/svg%3E") 0 0/400px 192px;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='192'%3E%3Cpath d='M0 8C66 1.0 133 1.0 200 8S333 15.0 400 8M0 24C66 11.2 133 11.2 200 24S333 36.8 400 24M0 40C66 29.9 133 29.9 200 40S333 50.1 400 40M0 56C66 53.1 133 53.1 200 56S333 58.9 400 56M0 72C66 70.3 133 70.3 200 72S333 73.7 400 72M0 88C66 79.7 133 79.7 200 88S333 96.3 400 88M0 104C66 91.0 133 91.0 200 104S333 117.0 400 104M0 120C66 111.1 133 111.1 200 120S333 128.9 400 120M0 136C66 134.0 133 134.0 200 136S333 138.0 400 136M0 152C66 149.6 133 149.6 200 152S333 154.4 400 152M0 168C66 158.5 133 158.5 200 168S333 177.5 400 168M0 184C66 171.1 133 171.1 200 184S333 196.9 400 184' fill='none' stroke='black' stroke-width='1.3'/%3E%3C/svg%3E") 0 0/400px 192px}
+body[data-look=dots]::before,body[data-look=dots] .lkp::before,.lkb.lk-dots i::before{background-image:radial-gradient(circle,var(--pc3) 1.1px,transparent 1.6px);background-size:20px 20px}
+body[data-look=blueprint]::before,body[data-look=blueprint] .lkp::before,.lkb.lk-blueprint i::before{background-image:linear-gradient(var(--pc3) 1px,transparent 1px),linear-gradient(90deg,var(--pc3) 1px,transparent 1px),linear-gradient(var(--pc2) 1px,transparent 1px),linear-gradient(90deg,var(--pc2) 1px,transparent 1px);background-size:120px 120px,120px 120px,24px 24px,24px 24px;background-position:-1px -1px}
+body[data-look=aurora]::before,body[data-look=aurora] .lkp::before,.lkb.lk-aurora i::before{background:radial-gradient(60% 50% at 20% 30%,var(--au1),transparent 70%),radial-gradient(50% 45% at 80% 70%,var(--au2),transparent 70%),radial-gradient(40% 40% at 70% 20%,var(--au3),transparent 70%)}
+body[data-look=glow] .lkp::before,.lkb.lk-glow i::before{background:radial-gradient(70% 60% at 15% 20%,var(--pc3),transparent 70%),radial-gradient(60% 55% at 90% 90%,var(--pc2),transparent 70%)}
+/* default (no look saved yet) behaves like Soft Glow */
+body:not([data-look]) .lkp::before{background:radial-gradient(70% 60% at 15% 20%,var(--pc3),transparent 70%),radial-gradient(60% 55% at 90% 90%,var(--pc2),transparent 70%)}
+/* swatches are small, so draw their pattern stronger than the real background */
+.lkb i{--pc:rgba(3,78,162,.32);--pc2:rgba(3,78,162,.16);--pc3:rgba(3,78,162,.42);--au1:rgba(3,78,162,.45);--au2:rgba(20,170,160,.4);--au3:rgba(255,208,2,.55)}
+body[data-theme=dark] .lkb i{--pc:rgba(130,175,255,.3);--pc2:rgba(130,175,255,.15);--pc3:rgba(130,175,255,.4);--au1:rgba(42,98,201,.6);--au2:rgba(20,150,140,.4);--au3:rgba(255,208,2,.3)}
+.lkb.lk-panes i::before{background-size:40px 32px,40px 32px,20px 16px,20px 16px}
+.lkb.lk-blueprint i::before{background-size:40px 40px,40px 40px,10px 10px,10px 10px}
+.lkb.lk-leaded i::before{background-image:repeating-linear-gradient(58deg,var(--pc) 0 1.2px,transparent 1.2px 14px),repeating-linear-gradient(-58deg,var(--pc) 0 1.2px,transparent 1.2px 14px)}
+.lkb.lk-dots i::before{background-size:10px 10px}
+.lkb.lk-contour i::before{-webkit-mask-size:200px 96px;mask-size:200px 96px}
 </style>
 </head>
 <body>
@@ -1927,7 +1983,7 @@ function vHome(){
   const okK=k=>KP[k]&&canSee(KP[k][3]),okP=k=>PN[k]&&(['hol'].includes(k)||canSee({fits:'fitting',calls:'service',low:'stock',del:'deliveries',chase:'leads',dep:'contracts',res:'leads',pay:'contracts',bills:'finance'}[k]));
   DASH_AV={k:Object.keys(KP).filter(okK).map(k=>[k,KP[k][0]]),p:Object.keys(PN).filter(okP).map(k=>[k,PN[k][0]])};
   const DL=dashGet();
-  return `<div class="hero"><span class="rt">${esc(m&&m.role?tc(m.role):RL[R]||'Team Member')}</span><button class="hero-cz" onclick="dashEdit()">${svg(IC.layout)} Customise</button><h1>Welcome back, ${esc(first)} <span class="wave">👋</span></h1><p>${greet()}. It's ${new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'})}. ${C.s}</p>${ratingsH()}</div>
+  return `<div class="hero lkp"><span class="rt">${esc(m&&m.role?tc(m.role):RL[R]||'Team Member')}</span><button class="hero-cz" onclick="dashEdit()">${svg(IC.layout)} Customise</button><h1>Welcome back, ${esc(first)} <span class="wave">👋</span></h1><p>${greet()}. It's ${new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'})}. ${C.s}</p>${ratingsH()}</div>
   ${DL.k.filter(okK).length?`<div class="kpis big">${DL.k.filter(okK).map(x=>{const k=KP[x];return `<button class="kpi ${k[2]}" ${A('go',k[3])}><small>${k[0]}</small><b class="${String(k[1]).length>5?'lg':''}">${k[1]}</b></button>`}).join('')}</div>`:''}
   <div class="two">${DL.p.filter(okP).map(x=>PN[x][1]).join('')||'<div class="panel"><p class="empty">No panels chosen. Press Customise to add some.</p></div>'}</div>`}
 /* per-person dashboard layout */
@@ -3517,22 +3573,11 @@ function vContracts(){const U=UI.ctr,L=ctrList(),pg=paginate(U,L),tv=sum(L,c=>c.
 
 /* ==========================================================================
    16 · Illustrations, empty states and the welcome tour
-   Flat drawings in the brand colours (navy, blue, yellow). Original artwork.
+   Pattern tiles in the chosen Look (see 18-looks.js), with line icons.
    ========================================================================== */
-const ART_C={n:'#012b59',b:'#034ea2',l:'#cfe0f7',s:'#e9f1fb',y:'#ffd002',w:'#ffffff',g:'#9fb3cc'};
-const ART=(()=>{const c=ART_C;const g=(b)=>`<svg viewBox="0 0 200 140" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="art">${b}</svg>`;
-  const ground=`<ellipse cx="100" cy="128" rx="80" ry="7" fill="${c.s}"/>`;
-  return{
-  van:g(`${ground}<rect x="28" y="52" width="92" height="56" rx="6" fill="${c.w}" stroke="${c.n}" stroke-width="4"/><path d="M120 66h28l18 20v22h-46z" fill="${c.b}" stroke="${c.n}" stroke-width="4" stroke-linejoin="round"/><path d="M128 72h18l11 13h-29z" fill="${c.l}"/><rect x="40" y="64" width="34" height="8" rx="4" fill="${c.y}"/><rect x="40" y="78" width="54" height="5" rx="2.5" fill="${c.l}"/><circle cx="56" cy="110" r="11" fill="${c.n}"/><circle cx="56" cy="110" r="4" fill="${c.w}"/><circle cx="144" cy="110" r="11" fill="${c.n}"/><circle cx="144" cy="110" r="4" fill="${c.w}"/><path d="M8 70h14M2 82h18M10 94h12" stroke="${c.g}" stroke-width="3" stroke-linecap="round"/>`),
-  survey:g(`${ground}<rect x="52" y="18" width="80" height="104" rx="8" fill="${c.w}" stroke="${c.n}" stroke-width="4"/><rect x="76" y="10" width="32" height="16" rx="5" fill="${c.b}"/><rect x="66" y="38" width="52" height="40" rx="2" fill="${c.l}" stroke="${c.b}" stroke-width="3"/><path d="M92 38v40M66 58h52" stroke="${c.b}" stroke-width="2"/><path d="M66 90h40M66 102h28" stroke="${c.g}" stroke-width="4" stroke-linecap="round"/><g transform="rotate(-18 150 96)"><rect x="128" y="84" width="46" height="24" rx="6" fill="${c.y}" stroke="${c.n}" stroke-width="3"/><circle cx="151" cy="96" r="6" fill="${c.n}"/><path d="M174 92h16v8h-16" fill="${c.y}" stroke="${c.n}" stroke-width="3"/></g>`),
-  stock:g(`${ground}<rect x="36" y="74" width="56" height="50" rx="3" fill="#e8c88f" stroke="${c.n}" stroke-width="4"/><path d="M36 88h56M64 74v14" stroke="${c.n}" stroke-width="3"/><rect x="98" y="74" width="66" height="50" rx="3" fill="#e8c88f" stroke="${c.n}" stroke-width="4"/><path d="M98 88h66M131 74v14" stroke="${c.n}" stroke-width="3"/><rect x="62" y="28" width="62" height="46" rx="3" fill="#f0d6a6" stroke="${c.n}" stroke-width="4"/><path d="M62 42h62M93 28v14" stroke="${c.n}" stroke-width="3"/><g fill="${c.n}"><rect x="108" y="100" width="2" height="16"/><rect x="112" y="100" width="4" height="16"/><rect x="118" y="100" width="2" height="16"/><rect x="122" y="100" width="3" height="16"/><rect x="127" y="100" width="2" height="16"/><rect x="131" y="100" width="4" height="16"/></g><circle cx="160" cy="34" r="12" fill="${c.y}"/><path d="M154 34l4 4 8-8" fill="none" stroke="${c.n}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>`),
-  holiday:g(`${ground}<circle cx="150" cy="34" r="18" fill="${c.y}"/><g stroke="${c.y}" stroke-width="4" stroke-linecap="round"><path d="M150 6v6M150 56v6M122 34h6M172 34h6M130 14l4 4M166 50l4 4M170 14l-4 4M134 50l-4 4"/></g><path d="M60 52c10-26 50-26 60 0" fill="${c.b}"/><path d="M60 52c6-8 14-8 20 0M80 52c6-8 14-8 20 0M100 52c6-8 14-8 20 0" fill="${c.w}" opacity=".9"/><path d="M90 52v70" stroke="${c.n}" stroke-width="4" stroke-linecap="round"/><rect x="30" y="80" width="44" height="40" rx="5" fill="${c.w}" stroke="${c.n}" stroke-width="4"/><rect x="30" y="80" width="44" height="12" rx="5" fill="${c.b}"/><g fill="${c.l}"><rect x="37" y="98" width="8" height="7" rx="1"/><rect x="48" y="98" width="8" height="7" rx="1"/><rect x="59" y="98" width="8" height="7" rx="1" fill="${c.y}"/><rect x="37" y="108" width="8" height="7" rx="1"/><rect x="48" y="108" width="8" height="7" rx="1"/></g>`),
-  team:g(`${ground}<circle cx="60" cy="62" r="16" fill="${c.l}" stroke="${c.n}" stroke-width="4"/><path d="M34 118c2-22 50-22 52 0" fill="${c.l}" stroke="${c.n}" stroke-width="4"/><circle cx="140" cy="62" r="16" fill="${c.l}" stroke="${c.n}" stroke-width="4"/><path d="M114 118c2-22 50-22 52 0" fill="${c.l}" stroke="${c.n}" stroke-width="4"/><circle cx="100" cy="50" r="19" fill="${c.y}" stroke="${c.n}" stroke-width="4"/><path d="M68 120c2-28 62-28 64 0" fill="${c.b}" stroke="${c.n}" stroke-width="4"/>`),
-  chart:g(`${ground}<rect x="30" y="20" width="120" height="98" rx="8" fill="${c.w}" stroke="${c.n}" stroke-width="4"/><rect x="46" y="74" width="16" height="32" rx="2" fill="${c.l}"/><rect x="70" y="58" width="16" height="48" rx="2" fill="${c.b}"/><rect x="94" y="44" width="16" height="62" rx="2" fill="${c.y}"/><rect x="118" y="64" width="16" height="42" rx="2" fill="${c.l}"/><circle cx="152" cy="92" r="20" fill="${c.s}" stroke="${c.n}" stroke-width="5"/><path d="M166 106l18 18" stroke="${c.n}" stroke-width="7" stroke-linecap="round"/>`),
-  done:g(`${ground}<circle cx="100" cy="68" r="42" fill="${c.l}"/><circle cx="100" cy="68" r="30" fill="${c.b}"/><path d="M86 68l10 10 20-20" fill="none" stroke="${c.w}" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><g fill="${c.y}"><circle cx="40" cy="36" r="5"/><rect x="152" y="28" width="9" height="9" rx="2" transform="rotate(20 156 32)"/><circle cx="160" cy="104" r="4"/><rect x="32" y="96" width="8" height="8" rx="2" transform="rotate(-15 36 100)"/></g>`),
-  files:g(`${ground}<path d="M34 40h44l10 12h78v66H34z" fill="${c.b}" stroke="${c.n}" stroke-width="4" stroke-linejoin="round"/><rect x="58" y="22" width="60" height="74" rx="4" fill="${c.w}" stroke="${c.n}" stroke-width="4" transform="rotate(-6 88 60)"/><rect x="86" y="18" width="60" height="74" rx="4" fill="${c.w}" stroke="${c.n}" stroke-width="4" transform="rotate(5 116 56)"/><path d="M98 38h34M98 50h34M98 62h22" stroke="${c.l}" stroke-width="5" stroke-linecap="round" transform="rotate(5 116 56)"/><path d="M34 64h132v54H34z" fill="${c.b}" stroke="${c.n}" stroke-width="4" stroke-linejoin="round"/><rect x="84" y="82" width="32" height="8" rx="4" fill="${c.y}"/>`)}})();
-/* empty state with a drawing */
-const emptyArt=(k,txt)=>`<div class="emp">${ART[k]||''}<p>${esc(txt)}</p></div>`;
+/* Empty lists and the tour use a pattern tile (in the chosen Look) with a line icon, instead of drawings. */
+const ART_IC={van:IC.deliveries,survey:IC.edit,stock:IC.stock,holiday:IC.holidays,team:IC.staff,chart:IC.reports,done:'M5 13l4 4L19 7',files:IC.downloads};
+const emptyArt=(k,txt)=>`<div class="emp">${ART_IC[k]?`<span class="pmed lkp">${svg(ART_IC[k])}</span>`:''}<p>${esc(txt)}</p></div>`;
 
 /* ---------------- welcome tour ---------------- */
 const TOUR=[{art:'team',t:'Welcome to Broadland Windows CRM',d:'A quick look round the main parts of the site. It takes about a minute, and you can skip it at any time.'},
@@ -3542,6 +3587,7 @@ const TOUR=[{art:'team',t:'Welcome to Broadland Windows CRM',d:'A quick look rou
   {sel:'#scanBtn',t:'Scan a barcode',d:'Use the camera to find a product or book stock in and out.'},
   {sel:'#bell',t:'Notifications',d:'Stock requests, low stock, deliveries due and FENSA reminders all land here.'},
   {sel:'#thb',t:'Light or dark',d:'Switch the look to suit the room. The factory screen works well in dark.'},
+  {sel:'#lookBtn',t:'Pick a background',d:'Choose a pattern for behind the glass: window panes, leaded light, contour lines and more.'},
   {sel:'.hero-cz',page:'home',t:'Make the overview yours',d:'Choose which numbers and panels show on your dashboard, and in what order.'},
   {sel:'#meBtn',t:'Your details',d:'Update your phone and email, and check your holiday allowance.'},
   {sel:'#acct',t:'Switch account',d:'Sign in as an administrator with your PIN when you need more access. It signs you out again after 30 minutes idle.'},
@@ -3555,7 +3601,7 @@ function tourGo(d){TI=Math.max(0,Math.min(TOUR.length-1,TI+d));tourDraw()}
 function tourDraw(){const o=$('#tour');if(!o)return;const s=TOUR[TI],el=s.sel&&$(s.sel),vis=el&&el.offsetParent!==null&&el.getBoundingClientRect().width>0,last=TI==TOUR.length-1;
   const r=vis?el.getBoundingClientRect():null,pad=8;
   o.innerHTML=`<div class="tspot ${vis?'':'none'}" style="${vis?`left:${r.left-pad}px;top:${r.top-pad}px;width:${r.width+pad*2}px;height:${r.height+pad*2}px`:''}"></div>
-   <div class="tcard ${vis?'':'mid'}">${!vis&&s.art?ART[s.art]:''}<small>${TI+1} of ${TOUR.length}</small><h3>${esc(s.t)}</h3><p>${esc(s.d)}</p>
+   <div class="tcard ${vis?'':'mid'}">${!vis&&s.art&&ART_IC[s.art]?`<div class="tban lkp">${svg(ART_IC[s.art])}</div>`:''}<small>${TI+1} of ${TOUR.length}</small><h3>${esc(s.t)}</h3><p>${esc(s.d)}</p>
     <div class="tdots">${TOUR.map((_,i)=>`<i class="${i==TI?'on':''}"></i>`).join('')}</div>
     ${ISOWN()||ROLE=='beta'?`<label class="ttest"><input type="checkbox" id="tourTest" ${tourTest()?'checked':''} onchange="tourToggle(this.checked)"> Show every time (testing)</label>`:''}
     <div class="tbtn"><button class="btn ghost sm" onclick="endTour()">${last?'Close':'Skip tour'}</button><span></span>${TI?'<button class="btn ghost sm" onclick="tourGo(-1)">Back</button>':''}<button class="btn sm" onclick="${last?'endTour()':'tourGo(1)'}">${last?'Finish':'Next'}</button></div></div>`;
@@ -3645,6 +3691,30 @@ function azSave(){if(!need(ISOWN,'Setting up sign-in'))return;azRead();const d=A
   if(d.on&&!d.google&&!d.ms){toast('Add a Google or Microsoft client ID before turning sign-in on');return}
   if(d.on&&!d.users.some(u=>['admin','beta'].includes(u.role))){toast('Add at least one administrator before turning sign-in on');return}
   const wasOn=authCfg().on;S.auth=d;audit('Sign-in settings changed',d.on?'On':'Off',d.users.length+' approved');store();closeModal();render();toast(d.on&&!wasOn?'Sign-in is on. It will ask everyone to sign in next time they open the CRM.':'Saved')}
+
+/* ==========================================================================
+   18 · Looks: background pattern behind the glass, picked from the top bar
+   Saved per browser (localStorage 'bb_look'). Styles live in css/07-looks.css.
+   ========================================================================== */
+const LOOKS=[['glow','Soft Glow'],['panes','Window Panes'],['leaded','Leaded Light'],['contour','Contour Lines'],['dots','Dot Grid'],['blueprint','Blueprint'],['aurora','Aurora']];
+const lookNow=()=>{let k='glow';try{k=localStorage.getItem('bb_look')||'glow'}catch(e){}return LOOKS.some(l=>l[0]==k)?k:'glow'};
+function setLook(k){if(!LOOKS.some(l=>l[0]==k))return;document.body.dataset.look=k;try{localStorage.setItem('bb_look',k)}catch(e){}
+  $$('#lookPop .lkb').forEach(b=>{const on=b.dataset.k==k;b.classList.toggle('on',on);b.setAttribute('aria-pressed',on)})}
+function lookPop(open){let p=$('#lookPop');
+  if(!p){p=document.createElement('div');p.id='lookPop';p.setAttribute('role','dialog');p.setAttribute('aria-label','Background');
+    p.innerHTML=`<h3>Background</h3><p>The pattern behind the glass. Saved on this device.</p><div class="lkg">${LOOKS.map(([k,n])=>`<button type="button" class="lkb lk-${esc(k)}" data-k="${esc(k)}" ${A('setLook',k)}><i></i>${esc(n)}</button>`).join('')}</div>`;
+    document.body.appendChild(p)}
+  const show=open??!p.classList.contains('open');p.classList.toggle('open',show);
+  if(show){setLook(lookNow());const r=$('#lookBtn').getBoundingClientRect(),w=p.offsetWidth;p.style.top=(r.bottom+8)+'px';p.style.left=Math.max(12,Math.min(innerWidth-w-12,r.right-w))+'px';const on=$('#lookPop .lkb.on');on&&on.focus()}}
+(function looks(){
+  document.body.dataset.look=lookNow();
+  const b=document.createElement('button');b.className='ib';b.id='lookBtn';b.type='button';b.title='Background';b.setAttribute('aria-label','Background');
+  b.innerHTML=svg('M12 3a9 9 0 100 18c1 0 1.7-.8 1.7-1.7 0-.4-.2-.8-.4-1.1-.3-.3-.5-.7-.5-1.1 0-1 .8-1.7 1.7-1.7H16a5 5 0 005-5c0-4-4-7.4-9-7.4zM7.5 11.5h.01M9.5 7.5h.01M14.5 7.5h.01M17 11h.01');
+  b.onclick=e=>{e.stopPropagation();lookPop()};const t=$('#thb');if(t)t.before(b);
+  document.addEventListener('click',e=>{const p=$('#lookPop');if(p&&p.classList.contains('open')&&!p.contains(e.target))lookPop(false)});
+  document.addEventListener('keydown',e=>{if(e.key=='Escape'&&$('#lookPop.open')){lookPop(false);$('#lookBtn').focus()}});
+  addEventListener('resize',()=>{if($('#lookPop.open'))lookPop(true)});
+})();
 
 /* ==========================================================================
    99 · Start-up
