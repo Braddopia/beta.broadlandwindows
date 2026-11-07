@@ -1075,6 +1075,48 @@ body[data-theme=dark] .tcard{background:rgba(22,27,38,.97);border-color:rgba(255
 .lvg .emp .art{width:min(7rem,45%)}
 .hbar2{display:flex;align-items:center;gap:.7rem;margin:.3rem 0 .2rem}.hbar2 .bar2{flex:1;margin:0}.hbar2 small{white-space:nowrap;font-size:.74rem;color:var(--muted)}
 
+/* holiday chart: type a code into each day */
+.xl-g td.ed{padding:0}.xl-g .hci{width:100%;height:100%;min-height:1.45rem;border:0;background:transparent;text-align:center;font:600 10.5px Arial,sans-serif;color:#13233a;text-transform:uppercase!important;padding:0;cursor:text;outline:none}
+.xl-g .hci:focus{background:#fff;box-shadow:inset 0 0 0 2px #034ea2}.xl-g td.ed:hover{outline:none}
+.xl-ct tbody tr{cursor:default}
+
+/* messages, chat style */
+.msn{display:grid;grid-template-columns:20rem minmax(0,1fr);height:calc(100dvh - 9.5rem);min-height:26rem;border-radius:18px;overflow:hidden;background:var(--card);border:1px solid var(--line);box-shadow:var(--sh)}
+.msn-l{display:flex;flex-direction:column;border-right:1px solid var(--line);min-height:0}
+.msn-lh{display:flex;align-items:center;justify-content:space-between;gap:.5rem;padding:1rem 1rem .6rem}.msn-lh h1{margin:0;font-size:1.4rem}
+.msn-lh select{border:1px solid var(--line);border-radius:20px;padding:.35rem .6rem;background:var(--card);color:var(--blue);font-weight:600;font-size:.8rem;max-width:9rem}
+.msn-list{overflow:auto;padding:.2rem .5rem .8rem}
+.msn-c{display:flex;align-items:center;gap:.7rem;width:100%;border:0;background:none;text-align:left;padding:.55rem .6rem;border-radius:12px;cursor:pointer;color:var(--ink)}
+.msn-c:hover{background:var(--blue-bg)}.msn-c.on{background:var(--blue-bg)}
+.mav{flex:0 0 auto;width:2.7rem;height:2.7rem;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#034ea2,#2f7fdb);color:#fff;font-weight:700;font-size:.85rem}.mav.all{background:linear-gradient(135deg,#ffd002,#f0a500);color:#012b59}
+.msn-ct{flex:1;min-width:0;display:flex;flex-direction:column}.msn-ct b{font-weight:600;font-size:.92rem}.msn-ct small{color:var(--muted);font-size:.78rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-transform:none}
+.msn-c.un .msn-ct b,.msn-c.un .msn-ct small{color:var(--ink);font-weight:700}
+.msn-m{display:flex;flex-direction:column;align-items:flex-end;gap:.2rem;font-size:.7rem;color:var(--muted)}.msn-m i{font-style:normal;min-width:1.2rem;height:1.2rem;border-radius:1rem;background:#034ea2;color:#fff;display:grid;place-items:center;font-size:.68rem;padding:0 .3rem}
+.msn-r{display:flex;flex-direction:column;min-height:0}
+.msn-h{display:flex;align-items:center;gap:.7rem;padding:.75rem 1rem;border-bottom:1px solid var(--line)}.msn-h .mav{width:2.4rem;height:2.4rem}.msn-h b{display:block}.msn-h small{color:var(--muted);font-size:.78rem}
+.msn-t{flex:1;overflow:auto;padding:1rem 1.2rem;display:flex;flex-direction:column;gap:.3rem;background:linear-gradient(180deg,transparent,rgba(3,78,162,.03))}
+.msn-day{align-self:center;font-size:.72rem;color:var(--muted);margin:.7rem 0 .3rem;padding:.15rem .6rem;border-radius:10px;background:var(--blue-bg)}
+.bub{max-width:min(70%,32rem);align-self:flex-start;background:#e9edf3;color:#13233a;padding:.5rem .8rem .35rem;border-radius:18px 18px 18px 6px}
+body[data-theme=dark] .bub{background:#2a3242;color:#e7ecf3}
+.bub.me{align-self:flex-end;background:linear-gradient(135deg,#034ea2,#2f7fdb);color:#fff;border-radius:18px 18px 6px 18px}
+.bub p{margin:0;white-space:pre-wrap;text-transform:none;line-height:1.4}.bub-n{display:block;font-size:.7rem;font-weight:700;color:#034ea2;margin-bottom:.1rem}
+.bub-t{display:flex;justify-content:flex-end;align-items:center;gap:.3rem;font-size:.66rem;opacity:.7;margin-top:.15rem}
+.bub-x{border:0;background:none;color:inherit;cursor:pointer;font-size:.9rem;line-height:1;padding:0 .1rem;opacity:.7}.bub-x:hover{opacity:1}
+.msn-empty{margin:auto}
+.msn-in{display:flex;align-items:flex-end;gap:.5rem;padding:.7rem 1rem;border-top:1px solid var(--line)}
+.msn-in textarea{flex:1;resize:none;max-height:8rem;border:0;border-radius:20px;padding:.6rem 1rem;background:#eef1f6;color:var(--ink);font:inherit;text-transform:none}
+body[data-theme=dark] .msn-in textarea{background:#232a37}
+.msn-send{flex:0 0 auto;width:2.5rem;height:2.5rem;border:0;border-radius:50%;background:#034ea2;color:#fff;display:grid;place-items:center;cursor:pointer}.msn-send svg{width:1.1rem;height:1.1rem}
+@media(max-width:800px){.msn{grid-template-columns:1fr;height:auto}.msn-l{max-height:14rem;border-right:0;border-bottom:1px solid var(--line)}.msn-t{min-height:22rem}}
+.rf i.any{font-style:normal;color:var(--blue)}.rg h4 .anyh{font-size:.68rem;letter-spacing:0;text-transform:none;color:var(--muted);font-weight:500}
+
+/* floor boards */
+.fl-head .bt{margin-bottom:.45rem}body.tv .fl-head .bt{display:none}
+.rvw{display:grid;grid-template-columns:1fr 1fr;gap:1rem}.rvb{display:flex;flex-direction:column;align-items:center;gap:.25rem;padding:.9rem .5rem;border-radius:14px;background:var(--blue-bg)}
+.rvb .rvn{width:2.2rem;height:2.2rem;border-radius:50%;display:grid;place-items:center;background:var(--c);color:#fff;font-weight:800}.rvb>b{font:700 2.2rem/1 var(--head);color:var(--navy)}.rvb .stars svg{width:1.1rem;height:1.1rem}.rvb small{color:var(--muted)}
+.bdl{display:block;margin:.5rem 0 .2rem;font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:700}
+body.tv .fl-head .bt{display:none!important}
+
 /* ==========================================================================
    06 · Adaptive layout
    Breakpoints: 1400 (laptop) · 1100 (small laptop / tablet landscape)
@@ -1458,7 +1500,7 @@ window.addEventListener('storage',e=>{if(e.key==KEY&&e.newValue){try{const n=JSO
 const FOCUS=['home','messages','live','deliveries','stock','suppliers','downloads'];
 const ROLES={
   admin:  {n:'Administrator',     d:'Everything a standard user has, plus staff and holidays',v:[...FOCUS,'leads','contracts','staff','holidays']},
-  staff:  {n:'Standard user',     d:'Overview, leads, contracts, live analytics, inventory and files',v:[...FOCUS,'leads','contracts','holidays']},
+  staff:  {n:'Standard user',     d:'Overview, leads, contracts, calendar, contacts, live analytics, inventory and files',v:[...FOCUS,'leads','contracts','fitting','contacts']},
   beta:   {n:'Beta (all features)',d:'Leads, contracts, finance, staff and everything else',v:'*'}};
 const RL={admin:'Administrator',staff:'Team Member',beta:'Beta Access'};
 const IDLE_MIN=30, PIN_TRIES=5, PIN_LOCK_S=60;
@@ -1554,14 +1596,14 @@ const UI={
   cal:{m:'month',o:0,sd:null,ly:{fit:1,svc:1,del:1,hol:1}},
   hol:{m:0,v:'chart',cm:new Date().getMonth(),y:new Date().getFullYear(),brush:''}, rep:{t:'summary'}, fin:{t:'debtors',pm:0},
   del:{f:'out',s:'all',v:'list'}, files:{cat:'all',az:0,list:0,ssq:'',page:1,per:50},
-  con:{f:'all'}, msg:{box:'in',to:'Everyone'}, staff:{c:'all'}, sup:{open:''}, lead:{v:'list',f:'live',src:'all',own:'all',sort:'id',dir:1,page:1,per:50}, ctr:{v:'list',f:'cur',sort:'id',dir:1,page:1,per:50}, nc:{t:'All'}, audit:{page:1,per:50}
+  con:{f:'all'}, board:'factory', msg:{box:'in',to:'Everyone'}, staff:{c:'all'}, sup:{open:''}, lead:{v:'list',f:'live',src:'all',own:'all',sort:'id',dir:1,page:1,per:50}, ctr:{v:'list',f:'cur',sort:'id',dir:1,page:1,per:50}, nc:{t:'All'}, audit:{page:1,per:50}
 };
 function setUI(path,val){const p=path.split('.');let o=UI;for(let i=0;i<p.length-1;i++)o=o[p[i]];o[p[p.length-1]]=val;if(p.length==2&&p[1]!='page'&&'page' in UI[p[0]])UI[p[0]].page=1;render()}
 function togUI(path){const p=path.split('.');let o=UI;for(let i=0;i<p.length-1;i++)o=o[p[i]];const k=p[p.length-1];o[k]=o[k]?0:1;render()}
 
 /* ---- views: key -> title, page function, optional after-render hook ---- */
 const VIEWS={
-  home:{t:'Overview',fn:vHome}, messages:{t:'Messages',fn:vMessages}, live:{t:'Factory Floor',fn:vLive,after:liveAfter},
+  home:{t:'Overview',fn:vHome}, messages:{t:'Messages',fn:vMessages,after:msnAfter}, live:{t:'Floor Boards',fn:vLive,after:liveAfter},
   deliveries:{t:'Deliveries',fn:vDeliveries}, suppliers:{t:'Suppliers',fn:vSuppliers},
   leads:{t:'Leads',fn:vLeads}, contracts:{t:'Contracts',fn:vContracts},
   fitting:{t:'Calendar',fn:vCalendar}, service:{t:'Service Calls',fn:vService},
@@ -1579,7 +1621,7 @@ function badges(){const td=today();return{
   messages:msgUnread(),
   leads:S.leads.filter(l=>!['Won','Lost'].includes(l.stage)).length,
   service:S.calls.filter(c=>c.status!='Complete').length,
-  fitting:S.contracts.filter(c=>c.fit&&c.stage!='Complete').length,
+  fitting:ISOWN()?S.contracts.filter(c=>c.fit&&c.stage!='Complete').length:0,
   stock:S.items.filter(r=>r.type=='request'&&r.reqStatus=='Pending').length,
   staff:ISOWN()?S.hols.filter(h=>h.status=='Pending').length:0,
   holidays:ISOWN()?S.hols.filter(h=>h.status=='Pending').length:0}}
@@ -1635,8 +1677,9 @@ document.addEventListener('change',e=>{const el=e.target;if(el.tagName=='SELECT'
 document.addEventListener('input',e=>{const el=e.target;if(!el.id||!el.id.startsWith('f_'))return;const k=el.id.slice(2);
   $$(`#mbox [data-nx="${k}"]`).forEach(r=>{const own=r.querySelector('input,select,textarea');r.hidden=!el.value.trim()&&!(own&&own.value.trim())})});
 /* styled confirmation instead of the browser's own box */
-let ASK=null;
-function askYes(title,msg,okLabel,cb,danger){ASK=cb;openModal(`<div class="ask"><div class="ask-ic ${danger?'r':''}">${danger?'!':'?'}</div><h2>${esc(title)}</h2><p class="muted">${esc(msg)}</p></div><div class="mact"><button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn ${danger?'red':''}" onclick="askGo()">${esc(okLabel||'Yes')}</button></div>`,'sm')}
+let ASK=null,ASK_NO=null;
+function askYes(title,msg,okLabel,cb,danger,noCb){ASK=cb;ASK_NO=noCb||null;openModal(`<div class="ask"><div class="ask-ic ${danger?'r':''}">${danger?'!':'?'}</div><h2>${esc(title)}</h2><p class="muted">${esc(msg)}</p></div><div class="mact"><button class="btn ghost" onclick="askNo()">${noCb?'No, go back':'Cancel'}</button><button class="btn ${danger?'red':''}" onclick="askGo()">${esc(okLabel||'Yes')}</button></div>`,'sm')}
+function askNo(){const f=ASK_NO;ASK=ASK_NO=null;closeModal();if(f)f()}
 function askGo(){const f=ASK;ASK=null;closeModal();if(f)f()}
 function closeModal(){$('#modal').classList.remove('open');const a=document.activeElement;if(a&&a!==document.body&&!a.closest('#modal'))a.blur()}
 $('#modal').addEventListener('mousedown',e=>{if(e.target.id=='modal')closeModal()});
@@ -1813,7 +1856,7 @@ function vHome(){
     staff:{k:[['Next Fitting',fits[0]?fd(fits[0].fit):'None','','fitting'],['Open Service Calls',oc.length,urgent?'bad':'','service'],['Deliveries Due Today',dToday,dToday?'warn':'','deliveries'],['Low Stock Lines',low.length,low.length?'warn':'','stock']],p:[fitsP,callsP,delP],s:`${dToday} deliveries due today and ${oc.length} open service calls.`}};
   cfg.beta=cfg.admin;const C=cfg[R]||cfg.staff;
   const allow=m?allowTot(m):0,used=m?hu(m):0,pend=m?sum(S.hols.filter(h=>h.sid==m.id&&h.status=='Pending'),h=>h.days):0,nxt=m?S.hols.filter(h=>h.sid==m.id&&h.status!='Rejected'&&h.to>=td).sort((a,b)=>a.from.localeCompare(b.from))[0]:null;
-  const holP=`<div class="panel"><h2><span>My Holiday</span><span class="acts"><button class="btn sm" onclick="bookMine()">Book Holiday</button>${canSee('holidays')?`<button class="mini" ${A('go','holidays')}>Holiday Planner</button>`:''}</span></h2>${m?`<div class="hl"><div class="big"><b>${allow-used}</b><small>Days Left</small></div><div><b>${used}</b><small>Booked</small></div><div><b>${pend}</b><small>Pending</small></div><div><b>${allow}</b><small>Allowance</small></div></div><div class="hbar2"><div class="bar2"><i style="width:${allow?Math.min(100,Math.round(100*(used+pend)/allow)):0}%"></i></div><small>${used+pend} of ${allow} days used</small></div><p class="muted" style="margin:.5rem 0 0">${nxt?`Next: ${fd(nxt.from)} to ${fd(nxt.to)}, ${nxt.days} days, ${esc(nxt.status)}`:'No holiday booked yet.'}</p><button type="button" class="svc" ${A('go','holidays')} title="Open the holiday planner"><span><small>Years Of Service</small><b>${m.start?svcYears(m):'-'}</b></span><span><small>Service Days</small><b>${svcExtra(m)?'+'+svcExtra(m):'0'}</b></span><span class="muted">${m.start?(svcYears(m)>=15?'Maximum service days reached':(5-svcYears(m)%5)+' year'+(5-svcYears(m)%5==1?'':'s')+' to the next extra day'):'Start date not set'}</span><span class="svc-go">Holiday planner &rarr;</span></button>`:'<p class="empty">Your name is not in the staff list yet, so there is no allowance to show.</p>'}</div>`;
+  const holP=`<div class="panel"><h2><span>My Holiday</span><span class="acts"><button class="btn sm" onclick="bookMine()">Book Holiday</button>${canSee('holidays')?`<button class="mini" ${A('go','holidays')}>Holiday Planner</button>`:canSee('fitting')?`<button class="mini" ${A('go','fitting')}>My Calendar</button>`:''}</span></h2>${m?`<div class="hl"><div class="big"><b>${allow-used}</b><small>Days Left</small></div><div><b>${used}</b><small>Booked</small></div><div><b>${pend}</b><small>Pending</small></div><div><b>${allow}</b><small>Allowance</small></div></div><div class="hbar2"><div class="bar2"><i style="width:${allow?Math.min(100,Math.round(100*(used+pend)/allow)):0}%"></i></div><small>${used+pend} of ${allow} days used</small></div><p class="muted" style="margin:.5rem 0 0">${nxt?`Next: ${fd(nxt.from)} to ${fd(nxt.to)}, ${nxt.days} days, ${esc(nxt.status)}`:'No holiday booked yet.'}</p><button type="button" class="svc" ${A('go',canSee('holidays')?'holidays':'fitting')} title="Open your holidays"><span><small>Years Of Service</small><b>${m.start?svcYears(m):'-'}</b></span><span><small>Service Days</small><b>${svcExtra(m)?'+'+svcExtra(m):'0'}</b></span><span class="muted">${m.start?(svcYears(m)>=15?'Maximum service days reached':(5-svcYears(m)%5)+' year'+(5-svcYears(m)%5==1?'':'s')+' to the next extra day'):'Start date not set'}</span><span class="svc-go">${canSee('holidays')?'Holiday planner':'My calendar'} &rarr;</span></button>`:'<p class="empty">Your name is not in the staff list yet, so there is no allowance to show.</p>'}</div>`;
   /* widgets: every tile and panel the person may see; they choose which show and in what order */
   const KP={leads:['Open Leads',open.length,'','leads'],pipe:['Pipeline Value',m0(pipe),'','leads'],live:['Live Contracts',m0(sum(live,c=>c.value)),'','contracts'],bal:['Balance To Collect',m0(bal),'warn','contracts'],calls:['Open Service Calls',oc.length,urgent?'bad':'','service'],req:['Stock Requests',reqP,reqP?'warn':'','stock'],
     nfit:['Next Fitting',fits[0]?fd(fits[0].fit):'None','','fitting'],fitwk:['Fittings This Week',fitWk,'','fitting'],dtoday:['Deliveries Due Today',dToday,dToday?'warn':'','deliveries'],dover:['Overdue Deliveries',dOver,dOver?'bad':'','deliveries'],low:['Low Stock Lines',low.length,low.length?'warn':'','stock'],out:['Out Of Stock',out,out?'bad':'','stock'],
@@ -1874,7 +1917,7 @@ const msDots=x=>Array.isArray(x.ms)&&x.ms.length?`<span class="ms">${x.ms.map(m=
 /* ---------------- factory floor ---------------- */
 function liveData(){const td=today(),D=S.deliveries.filter(x=>x.status!='Received').sort((a,b)=>a.due.localeCompare(b.due)),J=S.contracts.filter(c=>c.stage!='Complete'&&c.stage!='Deposit due').sort((a,b)=>(a.fit||'9').localeCompare(b.fit||'9'));
   return{td,D,J,od:D.filter(x=>x.due<td&&x.status!='In transit'),dt:D.filter(x=>x.due==td),dw:S.deliveries.filter(x=>inWeek(x.due)),jw:J.filter(c=>c.fit&&inWeek(c.fit))}}
-function vLive(){
+function vLive(){if(UI.board!='factory')return vBoard(UI.board);
   const{td,D,J,od,dt,dw,jw}=liveData(),wDone=dw.filter(x=>x.status=='Received').length,tv=document.body.classList.contains('tv');
   const lowN=products().filter(isLow).length,callN=S.calls.filter(c=>c.status!='Complete').length,reqN=S.items.filter(r=>r.type=='request'&&r.reqStatus=='Pending').length,offN=S.staff.filter(s=>['H','H1','H2','S','M','C','A','U'].includes(absCode(s,td))).length;
   const T=[['Deliveries Due Today',dt.length,dt.length?'warn':''],['Overdue Deliveries',od.length,od.length?'bad':''],['Deliveries This Week',dw.length,'',`${wDone} delivered, ${dw.length-wDone} to go`],['Jobs In Progress',J.length,''],['Jobs Due This Week',jw.length,''],['Low Stock Lines',lowN,lowN?'warn':''],['Open Service Calls',callN,''],['Stock Requests',reqN,reqN?'warn':''],['Staff Off Today',offN,'']];
@@ -1891,10 +1934,48 @@ function vLive(){
    calls:`<div class="panel"><h2>Service Visits</h2>${S.calls.filter(c=>c.status!='Complete').sort((a,b)=>(a.visit||'9').localeCompare(b.visit||'9')).slice(0,8).map(c=>`<div class="nrow"><span><b>${esc(c.name)}</b><small>${esc(c.issue)}</small></span><span class="so-due">${c.visit?fd(c.visit):'Not booked'}<small>${esc(c.priority||'')}</small></span></div>`).join('')||emptyArt('done','No open service calls.')}</div>`,
    low:`<div class="panel"><h2>Low Stock</h2>${products().filter(isLow).slice(0,10).map(r=>`<div class="nrow"><span><b>${esc(r.item)}</b><small>${esc(hasLoc(r)?r.location:'No location')}</small></span><span class="tag ${r.stock<=0?'r':'y'}">${r.stock} ${esc(unitOf(r))}</span></div>`).join('')||emptyArt('stock','Nothing low on stock.')}</div>`,
    off:`<div class="panel"><h2>Who's Off Today</h2>${S.staff.filter(s=>['H','H1','H2','S','M','C','A','U'].includes(absCode(s,td))).map(s=>`<div class="nrow"><span><b>${esc(s.name)}</b><small>${esc(s.cat||'')}</small></span><span class="tag">${esc(HC[absCode(s,td)][1])}</span></div>`).join('')||emptyArt('team','Everyone is in today.')}</div>`};
-  return `<div class="fl"><div class="fl-head"><div><h1>Factory Floor</h1><span class="muted"><i class="live"></i>Live &middot; Updated <span id="upd">${new Date().toLocaleTimeString('en-GB')}</span></span></div><div class="clk" id="clk">${new Date().toLocaleTimeString('en-GB')}</div><div class="acts">${ISOWN()?'<button class="btn ghost" onclick="flEdit()">Customise</button>':''}<button class="btn ghost" onclick="liveReport()">Factory Report</button><button class="btn" onclick="toggleTV()">${tv?'Exit Full Screen':'Full Screen'}</button></div></div>
+  return `<div class="fl"><div class="fl-head"><div>${boardTabs()}<h1>Factory Floor</h1><span class="muted"><i class="live"></i>Live &middot; Updated <span id="upd">${new Date().toLocaleTimeString('en-GB')}</span></span></div><div class="clk" id="clk">${new Date().toLocaleTimeString('en-GB')}</div><div class="acts">${ISOWN()?'<button class="btn ghost" onclick="flEdit()">Customise</button>':''}<button class="btn ghost" onclick="liveReport()">Factory Report</button><button class="btn" onclick="toggleTV()">${tv?'Exit Full Screen':'Full Screen'}</button></div></div>
   <div class="kpis">${T.filter((k,n)=>FL.k.includes(TK[n])).sort((a,b)=>FL.k.indexOf(TK[T.indexOf(a)])-FL.k.indexOf(TK[T.indexOf(b)])).map(k=>`<div class="kpi ${k[2]}"><small>${k[0]}</small><b>${k[1]}</b>${k[3]?`<span class="ksub">${k[3]}</span>`:''}</div>`).join('')}</div>
   <div class="lvg">${FL.p.filter(k=>FP[k]).map(k=>FP[k]).join('')||'<div class="panel"><p class="empty">No panels chosen. Press Customise to add some.</p></div>'}
   </div></div>`}
+/* ---------------- other floor boards: hardwood workshop and office ---------------- */
+const BOARDS=[['factory','Factory'],['hardwood','Hardwood'],['office','Office']];
+const boardTabs=()=>`<div class="seg2 bt">${BOARDS.map(([k,t])=>`<button class="${UI.board==k?'on':''}" ${A('setUI','board',k)}>${t}</button>`).join('')}</div>`;
+const isHW=c=>c.contractType=='Domestic Timber'||/hardwood|timber|\boak\b|accoya|sapele|sash/i.test((c.product||'')+' '+(c.notes||''));
+const hwItem=r=>/hardwood|timber|\boak\b|accoya|sapele|meranti|sash/i.test([r.item,r.notes,r.supplier,r.cInName,r.cOutName].join(' '));
+const stageBar=c=>`<div class="bar"><i style="width:${Math.round(100*(CSTAGES.indexOf(c.stage)+1)/CSTAGES.length)}%"></i></div>`;
+function boardData(b){const td=today(),row=(a,s,r)=>`<div class="nrow"><span><b>${a}</b><small>${s}</small></span>${r||''}`+'</div>';
+  if(b=='hardwood'){const J=S.contracts.filter(c=>isHW(c)&&c.stage!='Complete'&&c.cancelled!='Yes').sort((a,b)=>(a.fit||'9').localeCompare(b.fit||'9')),jw=J.filter(c=>c.fit&&inWeek(c.fit)),ids=new Set(J.map(c=>c.id)),D=S.deliveries.filter(d=>d.status!='Received'&&(ids.has(d.contract)||/hardwood|timber|oak|accoya|sapele/i.test(d.supplier+' '+d.items))).sort((a,b)=>a.due.localeCompare(b.due)),P=products().filter(hwItem),low=P.filter(isLow);
+    const st=CSTAGES.slice(1,5).map(s=>[s,J.filter(c=>c.stage==s).length]),mx=Math.max(1,...st.map(x=>x[1]));
+    return{t:'Hardwood Floor',s:'Timber windows and doors in the workshop',
+      K:{jip:['Hardwood Jobs',J.length,''],jw:['Fitting This Week',jw.length,''],del:['Timber Deliveries Due',D.length,D.some(d=>d.due<td)?'bad':''],low:['Timber Stock Low',low.length,low.length?'warn':''],val:['Work In Hand',m0(sum(J,c=>c.value)),'']},
+      P:{jobs:['Hardwood Jobs',`<div class="panel"><h2>Hardwood Jobs</h2>${J.map(c=>`<div class="nrow jr"><div style="display:flex;justify-content:space-between;gap:.5rem"><span><b>${esc(c.name)}</b> <span class="muted">#${esc(c.id)}</span></span><span class="tag">${esc(c.stage)}</span></div><div class="muted">${esc(c.product)}${c.fit?', fit '+fd(c.fit):''}</div>${stageBar(c)}</div>`).join('')||emptyArt('done','No hardwood jobs in progress.')}</div>`],
+        stage:['Jobs By Stage',`<div class="panel"><h2>Jobs By Stage</h2>${st.map(([s,n])=>`<div class="hb"><span>${esc(s)}</span><div class="bar2"><i style="width:${100*n/mx}%"></i></div><b>${n}</b></div>`).join('')}</div>`],
+        del:['Timber Deliveries',`<div class="panel"><h2>Timber Deliveries</h2>${D.map(d=>row(esc(d.supplier),esc(d.items)+(d.contract?', job '+esc(d.contract):''),dTag(d))).join('')||emptyArt('van','No timber deliveries due.')}</div>`],
+        fits:['Fitting This Week',`<div class="panel"><h2>Fitting This Week</h2>${jw.map(c=>row(esc(c.name),esc(c.product),`<span class="so-due">${fd(c.fit)}<small>${esc(c.fitter||'')}</small></span>`)).join('')||emptyArt('done','No hardwood fittings this week.')}</div>`],
+        stock:['Timber Stock',`<div class="panel"><h2>Timber Stock</h2>${P.slice(0,12).map(r=>row(esc(r.item),esc(hasLoc(r)?r.location:'No location'),`<span class="tag ${r.stock<=0?'r':isLow(r)?'y':'g'}">${r.stock} ${esc(unitOf(r))}</span>`)).join('')||emptyArt('stock','No timber stock lines yet. Items with hardwood, timber or oak in the name show here.')}</div>`]},
+      DEF:{k:['jip','jw','del','low'],p:['jobs','stage','del','fits','stock']}}}
+  /* office */
+  const L=S.leads.filter(l=>!['Won','Lost'].includes(l.stage)),C=S.contracts.filter(c=>c.stage!='Complete'&&c.cancelled!='Yes'),oc=S.calls.filter(c=>c.status!='Complete').sort((a,b)=>['Urgent','Normal','Low'].indexOf(a.priority)-['Urgent','Normal','Low'].indexOf(b.priority)),bal=sum(C,c=>c.value-c.paid),fort=addDays(14),due=C.filter(c=>c.value-c.paid>0&&c.fit&&c.fit<=fort).sort((a,b)=>a.fit.localeCompare(b.fit)),jw=C.filter(c=>c.fit&&inWeek(c.fit)),wk=addDays(-7),nl=allLeads().filter(l=>l.created&&l.created>=wk);
+  const tp=S.brand.tp,g=S.brand.g,rv=(x,n,col)=>`<div class="rvb"><span class="rvn" style="--c:${col}">${n}</span><b>${(+x.score||0).toFixed(1)}</b>${stars(x.score)}<small>${x.count?esc(x.count)+' reviews':'Reviews'}</small></div>`;
+  const ls=STAGES.filter(s=>!['Won','Lost'].includes(s)).map(s=>[s,L.filter(l=>l.stage==s).length]),cs=CSTAGES.map(s=>[s,C.filter(c=>c.stage==s).length]),mx=Math.max(1,...ls.map(x=>x[1]),...cs.map(x=>x[1]));
+  const team=(S.notes||[]).filter(n=>n.to=='Everyone').sort((a,b)=>b.at-a.at).slice(0,5);
+  return{t:'Office Floor',s:'Reviews, jobs going through and service',
+    K:{g:['Google Rating',(+g.score||0).toFixed(1)+' ★','',g.count?g.count+' reviews':''],tp:['Trustpilot Rating',(+tp.score||0).toFixed(1)+' ★','',tp.count?tp.count+' reviews':''],leads:['Open Leads',L.length,''],live:['Jobs Going Through',C.length,''],calls:['Open Service Calls',oc.length,oc.some(c=>c.priority=='Urgent')?'bad':''],bal:['To Collect',m0(bal),'warn'],newl:['New Leads, 7 Days',nl.length,'']},
+    P:{reviews:['Customer Reviews',`<div class="panel"><h2>Customer Reviews</h2><div class="rvw">${rv(g,'G','#4285f4')}${rv(tp,'★','#00b67a')}</div><p class="muted" style="margin:.6rem 0 0">Figures are set in Admin Console, Reviews.</p></div>`],
+      pipe:['Jobs Going Through',`<div class="panel"><h2>Jobs Going Through</h2><small class="bdl">Leads</small>${ls.map(([s,n])=>`<div class="hb"><span>${esc(s)}</span><div class="bar2"><i style="width:${100*n/mx}%;background:#ffd002"></i></div><b>${n}</b></div>`).join('')}<small class="bdl">Contracts</small>${cs.map(([s,n])=>`<div class="hb"><span>${esc(s)}</span><div class="bar2"><i style="width:${100*n/mx}%"></i></div><b>${n}</b></div>`).join('')}</div>`],
+      calls:['Service Calls',`<div class="panel"><h2>Service Calls</h2>${oc.slice(0,8).map(c=>row(esc(c.name),esc(c.issue),`<span class="so-due">${c.visit?fd(c.visit):'Not booked'}<small>${prTag(c.priority)}</small></span>`)).join('')||emptyArt('done','No open service calls.')}</div>`],
+      fits:['Fittings This Week',`<div class="panel"><h2>Fittings This Week</h2>${jw.map(c=>row(esc(c.name),esc(c.product),`<span class="so-due">${fd(c.fit)}<small>${esc(c.fitter||'')}</small></span>`)).join('')||emptyArt('done','No fittings this week.')}</div>`],
+      newl:['New Leads',`<div class="panel"><h2>New Leads</h2>${allLeads().slice().sort((a,b)=>(b.created||'').localeCompare(a.created||'')).slice(0,6).map(l=>row(esc(l.name),esc((l.productType||l.product||'')+(l.source?' · '+l.source:'')),`<span class="tag">${esc(l.stage)}</span>`)).join('')||emptyArt('survey','No leads yet.')}</div>`],
+      pay:['Payments Due Before Fit',`<div class="panel"><h2>Payments Due Before Fit</h2>${due.map(c=>row(esc(c.name),'Fit '+fd(c.fit)+', #'+esc(c.id),`<span class="tag r">${m0(c.value-c.paid)}</span>`)).join('')||emptyArt('done','Nothing due before a fitting.')}</div>`],
+      team:['Team Messages',`<div class="panel"><h2>Team Messages</h2>${team.map(n=>row(esc(n.by),esc(n.t),`<span class="so-due">${new Date(n.at).toLocaleDateString('en-GB',{day:'numeric',month:'short'})}</span>`)).join('')||emptyArt('team','No team messages.')}</div>`]},
+    DEF:{k:['g','tp','leads','live','calls'],p:['reviews','pipe','calls','fits','newl','team']}}}
+const boardLay=b=>{const d=boardData(b),L=(S.boards||{})[b];return L&&Array.isArray(L.k)?L:d.DEF};
+function vBoard(b){const d=boardData(b),L=boardLay(b),tv=document.body.classList.contains('tv');
+  return `<div class="fl"><div class="fl-head"><div>${boardTabs()}<h1>${esc(d.t)}</h1><span class="muted"><i class="live"></i>${esc(d.s)} &middot; Updated <span id="upd">${new Date().toLocaleTimeString('en-GB')}</span></span></div><div class="clk" id="clk">${new Date().toLocaleTimeString('en-GB')}</div><div class="acts">${ISOWN()?`<button class="btn ghost" ${A('boardEdit',b)}>Customise</button>`:''}<button class="btn" onclick="toggleTV()">${tv?'Exit Full Screen':'Full Screen'}</button></div></div>
+  <div class="kpis">${L.k.filter(k=>d.K[k]).map(k=>{const x=d.K[k];return `<div class="kpi ${x[2]}"><small>${x[0]}</small><b>${x[1]}</b>${x[3]?`<span class="ksub">${esc(x[3])}</span>`:''}</div>`}).join('')}</div>
+  <div class="lvg">${L.p.filter(k=>d.P[k]).map(k=>d.P[k][1]).join('')||'<div class="panel"><p class="empty">No panels chosen. Press Customise to add some.</p></div>'}</div></div>`}
+function boardEdit(b){if(!need(ISOWN,'Changing the floor boards'))return;const d=boardData(b);LAY['b_'+b]={t:'Customise '+d.t,d:'Pick what shows on this screen and the order. Shared by everyone who opens it.',av:()=>({k:Object.entries(d.K).map(([k,x])=>[k,x[0]]),p:Object.entries(d.P).map(([k,x])=>[k,x[0]])}),get:()=>boardLay(b),set:v=>{S.boards=S.boards||{};S.boards[b]=v},reset:()=>{if(S.boards)delete S.boards[b]}};layEdit('b_'+b)}
 /* ranked to-do list for the floor: 1 = act now, 2 = today / soon */
 function priorities(){const td=today(),d3=addDays(3),o=[];
   S.calls.filter(c=>c.status!='Complete'&&c.priority=='Urgent').forEach(c=>o.push({p:1,k:'Urgent Call',t:c.name+': '+c.issue,s:c.visit?'Visit '+fd(c.visit):'No visit booked',o:c.visit||'0'}));
@@ -2157,11 +2238,12 @@ function reportCall(id,mode){const c=S.calls.find(x=>x.id==id);if(!c)return;
 
 /* ---------------- contact book ---------------- */
 function vContacts(){let last='';const F=UI.con.f,L=S.contacts.filter(c=>(F=='all'||c.type==F)&&hit(c)).sort((a,b)=>(a.co||'').localeCompare(b.co||'')||(a.name||'').localeCompare(b.name||''));
-  return `<div class="head"><h1>Contact Book</h1><div class="tools"><button class="btn ghost" onclick="impCust()">Import customers</button><button class="btn" onclick="editContact()">New contact</button></div></div>
+  return `<div class="head"><h1>Contact Book</h1><div class="tools">${ISOWN()?'<button class="btn ghost" onclick="impCust()">Import customers</button>':''}<button class="btn" onclick="editContact()">New contact</button></div></div>
   <div class="chips">${['all',...CT].map(k=>`<button class="chip ${F==k?'on':''}" ${A('setUI','con.f',k)}>${k=='all'?'All':esc(k)}</button>`).join('')}</div>
-  <div class="book">${L.map(c=>{const ch=(c.co||'?')[0].toUpperCase(),hd=ch!=last?(last=ch,`<div class="az">${esc(ch)}</div>`):'';return hd+`<div class="cc"><div class="av">${esc(initials(c.co))}</div><div class="ci"><b>${esc(c.co)}</b><div>${esc(c.name)}${c.role?' &middot; '+esc(c.role):''}</div>${c.phone?`<a href="tel:${esc(c.phone)}">${esc(c.phone)}</a>`:''}${c.email?`<a href="mailto:${esc(c.email)}">${esc(c.email)}</a>`:''}<div class="muted">${esc(c.addr||'')}</div><span class="tag">${esc(c.type)}</span></div><div class="acts" style="flex-direction:column"><button class="mini" ${A('editContact',c.id)}>Edit</button><button class="mini del" ${A('del','contacts',c.id)}>Delete</button></div></div>`}).join('')||'<p class="empty">No contacts match.</p>'}</div>`}
-function editContact(id){const c=S.contacts.find(x=>x.id==id);
-  form(c?'Edit Contact':'New Contact',[{k:'co',l:'Company',w:'full',req:1},{k:'name',l:'Contact name'},{k:'role',l:'Role'},{k:'type',l:'Type',t:'select',o:CT},{k:'phone',l:'Phone',t:'tel',max:30},{k:'email',l:'Email',t:'email',w:'full'},{k:'addr',l:'Address / town',w:'full',max:200}],c||{type:'Supplier'},o=>{if(c)Object.assign(c,o);else S.contacts.push({id:shortId('K'),...o});audit(c?'Contact edited':'Contact added',o.co,'')})}
+  <div class="book">${L.map(c=>{const ch=(c.co||'?')[0].toUpperCase(),hd=ch!=last?(last=ch,`<div class="az">${esc(ch)}</div>`):'';return hd+`<div class="cc"><div class="av">${esc(initials(c.co))}</div><div class="ci"><b>${esc(c.co)}</b><div>${esc(c.name)}${c.role?' &middot; '+esc(c.role):''}</div>${c.phone?`<a href="tel:${esc(c.phone)}">${esc(c.phone)}</a>`:''}${c.email?`<a href="mailto:${esc(c.email)}">${esc(c.email)}</a>`:''}<div class="muted">${esc(c.addr||'')}</div><span class="tag">${esc(c.type)}</span></div><div class="acts" style="flex-direction:column"><button class="mini" ${A('editContact',c.id)}>Edit</button>${ISOWN()?`<button class="mini del" ${A('del','contacts',c.id)}>Delete</button>`:''}</div></div>`}).join('')||'<p class="empty">No contacts match.</p>'}</div>`}
+function editContact(id,draft){const c=S.contacts.find(x=>x.id==id);
+  form(c?'Edit Contact':'New Contact',[{k:'co',l:'Company',w:'full',req:1},{k:'name',l:'Contact name'},{k:'role',l:'Role'},{k:'type',l:'Type',t:'select',o:CT},{k:'phone',l:'Phone',t:'tel',max:30},{k:'email',l:'Email',t:'email',w:'full'},{k:'addr',l:'Address / town',w:'full',max:200}],draft||c||{type:'Supplier'},o=>{const go=()=>{if(c)Object.assign(c,o);else S.contacts.push({id:shortId('K'),...o});audit(c?'Contact edited':'Contact added',o.co,'')};
+    if(!ISOWN()){setTimeout(()=>askYes(c?'Save changes to '+(c.co||'this contact')+'?':'Add '+o.co+' to the contact book?',c?'The contact details will be updated for everyone.':'Everyone will be able to see this contact.','Yes, save',()=>{go();store();render();toast('Contact saved')},false,()=>editContact(id,o)),0);return false}go()})}
 function impCust(){let n=0;S.contracts.forEach(c=>{if(!S.contacts.some(k=>k.co==c.name)){n++;S.contacts.push({id:shortId('K'),co:c.name,name:c.name,role:'Contract '+c.id,type:'Customer',phone:c.phone||'',email:c.email||'',addr:c.address||c.town})}});audit('Customers imported','Contact book',n+' added');store();render();toast(n+' customer'+(n==1?'':'s')+' added')}
 
 /* ==========================================================================
@@ -2176,16 +2258,19 @@ const staffName=id=>(S.staff.find(s=>s.id==id)||{name:'Unknown'}).name;
 const holTag=h=>`<span class="tag ${h.status=='Approved'?'g':h.status=='Rejected'?'r':'y'}">${esc(h.status)}</span>`;
 
 /* ---------------- calendar ---------------- */
-function evs(k){const e=[],L=UI.cal.ly;
-  if(L.fit)S.contracts.filter(c=>c.fit==k&&c.stage!='Complete').forEach(c=>e.push({c:'fit',t:c.name,s:c.product+' ('+(c.fitter||'no fitter')+')',f:['openContract',c.id],k:'Fitting'}));
-  if(L.svc)S.calls.filter(c=>c.visit==k&&c.status!='Complete').forEach(c=>e.push({c:'svc',t:'Service: '+c.name,s:c.issue,f:['editCall',c.id],k:'Service visit'}));
-  if(L.del)S.deliveries.filter(d=>d.due==k&&d.status!='Received').forEach(d=>e.push({c:'del',t:'Delivery: '+d.supplier,s:d.items,f:['go','deliveries'],k:'Delivery'}));
-  if(L.hol&&isWk(k))S.hols.filter(h=>h.status!='Rejected'&&h.from<=k&&h.to>=k).forEach(h=>{const n=staffName(h.sid);e.push({c:'hol'+(h.status=='Pending'?' pd':''),t:n.split(' ')[0]+' off',s:n+' on holiday'+(h.status=='Pending'?' (pending)':''),f:['holEdit',h.id],k:'Holiday'})});
+function evs(k){const e=[],L=UI.cal.ly,Ad=ISOWN(),m=me(),mine=x=>Ad||(m&&forPerson(m,x));
+  if(L.fit)S.contracts.filter(c=>c.fit==k&&c.stage!='Complete'&&(Ad||mine(c.fitter)||c.soldBy==USER)).forEach(c=>e.push({c:'fit',t:c.name,s:c.product+' ('+(c.fitter||'no fitter')+')',f:['openContract',c.id],k:'Fitting'}));
+  if(L.svc)S.calls.filter(c=>c.visit==k&&c.status!='Complete'&&(Ad||mine(c.fitter))).forEach(c=>e.push({c:'svc',t:'Service: '+c.name,s:c.issue,f:['editCall',c.id],k:'Service visit'}));
+  if(L.del&&Ad)S.deliveries.filter(d=>d.due==k&&d.status!='Received').forEach(d=>e.push({c:'del',t:'Delivery: '+d.supplier,s:d.items,f:['go','deliveries'],k:'Delivery'}));
+  if(L.hol&&isWk(k))S.hols.filter(h=>h.status!='Rejected'&&h.from<=k&&h.to>=k&&(Ad||(m&&h.sid==m.id))).forEach(h=>{const n=staffName(h.sid);e.push({c:'hol'+(h.status=='Pending'?' pd':''),t:n.split(' ')[0]+' off',s:n+' on holiday'+(h.status=='Pending'?' (pending)':''),f:['holEdit',h.id],k:'Holiday'})});
   return e}
 const evA=x=>A(...x.f);
 function calCells(days,full){const td=today();return days.map(({k,d,out})=>{const e=evs(k),bh=BH[k],sh=full?e:e.slice(0,3);
   return `<div class="dc2 ${out?'out':''} ${k==td?'today':''} ${k==UI.cal.sd?'sel':''} ${isWk(k)?'':'we'} ${bh?'bh':''}" ${A('setUI','cal.sd',k)}><span class="dn">${d}</span>${bh?`<span class="more">${esc(bh)}</span>`:''}<div class="evs">${sh.map(x=>`<span class="ce ${x.c}" title="${esc(x.s)}" onclick="event.stopPropagation();${esc(x.f[0]+'('+x.f.slice(1).map(a=>JSON.stringify(a)).join(',')+')')}">${esc(x.t)}</span>`).join('')}${!full&&e.length>3?`<span class="more">+${e.length-3} more</span>`:''}</div></div>`}).join('')}
 const dRange=(s,n)=>{const a=[];for(let i=0;i<n;i++){const x=new Date(s);x.setDate(x.getDate()+i);a.push({k:iso(x),d:x.getDate(),out:false,x})}return a};
+function calMine(){const m=me();if(!m)return '<div class="panel" style="margin-top:1rem"><p class="empty">Your name is not in the staff list yet.</p></div>';const td=today(),H=S.hols.filter(h=>h.sid==m.id&&h.to>=td).sort((a,b)=>a.from.localeCompare(b.from)),J=S.contracts.filter(c=>c.fit&&c.fit>=td&&c.stage!='Complete'&&forPerson(m,c.fitter)).sort((a,b)=>a.fit.localeCompare(b.fit));
+  return `<div class="two" style="margin-top:1rem"><div class="panel"><h2><span>My Holidays</span><button class="btn sm" onclick="bookMine()">Book holiday</button></h2>${H.map(h=>`<div class="row"><span><b>${fd(h.from)} to ${fd(h.to)}</b><br><span class="muted">${h.days} working day${h.days==1?'':'s'}${h.note?', '+esc(h.note):''}</span></span>${holTag(h)}</div>`).join('')||emptyArt('holiday','No holiday booked yet.')}<p class="muted" style="margin:.6rem 0 0">${allowTot(m)-hu(m)} of ${allowTot(m)} days left this year.</p></div>
+  <div class="panel"><h2>My Jobs</h2>${J.map(c=>`<div class="row"><span><b>${fd(c.fit)}</b> ${esc(c.name)}<br><span class="muted">${esc(c.product)}, ${esc(c.town||'')}</span></span></div>`).join('')||emptyArt('done','No fittings booked for you.')}</div></div>`}
 function vCalendar(){const n=new Date(),C=UI.cal,M=C.m,o=C.o,WD=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(d=>`<div class="dh">${d}</div>`).join('');let title,grid;
   if(M=='month'){const b=new Date(n.getFullYear(),n.getMonth()+o,1),off=(b.getDay()+6)%7,dim=new Date(b.getFullYear(),b.getMonth()+1,0).getDate(),wks=Math.ceil((off+dim)/7),days=dRange(new Date(b.getFullYear(),b.getMonth(),1-off),wks*7).map(x=>({...x,out:x.x.getMonth()!=b.getMonth()}));title=b.toLocaleDateString('en-GB',{month:'long',year:'numeric'});grid=`<div class="cm">${WD}${calCells(days,false)}</div>`}
   else if(M=='week'){const t=new Date(n.getFullYear(),n.getMonth(),n.getDate()+o*7),st=new Date(t.getFullYear(),t.getMonth(),t.getDate()-((t.getDay()+6)%7));title='Week of '+st.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});grid=`<div class="cm wk">${WD}${calCells(dRange(st,7),true)}</div>`}
@@ -2193,10 +2278,10 @@ function vCalendar(){const n=new Date(),C=UI.cal,M=C.m,o=C.o,WD=['Mon','Tue','We
     grid=`<div class="panel"><div class="ag">${days.map(x=>`<b>${new Date(x.k+'T00:00').toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'})}</b><div>${BH[x.k]?`<span class="tag y">${esc(BH[x.k])}</span>`:''}${evs(x.k).map(e=>`<span class="ce ${e.c}" ${evA(e)}>${esc(e.t)} <span class="muted">${esc(e.s||'')}</span></span>`).join('')}</div>`).join('')||'<p class="empty">Nothing scheduled in this period.</p>'}</div></div>`}
   const fits=S.contracts.filter(c=>c.fit&&c.stage!='Complete').sort((a,b)=>a.fit.localeCompare(b.fit)),un=S.contracts.filter(c=>!c.fit&&c.stage!='Complete'),sd=C.sd,L=C.ly;
   const day=sd?`<div class="panel" style="margin-top:1rem"><h2><span>${new Date(sd+'T00:00').toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'})}</span><span class="acts"><button class="mini pri" ${A('holBook','',sd)}>Book holiday</button><button class="mini" ${A('setUI','cal.sd',null)}>Close</button></span></h2>${BH[sd]?`<span class="tag y">${esc(BH[sd])}</span>`:''}${evs(sd).map(e=>`<div class="row"><span><span class="tag">${e.k}</span> <b>${esc(e.t)}</b><br><span class="muted">${esc(e.s||'')}</span></span><button class="mini" ${evA(e)}>Open</button></div>`).join('')||'<p class="empty">Nothing scheduled.</p>'}</div>`:'';
-  return `<div class="head"><h1>Calendar</h1><div class="tools"><div class="seg">${[['month','Month'],['week','Week'],['agenda','Agenda']].map(([k,t])=>`<button class="${M==k?'on':''}" onclick="UI.cal.o=0;setUI('cal.m','${k}')">${t}</button>`).join('')}</div><button class="btn ghost" aria-label="Previous" ${A('setUI','cal.o',o-1)}>&lsaquo;</button><button class="btn ghost" ${A('setUI','cal.o',0)}>Today</button><button class="btn ghost" aria-label="Next" ${A('setUI','cal.o',o+1)}>&rsaquo;</button></div></div>
-  <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:.6rem;margin-bottom:.8rem;align-items:center"><h2 style="margin:0">${esc(title)}</h2><div class="chips" style="margin:0">${[['fit','Fittings','#034ea2'],['svc','Service visits','#e08a00'],['del','Deliveries','#7a4fd0'],['hol','Holidays','#12794c']].map(([k,t,c])=>`<button class="chip ${L[k]?'on':''}" ${A('togUI','cal.ly.'+k)}><span class="ldot" style="background:${c}"></span>${t}</button>`).join('')}</div></div>${grid}${day}
-  <div class="two" style="margin-top:1rem"><div class="panel"><h2>Upcoming Fittings</h2>${fits.map(c=>`<div class="row"><span><b>${fd(c.fit)}</b> ${esc(c.name)}<br><span class="muted">${esc(c.product)}, ${esc(c.town)} (${esc(c.fitter||'no fitter')})</span></span><button class="mini pri" ${A('markFit',c.id)}>Mark fitted</button></div>`).join('')||'<p class="empty">No fittings booked.</p>'}</div>
-  <div class="panel"><h2>Needs A Fit Date</h2>${un.map(c=>`<div class="row"><span><b>${esc(c.name)}</b> <span class="muted">#${esc(c.id)}</span><br><span class="muted">${esc(c.product)}</span></span><button class="mini" ${A('editContract',c.id)}>Set date</button></div>`).join('')||'<p class="empty">Everything has a date.</p>'}</div></div>`}
+  return `<div class="head"><div><h1>${ISOWN()?'Calendar':'My Calendar'}</h1>${ISOWN()?'':'<span class="muted">Your holidays and your jobs</span>'}</div><div class="tools">${ISOWN()?'':'<button class="btn" onclick="bookMine()">Book holiday</button>'}<div class="seg">${[['month','Month'],['week','Week'],['agenda','Agenda']].map(([k,t])=>`<button class="${M==k?'on':''}" onclick="UI.cal.o=0;setUI('cal.m','${k}')">${t}</button>`).join('')}</div><button class="btn ghost" aria-label="Previous" ${A('setUI','cal.o',o-1)}>&lsaquo;</button><button class="btn ghost" ${A('setUI','cal.o',0)}>Today</button><button class="btn ghost" aria-label="Next" ${A('setUI','cal.o',o+1)}>&rsaquo;</button></div></div>
+  <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:.6rem;margin-bottom:.8rem;align-items:center"><h2 style="margin:0">${esc(title)}</h2><div class="chips" style="margin:0">${[['fit','Fittings','#034ea2'],['svc','Service visits','#e08a00'],...(ISOWN()?[['del','Deliveries','#7a4fd0']]:[]),['hol','Holidays','#12794c']].map(([k,t,c])=>`<button class="chip ${L[k]?'on':''}" ${A('togUI','cal.ly.'+k)}><span class="ldot" style="background:${c}"></span>${t}</button>`).join('')}</div></div>${grid}${day}
+  ${ISOWN()?`<div class="two" style="margin-top:1rem"><div class="panel"><h2>Upcoming Fittings</h2>${fits.map(c=>`<div class="row"><span><b>${fd(c.fit)}</b> ${esc(c.name)}<br><span class="muted">${esc(c.product)}, ${esc(c.town)} (${esc(c.fitter||'no fitter')})</span></span><button class="mini pri" ${A('markFit',c.id)}>Mark fitted</button></div>`).join('')||'<p class="empty">No fittings booked.</p>'}</div>
+  <div class="panel"><h2>Needs A Fit Date</h2>${un.map(c=>`<div class="row"><span><b>${esc(c.name)}</b> <span class="muted">#${esc(c.id)}</span><br><span class="muted">${esc(c.product)}</span></span><button class="mini" ${A('editContract',c.id)}>Set date</button></div>`).join('')||'<p class="empty">Everything has a date.</p>'}</div></div>`:calMine()}`}
 
 
 /* ---------------- holiday chart (same codes and rules as the office spreadsheet) ---------------- */
@@ -2215,6 +2300,17 @@ function absCode(s,k){const m=(S.abs[s.id]||{})[k];if(m!==undefined)return m;if(
 function yearCounts(s,y){const c={},d=new Date(y,0,1);while(d.getFullYear()==y){const x=absCode(s,iso(d));if(x&&HC[x])c[x]=(c[x]||0)+1;d.setDate(d.getDate()+1)}return c}
 const bookedDays=(s,y)=>{const c=yearCounts(s,y);return sum(HCODES,h=>(c[h[0]]||0)*h[2])};
 const HGRP=['Factory','Fitters','Office','Salespeople'];
+/* typing a code into a day on the holiday chart */
+function hcSet(sid,k,raw){if(!ISOWN())return false;const s=S.staff.find(x=>x.id==sid);if(!s||!SAFE.date(k))return false;let v=String(raw||'').trim().toUpperCase();if(v=='?')return true;
+  if(v&&!HC[v]){toast('"'+v+'" is not a code. Use H, H1, H2, S, M, C, A, B, N or U');return false}
+  const m=S.abs[sid]=S.abs[sid]||{},before=absCode(s,k);if(v==before)return true;
+  if(!v){delete m[k];if(absCode(s,k))m[k]=''}else{delete m[k];if(absCode(s,k)!=v)m[k]=v}
+  audit('Holiday chart',s.name,k+': '+(v||'cleared'));store();return true}
+document.addEventListener('change',e=>{const el=e.target;if(!el.classList||!el.classList.contains('hci'))return;const ok=hcSet(el.dataset.s,el.dataset.k,el.value);if(!ok){const s=S.staff.find(x=>x.id==el.dataset.s);el.value=s?absCode(s,el.dataset.k):'';el.select();return}
+  const s=S.staff.find(x=>x.id==el.dataset.s),c=absCode(s,el.dataset.k),d=HC[c];el.value=c;el.parentElement.style.background=d?d[3]:'';const row=el.closest('tr');if(row){const tot=row.querySelector('td.tot');if(tot){const ks=[...row.querySelectorAll('.hci')].map(x=>x.dataset.k);tot.textContent=sum(ks,k=>{const q=HC[absCode(s,k)];return q?q[2]:0})}const rm=row.querySelector('.rm');if(rm)rm.textContent=allowTot(s)-hu(s,UI.hol.y)}});
+document.addEventListener('keydown',e=>{const el=e.target;if(!el.classList||!el.classList.contains('hci'))return;const mv=(dx,dy)=>{const td=el.parentElement,tr=td.parentElement,i=[...tr.children].indexOf(td);let n=null;if(dx){let x=td;do{x=dx>0?x.nextElementSibling:x.previousElementSibling}while(x&&!x.querySelector('.hci'));n=x}else{let r=tr;do{r=dy>0?r.nextElementSibling:r.previousElementSibling}while(r&&!r.children[i]?.querySelector('.hci'));n=r&&r.children[i]}const inp=n&&n.querySelector('.hci');if(inp){e.preventDefault();inp.focus();inp.select()}};
+  if(e.key=='Enter'||e.key=='ArrowRight'&&el.selectionStart==el.value.length){el.dispatchEvent(new Event('change',{bubbles:true}));mv(1,0)}else if(e.key=='ArrowLeft'&&el.selectionStart==0)mv(-1,0);else if(e.key=='ArrowDown')mv(0,1);else if(e.key=='ArrowUp')mv(0,-1)});
+document.addEventListener('focusin',e=>{const el=e.target;if(el.classList&&el.classList.contains('hci'))el.select()});
 function hcPaint(sid,k){if(!need(ISOWN,'Editing the holiday chart'))return;const b=UI.hol.brush,s=S.staff.find(x=>x.id==sid);if(!s)return;if(!b){toast('Pick a code first, at the top of the chart');return}
   const m=S.abs[sid]=S.abs[sid]||{};
   if(b=='X'){delete m[k];if(absCode(s,k))m[k]=''}else if(absCode(s,k)==b){delete m[k];if(absCode(s,k)==b)m[k]=''}else m[k]=b;
@@ -2231,15 +2327,16 @@ const MSHORT=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov',
 function holSheet(){const H=UI.hol,y=H.y,mo=H.cm,td=today(),Ad=ISOWN(),mine=me();
   const grp=HGRP.map(g=>[g,S.staff.filter(s=>(s.cat||'Office')==g)]).filter(x=>x[1].length);
   const last=(S.audit||[]).find(a=>/Holiday chart|Holiday approved|Christmas shutdown/i.test(a.a||''));
-  const side=`<aside class="xl-side"><div class="xl-title">Code Control</div><table class="xl-ct"><thead><tr><th>Absence Type</th><th>Code</th><th>Deduction</th></tr></thead><tbody>${HCODES.map(c=>`<tr class="${H.brush==c[0]?'on':''}" ${Ad?A('setUI','hol.brush',H.brush==c[0]?'':c[0]):''}><td>${esc(c[1])}</td><td style="background:${c[3]}"><b>${c[0]}</b></td><td>${c[2]}</td></tr>`).join('')}${Ad?`<tr class="${H.brush=='X'?'on':''}" ${A('setUI','hol.brush',H.brush=='X'?'':'X')}><td>Clear a day</td><td><b>✕</b></td><td></td></tr>`:''}</tbody></table>
-    <p class="xl-tip">${Ad?(H.brush?`Filling in <b>${esc(H.brush=='X'?'Clear':HC[H.brush][1])}</b>. Click days on the sheet. Click the code again to stop.`:'Click a code, then click days on the sheet to fill them in.'):'Click a free weekday on your own row to ask for holiday.'}</p>
+  const side=`<aside class="xl-side"><div class="xl-title">Code Control</div><table class="xl-ct"><thead><tr><th>Absence Type</th><th>Code</th><th>Deduction</th></tr></thead><tbody>${HCODES.map(c=>`<tr><td>${esc(c[1])}</td><td style="background:${c[3]}"><b>${c[0]}</b></td><td>${c[2]}</td></tr>`).join('')}</tbody></table>
+    <p class="xl-tip">${Ad?'Click a day and type a code from the table (H, H1, H2, S, M, C, A, B, N or U). Press Enter or Tab to move on. Delete the code to clear the day.':'Click a free weekday on your own row to ask for holiday.'}</p>
     <div class="xl-title">Useful Info</div><div class="xl-info"><p>After 5 years service = +1 holiday day<br>After 10 years service = +1 holiday day<br>After 15 years service = +1 holiday day<br>3 extra holiday days maximum</p><p>Standard allowance is 25 days. Booked includes the ${shutDays(y).length} Christmas shutdown days.</p><p>? = waiting for approval</p></div>
     ${last?`<p class="xl-upd">Last updated by: ${esc(last.by||'')} ${new Date(last.at).toLocaleDateString('en-GB')}</p>`:''}</aside>`;
   let main;
   if(mo<12){const dim=new Date(y,mo+1,0).getDate(),keys=Array.from({length:dim},(_,i)=>y+'-'+pad(mo+1)+'-'+pad(i+1));
     const wk=[];let w=1;keys.forEach((k,i)=>{if(i&&new Date(k+'T00:00').getDay()==1)w++;wk.push(w)});const ws=[];wk.forEach(n=>{const l=ws[ws.length-1];if(l&&l[0]==n)l[1]++;else ws.push([n,1])});
-    const cell=(s,k)=>{const c=absCode(s,k),def=HC[c],we=!isWk(k),can=Ad||(mine&&mine.id==s.id&&!c&&!we);
-      return `<td class="${we?'we':''} ${k==td?'td':''} ${c=='P'?'pd':''}" ${def?`style="background:${def[3]}"`:''} title="${esc(s.name)}, ${fd(k)}${def?': '+esc(def[1]):c=='P'?': waiting for approval':''}" ${can?(Ad?A('hcPaint',s.id,k):A('holBook',s.id,k)):''}>${c=='P'?'?':esc(c)}</td>`};
+    const cell=(s,k)=>{const c=absCode(s,k),def=HC[c],we=!isWk(k),can=mine&&mine.id==s.id&&!c&&!we,tt=`${esc(s.name)}, ${fd(k)}${def?': '+esc(def[1]):c=='P'?': waiting for approval':''}`;
+      if(Ad)return `<td class="${we?'we':''} ${k==td?'td':''} ${c=='P'?'pd':''} ed" ${def?`style="background:${def[3]}"`:''} title="${tt}"><input class="hci" value="${c=='P'?'?':esc(c)}" maxlength="2" autocomplete="off" spellcheck="false" aria-label="${tt}" data-s="${esc(s.id)}" data-k="${k}"></td>`;
+      return `<td class="${we?'we':''} ${k==td?'td':''} ${c=='P'?'pd':''}" ${def?`style="background:${def[3]}"`:''} title="${tt}" ${can?A('holBook',s.id,k):''}>${c=='P'?'?':esc(c)}</td>`};
     main=grp.map(([g,L])=>`<div class="xl-title">${esc(g)}</div><div class="xl-scroll"><table class="xl-g"><thead><tr class="wk"><th></th>${ws.map(([n,c])=>`<th colspan="${c}">Week ${n}</th>`).join('')}<th></th></tr>
       <tr class="xh"><th rowspan="3" class="nmh"></th>${keys.map(k=>`<th class="${isWk(k)?'':'we'}">${MSHORT[mo]}</th>`).join('')}<th rowspan="3" class="tot">Holidays<br>This Month</th></tr>
       <tr class="xh">${keys.map(k=>`<th class="${isWk(k)?'':'we'} ${k==td?'tdh':''}">${+k.slice(8)}</th>`).join('')}</tr><tr class="xh">${keys.map(k=>`<th class="${isWk(k)?'':'we'}">${new Date(k+'T00:00').toLocaleDateString('en-GB',{weekday:'short'})}</th>`).join('')}</tr></thead>
@@ -2977,15 +3074,24 @@ function ncNote(){const nm=[...new Set([USER,...S.staff.map(x=>x.name).filter(Bo
 const msgMine=n=>n.to==USER||n.to=='Everyone';
 const msgRead=n=>n.to=='Everyone'?(n.readBy||[]).includes(USER):!!n.read;
 const msgUnread=()=>(S.notes||[]).filter(n=>msgMine(n)&&n.by!=USER&&!msgRead(n)).length;
-function vMessages(){const U=UI.msg,box=U.box,N=(S.notes||[]).slice().sort((a,b)=>b.at-a.at),L=N.filter(n=>box=='in'?msgMine(n)&&n.by!=USER:n.by==USER).filter(n=>!q||(n.t+' '+n.by+' '+n.to).toLowerCase().includes(q));
-  const people=['Everyone',...new Set(S.staff.map(s=>s.name).filter(n=>n&&n!=USER))];
-  const when=t=>new Date(t).toLocaleString('en-GB',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
-  return `<div class="head"><div><h1>Messages</h1><span class="muted">${msgUnread()} unread</span></div><div class="tools"><div class="seg2"><button class="${box=='in'?'on':''}" ${A('setUI','msg.box','in')}>Inbox</button><button class="${box=='out'?'on':''}" ${A('setUI','msg.box','out')}>Sent</button></div>${box=='in'&&msgUnread()?'<button class="btn ghost" onclick="msgReadAll()">Mark all read</button>':''}</div></div>
-  <div class="msgw"><div class="panel msg-new"><h2>New Message</h2><label class="ff"><span>To</span><select id="m_to">${people.map(p=>`<option ${U.to==p?'selected':''}>${esc(p)}</option>`).join('')}</select></label><label class="ff"><span>Message</span><textarea id="m_t" rows="5" maxlength="1000" placeholder=""></textarea></label><div class="acts r"><button class="btn" onclick="msgSend()">Send</button></div></div>
-  <div class="panel msg-list">${L.map(n=>{const unread=box=='in'&&!msgRead(n);return `<div class="msg ${unread?'un':''}"><span class="av2">${esc(initials(box=='in'?n.by:n.to))}</span><div class="msg-b"><div class="msg-h"><b>${esc(box=='in'?n.by:'To '+n.to)}</b>${n.to=='Everyone'&&box=='in'?' <span class="tag">Everyone</span>':''}<span class="muted">${when(n.at)}</span></div><p>${esc(n.t)}</p><div class="acts">${box=='in'?`<button class="mini pri" ${A('msgReply',n.by)}>Reply</button>${unread?`<button class="mini" ${A('msgMark',n.id)}>Mark read</button>`:''}`:''}${box=='out'||n.to==USER?`<button class="mini del" ${A('msgDel',n.id)}>Delete</button>`:''}</div></div></div>`}).join('')||emptyArt('team',box=='in'?'No messages yet.':'You have not sent any messages.')}</div></div>`}
-function msgSend(){const to=SAFE.text($('#m_to').value,80),t=SAFE.text($('#m_t').value,1000);if(!t){toast('Write a message first');return}
+function vMessages(){const N=(S.notes||[]).slice().sort((a,b)=>a.at-b.at),me2=USER;
+  const people=[...new Set(S.staff.map(s=>s.name).filter(n=>n&&n!=me2))];
+  const conv=w=>w=='Everyone'?N.filter(n=>n.to=='Everyone'):N.filter(n=>(n.by==me2&&n.to==w)||(n.by==w&&n.to==me2));
+  const unreadIn=w=>conv(w).filter(n=>n.by!=me2&&!msgRead(n)).length;
+  const chats=['Everyone',...people].map(w=>{const L=conv(w);return{w,last:L[L.length-1],un:unreadIn(w)}}).filter(c=>c.w=='Everyone'||c.last||c.w==UI.msg.to).sort((a,b)=>(b.last?b.last.at:0)-(a.last?a.last.at:0)).filter(c=>!q||c.w.toLowerCase().includes(q)||(c.last&&c.last.t.toLowerCase().includes(q)));
+  const cur=UI.msg.to||'Everyone',L=conv(cur);L.filter(n=>n.by!=me2&&!msgRead(n)).forEach(n=>{if(n.to=='Everyone'){n.readBy=n.readBy||[];n.readBy.push(me2)}else n.read=true});if(L.length)store();
+  const ago=t=>{const m=Math.round((Date.now()-t)/6e4);return m<1?'now':m<60?m+'m':m<1440?Math.round(m/60)+'h':new Date(t).toLocaleDateString('en-GB',{day:'numeric',month:'short'})};
+  const av=n=>`<span class="mav ${n=='Everyone'?'all':''}">${n=='Everyone'?'★':esc(initials(n))}</span>`;
+  let lastDay='';
+  return `<div class="msn"><aside class="msn-l"><div class="msn-lh"><h1>Chats</h1><select aria-label="New chat" onchange="if(this.value){setUI('msg.to',this.value)}"><option value="">+ New chat</option>${people.map(p=>`<option>${esc(p)}</option>`).join('')}</select></div>
+   <div class="msn-list">${chats.map(c=>`<button class="msn-c ${c.w==cur?'on':''} ${c.un?'un':''}" ${A('setUI','msg.to',c.w)}>${av(c.w)}<span class="msn-ct"><b>${esc(c.w=='Everyone'?'Everyone (team chat)':c.w)}</b><small>${c.last?esc((c.last.by==me2?'You: ':c.w=='Everyone'?c.last.by.split(' ')[0]+': ':'')+c.last.t):'No messages yet'}</small></span><span class="msn-m">${c.last?ago(c.last.at):''}${c.un?`<i>${c.un}</i>`:''}</span></button>`).join('')}</div></aside>
+   <section class="msn-r"><header class="msn-h">${av(cur)}<div><b>${esc(cur=='Everyone'?'Everyone':cur)}</b><small>${cur=='Everyone'?'Messages here go to the whole team':esc((S.staff.find(s=>s.name==cur)||{}).role||'')}</small></div></header>
+    <div class="msn-t" id="msnT">${L.map(n=>{const d=new Date(n.at).toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'}),sep=d!=lastDay?(lastDay=d,`<div class="msn-day">${d}</div>`):'',mine=n.by==me2;return sep+`<div class="bub ${mine?'me':''}">${!mine&&cur=='Everyone'?`<small class="bub-n">${esc(n.by)}</small>`:''}<p>${esc(n.t)}</p><span class="bub-t">${new Date(n.at).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})}${mine?`<button class="bub-x" title="Delete" aria-label="Delete message" ${A('msgDel',n.id)}>&times;</button>`:''}</span></div>`}).join('')||`<div class="msn-empty">${emptyArt('team','Say hello to '+(cur=='Everyone'?'the team':cur)+'.')}</div>`}</div>
+    <div class="msn-in"><textarea id="m_t" rows="1" maxlength="1000" placeholder="Aa" aria-label="Message" onkeydown="if(event.key=='Enter'&&!event.shiftKey){event.preventDefault();msgSend()}"></textarea><button class="msn-send" onclick="msgSend()" aria-label="Send">${svg('M4 12l16-8-6 16-3-7z')}</button></div></section></div>`}
+function msnAfter(){const t=$('#msnT');if(t)t.scrollTop=t.scrollHeight;const i=$('#m_t');if(i&&matchMedia('(pointer:fine)').matches)i.focus()}
+function msgSend(){const to=UI.msg.to||'Everyone',t=SAFE.text($('#m_t').value,1000);if(!t){return}
   if(to!='Everyone'&&!S.staff.some(s=>s.name==to)){toast('Pick who it is for');return}
-  S.notes=S.notes||[];S.notes.push({id:shortId('N'),to,by:USER,t,at:Date.now(),read:false,readBy:[]});if(S.notes.length>800)S.notes.splice(0,S.notes.length-800);audit('Message sent',to,'');store();UI.msg.to=to;render();toast('Message sent to '+to)}
+  S.notes=S.notes||[];S.notes.push({id:shortId('N'),to,by:USER,t,at:Date.now(),read:false,readBy:[]});if(S.notes.length>800)S.notes.splice(0,S.notes.length-800);audit('Message sent',to,'');store();render()}
 function msgMark(id){const n=(S.notes||[]).find(x=>x.id==id);if(!n)return;if(n.to=='Everyone'){n.readBy=n.readBy||[];if(!n.readBy.includes(USER))n.readBy.push(USER)}else n.read=true;store();render()}
 function msgReadAll(){(S.notes||[]).filter(msgMine).forEach(n=>{if(n.to=='Everyone'){n.readBy=n.readBy||[];if(!n.readBy.includes(USER))n.readBy.push(USER)}else n.read=true});store();render()}
 function msgReply(to){UI.msg.to=S.staff.some(s=>s.name==to)?to:'Everyone';render();setTimeout(()=>{const e=$('#m_t');if(e)e.focus()},50)}
@@ -3010,11 +3116,11 @@ const CUSTF=[
   {k:'title',l:'Title',t:'select',o:['','Mr','Mrs','Miss','Ms','Mr & Mrs','Dr','Company'],req:1,g:'Customer'},
   {k:'name',l:'Customer / contact name',req:1,g:'Customer'},{k:'salutation',l:'Salutation (Dear ...)',g:'Customer'},{k:'company',l:'Company',g:'Customer'},
   {k:'prefContact',l:'Preferred contact',t:'select',o:['','Mobile','Home phone','Work phone','Email','Post'],g:'Customer'},
-  {k:'mob1',l:'Mobile',t:'tel',max:30,g:'Phone Numbers'},{k:'mob2',nx:'mob1',l:'Mobile 2',t:'tel',max:30,g:'Phone Numbers'},{k:'mob3',nx:'mob2',l:'Mobile 3',t:'tel',max:30,g:'Phone Numbers'},
-  {k:'home1',l:'Home phone',t:'tel',max:30,g:'Phone Numbers'},{k:'home2',nx:'home1',l:'Home phone 2',t:'tel',max:30,g:'Phone Numbers'},{k:'home3',nx:'home2',l:'Home phone 3',t:'tel',max:30,g:'Phone Numbers'},
-  {k:'work',l:'Work phone',t:'tel',max:30,g:'Phone Numbers'},{k:'work2',nx:'work',l:'Work phone 2',t:'tel',max:30,g:'Phone Numbers'},{k:'work3',nx:'work2',l:'Work phone 3',t:'tel',max:30,g:'Phone Numbers'},
+  {k:'mob1',l:'Mobile',t:'tel',max:30,g:'Phone Numbers',any:1},{k:'mob2',nx:'mob1',l:'Mobile 2',t:'tel',max:30,g:'Phone Numbers'},{k:'mob3',nx:'mob2',l:'Mobile 3',t:'tel',max:30,g:'Phone Numbers'},
+  {k:'home1',l:'Home phone',t:'tel',max:30,g:'Phone Numbers',any:1},{k:'home2',nx:'home1',l:'Home phone 2',t:'tel',max:30,g:'Phone Numbers'},{k:'home3',nx:'home2',l:'Home phone 3',t:'tel',max:30,g:'Phone Numbers'},
+  {k:'work',l:'Work phone',t:'tel',max:30,g:'Phone Numbers',any:1},{k:'work2',nx:'work',l:'Work phone 2',t:'tel',max:30,g:'Phone Numbers'},{k:'work3',nx:'work2',l:'Work phone 3',t:'tel',max:30,g:'Phone Numbers'},
   {k:'email1',l:'Email',t:'email',req:1,g:'Email'},{k:'email2',nx:'email1',l:'Email 2',t:'email',g:'Email'},{k:'email3',nx:'email2',l:'Email 3',t:'email',g:'Email'},
-  {k:'addrType',l:'Address type',t:'select',o:['Home','Business'],g:'Home Address'},{k:'homeAddr',l:'Address line 1',req:1,max:120,g:'Home Address'},{k:'homeAddr2',l:'Address line 2',max:120,g:'Home Address'},
+  {k:'addrType',l:'Address type',t:'select',o:['','Home','Business'],req:1,g:'Home Address'},{k:'homeAddr',l:'Address line 1',req:1,max:120,g:'Home Address'},{k:'homeAddr2',l:'Address line 2',max:120,g:'Home Address'},
   {k:'town',l:'Town / city',req:1,max:60,g:'Home Address'},{k:'county',l:'County',max:60,g:'Home Address'},{k:'homePc',l:'Postcode',req:1,max:10,g:'Home Address'},
   {k:'invSame',l:'Invoice to',t:'select',o:['Same as home','Different'],g:'Invoice Address'},{k:'invAddr',dep:'invSame',l:'Address line 1',max:120,g:'Invoice Address'},{k:'invAddr2',dep:'invSame',l:'Address line 2',max:120,g:'Invoice Address'},
   {k:'invTown',dep:'invSame',l:'Town / city',max:60,g:'Invoice Address'},{k:'invCounty',dep:'invSame',l:'County',max:60,g:'Invoice Address'},{k:'invPc',dep:'invSame',l:'Postcode',max:10,g:'Invoice Address'},
@@ -3041,8 +3147,8 @@ function rfH(f,v){const val=v[f.k]??'',id='f_'+f.k;let c;
   else c=`<input id="${id}" type="${f.t=='number'?'number':f.t=='date'?'date':f.t=='time'?'time':f.t=='email'?'email':f.t=='tel'?'tel':'text'}" ${f.t=='number'?'step="any" min="0" inputmode="decimal"':`maxlength="${f.max||120}"`} value="${esc(val)}" ${f.list?`list="${f.list}"`:''} autocomplete="off">`;
   const hid=(f.dep&&(v[f.dep]||'Same as home')!='Different')||nxHid(f,v);
   if(['invSame','siteSame'].includes(f.k))c=c.replace('<select ','<select onchange="recDep(this)" ');
-  return `<label class="rf ${f.t=='area'?'ta':''}" ${f.dep?`data-dep="${f.dep}"`:''} ${f.nx?`data-nx="${f.nx}"`:''} ${hid?'hidden':''}><span>${esc(f.l)}${f.req?' *':''}</span>${c}</label>`}
-const grpH=(t,fs,v)=>`<section class="rg"><h4>${esc(t)}</h4>${fs.map(f=>rfH(f,v)).join('')}</section>`;
+  return `<label class="rf ${f.t=='area'?'ta':''}" ${f.dep?`data-dep="${f.dep}"`:''} ${f.nx?`data-nx="${f.nx}"`:''} ${hid?'hidden':''}><span>${esc(f.l)}${f.req?' *':f.any?' <i class="any">*</i>':''}</span>${c}</label>`}
+const grpH=(t,fs,v)=>`<section class="rg"><h4>${esc(t)}${fs.some(f=>f.any)?'<small class="anyh">* at least one</small>':''}</h4>${fs.map(f=>rfH(f,v)).join('')}</section>`;
 const byGroup=(fs,v)=>{const g={},adv=[];fs.forEach(f=>(g[f.g]=g[f.g]||[]).push(f));
   return Object.entries(g).map(([t,x])=>grpH(t,x,v)).join('')+(adv.length?`<details class="rg more"><summary>More details <span class="muted">(${adv.length})</span></summary>${adv.map(f=>rfH(f,v)).join('')}</details>`:'')};
 function recDep(sel){const k=sel.id.slice(2);$$(`#mbox [data-dep="${k}"]`).forEach(r=>r.hidden=sel.value!='Different')}
@@ -3267,7 +3373,7 @@ function editLead(id){if(id)recOpen('lead',id);else leadWizard()}
 function leadWizard(){const id=nextLeadId();
   wizard({title:'New Lead '+id,saveLabel:'Create lead',v:{title:'',source:'Website',owner:USER,siteSame:'Same as home',productType:''},steps:[
     {t:'Customer',d:'Who is the customer?',f:[{k:'title',l:'Title',t:'select',o:['','Mr','Mrs','Miss','Ms','Mr & Mrs','Dr','Company'],req:1},{k:'name',l:'Name',req:1},{k:'mob1',l:'Mobile',t:'tel',max:30},{k:'mob2',nx:'mob1',l:'Second mobile',t:'tel',max:30},{k:'home1',l:'Home phone',t:'tel',max:30},{k:'mob3',nx:'mob2',l:'Third mobile',t:'tel',max:30},{k:'home2',nx:'home1',l:'Second home phone',t:'tel',max:30},{k:'home3',nx:'home2',l:'Third home phone',t:'tel',max:30},{k:'email1',l:'Email',t:'email',w:'full',req:1},{k:'email2',nx:'email1',l:'Second email',t:'email',w:'full'},{k:'email3',nx:'email2',l:'Third email',t:'email',w:'full'},{k:'company',l:'Company (if business)',w:'full'}]},
-    {t:'Address',d:'Where are they? Fill it in like a delivery address.',f:[{k:'homeAddr',l:'Address line 1',w:'full',max:120,req:1,hint:'House number or name and street'},{k:'homeAddr2',l:'Address line 2',w:'full',max:120},{k:'town',l:'Town / city',max:60,req:1},{k:'county',l:'County',max:60},{k:'homePc',l:'Postcode',max:10,req:1},{k:'addrType',l:'Address type',t:'select',o:['Home','Business']}]},
+    {t:'Address',d:'Where are they? Fill it in like a delivery address.',f:[{k:'homeAddr',l:'Address line 1',w:'full',max:120,req:1,hint:'House number or name and street'},{k:'homeAddr2',l:'Address line 2',w:'full',max:120},{k:'town',l:'Town / city',max:60,req:1},{k:'county',l:'County',max:60},{k:'homePc',l:'Postcode',max:10,req:1},{k:'addrType',l:'Address type',t:'select',o:['Home','Business'],req:1}]},
     {t:'Enquiry',d:'What do they want?',f:[{k:'productType',l:'Product type',t:'select',o:PTYPES,req:1},{k:'source',l:'How did they find us?',t:'select',o:SOURCES,req:1},{k:'product',l:'Work wanted',t:'area',w:'full',max:300},{k:'value',l:'Rough value (£)',t:'number'},{k:'owner',l:'Salesperson',t:'select',o:[...OWNERS(),RANDOM_SP]}]},
     {t:'Next Step',d:'What happens next?',f:[{k:'apptDate',l:'Appointment date',t:'date'},{k:'apptTime',l:'Appointment time',t:'time'},{k:'next',l:'Next action',w:'full',hint:'e.g. Call back Tuesday, send brochure'},{k:'followup',l:'Next action date',t:'date'}]},
     {t:'Review',d:'Check and create',review:1}],

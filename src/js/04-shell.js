@@ -9,14 +9,14 @@ const UI={
   cal:{m:'month',o:0,sd:null,ly:{fit:1,svc:1,del:1,hol:1}},
   hol:{m:0,v:'chart',cm:new Date().getMonth(),y:new Date().getFullYear(),brush:''}, rep:{t:'summary'}, fin:{t:'debtors',pm:0},
   del:{f:'out',s:'all',v:'list'}, files:{cat:'all',az:0,list:0,ssq:'',page:1,per:50},
-  con:{f:'all'}, msg:{box:'in',to:'Everyone'}, staff:{c:'all'}, sup:{open:''}, lead:{v:'list',f:'live',src:'all',own:'all',sort:'id',dir:1,page:1,per:50}, ctr:{v:'list',f:'cur',sort:'id',dir:1,page:1,per:50}, nc:{t:'All'}, audit:{page:1,per:50}
+  con:{f:'all'}, board:'factory', msg:{box:'in',to:'Everyone'}, staff:{c:'all'}, sup:{open:''}, lead:{v:'list',f:'live',src:'all',own:'all',sort:'id',dir:1,page:1,per:50}, ctr:{v:'list',f:'cur',sort:'id',dir:1,page:1,per:50}, nc:{t:'All'}, audit:{page:1,per:50}
 };
 function setUI(path,val){const p=path.split('.');let o=UI;for(let i=0;i<p.length-1;i++)o=o[p[i]];o[p[p.length-1]]=val;if(p.length==2&&p[1]!='page'&&'page' in UI[p[0]])UI[p[0]].page=1;render()}
 function togUI(path){const p=path.split('.');let o=UI;for(let i=0;i<p.length-1;i++)o=o[p[i]];const k=p[p.length-1];o[k]=o[k]?0:1;render()}
 
 /* ---- views: key -> title, page function, optional after-render hook ---- */
 const VIEWS={
-  home:{t:'Overview',fn:vHome}, messages:{t:'Messages',fn:vMessages}, live:{t:'Factory Floor',fn:vLive,after:liveAfter},
+  home:{t:'Overview',fn:vHome}, messages:{t:'Messages',fn:vMessages,after:msnAfter}, live:{t:'Floor Boards',fn:vLive,after:liveAfter},
   deliveries:{t:'Deliveries',fn:vDeliveries}, suppliers:{t:'Suppliers',fn:vSuppliers},
   leads:{t:'Leads',fn:vLeads}, contracts:{t:'Contracts',fn:vContracts},
   fitting:{t:'Calendar',fn:vCalendar}, service:{t:'Service Calls',fn:vService},
@@ -34,7 +34,7 @@ function badges(){const td=today();return{
   messages:msgUnread(),
   leads:S.leads.filter(l=>!['Won','Lost'].includes(l.stage)).length,
   service:S.calls.filter(c=>c.status!='Complete').length,
-  fitting:S.contracts.filter(c=>c.fit&&c.stage!='Complete').length,
+  fitting:ISOWN()?S.contracts.filter(c=>c.fit&&c.stage!='Complete').length:0,
   stock:S.items.filter(r=>r.type=='request'&&r.reqStatus=='Pending').length,
   staff:ISOWN()?S.hols.filter(h=>h.status=='Pending').length:0,
   holidays:ISOWN()?S.hols.filter(h=>h.status=='Pending').length:0}}
@@ -90,8 +90,9 @@ document.addEventListener('change',e=>{const el=e.target;if(el.tagName=='SELECT'
 document.addEventListener('input',e=>{const el=e.target;if(!el.id||!el.id.startsWith('f_'))return;const k=el.id.slice(2);
   $$(`#mbox [data-nx="${k}"]`).forEach(r=>{const own=r.querySelector('input,select,textarea');r.hidden=!el.value.trim()&&!(own&&own.value.trim())})});
 /* styled confirmation instead of the browser's own box */
-let ASK=null;
-function askYes(title,msg,okLabel,cb,danger){ASK=cb;openModal(`<div class="ask"><div class="ask-ic ${danger?'r':''}">${danger?'!':'?'}</div><h2>${esc(title)}</h2><p class="muted">${esc(msg)}</p></div><div class="mact"><button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn ${danger?'red':''}" onclick="askGo()">${esc(okLabel||'Yes')}</button></div>`,'sm')}
+let ASK=null,ASK_NO=null;
+function askYes(title,msg,okLabel,cb,danger,noCb){ASK=cb;ASK_NO=noCb||null;openModal(`<div class="ask"><div class="ask-ic ${danger?'r':''}">${danger?'!':'?'}</div><h2>${esc(title)}</h2><p class="muted">${esc(msg)}</p></div><div class="mact"><button class="btn ghost" onclick="askNo()">${noCb?'No, go back':'Cancel'}</button><button class="btn ${danger?'red':''}" onclick="askGo()">${esc(okLabel||'Yes')}</button></div>`,'sm')}
+function askNo(){const f=ASK_NO;ASK=ASK_NO=null;closeModal();if(f)f()}
 function askGo(){const f=ASK;ASK=null;closeModal();if(f)f()}
 function closeModal(){$('#modal').classList.remove('open');const a=document.activeElement;if(a&&a!==document.body&&!a.closest('#modal'))a.blur()}
 $('#modal').addEventListener('mousedown',e=>{if(e.target.id=='modal')closeModal()});
