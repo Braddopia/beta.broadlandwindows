@@ -51,21 +51,47 @@ const byGroup=(fs,v)=>{const g={},adv=fs.filter(f=>f.adv);fs.filter(f=>!f.adv).f
 function recDep(sel){const k=sel.id.slice(2);$$(`#mbox [data-dep="${k}"]`).forEach(r=>r.hidden=sel.value!='Different')}
 
 /* ---- record window ---- */
-let RW=null;const RTAB={lead:'details',contract:'details'};
+let RW=null;const RTAB={lead:'customer',contract:'customer'};
+/* the record is worked through as steps, in the order the job happens */
+const RSTEPS={lead:['customer','details','appts','survey','check','notes','docs','gdpr'],contract:['customer','details','survey','products','finance','fitting','deliveries','check','notes','docs','calls','gdpr']};
+const RNAME={lead:{details:'Enquiry'},contract:{details:'Contract'}};
+const RHINT={customer:'Who they are, how to reach them and where the work is.',details:{lead:'Where the enquiry came from, what they want and what happens next.',contract:'Contract type, stage and sales information.'},appts:'Survey and follow-up appointments.',survey:'Every window and door opening: sizes, type and glass.',products:'What is being supplied and fitted, with prices.',finance:'Contract value, payments and invoicing.',fitting:'Dates, fitting team and the details FENSA needs.',deliveries:'Supplier deliveries booked for this job.',check:'Tick each stage off as it is done.',notes:'General notes and a log of calls, emails and visits.',docs:'Photos from the survey and fitting, and any documents.',calls:'Service calls raised on this job.',gdpr:'Marketing consent and data notes.'};
 function recOpen(kind,id){const D=REC[kind],r=id?D.get(id):null;if(id&&!r)return;
   const W=RW={kind,id:r?r.id:null,isNew:!r,v:r?JSON.parse(JSON.stringify(r)):D.blank(),list:D.order()};
   W.v.log=W.v.log||[];W.v.photos=(W.v.photos||[]).filter(SAFE.img);tmp=W.v.photos;tmpDraw=drawThumbs;
-  const tabs=D.tabs(W),tab=tabs.some(t=>t.k==RTAB[kind])?RTAB[kind]:'details',pos=W.list.indexOf(W.id);
+  const ord=RSTEPS[kind],tabs=D.tabs(W).sort((a,b)=>ord.indexOf(a.k)-ord.indexOf(b.k)),tab=tabs.some(t=>t.k==RTAB[kind])?RTAB[kind]:tabs[0].k,pos=W.list.indexOf(W.id);W.steps=tabs.map(t=>t.k);
+  const nm=k=>(RNAME[kind]||{})[k]||tabs.find(t=>t.k==k).t,hint=k=>{const h=RHINT[k];return typeof h=='object'?h[kind]:h||''};
   openModal(`<div class="rw">
    <div class="rw-bar"><button class="rb1" onclick="recSave(true)">Save &amp; Close</button><button class="rb1" onclick="recSave(false)">Save</button>${W.isNew?'':D.actions(W)}<span class="rw-sp"></span>
     ${W.isNew?'':`<button class="rb1 ic" title="First" ${A('recNav','first')} ${pos<=0?'disabled':''}>&laquo;</button><button class="rb1 ic" title="Previous" ${A('recNav',-1)} ${pos<=0?'disabled':''}>&lsaquo;</button><span class="rw-pos">${pos+1} of ${W.list.length}</span><button class="rb1 ic" title="Next" ${A('recNav',1)} ${pos>=W.list.length-1?'disabled':''}>&rsaquo;</button><button class="rb1 ic" title="Last" ${A('recNav','last')} ${pos>=W.list.length-1?'disabled':''}>&raquo;</button>`}
     <button class="rb1 ic" onclick="recClose()" aria-label="Close">&times;</button></div>
    <div class="rw-h"><div><small>${esc(D.label)}${W.isNew?' · New':''}</small><h2>${esc(D.heading(W))}</h2></div><div class="rw-hk">${D.headStats(W)}</div></div>
-   <nav class="rw-tabs" role="tablist">${tabs.map(t=>`<button role="tab" class="${t.k==tab?'on':''}" data-t="${t.k}" ${A('recTab',t.k)}>${esc(t.t)}${t.n?` <i>${t.n}</i>`:''}</button>`).join('')}</nav>
-   <div class="rw-b">${tabs.map(t=>`<div class="rw-p ${t.k==tab?'on':''}" data-t="${t.k}" role="tabpanel">${t.h(W)}</div>`).join('')}</div></div>`,'full');
+   <div class="rw-x"><aside class="rw-rail"><div class="rw-cust" id="rwCust"></div><div class="rw-prog"><span id="rwPct"></span><i><b id="rwBar"></b></i></div>
+     <ol class="rw-steps">${tabs.map((t,i)=>`<li><button type="button" data-t="${t.k}" class="${t.k==tab?'on':''}" ${A('recTab',t.k)}><i>${i+1}</i><span><b>${esc(nm(t.k))}</b><small data-st="${t.k}"></small></span></button></li>`).join('')}</ol></aside>
+    <div class="rw-main"><div class="rw-b">${tabs.map((t,i)=>`<div class="rw-p ${t.k==tab?'on':''}" data-t="${t.k}" role="tabpanel"><div class="rw-sh"><small>Step ${i+1} of ${tabs.length}</small><h3>${esc(nm(t.k))}</h3><p>${esc(hint(t.k))}</p></div>${t.h(W)}</div>`).join('')}</div>
+     <div class="rw-foot"><button type="button" class="btn ghost" id="rwPrev" onclick="recStep(-1)"></button><span class="rw-sp"></span><button type="button" class="btn" id="rwNext" onclick="recStep(1)"></button></div></div></div></div>`,'full');
+  W.nm=nm;recFoot();recRail();$('#mbox .rw-x').addEventListener('input',()=>{clearTimeout(recRail.t);recRail.t=setTimeout(recRail,250)});$('#mbox .rw-x').addEventListener('change',()=>recRail());
   drawThumbs()}
-function recTab(k){RTAB[RW.kind]=k;$$('#mbox .rw-tabs button').forEach(b=>b.classList.toggle('on',b.dataset.t==k));$$('#mbox .rw-p').forEach(p=>p.classList.toggle('on',p.dataset.t==k));$('#mbox .rw-b').scrollTop=0}
-function recRedraw(t){const D=REC[RW.kind],x=D.tabs(RW).find(z=>z.k==t),p=$(`#mbox .rw-p[data-t="${t}"]`);if(x&&p)p.innerHTML=x.h(RW);const b=$(`#mbox .rw-tabs button[data-t="${t}"]`);if(b&&x)b.innerHTML=esc(x.t)+(x.n?` <i>${x.n}</i>`:'')}
+function recTab(k){RTAB[RW.kind]=k;$$('#mbox .rw-steps button').forEach(b=>b.classList.toggle('on',b.dataset.t==k));$$('#mbox .rw-p').forEach(p=>p.classList.toggle('on',p.dataset.t==k));$('#mbox .rw-b').scrollTop=0;recFoot();recRail();const b=$(`#mbox .rw-steps button[data-t="${k}"]`);if(b&&b.scrollIntoView)b.scrollIntoView({block:'nearest',inline:'nearest'})}
+function recStep(d){const S2=RW.steps,i=S2.indexOf(RTAB[RW.kind]);if(d>0&&i==S2.length-1){recSave(true);return}const n=S2[i+d];if(n)recTab(n)}
+function recFoot(){const S2=RW.steps,i=S2.indexOf(RTAB[RW.kind]),p=$('#rwPrev'),n=$('#rwNext');if(!p)return;
+  p.hidden=i<=0;p.innerHTML=i>0?'&larr; '+esc(RW.nm(S2[i-1])):'';n.innerHTML=i<S2.length-1?'Next: '+esc(RW.nm(S2[i+1]))+' &rarr;':'Save &amp; Close';n.classList.toggle('green',i==S2.length-1)}
+/* progress for each step, worked out from what is on screen now */
+function recRail(){if(!RW||!$('#rwCust'))return;const g=k=>{const e=$('#f_'+k);return String(e?e.value:(RW.v[k]??'')).trim()},n=s=>$$(`#mbox ${s}`).length,v=RW.v;
+  const ck=$$('#mbox .rck'),ckd=ck.filter(c=>c.checked).length,tel=[g('mob1'),g('home1'),g('work'),g('mob2'),g('home2')].find(Boolean)||v.phone||'',em=g('email1')||v.email||'',ad=[g('homeAddr')||v.address,g('town')].filter(Boolean).join(', ');
+  const ops=n('.op[data-f="ref"]'),lines=n('.pl[data-f="name"]'),val=+g('value')||0,paid=+g('paid')||0,ph=(tmp||[]).length,log=(v.log||[]).length;
+  const ST={customer:[[g('name'),tel||em,ad].filter(Boolean).length+' of 3: name, contact, address',!!(g('name')&&(tel||em)&&ad)],
+    details:RW.kind=='lead'?[g('source')?'From '+g('source'):'Source not set',!!(g('source')&&g('product'))]:[g('stage')||'Stage not set',!!(g('stage')&&g('product'))],
+    appts:[g('apptDate')?'Booked '+fd(g('apptDate')):(v.appts||[]).length?(v.appts||[]).length+' booked':'None booked',!!(g('apptDate')||(v.appts||[]).length)],
+    survey:[ops?ops+' opening'+(ops==1?'':'s'):'Nothing surveyed yet',ops>0],products:[lines?lines+' line'+(lines==1?'':'s'):'No products yet',lines>0],
+    finance:[val?(val-paid>0?m0(val-paid)+' to collect':'Paid in full'):'No value yet',val>0&&paid>=val],fitting:[g('fit')?'Fit '+fd(g('fit')):'No fit date',!!g('fit')],
+    deliveries:[S.deliveries.filter(d=>d.contract==v.id).length+' booked',S.deliveries.some(d=>d.contract==v.id)&&S.deliveries.filter(d=>d.contract==v.id).every(d=>d.status=='Received')],
+    check:[ckd+' of '+ck.length+' done',ck.length>0&&ckd==ck.length],notes:[log?log+' entr'+(log==1?'y':'ies'):g('notes')?'Notes added':'Nothing yet',!!(log||g('notes'))],
+    docs:[ph?ph+' photo'+(ph==1?'':'s'):'No photos',ph>0],calls:[S.calls.filter(c=>c.contract==v.id).length+' calls',false],gdpr:[g('gdprDate')?'Consent '+fd(g('gdprDate')):'Not recorded',!!g('gdprDate')]};
+  let done=0;RW.steps.forEach(k=>{const s=ST[k]||['',false],el=$(`#mbox small[data-st="${k}"]`);if(el)el.textContent=s[0];const b=$(`#mbox .rw-steps button[data-t="${k}"]`);if(b)b.classList.toggle('ok',!!s[1]);if(s[1])done++});
+  const pc=Math.round(100*done/RW.steps.length);$('#rwPct').textContent=done+' of '+RW.steps.length+' steps complete';$('#rwBar').style.width=pc+'%';
+  $('#rwCust').innerHTML=`<b>${esc([g('title'),g('name')].filter(Boolean).join(' ')||'New customer')}</b>${g('company')?`<span>${esc(g('company'))}</span>`:''}${tel?`<a class="nocap" href="tel:${esc(tel.replace(/[^\\d+]/g,''))}">${esc(tel)}</a>`:'<span class="muted">No phone yet</span>'}${em?`<a class="nocap" href="mailto:${esc(em)}">${esc(em)}</a>`:''}${ad?`<span class="muted">${esc(ad)}</span>`:''}`}
+function recRedraw(t){const D=REC[RW.kind],x=D.tabs(RW).find(z=>z.k==t),p=$(`#mbox .rw-p[data-t="${t}"]`);if(x&&p)p.innerHTML=x.h(RW);recRail()}
 function recRead(){const D=REC[RW.kind],o=readFields(D.fields(RW));if(!o)return null;
   $$('#mbox .rck').forEach(c=>{(o.chk=o.chk||{})[c.dataset.k]=c.checked});
   if($('#mbox .pl'))o.lines=readLines();if($('#mbox .op')||RW.v.openings)o.openings=$('#mbox .op')?readOps():RW.v.openings;o.photos=tmp.slice(0,MAX_PHOTOS);return o}
