@@ -131,7 +131,7 @@ function docGo(){const v=i=>SAFE.text(($('#'+i)||{value:''}).value,4000),n=v('dn
 /* ---------------- reports page ---------------- */
 const bar=(t,rows)=>({t,rows});
 const R={
-  summary(){const L=S.leads,open=L.filter(l=>!['Won','Lost'].includes(l.stage)),won=L.filter(l=>l.stage=='Won').length,lost=L.filter(l=>l.stage=='Lost').length,C=S.contracts,live=C.filter(c=>c.stage!='Complete'),oc=S.calls.filter(c=>c.status!='Complete'),P=products(),td=today(),att=[],Ad=ISADM();
+  summary(){const L=allLeads(),open=L.filter(l=>!['Won','Lost'].includes(l.stage)),won=L.filter(l=>l.stage=='Won').length,lost=L.filter(l=>l.stage=='Lost').length,C=S.contracts,live=C.filter(c=>c.stage!='Complete'),oc=S.calls.filter(c=>c.status!='Complete'),P=products(),td=today(),att=[],Ad=ISADM();
     oc.filter(c=>c.priority=='Urgent').forEach(c=>att.push(['Service',c.name+' ('+c.id+')',c.issue,c.visit?fd(c.visit):'No visit']));
     S.deliveries.filter(d=>d.status!='Received'&&d.due<=td).forEach(d=>att.push(['Delivery',d.supplier,d.items,d.due<td?'Overdue '+fd(d.due):'Due today']));
     P.filter(isLow).forEach(r=>att.push(['Stock',r.item+' '+r.length+' '+colTxt(r),r.stock+' '+unitOf(r)+' left',hasLoc(r)?r.location:'']));
@@ -139,7 +139,7 @@ const R={
     if(Ad){C.filter(c=>c.value-c.paid>0&&c.fit&&c.fit>=td&&c.fit<=addDays(7)).forEach(c=>att.push(['Payment',c.name+' (#'+c.id+')','Balance '+m0(c.value-c.paid)+' before fit',fd(c.fit)]));S.hols.filter(h=>h.status=='Pending').forEach(h=>att.push(['Holiday',staffName(h.sid),fd(h.from)+' to '+fd(h.to),'Awaiting approval']));S.fin.filter(b=>b.status=='Unpaid'&&b.due<td).forEach(b=>att.push(['Bill',b.payee,m0(b.amount)+' '+b.ref,'Overdue '+fd(b.due)]))}
     const k=[['Open leads',open.length],['Pipeline',m0(sum(open,l=>l.value))],['Win rate',pc(won,won+lost)],['Live contracts',live.length],['Open service calls',oc.length],['Stock value',m0(sum(P,r=>r.stock*r.cost))]];if(Ad)k.push(['Still to collect',m0(sum(C,c=>c.value-c.paid))],['Cash collected',m0(sum(C,c=>c.paid))]);
     return{t:'Summary',kpis:k,bars:[bar('Pipeline value by stage',STAGES.map(s=>[s,sum(L.filter(l=>l.stage==s),l=>l.value),m0])),bar('Contracts by stage',CSTAGES.map(s=>[s,C.filter(c=>c.stage==s).length,String]))],tables:[{t:'Needs attention',h:['Area','Item','Detail','When'],r:att}]}},
-  sales(){const L=S.leads,open=L.filter(l=>!['Won','Lost'].includes(l.stage)),won=L.filter(l=>l.stage=='Won'),lost=L.filter(l=>l.stage=='Lost');
+  sales(){const L=allLeads(),open=L.filter(l=>!['Won','Lost'].includes(l.stage)),won=L.filter(l=>l.stage=='Won'),lost=L.filter(l=>l.stage=='Lost');
     const src=SOURCES.map(s=>{const x=L.filter(l=>l.source==s),w=x.filter(l=>l.stage=='Won').length,lo=x.filter(l=>l.stage=='Lost').length;return[s,x.length,w,lo,m0(sum(x,l=>l.value)),pc(w,w+lo)]});
     return{t:'Sales',kpis:[['Total leads',L.length],['Open',open.length],['Pipeline value',m0(sum(open,l=>l.value))],['Won',won.length,m0(sum(won,l=>l.value))],['Lost',lost.length,m0(sum(lost,l=>l.value))],['Win rate',pc(won.length,won.length+lost.length)],['Average lead value',m0(L.length?sum(L,l=>l.value)/L.length:0)]],
       bars:[bar('Value by stage',STAGES.map(s=>[s,sum(L.filter(l=>l.stage==s),l=>l.value),m0])),bar('Leads by source',SOURCES.map(s=>[s,L.filter(l=>l.source==s).length,String])),bar('Quoted value by source',SOURCES.map(s=>[s,sum(L.filter(l=>l.source==s),l=>l.value),m0]))],
