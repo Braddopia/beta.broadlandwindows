@@ -841,6 +841,58 @@ body[data-theme=dark] .pager select{background:rgba(255,255,255,.06);color:var(-
 .opt td{padding:.3rem .25rem}.opt select{padding:.35rem .4rem;border:1px solid var(--line);border-radius:7px;background:var(--card);font-size:.85rem;max-width:12rem}
 .opt input{min-width:0}.opt tr.warnr td{background:rgba(191,52,52,.07)}.opt tr.warnr td:first-child{box-shadow:inset 3px 0 0 var(--red)}
 
+/* holiday chart */
+.hcl{display:flex;flex-wrap:wrap;gap:.35rem;margin:.2rem 0 .3rem}
+.hcb{display:inline-flex;align-items:center;gap:.4rem;border:1px solid var(--line);background:var(--card);border-radius:9px;padding:.3rem .6rem .3rem .3rem;font-size:.8rem;color:var(--ink);cursor:pointer}
+.hcb[disabled]{cursor:default;opacity:1}.hcb.on{border-color:var(--blue);box-shadow:0 0 0 2px var(--blue-bg)}
+.hcb i{font-style:normal;font-weight:700;font-size:.7rem;min-width:1.7rem;height:1.4rem;display:inline-grid;place-items:center;border-radius:6px;color:#13233a;border:1px solid rgba(0,0,0,.08)}
+.hcb small{color:var(--muted)}
+.hcw{overflow-x:auto}.hc{border-collapse:separate;border-spacing:0;font-size:.74rem;min-width:100%}
+.hc th,.hc td{padding:0;text-align:center;border-bottom:1px solid var(--line);border-right:1px solid var(--line)}
+.hc thead th{padding:.25rem 0;font-weight:600;color:var(--muted);background:transparent}
+.hc th.wkh{color:var(--blue);font-size:.7rem;letter-spacing:.04em}
+.hc th.dw{font-weight:500;font-size:.66rem}
+.hc .nm{position:sticky;left:0;z-index:1;background:var(--card);text-align:left;padding:.3rem .6rem;min-width:9.5rem;white-space:nowrap}
+.hc td.nm small{display:block;color:var(--muted);font-size:.66rem;text-transform:none}
+.hc .hcd{width:1.85rem;min-width:1.85rem;height:2.1rem;font-weight:700;font-size:.66rem;color:#13233a;cursor:pointer}
+.hc .hcd:hover{box-shadow:inset 0 0 0 2px var(--blue)}
+.hc .we{background:rgba(1,43,89,.06)}body[data-theme=dark] .hc .we{background:rgba(255,255,255,.04)}
+.hc .bh{color:#b26b00}.hc th.td,.hc td.td{box-shadow:inset 0 0 0 2px var(--yellow)}
+.hc td.pd{background:repeating-linear-gradient(45deg,rgba(124,188,68,.35) 0 4px,transparent 4px 8px);color:var(--ink)}
+.hc tr.hg td,table tr.hg td{background:var(--blue-bg);color:var(--blue);font-weight:700;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;text-align:left;padding:.35rem .6rem}
+.hc td.n{padding:0 .5rem;min-width:2.6rem}
+
+/* product window, view only */
+.ie-view .ie-f input:disabled,.ie-view .ie-f select:disabled,.ie-view .ie-f textarea:disabled{opacity:1;color:var(--ink);background:transparent;border-color:transparent;-webkit-text-fill-color:var(--ink);cursor:default}
+.ie-view .ie-f select:disabled{appearance:none;-webkit-appearance:none}
+.ie-view .ie-ph .prow,.ie-view .th button{display:none}.ie-view .ie-f button:disabled{opacity:.9;cursor:default}
+.supw:focus:not(:focus-visible),.supw *:focus:not(:focus-visible){outline:none}
+.ie-view .sws,.ie-view .hint,.ie-view label:has(#bcx),.ie-view .ie-f label .req,.ie-view .cdot+.sws{display:none!important}
+
+/* colour picker */
+.cbtn{width:2.3rem;height:2.3rem;flex:0 0 auto;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px var(--line),0 2px 6px rgba(1,43,89,.18);cursor:pointer;padding:0}
+#cpop{position:fixed;z-index:400;width:19.5rem;max-width:calc(100vw - 16px);padding:.8rem;border-radius:16px;display:none;background:rgba(250,251,254,.97);border:1px solid rgba(255,255,255,.9);box-shadow:0 18px 50px -12px rgba(1,43,89,.4),inset 0 1px 0 #fff;-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px)}
+body[data-theme=dark] #cpop{background:rgba(22,27,38,.97);border-color:rgba(255,255,255,.1)}
+#cpop.open{display:block}
+.cp-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:.4rem}.cp-h b{font:600 .92rem var(--head);color:var(--navy)}
+.cp-x{border:0;background:none;font-size:1.3rem;line-height:1;color:var(--muted);cursor:pointer}
+.cp-l{display:block;font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:600;margin:.5rem 0 .35rem}
+.cp-g{display:grid;grid-template-columns:repeat(5,1fr);gap:.3rem}
+.cp-s{display:flex;flex-direction:column;align-items:center;gap:.2rem;border:1px solid transparent;background:none;border-radius:9px;padding:.25rem .1rem;cursor:pointer;color:var(--ink)}
+.cp-s:hover{background:var(--blue-bg)}.cp-s.on{border-color:var(--blue);background:var(--blue-bg)}
+.cp-s i{width:1.9rem;height:1.9rem;border-radius:50%;box-shadow:inset 0 0 0 1px rgba(0,0,0,.12),0 1px 3px rgba(0,0,0,.15)}
+.cp-s span{font-size:.6rem;line-height:1.15;text-align:center;max-width:3.4rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cp-sv{position:relative;height:8.5rem;border-radius:11px;cursor:crosshair;touch-action:none;box-shadow:inset 0 0 0 1px rgba(0,0,0,.08)}
+.cp-sv i{position:absolute;width:1rem;height:1rem;margin:-.5rem 0 0 -.5rem;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.3),0 2px 6px rgba(0,0,0,.3);pointer-events:none}
+.cp-hue{-webkit-appearance:none;appearance:none;width:100%;height:.8rem;margin:.65rem 0 .2rem;border-radius:1rem;background:linear-gradient(90deg,red,#ff0,lime,cyan,blue,#f0f,red);outline:none;padding:0!important;border:0!important}
+.cp-hue::-webkit-slider-thumb{-webkit-appearance:none;width:1.15rem;height:1.15rem;border-radius:50%;background:#fff;border:0;box-shadow:0 0 0 1px rgba(0,0,0,.25),0 2px 5px rgba(0,0,0,.3);cursor:pointer}
+.cp-hue::-moz-range-thumb{width:1.15rem;height:1.15rem;border-radius:50%;background:#fff;border:0;box-shadow:0 0 0 1px rgba(0,0,0,.25),0 2px 5px rgba(0,0,0,.3);cursor:pointer}
+.cp-row{display:flex;align-items:center;gap:.5rem;margin-top:.55rem}
+.cp-pv{width:2.1rem;height:2.1rem;border-radius:50%;flex:0 0 auto;box-shadow:inset 0 0 0 1px rgba(0,0,0,.12)}
+.cp-hx{display:flex;align-items:center;gap:.35rem;font-size:.72rem;color:var(--muted);flex:1}.cp-hx input{width:100%;padding:.4rem .5rem;border:1px solid var(--line);border-radius:8px;font:500 .85rem ui-monospace,Menlo,monospace;background:var(--card);color:var(--ink)}
+.cp-none{margin-top:.55rem;width:100%;border:1px dashed var(--line);background:none;border-radius:9px;padding:.4rem;font-size:.78rem;color:var(--muted);cursor:pointer}
+.ie-view .cbtn{pointer-events:none}
+
 /* ==========================================================================
    06 · Adaptive layout
    Breakpoints: 1400 (laptop) · 1100 (small laptop / tablet landscape)
@@ -1146,7 +1198,7 @@ function seed(){
   calls:[{id:'S-0871',name:'Sample Customer I',town:'Norwich',contract:'2402311',issue:'Bifold handle stiff, one panel rubbing',priority:'Normal',status:'Open',visit:'2026-11-09',fitter:'Fitter A',notes:''},{id:'S-0870',name:'Sample Customer M',town:'Holt',contract:'2402204',issue:'Misted unit, kitchen window',priority:'Low',status:'Booked',visit:'2026-11-11',fitter:'Fitter B',notes:'Replacement unit ordered'},{id:'S-0869',name:'Sample Customer N',town:'Sheringham',contract:'2402187',issue:'Water ingress below patio door',priority:'Urgent',status:'Open',visit:'',fitter:'Team A',notes:''},{id:'S-0866',name:'Sample Customer O',town:'Wymondham',contract:'2402150',issue:'Replace lost door key set',priority:'Low',status:'Complete',visit:'2026-10-30',fitter:'Fitter A',notes:''}],
   contacts:[{id:'K-1',co:'Example Glass Ltd',name:'Contact One',role:'Account manager',type:'Supplier',phone:'01632 960 201',email:'sales@glass.example.com',addr:'Norwich'},{id:'K-2',co:'Example Aluminium Ltd',name:'Contact Two',role:'Sales office',type:'Supplier',phone:'01632 961 310',email:'orders@aluminium.example.com',addr:'Attleborough'},{id:'K-3',co:'Example Timber Ltd',name:'Contact Three',role:'Director',type:'Supplier',phone:'01632 962 118',email:'info@timber.example.com',addr:'North Walsham'},{id:'K-4',co:'Example Fitting Services',name:'Fitter A',role:'Lead fitter',type:'Sub-contractor',phone:'07700 900 312',email:'jobs@fitting.example.com',addr:'Norwich'},{id:'K-5',co:'Example Groundworks',name:'Contact Five',role:'Groundworks',type:'Trade',phone:'07700 900 845',email:'office@groundworks.example.com',addr:'Dereham'}],
   deliveries:[{id:'D-1',supplier:'Example Glass Ltd',items:'Sealed units x24',due:d(-1),status:'In transit',contract:'2402318'},{id:'D-2',supplier:'Example Aluminium Ltd',items:'Bifold frames x3',due:d(0),status:'Due',contract:'2402305'},{id:'D-3',supplier:'Example Timber Ltd',items:'Garden room kit 3m x 3m',due:d(0),status:'In transit',contract:'2402305'},{id:'D-4',supplier:'Example Glass Ltd',items:'Glass panels x12',due:d(2),status:'Due',contract:'2402299'},{id:'D-5',supplier:'Example Aluminium Ltd',items:'French doors x1',due:d(5),status:'Due',contract:'2402290'}],
-  staff:[P('U-1','Demo User','Director','','2012-04-02',33,62000),P('U-2','Fitter A','Lead fitter','Team A','2016-09-12',28,34000),P('U-3','Fitter B','Fitter','Team B','2019-03-04',28,31000),P('U-4','Stock Controller','Stock controller','','2020-06-15',28,29500),P('U-5','Operative 1','Production operative','','2021-01-11',28,27500),P('U-6','Operative 2','Production operative','','2022-05-03',28,27000),P('U-7','Operative 3','Production operative','','2023-02-20',28,26500),P('U-8','Operative 4','Production operative','','2024-08-05',28,26000),P('U-9','Sales A','Sales consultant','','2023-09-04',28,30000),P('U-10','Office A','Office manager','','2018-01-08',28,29000)],
+  staff:[P('U-1','Demo User','Director','','2012-04-02',25,62000),P('U-2','Fitter A','Lead fitter','Team A','2016-09-12',25,34000),P('U-3','Fitter B','Fitter','Team B','2019-03-04',25,31000),P('U-4','Stock Controller','Stock controller','','2020-06-15',25,29500),P('U-5','Operative 1','Production operative','','2021-01-11',25,27500),P('U-6','Operative 2','Production operative','','2022-05-03',25,27000),P('U-7','Operative 3','Production operative','','2023-02-20',25,26500),P('U-8','Operative 4','Production operative','','2024-08-05',25,26000),P('U-9','Sales A','Sales consultant','','2023-09-04',25,30000),P('U-10','Office A','Office manager','','2018-01-08',25,29000)],
   hols:[{id:'H-1',sid:'U-2',from:'2026-11-23',to:'2026-11-27',days:5,status:'Approved'},{id:'H-2',sid:'U-3',from:'2026-12-21',to:'2026-12-31',days:7,status:'Pending'},{id:'H-3',sid:'U-4',from:'2026-08-03',to:'2026-08-14',days:10,status:'Approved'},{id:'H-4',sid:'U-5',from:'2026-12-24',to:'2026-12-24',days:1,status:'Pending'}],
   fin:[{id:'B-1',payee:'Example Glass Ltd',type:'Supplier',ref:'INV-8841',job:'2402318',amount:1840,due:d(-3),status:'Unpaid'},{id:'B-2',payee:'Example Aluminium Ltd',type:'Supplier',ref:'INV-5520',job:'2402305',amount:2310,due:d(6),status:'Unpaid'},{id:'B-3',payee:'Example Timber Ltd',type:'Supplier',ref:'INV-1207',job:'2402305',amount:6450,due:d(12),status:'Unpaid'},{id:'B-4',payee:'Example Groundworks',type:'Job cost',ref:'Garden room base',job:'2402305',amount:1200,due:d(2),status:'Unpaid'}]
 }}
@@ -1316,7 +1368,7 @@ const UI={
   inv:{v:'products',f:'all',sup:'all',loc:'all',unit:'all',sort:'item',dir:1,page:1,per:50},
   mov:{f:'all',sort:'',dir:1,page:1,per:50},
   cal:{m:'month',o:0,sd:null,ly:{fit:1,svc:1,del:1,hol:1}},
-  hol:{m:0,v:'tl'}, rep:{t:'summary'}, fin:{t:'debtors',pm:0},
+  hol:{m:0,v:'chart',cm:new Date().getMonth(),y:new Date().getFullYear(),brush:''}, rep:{t:'summary'}, fin:{t:'debtors',pm:0},
   del:{f:'out',s:'all',v:'list'}, files:{cat:'all',az:0,list:0,ssq:'',page:1,per:50},
   con:{f:'all'}, staff:{c:'all'}, sup:{open:''}, lead:{v:'list',f:'live',src:'all',own:'all',sort:'id',dir:1,page:1,per:50}, ctr:{v:'list',f:'cur',sort:'id',dir:1,page:1,per:50}, nc:{t:'All'}, audit:{page:1,per:50}
 };
@@ -1396,7 +1448,7 @@ function openModal(h,size){const b=$('#mbox');b.className='mb'+(size?' '+size:''
 const nxHid=(f,v)=>!!f.nx&&!String(v[f.nx]??'').trim()&&!String(v[f.k]??'').trim();
 document.addEventListener('input',e=>{const el=e.target;if(!el.id||!el.id.startsWith('f_'))return;const k=el.id.slice(2);
   $$(`#mbox [data-nx="${k}"]`).forEach(r=>{const own=r.querySelector('input,select,textarea');r.hidden=!el.value.trim()&&!(own&&own.value.trim())})});
-function closeModal(){$('#modal').classList.remove('open')}
+function closeModal(){$('#modal').classList.remove('open');const a=document.activeElement;if(a&&a!==document.body&&!a.closest('#modal'))a.blur()}
 $('#modal').addEventListener('mousedown',e=>{if(e.target.id=='modal')closeModal()});
 
 /* ---- generic form ----
@@ -1423,9 +1475,33 @@ function readFields(fields){const o={};
     if(f.t=='colour')o[f.k+'Hex']=raw?SAFE.hex($('#f_'+f.k+'_hex').value):'';}
   return o}
 function colourField(f,v){const base=f.k.slice(0,-4),hx=SAFE.hex(v[base]||'#8a8a8a');
-  return `<div class="inl"><input id="f_${f.k}" placeholder="Colour name (optional)" maxlength="30" value="${esc(v[f.k]??'')}"><input type="color" id="f_${f.k}_hex" value="${hx}" title="Pick any colour" ${AC('oninput','pickHex',f.k)}></div><div class="sws"><button type="button" class="mini" ${A('pickC',f.k,'','#8a8a8a')}>No Colour</button>${PRE.map(([n,h])=>`<button type="button" class="sw" title="${n}" aria-label="${n}" style="background:${h}" ${A('pickC',f.k,n,h)}></button>`).join('')}</div>`}
-function pickC(k,n,h){$('#f_'+k).value=n;$('#f_'+k+'_hex').value=h}
+  return `<div class="inl"><input id="f_${f.k}" placeholder="Colour name (optional)" maxlength="30" value="${esc(v[f.k]??'')}"><input type="hidden" id="f_${f.k}_hex" value="${hx}"><button type="button" class="cbtn" id="cb_${f.k}" style="background:${hx}" title="Pick a colour" aria-label="Pick a colour" ${A('cpOpen',f.k)}></button></div><div class="sws"><button type="button" class="mini" ${A('pickC',f.k,'','#8a8a8a')}>No Colour</button>${PRE.map(([n,h])=>`<button type="button" class="sw" title="${n}" aria-label="${n}" style="background:${h}" ${A('pickC',f.k,n,h)}></button>`).join('')}</div>`}
+function pickC(k,n,h){$('#f_'+k).value=n;$('#f_'+k+'_hex').value=h;const b=$('#cb_'+k);if(b)b.style.background=h}
 function pickHex(k){const e=$('#f_'+k);if(!e.value)e.value='Custom'}
+/* ---- colour picker: window and door finishes first, then any colour ---- */
+const FINISH=[['White (RAL 9016)','#f1f0ea'],['Cream (RAL 9001)','#e9e0c8'],['Agate Grey (RAL 7038)','#b5b8b1'],['Light Grey (RAL 7035)','#c5c7c4'],['Slate Grey (RAL 7015)','#51565c'],['Anthracite Grey (RAL 7016)','#383e42'],['Basalt Grey (RAL 7012)','#575d5e'],['Black (RAL 9005)','#0e0e10'],['Black Brown (RAL 8022)','#1e1a1a'],['Chartwell Green','#a9bba5'],['Fir Green (RAL 6009)','#27352a'],['Pebble Grey (RAL 7032)','#b8b799'],['Steel Blue (RAL 5011)','#1a2b3c'],['Ruby Red (RAL 3003)','#7b1c20'],['Golden Oak','#b5752f'],['Irish Oak','#8a5a33'],['Rosewood','#5a2a1f'],['Light Oak','#c79a5c'],['Gold','#c9a24b'],['Silver','#b9b9b9']];
+let CP={k:'',h:0,s:0,v:0};
+const hsv2hex=(h,s,v)=>{const f=n=>{const k=(n+h/60)%6;return v-v*s*Math.max(0,Math.min(k,4-k,1))};return '#'+[f(5),f(3),f(1)].map(x=>Math.round(x*255).toString(16).padStart(2,'0')).join('')};
+const hex2hsv=x=>{const n=parseInt(x.slice(1),16),r=(n>>16&255)/255,g=(n>>8&255)/255,b=(n&255)/255,mx=Math.max(r,g,b),d=mx-Math.min(r,g,b);let h=0;if(d){h=mx==r?((g-b)/d)%6:mx==g?(b-r)/d+2:(r-g)/d+4;h*=60;if(h<0)h+=360}return{h,s:mx?d/mx:0,v:mx}};
+function cpOpen(k){let p=$('#cpop');if(!p){p=document.createElement('div');p.id='cpop';document.body.appendChild(p);
+    document.addEventListener('mousedown',e=>{const q=$('#cpop');if(q&&q.classList.contains('open')&&!e.target.closest('#cpop,.cbtn'))q.classList.remove('open')})}
+  if(p.classList.contains('open')&&CP.k==k){p.classList.remove('open');return}
+  const hx=SAFE.hex($('#f_'+k+'_hex').value);CP={k,...hex2hsv(hx)};const cur=($('#f_'+k).value||'').toLowerCase();
+  p.innerHTML=`<div class="cp-h"><b>Pick a colour</b><button type="button" class="cp-x" aria-label="Close" onclick="$('#cpop').classList.remove('open')">&times;</button></div>
+   <small class="cp-l">Window and door finishes</small><div class="cp-g">${FINISH.map(([n,h])=>`<button type="button" class="cp-s ${cur==n.toLowerCase()?'on':''}" title="${esc(n)}" ${A('cpPick',n,h)}><i style="background:${h}"></i><span>${esc(n.replace(/ \(RAL \d+\)/,''))}</span></button>`).join('')}</div>
+   <small class="cp-l">Any colour</small><div class="cp-sv" id="cpSv"><i id="cpKnob"></i></div><input type="range" class="cp-hue" id="cpHue" min="0" max="359" value="${Math.round(CP.h)}" oninput="cpHue(this.value)" aria-label="Hue">
+   <div class="cp-row"><span class="cp-pv" id="cpPv"></span><label class="cp-hx">Hex<input id="cpHex" maxlength="7" value="${hx}" oninput="cpHexIn(this.value)" class="nocap"></label><button type="button" class="btn sm" onclick="cpUse()">Use colour</button></div>
+   <button type="button" class="cp-none" ${A('cpPick','','#8a8a8a')}>No colour</button>`;
+  p.classList.add('open');const b=$('#cb_'+k).getBoundingClientRect();
+  p.style.left=Math.max(8,Math.min(innerWidth-p.offsetWidth-8,b.right-p.offsetWidth))+'px';p.style.top=Math.max(8,Math.min(innerHeight-p.offsetHeight-8,b.bottom+8))+'px';
+  const sv=$('#cpSv'),drag=e=>{const r=sv.getBoundingClientRect();CP.s=Math.max(0,Math.min(1,(e.clientX-r.left)/r.width));CP.v=1-Math.max(0,Math.min(1,(e.clientY-r.top)/r.height));cpDraw(true)};
+  sv.addEventListener('pointerdown',e=>{sv.setPointerCapture(e.pointerId);drag(e);sv.onpointermove=drag});sv.addEventListener('pointerup',()=>{sv.onpointermove=null});cpDraw(false)}
+function cpDraw(setHex){const hx=hsv2hex(CP.h,CP.s,CP.v),sv=$('#cpSv');if(!sv)return;sv.style.background=`linear-gradient(to top,#000,transparent),linear-gradient(to right,#fff,hsl(${CP.h},100%,50%))`;
+  const k=$('#cpKnob');k.style.left=CP.s*100+'%';k.style.top=(1-CP.v)*100+'%';k.style.background=hx;$('#cpPv').style.background=hx;if(setHex)$('#cpHex').value=hx}
+function cpHue(v){CP.h=+v;cpDraw(true)}
+function cpHexIn(v){if(/^#[0-9a-f]{6}$/i.test(v)){Object.assign(CP,hex2hsv(v));$('#cpHue').value=Math.round(CP.h);cpDraw(false)}}
+function cpUse(){const hx=SAFE.hex($('#cpHex').value),n=$('#f_'+CP.k);pickC(CP.k,n.value&&![...FINISH,...PRE].some(f=>f[0].toLowerCase()==n.value.toLowerCase())?n.value:'Custom',hx);$('#cpop').classList.remove('open')}
+function cpPick(n,h){pickC(CP.k,n,h);$('#cpop').classList.remove('open')}
 function scanInto(id){scan(c=>{const e=$('#'+id);if(e){e.value=c;e.dispatchEvent(new Event('input'))}})}
 
 /* ---- photos: resized + compressed before storing, capped per record ---- */
@@ -1535,7 +1611,7 @@ function vHome(){
     admin:{k:[['Open Leads',open.length,'','leads'],['Pipeline Value',m0(pipe),'','leads'],['Live Contracts',m0(sum(live,c=>c.value)),'','contracts'],['Balance To Collect',m0(bal),'warn','contracts'],['Open Service Calls',oc.length,urgent?'bad':'','service'],['Stock Requests',reqP,reqP?'warn':'','stock']],p:[fitsP,callsP,lowP,resP],s:`${fits.length} fittings coming up, ${urgent} urgent service calls and ${m0(bal)} still to collect.`},
     staff:{k:[['Next Fitting',fits[0]?fd(fits[0].fit):'None','','fitting'],['Open Service Calls',oc.length,urgent?'bad':'','service'],['Deliveries Due Today',dToday,dToday?'warn':'','deliveries'],['Low Stock Lines',low.length,low.length?'warn':'','stock']],p:[fitsP,callsP,delP],s:`${dToday} deliveries due today and ${oc.length} open service calls.`}};
   cfg.beta=cfg.admin;const C=cfg[R]||cfg.staff;
-  const allow=m?m.allow:0,used=m?sum(S.hols.filter(h=>h.sid==m.id&&h.status=='Approved'),h=>h.days):0,pend=m?sum(S.hols.filter(h=>h.sid==m.id&&h.status=='Pending'),h=>h.days):0,nxt=m?S.hols.filter(h=>h.sid==m.id&&h.status!='Rejected'&&h.to>=td).sort((a,b)=>a.from.localeCompare(b.from))[0]:null;
+  const allow=m?allowTot(m):0,used=m?hu(m):0,pend=m?sum(S.hols.filter(h=>h.sid==m.id&&h.status=='Pending'),h=>h.days):0,nxt=m?S.hols.filter(h=>h.sid==m.id&&h.status!='Rejected'&&h.to>=td).sort((a,b)=>a.from.localeCompare(b.from))[0]:null;
   const holP=`<div class="panel"><h2><span>My Holiday</span><span class="acts"><button class="btn sm" onclick="bookMine()">Book Holiday</button>${canSee('holidays')?`<button class="mini" ${A('go','holidays')}>Holiday Planner</button>`:''}</span></h2>${m?`<div class="hl"><div class="big"><b>${allow-used}</b><small>Days Left</small></div><div><b>${used}</b><small>Booked</small></div><div><b>${pend}</b><small>Pending</small></div><div><b>${allow}</b><small>Allowance</small></div></div><div class="bar2"><i style="width:${allow?Math.min(100,Math.round(100*(used+pend)/allow)):0}%"></i></div><p class="muted" style="margin:.5rem 0 0">${nxt?`Next: ${fd(nxt.from)} to ${fd(nxt.to)}, ${nxt.days} days, ${esc(nxt.status)}`:'No holiday booked yet.'}</p>`:'<p class="empty">Your name is not in the staff list yet, so there is no allowance to show.</p>'}</div>`;
   return `<div class="hero"><span class="rt">${esc(RL[R]||'Team Member')}</span><h1>Welcome back, ${esc(first)} <span class="wave">👋</span></h1><p>${greet()}. It's ${new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'})}. ${C.s}</p>${ratingsH()}</div>
   <div class="kpis big">${C.k.map(k=>canSee(k[3])?`<button class="kpi ${k[2]}" ${A('go',k[3])}><small>${k[0]}</small><b class="${String(k[1]).length>5?'lg':''}">${k[1]}</b></button>`:`<div class="kpi ${k[2]}"><small>${k[0]}</small><b class="${String(k[1]).length>5?'lg':''}">${k[1]}</b></div>`).join('')}</div>
@@ -1853,7 +1929,7 @@ function impCust(){let n=0;S.contracts.forEach(c=>{if(!S.contacts.some(k=>k.co==
 /* ==========================================================================
    08 · Calendar, holiday planner, staff
    ========================================================================== */
-const hu=s=>sum(S.hols.filter(h=>h.sid==s.id&&h.status=='Approved'),h=>h.days);
+const hu=(s,y)=>bookedDays(s,y||new Date().getFullYear());
 const forPerson=(s,f)=>f==s.name||(s.team&&f==s.team);
 const jobsOf=s=>S.contracts.filter(c=>c.stage!='Complete'&&forPerson(s,c.fitter));
 const callsOf=s=>S.calls.filter(c=>c.status!='Complete'&&forPerson(s,c.fitter));
@@ -1884,11 +1960,61 @@ function vCalendar(){const n=new Date(),C=UI.cal,M=C.m,o=C.o,WD=['Mon','Tue','We
   <div class="two" style="margin-top:1rem"><div class="panel"><h2>Upcoming Fittings</h2>${fits.map(c=>`<div class="row"><span><b>${fd(c.fit)}</b> ${esc(c.name)}<br><span class="muted">${esc(c.product)}, ${esc(c.town)} (${esc(c.fitter||'no fitter')})</span></span><button class="mini pri" ${A('markFit',c.id)}>Mark fitted</button></div>`).join('')||'<p class="empty">No fittings booked.</p>'}</div>
   <div class="panel"><h2>Needs A Fit Date</h2>${un.map(c=>`<div class="row"><span><b>${esc(c.name)}</b> <span class="muted">#${esc(c.id)}</span><br><span class="muted">${esc(c.product)}</span></span><button class="mini" ${A('editContract',c.id)}>Set date</button></div>`).join('')||'<p class="empty">Everything has a date.</p>'}</div></div>`}
 
+
+/* ---------------- holiday chart (same codes and rules as the office spreadsheet) ---------------- */
+const HCODES=[['H','Holiday',1,'#7cbc44'],['H1','Half day (morning)',.5,'#add58a'],['H2','Half day (afternoon)',.5,'#add58a'],['S','Sickness',0,'#f7a19a'],['M','Maternity / paternity',0,'#fcc79b'],['C','Compassionate',0,'#cccccc'],['A','Absent',0,'#cccccc'],['B','Bank holiday',0,'#cccccc'],['N','Non working day',0,'#cccccc'],['U','Voluntary unpaid',0,'#eaf7a9']];
+const HC=Object.fromEntries(HCODES.map(c=>[c[0],c]));
+(function holV2(){let ch=0;if(!S.abs){S.abs={'U-5':{'2026-11-02':'S','2026-11-03':'S'},'U-4':{'2026-11-13':'H1'},'U-7':{'2026-11-20':'N'}};ch=1}if(!S.shut){S.shut={};ch=1}
+  if(!S.hol25){S.staff.forEach(s=>{if(s.allow==28||s.allow==33||s.allow==null)s.allow=25});S.hol25=1;ch=1}if(ch)store()})();
+/* Christmas shutdown: weekdays 23-31 Dec that are not bank holidays, unless an admin has changed them */
+const shutDays=y=>S.shut[y]||Array.from({length:9},(_,i)=>y+'-12-'+(23+i)).filter(k=>isWk(k)&&!BH[k]);
+const svcYears=s=>s.start?Math.max(0,Math.floor((Date.now()-new Date(s.start+'T00:00'))/(365.25*864e5))):0;
+const svcExtra=s=>Math.min(3,Math.floor(svcYears(s)/5));   /* +1 day at 5, 10 and 15 years, 3 max */
+const allowTot=s=>(+s.allow||0)+svcExtra(s)+(+s.pension||0)+(+s.carry||0);
+function absCode(s,k){const m=(S.abs[s.id]||{})[k];if(m!==undefined)return m;if(!isWk(k))return '';if(BH[k])return 'B';
+  const h=S.hols.find(h=>h.sid==s.id&&h.status!='Rejected'&&h.from<=k&&h.to>=k);if(h)return h.status=='Approved'?'H':'P';
+  return shutDays(+k.slice(0,4)).includes(k)?'H':''}
+function yearCounts(s,y){const c={},d=new Date(y,0,1);while(d.getFullYear()==y){const x=absCode(s,iso(d));if(x&&HC[x])c[x]=(c[x]||0)+1;d.setDate(d.getDate()+1)}return c}
+const bookedDays=(s,y)=>{const c=yearCounts(s,y);return sum(HCODES,h=>(c[h[0]]||0)*h[2])};
+const HGRP=['Factory','Fitters','Office','Salespeople'];
+function holChart(){const H=UI.hol,y=H.y,mo=H.cm,dim=new Date(y,mo+1,0).getDate(),td=today(),Ad=ISOWN(),mine=me();
+  const keys=Array.from({length:dim},(_,i)=>y+'-'+pad(mo+1)+'-'+pad(i+1));
+  const wk=[];let w=1;keys.forEach((k,i)=>{if(i&&new Date(k+'T00:00').getDay()==1)w++;wk.push(w)});const wspan=[];wk.forEach(n=>{const l=wspan[wspan.length-1];if(l&&l[0]==n)l[1]++;else wspan.push([n,1])});
+  const cell=(s,k)=>{const c=absCode(s,k),def=HC[c],we=!isWk(k),can=Ad||(mine&&mine.id==s.id&&!c&&!we);
+    return `<td class="hcd ${we?'we':''} ${k==td?'td':''} ${c=='P'?'pd':''}" ${def?`style="background:${def[3]}"`:''} title="${esc(s.name)}, ${fd(k)}${def?': '+esc(def[1]):c=='P'?': requested':''}" ${can?(Ad?A('hcPaint',s.id,k):A('holBook',s.id,k)):''}>${c=='P'?'?':esc(c)}</td>`};
+  const mtot=s=>sum(keys,k=>{const c=HC[absCode(s,k)];return c?c[2]:0});
+  const grp=HGRP.map(g=>[g,S.staff.filter(s=>(s.cat||'Office')==g)]).filter(x=>x[1].length);
+  const legend=`<div class="hcl">${HCODES.map(c=>`<button class="hcb ${H.brush==c[0]?'on':''}" ${Ad?A('setUI','hol.brush',H.brush==c[0]?'':c[0]):'disabled'}><i style="background:${c[3]}">${c[0]}</i>${esc(c[1])}${c[2]?` <small>${c[2]==1?'1 day':'½ day'}</small>`:''}</button>`).join('')}${Ad?`<button class="hcb ${H.brush=='X'?'on':''}" ${A('setUI','hol.brush',H.brush=='X'?'':'X')}><i style="background:#fff">✕</i>Clear</button>`:''}</div>
+   <p class="muted" style="margin:.2rem 0 .8rem;font-size:.82rem">${Ad?(H.brush?`Painting <b>${esc(H.brush=='X'?'Clear':HC[H.brush][1])}</b>: click days to set it, click again to remove.`:'Pick a code above, then click days on the chart to fill them in.'):'Click an empty weekday on your own row to request holiday.'} Bank holidays and the Christmas shutdown fill in by themselves. ? = waiting for approval.</p>`;
+  const months=`<div class="views">${[...Array(12)].map((_,i)=>`<button class="chip ${i==mo?'on':''}" ${A('setUI','hol.cm',i)}>${new Date(y,i,1).toLocaleDateString('en-GB',{month:'short'})}</button>`).join('')}</div>`;
+  const tbl=`<div class="tw hcw"><table class="hc"><thead><tr><th class="nm" rowspan="3">${new Date(y,mo,1).toLocaleDateString('en-GB',{month:'long',year:'numeric'})}</th>${wspan.map(([n,c])=>`<th colspan="${c}" class="wkh">Week ${n}</th>`).join('')}<th rowspan="3" class="n">Days</th></tr>
+    <tr>${keys.map(k=>`<th class="${isWk(k)?'':'we'} ${BH[k]?'bh':''} ${k==td?'td':''}" title="${esc(BH[k]||'')}">${+k.slice(8)}</th>`).join('')}</tr><tr>${keys.map(k=>`<th class="dw ${isWk(k)?'':'we'}">${new Date(k+'T00:00').toLocaleDateString('en-GB',{weekday:'short'}).slice(0,2)}</th>`).join('')}</tr></thead>
+    <tbody>${grp.map(([g,L])=>`<tr class="hg"><td colspan="${dim+2}">${esc(g)}</td></tr>${L.map(s=>`<tr><td class="nm"><b>${esc(s.name)}</b><small>${allowTot(s)-hu(s,y)} of ${allowTot(s)} left</small></td>${keys.map(k=>cell(s,k)).join('')}<td class="n"><b>${mtot(s)||''}</b></td></tr>`).join('')}`).join('')}</tbody></table></div>`;
+  const yc=Object.fromEntries(S.staff.map(s=>[s.id,yearCounts(s,y)])),n=(s,c)=>(yc[s.id][c]||0);
+  const summ=`<div class="tw" style="margin-top:1rem"><table><thead><tr><th>Name</th><th class="c-md">Started</th><th class="n c-sm">Years</th><th class="n">Base</th><th class="n c-sm">Service</th><th class="n c-sm">Pension</th><th class="n c-sm">Carried</th><th class="n">Total</th><th class="n">Booked</th><th class="n">Left</th><th class="n c-md">Half days</th><th class="n c-md">Sick</th><th class="n c-xl">Mat / Pat</th><th class="n c-xl">Compassionate</th><th class="n c-xl">Absent</th><th class="n c-xl">Unpaid</th>${Ad?'<th class="ac"></th>':''}</tr></thead><tbody>
+    ${grp.map(([g,L])=>`<tr class="hg"><td colspan="${Ad?17:16}">${esc(g)}</td></tr>`+L.map(s=>{const t=allowTot(s),b=hu(s,y),l=t-b;return `<tr><td><b>${esc(s.name)}</b></td><td class="c-md">${s.start?fd(s.start)+' '+s.start.slice(0,4):'-'}</td><td class="n c-sm">${svcYears(s)}</td><td class="n">${+s.allow||0}</td><td class="n c-sm">${svcExtra(s)?'+'+svcExtra(s):'-'}</td><td class="n c-sm">${+s.pension?'+'+s.pension:'-'}</td><td class="n c-sm">${+s.carry?'+'+s.carry:'-'}</td><td class="n"><b>${t}</b></td><td class="n">${b}</td><td class="n"><b style="color:${l<0?'var(--red)':l<=3?'#b26b00':'var(--green,#12794c)'}">${l}</b></td><td class="n c-md">${n(s,'H1')+n(s,'H2')||'-'}</td><td class="n c-md">${n(s,'S')||'-'}</td><td class="n c-xl">${n(s,'M')||'-'}</td><td class="n c-xl">${n(s,'C')||'-'}</td><td class="n c-xl">${n(s,'A')||'-'}</td><td class="n c-xl">${n(s,'U')||'-'}</td>${Ad?`<td class="ac"><button class="mini" ${A('editStaff',s.id)}>Edit</button></td>`:''}</tr>`}).join('')).join('')}</tbody></table></div>
+    <p class="muted" style="font-size:.8rem;margin:.5rem 0 0">Total = base (25 standard) + 1 day after 5, 10 and 15 years' service (3 max) + pension extra + days carried over. Booked includes the ${shutDays(y).length} Christmas shutdown days.</p>`;
+  return {legend,months,tbl,summ}}
+function hcPaint(sid,k){if(!need(ISOWN,'Editing the holiday chart'))return;const b=UI.hol.brush,s=S.staff.find(x=>x.id==sid);if(!s)return;if(!b){toast('Pick a code first, at the top of the chart');return}
+  const m=S.abs[sid]=S.abs[sid]||{};
+  if(b=='X'){delete m[k];if(absCode(s,k))m[k]=''}else if(absCode(s,k)==b){delete m[k];if(absCode(s,k)==b)m[k]=''}else m[k]=b;
+  audit('Holiday chart',s.name,k+': '+(m[k]===undefined?'reset':m[k]||'cleared'));store();render()}
+function shutEdit(){if(!need(ISOWN,'Changing the Christmas shutdown'))return;const y=UI.hol.y,cur=shutDays(y),days=Array.from({length:17},(_,i)=>y+'-12-'+pad(15+i)).filter(k=>isWk(k));
+  openModal(`<h2>Christmas Shutdown ${y}</h2><p class="muted">These days are booked as holiday for everyone and come off their allowance.</p><div class="rck-g">${days.map(k=>`<label class="rckl"><input type="checkbox" class="shd" value="${k}" ${cur.includes(k)?'checked':''} ${BH[k]?'disabled':''}><span>${new Date(k+'T00:00').toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'})}${BH[k]?' (bank holiday)':''}</span></label>`).join('')}</div>
+  <div class="mact"><button class="btn ghost" ${A('shutReset',y)}>Use default</button><button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn" ${A('shutSave',y)}>Save</button></div>`,'sm')}
+function shutSave(y){if(!need(ISOWN,'Changing the Christmas shutdown'))return;S.shut[y]=$$('#mbox .shd:checked').map(e=>SAFE.date(e.value)).filter(Boolean);audit('Christmas shutdown',String(y),S.shut[y].length+' days');store();closeModal();render()}
+function shutReset(y){if(!need(ISOWN,'Changing the Christmas shutdown'))return;delete S.shut[y];store();closeModal();render()}
+
 /* ---------------- holiday planner ---------------- */
 function clashes(){const o=[];
   S.contracts.filter(c=>c.fit&&c.stage!='Complete').forEach(c=>S.staff.forEach(s=>{if(forPerson(s,c.fitter)&&holOn(s.id,c.fit))o.push(`${s.name} is off on ${fd(c.fit)} but ${c.fitter} has fitting #${c.id} (${c.name})`)}));
   S.calls.filter(c=>c.visit&&c.status!='Complete').forEach(c=>S.staff.forEach(s=>{if(forPerson(s,c.fitter)&&holOn(s.id,c.visit))o.push(`${s.name} is off on ${fd(c.visit)} but has service visit #${c.id}`)}));return o}
-function vHolidays(){const n=new Date(),H=UI.hol,b=new Date(n.getFullYear(),n.getMonth()+H.m,1),y=b.getFullYear(),mo=b.getMonth(),dim=new Date(y,mo+1,0).getDate(),td=today(),Ad=ISOWN(),pend=S.hols.filter(h=>h.status=='Pending'),cl=clashes();
+function vHolidays(){if(UI.hol.v=='chart'){const H=UI.hol,c=holChart(),Ad=ISOWN(),pend=S.hols.filter(h=>h.status=='Pending'),td=today();
+    return `<div class="head"><h1>Holiday Planner</h1><div class="tools"><div class="seg">${[['chart','Chart'],['tl','Month'],['yr','Year']].map(([k,t])=>`<button class="${H.v==k?'on':''}" ${A('setUI','hol.v',k)}>${t}</button>`).join('')}</div><button class="btn ghost" aria-label="Previous year" ${A('setUI','hol.y',H.y-1)}>&lsaquo;</button><b style="min-width:3rem;text-align:center">${H.y}</b><button class="btn ghost" aria-label="Next year" ${A('setUI','hol.y',H.y+1)}>&rsaquo;</button>${Ad?'<button class="btn ghost" onclick="shutEdit()">Christmas shutdown</button>':''}<button class="btn" onclick="holBook()">Book holiday</button></div></div>
+    <div class="kpis">${[['Off today',S.staff.filter(s=>['H','H1','H2','S','M','C','A','U'].includes(absCode(s,td))).length],['Pending requests',pend.length],['Standard allowance','25 days'],['Christmas shutdown',shutDays(H.y).length+' days']].map(k=>`<div class="kpi"><small>${k[0]}</small><b>${k[1]}</b></div>`).join('')}</div>
+    ${c.months}${c.legend}${c.tbl}<h2 style="margin-top:1.4rem">Allowances ${H.y}</h2>${c.summ}
+    ${pend.length?`<div class="panel" style="margin-top:1rem"><h2>Waiting For Approval</h2>${pend.map(h=>`<div class="row"><span><b>${esc(staffName(h.sid))}</b> <span class="muted">${fd(h.from)} to ${fd(h.to)}, ${h.days} day${h.days==1?'':'s'}</span></span><span class="acts">${Ad?`<button class="mini pri" ${A('holSet',h.id,'Approved')}>Approve</button><button class="mini del" ${A('holSet',h.id,'Rejected')}>Reject</button>`:holTag(h)}</span></div>`).join('')}</div>`:''}`}
+const n=new Date(),H=UI.hol,b=new Date(n.getFullYear(),n.getMonth()+H.m,1),y=b.getFullYear(),mo=b.getMonth(),dim=new Date(y,mo+1,0).getDate(),td=today(),Ad=ISOWN(),pend=S.hols.filter(h=>h.status=='Pending'),cl=clashes();
   const off=S.staff.filter(s=>holOn(s.id,td)).length,booked=sum(S.hols.filter(h=>h.status=='Approved'),h=>h.days);
   const keys=Array.from({length:dim},(_,i)=>y+'-'+pad(mo+1)+'-'+pad(i+1));
   const tl=`<div class="tl"><div class="tlg" style="grid-template-columns:11rem repeat(${dim},2.2rem)"><div class="nm hd" style="align-items:flex-start">Team</div>${keys.map(k=>`<div class="hd ${isWk(k)?'':'we'} ${BH[k]?'bh':''} ${k==td?'td':''}" title="${esc(BH[k]||'')}"><span>${'SMTWTFS'[new Date(k+'T00:00').getDay()]}</span><b>${+k.slice(8)}</b></div>`).join('')}
@@ -1897,20 +2023,20 @@ function vHolidays(){const n=new Date(),H=UI.hol,b=new Date(n.getFullYear(),n.ge
   const yr=(()=>{const cnt={};S.hols.filter(h=>h.status!='Rejected').forEach(h=>{const d=new Date(h.from+'T00:00'),e=new Date(h.to+'T00:00');while(d<=e){const g=d.getDay();if(g&&g<6&&d.getFullYear()==y){const k=h.sid+'|'+d.getMonth();cnt[k]=(cnt[k]||0)+1}d.setDate(d.getDate()+1)}});
     return `<div class="tw"><table><thead><tr><th>${y}</th>${[...Array(12)].map((_,i)=>`<th class="n">${new Date(y,i,1).toLocaleDateString('en-GB',{month:'short'})}</th>`).join('')}</tr></thead><tbody>${S.staff.map(s=>`<tr><td><b>${esc(s.name)}</b></td>${[...Array(12)].map((_,i)=>{const c=cnt[s.id+'|'+i]||0;return `<td class="heat" style="${c?`background:rgba(18,121,76,${Math.min(.15+c/20,.6)})`:''}">${c||''}</td>`}).join('')}</tr>`).join('')}</tbody></table></div>`})();
   const step=H.v=='yr'?12:1;
-  return `<div class="head"><h1>Holiday Planner</h1><div class="tools"><div class="seg">${[['tl','Month'],['yr','Year']].map(([k,t])=>`<button class="${H.v==k?'on':''}" ${A('setUI','hol.v',k)}>${t}</button>`).join('')}</div><button class="btn ghost" aria-label="Previous" ${A('setUI','hol.m',H.m-step)}>&lsaquo;</button><button class="btn ghost" ${A('setUI','hol.m',0)}>Today</button><button class="btn ghost" aria-label="Next" ${A('setUI','hol.m',H.m+step)}>&rsaquo;</button><button class="btn" onclick="holBook()">Book holiday</button></div></div>
+  return `<div class="head"><h1>Holiday Planner</h1><div class="tools"><div class="seg">${[['chart','Chart'],['tl','Month'],['yr','Year']].map(([k,t])=>`<button class="${H.v==k?'on':''}" ${A('setUI','hol.v',k)}>${t}</button>`).join('')}</div><button class="btn ghost" aria-label="Previous" ${A('setUI','hol.m',H.m-step)}>&lsaquo;</button><button class="btn ghost" ${A('setUI','hol.m',0)}>Today</button><button class="btn ghost" aria-label="Next" ${A('setUI','hol.m',H.m+step)}>&rsaquo;</button><button class="btn" onclick="holBook()">Book holiday</button></div></div>
   <div class="kpis">${[['Off today',off],['Pending requests',pend.length],['Days booked',booked],['Clashes',cl.length]].map(k=>`<div class="kpi ${k[0]=='Clashes'&&k[1]?'bad':''}"><small>${k[0]}</small><b>${k[1]}</b></div>`).join('')}</div>
   <h2>${H.v=='yr'?y:b.toLocaleDateString('en-GB',{month:'long',year:'numeric'})} <span class="muted" style="font:500 .78rem var(--body)">${H.v=='yr'?'working days off per month':'click a day to book, click a bar to manage. Green = approved, striped = pending, yellow = bank holiday'}</span></h2>${H.v=='yr'?yr:tl}
   ${cl.length?`<div class="panel" style="margin-top:1rem"><h2>Clashes With Booked Work</h2>${cl.map(x=>`<div class="row warn">${esc(x)}</div>`).join('')}</div>`:''}
-  <div class="two" style="margin-top:1rem"><div class="panel"><h2>Allowances</h2>${S.staff.map(s=>{const t=hu(s),p=sum(S.hols.filter(h=>h.sid==s.id&&h.status=='Pending'),h=>h.days);return `<div class="row"><span style="flex:1"><b>${esc(s.name)}</b><br><span class="muted">${t} booked${p?', '+p+' pending':''} of ${s.allow}</span><div class="bar"><i style="width:${Math.min(100,Math.round(100*t/(s.allow||1)))}%"></i></div></span><b>${s.allow-t} left</b></div>`}).join('')}</div>
+  <div class="two" style="margin-top:1rem"><div class="panel"><h2>Allowances</h2>${S.staff.map(s=>{const t=hu(s),p=sum(S.hols.filter(h=>h.sid==s.id&&h.status=='Pending'),h=>h.days);return `<div class="row"><span style="flex:1"><b>${esc(s.name)}</b><br><span class="muted">${t} booked${p?', '+p+' pending':''} of ${allowTot(s)}</span><div class="bar"><i style="width:${Math.min(100,Math.round(100*t/(allowTot(s)||1)))}%"></i></div></span><b>${s.allow-t} left</b></div>`}).join('')}</div>
   <div class="panel"><h2>Requests And Bookings</h2>${[...S.hols].sort((a,c)=>(c.status=='Pending')-(a.status=='Pending')||c.from.localeCompare(a.from)).map(h=>`<div class="row"><span><b>${esc(staffName(h.sid))}</b> <span class="muted">${fd(h.from)} to ${fd(h.to)}, ${h.days} day${h.days==1?'':'s'}${h.note?' | '+esc(h.note):''}</span></span><span class="acts">${holTag(h)}${Ad&&h.status=='Pending'?`<button class="mini pri" ${A('holSet',h.id,'Approved')}>Approve</button><button class="mini del" ${A('holSet',h.id,'Rejected')}>Reject</button>`:''}</span></div>`).join('')||'<p class="empty">No holiday booked.</p>'}${Ad?'':'<p class="muted" style="font-size:.82rem;margin-top:.6rem">Requests are approved by an administrator.</p>'}</div></div>`}
 function holSet(id,st){if(!need(ISOWN,'Approving holiday'))return;const h=S.hols.find(x=>x.id==id);if(!h)return;h.status=st;audit('Holiday '+st.toLowerCase(),staffName(h.sid),h.from+' to '+h.to);store();render()}
 function holBook(sid,day){const d=day||today();if(!sid&&!ISOWN()){const m=me();if(m)sid=m.id}
   openModal(`<h2>Book Holiday</h2><div class="dfm"><label>Staff member<select id="hs" onchange="holChk()">${S.staff.map(s=>`<option value="${esc(s.id)}" ${s.id==sid?'selected':''}>${esc(s.name)}</option>`).join('')}</select></label><label>From<input type="date" id="hf" value="${esc(d)}" onchange="holChk()"></label><label>To<input type="date" id="ht" value="${esc(d)}" onchange="holChk()"></label><label>Note (optional)<input id="hn" maxlength="120"></label><div id="hi" style="margin-top:.7rem;font-size:.88rem"></div></div><div class="mact"><button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn" onclick="holSave()">${ISOWN()?'Book holiday':'Send request'}</button></div>`);holChk()}
-function holChk(){const s=S.staff.find(x=>x.id==$('#hs').value),f=$('#hf').value;let t=$('#ht').value;if(!s||!f)return;if(t<f){$('#ht').value=t=f}const n=wd(f,t),left=s.allow-hu(s),w=[];if(n>left)w.push('Only '+left+' days left');
+function holChk(){const s=S.staff.find(x=>x.id==$('#hs').value),f=$('#hf').value;let t=$('#ht').value;if(!s||!f)return;if(t<f){$('#ht').value=t=f}const n=wd(f,t),left=allowTot(s)-hu(s),w=[];if(n>left)w.push('Only '+left+' days left');
   S.contracts.filter(c=>c.fit&&c.stage!='Complete'&&c.fit>=f&&c.fit<=t&&forPerson(s,c.fitter)).forEach(c=>w.push('Fitting #'+c.id+' is booked on '+fd(c.fit)));
   const mates=S.staff.filter(x=>x.id!=s.id&&S.hols.some(h=>h.sid==x.id&&h.status!='Rejected'&&h.from<=t&&h.to>=f));if(mates.length)w.push('Also off in this period: '+mates.map(x=>x.name.split(' ')[0]).join(', '));
   $('#hi').innerHTML=`<b>${n} working day${n==1?'':'s'}</b> <span class="muted">(${left} left)</span>`+w.map(x=>`<div class="warn">${esc(x)}</div>`).join('')}
-function holSave(){const sid=$('#hs').value,s=S.staff.find(x=>x.id==sid),f=SAFE.date($('#hf').value),t=SAFE.date($('#ht').value);if(!s||!f||!t){toast('Pick valid dates');return}const n=wd(f,t),left=s.allow-hu(s);
+function holSave(){const sid=$('#hs').value,s=S.staff.find(x=>x.id==sid),f=SAFE.date($('#hf').value),t=SAFE.date($('#ht').value);if(!s||!f||!t){toast('Pick valid dates');return}const n=wd(f,t),left=allowTot(s)-hu(s);
   if(!n){toast('Pick working days (Mon to Fri)');return}if(n>left){toast('Only '+left+' days left');return}
   if(!ISOWN()&&me()&&sid!=me().id){toast('You can only request your own holiday');return}
   S.hols.push({id:shortId('H'),sid,from:f,to:t,days:n,status:ISOWN()?'Approved':'Pending',note:SAFE.text($('#hn').value,120)});audit(ISOWN()?'Holiday booked':'Holiday requested',s.name,f+' to '+t);store();closeModal();render();toast(ISOWN()?'Holiday booked':'Request sent for approval')}
@@ -1923,9 +2049,9 @@ function vStaff(){const td=today(),Ad=ISOWN(),U=UI.staff,L=S.staff.filter(s=>hit
   return `<div class="head"><h1>Staff</h1><div class="tools">${Ad?'<button class="btn" onclick="editStaff()">Add staff member</button>':''}</div></div>
   <div class="kpis">${[['Headcount',S.staff.length],['On holiday today',off],['Holiday requests',pend.length],['Jobs on hand',sum(S.staff,s=>jobsOf(s).length)]].map(k=>`<div class="kpi"><small>${k[0]}</small><b>${k[1]}</b></div>`).join('')}</div>
   <div class="views">${[['all','All Staff'],...SCATS.map(c=>[c,c])].map(([k,n])=>`<button class="chip ${U.c==k?'on':''}" ${A('setUI','staff.c',k)}>${esc(n)} <i>${k=='all'?S.staff.length:S.staff.filter(s=>s.cat==k).length}</i></button>`).join('')}</div>
-  <div class="tw"><table><thead><tr><th>Name</th><th>Category</th><th class="c-sm">Contact</th><th class="c-md">Started</th><th>Holiday left</th><th class="n c-sm">Jobs</th><th class="n c-md">Open calls</th>${Ad?'<th class="n c-md">Salary</th>':''}<th class="ac"></th></tr></thead><tbody>${L.map(s=>{const left=s.allow-hu(s),p=Math.max(0,Math.round(100*left/(s.allow||1)));return `<tr><td><b>${esc(s.name)}</b><br><span class="muted">${esc(s.role)}${s.team?' &middot; '+esc(s.team):''}</span></td><td><span class="tag ${{Salespeople:'',Fitters:'g',Office:'',Factory:'y'}[s.cat]||''}">${esc(s.cat||'-')}</span></td><td class="c-sm nocap"><a href="tel:${esc(s.phone)}">${esc(s.phone)}</a><br><a href="mailto:${esc(s.email)}">${esc(s.email)}</a></td><td class="c-md">${fd(s.start)}</td><td><b>${left}</b> of ${s.allow} days<div class="bar"><i style="width:${p}%"></i></div></td><td class="n c-sm">${jobsOf(s).length}</td><td class="n c-md">${callsOf(s).length}</td>${Ad?`<td class="n c-md">${m0(s.salary)}</td>`:''}<td class="ac"><div class="acts r"><button class="mini pri" ${A('holBook',s.id)}>Book holiday</button>${Ad?`<button class="mini" ${A('editStaff',s.id)}>Edit</button><button class="mini del" ${A('del','staff',s.id)}>Delete</button>`:''}</div></td></tr>`}).join('')||'<tr><td colspan="9" class="empty">No staff match.</td></tr>'}</tbody></table></div>`}
+  <div class="tw"><table><thead><tr><th>Name</th><th>Category</th><th class="c-sm">Contact</th><th class="c-md">Started</th><th>Holiday left</th><th class="n c-sm">Jobs</th><th class="n c-md">Open calls</th>${Ad?'<th class="n c-md">Salary</th>':''}<th class="ac"></th></tr></thead><tbody>${L.map(s=>{const left=allowTot(s)-hu(s),p=Math.max(0,Math.round(100*left/(allowTot(s)||1)));return `<tr><td><b>${esc(s.name)}</b><br><span class="muted">${esc(s.role)}${s.team?' &middot; '+esc(s.team):''}</span></td><td><span class="tag ${{Salespeople:'',Fitters:'g',Office:'',Factory:'y'}[s.cat]||''}">${esc(s.cat||'-')}</span></td><td class="c-sm nocap"><a href="tel:${esc(s.phone)}">${esc(s.phone)}</a><br><a href="mailto:${esc(s.email)}">${esc(s.email)}</a></td><td class="c-md">${fd(s.start)}</td><td><b>${left}</b> of ${allowTot(s)} days<div class="bar"><i style="width:${p}%"></i></div></td><td class="n c-sm">${jobsOf(s).length}</td><td class="n c-md">${callsOf(s).length}</td>${Ad?`<td class="n c-md">${m0(s.salary)}</td>`:''}<td class="ac"><div class="acts r"><button class="mini pri" ${A('holBook',s.id)}>Book holiday</button>${Ad?`<button class="mini" ${A('editStaff',s.id)}>Edit</button><button class="mini del" ${A('del','staff',s.id)}>Delete</button>`:''}</div></td></tr>`}).join('')||'<tr><td colspan="9" class="empty">No staff match.</td></tr>'}</tbody></table></div>`}
 function editStaff(id){if(!need(ISOWN,'Editing staff'))return;const x=S.staff.find(u=>u.id==id);
-  form(x?'Edit '+x.name:'Add Staff Member',[{k:'name',l:'Name',req:1},{k:'cat',l:'Category',t:'select',o:SCATS,req:1},{k:'role',l:'Job title'},{k:'team',l:'Team',t:'select',o:[['','None'],'Team A','Team B']},{k:'start',l:'Start date',t:'date'},{k:'phone',l:'Phone',t:'tel',max:30},{k:'email',l:'Email',t:'email'},{k:'allow',l:'Holiday allowance (days)',t:'number',max:60,dp:0},{k:'salary',l:'Annual salary (£)',t:'number',max:1e6}],x||{allow:28,team:'',cat:UI.staff.c!='all'?UI.staff.c:'Office'},o=>{if(x)Object.assign(x,o);else S.staff.push({id:shortId('U'),...o});audit(x?'Staff edited':'Staff added',o.name,'')})}
+  form(x?'Edit '+x.name:'Add Staff Member',[{k:'name',l:'Name',req:1},{k:'cat',l:'Category',t:'select',o:SCATS,req:1},{k:'role',l:'Job title'},{k:'team',l:'Team',t:'select',o:[['','None'],'Team A','Team B']},{k:'start',l:'Start date',t:'date'},{k:'phone',l:'Phone',t:'tel',max:30},{k:'email',l:'Email',t:'email'},{k:'allow',l:'Base holiday allowance (days)',t:'number',max:60,dp:0,hint:'25 is standard. Service days are added automatically.'},{k:'pension',l:'Pension extra (days)',t:'number',max:10,dp:0},{k:'carry',l:'Carried over from last year (days)',t:'number',max:20,dp:1},{k:'salary',l:'Annual salary (£)',t:'number',max:1e6}],x||{allow:25,pension:0,carry:0,team:'',cat:UI.staff.c!='all'?UI.staff.c:'Office'},o=>{if(x)Object.assign(x,o);else S.staff.push({id:shortId('U'),...o});audit(x?'Staff edited':'Staff added',o.name,'')})}
 
 /* ==========================================================================
    09 · Inventory
@@ -2039,7 +2165,7 @@ function stockForm(kind,k,pre){itemWindow(kind,k,pre)}
 function editItem(k){itemWindow('edit',k)}
 function ieFields(){const Ad=ISADM(),Own=ISOWN(),ed=ieMode=='edit',mv=!ed,r=(ieKey&&prod(ieKey))||{};return[
   /* Product: Stock ID | Item code | Unit, then Qty | Barcode | Length (length sits under unit) */
-  {k:'pid',l:ed&&Own?'Stock ID (admin override, must be unique)':'Stock ID',ro:!(ed&&Own),req:1,max:24,sec:'p'},
+  {k:'pid',l:ed&&Own&&!ieView?'Stock ID (admin override, must be unique)':'Stock ID',ro:!(ed&&Own),req:1,max:24,sec:'p'},
   {k:'item',l:'Item code',ro:ed&&!Ad,req:1,max:64,list:'itemCodes',sec:'p',hint:ed&&!Ad?'Only an admin can rename':''},
   {k:'unit',l:'Unit',t:'select',o:UNITS,sec:'p'},
   ed?{k:'stock',l:'Current stock',t:'number',max:1e7,sec:'p',hint:'Changing this logs an adjustment'}:{k:'qty',l:'Quantity',t:'number',req:1,pos:1,max:1e6,sec:'p'},
@@ -2053,22 +2179,24 @@ function ieFields(){const Ad=ISADM(),Own=ISOWN(),ed=ieMode=='edit',mv=!ed,r=(ieK
 function fieldH(f,v){const val=v[f.k]??'';
   const inp=f.t=='colour'?colourField(f,v):f.t=='select'?`<select id="f_${f.k}" ${f.ro?'disabled':''}>${f.o.map(o=>`<option value="${esc(o)}" ${String(o)==String(val)?'selected':''}>${esc(o||'-')}</option>`).join('')}</select>`:f.t=='area'?`<textarea id="f_${f.k}" rows="3" maxlength="2000">${esc(val)}</textarea>`:`<input id="f_${f.k}" type="${f.t||'text'}" ${f.t=='number'?'step="any" min="0" inputmode="decimal"':`maxlength="${f.max||120}"`} value="${esc(val)}" ${f.ro?'readonly':''} ${f.list?`list="${f.list}"`:''} autocomplete="off">`;
   return `<div class="ff ${f.w||''}" ${f.nx?`data-nx="${f.nx}"`:''} ${nxHid(f,v)?'hidden':''}><label for="f_${f.k}">${esc(f.l)}${f.req?' *':''}</label>${inp}${f.hint?`<span class="hint">${esc(f.hint)}</span>`:''}</div>`}
-function itemWindow(mode,k,pre){
+let ieView=false;
+function itemWindow(mode,k,pre){const view=ieView=mode=='view';if(view)mode='edit';
   const r=(k&&prod(k))||null;if(mode=='edit'&&!r)return;
   ieMode=mode;ieKey=r?r.pid:null;iePre=pre||{};ieIdx=0;tmp=r?pphotos(r.pid).slice():[];tmpDraw=ieDraw;
   const ed=mode=='edit',clean=x=>x&&x!='-'?x:'';
   const v=r?{...r,length:clean(r.length),cInName:clean(r.cInName),cOutName:clean(r.cOutName),location:hasLoc(r)?r.location:'',unit:unitOf(r),reorder:r.reorder??0,qty:iePre.qty||1,cost:ed?r.cost:0,barcode:r.barcode||r.item,notes:r.notes||''}
              :{pid:stkId(),item:'',unit:'Each',qty:1,length:'',cInName:'',cOutName:'',cIn:'',cOut:'',reorder:0,cost:0,location:'',supplier:'',barcode:''};
   const F=ieFields(),sec=(t,s,cls)=>{const L=F.filter(f=>f.sec==s);return L.length?`<fieldset><legend>${t}</legend><div class="grid ${cls||''}">${L.map(f=>fieldH(f,v)).join('')}</div></fieldset>`:''};
-  const T={edit:'Edit '+(r?r.item:''),add:'Add Stock',remove:'Remove Stock',request:'Request Stock'}[mode],B={edit:'Save changes',add:'Add stock',remove:'Remove stock',request:'Send request'}[mode];
+  const T={edit:(view?'':'Edit ')+(r?r.item:''),add:'Add Stock',remove:'Remove Stock',request:'Request Stock'}[mode],B={edit:'Save changes',add:'Add stock',remove:'Remove stock',request:'Send request'}[mode];
   const s=r?stt(r):null;
   openModal(`<div class="ie-h"><div><h2>${esc(T)}</h2><span class="muted" id="ieSub">${r?`Stock ID ${esc(r.pid)} · ${prodRows(r.pid).length} movements · <span class="tag ${s[1]}">${s[0]}</span>`:'New product: a Stock ID is given automatically'}</span></div><button class="mx" onclick="closeModal()" aria-label="Close">&times;</button></div>
   <div class="ie"><div class="ie-ph"><div class="ie-main" id="ieMain"></div><div class="ie-strip" id="ieStrip"></div>
      <div class="prow"><label class="btn ghost sm">${svg(IC.photo)}Take photo<input type="file" accept="image/*" capture="environment" hidden onchange="addPh(this)"></label><label class="btn ghost sm">Upload photos<input type="file" accept="image/*" multiple hidden onchange="addPh(this)"></label><span class="muted" style="align-self:center;font-size:.75rem">Up to ${MAX_PHOTOS}, resized automatically</span></div>
      <div class="ie-stats" id="ieStats"></div></div>
    <div class="ie-f">${sec('Product','p','ie-prod')}${sec('Colours','c')}${sec('Stock And Ordering','o')}${sec('Location And Supplier','l')}${sec(mode=='request'?'Request':'Notes','n')}</div></div>
-  <div class="mact">${ed&&ISOWN()?`<button class="btn ghost l" style="color:var(--red)" ${A('delProduct',r.pid)}>Delete product</button>`:''}${r?`<button class="btn ghost" ${A('reportProd',r.pid)}>Report</button>`:''}<button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn ${mode=='remove'?'red':mode=='add'?'green':''}" onclick="ieSave()">${B}</button></div>`,'xl');
+  ${view?`<div class="mact"><button class="btn ghost" ${A('reportProd',r.pid)}>Report</button><button class="btn ghost" ${A('stockForm','request',r.pid)}>Request stock</button><button class="btn ghost" onclick="closeModal()">Close</button><button class="btn" ${A('itemWindow','edit',r.pid)}>Edit</button>`:`<div class="mact">${ed&&ISOWN()?`<button class="btn ghost l" style="color:var(--red)" ${A('delProduct',r.pid)}>Delete product</button>`:''}${r?`<button class="btn ghost" ${A('reportProd',r.pid)}>Report</button>`:''}<button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn ${mode=='remove'?'red':mode=='add'?'green':''}" onclick="ieSave()">${B}</button>`}</div>`,'xl');
   ieDraw();ieStats();bcDeco({diff:!!(r&&r.barcode&&r.barcode!=r.item),val:r?r.barcode||'':''});
+  if(view){const b=$('#mbox');b.classList.add('ie-view');b.querySelectorAll('.ie-f input,.ie-f select,.ie-f textarea,.ie-f button,.ie-ph .prow input').forEach(e=>e.disabled=true);const mv=prodRows(r.pid).slice(0,6);$('#mbox .ie-f').insertAdjacentHTML('beforeend',`<fieldset><legend>Recent Movements</legend>${mv.map(x=>`<div class="row"><span><span class="tag ${x.type=='add'?'g':x.type=='remove'?'r':'y'}">${esc(x.type=='add'?'In':x.type=='remove'?'Out':'Request')}</span> ${x.qty} ${esc(unitOf(x))} by ${esc(x.user)}</span><span class="muted">${esc(x.time)}</span></div>`).join('')||'<p class="empty">No movements yet.</p>'}</fieldset>`)}
   if(!ed){const sync=()=>{const g=i=>($('#f_'+i)||{}).value||'',ex=S.items.find(x=>ikey(x)==ikey({item:g('item'),length:g('length'),cInName:g('cInName'),cOutName:g('cOutName')}));
       $('#f_pid').value=ex?ex.pid:stkId();if(ex&&ex.pid!=ieKey){ieKey=ex.pid;$('#f_unit').value=unitOf(ex);if(!tmp.length){tmp=pphotos(ex.pid).slice();ieDraw()}}else if(!ex)ieKey=null;ieStats()};
     ['item','length','cInName','cOutName'].forEach(i=>{const e=$('#f_'+i);e&&['input','change'].forEach(t=>e.addEventListener(t,sync))});$$('#mbox .sws button').forEach(b=>b.addEventListener('click',()=>setTimeout(sync)))}}
@@ -2115,10 +2243,7 @@ function delProduct(k){if(!need(ISOWN,'Deleting products'))return;const r=prod(k
 
 
 /* ---------------- view item ---------------- */
-function viewItem(k){const r=prod(k);if(!r)return;const h=prodRows(k).slice(0,8),s=stt(r),Ad=ISADM();
-  const rows=[['Item code',esc(r.item)],['Stock ID',esc(r.pid)],['Length',esc(r.length)],['Colours',esc(r.cInName)+' in, '+esc(r.cOutName)+' out'],['Unit',esc(unitOf(r))],['Barcode',esc(r.barcode||r.item)],['Location',hasLoc(r)?esc(r.location):'Not set'],['In stock',r.stock+' '+esc(unitOf(r))+` <span class="tag ${s[1]}">${s[0]=='OK'?'OK':s[0]=='Low'?'Reorder now':'Out of stock'}</span>`],['Reorder level and qty',ro(r)+' and '+(r.reorderQty||'-')],['Supplier',esc(r.supplier||'-')],['Lead time',r.lead?r.lead+' days':'-'],...(Ad?[['Cost each',money(r.cost)],['Stock value',money(r.stock*r.cost)]]:[]),['Notes',esc(r.notes||'-')]];
-  openModal(`<button class="mx" onclick="closeModal()" aria-label="Close">&times;</button><h2>${esc(r.item)}</h2>${gallery(pphotos(k))}${rows.map(([a,b])=>`<div class="row"><span class="muted">${a}</span><b>${b}</b></div>`).join('')}<h3>Recent Movements</h3>${h.map(x=>`<div class="row"><span><span class="tag ${x.type=='add'?'g':x.type=='remove'?'r':'y'}">${esc(x.type)}</span> ${ordTag(x)} ${x.qty} by ${esc(x.user)}</span><span class="muted">${esc(x.time)}</span></div>`).join('')}
-  <div class="mact"><button class="btn ghost" ${A('reportProd',k)}>Report</button><button class="btn ghost" ${A('stockForm','request',k)}>Request</button><button class="btn" ${A('editItem',k)}>Edit item and photos</button></div>`,'lg')}
+function viewItem(k){itemWindow('view',k)}
 
 /* ---------------- scanner result ---------------- */
 function found(code,pv){const c=code.toLowerCase(),vs=products().filter(x=>x.item.toLowerCase()==c||(x.barcode||'').toLowerCase()==c);
@@ -2361,7 +2486,7 @@ const R={
   people(){const td=today(),H=S.hols.filter(h=>h.status=='Approved'),mo=Array(12).fill(0),y=new Date().getFullYear();H.forEach(h=>{const d=new Date(h.from+'T00:00'),e=new Date(h.to+'T00:00');while(d<=e){const g=d.getDay();if(g&&g<6&&d.getFullYear()==y)mo[d.getMonth()]++;d.setDate(d.getDate()+1)}});
     return{t:'People and holidays',kpis:[['Headcount',S.staff.length],['Off today',S.staff.filter(s=>holOn(s.id,td)).length],['Days booked',sum(H,h=>h.days)],['Pending requests',S.hols.filter(h=>h.status=='Pending').length],['Jobs on hand',sum(S.staff,s=>jobsOf(s).length)],['Open calls',sum(S.staff,s=>callsOf(s).length)]],
       bars:[bar('Holiday days by month ('+y+')',mo.map((n,i)=>[new Date(y,i,1).toLocaleDateString('en-GB',{month:'long'}),n,String])),bar('Jobs on hand per person',S.staff.map(s=>[s.name,jobsOf(s).length,String]))],
-      tables:[{t:'Team',h:['Name','Role','Team','Allowance','Booked','Pending','Left','Jobs','Open calls'],r:S.staff.map(s=>{const t=hu(s),p=sum(S.hols.filter(h=>h.sid==s.id&&h.status=='Pending'),h=>h.days);return[s.name,s.role,s.team||'',s.allow,t,p,s.allow-t,jobsOf(s).length,callsOf(s).length]})},{t:'Holiday bookings',h:['Name','From','To','Days','Status','Note'],r:[...S.hols].sort((a,b)=>a.from.localeCompare(b.from)).map(h=>[staffName(h.sid),fd(h.from),fd(h.to),h.days,h.status,h.note||''])}]}}};
+      tables:[{t:'Team',h:['Name','Role','Team','Allowance','Booked','Pending','Left','Jobs','Open calls'],r:S.staff.map(s=>{const t=hu(s),p=sum(S.hols.filter(h=>h.sid==s.id&&h.status=='Pending'),h=>h.days);return[s.name,s.role,s.team||'',allowTot(s),t,p,allowTot(s)-t,jobsOf(s).length,callsOf(s).length]})},{t:'Holiday bookings',h:['Name','From','To','Days','Status','Note'],r:[...S.hols].sort((a,b)=>a.from.localeCompare(b.from)).map(h=>[staffName(h.sid),fd(h.from),fd(h.to),h.days,h.status,h.note||''])}]}}};
 const TABS=()=>[['summary','Summary'],['sales','Sales'],['contracts','Contracts'],['service','Service'],['stock','Stock'],...(ISADM()?[['finance','Finance']]:[]),['people','People'],['docs','Documents']];
 const isNum=v=>/^[£\d.,%\-\s]+$/.test(String(v))&&String(v).trim()!='';
 function vReports(){if(UI.rep.t=='finance'&&!ISADM())UI.rep.t='summary';const T=UI.rep.t;let body;

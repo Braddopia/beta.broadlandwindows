@@ -110,7 +110,7 @@ function stockForm(kind,k,pre){itemWindow(kind,k,pre)}
 function editItem(k){itemWindow('edit',k)}
 function ieFields(){const Ad=ISADM(),Own=ISOWN(),ed=ieMode=='edit',mv=!ed,r=(ieKey&&prod(ieKey))||{};return[
   /* Product: Stock ID | Item code | Unit, then Qty | Barcode | Length (length sits under unit) */
-  {k:'pid',l:ed&&Own?'Stock ID (admin override, must be unique)':'Stock ID',ro:!(ed&&Own),req:1,max:24,sec:'p'},
+  {k:'pid',l:ed&&Own&&!ieView?'Stock ID (admin override, must be unique)':'Stock ID',ro:!(ed&&Own),req:1,max:24,sec:'p'},
   {k:'item',l:'Item code',ro:ed&&!Ad,req:1,max:64,list:'itemCodes',sec:'p',hint:ed&&!Ad?'Only an admin can rename':''},
   {k:'unit',l:'Unit',t:'select',o:UNITS,sec:'p'},
   ed?{k:'stock',l:'Current stock',t:'number',max:1e7,sec:'p',hint:'Changing this logs an adjustment'}:{k:'qty',l:'Quantity',t:'number',req:1,pos:1,max:1e6,sec:'p'},
@@ -124,22 +124,24 @@ function ieFields(){const Ad=ISADM(),Own=ISOWN(),ed=ieMode=='edit',mv=!ed,r=(ieK
 function fieldH(f,v){const val=v[f.k]??'';
   const inp=f.t=='colour'?colourField(f,v):f.t=='select'?`<select id="f_${f.k}" ${f.ro?'disabled':''}>${f.o.map(o=>`<option value="${esc(o)}" ${String(o)==String(val)?'selected':''}>${esc(o||'-')}</option>`).join('')}</select>`:f.t=='area'?`<textarea id="f_${f.k}" rows="3" maxlength="2000">${esc(val)}</textarea>`:`<input id="f_${f.k}" type="${f.t||'text'}" ${f.t=='number'?'step="any" min="0" inputmode="decimal"':`maxlength="${f.max||120}"`} value="${esc(val)}" ${f.ro?'readonly':''} ${f.list?`list="${f.list}"`:''} autocomplete="off">`;
   return `<div class="ff ${f.w||''}" ${f.nx?`data-nx="${f.nx}"`:''} ${nxHid(f,v)?'hidden':''}><label for="f_${f.k}">${esc(f.l)}${f.req?' *':''}</label>${inp}${f.hint?`<span class="hint">${esc(f.hint)}</span>`:''}</div>`}
-function itemWindow(mode,k,pre){
+let ieView=false;
+function itemWindow(mode,k,pre){const view=ieView=mode=='view';if(view)mode='edit';
   const r=(k&&prod(k))||null;if(mode=='edit'&&!r)return;
   ieMode=mode;ieKey=r?r.pid:null;iePre=pre||{};ieIdx=0;tmp=r?pphotos(r.pid).slice():[];tmpDraw=ieDraw;
   const ed=mode=='edit',clean=x=>x&&x!='-'?x:'';
   const v=r?{...r,length:clean(r.length),cInName:clean(r.cInName),cOutName:clean(r.cOutName),location:hasLoc(r)?r.location:'',unit:unitOf(r),reorder:r.reorder??0,qty:iePre.qty||1,cost:ed?r.cost:0,barcode:r.barcode||r.item,notes:r.notes||''}
              :{pid:stkId(),item:'',unit:'Each',qty:1,length:'',cInName:'',cOutName:'',cIn:'',cOut:'',reorder:0,cost:0,location:'',supplier:'',barcode:''};
   const F=ieFields(),sec=(t,s,cls)=>{const L=F.filter(f=>f.sec==s);return L.length?`<fieldset><legend>${t}</legend><div class="grid ${cls||''}">${L.map(f=>fieldH(f,v)).join('')}</div></fieldset>`:''};
-  const T={edit:'Edit '+(r?r.item:''),add:'Add Stock',remove:'Remove Stock',request:'Request Stock'}[mode],B={edit:'Save changes',add:'Add stock',remove:'Remove stock',request:'Send request'}[mode];
+  const T={edit:(view?'':'Edit ')+(r?r.item:''),add:'Add Stock',remove:'Remove Stock',request:'Request Stock'}[mode],B={edit:'Save changes',add:'Add stock',remove:'Remove stock',request:'Send request'}[mode];
   const s=r?stt(r):null;
   openModal(`<div class="ie-h"><div><h2>${esc(T)}</h2><span class="muted" id="ieSub">${r?`Stock ID ${esc(r.pid)} · ${prodRows(r.pid).length} movements · <span class="tag ${s[1]}">${s[0]}</span>`:'New product: a Stock ID is given automatically'}</span></div><button class="mx" onclick="closeModal()" aria-label="Close">&times;</button></div>
   <div class="ie"><div class="ie-ph"><div class="ie-main" id="ieMain"></div><div class="ie-strip" id="ieStrip"></div>
      <div class="prow"><label class="btn ghost sm">${svg(IC.photo)}Take photo<input type="file" accept="image/*" capture="environment" hidden onchange="addPh(this)"></label><label class="btn ghost sm">Upload photos<input type="file" accept="image/*" multiple hidden onchange="addPh(this)"></label><span class="muted" style="align-self:center;font-size:.75rem">Up to ${MAX_PHOTOS}, resized automatically</span></div>
      <div class="ie-stats" id="ieStats"></div></div>
    <div class="ie-f">${sec('Product','p','ie-prod')}${sec('Colours','c')}${sec('Stock And Ordering','o')}${sec('Location And Supplier','l')}${sec(mode=='request'?'Request':'Notes','n')}</div></div>
-  <div class="mact">${ed&&ISOWN()?`<button class="btn ghost l" style="color:var(--red)" ${A('delProduct',r.pid)}>Delete product</button>`:''}${r?`<button class="btn ghost" ${A('reportProd',r.pid)}>Report</button>`:''}<button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn ${mode=='remove'?'red':mode=='add'?'green':''}" onclick="ieSave()">${B}</button></div>`,'xl');
+  ${view?`<div class="mact"><button class="btn ghost" ${A('reportProd',r.pid)}>Report</button><button class="btn ghost" ${A('stockForm','request',r.pid)}>Request stock</button><button class="btn ghost" onclick="closeModal()">Close</button><button class="btn" ${A('itemWindow','edit',r.pid)}>Edit</button>`:`<div class="mact">${ed&&ISOWN()?`<button class="btn ghost l" style="color:var(--red)" ${A('delProduct',r.pid)}>Delete product</button>`:''}${r?`<button class="btn ghost" ${A('reportProd',r.pid)}>Report</button>`:''}<button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn ${mode=='remove'?'red':mode=='add'?'green':''}" onclick="ieSave()">${B}</button>`}</div>`,'xl');
   ieDraw();ieStats();bcDeco({diff:!!(r&&r.barcode&&r.barcode!=r.item),val:r?r.barcode||'':''});
+  if(view){const b=$('#mbox');b.classList.add('ie-view');b.querySelectorAll('.ie-f input,.ie-f select,.ie-f textarea,.ie-f button,.ie-ph .prow input').forEach(e=>e.disabled=true);const mv=prodRows(r.pid).slice(0,6);$('#mbox .ie-f').insertAdjacentHTML('beforeend',`<fieldset><legend>Recent Movements</legend>${mv.map(x=>`<div class="row"><span><span class="tag ${x.type=='add'?'g':x.type=='remove'?'r':'y'}">${esc(x.type=='add'?'In':x.type=='remove'?'Out':'Request')}</span> ${x.qty} ${esc(unitOf(x))} by ${esc(x.user)}</span><span class="muted">${esc(x.time)}</span></div>`).join('')||'<p class="empty">No movements yet.</p>'}</fieldset>`)}
   if(!ed){const sync=()=>{const g=i=>($('#f_'+i)||{}).value||'',ex=S.items.find(x=>ikey(x)==ikey({item:g('item'),length:g('length'),cInName:g('cInName'),cOutName:g('cOutName')}));
       $('#f_pid').value=ex?ex.pid:stkId();if(ex&&ex.pid!=ieKey){ieKey=ex.pid;$('#f_unit').value=unitOf(ex);if(!tmp.length){tmp=pphotos(ex.pid).slice();ieDraw()}}else if(!ex)ieKey=null;ieStats()};
     ['item','length','cInName','cOutName'].forEach(i=>{const e=$('#f_'+i);e&&['input','change'].forEach(t=>e.addEventListener(t,sync))});$$('#mbox .sws button').forEach(b=>b.addEventListener('click',()=>setTimeout(sync)))}}
@@ -186,10 +188,7 @@ function delProduct(k){if(!need(ISOWN,'Deleting products'))return;const r=prod(k
 
 
 /* ---------------- view item ---------------- */
-function viewItem(k){const r=prod(k);if(!r)return;const h=prodRows(k).slice(0,8),s=stt(r),Ad=ISADM();
-  const rows=[['Item code',esc(r.item)],['Stock ID',esc(r.pid)],['Length',esc(r.length)],['Colours',esc(r.cInName)+' in, '+esc(r.cOutName)+' out'],['Unit',esc(unitOf(r))],['Barcode',esc(r.barcode||r.item)],['Location',hasLoc(r)?esc(r.location):'Not set'],['In stock',r.stock+' '+esc(unitOf(r))+` <span class="tag ${s[1]}">${s[0]=='OK'?'OK':s[0]=='Low'?'Reorder now':'Out of stock'}</span>`],['Reorder level and qty',ro(r)+' and '+(r.reorderQty||'-')],['Supplier',esc(r.supplier||'-')],['Lead time',r.lead?r.lead+' days':'-'],...(Ad?[['Cost each',money(r.cost)],['Stock value',money(r.stock*r.cost)]]:[]),['Notes',esc(r.notes||'-')]];
-  openModal(`<button class="mx" onclick="closeModal()" aria-label="Close">&times;</button><h2>${esc(r.item)}</h2>${gallery(pphotos(k))}${rows.map(([a,b])=>`<div class="row"><span class="muted">${a}</span><b>${b}</b></div>`).join('')}<h3>Recent Movements</h3>${h.map(x=>`<div class="row"><span><span class="tag ${x.type=='add'?'g':x.type=='remove'?'r':'y'}">${esc(x.type)}</span> ${ordTag(x)} ${x.qty} by ${esc(x.user)}</span><span class="muted">${esc(x.time)}</span></div>`).join('')}
-  <div class="mact"><button class="btn ghost" ${A('reportProd',k)}>Report</button><button class="btn ghost" ${A('stockForm','request',k)}>Request</button><button class="btn" ${A('editItem',k)}>Edit item and photos</button></div>`,'lg')}
+function viewItem(k){itemWindow('view',k)}
 
 /* ---------------- scanner result ---------------- */
 function found(code,pv){const c=code.toLowerCase(),vs=products().filter(x=>x.item.toLowerCase()==c||(x.barcode||'').toLowerCase()==c);

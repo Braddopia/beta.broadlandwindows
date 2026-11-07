@@ -7,7 +7,7 @@ const UI={
   inv:{v:'products',f:'all',sup:'all',loc:'all',unit:'all',sort:'item',dir:1,page:1,per:50},
   mov:{f:'all',sort:'',dir:1,page:1,per:50},
   cal:{m:'month',o:0,sd:null,ly:{fit:1,svc:1,del:1,hol:1}},
-  hol:{m:0,v:'tl'}, rep:{t:'summary'}, fin:{t:'debtors',pm:0},
+  hol:{m:0,v:'chart',cm:new Date().getMonth(),y:new Date().getFullYear(),brush:''}, rep:{t:'summary'}, fin:{t:'debtors',pm:0},
   del:{f:'out',s:'all',v:'list'}, files:{cat:'all',az:0,list:0,ssq:'',page:1,per:50},
   con:{f:'all'}, staff:{c:'all'}, sup:{open:''}, lead:{v:'list',f:'live',src:'all',own:'all',sort:'id',dir:1,page:1,per:50}, ctr:{v:'list',f:'cur',sort:'id',dir:1,page:1,per:50}, nc:{t:'All'}, audit:{page:1,per:50}
 };
@@ -87,7 +87,7 @@ function openModal(h,size){const b=$('#mbox');b.className='mb'+(size?' '+size:''
 const nxHid=(f,v)=>!!f.nx&&!String(v[f.nx]??'').trim()&&!String(v[f.k]??'').trim();
 document.addEventListener('input',e=>{const el=e.target;if(!el.id||!el.id.startsWith('f_'))return;const k=el.id.slice(2);
   $$(`#mbox [data-nx="${k}"]`).forEach(r=>{const own=r.querySelector('input,select,textarea');r.hidden=!el.value.trim()&&!(own&&own.value.trim())})});
-function closeModal(){$('#modal').classList.remove('open')}
+function closeModal(){$('#modal').classList.remove('open');const a=document.activeElement;if(a&&a!==document.body&&!a.closest('#modal'))a.blur()}
 $('#modal').addEventListener('mousedown',e=>{if(e.target.id=='modal')closeModal()});
 
 /* ---- generic form ----
@@ -114,9 +114,33 @@ function readFields(fields){const o={};
     if(f.t=='colour')o[f.k+'Hex']=raw?SAFE.hex($('#f_'+f.k+'_hex').value):'';}
   return o}
 function colourField(f,v){const base=f.k.slice(0,-4),hx=SAFE.hex(v[base]||'#8a8a8a');
-  return `<div class="inl"><input id="f_${f.k}" placeholder="Colour name (optional)" maxlength="30" value="${esc(v[f.k]??'')}"><input type="color" id="f_${f.k}_hex" value="${hx}" title="Pick any colour" ${AC('oninput','pickHex',f.k)}></div><div class="sws"><button type="button" class="mini" ${A('pickC',f.k,'','#8a8a8a')}>No Colour</button>${PRE.map(([n,h])=>`<button type="button" class="sw" title="${n}" aria-label="${n}" style="background:${h}" ${A('pickC',f.k,n,h)}></button>`).join('')}</div>`}
-function pickC(k,n,h){$('#f_'+k).value=n;$('#f_'+k+'_hex').value=h}
+  return `<div class="inl"><input id="f_${f.k}" placeholder="Colour name (optional)" maxlength="30" value="${esc(v[f.k]??'')}"><input type="hidden" id="f_${f.k}_hex" value="${hx}"><button type="button" class="cbtn" id="cb_${f.k}" style="background:${hx}" title="Pick a colour" aria-label="Pick a colour" ${A('cpOpen',f.k)}></button></div><div class="sws"><button type="button" class="mini" ${A('pickC',f.k,'','#8a8a8a')}>No Colour</button>${PRE.map(([n,h])=>`<button type="button" class="sw" title="${n}" aria-label="${n}" style="background:${h}" ${A('pickC',f.k,n,h)}></button>`).join('')}</div>`}
+function pickC(k,n,h){$('#f_'+k).value=n;$('#f_'+k+'_hex').value=h;const b=$('#cb_'+k);if(b)b.style.background=h}
 function pickHex(k){const e=$('#f_'+k);if(!e.value)e.value='Custom'}
+/* ---- colour picker: window and door finishes first, then any colour ---- */
+const FINISH=[['White (RAL 9016)','#f1f0ea'],['Cream (RAL 9001)','#e9e0c8'],['Agate Grey (RAL 7038)','#b5b8b1'],['Light Grey (RAL 7035)','#c5c7c4'],['Slate Grey (RAL 7015)','#51565c'],['Anthracite Grey (RAL 7016)','#383e42'],['Basalt Grey (RAL 7012)','#575d5e'],['Black (RAL 9005)','#0e0e10'],['Black Brown (RAL 8022)','#1e1a1a'],['Chartwell Green','#a9bba5'],['Fir Green (RAL 6009)','#27352a'],['Pebble Grey (RAL 7032)','#b8b799'],['Steel Blue (RAL 5011)','#1a2b3c'],['Ruby Red (RAL 3003)','#7b1c20'],['Golden Oak','#b5752f'],['Irish Oak','#8a5a33'],['Rosewood','#5a2a1f'],['Light Oak','#c79a5c'],['Gold','#c9a24b'],['Silver','#b9b9b9']];
+let CP={k:'',h:0,s:0,v:0};
+const hsv2hex=(h,s,v)=>{const f=n=>{const k=(n+h/60)%6;return v-v*s*Math.max(0,Math.min(k,4-k,1))};return '#'+[f(5),f(3),f(1)].map(x=>Math.round(x*255).toString(16).padStart(2,'0')).join('')};
+const hex2hsv=x=>{const n=parseInt(x.slice(1),16),r=(n>>16&255)/255,g=(n>>8&255)/255,b=(n&255)/255,mx=Math.max(r,g,b),d=mx-Math.min(r,g,b);let h=0;if(d){h=mx==r?((g-b)/d)%6:mx==g?(b-r)/d+2:(r-g)/d+4;h*=60;if(h<0)h+=360}return{h,s:mx?d/mx:0,v:mx}};
+function cpOpen(k){let p=$('#cpop');if(!p){p=document.createElement('div');p.id='cpop';document.body.appendChild(p);
+    document.addEventListener('mousedown',e=>{const q=$('#cpop');if(q&&q.classList.contains('open')&&!e.target.closest('#cpop,.cbtn'))q.classList.remove('open')})}
+  if(p.classList.contains('open')&&CP.k==k){p.classList.remove('open');return}
+  const hx=SAFE.hex($('#f_'+k+'_hex').value);CP={k,...hex2hsv(hx)};const cur=($('#f_'+k).value||'').toLowerCase();
+  p.innerHTML=`<div class="cp-h"><b>Pick a colour</b><button type="button" class="cp-x" aria-label="Close" onclick="$('#cpop').classList.remove('open')">&times;</button></div>
+   <small class="cp-l">Window and door finishes</small><div class="cp-g">${FINISH.map(([n,h])=>`<button type="button" class="cp-s ${cur==n.toLowerCase()?'on':''}" title="${esc(n)}" ${A('cpPick',n,h)}><i style="background:${h}"></i><span>${esc(n.replace(/ \(RAL \d+\)/,''))}</span></button>`).join('')}</div>
+   <small class="cp-l">Any colour</small><div class="cp-sv" id="cpSv"><i id="cpKnob"></i></div><input type="range" class="cp-hue" id="cpHue" min="0" max="359" value="${Math.round(CP.h)}" oninput="cpHue(this.value)" aria-label="Hue">
+   <div class="cp-row"><span class="cp-pv" id="cpPv"></span><label class="cp-hx">Hex<input id="cpHex" maxlength="7" value="${hx}" oninput="cpHexIn(this.value)" class="nocap"></label><button type="button" class="btn sm" onclick="cpUse()">Use colour</button></div>
+   <button type="button" class="cp-none" ${A('cpPick','','#8a8a8a')}>No colour</button>`;
+  p.classList.add('open');const b=$('#cb_'+k).getBoundingClientRect();
+  p.style.left=Math.max(8,Math.min(innerWidth-p.offsetWidth-8,b.right-p.offsetWidth))+'px';p.style.top=Math.max(8,Math.min(innerHeight-p.offsetHeight-8,b.bottom+8))+'px';
+  const sv=$('#cpSv'),drag=e=>{const r=sv.getBoundingClientRect();CP.s=Math.max(0,Math.min(1,(e.clientX-r.left)/r.width));CP.v=1-Math.max(0,Math.min(1,(e.clientY-r.top)/r.height));cpDraw(true)};
+  sv.addEventListener('pointerdown',e=>{sv.setPointerCapture(e.pointerId);drag(e);sv.onpointermove=drag});sv.addEventListener('pointerup',()=>{sv.onpointermove=null});cpDraw(false)}
+function cpDraw(setHex){const hx=hsv2hex(CP.h,CP.s,CP.v),sv=$('#cpSv');if(!sv)return;sv.style.background=`linear-gradient(to top,#000,transparent),linear-gradient(to right,#fff,hsl(${CP.h},100%,50%))`;
+  const k=$('#cpKnob');k.style.left=CP.s*100+'%';k.style.top=(1-CP.v)*100+'%';k.style.background=hx;$('#cpPv').style.background=hx;if(setHex)$('#cpHex').value=hx}
+function cpHue(v){CP.h=+v;cpDraw(true)}
+function cpHexIn(v){if(/^#[0-9a-f]{6}$/i.test(v)){Object.assign(CP,hex2hsv(v));$('#cpHue').value=Math.round(CP.h);cpDraw(false)}}
+function cpUse(){const hx=SAFE.hex($('#cpHex').value),n=$('#f_'+CP.k);pickC(CP.k,n.value&&![...FINISH,...PRE].some(f=>f[0].toLowerCase()==n.value.toLowerCase())?n.value:'Custom',hx);$('#cpop').classList.remove('open')}
+function cpPick(n,h){pickC(CP.k,n,h);$('#cpop').classList.remove('open')}
 function scanInto(id){scan(c=>{const e=$('#'+id);if(e){e.value=c;e.dispatchEvent(new Event('input'))}})}
 
 /* ---- photos: resized + compressed before storing, capped per record ---- */
