@@ -16,7 +16,7 @@ src/js/03-auth        accounts, PINs, idle sign-out, My Details
 src/js/04-shell       render loop, navigation, forms, pagination, theme
 src/js/05-home        Overview
 src/js/06-operations  Factory floor, deliveries, suppliers, Hallmark, Smart Orders
-src/js/07-sales       Leads, contracts, service calls, contacts
+src/js/07-sales       Lead and contract helpers, convert, service calls, contacts
 src/js/08-people      Calendar, holiday planner, staff
 src/js/09-inventory   Inventory (products, movements, requests, item editor)
 src/js/10-scanner     Barcode scanner
@@ -24,6 +24,7 @@ src/js/11-print-reports  Report template, stock reports, customer documents, Rep
 src/js/12-files       Files page
 src/js/13-finance-admin  Finance, Admin console (PINs, audit log, backups)
 src/js/14-notify      Notification centre
+src/js/15-records     Full-screen lead and contract records, lead wizard, list views
 src/js/99-boot        Start-up
 ```
 

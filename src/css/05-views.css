@@ -416,3 +416,7 @@ body[data-theme=dark] .mb{background:rgba(17,21,30,.97)!important}
 /* sidebar logo: more room above */
 .brand{padding:1.1rem .2rem 1rem}
 @media(max-height:760px) and (min-width:901px){.brand{padding:.8rem .2rem .7rem}}
+
+/* no hover movement anywhere: shadow only */
+.kpi:hover,.supc:hover,button.kpi:hover,.lc:hover{transform:none}
+input[type=color]:hover{transform:none}

@@ -185,7 +185,7 @@ let WZ=null;
 function wizard(o){WZ={...o,st:0,seen:0};wzDraw()}
 function wzDraw(){const W=WZ,st=W.steps[W.st],last=W.st==W.steps.length-1;
   const lab=f=>{const val=W.v[f.k];return f.t=='number'?(val?val:''):val};
-  const rev=()=>W.steps.filter(x=>x.f).map(x=>`<div class="wz-r"><h3>${esc(x.t)} <button class="mini" ${A('wzGo',W.steps.indexOf(x))}>Change</button></h3>${x.f.map(f=>`<div class="si"><span>${esc(f.l.replace(/ \(.*\)/,''))}</span><b>${esc(lab(f))||'<span class="muted">-</span>'}</b></div>`).join('')}</div>`).join('');
+  const rev=()=>W.steps.filter(x=>x.f).map(x=>`<div class="wz-r"><h3>${esc(x.t)} <button class="mini" ${A('wzGo',W.steps.indexOf(x))}>Change</button></h3>${x.f.map(f=>`<div class="si"><span>${esc(f.l.replace(/ \(.*\)/,''))}</span><b class="${f.t=='email'||/email|web|url/i.test(f.k)?'nocap':''}">${esc(lab(f))||'<span class="muted">-</span>'}</b></div>`).join('')}</div>`).join('');
   openModal(`<button class="mx" onclick="closeModal()" aria-label="Close">&times;</button><h2>${esc(W.title)}</h2>
    <div class="stp wz">${W.steps.map((x,i)=>`<span class="${i<=W.st?'on':''} ${i<=W.seen||W.edit?'go':''}" ${i<=W.seen||W.edit?A('wzGo',i):''}><i>${i<W.st?'&#10003;':i+1}</i>${esc(x.t)}</span>`).join('')}</div>
    <p class="muted wz-d">Step ${W.st+1} of ${W.steps.length}: ${esc(st.d||'')}</p>
@@ -193,7 +193,7 @@ function wzDraw(){const W=WZ,st=W.steps[W.st],last=W.st==W.steps.length-1;
    <div class="mact">${W.del?`<button class="btn ghost l" style="color:var(--red)" onclick="WZ.del()">Delete</button>`:''}${W.st?'<button class="btn ghost" onclick="wzStep(-1)">Back</button>':'<button class="btn ghost" onclick="closeModal()">Cancel</button>'}${W.edit&&!last?'<button class="btn ghost" onclick="wzSave()">Save now</button>':''}${last?`<button class="btn green" onclick="wzSave()">${esc(W.saveLabel||'Save')}</button>`:'<button class="btn" onclick="wzStep(1)">Next</button>'}</div>`,'md');
   const f=$('#mbox .wz-b input:not([readonly]),#mbox .wz-b textarea');if(f&&matchMedia('(pointer:fine)').matches)setTimeout(()=>f.focus(),80)}
 function wzRead(){const st=WZ.steps[WZ.st];if(st.review)return true;const o=readFields(st.f);if(!o)return false;Object.assign(WZ.v,o);const e=WZ.check&&WZ.check(WZ.st,WZ.v);if(e){toast(e);return false}return true}
-function wzStep(d){if(d>0&&!wzRead())return;if(d<0){const st=WZ.steps[WZ.st];if(!st.review){const o={};st.f.forEach(f=>{const e=$('#f_'+f.k);if(e)o[f.k]=e.value});Object.assign(WZ.v,o)}}
+function wzStep(d){if(d>0&&!wzRead())return;if(d<0){const st=WZ.steps[WZ.st];if(!st.review){const o={};st.f.forEach(f=>{const e=$('#f_'+f.k);if(!e)return;const r=(e.value||'').trim();o[f.k]=f.t=='number'?(SAFE.num(r,{min:f.min??0,max:f.max??1e9,dp:f.dp??2})??0):f.t=='date'?SAFE.date(r):SAFE.text(r,f.t=='area'?(f.max||2000):(f.max||120))});Object.assign(WZ.v,o)}}
   WZ.st=Math.max(0,Math.min(WZ.steps.length-1,WZ.st+d));WZ.seen=Math.max(WZ.seen,WZ.st);wzDraw()}
 function wzGo(i){if(i>WZ.seen&&!WZ.edit)return;if(i!=WZ.st&&!wzRead())return;WZ.st=i;WZ.seen=Math.max(WZ.seen,i);wzDraw()}
 function wzSave(){if(!wzRead())return;for(let i=0;i<WZ.steps.length;i++){const e=WZ.check&&WZ.check(i,WZ.v);if(e){WZ.st=i;wzDraw();toast(e);return}}WZ.save(WZ.v);store();closeModal();render()}
