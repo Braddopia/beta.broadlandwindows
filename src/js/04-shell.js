@@ -113,12 +113,16 @@ function form(title,fields,v,cb,photos,size){
   if(photos)drawThumbs();
   $('#saveBtn').onclick=()=>{const o=readFields(fields);if(!o)return;if(photos)o.photos=tmp;if(cb(o)===false)return;store();closeModal();render()}}
 /* read + validate form fields; returns null (and focuses the field) when invalid */
+/* show a problem next to the box itself (and still as a message at the bottom) */
+function fieldErr(e,msg){toast(msg);const w=e.closest('.rf,.ff');if(w){w.classList.add('err');let m=w.querySelector('.ferr');if(!m){m=document.createElement('em');m.className='ferr';w.appendChild(m)}m.textContent=msg;
+    const d=w.closest('details');if(d)d.open=true;const clr=()=>{w.classList.remove('err');m.remove();e.removeEventListener('input',clr);e.removeEventListener('change',clr)};e.addEventListener('input',clr);e.addEventListener('change',clr)}
+  const p=e.closest('.rw-p');if(p&&!p.classList.contains('on')&&typeof recTab=='function')recTab(p.dataset.t);e.focus();if(e.scrollIntoView)e.scrollIntoView({block:'center'})}
 function readFields(fields){const o={};
   for(const f of fields){const e=$('#f_'+f.k);if(!e)continue;const raw=(e.value||'').trim(),lab=f.l.replace(/ \(.*\)/,'');
-    if(f.req&&!raw){toast(lab+' is required');e.focus();return null}
-    if(f.t=='number'){if(raw===''){o[f.k]=0;continue}const n=SAFE.num(raw,{min:f.min??0,max:f.max??1e9,dp:f.dp??2});if(n==null||(f.pos&&!(n>0))){toast(lab+' must be a '+(f.pos?'positive ':'')+'number');e.focus();return null}if(parseFloat(raw)!=n&&(parseFloat(raw)<(f.min??0)||parseFloat(raw)>(f.max??1e9))){toast(lab+' must be between '+(f.min??0)+' and '+(f.max??1e9));e.focus();return null}o[f.k]=n}
-    else if(f.t=='date'){if(raw&&!SAFE.date(raw)){toast(lab+' is not a valid date');e.focus();return null}o[f.k]=raw}
-    else if(f.t=='email'){if(raw&&!SAFE.email(raw)){toast(lab+' does not look like an email address');e.focus();return null}o[f.k]=raw}
+    if(f.req&&!raw){fieldErr(e,lab+' must be filled in');return null}
+    if(f.t=='number'){if(raw===''){o[f.k]=0;continue}const n=SAFE.num(raw,{min:f.min??0,max:f.max??1e9,dp:f.dp??2});if(n==null||(f.pos&&!(n>0))){fieldErr(e,lab+' must be a '+(f.pos?'positive ':'')+'number');return null}if(parseFloat(raw)!=n&&(parseFloat(raw)<(f.min??0)||parseFloat(raw)>(f.max??1e9))){fieldErr(e,lab+' must be between '+(f.min??0)+' and '+(f.max??1e9));return null}o[f.k]=n}
+    else if(f.t=='date'){if(raw&&!SAFE.date(raw)){fieldErr(e,lab+' is not a valid date');return null}o[f.k]=raw}
+    else if(f.t=='email'){if(raw&&!SAFE.email(raw)){fieldErr(e,lab+' does not look like an email address');return null}o[f.k]=raw}
     else o[f.k]=SAFE.text(raw,f.t=='area'?(f.max||2000):(f.max||120));
     if(f.t=='colour')o[f.k+'Hex']=raw?SAFE.hex($('#f_'+f.k+'_hex').value):'';}
   return o}

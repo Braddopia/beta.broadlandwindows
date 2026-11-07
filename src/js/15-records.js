@@ -15,18 +15,18 @@ const staffNames=()=>['',...new Set(S.staff.map(s=>s.name))];
 /* ---- customer information: same fields on leads and contracts ---- */
 const CUSTF=[
   {k:'title',l:'Title',t:'select',o:['','Mr','Mrs','Miss','Ms','Mr & Mrs','Dr','Company'],req:1,g:'Customer'},
-  {k:'name',l:'Customer / contact name',req:1,g:'Customer'},{k:'salutation',l:'Salutation (Dear ...)',g:'Customer'},{k:'company',l:'Company',g:'Customer'},
-  {k:'prefContact',l:'Preferred contact',t:'select',o:['','Mobile','Home phone','Work phone','Email','Post'],g:'Customer'},
+  {k:'name',l:'Customer / contact name',req:1,g:'Customer'},{k:'salutation',adv:1,l:'Letters start "Dear ..."',g:'Customer'},{k:'company',adv:1,l:'Company (if a business)',g:'Customer'},
+  {k:'prefContact',l:'Best way to contact them',t:'select',o:['','Mobile','Home phone','Work phone','Email','Post'],g:'Customer'},
   {k:'mob1',l:'Mobile',t:'tel',max:30,g:'Phone Numbers',any:1},{k:'mob2',nx:'mob1',l:'Mobile 2',t:'tel',max:30,g:'Phone Numbers'},{k:'mob3',nx:'mob2',l:'Mobile 3',t:'tel',max:30,g:'Phone Numbers'},
   {k:'home1',l:'Home phone',t:'tel',max:30,g:'Phone Numbers',any:1},{k:'home2',nx:'home1',l:'Home phone 2',t:'tel',max:30,g:'Phone Numbers'},{k:'home3',nx:'home2',l:'Home phone 3',t:'tel',max:30,g:'Phone Numbers'},
   {k:'work',l:'Work phone',t:'tel',max:30,g:'Phone Numbers',any:1},{k:'work2',nx:'work',l:'Work phone 2',t:'tel',max:30,g:'Phone Numbers'},{k:'work3',nx:'work2',l:'Work phone 3',t:'tel',max:30,g:'Phone Numbers'},
   {k:'email1',l:'Email',t:'email',req:1,g:'Email'},{k:'email2',nx:'email1',l:'Email 2',t:'email',g:'Email'},{k:'email3',nx:'email2',l:'Email 3',t:'email',g:'Email'},
   {k:'addrType',l:'Address type',t:'select',o:['','Home','Business'],req:1,g:'Home Address'},{k:'homeAddr',l:'Address line 1',req:1,max:120,g:'Home Address'},{k:'homeAddr2',l:'Address line 2',max:120,g:'Home Address'},
-  {k:'town',l:'Town / city',req:1,max:60,g:'Home Address'},{k:'county',l:'County',max:60,g:'Home Address'},{k:'homePc',l:'Postcode',req:1,max:10,g:'Home Address'},
-  {k:'invSame',l:'Invoice to',t:'select',o:['Same as home','Different'],g:'Invoice Address'},{k:'invAddr',dep:'invSame',l:'Address line 1',max:120,g:'Invoice Address'},{k:'invAddr2',dep:'invSame',l:'Address line 2',max:120,g:'Invoice Address'},
-  {k:'invTown',dep:'invSame',l:'Town / city',max:60,g:'Invoice Address'},{k:'invCounty',dep:'invSame',l:'County',max:60,g:'Invoice Address'},{k:'invPc',dep:'invSame',l:'Postcode',max:10,g:'Invoice Address'},
-  {k:'siteSame',l:'Installation at',t:'select',o:['Same as home','Different'],g:'Site Address'},{k:'siteAddr',dep:'siteSame',l:'Address line 1',max:120,g:'Site Address'},{k:'siteAddr2',dep:'siteSame',l:'Address line 2',max:120,g:'Site Address'},
-  {k:'siteTown',dep:'siteSame',l:'Town / city',max:60,g:'Site Address'},{k:'siteCounty',dep:'siteSame',l:'County',max:60,g:'Site Address'},{k:'sitePc',dep:'siteSame',l:'Postcode',max:10,g:'Site Address'},{k:'siteAccess',l:'Access / parking notes',max:200,g:'Site Address'}];
+  {k:'town',l:'Town / city',req:1,max:60,g:'Home Address'},{k:'county',adv:1,l:'County',max:60,g:'Home Address'},{k:'homePc',l:'Postcode',req:1,max:10,g:'Home Address'},
+  {k:'invSame',l:'Send the invoice to',t:'select',o:['Same as home','Different'],g:'Invoice Address'},{k:'invAddr',dep:'invSame',l:'Address line 1',max:120,g:'Invoice Address'},{k:'invAddr2',dep:'invSame',l:'Address line 2',max:120,g:'Invoice Address'},
+  {k:'invTown',dep:'invSame',l:'Town / city',max:60,g:'Invoice Address'},{k:'invCounty',dep:'invSame',adv:1,l:'County',max:60,g:'Invoice Address'},{k:'invPc',dep:'invSame',l:'Postcode',max:10,g:'Invoice Address'},
+  {k:'siteSame',l:'Where the work is',t:'select',o:['Same as home','Different'],g:'Site Address'},{k:'siteAddr',dep:'siteSame',l:'Address line 1',max:120,g:'Site Address'},{k:'siteAddr2',dep:'siteSame',l:'Address line 2',max:120,g:'Site Address'},
+  {k:'siteTown',dep:'siteSame',l:'Town / city',max:60,g:'Site Address'},{k:'siteCounty',dep:'siteSame',adv:1,l:'County',max:60,g:'Site Address'},{k:'sitePc',dep:'siteSame',l:'Postcode',max:10,g:'Site Address'},{k:'siteAccess',l:'Access / parking notes',max:200,g:'Site Address'}];
 const GDPRF=[{k:'gdprEmail',l:'Marketing by email',t:'select',o:YN},{k:'gdprSms',l:'Marketing by text',t:'select',o:YN},{k:'gdprPhone',l:'Marketing by phone',t:'select',o:YN},{k:'gdprPost',l:'Marketing by post',t:'select',o:YN},{k:'gdprDate',l:'Consent date',t:'date'},{k:'gdprHow',l:'How consent was given',max:100},{k:'gdprNotes',l:'Data notes',t:'area',max:500}];
 const CUSTK=[...CUSTF,...GDPRF].map(f=>f.k);
 /* move old single phone/email/address fields into the new structure */
@@ -48,10 +48,13 @@ function rfH(f,v){const val=v[f.k]??'',id='f_'+f.k;let c;
   else c=`<input id="${id}" type="${f.t=='number'?'number':f.t=='date'?'date':f.t=='time'?'time':f.t=='email'?'email':f.t=='tel'?'tel':'text'}" ${f.t=='number'?'step="any" min="0" inputmode="decimal"':`maxlength="${f.max||120}"`} value="${esc(val)}" ${f.list?`list="${f.list}"`:''} autocomplete="off">`;
   const hid=(f.dep&&(v[f.dep]||'Same as home')!='Different')||nxHid(f,v);
   if(['invSame','siteSame'].includes(f.k))c=c.replace('<select ','<select onchange="recDep(this)" ');
-  return `<label class="rf ${f.t=='area'?'ta':''}" ${f.dep?`data-dep="${f.dep}"`:''} ${f.nx?`data-nx="${f.nx}"`:''} ${hid?'hidden':''}><span>${esc(f.l)}${f.req?' *':f.any?' <i class="any">*</i>':''}</span>${c}</label>`}
-const grpH=(t,fs,v)=>`<section class="rg"><h4>${esc(t)}${fs.some(f=>f.any)?'<small class="anyh">* at least one</small>':''}</h4>${fs.map(f=>rfH(f,v)).join('')}</section>`;
-const byGroup=(fs,v)=>{const g={},adv=[];fs.forEach(f=>(g[f.g]=g[f.g]||[]).push(f));
-  return Object.entries(g).map(([t,x])=>grpH(t,x,v)).join('')+(adv.length?`<details class="rg more"><summary>More details <span class="muted">(${adv.length})</span></summary>${adv.map(f=>rfH(f,v)).join('')}</details>`:'')};
+  return `<label class="rf ${f.t=='area'?'ta':''}" ${f.dep?`data-dep="${f.dep}"`:''} ${f.nx?`data-nx="${f.nx}"`:''} ${hid?'hidden':''}><span>${esc(f.l)}${f.req?' *':''}</span>${c}</label>`}
+/* each group reads as a plain question; fields marked adv fold away under "More details" */
+const GQ={'Customer':'Who Is The Customer?','Phone Numbers':'How Can We Phone Them?','Email':'Their Email Address','Home Address':'Where Do They Live?','Invoice Address':'Where Should The Invoice Go?','Site Address':'Where Is The Work Being Done?',
+  'Lead':'About This Lead','Source And Interest':'How They Found Us And What They Want','Result':'What Happens Next','Next Visit':'The Next Visit'};
+const grpH=(t,fs,v)=>{const main=fs.filter(f=>!f.adv),adv=fs.filter(f=>f.adv),open=adv.some(f=>String(v[f.k]??'').trim());
+  return `<section class="rg fg"><h4>${esc(GQ[t]||t)}${fs.some(f=>f.any)?'<small class="anyh">Fill in at least one number *</small>':''}</h4>${main.map(f=>rfH(f,v)).join('')}${adv.length?`<details class="rmore"${open?' open':''}><summary>More details <span>(${adv.length})</span></summary><div class="rmore-b">${adv.map(f=>rfH(f,v)).join('')}</div></details>`:''}</section>`};
+const byGroup=(fs,v)=>{const g={};fs.forEach(f=>(g[f.g]=g[f.g]||[]).push(f));return Object.entries(g).map(([t,x])=>grpH(t,x,v)).join('')};
 function recDep(sel){const k=sel.id.slice(2);$$(`#mbox [data-dep="${k}"]`).forEach(r=>r.hidden=sel.value!='Different')}
 
 /* ---- record window ---- */
@@ -66,20 +69,20 @@ function recOpen(kind,id){const D=REC[kind],r=id?D.get(id):null;if(id&&!r)return
   const ord=RSTEPS[kind],tabs=D.tabs(W).sort((a,b)=>ord.indexOf(a.k)-ord.indexOf(b.k)),tab=tabs.some(t=>t.k==RTAB[kind])?RTAB[kind]:tabs[0].k,pos=W.list.indexOf(W.id);W.steps=tabs.map(t=>t.k);
   const nm=k=>(RNAME[kind]||{})[k]||tabs.find(t=>t.k==k).t,hint=k=>{const h=RHINT[k];return typeof h=='object'?h[kind]:h||''};
   openModal(`<div class="rw">
-   <div class="rw-bar"><button class="rb1" onclick="recSave(true)">Save &amp; Close</button><button class="rb1" onclick="recSave(false)">Save</button>${W.isNew?'':D.actions(W)}<span class="rw-sp"></span>
-    ${W.isNew?'':`<button class="rb1 ic" title="First" ${A('recNav','first')} ${pos<=0?'disabled':''}>&laquo;</button><button class="rb1 ic" title="Previous" ${A('recNav',-1)} ${pos<=0?'disabled':''}>&lsaquo;</button><span class="rw-pos">${pos+1} of ${W.list.length}</span><button class="rb1 ic" title="Next" ${A('recNav',1)} ${pos>=W.list.length-1?'disabled':''}>&rsaquo;</button><button class="rb1 ic" title="Last" ${A('recNav','last')} ${pos>=W.list.length-1?'disabled':''}>&raquo;</button>`}
-    <button class="rb1 ic" onclick="recClose()" aria-label="Close">&times;</button></div>
+   <div class="rw-bar"><button class="rb1 sv" onclick="recSave(false)">Save</button>${W.isNew?'':D.actions(W)}<span class="rw-sp"></span>
+    ${W.isNew||W.list.length<2?'':`<button class="rb1" title="Save this one and open the previous ${esc(D.label.toLowerCase())}" ${A('recNav',-1)} ${pos<=0?'disabled':''}>&lsaquo; Previous</button><span class="rw-pos">${esc(D.label)} ${pos+1} of ${W.list.length}</span><button class="rb1" title="Save this one and open the next ${esc(D.label.toLowerCase())}" ${A('recNav',1)} ${pos>=W.list.length-1?'disabled':''}>Next &rsaquo;</button>`}
+    <button class="rb1 cl" onclick="recClose()">Close &times;</button></div>
    <div class="rw-h"><div><small>${esc(D.label)}${W.isNew?' · New':''}</small><h2>${esc(D.heading(W))}</h2></div><div class="rw-hk">${D.headStats(W)}</div></div>
    <div class="rw-x"><aside class="rw-rail"><div class="rw-cust" id="rwCust"></div><div class="rw-prog"><span id="rwPct"></span><i><b id="rwBar"></b></i></div>
      <ol class="rw-steps">${tabs.map((t,i)=>`<li><button type="button" data-t="${t.k}" class="${t.k==tab?'on':''}" ${A('recTab',t.k)}><i>${i+1}</i><span><b>${esc(nm(t.k))}</b><small data-st="${t.k}"></small></span></button></li>`).join('')}</ol></aside>
-    <div class="rw-main"><div class="rw-b">${tabs.map((t,i)=>`<div class="rw-p ${t.k==tab?'on':''}" data-t="${t.k}" role="tabpanel"><div class="rw-sh"><small>Step ${i+1} of ${tabs.length}</small><h3>${esc(nm(t.k))}</h3><p>${esc(hint(t.k))}</p></div>${t.h(W)}</div>`).join('')}</div>
-     <div class="rw-foot"><button type="button" class="btn ghost" id="rwPrev" onclick="recStep(-1)"></button><span class="rw-sp"></span><button type="button" class="btn" id="rwNext" onclick="recStep(1)"></button></div></div></div></div>`,'full');
-  W.nm=nm;recThumbs();recDocs();recFoot();recRail();$('#mbox .rw-x').addEventListener('input',()=>{clearTimeout(recRail.t);recRail.t=setTimeout(recRail,250)});$('#mbox .rw-x').addEventListener('change',e=>{const c=e.target;if(c.classList&&c.classList.contains('rck')){const w=c.parentElement.querySelector('.ck-w');if(w)w.textContent=c.checked?'Done today by '+USER:''}recRail()});
+    <div class="rw-main"><div class="rw-b">${tabs.map((t,i)=>`<div class="rw-p ${t.k==tab?'on':''}" data-t="${t.k}" role="tabpanel"><div class="rw-sh"><small>Step ${i+1} of ${tabs.length}</small><h3>${esc(nm(t.k))}</h3><p>${esc(hint(t.k))}</p>${t.k=='customer'||t.k=='details'?'<p class="rw-req">Boxes marked * must be filled in.</p>':''}</div>${t.h(W)}</div>`).join('')}</div>
+     <div class="rw-foot"><button type="button" class="btn ghost" id="rwPrev" onclick="recStep(-1)"></button><span class="rw-sp"></span><button type="button" class="btn ghost" onclick="recSave(false)">Save</button><button type="button" class="btn" id="rwNext" onclick="recStep(1)"></button></div></div></div></div>`,'full');
+  W.nm=nm;recThumbs();recDocs();recFoot();recRail();$('#mbox .rw-x').addEventListener('input',()=>{RW.dirty=1;clearTimeout(recRail.t);recRail.t=setTimeout(recRail,250)});$('#mbox .rw-x').addEventListener('change',e=>{RW.dirty=1;const c=e.target;if(c.classList&&c.classList.contains('rck')){const w=c.parentElement.querySelector('.ck-w');if(w)w.textContent=c.checked?'Done today by '+USER:''}recRail()});
   drawThumbs()}
 function recTab(k){RTAB[RW.kind]=k;$$('#mbox .rw-steps button').forEach(b=>b.classList.toggle('on',b.dataset.t==k));$$('#mbox .rw-p').forEach(p=>p.classList.toggle('on',p.dataset.t==k));$('#mbox .rw-b').scrollTop=0;recFoot();recRail();const b=$(`#mbox .rw-steps button[data-t="${k}"]`);if(b&&b.scrollIntoView)b.scrollIntoView({block:'nearest',inline:'nearest'})}
 function recStep(d){const S2=RW.steps,i=S2.indexOf(RTAB[RW.kind]);if(d>0&&i==S2.length-1){recSave(true);return}const n=S2[i+d];if(n)recTab(n)}
 function recFoot(){const S2=RW.steps,i=S2.indexOf(RTAB[RW.kind]),p=$('#rwPrev'),n=$('#rwNext');if(!p)return;
-  p.hidden=i<=0;p.innerHTML=i>0?'&larr; '+esc(RW.nm(S2[i-1])):'';n.innerHTML=i<S2.length-1?'Next: '+esc(RW.nm(S2[i+1]))+' &rarr;':'Save &amp; Close';n.classList.toggle('green',i==S2.length-1)}
+  p.hidden=i<=0;p.innerHTML=i>0?'&larr; Back: '+esc(RW.nm(S2[i-1])):'';n.innerHTML=i<S2.length-1?'Next: '+esc(RW.nm(S2[i+1]))+' &rarr;':'Save and finish';n.classList.toggle('green',i==S2.length-1)}
 /* progress for each step, worked out from what is on screen now */
 function recRail(){if(!RW||!$('#rwCust'))return;const g=k=>{const e=$('#f_'+k);return String(e?e.value:(RW.v[k]??'')).trim()},n=s=>$$(`#mbox ${s}`).length,v=RW.v;
   const ck=$$('#mbox .rck'),ckd=ck.filter(c=>c.checked).length,tel=[g('mob1'),g('home1'),g('work'),g('mob2'),g('home2')].find(Boolean)||v.phone||'',em=g('email1')||v.email||'',ad=[g('homeAddr')||v.address,g('town')].filter(Boolean).join(', ');
@@ -100,14 +103,18 @@ function recRedraw(t){const D=REC[RW.kind],x=D.tabs(RW).find(z=>z.k==t),p=$(`#mb
 function recRead(){const D=REC[RW.kind],o=readFields(D.fields(RW));if(!o)return null;
   const at={...(RW.v.chkAt||{})};$$('#mbox .rck').forEach(c=>{const k=c.dataset.k;(o.chk=o.chk||{})[k]=c.checked;if(c.checked&&!at[k])at[k]={d:today(),by:USER};if(!c.checked)delete at[k]});o.chkAt=at;
   o.phTags=(RW.v.phTags||[]).slice(0,MAX_PHOTOS);if($('#mbox .pl'))o.lines=readLines();if($('#mbox .op')||RW.v.openings)o.openings=$('#mbox .op')?readOps():RW.v.openings;o.photos=tmp.slice(0,MAX_PHOTOS);return o}
-function recSave(close){const D=REC[RW.kind],o=recRead();if(!o){const a=document.activeElement,p=a&&a.closest&&a.closest('.rw-p');if(p&&!p.classList.contains('on')){recTab(p.dataset.t);setTimeout(()=>a.focus(),30)}return false}const e=D.check&&D.check(RW,o);if(e){toast(e);if(/Customer step/.test(e))recTab('customer');return false}
+function recSave(close){const D=REC[RW.kind],o=recRead();if(!o){const a=document.activeElement,p=a&&a.closest&&a.closest('.rw-p');if(p&&!p.classList.contains('on')){recTab(p.dataset.t);setTimeout(()=>a.focus(),30)}return false}const e=D.check&&D.check(RW,o);if(e){toast(e.replace(/ \(.*step\)$/,''));if(/Customer step/.test(e)){recTab('customer');if(/phone/i.test(e)){const f=$('#f_mob1')||$('#f_home1');if(f)fieldErr(f,'Fill in at least one phone number')}else if(/name/i.test(e)){const f=$('#f_name');if(f)fieldErr(f,'Type the customer name')}}return false}
   const id=D.save(RW,o);store();if(close){closeModal();render()}else{render();recOpen(RW.kind,id)}toast('Saved');return true}
 function recNav(d){const L=RW.list,i=L.indexOf(RW.id),n=d=='first'?0:d=='last'?L.length-1:i+d;if(n<0||n>=L.length)return;const kind=RW.kind;if(!recSave(false))return;recOpen(kind,L[n])}
 /* small inline lists inside a record */
 function recAdd(list,fs,tab){const o={};for(const k of fs){const e=$('#ra_'+k);o[k]=e?SAFE.text(e.value,300):''}if(!Object.values(o).some(Boolean)){toast('Fill in the details first');return}
   RW.v[list]=RW.v[list]||[];RW.v[list].unshift({...o,by:USER,at:today()});RW.dirty=1;recRedraw(tab)}
 function recDel(list,i,tab){RW.v[list].splice(i,1);RW.dirty=1;recRedraw(tab)}
-function recClose(){if(RW&&RW.dirty&&!confirm('You have unsaved changes. Close without saving?'))return;closeModal()}
+/* closing with changes: ask inside the window (a separate popup would replace the record) */
+function recClose(){if(!RW||!RW.dirty){closeModal();return}const w=$('#mbox .rw');if(!w){closeModal();return}let a=$('#rwAsk');
+  if(!a){w.insertAdjacentHTML('beforeend',`<div class="rw-ask" id="rwAsk" role="alertdialog" aria-modal="true" aria-labelledby="rwAskT"><div class="rw-ask-b"><h3 id="rwAskT">Save your changes?</h3><p>You have changed this ${esc(REC[RW.kind].label.toLowerCase())}. If you close without saving, the changes are lost.</p>
+    <div class="rw-ask-a"><button class="btn green" onclick="$('#rwAsk').remove();recSave(true)">Save and close</button><button class="btn ghost" onclick="closeModal()">Close without saving</button><button class="btn ghost" onclick="$('#rwAsk').remove()">Keep editing</button></div></div></div>`);a=$('#rwAsk')}
+  a.querySelector('.btn').focus()}
 /* checklist shown as stages, with who ticked each item and when */
 const ckTab=(W,items)=>{const G=items===CK?CKG:LCKG,C=W.v.chk||{},T=W.v.chkAt||{},n=items.filter(k=>C[k]).length;
   return `<div class="ckw"><div class="ck-top"><b>${n} of ${items.length} done</b><i><b style="width:${Math.round(100*n/(items.length||1))}%"></b></i></div><div class="ckg">${G.map(([t,d,L],gi)=>{const dn=L.filter(k=>C[k]).length;return `<section class="rg ck-s ${dn==L.length?'all':''}"><h4><span><i class="ck-n">${gi+1}</i>${esc(t)}</span><small>${dn} of ${L.length}</small></h4><p class="muted">${esc(d)}</p>${L.map(k=>`<label class="ck-i"><input type="checkbox" class="rck" data-k="${esc(k)}" ${C[k]?'checked':''}><span><b>${esc(k)}</b><small class="ck-w">${C[k]&&T[k]?'Done '+fd(T[k].d)+' by '+esc(T[k].by):C[k]?'Done':''}</small></span></label>`).join('')}</section>`}).join('')}</div></div>`};
@@ -273,7 +280,7 @@ function openLead(id){recOpen('lead',id)}
 function editLead(id){if(id)recOpen('lead',id);else leadWizard()}
 function leadWizard(){const id=nextLeadId();
   wizard({title:'New Lead '+id,saveLabel:'Create lead',v:{title:'',source:'Website',owner:USER,siteSame:'Same as home',productType:''},steps:[
-    {t:'Customer',d:'Who is the customer?',f:[{k:'title',l:'Title',t:'select',o:['','Mr','Mrs','Miss','Ms','Mr & Mrs','Dr','Company'],req:1},{k:'name',l:'Name',req:1},{k:'mob1',l:'Mobile',t:'tel',max:30},{k:'mob2',nx:'mob1',l:'Second mobile',t:'tel',max:30},{k:'home1',l:'Home phone',t:'tel',max:30},{k:'mob3',nx:'mob2',l:'Third mobile',t:'tel',max:30},{k:'home2',nx:'home1',l:'Second home phone',t:'tel',max:30},{k:'home3',nx:'home2',l:'Third home phone',t:'tel',max:30},{k:'email1',l:'Email',t:'email',w:'full',req:1},{k:'email2',nx:'email1',l:'Second email',t:'email',w:'full'},{k:'email3',nx:'email2',l:'Third email',t:'email',w:'full'},{k:'company',l:'Company (if business)',w:'full'}]},
+    {t:'Customer',d:'Who is the customer?',f:[{k:'title',l:'Title',t:'select',o:['','Mr','Mrs','Miss','Ms','Mr & Mrs','Dr','Company'],req:1},{k:'name',l:'Name',req:1},{k:'mob1',l:'Mobile',t:'tel',max:30,hint:'Fill in at least one: a mobile or a home phone'},{k:'mob2',nx:'mob1',l:'Second mobile',t:'tel',max:30},{k:'home1',l:'Home phone',t:'tel',max:30},{k:'mob3',nx:'mob2',l:'Third mobile',t:'tel',max:30},{k:'home2',nx:'home1',l:'Second home phone',t:'tel',max:30},{k:'home3',nx:'home2',l:'Third home phone',t:'tel',max:30},{k:'email1',l:'Email',t:'email',w:'full',req:1},{k:'email2',nx:'email1',l:'Second email',t:'email',w:'full'},{k:'email3',nx:'email2',l:'Third email',t:'email',w:'full'},{k:'company',l:'Company (if business)',w:'full'}]},
     {t:'Address',d:'Where are they? Fill it in like a delivery address.',f:[{k:'homeAddr',l:'Address line 1',w:'full',max:120,req:1,hint:'House number or name and street'},{k:'homeAddr2',l:'Address line 2',w:'full',max:120},{k:'town',l:'Town / city',max:60,req:1},{k:'county',l:'County',max:60},{k:'homePc',l:'Postcode',max:10,req:1},{k:'addrType',l:'Address type',t:'select',o:['Home','Business'],req:1}]},
     {t:'Enquiry',d:'What do they want?',f:[{k:'productType',l:'Product type',t:'select',o:PTYPES,req:1},{k:'source',l:'How did they find us?',t:'select',o:SOURCES,req:1},{k:'product',l:'Work wanted',t:'area',w:'full',max:300},{k:'value',l:'Rough value (£)',t:'number'},{k:'owner',l:'Salesperson',t:'select',o:[...OWNERS(),RANDOM_SP]}]},
     {t:'Next Step',d:'What happens next?',f:[{k:'apptDate',l:'Appointment date',t:'date'},{k:'apptTime',l:'Appointment time',t:'time'},{k:'next',l:'Next action',w:'full',hint:'e.g. Call back Tuesday, send brochure'},{k:'followup',l:'Next action date',t:'date'}]},
