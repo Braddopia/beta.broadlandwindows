@@ -98,6 +98,8 @@ code{font:500 .76rem ui-monospace,SFMono-Regular,Menlo,monospace;background:var(
 .main.enter .kpi,.main.enter .panel,.main.enter .col,.main.enter .cc,.main.enter .bc,.main.enter .hero,.main.enter .dlane{animation:up .45s cubic-bezier(.2,.7,.2,1) backwards;animation-delay:calc(var(--i,0)*35ms)}
 body.ready .side .nav{animation:navIn .45s cubic-bezier(.2,.7,.2,1) backwards;animation-delay:calc(var(--n,0)*30ms + 200ms)}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-delay:0s!important;transition-duration:.01ms!important}#splash{display:none}}
+/* focusable page area must not draw the yellow ring (it showed round the page after closing a popup) */
+#main:focus,#main:focus-visible,[tabindex="-1"]:focus,[tabindex="-1"]:focus-visible{outline:none}
 
 /* ==========================================================================
    03 · App shell: sidebar, top bar, main area, splash, notification centre
@@ -808,6 +810,32 @@ body[data-theme=dark] .mb{background:rgba(17,21,30,.97)!important}
 /* no hover movement anywhere: shadow only */
 .kpi:hover,.supc:hover,button.kpi:hover,.lc:hover{transform:none}
 input[type=color]:hover{transform:none}
+
+/* ---------- liquid glass (web take on Apple's rules: glass on the control layer, content stays readable) ---------- */
+:root{--lg-fill:linear-gradient(180deg,rgba(255,255,255,.62),rgba(255,255,255,.38));--lg-edge:rgba(255,255,255,.85);
+  --lg-spec:inset 0 1px 0 rgba(255,255,255,.95),inset 0 -1px 0 rgba(255,255,255,.35),inset 1px 0 0 rgba(255,255,255,.4),inset -1px 0 0 rgba(255,255,255,.25);
+  --lg-drop:0 10px 30px -12px rgba(1,43,89,.28),0 2px 6px -2px rgba(1,43,89,.12)}
+body[data-theme=dark]{--lg-fill:linear-gradient(180deg,rgba(40,48,64,.62),rgba(20,26,38,.48));--lg-edge:rgba(255,255,255,.14);
+  --lg-spec:inset 0 1px 0 rgba(255,255,255,.16),inset 0 -1px 0 rgba(255,255,255,.04);--lg-drop:0 12px 32px -12px rgba(0,0,0,.6)}
+.side,.top{background:var(--lg-fill)!important;border:1px solid var(--lg-edge)!important;box-shadow:var(--lg-spec),var(--lg-drop)!important;
+  -webkit-backdrop-filter:blur(26px) saturate(190%) brightness(1.04);backdrop-filter:blur(26px) saturate(190%) brightness(1.04)}
+/* controls: clear glass pills, concentric with their bar */
+.top .ib,.top #thb,.top #bell,.seg2,.views .chip,.pager select{background:rgba(255,255,255,.42);border-color:var(--lg-edge);box-shadow:var(--lg-spec);
+  -webkit-backdrop-filter:blur(12px) saturate(170%);backdrop-filter:blur(12px) saturate(170%)}
+body[data-theme=dark] .top .ib,body[data-theme=dark] .top #thb,body[data-theme=dark] .top #bell,body[data-theme=dark] .seg2,body[data-theme=dark] .views .chip{background:rgba(255,255,255,.06)}
+.views .chip.on{background:var(--navy,#012b59);box-shadow:inset 0 1px 0 rgba(255,255,255,.25)}
+.sb{background:rgba(255,255,255,.45)!important;box-shadow:inset 0 1px 2px rgba(1,43,89,.08),inset 0 -1px 0 rgba(255,255,255,.6)}
+body[data-theme=dark] .sb{background:rgba(255,255,255,.05)!important}
+.rw-bar{box-shadow:inset 0 1px 0 rgba(255,255,255,.22),inset 0 -1px 0 rgba(0,0,0,.15)}
+.rb1{box-shadow:inset 0 1px 0 rgba(255,255,255,.18)}
+/* Reduce Transparency / Increase Contrast: solid surfaces, no blur */
+@media (prefers-reduced-transparency:reduce),(prefers-contrast:more){
+  .side,.top,.panel,.kpi,.tw,.cc,.bc,.dlane,.supw,.col,.nc,.menu,.fpop,.mb,.rg,.top .ib,.seg2,.views .chip{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+  .side,.top{background:var(--card)!important}
+  .mb{background:var(--card)!important}
+  body[data-theme=dark] .side,body[data-theme=dark] .top{background:#141a25!important}}
+body[data-theme=dark] .views .chip.on{background:#2a62c9;color:#fff}
+body[data-theme=dark] .pager select{background:rgba(255,255,255,.06);color:var(--ink)}
 
 /* ==========================================================================
    06 · Adaptive layout
@@ -2712,6 +2740,11 @@ function vContracts(){const U=UI.ctr,L=ctrList(),pg=paginate(U,L),tv=sum(L,c=>c.
   document.body.classList.add('ready');setTimeout(()=>document.body.classList.remove('ready'),2000);
   setTimeout(()=>syncHM(true),1500);setInterval(()=>syncHM(true),600000);
 })();
+
+/* light tap feedback on touch phones: every button, chip, tab and row gives a short buzz (Android; iOS browsers ignore it) */
+const HAPTIC={light:8,medium:14,heavy:24};
+function haptic(k){try{if(matchMedia('(pointer:coarse)').matches&&navigator.vibrate)navigator.vibrate(HAPTIC[k]||HAPTIC.light)}catch(e){}}
+document.addEventListener('click',e=>{const t=e.target.closest('button,a,.chip,.clk-r,.nav,[onclick],label,summary');if(!t)return;haptic(t.matches('.btn.green,.rb1.go,.btn.red,.del')?'medium':'light')},true);
 
 </script>
 </body>

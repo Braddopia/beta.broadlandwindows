@@ -46,3 +46,5 @@ code{font:500 .76rem ui-monospace,SFMono-Regular,Menlo,monospace;background:var(
 .main.enter .kpi,.main.enter .panel,.main.enter .col,.main.enter .cc,.main.enter .bc,.main.enter .hero,.main.enter .dlane{animation:up .45s cubic-bezier(.2,.7,.2,1) backwards;animation-delay:calc(var(--i,0)*35ms)}
 body.ready .side .nav{animation:navIn .45s cubic-bezier(.2,.7,.2,1) backwards;animation-delay:calc(var(--n,0)*30ms + 200ms)}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-delay:0s!important;transition-duration:.01ms!important}#splash{display:none}}
+/* focusable page area must not draw the yellow ring (it showed round the page after closing a popup) */
+#main:focus,#main:focus-visible,[tabindex="-1"]:focus,[tabindex="-1"]:focus-visible{outline:none}
