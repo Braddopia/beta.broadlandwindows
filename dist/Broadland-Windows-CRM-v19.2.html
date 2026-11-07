@@ -1414,6 +1414,35 @@ body[data-theme=dark] .ck-b{background:linear-gradient(180deg,rgba(26,32,44,.95)
 .kpi{--kc:rgba(3,78,162,.22)}.kpi.warn{--kc:rgba(255,190,0,.34)}.kpi.bad{--kc:rgba(214,58,58,.28)}.kpi.good{--kc:rgba(18,121,76,.26)}
 .kpi::after{top:-70%;right:-28%;width:80%;height:190%;filter:blur(6px)}
 
+/* ==== lead and contract forms: cards that open in turn ==== */
+.mb .rg.fg.gc{display:block;padding:0;background:var(--card);border:1.5px solid var(--line);border-radius:18px;box-shadow:none;transition:border-color .2s,box-shadow .2s}
+.gc>h4{margin:0;padding:0;display:block}
+.gc .rg-t{display:flex;align-items:center;gap:14px;width:100%;padding:16px 18px;cursor:pointer;border-radius:16px}
+.gc .rg-t::after{content:none!important}
+.gc .rg-t:hover{background:rgba(3,78,162,.035)}
+.rg-ic{flex:0 0 auto;display:grid;place-items:center;width:44px;height:44px;border-radius:13px;background:var(--blue-bg);color:var(--blue)}
+.rg-ic svg{width:1.3rem;height:1.3rem}
+.gc.done .rg-ic{background:#e0f3ea;color:#12794c}
+body[data-theme=dark] .gc.done .rg-ic{background:#0f3a29;color:#7fe0aa}
+.rg-tt{flex:1;min-width:0;display:flex;flex-direction:column;gap:.1rem}
+.rg-n{font:700 1.1rem var(--head);color:var(--navy)}
+.gc .rg-sum{display:block!important;font:500 .92rem var(--body);color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gc .rg-ch{display:inline-block!important;flex:0 0 auto;font:700 .92rem var(--body);font-style:normal;color:var(--blue);padding:.4rem .9rem;border-radius:999px;background:var(--blue-bg)}
+.gc.shut>*:not(h4){display:none!important}
+.gc:not(.shut){display:grid!important;grid-template-columns:1fr 1fr;gap:14px 16px;padding:0 18px 18px;border-color:var(--blue);box-shadow:0 16px 36px -20px rgba(1,43,89,.55)}
+.gc:not(.shut)>h4{grid-column:1/-1;margin:0 -18px}
+.gc:not(.shut) .rg-ch{visibility:hidden}
+.gc .anyh{grid-column:1/-1;margin:-4px 0 0;font:600 .88rem var(--body);color:var(--muted)}
+.rg-nx{grid-column:1/-1;display:flex;justify-content:flex-end;margin-top:4px}
+.rg-nx .btn{min-height:2.8rem;padding:.6rem 1.3rem;font-size:1rem;border-radius:12px}
+.mb.full .rcols{gap:12px}
+.gring{display:flex;align-items:center;gap:12px;margin-top:12px}
+.gring svg{width:44px;height:44px}.gring b{font:700 1.15rem var(--head);color:var(--navy)}
+@media(max-width:700px){.gc:not(.shut){grid-template-columns:1fr}.gc .rg-t{padding:14px}.rg-ic{width:38px;height:38px}}
+
+.mb .rg.fg.gc:not(.shut){padding:0 18px 18px}
+.mb .rg.fg.gc:not(.shut)>h4{margin:0 -18px}
+
 /* ==========================================================================
    06 · Adaptive layout
    Breakpoints: 1400 (laptop) · 1100 (small laptop / tablet landscape)
@@ -3668,18 +3697,43 @@ function rfH(f,v){const val=v[f.k]??'',id='f_'+f.k;let c;
   return `<label class="rf ${f.t=='area'?'ta':''}" ${f.dep?`data-dep="${f.dep}"`:''} ${f.nx?`data-nx="${f.nx}"`:''} ${hid?'hidden':''}><span>${esc(f.l)}${f.req?' *':''}</span>${c}</label>`}
 /* each group reads as a plain question; fields marked adv fold away under "More details" */
 const GQ={'Customer':'Who Is The Customer?','Phone Numbers':'How Can We Phone Them?','Email':'Their Email Address','Home Address':'Where Do They Live?','Invoice Address':'Where Should The Invoice Go?','Site Address':'Where Is The Work Being Done?',
-  'Lead':'About This Lead','Source And Interest':'How They Found Us And What They Want','Result':'What Happens Next','Next Visit':'The Next Visit'};
+  'Lead':'About This Lead','Source And Interest':'How They Found Us And What They Want','Result':'What Happens Next','Next Visit':'The Next Visit',
+  'Contract':'About This Contract','Sales Information':'Who Sold It And How They Found Us','Money':'The Money','Invoice':'Invoicing','Dates':'Fitting Dates','Team':'Fitting Team','Info For FENSA':'Details For FENSA'};
 const DEFV={invSame:'Same as home',siteSame:'Same as home'};
 const fval=(f,v)=>String(v[f.k]??DEFV[f.k]??'').trim();
 /* a section is finished when its required boxes are filled (and, for phones, at least one number) */
 function grpDone(fs,v){const vis=fs.filter(f=>!(f.dep&&(v[f.dep]||'Same as home')!='Different'));
-  if(!vis.some(f=>f.req||f.any||DEFV[f.k]))return false;
+  if(!vis.some(f=>f.req||f.any||DEFV[f.k]))return vis.some(f=>!f.ro&&!f.adv&&fval(f,v));
   return vis.filter(f=>f.req).every(f=>fval(f,v))&&(!vis.some(f=>f.any)||vis.some(f=>f.any&&fval(f,v)))&&vis.some(f=>fval(f,v))}
 const grpSum=(fs,v)=>fs.filter(f=>!f.adv&&!(f.dep&&(v[f.dep]||'Same as home')!='Different')).map(f=>fval(f,v)).filter(Boolean).slice(0,4).join(' · ');
-const grpH=(t,fs,v)=>{const main=fs.filter(f=>!f.adv),adv=fs.filter(f=>f.adv),open=adv.some(f=>String(v[f.k]??'').trim()),shut=RW&&!RW.isNew&&grpDone(fs,v);
-  return `<section class="rg fg ${shut?'shut done':''}"><h4><button type="button" class="rg-t" onclick="grpToggle(this)" aria-expanded="${!shut}">${shut?'<i class="rg-ok" aria-hidden="true">&#10003;</i>':''}<span>${esc(GQ[t]||t)}</span>${shut?`<small class="rg-sum nocap">${esc(grpSum(fs,v))}</small><em class="rg-ch">Change</em>`:''}</button>${fs.some(f=>f.any)&&!shut?'<small class="anyh">Fill in at least one number *</small>':''}</h4>${main.map(f=>rfH(f,v)).join('')}${adv.length?`<details class="rmore"${open?' open':''}><summary>More details <span>(${adv.length})</span></summary><div class="rmore-b">${adv.map(f=>rfH(f,v)).join('')}</div></details>`:''}</section>`};
-function grpToggle(b){const g=b.closest('.rg');if(!g.classList.contains('done'))return;const s=g.classList.toggle('shut');b.setAttribute('aria-expanded',!s);if(!s){const f=g.querySelector('input:not([readonly]),select,textarea');if(f)f.focus()}}
-const byGroup=(fs,v)=>{const g={};fs.forEach(f=>(g[f.g]=g[f.g]||[]).push(f));return Object.entries(g).map(([t,x])=>grpH(t,x,v)).join('')};
+/* ---- cards that open in turn ----
+   Each group is a card: icon, plain question, and "Not filled in yet" or a one-line summary with a tick.
+   One card is open at a time; its Next button closes it and opens the next (or moves to the next step). */
+const GRPF={};let GID=0;
+const GIC={'Customer':IC.user,'Phone Numbers':'M5 4h4l2 5-2.5 1.5a11 11 0 005 5L15 13l5 2v4a2 2 0 01-2 2A16 16 0 013 6a2 2 0 012-2','Email':'M4 6h16v12H4zM4 7l8 6 8-6','Home Address':IC.home,
+  'Invoice Address':IC.finance,'Site Address':'M12 21s-7-6-7-11a7 7 0 0114 0c0 5-7 11-7 11zM12 12a2 2 0 100-4 2 2 0 000 4z','Lead':IC.leads,'Source And Interest':IC.search,'Result':IC.fitting,'Next Visit':IC.fitting,'Contract':IC.contracts,'Sales Information':IC.leads,'Money':IC.finance,'Invoice':IC.reports,'Dates':IC.fitting,'Team':IC.staff,'Info For FENSA':IC.admin};
+const TICK='M5 13l4 4L19 7';
+const grpH=(t,fs,v,id,nextT)=>{GRPF[id]=fs;const main=fs.filter(f=>!f.adv),adv=fs.filter(f=>f.adv),open=adv.some(f=>String(v[f.k]??'').trim()),done=grpDone(fs,v);
+  return `<section class="rg fg gc shut ${done?'done':''}" data-g="${id}" data-ic="${esc(GIC[t]||IC.edit)}"><h4><button type="button" class="rg-t" onclick="grpOpen(this.closest('.rg'))" aria-expanded="false"><span class="rg-ic">${svg(done?TICK:(GIC[t]||IC.edit))}</span><span class="rg-tt"><span class="rg-n">${esc(GQ[t]||t)}</span><small class="rg-sum nocap">${done?esc(grpSum(fs,v)):'Not filled in yet'}</small></span><em class="rg-ch">${done?'Change':'Fill in'}</em></button></h4>${fs.some(f=>f.any)?'<p class="anyh">Fill in at least one number *</p>':''}${main.map(f=>rfH(f,v)).join('')}${adv.length?`<details class="rmore"${open?' open':''}><summary>More details <span>(${adv.length})</span></summary><div class="rmore-b">${adv.map(f=>rfH(f,v)).join('')}</div></details>`:''}<div class="rg-nx"><button type="button" class="btn" onclick="grpNext(this.closest('.rg'))">${nextT?'Next: '+esc(GQ[nextT]||nextT)+' &rarr;':'Done'}</button></div></section>`};
+const byGroup=(fs,v)=>{const g={};fs.forEach(f=>(g[f.g]=g[f.g]||[]).push(f));const E=Object.entries(g);return E.map(([t,x],i)=>grpH(t,x,v,'g'+(GID++),E[i+1]&&E[i+1][0])).join('')};
+function grpVals(fs){const v={};fs.forEach(f=>{const e=$('#f_'+f.k);v[f.k]=e?e.value:''});return v}
+function grpRefresh(g){const fs=GRPF[g.dataset.g];if(!fs)return;const v=grpVals(fs),d=grpDone(fs,v);g.classList.toggle('done',d);
+  g.querySelector('.rg-ic').innerHTML=svg(d?TICK:g.dataset.ic);g.querySelector('.rg-sum').textContent=d?grpSum(fs,v):'Not filled in yet';g.querySelector('.rg-ch').textContent=d?'Change':'Fill in';grpRing(g.closest('.rw-p'))}
+function grpShut(g,s){g.classList.toggle('shut',s);g.querySelector('.rg-t').setAttribute('aria-expanded',!s);if(s)grpRefresh(g)}
+function grpOpen(g){if(!g.classList.contains('shut')){grpShut(g,true);return}
+  [...(g.closest('.rw-p')||document).querySelectorAll('.rg.gc')].forEach(x=>{if(x!==g&&!x.classList.contains('shut'))grpShut(x,true)});grpShut(g,false);
+  const f=g.querySelector('.rf:not([hidden]) input:not([readonly]),.rf:not([hidden]) select,.rf:not([hidden]) textarea');if(f&&matchMedia('(pointer:fine)').matches)setTimeout(()=>f.focus(),30);
+  setTimeout(()=>g.scrollIntoView({block:'nearest',behavior:'smooth'}),40)}
+/* Next skips cards that are already finished; when none are left in this step, go to the next step */
+function grpNext(g){grpShut(g,true);const G=[...(g.closest('.rw-p')||document).querySelectorAll('.rg.gc')],i=G.indexOf(g);
+  const n=G.slice(i+1).find(x=>!x.classList.contains('done'))||G.slice(0,i).find(x=>!x.classList.contains('done'));
+  if(n)grpOpen(n);else{const S2=RW.steps,i=S2.indexOf(RTAB[RW.kind]);if(i<S2.length-1)recStep(1)}}
+function grpRing(P){if(!P)return;const G=[...P.querySelectorAll('.rg.gc')];if(!G.length)return;const d=G.filter(x=>x.classList.contains('done')).length;let r=P.querySelector('.gring');
+  if(!r){const H=P.querySelector('.rw-sh');if(!H)return;H.insertAdjacentHTML('beforeend','<div class="gring"><svg viewBox="0 0 36 36" aria-hidden="true"><circle cx="18" cy="18" r="15" fill="none" stroke="var(--line)" stroke-width="4"/><circle class="gr-v" cx="18" cy="18" r="15" fill="none" stroke="#12794c" stroke-width="4" stroke-linecap="round" transform="rotate(-90 18 18)"/></svg><b></b></div>');r=P.querySelector('.gring')}
+  r.querySelector('.gr-v').setAttribute('stroke-dasharray',(94*d/G.length)+' 95');r.querySelector('b').textContent=d+' of '+G.length+' done'}
+/* first time a step is shown: open the first card that still needs filling in */
+function grpInit(P){if(!P||P.dataset.ginit)return;const G=[...P.querySelectorAll('.rg.gc')];if(!G.length)return;P.dataset.ginit=1;
+  const first=G.find(x=>!x.classList.contains('done'));if(first)grpShut(first,false);grpRing(P)}
 function recDep(sel){const k=sel.id.slice(2);$$(`#mbox [data-dep="${k}"]`).forEach(r=>r.hidden=sel.value!='Different')}
 
 /* ---- record window ---- */
@@ -3705,9 +3759,10 @@ function recOpen(kind,id){const D=REC[kind],r=id?D.get(id):null;if(id&&!r)return
     <div class="rw-main"><div class="rw-b">${tabs.map((t,i)=>`<div class="rw-p ${t.k==tab?'on':''}" data-t="${t.k}" role="tabpanel"><div class="rw-sh"><small>Step ${i+1} of ${tabs.length}</small><h3>${esc(nm(t.k))}</h3><p>${esc(hint(t.k))}</p>${t.k=='customer'||t.k=='details'?'<p class="rw-req">Boxes marked * must be filled in.</p>':''}</div>${t.h(W)}</div>`).join('')}</div>
      <div class="rw-foot"><button type="button" class="btn ghost" id="rwPrev" onclick="recStep(-1)"></button><span class="rw-sp"></span><button type="button" class="btn ghost" onclick="recSave(false)">Save</button><button type="button" class="btn" id="rwNext" onclick="recStep(1)"></button></div></div></div></div>`,'full');
   W.nm=nm;recThumbs();recDocs();recFoot();recRail();
-  if(!W.isNew){const todo=W.steps.find(k=>{const b=$(`#mbox .rw-steps button[data-t="${k}"]`);return b&&!b.classList.contains('ok')&&!REC_OPTIONAL.includes(k)});recTab(todo||W.steps[0])}$('#mbox .rw-x').addEventListener('input',()=>{RW.dirty=1;clearTimeout(recRail.t);recRail.t=setTimeout(recRail,250)});$('#mbox .rw-x').addEventListener('change',e=>{RW.dirty=1;const c=e.target;if(c.classList&&c.classList.contains('rck')){const w=c.parentElement.querySelector('.ck-w');if(w)w.textContent=c.checked?'Done today by '+USER:''}recRail()});
+  if(!W.isNew){const todo=W.steps.find(k=>{const b=$(`#mbox .rw-steps button[data-t="${k}"]`);return b&&!b.classList.contains('ok')&&!REC_OPTIONAL.includes(k)});recTab(todo||W.steps[0])}grpInit($('#mbox .rw-p.on'));
+  $('#mbox .rw-x').addEventListener('change',e=>{const g=e.target.closest&&e.target.closest('.rg.gc');if(g)grpRefresh(g)});$('#mbox .rw-x').addEventListener('input',()=>{RW.dirty=1;clearTimeout(recRail.t);recRail.t=setTimeout(recRail,250)});$('#mbox .rw-x').addEventListener('change',e=>{RW.dirty=1;const c=e.target;if(c.classList&&c.classList.contains('rck')){const w=c.parentElement.querySelector('.ck-w');if(w)w.textContent=c.checked?'Done today by '+USER:''}recRail()});
   drawThumbs()}
-function recTab(k){RTAB[RW.kind]=k;$$('#mbox .rw-steps button').forEach(b=>b.classList.toggle('on',b.dataset.t==k));$$('#mbox .rw-p').forEach(p=>p.classList.toggle('on',p.dataset.t==k));$('#mbox .rw-b').scrollTop=0;recFoot();recRail();const b=$(`#mbox .rw-steps button[data-t="${k}"]`);if(b&&b.scrollIntoView)b.scrollIntoView({block:'nearest',inline:'nearest'})}
+function recTab(k){RTAB[RW.kind]=k;$$('#mbox .rw-steps button').forEach(b=>b.classList.toggle('on',b.dataset.t==k));$$('#mbox .rw-p').forEach(p=>p.classList.toggle('on',p.dataset.t==k));grpInit($('#mbox .rw-p.on'));$('#mbox .rw-b').scrollTop=0;recFoot();recRail();const b=$(`#mbox .rw-steps button[data-t="${k}"]`);if(b&&b.scrollIntoView)b.scrollIntoView({block:'nearest',inline:'nearest'})}
 function recStep(d){const S2=RW.steps,i=S2.indexOf(RTAB[RW.kind]);if(d>0&&i==S2.length-1){recSave(true);return}const n=S2[i+d];if(n)recTab(n)}
 function recFoot(){const S2=RW.steps,i=S2.indexOf(RTAB[RW.kind]),p=$('#rwPrev'),n=$('#rwNext');if(!p)return;
   p.hidden=i<=0;p.innerHTML=i>0?'&larr; Back: '+esc(RW.nm(S2[i-1])):'';n.innerHTML=i<S2.length-1?'Next: '+esc(RW.nm(S2[i+1]))+' &rarr;':'Save and finish';n.classList.toggle('green',i==S2.length-1)}
