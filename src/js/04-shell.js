@@ -9,7 +9,7 @@ const UI={
   cal:{m:'month',o:0,sd:null,ly:{fit:1,svc:1,del:1,hol:1}},
   hol:{m:0,v:'tl'}, rep:{t:'summary'}, fin:{t:'debtors',pm:0},
   del:{f:'out',s:'all',v:'list'}, files:{cat:'all',az:0,list:0,ssq:'',page:1,per:50},
-  con:{f:'all'}, sup:{open:''}, lead:{v:'list',f:'open',src:'all',own:'all',sort:'followup',dir:1,page:1,per:50}, ctr:{v:'list',f:'live'}, nc:{t:'All'}, audit:{page:1,per:50}
+  con:{f:'all'}, sup:{open:''}, lead:{v:'list',f:'live',src:'all',own:'all',sort:'id',dir:1,page:1,per:50}, ctr:{v:'list',f:'cur',sort:'id',dir:1,page:1,per:50}, nc:{t:'All'}, audit:{page:1,per:50}
 };
 function setUI(path,val){const p=path.split('.');let o=UI;for(let i=0;i<p.length-1;i++)o=o[p[i]];o[p[p.length-1]]=val;if(p.length==2&&p[1]!='page'&&'page' in UI[p[0]])UI[p[0]].page=1;render()}
 function togUI(path){const p=path.split('.');let o=UI;for(let i=0;i<p.length-1;i++)o=o[p[i]];const k=p[p.length-1];o[k]=o[k]?0:1;render()}
