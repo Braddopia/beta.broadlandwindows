@@ -782,3 +782,10 @@ body[data-theme=dark] #sres{background:#161b26;border-color:rgba(255,255,255,.1)
 .sri b{font-weight:600;font-size:.92rem}.sri small{color:var(--muted);font-size:.78rem}
 .sri.on,.sri:hover{background:var(--blue-bg)}
 .srn{margin:0;padding:.9rem;color:var(--muted);font-size:.88rem;text-align:center}
+
+/* office board: customer quotes */
+.rvq{padding:.6rem 0;border-bottom:1px solid var(--line)}.rvq:last-child{border:0}
+.rvq p{margin:0 0 .25rem;font-size:.95rem;line-height:1.45}.rvq small{color:var(--muted);font-weight:600}
+.fl .rvq p{font-size:1.05rem}
+/* floor boards: up to 8 tiles share one row on wide screens */
+@media(min-width:1100px){.fl .kpis{grid-template-columns:repeat(auto-fit,minmax(min(100%,9.5rem),1fr))}}

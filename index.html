@@ -1173,6 +1173,13 @@ body[data-theme=dark] #sres{background:#161b26;border-color:rgba(255,255,255,.1)
 .sri.on,.sri:hover{background:var(--blue-bg)}
 .srn{margin:0;padding:.9rem;color:var(--muted);font-size:.88rem;text-align:center}
 
+/* office board: customer quotes */
+.rvq{padding:.6rem 0;border-bottom:1px solid var(--line)}.rvq:last-child{border:0}
+.rvq p{margin:0 0 .25rem;font-size:.95rem;line-height:1.45}.rvq small{color:var(--muted);font-weight:600}
+.fl .rvq p{font-size:1.05rem}
+/* floor boards: up to 8 tiles share one row on wide screens */
+@media(min-width:1100px){.fl .kpis{grid-template-columns:repeat(auto-fit,minmax(min(100%,9.5rem),1fr))}}
+
 /* ==========================================================================
    06 · Adaptive layout
    Breakpoints: 1400 (laptop) · 1100 (small laptop / tablet landscape)
@@ -1508,7 +1515,7 @@ const IC={
 const KEY='broadland_crm_v1', LOW=15, MAX_PHOTOS=8, MAX_LOG=1500;
 const STAGES=['New','Surveyed','Quoted','Won','Lost'];
 const CSTAGES=['Deposit due','Survey done','Ordered','Fitting booked','Fitted','Complete'];
-const SOURCES=['Website','Phone','Referral','Trade show','Facebook','Showroom'];
+const SOURCES=['Website','Google search','Phone','Showroom','Referral','Repeat customer','Signboard','Van signage','Facebook','Instagram','TikTok','Leaflet','Newspaper or magazine','Radio','Trade show','Trusted Trader','ReferenceLine','Other'];
 const FIT=['Team A','Team B','Fitter A','Fitter B'];
 const SCATS=['Salespeople','Fitters','Office','Factory'];
 const guessCat=r=>/sales|surveyor|consultant|estimator/i.test(r)?'Salespeople':/fit|install/i.test(r)?'Fitters':/operative|production|factory|stock|warehouse|driver/i.test(r)?'Factory':'Office';
@@ -1574,6 +1581,22 @@ const ikey=r=>[r.item,r.length,r.cInName,r.cOutName].map(v=>{v=String(v||'').tri
     if(!r.ord)r.ord='P'+String(++S.seq.pend).padStart(4,'0')});
   /* public review scores shown on the overview and customer documents (admin can update) */
   S.brand=S.brand||{};S.brand.tp=S.brand.tp||{score:4.5,count:'',url:'https://uk.trustpilot.com/review/broadlandwindows.co.uk'};S.brand.g=S.brand.g||{score:4.5,count:'',url:''};
+  /* review sites figures as published (Nov 2026); admins update them in Admin Console > Reviews */
+  S.brand.tt=S.brand.tt||{score:4.9,count:'613',url:'https://trustedtrader.team/Norfolk/Broadland-Windows-0000015.html'};
+  S.brand.rl=S.brand.rl||{score:9.6,count:'650',rec:'99',url:'https://www.referenceline.com/replacement_doors_windows_conservatories-in-norwich-broadlandwindowsltd-24531'};
+  /* short quotes from public reviews; names of reviewers are deliberately not stored */
+  if(!Array.isArray(S.brand.quotes))S.brand.quotes=[
+    {src:'Trusted Trader',d:'2026-10-24',t:'Very impressed from start to finish with the service for our 2 replacement windows and 1 replacement door. Everyone we dealt with was friendly and courteous.'},
+    {src:'Trusted Trader',d:'2026-10-22',t:'A thoroughly professional, local company that is a pleasure to deal with. Their work is of the highest quality and so is their service.'},
+    {src:'Trusted Trader',d:'2026-10-22',t:'Excellent service from start to finish. Very pleased with our quality new windows and door. They have transformed our property.'},
+    {src:'Trusted Trader',d:'2026-10-16',t:'Always on time, worked hard, efficient and clearly knew what they were doing. I can recommend Broadland Windows without hesitation.'},
+    {src:'Trusted Trader',d:'2026-09-27',t:'The work was done quickly, with hardly any mess, and we have now got a lovely new bedroom window.'},
+    {src:'Trusted Trader',d:'2026-07-28',t:'Very professional, punctual and very competitive. The quality of the products they provide is also top-notch.'},
+    {src:'ReferenceLine',d:'2022-12-04',t:'I was very pleased with Broadland Windows work and would happily recommend them.'},
+    {src:'ReferenceLine',d:'2022-11-07',t:'Very happy with all the work undertaken by a professional, friendly team.'},
+    {src:'ReferenceLine',d:'2022-10-10',t:'Very efficient, helpful, tidy. All surfaces cleaned and all old material taken away. Very professional at all times.'}];
+  /* show the two new review tiles once on an office board someone already customised */
+  if(!S.brand._rv2){S.brand._rv2=1;const o=(S.boards||{}).office;if(o&&Array.isArray(o.k))['tt','rl'].forEach(k=>{if(!o.k.includes(k))o.k.splice(Math.min(2,o.k.length),0,k)})}
   /* profile: who is using this browser */
   if(!S.profile){const u=S.staff.find(s=>s.name=='Demo User')||S.staff[0]||{};S.profile={sid:u.id||'',name:u.name||'Demo User',email:u.email||'',phone:u.phone||'',mobile:'',emergency:'',signature:'',notes:''}}
   /* security: per-install salt and hashed PINs (default 1234 until changed) */
@@ -2018,11 +2041,20 @@ const prTag=p=>`<span class="tag ${p=='Urgent'?'r':p=='Normal'?'y':'n'}">${esc(p
 /* review scores (Trustpilot / Google): figures set by an admin in Admin Console > Reviews */
 function ratingsH(){const r=(x,n)=>{const u=SAFE.url(x.url),t=`${stars(x.score)} <b>${(+x.score).toFixed(1)}</b> on ${n}${x.count?' <span>('+esc(x.count)+' reviews)</span>':''}`;return u?`<a href="${esc(u)}" target="_blank" rel="noopener noreferrer">${t}</a>`:`<span>${t}</span>`};
   return `<div class="rate">${r(S.brand.tp,'Trustpilot')}${r(S.brand.g,'Google')}</div>`}
-function editRatings(){if(!need(ISOWN,'Review scores'))return;const b=S.brand;
-  form('Review Scores',[{k:'tps',l:'Trustpilot score (0 to 5)',t:'number',max:5,dp:1},{k:'tpc',l:'Trustpilot review count',max:12},{k:'tpu',l:'Trustpilot page link',w:'full',max:300},{k:'gs',l:'Google score (0 to 5)',t:'number',max:5,dp:1},{k:'gc',l:'Google review count',max:12},{k:'gu',l:'Google reviews link',w:'full',max:300}],
-    {tps:b.tp.score,tpc:b.tp.count,tpu:b.tp.url,gs:b.g.score,gc:b.g.count,gu:b.g.url},o=>{
-    if((o.tpu&&!SAFE.url(o.tpu))||(o.gu&&!SAFE.url(o.gu))){toast('Links must start with https://');return false}
-    b.tp={score:o.tps,count:o.tpc,url:o.tpu};b.g={score:o.gs,count:o.gc,url:o.gu};audit('Review scores updated','Brand',o.tps+' / '+o.gs)},false,'md')}
+function editRatings(){if(!need(ISOWN,'Review scores'))return;const b=S.brand,tt=b.tt||{},rl=b.rl||{};
+  form('Review Scores',[{k:'tps',l:'Trustpilot score (0 to 5)',t:'number',max:5,dp:1},{k:'tpc',l:'Trustpilot review count',max:12},{k:'tpu',l:'Trustpilot page link',w:'full',max:300},
+    {k:'gs',l:'Google score (0 to 5)',t:'number',max:5,dp:1},{k:'gc',l:'Google review count',max:12},{k:'gu',l:'Google reviews link',w:'full',max:300},
+    {k:'tts',l:'Trusted Trader score (0 to 5)',t:'number',max:5,dp:1},{k:'ttc',l:'Trusted Trader review count',max:12},{k:'ttu',l:'Trusted Trader page link',w:'full',max:300},
+    {k:'rls',l:'ReferenceLine score (0 to 10)',t:'number',max:10,dp:1},{k:'rlc',l:'ReferenceLine review count',max:12},{k:'rlr',l:'ReferenceLine % recommend',t:'number',max:100,dp:0},{k:'rlu',l:'ReferenceLine page link',w:'full',max:300}],
+    {tps:b.tp.score,tpc:b.tp.count,tpu:b.tp.url,gs:b.g.score,gc:b.g.count,gu:b.g.url,tts:tt.score,ttc:tt.count,ttu:tt.url,rls:rl.score,rlc:rl.count,rlr:rl.rec,rlu:rl.url},o=>{
+    if([o.tpu,o.gu,o.ttu,o.rlu].some(u=>u&&!SAFE.url(u))){toast('Links must start with https://');return false}
+    b.tp={score:o.tps,count:o.tpc,url:o.tpu};b.g={score:o.gs,count:o.gc,url:o.gu};b.tt={score:o.tts,count:o.ttc,url:o.ttu};b.rl={score:o.rls,count:o.rlc,rec:o.rlr,url:o.rlu};
+    audit('Review scores updated','Brand',[o.tps,o.gs,o.tts,o.rls].join(' / '))},false,'md')}
+/* review quotes for the office board (no reviewer names) */
+function addQuote(){if(!need(ISOWN,'Review quotes'))return;
+  form('Add Review Quote',[{k:'src',l:'Where it was posted',t:'select',o:['Trusted Trader','ReferenceLine','Google','Trustpilot','Facebook','Other'],req:1},{k:'d',l:'Date',t:'date'},{k:'t',l:'What they said (leave out their name)',t:'area',w:'full',max:400,req:1}],{src:'Trusted Trader',d:today()},o=>{
+    S.brand.quotes=S.brand.quotes||[];S.brand.quotes.unshift({src:o.src,d:o.d,t:o.t});audit('Review quote added','Brand',o.src)},false,'md')}
+function delQuote(i){if(!need(ISOWN,'Review quotes'))return;askYes('Remove This Quote?','It will no longer show on the office board.','Remove',()=>{S.brand.quotes.splice(i,1);audit('Review quote removed','Brand','');store();render()},true)}
 
 /* ==========================================================================
    06 · Operations: factory floor, deliveries, suppliers,
@@ -2083,18 +2115,19 @@ function boardData(b){const td=today(),row=(a,s,r)=>`<div class="nrow"><span><b>
       DEF:{k:['jip','jw','del','low'],p:['jobs','stage','del','fits','stock']}}}
   /* office */
   const L=S.leads.filter(l=>!['Won','Lost'].includes(l.stage)),C=S.contracts.filter(c=>c.stage!='Complete'&&c.cancelled!='Yes'),oc=S.calls.filter(c=>c.status!='Complete').sort((a,b)=>['Urgent','Normal','Low'].indexOf(a.priority)-['Urgent','Normal','Low'].indexOf(b.priority)),bal=sum(C,c=>c.value-c.paid),fort=addDays(14),due=C.filter(c=>c.value-c.paid>0&&c.fit&&c.fit<=fort).sort((a,b)=>a.fit.localeCompare(b.fit)),jw=C.filter(c=>c.fit&&inWeek(c.fit)),wk=addDays(-7),nl=allLeads().filter(l=>l.created&&l.created>=wk);
-  const tp=S.brand.tp,g=S.brand.g,rv=(x,n,col)=>`<div class="rvb"><span class="rvn" style="--c:${col}">${n}</span><b>${(+x.score||0).toFixed(1)}</b>${stars(x.score)}<small>${x.count?esc(x.count)+' reviews':'Reviews'}</small></div>`;
+  const tp=S.brand.tp,g=S.brand.g,tt=S.brand.tt||{},rl=S.brand.rl||{},rv=(x,n,col)=>`<div class="rvb"><span class="rvn" style="--c:${col}">${n}</span><b>${(+x.score||0).toFixed(1)}</b>${stars(x.score)}<small>${x.count?esc(x.count)+' reviews':'Reviews'}</small></div>`;
   const ls=STAGES.filter(s=>!['Won','Lost'].includes(s)).map(s=>[s,L.filter(l=>l.stage==s).length]),cs=CSTAGES.map(s=>[s,C.filter(c=>c.stage==s).length]),mx=Math.max(1,...ls.map(x=>x[1]),...cs.map(x=>x[1]));
   const team=(S.notes||[]).filter(n=>n.to=='Everyone').sort((a,b)=>b.at-a.at).slice(0,5);
   return{t:'Office Floor',s:'Reviews, jobs going through and service',
-    K:{g:['Google Rating',(+g.score||0).toFixed(1)+' ★','',g.count?g.count+' reviews':''],tp:['Trustpilot Rating',(+tp.score||0).toFixed(1)+' ★','',tp.count?tp.count+' reviews':''],leads:['Open Leads',L.length,''],live:['Jobs Going Through',C.length,''],calls:['Open Service Calls',oc.length,oc.some(c=>c.priority=='Urgent')?'bad':''],bal:['To Collect',bal>=10000?'£'+(bal/1000).toFixed(1)+'k':m0(bal),'warn',m0(bal)],newl:['New Leads, 7 Days',nl.length,'']},
+    K:{g:['Google Rating',(+g.score||0).toFixed(1)+' ★','',g.count?g.count+' reviews':''],tp:['Trustpilot Rating',(+tp.score||0).toFixed(1)+' ★','',tp.count?tp.count+' reviews':''],tt:['Trusted Trader',(+tt.score||0).toFixed(1)+' / 5','',tt.count?tt.count+' reviews':''],rl:['ReferenceLine',(+rl.score||0).toFixed(1)+' / 10','',[rl.count?rl.count+' reviews':'',rl.rec?rl.rec+'% recommend':''].filter(Boolean).join(' · ')],leads:['Open Leads',L.length,''],live:['Jobs Going Through',C.length,''],calls:['Open Service Calls',oc.length,oc.some(c=>c.priority=='Urgent')?'bad':''],bal:['To Collect',bal>=10000?'£'+(bal/1000).toFixed(1)+'k':m0(bal),'warn',m0(bal)],newl:['New Leads, 7 Days',nl.length,'']},
     P:{pipe:['Jobs Going Through',`<div class="panel"><h2>Jobs Going Through</h2><small class="bdl">Leads</small>${ls.map(([s,n])=>`<div class="hb"><span>${esc(s)}</span><div class="bar2"><i style="width:${100*n/mx}%;background:#ffd002"></i></div><b>${n}</b></div>`).join('')}<small class="bdl">Contracts</small>${cs.map(([s,n])=>`<div class="hb"><span>${esc(s)}</span><div class="bar2"><i style="width:${100*n/mx}%"></i></div><b>${n}</b></div>`).join('')}</div>`],
       calls:['Service Calls',`<div class="panel"><h2>Service Calls</h2>${oc.slice(0,8).map(c=>row(esc(c.name),esc(c.issue),`<span class="so-due">${c.visit?fd(c.visit):'Not booked'}<small>${prTag(c.priority)}</small></span>`)).join('')||emptyArt('done','No open service calls.')}</div>`],
       fits:['Fittings This Week',`<div class="panel"><h2>Fittings This Week</h2>${jw.map(c=>row(esc(c.name),esc(c.product),`<span class="so-due">${fd(c.fit)}<small>${esc(c.fitter||'')}</small></span>`)).join('')||emptyArt('done','No fittings this week.')}</div>`],
       newl:['New Leads',`<div class="panel"><h2>New Leads</h2>${allLeads().slice().sort((a,b)=>(b.created||'').localeCompare(a.created||'')).slice(0,6).map(l=>row(esc(l.name),esc((l.productType||l.product||'')+(l.source?' · '+l.source:'')),`<span class="tag">${esc(l.stage)}</span>`)).join('')||emptyArt('survey','No leads yet.')}</div>`],
       pay:['Payments Due Before Fit',`<div class="panel"><h2>Payments Due Before Fit</h2>${due.map(c=>row(esc(c.name),'Fit '+fd(c.fit)+', #'+esc(c.id),`<span class="tag r">${m0(c.value-c.paid)}</span>`)).join('')||emptyArt('done','Nothing due before a fitting.')}</div>`],
+      quotes:['What Customers Say',`<div class="panel"><h2>What Customers Say</h2>${(S.brand.quotes||[]).slice().sort((a,b)=>(b.d||'').localeCompare(a.d||'')).slice(0,4).map(x=>`<div class="rvq"><p>“${esc(x.t)}”</p><small>${esc(x.src)}${x.d?' · '+esc(new Date(x.d).toLocaleDateString('en-GB',{month:'short',year:'numeric'})):''}</small></div>`).join('')||emptyArt('done','No review quotes yet.')}</div>`],
       team:['Team Messages',`<div class="panel"><h2>Team Messages</h2>${team.map(n=>row(esc(n.by),esc(n.t),`<span class="so-due">${new Date(n.at).toLocaleDateString('en-GB',{day:'numeric',month:'short'})}</span>`)).join('')||emptyArt('team','No team messages.')}</div>`]},
-    DEF:{k:['g','tp','leads','live','calls'],p:['pipe','calls','fits','newl','team','pay']}}}
+    DEF:{k:['g','tp','tt','rl','leads','live','calls'],p:['pipe','calls','fits','newl','team','pay']}}}
 const boardLay=b=>{const d=boardData(b),L=(S.boards||{})[b];return L&&Array.isArray(L.k)?L:d.DEF};
 function vBoard(b){const d=boardData(b),L=boardLay(b),tv=document.body.classList.contains('tv');
   return `<div class="fl"><div class="fl-head"><div>${boardTabs()}<h1>${esc(d.t)}</h1><span class="muted"><i class="live"></i>${esc(d.s)} &middot; Updated <span id="upd">${new Date().toLocaleTimeString('en-GB')}</span></span></div><div class="clk" id="clk">${new Date().toLocaleTimeString('en-GB')}</div><div class="acts">${boardPick()}${ISOWN()?`<button class="btn ghost" ${A('boardEdit',b)}>Customise</button>`:''}<button class="btn" onclick="toggleTV()">${tv?'Exit Full Screen':'Full Screen'}</button></div></div>
@@ -2283,13 +2316,14 @@ const RANDOM_SP='Pick at random';
 (function salesABC(){if(S.salesABC)return;['Sales B','Sales C'].forEach((n,i)=>{if(!S.staff.some(s=>s.name==n))S.staff.push({id:'U-S'+(i+2),name:n,role:'Sales consultant',team:'',phone:'07700 900 '+(610+i*7),email:n.toLowerCase().replace(' ','.')+'@example.com',start:'2025-03-0'+(i+3),allow:25,salary:30000,cat:'Salespeople'})});S.salesABC=1;store()})();
 const OWNERS=()=>{const s=staffIn('Salespeople');return['Unassigned',...new Set(s.length?s:S.staff.map(x=>x.name))]};
 const FITL=()=>[...new Set([...staffIn('Fitters'),...FIT])];
-const PROB={New:10,Surveyed:30,Quoted:55,Won:90,Lost:0};
+const PROB={New:10,Surveyed:30,Quoted:55,Won:100,Lost:0};
 (function migrateLeads(){if(S.leadsV2)return;S.leadArchive=S.leadArchive||[];
   const conv=S.leads.filter(l=>l.contract);S.leadArchive.push(...conv.map(l=>({...l,convertedTo:(S.contracts.find(c=>c.lead==l.id)||{}).id||''})));
   let n=0;S.leads=S.leads.filter(l=>!l.contract).map(l=>{const old=l.id;l.id='L'+String(++n).padStart(4,'0');l.oldRef=old;S.contracts.forEach(c=>{if(c.lead==old)c.lead=l.id});return l});S.leadsV2=1;store()})();
 function nextLeadId(){const used=new Set(S.leads.map(l=>l.id));let n=1;while(used.has('L'+String(n).padStart(4,'0')))n++;return 'L'+String(n).padStart(4,'0')}
 const allLeads=()=>[...S.leads,...(S.leadArchive||[]).map(l=>({...l,stage:'Won'}))];
-const leadProb=l=>l.prob!=null&&l.prob!==''?+l.prob:PROB[l.stage]??0;
+/* a won lead is always 100% and a lost one 0%, whatever was typed before */
+const leadProb=l=>l.stage=='Won'?100:l.stage=='Lost'?0:l.prob!=null&&l.prob!==''?+l.prob:PROB[l.stage]??0;
 const leadTag=s=>`<span class="tag fw ${s=='Won'?'g':s=='Lost'?'r':s=='Quoted'?'y':s=='New'?'n':''}">${esc(s)}</span>`;
 function mvLead(id,d){const l=S.leads.find(x=>x.id==id),i=STAGES.indexOf(l.stage)+d;if(i<0||i>=STAGES.length)return;const a=l.stage;l.stage=STAGES[i];(l.log=l.log||[]).unshift({d:today(),t:'Stage: '+a+' to '+l.stage,by:USER});audit('Lead stage',l.id,a+' to '+l.stage);store();render()}
 function delLead(id){if(!need(ISOWN,'Deleting leads'))return;const l=S.leads.find(x=>x.id==id);if(!l)return;askYes('Delete lead '+id+'?',l.name+' will be removed. This cannot be undone.','Delete lead',()=>{S.leads=S.leads.filter(x=>x.id!=id);audit('Lead deleted',id,l.name);store();render()},true)}
@@ -3173,7 +3207,8 @@ function vAdmin(){if(!ISOWN())return '';
     <div class="row"><span>Browser storage used<br><small class="muted">${ph} product photos stored</small></span><b>${kb(size)} used</b></div>
     <p class="muted" style="font-size:.78rem;margin:.2rem 0 0">Saved in the browser database on this device, room for hundreds of MB. Export a backup regularly.</p>
     <div class="acts" style="margin-top:.8rem"><button class="mini pri" onclick="chPin()">Change PINs</button><button class="mini" onclick="backupDl()">Download backup</button><label class="mini" style="cursor:pointer">Restore backup<input type="file" accept=".json,application/json" hidden onchange="backupLoad(this)"></label></div></div>
-   <div class="panel"><h2><span>Reviews</span><button class="mini pri" onclick="editRatings()">Update scores</button></h2><div class="row"><span>Trustpilot</span><span>${stars(S.brand.tp.score,'#e0a800','#d9e1ee')} <b>${(+S.brand.tp.score).toFixed(1)}</b></span></div><div class="row"><span>Google</span><span>${stars(S.brand.g.score,'#e0a800','#d9e1ee')} <b>${(+S.brand.g.score).toFixed(1)}</b></span></div><p class="muted" style="font-size:.8rem;margin:.5rem 0 0">Shown on the overview and on customer documents.</p></div>
+   <div class="panel"><h2><span>Reviews</span><button class="mini pri" onclick="editRatings()">Update scores</button></h2><div class="row"><span>Trustpilot</span><span>${stars(S.brand.tp.score,'#e0a800','#d9e1ee')} <b>${(+S.brand.tp.score).toFixed(1)}</b></span></div><div class="row"><span>Google</span><span>${stars(S.brand.g.score,'#e0a800','#d9e1ee')} <b>${(+S.brand.g.score).toFixed(1)}</b></span></div><div class="row"><span>Trusted Trader</span><span><b>${(+(S.brand.tt||{}).score||0).toFixed(1)}</b> / 5</span></div><div class="row"><span>ReferenceLine</span><span><b>${(+(S.brand.rl||{}).score||0).toFixed(1)}</b> / 10</span></div><p class="muted" style="font-size:.8rem;margin:.5rem 0 0">Shown on the overview, the office board and customer documents.</p>
+   <h3 class="nch" style="display:flex;justify-content:space-between;align-items:center">Review Quotes <button class="mini" onclick="addQuote()">Add Quote</button></h3>${(S.brand.quotes||[]).map((x,i)=>`<div class="row"><span style="font-size:.84rem">“${esc(x.t.length>90?x.t.slice(0,90)+'…':x.t)}” <small class="muted">${esc(x.src)}</small></span><button class="mini red" ${A('delQuote',i)} aria-label="Remove quote">Remove</button></div>`).join('')||'<p class="muted">No quotes yet.</p>'}</div>
    ${authPanel()}
    <div class="panel"><h2>Testing Tools</h2><label class="tsw"><input type="checkbox" ${tourTest()?'checked':''} ${AC('onchange','tourToggle','this.checked')}><span>Show the welcome tour every time the site opens</span></label><p class="muted" style="font-size:.82rem;margin:.4rem 0 .7rem">For testing. Turn it off before the team starts using the site, so the tour only shows once per browser.</p><button class="btn ghost sm" onclick="startTour()">Start the tour now</button></div>
    <div class="panel"><h2>Quick Actions</h2><div class="acts" style="gap:.5rem"><button class="btn ghost" ${A('go','finance')}>Finance</button><button class="btn ghost" ${A('go','staff')}>Staff</button><button class="btn ghost" ${A('go','holidays')}>Holidays</button><button class="btn ghost" ${A('go','reports')}>Reports</button><button class="btn ghost" ${A('setRole','staff')}>Leave admin mode</button></div></div>
@@ -3483,7 +3518,7 @@ REC.lead={label:'Lead',
     if(ISOWN()&&o.id&&o.id!=W.id){if(!/^L\d{4}$/.test(o.id))return 'Lead numbers look like L0001';if(S.leads.some(x=>x.id==o.id))return 'Lead number '+o.id+' is already used'}},
   save:(W,o)=>{const isNew=W.isNew,l=isNew?{id:nextLeadId(),log:[{d:today(),t:'Lead created',by:USER}]}:S.leads.find(x=>x.id==W.id);if(!l)return;
     const a=l.stage;if(o.prob===0&&!($('#f_prob').value||'').trim())o.prob='';const nid2=ISOWN()&&o.id&&/^L\d{4}$/.test(o.id)&&!S.leads.some(x=>x!==l&&x.id==o.id)?o.id:null;delete o.id;if(nid2&&nid2!=l.id){audit('Lead number changed',l.id,'to '+nid2);l.id=nid2}
-    Object.assign(l,o,{log:W.v.log,appts:W.v.appts||[]});if(!isNew&&a!=o.stage)l.log.unshift({d:today(),t:'Stage: '+a+' to '+o.stage,by:USER});
+    Object.assign(l,o,{log:W.v.log,appts:W.v.appts||[]});if(l.stage=='Won')l.prob=100;else if(l.stage=='Lost')l.prob=0;if(!isNew&&a!=o.stage)l.log.unshift({d:today(),t:'Stage: '+a+' to '+o.stage,by:USER});
     if(isNew){l.log=[...W.v.log,{d:today(),t:'Lead created',by:USER}];S.leads.push(l)}custCompat(l);audit(isNew?'Lead added':'Lead edited',l.id,l.name);return l.id}};
 function recConvert(){if(!recSave(false))return;const id=RW.id;closeModal();convertLead(id)}
 

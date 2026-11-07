@@ -223,7 +223,7 @@ REC.lead={label:'Lead',
     if(ISOWN()&&o.id&&o.id!=W.id){if(!/^L\d{4}$/.test(o.id))return 'Lead numbers look like L0001';if(S.leads.some(x=>x.id==o.id))return 'Lead number '+o.id+' is already used'}},
   save:(W,o)=>{const isNew=W.isNew,l=isNew?{id:nextLeadId(),log:[{d:today(),t:'Lead created',by:USER}]}:S.leads.find(x=>x.id==W.id);if(!l)return;
     const a=l.stage;if(o.prob===0&&!($('#f_prob').value||'').trim())o.prob='';const nid2=ISOWN()&&o.id&&/^L\d{4}$/.test(o.id)&&!S.leads.some(x=>x!==l&&x.id==o.id)?o.id:null;delete o.id;if(nid2&&nid2!=l.id){audit('Lead number changed',l.id,'to '+nid2);l.id=nid2}
-    Object.assign(l,o,{log:W.v.log,appts:W.v.appts||[]});if(!isNew&&a!=o.stage)l.log.unshift({d:today(),t:'Stage: '+a+' to '+o.stage,by:USER});
+    Object.assign(l,o,{log:W.v.log,appts:W.v.appts||[]});if(l.stage=='Won')l.prob=100;else if(l.stage=='Lost')l.prob=0;if(!isNew&&a!=o.stage)l.log.unshift({d:today(),t:'Stage: '+a+' to '+o.stage,by:USER});
     if(isNew){l.log=[...W.v.log,{d:today(),t:'Lead created',by:USER}];S.leads.push(l)}custCompat(l);audit(isNew?'Lead added':'Lead edited',l.id,l.name);return l.id}};
 function recConvert(){if(!recSave(false))return;const id=RW.id;closeModal();convertLead(id)}
 

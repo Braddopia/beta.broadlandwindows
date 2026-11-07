@@ -18,13 +18,14 @@ const RANDOM_SP='Pick at random';
 (function salesABC(){if(S.salesABC)return;['Sales B','Sales C'].forEach((n,i)=>{if(!S.staff.some(s=>s.name==n))S.staff.push({id:'U-S'+(i+2),name:n,role:'Sales consultant',team:'',phone:'07700 900 '+(610+i*7),email:n.toLowerCase().replace(' ','.')+'@example.com',start:'2025-03-0'+(i+3),allow:25,salary:30000,cat:'Salespeople'})});S.salesABC=1;store()})();
 const OWNERS=()=>{const s=staffIn('Salespeople');return['Unassigned',...new Set(s.length?s:S.staff.map(x=>x.name))]};
 const FITL=()=>[...new Set([...staffIn('Fitters'),...FIT])];
-const PROB={New:10,Surveyed:30,Quoted:55,Won:90,Lost:0};
+const PROB={New:10,Surveyed:30,Quoted:55,Won:100,Lost:0};
 (function migrateLeads(){if(S.leadsV2)return;S.leadArchive=S.leadArchive||[];
   const conv=S.leads.filter(l=>l.contract);S.leadArchive.push(...conv.map(l=>({...l,convertedTo:(S.contracts.find(c=>c.lead==l.id)||{}).id||''})));
   let n=0;S.leads=S.leads.filter(l=>!l.contract).map(l=>{const old=l.id;l.id='L'+String(++n).padStart(4,'0');l.oldRef=old;S.contracts.forEach(c=>{if(c.lead==old)c.lead=l.id});return l});S.leadsV2=1;store()})();
 function nextLeadId(){const used=new Set(S.leads.map(l=>l.id));let n=1;while(used.has('L'+String(n).padStart(4,'0')))n++;return 'L'+String(n).padStart(4,'0')}
 const allLeads=()=>[...S.leads,...(S.leadArchive||[]).map(l=>({...l,stage:'Won'}))];
-const leadProb=l=>l.prob!=null&&l.prob!==''?+l.prob:PROB[l.stage]??0;
+/* a won lead is always 100% and a lost one 0%, whatever was typed before */
+const leadProb=l=>l.stage=='Won'?100:l.stage=='Lost'?0:l.prob!=null&&l.prob!==''?+l.prob:PROB[l.stage]??0;
 const leadTag=s=>`<span class="tag fw ${s=='Won'?'g':s=='Lost'?'r':s=='Quoted'?'y':s=='New'?'n':''}">${esc(s)}</span>`;
 function mvLead(id,d){const l=S.leads.find(x=>x.id==id),i=STAGES.indexOf(l.stage)+d;if(i<0||i>=STAGES.length)return;const a=l.stage;l.stage=STAGES[i];(l.log=l.log||[]).unshift({d:today(),t:'Stage: '+a+' to '+l.stage,by:USER});audit('Lead stage',l.id,a+' to '+l.stage);store();render()}
 function delLead(id){if(!need(ISOWN,'Deleting leads'))return;const l=S.leads.find(x=>x.id==id);if(!l)return;askYes('Delete lead '+id+'?',l.name+' will be removed. This cannot be undone.','Delete lead',()=>{S.leads=S.leads.filter(x=>x.id!=id);audit('Lead deleted',id,l.name);store();render()},true)}

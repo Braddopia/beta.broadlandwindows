@@ -5,7 +5,7 @@
 const KEY='broadland_crm_v1', LOW=15, MAX_PHOTOS=8, MAX_LOG=1500;
 const STAGES=['New','Surveyed','Quoted','Won','Lost'];
 const CSTAGES=['Deposit due','Survey done','Ordered','Fitting booked','Fitted','Complete'];
-const SOURCES=['Website','Phone','Referral','Trade show','Facebook','Showroom'];
+const SOURCES=['Website','Google search','Phone','Showroom','Referral','Repeat customer','Signboard','Van signage','Facebook','Instagram','TikTok','Leaflet','Newspaper or magazine','Radio','Trade show','Trusted Trader','ReferenceLine','Other'];
 const FIT=['Team A','Team B','Fitter A','Fitter B'];
 const SCATS=['Salespeople','Fitters','Office','Factory'];
 const guessCat=r=>/sales|surveyor|consultant|estimator/i.test(r)?'Salespeople':/fit|install/i.test(r)?'Fitters':/operative|production|factory|stock|warehouse|driver/i.test(r)?'Factory':'Office';
@@ -71,6 +71,22 @@ const ikey=r=>[r.item,r.length,r.cInName,r.cOutName].map(v=>{v=String(v||'').tri
     if(!r.ord)r.ord='P'+String(++S.seq.pend).padStart(4,'0')});
   /* public review scores shown on the overview and customer documents (admin can update) */
   S.brand=S.brand||{};S.brand.tp=S.brand.tp||{score:4.5,count:'',url:'https://uk.trustpilot.com/review/broadlandwindows.co.uk'};S.brand.g=S.brand.g||{score:4.5,count:'',url:''};
+  /* review sites figures as published (Nov 2026); admins update them in Admin Console > Reviews */
+  S.brand.tt=S.brand.tt||{score:4.9,count:'613',url:'https://trustedtrader.team/Norfolk/Broadland-Windows-0000015.html'};
+  S.brand.rl=S.brand.rl||{score:9.6,count:'650',rec:'99',url:'https://www.referenceline.com/replacement_doors_windows_conservatories-in-norwich-broadlandwindowsltd-24531'};
+  /* short quotes from public reviews; names of reviewers are deliberately not stored */
+  if(!Array.isArray(S.brand.quotes))S.brand.quotes=[
+    {src:'Trusted Trader',d:'2026-10-24',t:'Very impressed from start to finish with the service for our 2 replacement windows and 1 replacement door. Everyone we dealt with was friendly and courteous.'},
+    {src:'Trusted Trader',d:'2026-10-22',t:'A thoroughly professional, local company that is a pleasure to deal with. Their work is of the highest quality and so is their service.'},
+    {src:'Trusted Trader',d:'2026-10-22',t:'Excellent service from start to finish. Very pleased with our quality new windows and door. They have transformed our property.'},
+    {src:'Trusted Trader',d:'2026-10-16',t:'Always on time, worked hard, efficient and clearly knew what they were doing. I can recommend Broadland Windows without hesitation.'},
+    {src:'Trusted Trader',d:'2026-09-27',t:'The work was done quickly, with hardly any mess, and we have now got a lovely new bedroom window.'},
+    {src:'Trusted Trader',d:'2026-07-28',t:'Very professional, punctual and very competitive. The quality of the products they provide is also top-notch.'},
+    {src:'ReferenceLine',d:'2022-12-04',t:'I was very pleased with Broadland Windows work and would happily recommend them.'},
+    {src:'ReferenceLine',d:'2022-11-07',t:'Very happy with all the work undertaken by a professional, friendly team.'},
+    {src:'ReferenceLine',d:'2022-10-10',t:'Very efficient, helpful, tidy. All surfaces cleaned and all old material taken away. Very professional at all times.'}];
+  /* show the two new review tiles once on an office board someone already customised */
+  if(!S.brand._rv2){S.brand._rv2=1;const o=(S.boards||{}).office;if(o&&Array.isArray(o.k))['tt','rl'].forEach(k=>{if(!o.k.includes(k))o.k.splice(Math.min(2,o.k.length),0,k)})}
   /* profile: who is using this browser */
   if(!S.profile){const u=S.staff.find(s=>s.name=='Demo User')||S.staff[0]||{};S.profile={sid:u.id||'',name:u.name||'Demo User',email:u.email||'',phone:u.phone||'',mobile:'',emergency:'',signature:'',notes:''}}
   /* security: per-install salt and hashed PINs (default 1234 until changed) */
