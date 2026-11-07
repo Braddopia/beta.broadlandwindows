@@ -56,6 +56,9 @@ function render(){
   let h;try{h=V.fn()}catch(e){console.error(e);h=`<div class="panel"><h2>Something Went Wrong</h2><p class="muted">${esc(e.message)}</p></div>`}
   const m=$('#main');m.innerHTML=h;
   document.body.classList.toggle('lv',view=='live');
+  /* "Frame & Glass" design, trialled on a few pages first */
+  let fgOn=true;try{fgOn=localStorage.getItem('bb_fg')!=='0'}catch(e){}document.body.classList.toggle('fg',fgOn&&['home','leads','live'].includes(view));
+  requestAnimationFrame(()=>{if(document.body.classList.contains('fg'))$$('#main .kpi b').forEach(b=>b.style.setProperty('--n',Math.max(2,b.textContent.trim().length)))});
   document.body.classList.toggle('isadm',ISADM());
   shellSync();
   $$('#main .kpi,#main .panel,#main .col,#main .bc,#main .cc,#main .dlane,#main .supc').forEach((e,i)=>e.style.setProperty('--i',Math.min(i,14)));
