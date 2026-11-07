@@ -32,7 +32,7 @@ function vHome(){
   const okK=k=>KP[k]&&canSee(KP[k][3]),okP=k=>PN[k]&&(['hol'].includes(k)||canSee({fits:'fitting',calls:'service',low:'stock',del:'deliveries',chase:'leads',dep:'contracts',res:'leads',pay:'contracts',bills:'finance'}[k]));
   DASH_AV={k:Object.keys(KP).filter(okK).map(k=>[k,KP[k][0]]),p:Object.keys(PN).filter(okP).map(k=>[k,PN[k][0]])};
   const DL=dashGet();
-  return `<div class="hero lkp"><span class="rt">${esc(m&&m.role?tc(m.role):RL[R]||'Team Member')}</span><button class="hero-cz" onclick="dashEdit()">${svg(IC.layout)} Customise</button><h1>Welcome back, ${esc(first)} <span class="wave">👋</span></h1><p>${greet()}. It's ${new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'})}. ${C.s}</p>${ratingsH()}</div>
+  return `<div class="hero lkp"><span class="rt">${esc(m&&m.role?tc(m.role):RL[R]||'Team Member')}</span><button class="hero-cz" onclick="dashEdit()">${svg(IC.layout)} Customise Widgets</button><h1>Welcome back, ${esc(first)} <span class="wave">👋</span></h1><p>${greet()}. It's ${new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'})}. ${C.s}</p>${ratingsH()}</div>
   ${DL.k.filter(okK).length?`<div class="kpis big">${DL.k.filter(okK).map(x=>{const k=KP[x];return `<button class="kpi ${k[2]}" ${A('go',k[3])}><small>${k[0]}</small><b class="${String(k[1]).length>5?'lg':''}">${k[1]}</b></button>`}).join('')}</div>`:''}
   <div class="two">${DL.p.filter(okP).map(x=>PN[x][1]).join('')||'<div class="panel"><p class="empty">No panels chosen. Press Customise to add some.</p></div>'}</div>`}
 /* per-person dashboard layout */
