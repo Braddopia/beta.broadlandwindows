@@ -961,3 +961,10 @@ body[data-theme=dark] .mb .ff input,body[data-theme=dark] .mb .ff select,body[da
 /* page headers: the same gap under every title */
 .main>.head{margin-bottom:.9rem}
 .main>.head+.subbar,.main>.head+.sg2,.main>.head+.chips{margin-top:0}
+
+/* tour on phones: a panel across the screen, never off the edge */
+.tcard{max-height:calc(100dvh - 24px);overflow:auto}
+.tcard.sheet{left:12px!important;right:12px;width:auto!important;transform:none!important}
+.tcard.mid{max-width:calc(100vw - 24px)}
+@media(max-width:640px){.tcard.mid .tban{height:5rem}.tcard .tbtn{flex-wrap:wrap}.tcard h3{font-size:1.05rem}}
+#tour{z-index:960}

@@ -1356,6 +1356,13 @@ body[data-theme=dark] .mb .ff input,body[data-theme=dark] .mb .ff select,body[da
 .main>.head{margin-bottom:.9rem}
 .main>.head+.subbar,.main>.head+.sg2,.main>.head+.chips{margin-top:0}
 
+/* tour on phones: a panel across the screen, never off the edge */
+.tcard{max-height:calc(100dvh - 24px);overflow:auto}
+.tcard.sheet{left:12px!important;right:12px;width:auto!important;transform:none!important}
+.tcard.mid{max-width:calc(100vw - 24px)}
+@media(max-width:640px){.tcard.mid .tban{height:5rem}.tcard .tbtn{flex-wrap:wrap}.tcard h3{font-size:1.05rem}}
+#tour{z-index:960}
+
 /* ==========================================================================
    06 · Adaptive layout
    Breakpoints: 1400 (laptop) · 1100 (small laptop / tablet landscape)
@@ -1997,7 +2004,7 @@ function shellSync(){
 function toast(t){if(document.body.classList.contains('tv'))return;const e=$('#toast');e.textContent=t;e.style.display='block';clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.display='none',3400)}
 
 /* ---- modal ---- */
-function openModal(h,size){const b=$('#mbox');b.className='mb'+(size?' '+size:'');b.innerHTML=h;$('#modal').classList.add('open');b.scrollTop=0;
+function openModal(h,size){const b=$('#mbox');b.className='mb '+(size||'md'); /* one standard width unless a window needs another */b.innerHTML=h;$('#modal').classList.add('open');b.scrollTop=0;
   if(size!='full')setTimeout(()=>{const f=b.querySelector('input:not([readonly]):not([type=hidden]):not([type=checkbox]),select,textarea');if(f&&matchMedia('(pointer:fine)').matches)f.focus({preventScroll:true})},60)}
 /* "next" fields: Mobile 2 shows once Mobile 1 has something in it, and so on */
 const nxHid=(f,v)=>!!f.nx&&!String(v[f.nx]??'').trim()&&!String(v[f.k]??'').trim();
@@ -2032,7 +2039,7 @@ function form(title,fields,v,cb,photos,size){
     :`<input id="f_${f.k}" type="${f.t||'text'}"${f.t=='number'?` step="any" min="${f.min??0}"${f.max?` max="${f.max}"`:''} inputmode="decimal"`:` maxlength="${f.max||120}"`} value="${esc(v[f.k]??'')}"${f.ro?' readonly':''}${f.list?` list="${f.list}"`:''} autocomplete="off">`;
   openModal(`<h2>${esc(title)}</h2><div class="grid">${fields.map(f=>`<div class="ff ${f.w||''}"><label for="f_${f.k}">${esc(f.l)}${f.req?' *':''}</label>${f.scan?`<div class="inl">${inp(f)}<button type="button" class="btn scan sm" ${A('scanInto','f_'+f.k)}>Scan</button></div>`:inp(f)}${f.hint?`<span class="hint">${esc(f.hint)}</span>`:''}</div>`).join('')}
    ${photos?`<div class="ff full"><label>Photos <span class="muted">(up to ${MAX_PHOTOS})</span></label><div class="thumbs" id="thumbs"></div><div class="prow"><label class="btn ghost sm">Take photo<input type="file" accept="image/*" capture="environment" hidden onchange="addPh(this)"></label><label class="btn ghost sm">Choose from gallery<input type="file" accept="image/*" multiple hidden onchange="addPh(this)"></label></div></div>`:''}</div>
-   <div class="mact"><button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn" id="saveBtn">Save changes</button></div>`,size);
+   <div class="mact"><button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn" id="saveBtn">Save changes</button></div>`,size||'md'); /* every plain form is the same width */
   if(photos)drawThumbs();
   $('#saveBtn').onclick=()=>{const o=readFields(fields);if(!o)return;if(photos)o.photos=tmp;if(cb(o)===false)return;store();closeModal();render()}}
 /* read + validate form fields; returns null (and focuses the field) when invalid */
@@ -3498,14 +3505,14 @@ let ncAlerts=[];
 function ncData(){const td=today(),req=[],mov=[],alr=[];
   const Ad=ISADM();S.items.forEach(r=>{if(r.type=='request'){if(['Pending','Approved'].includes(r.reqStatus)&&!r.cleared&&(Ad||r.user==USER))req.push(r)}else if(Ad){mov.push({r,n:!S.seen[r.uid]});if(r.flag&&!r.cleared)alr.push({k:'Alert',t:r.item+': '+r.type+' '+r.qty,s:r.user+', '+r.time,uid:r.uid})}});
   products().forEach(r=>{const k='low:'+r.pid;if(isLow(r)&&S.dis[k]!==r.stock)alr.push({k:'Low Stock',t:r.item,s:r.stock+' '+unitOf(r)+' left at '+(hasLoc(r)?r.location:'no location'),key:k,stock:r.stock})});
-  S.contracts.filter(c=>fensaDue(c)&&c.fit&&c.fit<=addDays(-14)).forEach(c=>{const g=Math.round((new Date(td)-new Date(c.fit))/864e5);alr.push({k:'FENSA',t:c.name+' #'+c.id,s:'Fitted '+g+' days ago. Notify FENSA within 30 days of fitting.',go:'contracts'})});
-  S.deliveries.filter(d=>d.status=='Due'&&d.due<=td).forEach(d=>alr.push({k:'Delivery',t:d.supplier+': '+d.items,s:d.due<td?'Overdue since '+fd(d.due):'Due today',go:'deliveries'}));
-  return{req,mov:Ad?mov.slice(0,20):[],alr:alr.filter(x=>Ad||!['FENSA','Alert'].includes(x.k)),men:[]}}
-function ncCount(){const d=ncData();return d.req.filter(r=>r.reqStatus=='Pending'||!ISADM()).length+d.mov.filter(x=>x.n).length+d.alr.length+d.men.filter(n=>!n.read).length}
+  S.contracts.filter(c=>fensaDue(c)&&c.fit&&c.fit<=addDays(-14)).forEach(c=>{const g=Math.round((new Date(td)-new Date(c.fit))/864e5);alr.push({k:'FENSA',t:c.name+' #'+c.id,s:'Fitted '+g+' days ago. Notify FENSA within 30 days of fitting.',go:'contracts',key:'fensa:'+c.id,stock:1})});
+  S.deliveries.filter(d=>d.status=='Due'&&d.due<=td).forEach(d=>alr.push({k:'Delivery',t:d.supplier+': '+d.items,s:d.due<td?'Overdue since '+fd(d.due):'Due today',go:'deliveries',key:'del:'+d.id+':'+d.due,stock:1}));
+  return{req,mov:Ad?mov.slice(0,20):[],alr:alr.filter(x=>(Ad||!['FENSA','Alert'].includes(x.k))&&!(x.stock===1&&S.dis[x.key]===1)),men:[]}}
+function ncCount(){const d=ncData();return d.req.filter(r=>ISADM()?r.reqStatus=='Pending':r.reqStatus=='Approved').length+d.mov.filter(x=>x.n).length+d.alr.length+d.men.filter(n=>!n.read).length}
 function ncDraw(){const nc=$('#nc'),d=ncData(),T=UI.nc.t,show=k=>T=='All'||T==k||(k=='Requests'&&T=='My Requests'),Ad=ISADM();ncAlerts=d.alr;
   const sec=(t,h)=>`<h3 class="nch">${t}</h3>${h||emptyArt('done','Nothing here.')}`;
   const rq=d.req.map(r=>`<div class="nrow ${r.flag?'hot':''}"><span><span class="tag ${r.reqStatus=='Pending'?'y':'g'}">${esc(r.reqStatus)}</span> <b>${ordTag(r)} ${r.qty} ${esc(unitOf(r))} x ${esc(r.item)}</b><small>${esc(colTxt(r))}, ${esc(r.user)}, ${esc(r.time)}${r.note?', '+esc(r.note):''}</small></span><span class="acts">${r.reqStatus=='Pending'&&Ad?`<button class="mini pri" ${A('ncAct','approve',r.uid)}>Approve</button><button class="mini del" ${A('ncAct','reject',r.uid)}>Reject</button>`:''}${r.reqStatus=='Approved'?`<button class="mini" ${A('ncAct','receive',r.uid)}>Receive</button><button class="mini" ${A('ncAct','clr',r.uid)}>Clear</button>`:''}</span></div>`).join('');
-  const al=d.alr.map((x,j)=>`<div class="nrow"><span><span class="tag ${x.k=='Alert'?'r':'y'}">${esc(x.k)}</span> <b>${esc(x.t)}</b><small>${esc(x.s)}</small></span><span class="acts">${x.go?`<button class="mini" ${A('ncAct','go',x.go)}>Open</button>`:`<button class="mini pri" ${A('ncAct','alr',j)}>Clear</button>`}</span></div>`).join('');
+  const al=d.alr.map((x,j)=>`<div class="nrow"><span><span class="tag ${x.k=='Alert'?'r':'y'}">${esc(x.k)}</span> <b>${esc(x.t)}</b><small>${esc(x.s)}</small></span><span class="acts">${x.go?`<button class="mini" ${A('ncAct','go',x.go)}>Open</button>`:''}<button class="mini pri" ${A('ncAct','alr',j)}>Clear</button></span></div>`).join('');
   const mv=d.mov.map(x=>`<div class="nrow ${x.n?'':'seen'}"><span><span class="tag ${x.r.type=='add'?'g':'r'}">${x.r.type=='add'?'In':'Out'}</span> <b>${x.r.qty} ${esc(unitOf(x.r))} x ${esc(x.r.item)}</b><small>${esc(x.r.user)}, ${esc(x.r.time)}, stock now ${x.r.stock}</small></span>${x.n?'<span class="dotn"></span>':''}</div>`).join('');
   const mn=d.men.slice().reverse().map(n=>`<div class="nrow ${n.read?'seen':''}"><span><span class="tag">Mention</span> <b>${esc(n.t)}</b><small>From ${esc(n.by)}, ${new Date(n.at).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</small></span><span class="acts">${n.read?'':`<button class="mini" ${A('ncAct','read',n.id)}>Read</button>`}<button class="mini del" ${A('ncAct','del',n.id)}>Delete</button></span></div>`).join('');
   nc.innerHTML=`<div class="nc-h"><h2>Notification Centre</h2><button class="mini" onclick="ncToggle(false)">Close</button></div><div class="chips" style="padding:.6rem 1.1rem 0">${ncTabs().map(t=>`<button class="chip ${T==t?'on':''}" ${A('ncTab',t)}>${t}</button>`).join('')}</div><div class="nc-t"><button class="mini" ${A('ncAct','readall')}>Mark all read</button><button class="mini" ${A('ncAct','clrall')}>Clear all</button><button class="mini pri" onclick="ncToggle(false);go('messages')">Messages</button></div><div class="nc-b">${show('Requests')?sec((ISADM()?'Stock Requests':'My Stock Requests')+' ('+d.req.length+')',rq):''}${show('Alerts')?sec('Alerts ('+d.alr.length+')',al):''}${ISADM()&&show('Stock In/Out')?sec('Stock In And Out',mv):''}</div>`}
@@ -3921,22 +3928,32 @@ let TI=0;
 const tourTest=()=>{try{return localStorage.getItem('bb_tour_test')=='1'}catch(e){return false}};
 function tourToggle(on){try{localStorage.setItem('bb_tour_test',on?'1':'0')}catch(e){}toast(on?'The tour will show every time the site opens':'The tour will only show once');const c=$('#tourTest');if(c)c.checked=on;render()}
 function startTour(){if(view!='home'&&TOUR.some(s=>s.page=='home'))go('home');TI=0;let o=$('#tour');if(!o){o=document.createElement('div');o.id='tour';o.setAttribute('role','dialog');o.setAttribute('aria-modal','true');document.body.appendChild(o)}o.classList.add('open');setTimeout(tourDraw,60)}
-function endTour(){const o=$('#tour');if(o)o.classList.remove('open');try{localStorage.setItem('bb_tour_seen','1')}catch(e){}}
+function endTour(){const o=$('#tour');if(o)o.classList.remove('open');if(document.body.dataset.tourMenu){document.body.classList.remove('sopen');delete document.body.dataset.tourMenu}try{localStorage.setItem('bb_tour_seen','1')}catch(e){}}
 function tourGo(d){TI=Math.max(0,Math.min(TOUR.length-1,TI+d));tourDraw()}
-function tourDraw(){const o=$('#tour');if(!o)return;const s=TOUR[TI],el=s.sel&&$(s.sel),vis=el&&el.offsetParent!==null&&el.getBoundingClientRect().width>0,last=TI==TOUR.length-1;
-  const r=vis?el.getBoundingClientRect():null,pad=8;
+function tourDraw(){const o=$('#tour');if(!o)return;const s=TOUR[TI],last=TI==TOUR.length-1;
+  let el=s.sel&&$(s.sel);const inSide=el&&el.closest('.side'),narrow=matchMedia('(max-width:900px)').matches;
+  /* on a phone the menu is tucked away: slide it open for steps that point at it */
+  if(inSide&&narrow&&!document.body.classList.contains('sopen')){document.body.classList.add('sopen');document.body.dataset.tourMenu='1';setTimeout(tourDraw,320);return}
+  if(!(inSide&&narrow)&&document.body.dataset.tourMenu){document.body.classList.remove('sopen');delete document.body.dataset.tourMenu}
+  const rr=el&&el.getBoundingClientRect(),vis=!!(el&&el.offsetParent!==null&&rr.width>0&&rr.right>0&&rr.bottom>0&&rr.left<innerWidth&&rr.top<innerHeight);
+  const r=vis?rr:null,pad=8;
   o.innerHTML=`<div class="tspot ${vis?'':'none'}" style="${vis?`left:${r.left-pad}px;top:${r.top-pad}px;width:${r.width+pad*2}px;height:${r.height+pad*2}px`:''}"></div>
    <div class="tcard ${vis?'':'mid'}">${!vis&&s.art&&ART_IC[s.art]?`<div class="tban lkp">${svg(ART_IC[s.art])}</div>`:''}<small>${TI+1} of ${TOUR.length}</small><h3>${esc(s.t)}</h3><p>${esc(s.d)}</p>
     <div class="tdots">${TOUR.map((_,i)=>`<i class="${i==TI?'on':''}"></i>`).join('')}</div>
     ${ISOWN()||ROLE=='beta'?`<label class="ttest"><input type="checkbox" id="tourTest" ${tourTest()?'checked':''} onchange="tourToggle(this.checked)"> Show every time (testing)</label>`:''}
     <div class="tbtn"><button class="btn ghost sm" onclick="endTour()">${last?'Close':'Skip tour'}</button><span></span>${TI?'<button class="btn ghost sm" onclick="tourGo(-1)">Back</button>':''}<button class="btn sm" onclick="${last?'endTour()':'tourGo(1)'}">${last?'Finish':'Next'}</button></div></div>`;
-  const c=o.querySelector('.tcard');if(vis){const cw=c.offsetWidth,ch=c.offsetHeight;let top=r.bottom+16,left=r.left;if(top+ch>innerHeight-12)top=Math.max(12,r.top-ch-16);if(r.width<260&&r.left>innerWidth/2)left=r.right-cw;if(r.left<300&&r.height>innerHeight*.5){left=r.right+20;top=Math.max(12,Math.min(innerHeight-ch-12,r.top+40))}
-    c.style.left=Math.max(12,Math.min(innerWidth-cw-12,left))+'px';c.style.top=top+'px'}
+  const c=o.querySelector('.tcard');const sm=innerWidth<640;
+  if(vis&&sm){c.classList.add('sheet');const below=r.top+r.height/2<innerHeight/2;c.style.left='';c.style.top=below?'':'12px';c.style.bottom=below?'12px':''}
+  else if(vis){const cw=c.offsetWidth,ch=c.offsetHeight;let top=r.bottom+16,left=r.left;if(top+ch>innerHeight-12)top=Math.max(12,r.top-ch-16);if(r.width<260&&r.left>innerWidth/2)left=r.right-cw;if(r.left<300&&r.height>innerHeight*.5){left=r.right+20;top=Math.max(12,Math.min(innerHeight-ch-12,r.top+40))}
+    c.style.left=Math.max(12,Math.min(innerWidth-cw-12,left))+'px';c.style.top=Math.max(12,Math.min(innerHeight-ch-12,top))+'px'}
   const b=o.querySelector('.tbtn .btn:last-child');if(b)b.focus()}
 document.addEventListener('keydown',e=>{const o=$('#tour');if(!o||!o.classList.contains('open'))return;if(e.key=='Escape')endTour();else if(e.key=='ArrowRight')tourGo(1);else if(e.key=='ArrowLeft')tourGo(-1)});
 addEventListener('resize',()=>{const o=$('#tour');if(o&&o.classList.contains('open'))tourDraw()});
 function tourBoot(){const b=document.createElement('button');b.className='ib';b.id='helpBtn';b.type='button';b.title='Show the tour';b.setAttribute('aria-label','Show the tour');b.innerHTML=svg('M9.1 9a3 3 0 015.8 1c0 2-3 3-3 3M12 17h.01M12 22a10 10 0 100-20 10 10 0 000 20z');b.onclick=startTour;const t=$('#thb');if(t)t.after(b);
   let seen=false;try{seen=localStorage.getItem('bb_tour_seen')=='1'}catch(e){}if(tourTest()||!seen)setTimeout(startTour,1600)}
+
+/* keep the tour in place when the screen turns or resizes */
+addEventListener('resize',()=>{const o=$('#tour');if(o&&o.classList.contains('open')){clearTimeout(tourDraw.t);tourDraw.t=setTimeout(tourDraw,120)}});
 
 /* ==========================================================================
    17 · Staff sign-in with Google or Microsoft work accounts
