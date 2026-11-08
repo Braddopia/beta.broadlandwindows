@@ -24,10 +24,10 @@ function need(test,what){if(test())return true;toast((what||'That')+' needs an a
 /* ---- switching account ---- */
 let pendView=null;
 function swRole(){
-  openModal(`<h2>Switch Account</h2><div class="rl">${Object.entries(ROLES).map(([k,r])=>`<button class="rb ${k==ROLE?'on':''}" ${A('pickRole',k)}><b>${esc(r.n)}</b><span>${esc(r.d)}</span></button>`).join('')}</div><div class="mact">${window.SSO?`<button class="btn ghost l" style="color:var(--red)" onclick="ssoOut()">Sign out ${esc(SSO.email||USER)}</button>`:''}<button class="btn ghost" onclick="closeModal()">Cancel</button></div>`)}
+  openModal(`<h2>Switch Account</h2><div class="rl">${Object.entries(ROLES).map(([k,r])=>`<button class="rb ${k==ROLE?'on':''}" ${A('pickRole',k)}><b>${esc(r.n)}</b><span>${esc(r.d)}</span></button>`).join('')}</div><div class="mact">${window.SSO?`<button class="btn ghost l" style="color:var(--red)" data-act="ssoOut">Sign out ${esc(SSO.email||USER)}</button>`:''}<button class="btn ghost" data-act="closeModal">Cancel</button></div>`)}
 function pickRole(k){
   if(!ROLES[k])return;if(k=='staff'||k==ROLE){closeModal();setRole(k);return}
-  openModal(`<h2>${esc(ROLES[k].n)} PIN</h2><div class="mf"><input id="pin" type="password" inputmode="numeric" autocomplete="off" maxlength="12" ${AC('onkeydown','pinKey','this')} data-r="${esc(k)}"><button class="btn" ${A('chkPin',k)}>Sign in</button></div><p class="muted" id="pinMsg" style="margin:0"></p><div class="mact"><button class="btn ghost" onclick="swRole()">Back</button></div>`,'sm');
+  openModal(`<h2>${esc(ROLES[k].n)} PIN</h2><div class="mf"><input id="pin" type="password" inputmode="numeric" autocomplete="off" maxlength="12" ${AC('onkeydown','pinKey','this')} data-r="${esc(k)}"><button class="btn" ${A('chkPin',k)}>Sign in</button></div><p class="muted" id="pinMsg" style="margin:0"></p><div class="mact"><button class="btn ghost" data-act="swRole">Back</button></div>`,'sm');
   setTimeout(()=>{const e=$('#pin');e&&e.focus()},50)}
 function pinKey(el){if(event.key=='Enter')chkPin(el.dataset.r)}
 function pinState(){try{return JSON.parse(sessionStorage.getItem('bb_pin'))||{n:0,until:0}}catch(e){return{n:0,until:0}}}
@@ -54,7 +54,7 @@ setInterval(()=>{if(!window.SSO&&ROLE!='staff'&&!document.body.classList.contain
 /* ---- PIN management (owner accounts) ---- */
 function chPin(){
   if(!need(ISOWN,'Changing PINs'))return;
-  openModal(`<h2>Account PINs</h2><p class="muted">PINs are stored as salted SHA-256 hashes. Use 4 to 12 digits.</p>${Object.entries(ROLES).filter(([k])=>k!='staff').map(([k,r])=>`<div class="row"><span><b>${esc(r.n)}</b><br><span class="muted">${S.sec.pins[k].def?'<span class="tag y">Default PIN</span>':'Custom PIN set'}</span></span><button class="mini pri" ${A('setPin',k)}>Change</button></div>`).join('')}<div class="mact"><button class="btn" onclick="closeModal()">Done</button></div>`)}
+  openModal(`<h2>Account PINs</h2><p class="muted">PINs are stored as salted SHA-256 hashes. Use 4 to 12 digits.</p>${Object.entries(ROLES).filter(([k])=>k!='staff').map(([k,r])=>`<div class="row"><span><b>${esc(r.n)}</b><br><span class="muted">${S.sec.pins[k].def?'<span class="tag y">Default PIN</span>':'Custom PIN set'}</span></span><button class="mini pri" ${A('setPin',k)}>Change</button></div>`).join('')}<div class="mact"><button class="btn" data-act="closeModal">Done</button></div>`)}
 function setPin(k){
   if(!need(ISOWN,'Changing PINs'))return;
   form('New PIN: '+ROLES[k].n,[{k:'a',l:'New PIN',t:'password',req:1,max:12},{k:'b',l:'Repeat new PIN',t:'password',req:1,max:12}],{},o=>{
@@ -66,13 +66,13 @@ function setPin(k){
 /* ---- my details: name, contact info. Job role, team, start date are admin-only ---- */
 function editProfile(){
   const p=S.profile,m=me()||{},adm=ISOWN(),lk=t=>MARK(0,1);
-  openModal(`<button class="mx" onclick="closeModal()" aria-label="Close">&times;</button><div class="pf"><span class="av2">${esc(initials(p.name))}</span><div><h2 style="margin:0">My Details</h2><span class="muted">${esc(ROLES[ROLE].n)} account</span></div></div>
+  openModal(`<button class="mx" data-act="closeModal" aria-label="Close">&times;</button><div class="pf"><span class="av2">${esc(initials(p.name))}</span><div><h2 style="margin:0">My Details</h2><span class="muted">${esc(ROLES[ROLE].n)} account</span></div></div>
   <div class="grid">
    <div class="ff"><label for="p_name">Display name *</label><input id="p_name" maxlength="60" value="${esc(p.name)}"></div>
    <div class="ff"><label for="p_email">Email${MARK(1)}</label><input id="p_email" class="nocap" type="email" maxlength="120" value="${esc((window.SSO&&SSO.email)||p.email||m.email||'')}" ${window.SSO&&SSO.email?'readonly':''}>${window.SSO&&SSO.email?'<span class="hint">From your Microsoft 365 sign-in</span>':'<span class="hint">Fills in by itself once you sign in with Microsoft 365</span>'}</div>
    <div class="ff"><label for="p_phone">Work phone${MARK(1)}</label><input id="p_phone" type="tel" maxlength="30" value="${esc(p.phone||m.phone||CO.tel||'01603 483002')}"></div>
    <div class="ff"><label for="p_mobile">Mobile</label><input id="p_mobile" type="tel" maxlength="30" value="${esc(p.mobile||'')}"></div>
-   <div class="ff full"><label for="p_en">Emergency contacts</label><select id="p_en" onchange="emerDraw()">${[0,1,2,3].map(n=>`<option value="${n}" ${n==emerList(p).length?'selected':''}>${n?n+' '+(n==1?'person':'people'):'None yet'}</option>`).join('')}</select></div>
+   <div class="ff full"><label for="p_en">Emergency contacts</label><select id="p_en" data-onchange="emerDraw">${[0,1,2,3].map(n=>`<option value="${n}" ${n==emerList(p).length?'selected':''}>${n?n+' '+(n==1?'person':'people'):'None yet'}</option>`).join('')}</select></div>
    <div class="ff full" id="p_emer">${emerRows(emerList(p))}</div>
    <div class="ff full"><label for="p_sig">Email signature / sign-off</label><textarea id="p_sig" rows="2" maxlength="400">${esc(p.signature||'')}</textarea></div>
    <div class="ff"><label for="p_role">Job role ${adm?'':lk('Admin only')}</label><input id="p_role" maxlength="60" value="${esc(m.role||'')}" ${adm?'':'readonly'}></div>
@@ -81,7 +81,7 @@ function editProfile(){
    <div class="ff"><label for="p_allow">Holiday allowance ${adm?'':lk('Admin only')}</label><input id="p_allow" type="number" min="0" max="60" value="${esc(m.allow??'')}" ${adm?'':'readonly'}></div>
   </div>
   ${m.id?'':'<p class="warn">Your name is not linked to a staff record yet. An administrator can add you under Staff.</p>'}
-  <div class="mact"><button class="btn ghost l" onclick="swRole()">${svg(IC.switch)}Switch account</button><button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn" onclick="saveProfile()">Save details</button></div>`,'md')}
+  <div class="mact"><button class="btn ghost l" data-act="swRole">${svg(IC.switch)}Switch account</button><button class="btn ghost" data-act="closeModal">Cancel</button><button class="btn" data-act="saveProfile">Save details</button></div>`,'md')}
 /* emergency contacts: up to three people, each with a name, how they know you and a number */
 const emerList=p=>Array.isArray(p.emer)?p.emer.slice(0,3):p.emergency?[{n:p.emergency,r:'',t:''}]:[];
 const emerRows=L=>L.map((e,i)=>`<div class="emr"><b>Person ${i+1}</b><input id="pe_n${i}" maxlength="60" placeholder="Name" aria-label="Name" value="${esc(e.n||'')}"><input id="pe_r${i}" maxlength="40" placeholder="Relationship, e.g. partner" aria-label="Relationship" value="${esc(e.r||'')}"><input id="pe_t${i}" type="tel" maxlength="30" placeholder="Phone number" aria-label="Phone number" value="${esc(e.t||'')}"></div>`).join('');

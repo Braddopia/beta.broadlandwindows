@@ -9,14 +9,34 @@ const $$=s=>[...document.querySelectorAll(s)];
 
 /* ---- escaping (every piece of data that reaches innerHTML goes through esc) ---- */
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-/* Safe inline handler: A('openContract',id) -> onclick="openContract(&quot;2402318&quot;)".
+/* Safe inline handler: A('openContract',id) -> data-act="openContract" data-args="[&quot;2402318&quot;]".
    Arguments are JSON-encoded then HTML-escaped, so names/ids containing quotes can't break out. */
 /* click anywhere on a row or card to open it (buttons, links and boxes inside keep their own job) */
-const RC=(fn,...a)=>`tabindex="0" data-rc="1" onclick="${esc("if(event.target.closest('button,a,input,select,textarea,label,summary'))return;"+fn+'('+a.map(x=>JSON.stringify(x===undefined?null:x)).join(',')+')')}"`;
+/* ---- actions: markup names the function to run in data attributes, and one listener per event type
+   runs it. No inline code in the page, so a strict Content-Security-Policy works.
+     A('fn',a,b)            click            -> data-act="fn" data-args="[a,b]"
+     AC('onchange','fn',x)  change/input/... -> data-onchange="fn" data-args-change="[x]"
+                            'this', 'this.value', 'this.checked' and 'event' are passed as the element, its value, ...
+     RC('fn',a)             whole row/card is clickable (clicks on buttons/links inside it are left alone)
+   Handlers are looked up in ACTIONS first (registered with act()), then as named global functions. ---- */
+const ACTIONS=Object.create(null),ACT_TOK={'this':{$:'this'},'this.value':{$:'value'},'this.checked':{$:'checked'},'event':{$:'event'}};
+const actJson=(a,tok)=>esc(JSON.stringify(a.map(x=>x===undefined?null:tok&&typeof x=='string'&&ACT_TOK[x]?ACT_TOK[x]:x)));
+const A=(fn,...a)=>`data-act="${esc(fn)}"${a.length?` data-args="${actJson(a)}"`:''}`;
+const AC=(ev,fn,...a)=>{const t=String(ev).replace(/^on/,'');return `data-on${t}="${esc(fn)}"${a.length?` data-args-${t}="${actJson(a,1)}"`:''}`};
+const RC=(fn,...a)=>`tabindex="0" data-rc="1" data-row="${esc(fn)}"${a.length?` data-args-row="${actJson(a)}"`:''}`;
 /* labels: required boxes get a red star, admin-only boxes a lock (same everywhere) */
 const MARK=(req,adm)=>(req?'<span class="rq" aria-hidden="true">*</span><span class="sr"> (required)</span>':'')+(adm?`<span class="lockd" title="Only administrators can change this" aria-label="Only administrators can change this">${svg(IC.lock)}</span>`:'');
-const A=(fn,...a)=>`onclick="${esc(fn+'('+a.map(x=>JSON.stringify(x===undefined?null:x)).join(',')+')')}"`;
-const AC=(ev,fn,...a)=>`${ev}="${esc(fn+'('+a.map(x=>x==='this'||x==='this.value'||x==='this.checked'?x:JSON.stringify(x===undefined?null:x)).join(',')+')')}"`;
+function act(name,fn){ACTIONS[name]=fn}
+function actFind(name){if(ACTIONS[name])return ACTIONS[name];return /^[A-Za-z_$][\w$]*$/.test(name)&&typeof window[name]=='function'?window[name]:null}
+function actRun(name,args){const f=actFind(name);if(!f){console.warn('No action called '+name);return}return f(...(args||[]))}
+function actArgs(el,attr,ev){let a=[];try{a=JSON.parse(el.getAttribute(attr)||'[]')}catch(e){}
+  return a.map(x=>x&&typeof x=='object'&&!Array.isArray(x)&&typeof x.$=='string'&&Object.keys(x).length==1?(x.$=='this'?el:x.$=='value'?el.value:x.$=='checked'?el.checked:x.$=='event'?ev:null):x)}
+document.addEventListener('click',e=>{const t=e.target;if(!(t instanceof Element))return;
+  const el=t.closest('[data-act]');if(el){if(el.dataset.stop)e.stopImmediatePropagation();actRun(el.dataset.act,actArgs(el,'data-args',e));return}
+  const row=t.closest('[data-row]');if(!row)return;const hit=t.closest('button,a,input,select,textarea,label,summary,[data-norow]');if(hit&&hit!==row&&row.contains(hit))return;
+  actRun(row.dataset.row,actArgs(row,'data-args-row',e))});
+['change','input','keydown'].forEach(type=>document.addEventListener(type,e=>{const t=e.target;if(!(t instanceof Element))return;const el=t.closest('[data-on'+type+']');if(el)actRun(el.getAttribute('data-on'+type),actArgs(el,'data-args-'+type,e))}));
+document.addEventListener('error',e=>{const el=e.target;if(el instanceof Element&&el.hasAttribute('data-onerror'))actRun(el.getAttribute('data-onerror'),actArgs(el,'data-args-error',e))},true);
 
 /* ---- validation / sanitising ---- */
 const SAFE={

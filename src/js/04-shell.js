@@ -99,7 +99,7 @@ document.addEventListener('input',e=>{const el=e.target;if(!el.id||!el.id.starts
   $$(`#mbox [data-nx="${k}"]`).forEach(r=>{const own=r.querySelector('input,select,textarea');r.hidden=!el.value.trim()&&!(own&&own.value.trim())})});
 /* styled confirmation instead of the browser's own box */
 let ASK=null,ASK_NO=null;
-function askYes(title,msg,okLabel,cb,danger,noCb){ASK=cb;ASK_NO=noCb||null;openModal(`<div class="ask"><div class="ask-ic ${danger?'r':''}">${danger?'!':'?'}</div><h2>${esc(title)}</h2><p class="muted">${esc(msg)}</p></div><div class="mact"><button class="btn ghost" onclick="askNo()">${noCb?'No, go back':'Cancel'}</button><button class="btn ${danger?'red':''}" onclick="askGo()">${esc(okLabel||'Yes')}</button></div>`,'sm')}
+function askYes(title,msg,okLabel,cb,danger,noCb){ASK=cb;ASK_NO=noCb||null;openModal(`<div class="ask"><div class="ask-ic ${danger?'r':''}">${danger?'!':'?'}</div><h2>${esc(title)}</h2><p class="muted">${esc(msg)}</p></div><div class="mact"><button class="btn ghost" data-act="askNo">${noCb?'No, go back':'Cancel'}</button><button class="btn ${danger?'red':''}" data-act="askGo">${esc(okLabel||'Yes')}</button></div>`,'sm')}
 /* askIn: our own confirm box, layered above any open window. Esc or Cancel closes it. */
 let ASKI=null;
 function askIn(title,msg,okLabel,cb,danger){if(ASKI)ASKI.remove();const o=document.createElement('div');o.className='aski';o.setAttribute('role','alertdialog');o.setAttribute('aria-modal','true');o.setAttribute('aria-label',title);
@@ -136,8 +136,8 @@ function form(title,fields,v,cb,photos,size){
   const inp=f=>f.t=='colour'?colourField(f,v):f.t=='select'?sel(f):f.t=='area'?`<textarea id="f_${f.k}" rows="3" maxlength="${f.max||2000}">${esc(v[f.k]||'')}</textarea>`
     :`<input id="f_${f.k}" type="${f.t||'text'}"${f.t=='number'?` step="any" min="${f.min??0}"${f.max?` max="${f.max}"`:''} inputmode="decimal"`:` maxlength="${f.max||120}"`} value="${esc(v[f.k]??'')}"${f.ro?' readonly':''}${f.list?` list="${f.list}"`:''}${f.t=='email'||/url|web|portal|feed|link/i.test(f.k)?' class="nocap"':''} autocomplete="off">`;
   openModal(`<h2>${esc(title)}</h2><div class="grid">${fields.map(f=>f.t=='h'?`<h3 class="fsec full">${esc(f.l)}</h3>`:`<div class="ff ${f.w||''}"><label for="f_${f.k}">${esc(f.l)}${MARK(f.req,f.adm)}</label>${f.scan?`<div class="inl">${inp(f)}<button type="button" class="btn scan sm" ${A('scanInto','f_'+f.k)}>Scan</button></div>`:inp(f)}${f.hint?`<span class="hint ${/https?:|@/.test(f.hint)?'nocap':''}">${esc(f.hint)}</span>`:''}</div>`).join('')}
-   ${photos?`<div class="ff full"><label>Photos <span class="muted">(up to ${MAX_PHOTOS})</span></label>${typeof photos=='string'?`<span class="hint">${esc(photos)}</span>`:''}<div class="thumbs phg" id="thumbs"></div><div class="prow"><label class="btn ghost sm">Take photo<input type="file" accept="image/*" capture="environment" hidden onchange="addPh(this)"></label><label class="btn ghost sm">Choose from gallery<input type="file" accept="image/*" multiple hidden onchange="addPh(this)"></label></div></div>`:''}</div>
-   <div class="mact"><button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn" id="saveBtn">Save changes</button></div>`,size||'md'); /* every plain form is the same width */
+   ${photos?`<div class="ff full"><label>Photos <span class="muted">(up to ${MAX_PHOTOS})</span></label>${typeof photos=='string'?`<span class="hint">${esc(photos)}</span>`:''}<div class="thumbs phg" id="thumbs"></div><div class="prow"><label class="btn ghost sm">Take photo<input type="file" accept="image/*" capture="environment" hidden data-onchange="addPh" data-args-change="[{&quot;$&quot;:&quot;this&quot;}]"></label><label class="btn ghost sm">Choose from gallery<input type="file" accept="image/*" multiple hidden data-onchange="addPh" data-args-change="[{&quot;$&quot;:&quot;this&quot;}]"></label></div></div>`:''}</div>
+   <div class="mact"><button class="btn ghost" data-act="closeModal">Cancel</button><button class="btn" id="saveBtn">Save changes</button></div>`,size||'md'); /* every plain form is the same width */
   if(photos)drawThumbs();
   $('#saveBtn').onclick=()=>{const o=readFields(fields);if(!o)return;if(photos)o.photos=tmp;const bx=$('#mbox'),mk=bx.firstElementChild;if(cb(o)===false)return;store();render();if($('#modal').classList.contains('open')&&bx.firstElementChild===mk)doneIn('Saved')}}
 /* read + validate form fields; returns null (and focuses the field) when invalid */
@@ -173,10 +173,10 @@ function cpOpen(k){let p=$('#cpop');if(!p){p=document.createElement('div');p.id=
     document.addEventListener('mousedown',e=>{const q=$('#cpop');if(q&&q.classList.contains('open')&&!e.target.closest('#cpop,.cbtn'))q.classList.remove('open')})}
   if(p.classList.contains('open')&&CP.k==k){p.classList.remove('open');return}
   const hx=SAFE.hex($('#f_'+k+'_hex').value);CP={k,...hex2hsv(hx),ral:null};const cur=($('#f_'+k).value||'').toLowerCase();
-  p.innerHTML=`<div class="cp-h"><b>Pick a colour</b><button type="button" class="cp-x" aria-label="Close" onclick="$('#cpop').classList.remove('open')">&times;</button></div>
+  p.innerHTML=`<div class="cp-h"><b>Pick a colour</b><button type="button" class="cp-x" aria-label="Close" data-act="cpClose">&times;</button></div>
    <small class="cp-l">Window and door finishes</small><div class="cp-g">${FINISH.map(([n,h])=>`<button type="button" class="cp-s ${cur==n.toLowerCase()?'on':''}" title="${esc(n)}" ${A('cpPick',n,h)}><i style="background:${h}"></i><span>${esc((/RAL \d+/.exec(n)||[n])[0])}</span></button>`).join('')}</div>
-   <small class="cp-l">Any colour</small><div class="cp-sv" id="cpSv"><i id="cpKnob"></i></div><input type="range" class="cp-hue" id="cpHue" min="0" max="359" value="${Math.round(CP.h)}" oninput="cpHue(this.value)" aria-label="Hue">
-   <div class="cp-row"><span class="cp-pv" id="cpPv"></span><label class="cp-hx">RAL<input id="cpRal" maxlength="30" aria-label="RAL number or name" oninput="cpRalIn(this.value)" autocomplete="off"></label><button type="button" class="btn sm" onclick="cpUse()">Use colour</button></div>
+   <small class="cp-l">Any colour</small><div class="cp-sv" id="cpSv"><i id="cpKnob"></i></div><input type="range" class="cp-hue" id="cpHue" min="0" max="359" value="${Math.round(CP.h)}" data-oninput="cpHue" data-args-input="[{&quot;$&quot;:&quot;value&quot;}]" aria-label="Hue">
+   <div class="cp-row"><span class="cp-pv" id="cpPv"></span><label class="cp-hx">RAL<input id="cpRal" maxlength="30" aria-label="RAL number or name" data-oninput="cpRalIn" data-args-input="[{&quot;$&quot;:&quot;value&quot;}]" autocomplete="off"></label><button type="button" class="btn sm" data-act="cpUse">Use colour</button></div>
    <div class="cp-nm" id="cpNm"></div><div class="cp-sug" id="cpSug"></div>
    <button type="button" class="cp-none" ${A('cpPick','','#8a8a8a')}>No colour</button>`;
   p.classList.add('open');const b=$('#cb_'+k).getBoundingClientRect();
@@ -197,7 +197,7 @@ function scanInto(id){scan(c=>{const e=$('#'+id);if(e){e.value=c;e.dispatchEvent
 
 /* ---- photos: resized + compressed before storing, capped per record ---- */
 /* photos as a grid of 8 glass boxes (2 rows of 4): filled ones show the photo, the next empty one adds more */
-function drawThumbs(){const t=$('#thumbs');if(!t)return;if(t.classList.contains('phg')){const n=tmp.length;t.innerHTML=Array.from({length:MAX_PHOTOS},(_,i)=>i<n?`<div class="phb on"><img src="${SAFE.img(tmp[i])}" alt="Photo ${i+1}" ${A('viewPhoto',tmp[i])}><button type="button" aria-label="Remove photo ${i+1}" ${A('rmPh',i)}>&times;</button></div>`:i==n?`<label class="phb add" title="Add photos"><input type="file" accept="image/*" multiple hidden onchange="addPh(this)">${svg(IC.plus)}<span>Add</span></label>`:'<div class="phb" aria-hidden="true"></div>').join('');return}
+function drawThumbs(){const t=$('#thumbs');if(!t)return;if(t.classList.contains('phg')){const n=tmp.length;t.innerHTML=Array.from({length:MAX_PHOTOS},(_,i)=>i<n?`<div class="phb on"><img src="${SAFE.img(tmp[i])}" alt="Photo ${i+1}" ${A('viewPhoto',tmp[i])}><button type="button" aria-label="Remove photo ${i+1}" ${A('rmPh',i)}>&times;</button></div>`:i==n?`<label class="phb add" title="Add photos"><input type="file" accept="image/*" multiple hidden data-onchange="addPh" data-args-change="[{&quot;$&quot;:&quot;this&quot;}]">${svg(IC.plus)}<span>Add</span></label>`:'<div class="phb" aria-hidden="true"></div>').join('');return}
   t.innerHTML=tmp.map((p,i)=>`<div class="th"><img src="${SAFE.img(p)}" alt="Photo ${i+1}"><button type="button" aria-label="Remove photo" ${A('rmPh',i)}>&times;</button></div>`).join('')||'<span class="muted">No photos yet.</span>'}
 function rmPh(i){tmp.splice(i,1);tmpDraw&&tmpDraw()}
 function addPh(inp){const files=[...inp.files].filter(f=>/^image\//.test(f.type));inp.value='';
@@ -265,15 +265,17 @@ function countUp(){if(matchMedia('(prefers-reduced-motion:reduce)').matches)retu
 
 /* ---- step-by-step wizard: steps [{t,d,f:[fields]} | {t,d,review:1}], v = values, check(step,v) -> error, save(v) ---- */
 let WZ=null;
+function wzDel(){WZ.del()}
+function cpClose(){$('#cpop').classList.remove('open')}
 function wizard(o){WZ={...o,st:0,seen:0};wzDraw()}
 function wzDraw(){const W=WZ,st=W.steps[W.st],last=W.st==W.steps.length-1;
   const lab=f=>{const val=W.v[f.k];return f.t=='number'?(val?val:''):val};
   const rev=()=>W.steps.filter(x=>x.f).map(x=>`<div class="wz-r"><h3>${esc(x.t)} <button class="mini" ${A('wzGo',W.steps.indexOf(x))}>Change</button></h3>${x.f.filter(f=>!(f.nx&&!W.v[f.k])).map(f=>`<div class="si"><span>${esc(f.l.replace(/ \(.*\)/,''))}</span><b class="${f.t=='email'||/email|web|url/i.test(f.k)?'nocap':''}">${esc(lab(f))||'<span class="muted">-</span>'}</b></div>`).join('')}</div>`).join('');
-  openModal(`<button class="mx" onclick="closeModal()" aria-label="Close">&times;</button><h2>${esc(W.title)}</h2>
+  openModal(`<button class="mx" data-act="closeModal" aria-label="Close">&times;</button><h2>${esc(W.title)}</h2>
    <div class="stp wz">${W.steps.map((x,i)=>`<span class="${i<=W.st?'on':''} ${i<=W.seen||W.edit?'go':''}" ${i<=W.seen||W.edit?A('wzGo',i):''}><i>${i<W.st?'&#10003;':i+1}</i>${esc(x.t)}</span>`).join('')}</div>
    <p class="muted wz-d">Step ${W.st+1} of ${W.steps.length}: ${esc(st.d||'')}</p>
    <div class="wz-b">${st.review?rev():`<div class="grid">${st.f.map(f=>fieldH(f,W.v)).join('')}</div>`}</div>
-   <div class="mact">${W.del?`<button class="btn ghost l" style="color:var(--red)" onclick="WZ.del()">Delete</button>`:''}${W.st?'<button class="btn ghost" onclick="wzStep(-1)">Back</button>':'<button class="btn ghost" onclick="closeModal()">Cancel</button>'}${W.edit&&!last?'<button class="btn ghost" onclick="wzSave()">Save now</button>':''}${last?`<button class="btn green" onclick="wzSave()">${esc(W.saveLabel||'Save')}</button>`:'<button class="btn" onclick="wzStep(1)">Next</button>'}</div>`,'md');
+   <div class="mact">${W.del?`<button class="btn ghost l" style="color:var(--red)" data-act="wzDel">Delete</button>`:''}${W.st?'<button class="btn ghost" data-act="wzStep" data-args="[-1]">Back</button>':'<button class="btn ghost" data-act="closeModal">Cancel</button>'}${W.edit&&!last?'<button class="btn ghost" data-act="wzSave">Save now</button>':''}${last?`<button class="btn green" data-act="wzSave">${esc(W.saveLabel||'Save')}</button>`:'<button class="btn" data-act="wzStep" data-args="[1]">Next</button>'}</div>`,'md');
   const f=$('#mbox .wz-b input:not([readonly]),#mbox .wz-b textarea');if(f&&matchMedia('(pointer:fine)').matches)setTimeout(()=>f.focus(),80)}
 function wzRead(){const st=WZ.steps[WZ.st];if(st.review)return true;const o=readFields(st.f);if(!o)return false;Object.assign(WZ.v,o);const e=WZ.check&&WZ.check(WZ.st,WZ.v);if(e){toast(e);return false}return true}
 function wzStep(d){if(d>0&&!wzRead())return;if(d<0){const st=WZ.steps[WZ.st];if(!st.review){const o={};st.f.forEach(f=>{const e=$('#f_'+f.k);if(!e)return;const r=(e.value||'').trim();o[f.k]=f.t=='number'?(SAFE.num(r,{min:f.min??0,max:f.max??1e9,dp:f.dp??2})??0):f.t=='date'?SAFE.date(r):SAFE.text(r,f.t=='area'?(f.max||2000):(f.max||120))});Object.assign(WZ.v,o)}}

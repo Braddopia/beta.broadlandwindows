@@ -21,34 +21,34 @@ function vSettings(){const own=ISOWN(),p=S.profile||{},dark=document.body.datase
   return `<div class="head"><h1>Settings</h1></div>
   <div class="set">
    <section class="panel set-c"><h2><span class="set-ic">${svg(IC.user)}</span><span>My Settings</span></h2>
-    ${row('My Details',esc([p.name,p.phone||p.mobile].filter(Boolean).join(' · '))||'Name and phone','<button class="btn ghost sm" onclick="editProfile()">Edit</button>')}
+    ${row('My Details',esc([p.name,p.phone||p.mobile].filter(Boolean).join(' · '))||'Name and phone','<button class="btn ghost sm" data-act="editProfile">Edit</button>')}
     ${row('Light Or Dark','How the site looks for you',`<span class="seg"><button class="${dark?'':'on'}" ${A('setThR','light')}>Light</button><button class="${dark?'on':''}" ${A('setThR','dark')}>Dark</button></span>`)}
-    ${row('Page Background And Greeting Box','Patterns and colours','<button class="btn ghost sm" onclick="event.stopPropagation();lookPop(true)">Change</button>')}
+    ${row('Page Background And Greeting Box','Patterns and colours','<button class="btn ghost sm" data-act="lookOpen" data-stop="1">Change</button>')}
     ${row('Fewer Animations','Turns off movement and glow effects',`<label class="tsw"><input type="checkbox" ${rm?'checked':''} ${AC('onchange','motionSet','this.checked')}><span></span></label>`)}
-    ${row('Help Tour','A short guide to the site','<button class="btn ghost sm" onclick="startTour()">Start</button>')}
-    ${row('Report A Problem','Something not working or looking wrong? Tell us here','<button class="btn sm" onclick="bugReport()">Report</button>')}
-    ${row('Account','Signed in as '+esc(ROLES[ROLE].n),'<button class="btn ghost sm" onclick="swRole()">Switch</button>')}
+    ${row('Help Tour','A short guide to the site','<button class="btn ghost sm" data-act="startTour">Start</button>')}
+    ${row('Report A Problem','Something not working or looking wrong? Tell us here','<button class="btn sm" data-act="bugReport">Report</button>')}
+    ${row('Account','Signed in as '+esc(ROLES[ROLE].n),'<button class="btn ghost sm" data-act="swRole">Switch</button>')}
    </section>
    ${own?`<section class="panel set-c"><h2><span class="set-ic">${svg(IC.contacts)}</span><span>Company Details</span><button class="btn sm" ${A('coEditK','co')}>Edit</button></h2>${dl(SET_CO)}<p class="muted set-n">Used on printed contracts, invoices and guarantees.</p></section>
    <section class="panel set-c"><h2><span class="set-ic">${svg(IC.finance)}</span><span>Money And Invoices</span><button class="btn sm" ${A('coEditK','money')}>Edit</button></h2>${dl(SET_MONEY)}</section>
    <section class="panel set-c"><h2><span class="set-ic">${svg(IC.admin)}</span><span>Security And Data</span></h2>
-    ${row('Account PINs','Change the PIN for each account','<button class="btn ghost sm" onclick="chPin()">Change</button>')}
-    ${row('Backup','Download everything as one file','<button class="btn ghost sm" onclick="backupDl()">Download</button>')}
-    ${row('Restore','Load a backup file','<label class="btn ghost sm" style="cursor:pointer">Choose File<input type="file" accept=".json,application/json" hidden onchange="backupLoad(this)"></label>')}
-    ${row('Review Scores','Google, Trustpilot, Trusted Trader, ReferenceLine','<button class="btn ghost sm" onclick="editRatings()">Update</button>')}
+    ${row('Account PINs','Change the PIN for each account','<button class="btn ghost sm" data-act="chPin">Change</button>')}
+    ${row('Backup','Download everything as one file','<button class="btn ghost sm" data-act="backupDl">Download</button>')}
+    ${row('Restore','Load a backup file','<label class="btn ghost sm" style="cursor:pointer">Choose File<input type="file" accept=".json,application/json" hidden data-onchange="backupLoad" data-args-change="[{&quot;$&quot;:&quot;this&quot;}]"></label>')}
+    ${row('Review Scores','Google, Trustpilot, Trusted Trader, ReferenceLine','<button class="btn ghost sm" data-act="editRatings">Update</button>')}
     ${row('Admin Console','Approvals, audit trail and more',`<button class="btn ghost sm" ${A('go','admin')}>Open</button>`)}
-    ${row('Photo Storage',`${phRefs().length} photos kept in their own store, so years of jobs stay quick`,'<button class="btn ghost sm" onclick="phTidyGo()">Tidy Up</button>')}
+    ${row('Photo Storage',`${phRefs().length} photos kept in their own store, so years of jobs stay quick`,'<button class="btn ghost sm" data-act="phTidyGo">Tidy Up</button>')}
    </section>
-   <section class="panel set-c"><h2><span class="set-ic">${svg(IC.contracts)}</span><span>Numbering</span><button class="btn sm" onclick="numEdit()">Change</button></h2>
+   <section class="panel set-c"><h2><span class="set-ic">${svg(IC.contracts)}</span><span>Numbering</span><button class="btn sm" data-act="numEdit">Change</button></h2>
     ${NUMS.map(([k,n])=>row(n,'Next one will be <b class="nocap">'+esc(numNext(k))+'</b>'+(S.num[k]?' (set by hand)':' (automatic)'),S.num[k]?`<button class="btn ghost sm" ${A('numReset',k)}>Reset</button>`:'')).join('')}
    </section>
    <section class="panel set-c"><h2><span class="set-ic">${svg(IC.reports)}</span><span>Export Data</span></h2>
     ${[['leads','Leads'],['contracts','Contracts'],['calls','Service Calls'],['deliveries','Deliveries'],['contacts','Contact Book'],['stock','Stock']].map(([k,n])=>row(n,'Spreadsheet (CSV) of every record',`<button class="btn ghost sm" ${A('csvAll',k)}>Export</button>`)).join('')}
-    ${row('Everything','One backup file with all data and photos','<button class="btn ghost sm" onclick="backupDl()">Download</button>')}
+    ${row('Everything','One backup file with all data and photos','<button class="btn ghost sm" data-act="backupDl">Download</button>')}
    </section>
    <section class="panel set-c set-w"><h2><span class="set-ic">${svg(IC.service)}</span><span>Reported Problems</span>${S.bugs.length?`<button class="btn ghost sm" ${A('csvAll','bugs')}>Export</button>`:''}</h2>
     ${S.bugs.map(b=>`<div class="set-r"><span><b>${esc(b.what.length>90?b.what.slice(0,90)+'…':b.what)}</b><small>${esc([b.id,b.where,b.sev,b.by,new Date(b.at).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})].filter(Boolean).join(' · '))}${(b.photos||[]).length?' · '+(b.photos||[]).length+' photo'+((b.photos||[]).length>1?'s':''):''}</small></span><span class="set-a"><span class="tag ${b.status=='Fixed'?'g':b.status=='Open'?'y':'n'}">${esc(b.status)}</span><button class="btn ghost sm" ${A('bugView',b.id)}>Open</button></span></div>`).join('')||'<p class="muted">Nothing reported. Everyone can report a problem from My Settings.</p>'}
-   </section>`:`<section class="panel set-c"><h2><span class="set-ic">${svg(IC.lock)}</span><span>Company Settings</span></h2><p class="muted">Company details, VAT and invoice settings are for administrators.</p><button class="btn ghost sm" onclick="swRole()">Switch Account</button></section>`}
+   </section>`:`<section class="panel set-c"><h2><span class="set-ic">${svg(IC.lock)}</span><span>Company Settings</span></h2><p class="muted">Company details, VAT and invoice settings are for administrators.</p><button class="btn ghost sm" data-act="swRole">Switch Account</button></section>`}
   </div>`}
 /* ---- report a problem (everyone); administrators see the list ---- */
 const BUG_SEV=['Small annoyance','Something does not work','It stops me working'];
@@ -81,3 +81,5 @@ function csvAll(k){if(!need(ISOWN,'Exporting data'))return;const d=today();
   const rows=T[k]&&T[k]();if(!rows)return;csvDownload('broadland-'+k+'-'+d+'.csv',rows);audit('Data exported',k,rows.length-1+' rows')}
 function coEditK(k){if(k=='co')coEdit('Company Details',SET_CO);else coEdit('Money And Invoices',SET_MONEY)}
 function setThR(t){setTh(t);render(true)}
+
+function lookOpen(){lookPop(true)}

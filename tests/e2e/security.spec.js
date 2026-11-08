@@ -93,3 +93,16 @@ test('script payloads in saved data never run (pages, records, reports)', async 
   }
   expect(hits, 'payloads that ran').toEqual([]);
 });
+
+test('strict security policy: injected scripts and inline handlers are blocked', async ({ app }) => {
+  const ran = await app.run(async () => {
+    const s = document.createElement('script'); s.textContent = 'window.__csp1=1'; document.body.appendChild(s);
+    const d = document.createElement('div'); d.innerHTML = '<img src="data:," onerror="window.__csp2=1">'; document.body.appendChild(d);
+    await new Promise((r) => setTimeout(r, 200));
+    return [window.__csp1, window.__csp2];
+  });
+  expect(ran).toEqual([null, null].map(() => undefined));
+  const csp = app.errors.filter((e) => e.startsWith('CSP:'));
+  expect(csp.length, 'the browser reported the blocked code').toBeGreaterThan(0);
+  app.errors.splice(0, app.errors.length, ...app.errors.filter((e) => !e.startsWith('CSP:')));
+});

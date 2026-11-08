@@ -19,11 +19,15 @@
  *   - assets really are base64 image data URIs
  *   - no inlined code can close its own <script>/<style> block early
  *   - the JavaScript parses (esbuild syntax check), so a typo can't ship as a blank page
+ *
+ * Security: the page's Content-Security-Policy allows only these two exact scripts (by SHA-256 hash)
+ * instead of 'unsafe-inline', so injected <script> tags or inline event handlers can never run.
  */
 import { readFileSync, writeFileSync, readdirSync, mkdirSync, unlinkSync, statSync } from 'node:fs';
 import { join, dirname, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { transformSync } from 'esbuild';
+import { createHash } from 'node:crypto';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const SRC = join(ROOT, 'src');
@@ -99,7 +103,10 @@ checkSyntax(loader, 'src/boot-loader.js');
 // ---- page ----
 let html = read(join(SRC, 'index.html'));
 html = place(html, '<!-- @@CSS@@ -->', `<style>\n/* Broadland Windows CRM ${VERSION} */\n${css}</style>`);
-html = place(html, '<!-- @@JS@@ -->', `<script type="text/plain" id="appjs">\n${js}\n</script>\n<script>\n${loader}\n</script>`);
+const appText = `\n${js}\n`, loaderText = `\n${loader}\n`;
+const sha = (s) => `'sha256-${createHash('sha256').update(s, 'utf8').digest('base64')}'`;
+html = place(html, '@@SCRIPT_HASHES@@', `${sha(loaderText)} ${sha(appText)}`);
+html = place(html, '<!-- @@JS@@ -->', `<script type="text/plain" id="appjs">${appText}</script>\n<script>${loaderText}</script>`);
 
 mkdirSync(DIST, { recursive: true });
 const out = join(DIST, `${NAME}-${VERSION}.html`);

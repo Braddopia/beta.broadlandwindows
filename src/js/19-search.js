@@ -131,7 +131,7 @@ function nlq(raw){const q=' '+String(raw||'').toLowerCase().replace(/[?.!,]/g,' 
   const PRE=['urgent','open','won','lost','quoted','surveyed','new','booked','complete','received','damaged','overdue','fitted','ordered','awaiting parts'],pre=T.filter(x=>PRE.includes(x)),rest=T.filter(x=>!PRE.includes(x));
   return{E,L,title:(pre.length?pre.join(', ')+' '+E.n.toLowerCase():E.n)+(rest.length?' '+rest.join(', '):'')}}
 let NLQ=null;
-function nlqAll(){if(!NLQ)return;const{E,L,title}=NLQ;openModal(`<button class="mx" onclick="closeModal()" aria-label="Close">&times;</button><h2>${esc(tc(title))}</h2><p class="muted">${L.length} found</p><div class="nlq-l">${L.map((r,i)=>{const[t,s]=E.sh(r);return `<button type="button" class="sri" ${A('nlqOpen',i)}><span class="sri-t"><b>${esc(tc(String(t||'')))}</b><small>${esc(s)}</small></span></button>`}).join('')}</div>`,'md')}
+function nlqAll(){if(!NLQ)return;const{E,L,title}=NLQ;openModal(`<button class="mx" data-act="closeModal" aria-label="Close">&times;</button><h2>${esc(tc(title))}</h2><p class="muted">${L.length} found</p><div class="nlq-l">${L.map((r,i)=>{const[t,s]=E.sh(r);return `<button type="button" class="sri" ${A('nlqOpen',i)}><span class="sri-t"><b>${esc(tc(String(t||'')))}</b><small>${esc(s)}</small></span></button>`}).join('')}</div>`,'md')}
 function nlqOpen(i){const r=NLQ&&NLQ.L[i];if(!r)return;closeModal();NLQ.E.o(r)}
 /* one search engine for the top bar list and the big Ctrl+K box */
 function srchBuild(raw,big){const RUN=[],grp=[],q0=String(raw||'').trim().toLowerCase(),cmdOnly=q0.startsWith('>'),query=cmdOnly?q0.slice(1).trim():q0;

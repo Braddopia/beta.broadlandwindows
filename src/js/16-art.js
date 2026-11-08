@@ -35,8 +35,8 @@ function tourDraw(){const o=$('#tour');if(!o)return;const s=TOUR[TI],last=TI==TO
   o.innerHTML=`<div class="tspot ${vis?'':'none'}" style="${vis?`left:${r.left-pad}px;top:${r.top-pad}px;width:${r.width+pad*2}px;height:${r.height+pad*2}px`:''}"></div>
    <div class="tcard ${vis?'':'mid'}">${!vis&&s.art&&ART_IC[s.art]?`<div class="tban lkp">${svg(ART_IC[s.art])}</div>`:''}<small>${TI+1} of ${TOUR.length}</small><h3>${esc(s.t)}</h3><p>${esc(s.d)}</p>
     <div class="tdots">${TOUR.map((_,i)=>`<i class="${i==TI?'on':''}"></i>`).join('')}</div>
-    ${ISOWN()||ROLE=='beta'?`<label class="ttest"><input type="checkbox" id="tourTest" ${tourTest()?'checked':''} onchange="tourToggle(this.checked)"> Show every time (testing)</label>`:''}
-    <div class="tbtn"><button class="btn ghost sm" onclick="endTour()">${last?'Close':'Skip tour'}</button><span></span>${TI?'<button class="btn ghost sm" onclick="tourGo(-1)">Back</button>':''}<button class="btn sm" onclick="${last?'endTour()':'tourGo(1)'}">${last?'Finish':'Next'}</button></div></div>`;
+    ${ISOWN()||ROLE=='beta'?`<label class="ttest"><input type="checkbox" id="tourTest" ${tourTest()?'checked':''} data-onchange="tourToggle" data-args-change="[{&quot;$&quot;:&quot;checked&quot;}]"> Show every time (testing)</label>`:''}
+    <div class="tbtn"><button class="btn ghost sm" data-act="endTour">${last?'Close':'Skip tour'}</button><span></span>${TI?'<button class="btn ghost sm" data-act="tourGo" data-args="[-1]">Back</button>':''}<button class="btn sm" ${last?'data-act="endTour"':'data-act="tourGo" data-args="[1]"'}>${last?'Finish':'Next'}</button></div></div>`;
   const c=o.querySelector('.tcard');const sm=innerWidth<640;
   if(vis&&sm){c.classList.add('sheet');const below=r.top+r.height/2<innerHeight/2;c.style.left='';c.style.top=below?'':'12px';c.style.bottom=below?'12px':''}
   else if(vis){const cw=c.offsetWidth,ch=c.offsetHeight;let top=r.bottom+16,left=r.left;if(top+ch>innerHeight-12)top=Math.max(12,r.top-ch-16);if(r.width<260&&r.left>innerWidth/2)left=r.right-cw;if(r.left<300&&r.height>innerHeight*.5){left=r.right+20;top=Math.max(12,Math.min(innerHeight-ch-12,r.top+40))}

@@ -17,6 +17,7 @@ const test = base.extend({
     page.on('pageerror', (e) => errors.push(e.message));
     context.on('page', (p) => p.on('pageerror', (e) => errors.push('popup: ' + e.message)));
     page.on('dialog', (d) => d.accept());
+    page.on('console', (m) => { if (/Content Security Policy|Refused to (execute|run)/i.test(m.text())) errors.push('CSP: ' + m.text()); });
     await page.clock.setFixedTime(new Date(TODAY));
     await context.route(/^https?:\/\//, (r) => r.abort());
     await page.addInitScript(() => {
