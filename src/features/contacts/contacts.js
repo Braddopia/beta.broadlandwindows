@@ -1,4 +1,5 @@
 /* features/contacts/contacts: The Contact Book. */
+import { fieldControl } from '../../ui/forms/fields.js';
 import { CPH, CPH_ALL, CT } from '../../config/constants.js';
 import { onClick, rowClick } from '../../core/actions.js';
 import { $, $$, esc } from '../../core/dom.js';
@@ -115,7 +116,7 @@ export function editContact(id, draft, after) {
   const c = state.contacts.find((x) => x.id == id),
     v = draft || (c ? { ...c, phones: conPhones(c) } : { type: 'Supplier', phones: [] });
   const fld = (k, l, o = {}) =>
-    `<div class="ff ${o.w || ''}"><label for="c_${k}">${esc(l)}<span data-rq="${k}"></span>${MARK(0, o.adm)}</label>${o.sel ? `<select id="c_${k}">${o.sel.map((x) => `<option${x == (v[k] || '') ? ' selected' : ''}>${esc(x)}</option>`).join('')}</select>` : o.area ? `<textarea id="c_${k}" rows="2" maxlength="${o.max || 600}">${esc(v[k] || '')}</textarea>` : `<input id="c_${k}" type="${o.t || 'text'}" maxlength="${o.max || 120}" value="${esc(v[k] || '')}" autocomplete="off"${o.ph ? ` placeholder="${esc(o.ph)}"` : ''}${o.t == 'email' || k == 'web' ? ' class="nocap"' : ''}>`}</div>`;
+    `<div class="ff ${o.w || ''}"><label for="c_${k}">${esc(l)}<span data-rq="${k}"></span>${MARK(0, o.adm)}</label>${fieldControl({ k, t: o.sel ? 'select' : o.area ? 'area' : o.t || 'text', o: o.sel, max: o.max || (o.area ? 600 : 120), ph: o.ph }, v[k] || '', { id: 'c_' + k, rows: 2 })}</div>`;
   openModal(
     `<button class="mx" data-act="closeModal" aria-label="Close">&times;</button><h2>${c ? 'Edit Contact' : 'New Contact'}</h2>
    <div class="cform">

@@ -11,7 +11,7 @@ Code layout (ES modules, bundled by esbuild into the one HTML file; imports only
 - To change another module's variable, call a setter it exports (e.g. `setView`, `replaceState`); imports are read-only.
 
 Rules for code in `src/`:
-- Every value put into HTML goes through `esc()`, or is passed to a handler with `A()` / `AC()`.
+- Every value put into HTML goes through `esc()`, or is passed to a handler with `onClick()` / `onEvent()`. New or rewritten markup uses the `html`` ` tag (`src/core/html.js`), which escapes every `${value}` itself; use `raw()` only for markup the app built. Older templates move to `html`` ` when they are next touched. Form boxes are drawn only by `fieldControl()` (`src/ui/forms/fields.js`).
 - User input is cleaned with `SAFE.*` before it is stored.
 - Save with `store()`; record changes with `audit()`.
 - No personal data in the repo: sample names only.

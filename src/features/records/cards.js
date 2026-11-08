@@ -1,10 +1,11 @@
 /* features/records/cards: Lead and contract cards: one plain question each, opening in turn. */
+import { fieldControl } from '../../ui/forms/fields.js';
 import { fd } from '../../core/dates.js';
 import { $, $$, esc } from '../../core/dom.js';
 import { money } from '../../core/format.js';
 import { ICONS, svg } from '../../core/icons.js';
 import { SAFE } from '../../core/sanitize.js';
-import { ISADM } from '../auth/session.js';
+
 import { RTAB, recStep, recordWin } from './record-window.js';
 import { MARK, nxHid } from '../../ui/forms/form.js';
 
@@ -12,14 +13,7 @@ import { MARK, nxHid } from '../../ui/forms/form.js';
 export function rfH(f, v) {
   const val = v[f.k] ?? '',
     id = 'f_' + f.k;
-  let c;
-  if (f.ro || (f.adm && !ISADM())) c = `<input id="${id}" value="${esc(val)}" readonly tabindex="-1">`;
-  else if (f.t == 'select')
-    c = `<select id="${id}">${(val !== '' && !f.o.map(String).includes(String(val)) ? [val, ...f.o] : f.o).map((o) => `<option value="${esc(o)}" ${String(o) == String(val) ? 'selected' : ''}>${esc(o || '-')}</option>`).join('')}</select>`;
-  else if (f.t == 'area')
-    c = `<textarea id="${id}" rows="${f.rows || 2}" maxlength="${f.max || 2000}">${esc(val)}</textarea>`;
-  else
-    c = `<input id="${id}" type="${f.t == 'number' ? 'number' : f.t == 'date' ? 'date' : f.t == 'time' ? 'time' : f.t == 'email' ? 'email' : f.t == 'tel' ? 'tel' : 'text'}" ${f.t == 'number' ? 'step="any" min="0" inputmode="decimal"' : `maxlength="${f.max || 120}"`} value="${esc(val)}" ${f.list ? `list="${f.list}"` : ''} autocomplete="off">`;
+  let c = fieldControl(f, val, { id, rows: 2, lockedAsText: true });
   const hid = (f.dep && (v[f.dep] || 'Same as home') != 'Different') || nxHid(f, v);
   if (['invSame', 'siteSame'].includes(f.k))
     c = c.replace('<select ', '<select data-onchange="recDep" data-args-change="[{&quot;$&quot;:&quot;this&quot;}]" ');

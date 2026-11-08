@@ -1,4 +1,5 @@
 /* ui/forms/form: Plain forms: fields, required star and admin lock, reading and checking what was typed. */
+import { fieldControl } from './fields.js';
 import { MAX_PHOTOS } from '../../config/constants.js';
 import { onClick } from '../../core/actions.js';
 import { $, $$, esc } from '../../core/dom.js';
@@ -10,7 +11,6 @@ import { ISADM } from '../../features/auth/session.js';
 import { recTab } from '../../features/records/record-window.js';
 import { scan } from '../../features/scanner/scanner.js';
 import { NEWCO, supNewCo } from '../../features/suppliers/suppliers.js';
-import { colourField } from './colour-picker.js';
 import { drawThumbs, setPhotoList, tmp } from './photos.js';
 import { doneIn, openModal } from '../modal.js';
 import { render } from '../shell/router.js';
@@ -27,24 +27,7 @@ export const nxHid = (f, v) => !!f.nx && !String(v[f.nx] ?? '').trim() && !Strin
 export function form(title, fields, v, cb, photos, size) {
   v = v || {};
   setPhotoList(photos ? (v.photos || []).filter(SAFE.img).slice() : null, drawThumbs);
-  const sel = (f) => {
-    const cur = v[f.k] ?? '',
-      has = f.o.some((o) => String(Array.isArray(o) ? o[0] : o) == String(cur));
-    return `<select id="f_${f.k}" ${f.ro ? 'disabled' : ''}>${(cur !== '' && !has ? [cur, ...f.o] : f.o)
-      .map((o) => {
-        const [val, lab] = Array.isArray(o) ? o : [o, o || '-'];
-        return `<option value="${esc(val)}"${String(val) == String(v[f.k] ?? '') ? ' selected' : ''}>${esc(lab)}</option>`;
-      })
-      .join('')}</select>`;
-  };
-  const inp = (f) =>
-    f.t == 'colour'
-      ? colourField(f, v)
-      : f.t == 'select'
-        ? sel(f)
-        : f.t == 'area'
-          ? `<textarea id="f_${f.k}" rows="3" maxlength="${f.max || 2000}">${esc(v[f.k] || '')}</textarea>`
-          : `<input id="f_${f.k}" type="${f.t || 'text'}"${f.t == 'number' ? ` step="any" min="${f.min ?? 0}"${f.max ? ` max="${f.max}"` : ''} inputmode="decimal"` : ` maxlength="${f.max || 120}"`} value="${esc(v[f.k] ?? '')}"${f.ro ? ' readonly' : ''}${f.list ? ` list="${f.list}"` : ''}${f.t == 'email' || /url|web|portal|feed|link/i.test(f.k) ? ' class="nocap"' : ''} autocomplete="off">`;
+  const inp = (f) => fieldControl(f, v[f.k]);
   openModal(
     `<h2>${esc(title)}</h2><div class="grid">${fields.map((f) => (f.t == 'h' ? `<h3 class="fsec full">${esc(f.l)}</h3>` : `<div class="ff ${f.w || ''}"><label for="f_${f.k}">${esc(f.l)}${MARK(f.req, f.adm)}</label>${f.scan ? `<div class="inl">${inp(f)}<button type="button" class="btn scan sm" ${onClick('scanInto', 'f_' + f.k)}>Scan</button></div>` : inp(f)}${f.hint ? `<span class="hint ${/https?:|@/.test(f.hint) ? 'nocap' : ''}">${esc(f.hint)}</span>` : ''}</div>`)).join('')}
    ${photos ? `<div class="ff full"><label>Photos <span class="muted">(up to ${MAX_PHOTOS})</span></label>${typeof photos == 'string' ? `<span class="hint">${esc(photos)}</span>` : ''}<div class="thumbs phg" id="thumbs"></div><div class="prow"><label class="btn ghost sm">Take photo<input type="file" accept="image/*" capture="environment" hidden data-onchange="addPh" data-args-change="[{&quot;$&quot;:&quot;this&quot;}]"></label><label class="btn ghost sm">Choose from gallery<input type="file" accept="image/*" multiple hidden data-onchange="addPh" data-args-change="[{&quot;$&quot;:&quot;this&quot;}]"></label></div></div>` : ''}</div>
@@ -152,14 +135,7 @@ export function scanInto(id) {
 }
 export function fieldH(f, v) {
   const val = v[f.k] ?? '';
-  const inp =
-    f.t == 'colour'
-      ? colourField(f, v)
-      : f.t == 'select'
-        ? `<select id="f_${f.k}" ${f.ro ? 'disabled' : ''}>${(val !== '' && !f.o.map(String).includes(String(val)) ? [val, ...f.o] : f.o).map((o) => `<option value="${esc(o)}" ${String(o) == String(val) ? 'selected' : ''}>${esc(o || '-')}</option>`).join('')}</select>`
-        : f.t == 'area'
-          ? `<textarea id="f_${f.k}" rows="3" maxlength="2000">${esc(val)}</textarea>`
-          : `<input id="f_${f.k}" type="${f.t || 'text'}" ${f.t == 'number' ? 'step="any" min="0" inputmode="decimal"' : `maxlength="${f.max || 120}"`} value="${esc(val)}" ${f.ro ? 'readonly' : ''} ${f.list ? `list="${f.list}"` : ''}${f.t == 'email' || /url|web|portal|feed|link/i.test(f.k) ? ' class="nocap"' : ''} autocomplete="off">`;
+  const inp = fieldControl(f, val);
   return `<div class="ff ${f.w || ''}" ${f.nx ? `data-nx="${f.nx}"` : ''} ${nxHid(f, v) ? 'hidden' : ''}><label for="f_${f.k}">${esc(f.l)}${MARK(f.req, f.adm)}</label>${inp}${f.hint ? `<span class="hint ${/https?:|@/.test(f.hint) ? 'nocap' : ''}">${esc(f.hint)}</span>` : ''}</div>`;
 }
 /* start-up step (run once by main.js) */
