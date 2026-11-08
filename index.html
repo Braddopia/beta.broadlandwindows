@@ -3649,7 +3649,7 @@ function invoicePrint(id){const c=S.contracts.find(x=>x.id==id);if(!c)return;con
   const howPay=[CO.bank?'Account name '+CO.bank:'',CO.sort?'sort code '+CO.sort:'',CO.acct?'account '+CO.acct:''].filter(Boolean).join(', ');
   printDoc('Invoice '+no,c.product||'',[['Invoice number',no],['Invoice date',fdl(c.invoiceDate||today())],['Contract',c.id],['Work',c.product],['Installation address',siteOf(c)||addrOf(c)],['VAT number',CO.vatNo]],[],
     {customer:{name:[c.title,c.name].filter(Boolean).join(' '),address:addrOf(c)},kind:'Invoice',ref:no,kpis:[['Total (inc VAT)',money(val)],['VAT at '+rate+'%',money(vat)],['Paid so far',money(paid)],['Balance due',money(Math.max(0,val-paid))]],money:{total:val,paid},
-     tables:[{t:'Payments received',h:['Date','Paid by','What for','Amount'],r:P.map(p=>[fd(p.date),p.method||'',p.kind||'',money(p.amt)]),foot:P.length?['','','Total paid',money(sum(P,p=>p.amt))]:null}],
+     tables:P.length?[{t:'Payments received',h:['Date','Paid by','What for','Amount'],r:P.map(p=>[fd(p.date),p.method||'',p.kind||'',money(p.amt)]),foot:['','','Total paid',money(sum(P,p=>p.amt))]}]:[],
      thanks:(val-paid>0?'Please pay the balance of '+money(val-paid)+(CO.terms?' within '+CO.terms+' days of fitting':'')+(howPay?' by bank transfer ('+howPay+')':'')+', quoting '+no+'. ':'This invoice is paid in full. Thank you. ')});audit('Invoice printed',c.id,no)}
 function printDoc(t,sub,rows,ph,o){o=o||{};rows=(rows||[]).filter(r=>r&&!blankV(r[1]));ph=(ph||[]).filter(SAFE.img);const cus=!!o.customer;
   const w=window.open('','_blank');if(!w){toast('Allow pop-ups to open reports');return}
