@@ -13,6 +13,8 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
    Arguments are JSON-encoded then HTML-escaped, so names/ids containing quotes can't break out. */
 /* click anywhere on a row or card to open it (buttons, links and boxes inside keep their own job) */
 const RC=(fn,...a)=>`tabindex="0" data-rc="1" onclick="${esc("if(event.target.closest('button,a,input,select,textarea,label,summary'))return;"+fn+'('+a.map(x=>JSON.stringify(x===undefined?null:x)).join(',')+')')}"`;
+/* labels: required boxes get a red star, admin-only boxes a lock (same everywhere) */
+const MARK=(req,adm)=>(req?'<span class="rq" aria-hidden="true">*</span><span class="sr"> (required)</span>':'')+(adm?`<span class="lockd" title="Only administrators can change this" aria-label="Only administrators can change this">${svg(IC.lock)}</span>`:'');
 const A=(fn,...a)=>`onclick="${esc(fn+'('+a.map(x=>JSON.stringify(x===undefined?null:x)).join(',')+')')}"`;
 const AC=(ev,fn,...a)=>`${ev}="${esc(fn+'('+a.map(x=>x==='this'||x==='this.value'||x==='this.checked'?x:JSON.stringify(x===undefined?null:x)).join(',')+')')}"`;
 

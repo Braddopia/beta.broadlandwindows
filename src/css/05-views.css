@@ -1181,3 +1181,28 @@ body.rm *,body.rm *::before,body.rm *::after{animation:none!important;transition
 .seg button{border:0;background:none;padding:.4rem .85rem;border-radius:9px;font:500 .85rem var(--body);color:var(--muted);cursor:pointer}
 .seg button.on{background:var(--card);color:var(--ink);box-shadow:0 1px 3px rgba(1,43,89,.15)}
 .set-c h2{justify-content:flex-start}.set-dl dd{overflow-wrap:break-word}
+
+/* ==== round 9 ==== */
+/* required star and admin lock: one look everywhere */
+.rq{color:var(--red);font-weight:700;margin-left:.2rem}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+label .lockd,.rf>span .lockd{margin-left:.35rem;vertical-align:middle}
+.rf>span{display:flex;align-items:center;flex-wrap:wrap}
+.rf input[readonly]{background:var(--card2);color:var(--muted);cursor:not-allowed}
+.rw-req .lockd{vertical-align:-.15rem}
+/* scan: yellow icon button inside the search bar */
+.sb-scan{flex:0 0 auto;display:grid;place-items:center;width:2.1rem;height:2.1rem;margin-right:-.55rem;border:0;border-radius:10px;background:var(--yellow);color:#012b59;cursor:pointer;transition:transform .12s,filter .15s}
+.sb-scan:hover{filter:brightness(.95)}.sb-scan:active{transform:scale(.94)}
+.sb-scan svg{width:1.1rem;height:1.1rem}
+/* Ctrl+K box: the same soft moving colour around its edge */
+.ck-b{position:relative;isolation:isolate;overflow:visible}
+.ck-b::before{content:"";position:absolute;inset:-2px;border-radius:24px;padding:2px;z-index:-1;pointer-events:none;background:conic-gradient(from var(--sa),#ff6ec4,#ffb36b,#ffe66b,#6bffb8,#5ac8ff,#7873f5,#ff6ec4);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0);opacity:.6;animation:sa 6s linear infinite}
+.ck-b::after{content:"";position:absolute;inset:8% 4% -6%;border-radius:30px;z-index:-2;pointer-events:none;background:conic-gradient(from var(--sa),#ff6ec4,#ffe66b,#5ac8ff,#7873f5,#ff6ec4);filter:blur(40px);opacity:.28;animation:sa 6s linear infinite}
+.ck-b>*{border-radius:inherit}.ck-r{border-radius:0}.ck-in{border-radius:22px 22px 0 0}.ck-f{border-radius:0 0 22px 22px}
+/* fewer animations: finish every animation at once (never 'none', the start-up screen relies on finishing) */
+body.rm *,body.rm *::before,body.rm *::after{animation-duration:.01ms!important;animation-delay:0s!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+body.rm #splash{display:none}
+/* finance step: every box the same width */
+.fin,.fin>*,.rw-todo,.mb.full .fin .rcols{width:100%;max-width:56rem}
+.fin .rcols{max-width:none}
+.ck-b::after{display:none}.ck-b{box-shadow:inset 0 1px 0 #fff,0 30px 80px -30px rgba(1,30,70,.55),0 0 50px -18px rgba(120,115,245,.45)}

@@ -1576,6 +1576,31 @@ body.rm *,body.rm *::before,body.rm *::after{animation:none!important;transition
 .seg button.on{background:var(--card);color:var(--ink);box-shadow:0 1px 3px rgba(1,43,89,.15)}
 .set-c h2{justify-content:flex-start}.set-dl dd{overflow-wrap:break-word}
 
+/* ==== round 9 ==== */
+/* required star and admin lock: one look everywhere */
+.rq{color:var(--red);font-weight:700;margin-left:.2rem}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+label .lockd,.rf>span .lockd{margin-left:.35rem;vertical-align:middle}
+.rf>span{display:flex;align-items:center;flex-wrap:wrap}
+.rf input[readonly]{background:var(--card2);color:var(--muted);cursor:not-allowed}
+.rw-req .lockd{vertical-align:-.15rem}
+/* scan: yellow icon button inside the search bar */
+.sb-scan{flex:0 0 auto;display:grid;place-items:center;width:2.1rem;height:2.1rem;margin-right:-.55rem;border:0;border-radius:10px;background:var(--yellow);color:#012b59;cursor:pointer;transition:transform .12s,filter .15s}
+.sb-scan:hover{filter:brightness(.95)}.sb-scan:active{transform:scale(.94)}
+.sb-scan svg{width:1.1rem;height:1.1rem}
+/* Ctrl+K box: the same soft moving colour around its edge */
+.ck-b{position:relative;isolation:isolate;overflow:visible}
+.ck-b::before{content:"";position:absolute;inset:-2px;border-radius:24px;padding:2px;z-index:-1;pointer-events:none;background:conic-gradient(from var(--sa),#ff6ec4,#ffb36b,#ffe66b,#6bffb8,#5ac8ff,#7873f5,#ff6ec4);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0);opacity:.6;animation:sa 6s linear infinite}
+.ck-b::after{content:"";position:absolute;inset:8% 4% -6%;border-radius:30px;z-index:-2;pointer-events:none;background:conic-gradient(from var(--sa),#ff6ec4,#ffe66b,#5ac8ff,#7873f5,#ff6ec4);filter:blur(40px);opacity:.28;animation:sa 6s linear infinite}
+.ck-b>*{border-radius:inherit}.ck-r{border-radius:0}.ck-in{border-radius:22px 22px 0 0}.ck-f{border-radius:0 0 22px 22px}
+/* fewer animations: finish every animation at once (never 'none', the start-up screen relies on finishing) */
+body.rm *,body.rm *::before,body.rm *::after{animation-duration:.01ms!important;animation-delay:0s!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+body.rm #splash{display:none}
+/* finance step: every box the same width */
+.fin,.fin>*,.rw-todo,.mb.full .fin .rcols{width:100%;max-width:56rem}
+.fin .rcols{max-width:none}
+.ck-b::after{display:none}.ck-b{box-shadow:inset 0 1px 0 #fff,0 30px 80px -30px rgba(1,30,70,.55),0 0 50px -18px rgba(120,115,245,.45)}
+
 /* ==========================================================================
    06 · Adaptive layout
    Breakpoints: 1400 (laptop) · 1100 (small laptop / tablet landscape)
@@ -1738,7 +1763,7 @@ body[data-hero=leaded] .lkp::before,.lkb.hp-leaded i::before{background-image:re
     <!-- ===== Top bar ===== -->
     <header class="top">
       <button class="ib" id="mnb" type="button" aria-label="Open menu"></button>
-      <label class="sb" id="sb"><span id="sbIc"></span><input id="q" type="search" placeholder="Search" aria-label="Search" autocomplete="off" maxlength="80"><kbd>/</kbd><button type="button" class="clr" id="qClr" aria-label="Clear search">&times;</button></label>
+      <label class="sb" id="sb"><span id="sbIc"></span><input id="q" type="search" placeholder="Search" aria-label="Search" autocomplete="off" maxlength="80"><kbd>/</kbd><button type="button" class="clr" id="qClr" aria-label="Clear search">&times;</button><button class="sb-scan" id="scanBtn" type="button" title="Scan a barcode" aria-label="Scan a barcode"></button></label>
       <div class="nw">
         <button class="btn" id="nwb" type="button" aria-haspopup="true"></button>
         <div class="menu" id="nwm" role="menu">
@@ -1751,7 +1776,6 @@ body[data-hero=leaded] .lkp::before,.lkb.hp-leaded i::before{background-image:re
           <button data-a="doc" data-v="reports">Guarantee certificate</button>
         </div>
       </div>
-      <button class="btn scan" id="scanBtn" type="button"></button>
       <span class="tsep" aria-hidden="true"></span>
       <button class="ib" id="bell" type="button" aria-label="Notifications"><span class="bn" id="bellN"></span></button>
       <button class="ib" id="thb" type="button" aria-label="Light or dark mode" title="Light or dark mode"></button>
@@ -1795,6 +1819,8 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
    Arguments are JSON-encoded then HTML-escaped, so names/ids containing quotes can't break out. */
 /* click anywhere on a row or card to open it (buttons, links and boxes inside keep their own job) */
 const RC=(fn,...a)=>`tabindex="0" data-rc="1" onclick="${esc("if(event.target.closest('button,a,input,select,textarea,label,summary'))return;"+fn+'('+a.map(x=>JSON.stringify(x===undefined?null:x)).join(',')+')')}"`;
+/* labels: required boxes get a red star, admin-only boxes a lock (same everywhere) */
+const MARK=(req,adm)=>(req?'<span class="rq" aria-hidden="true">*</span><span class="sr"> (required)</span>':'')+(adm?`<span class="lockd" title="Only administrators can change this" aria-label="Only administrators can change this">${svg(IC.lock)}</span>`:'');
 const A=(fn,...a)=>`onclick="${esc(fn+'('+a.map(x=>JSON.stringify(x===undefined?null:x)).join(',')+')')}"`;
 const AC=(ev,fn,...a)=>`${ev}="${esc(fn+'('+a.map(x=>x==='this'||x==='this.value'||x==='this.checked'?x:JSON.stringify(x===undefined?null:x)).join(',')+')')}"`;
 
@@ -1985,6 +2011,7 @@ const ikey=r=>[r.item,r.length,r.cInName,r.cOutName].map(v=>{v=String(v||'').tri
   S.contracts.forEach(fitSync);
   S.brand=S.brand||{};S.brand.tp=S.brand.tp||{score:4.5,count:'',url:'https://uk.trustpilot.com/review/broadlandwindows.co.uk'};S.brand.g=S.brand.g||{score:4.5,count:'',url:''};
   /* review sites figures as published (Nov 2026); admins update them in Admin Console > Reviews */
+  if(!S.brand.tp.count)S.brand.tp.count='21';
   S.brand.tt=S.brand.tt||{score:4.9,count:'613',url:'https://trustedtrader.team/Norfolk/Broadland-Windows-0000015.html'};
   S.brand.rl=S.brand.rl||{score:9.6,count:'650',rec:'99',url:'https://www.referenceline.com/replacement_doors_windows_conservatories-in-norwich-broadlandwindowsltd-24531'};
   /* short quotes from public reviews; names of reviewers are deliberately not stored */
@@ -2109,7 +2136,7 @@ function setPin(k){
 
 /* ---- my details: name, contact info. Job role, team, start date are admin-only ---- */
 function editProfile(){
-  const p=S.profile,m=me()||{},adm=ISOWN(),lk=t=>`<span class="lockd" title="${esc(t)}" aria-label="${esc(t)}">${svg(IC.lock)}</span>`;
+  const p=S.profile,m=me()||{},adm=ISOWN(),lk=t=>MARK(0,1);
   openModal(`<button class="mx" onclick="closeModal()" aria-label="Close">&times;</button><div class="pf"><span class="av2">${esc(initials(p.name))}</span><div><h2 style="margin:0">My Details</h2><span class="muted">${esc(ROLES[ROLE].n)} account</span></div></div>
   <div class="grid">
    <div class="ff"><label for="p_name">Display name *</label><input id="p_name" maxlength="60" value="${esc(p.name)}"></div>
@@ -2256,7 +2283,7 @@ function form(title,fields,v,cb,photos,size){
   const sel=f=>{const cur=v[f.k]??'',has=f.o.some(o=>String(Array.isArray(o)?o[0]:o)==String(cur));return `<select id="f_${f.k}" ${f.ro?'disabled':''}>${(cur!==''&&!has?[cur,...f.o]:f.o).map(o=>{const[val,lab]=Array.isArray(o)?o:[o,o||'-'];return `<option value="${esc(val)}"${String(val)==String(v[f.k]??'')?' selected':''}>${esc(lab)}</option>`}).join('')}</select>`};
   const inp=f=>f.t=='colour'?colourField(f,v):f.t=='select'?sel(f):f.t=='area'?`<textarea id="f_${f.k}" rows="3" maxlength="${f.max||2000}">${esc(v[f.k]||'')}</textarea>`
     :`<input id="f_${f.k}" type="${f.t||'text'}"${f.t=='number'?` step="any" min="${f.min??0}"${f.max?` max="${f.max}"`:''} inputmode="decimal"`:` maxlength="${f.max||120}"`} value="${esc(v[f.k]??'')}"${f.ro?' readonly':''}${f.list?` list="${f.list}"`:''} autocomplete="off">`;
-  openModal(`<h2>${esc(title)}</h2><div class="grid">${fields.map(f=>`<div class="ff ${f.w||''}"><label for="f_${f.k}">${esc(f.l)}${f.req?' *':''}</label>${f.scan?`<div class="inl">${inp(f)}<button type="button" class="btn scan sm" ${A('scanInto','f_'+f.k)}>Scan</button></div>`:inp(f)}${f.hint?`<span class="hint">${esc(f.hint)}</span>`:''}</div>`).join('')}
+  openModal(`<h2>${esc(title)}</h2><div class="grid">${fields.map(f=>`<div class="ff ${f.w||''}"><label for="f_${f.k}">${esc(f.l)}${MARK(f.req,f.adm)}</label>${f.scan?`<div class="inl">${inp(f)}<button type="button" class="btn scan sm" ${A('scanInto','f_'+f.k)}>Scan</button></div>`:inp(f)}${f.hint?`<span class="hint">${esc(f.hint)}</span>`:''}</div>`).join('')}
    ${photos?`<div class="ff full"><label>Photos <span class="muted">(up to ${MAX_PHOTOS})</span></label><div class="thumbs" id="thumbs"></div><div class="prow"><label class="btn ghost sm">Take photo<input type="file" accept="image/*" capture="environment" hidden onchange="addPh(this)"></label><label class="btn ghost sm">Choose from gallery<input type="file" accept="image/*" multiple hidden onchange="addPh(this)"></label></div></div>`:''}</div>
    <div class="mact"><button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn" id="saveBtn">Save changes</button></div>`,size||'md'); /* every plain form is the same width */
   if(photos)drawThumbs();
@@ -2267,7 +2294,7 @@ function fieldErr(e,msg){toast(msg);const w=e.closest('.rf,.ff');if(w){w.classLi
     const d=w.closest('details');if(d)d.open=true;const sg=w.closest('.rg.shut');if(sg)sg.classList.remove('shut');const clr=()=>{w.classList.remove('err');m.remove();e.removeEventListener('input',clr);e.removeEventListener('change',clr)};e.addEventListener('input',clr);e.addEventListener('change',clr)}
   const p=e.closest('.rw-p');if(p&&!p.classList.contains('on')&&typeof recTab=='function')recTab(p.dataset.t);e.focus();if(e.scrollIntoView)e.scrollIntoView({block:'center'})}
 function readFields(fields){const o={};
-  for(const f of fields){const e=$('#f_'+f.k);if(!e)continue;const raw=(e.value||'').trim(),lab=f.l.replace(/ \(.*\)/,'');
+  for(const f of fields){const e=$('#f_'+f.k);if(!e)continue;if(f.adm&&!ISADM())continue;const raw=(e.value||'').trim(),lab=f.l.replace(/ \(.*\)/,'');
     if(f.req&&!raw){fieldErr(e,lab+' must be filled in');return null}
     if(f.t=='number'){if(raw===''){o[f.k]=0;continue}const n=SAFE.num(raw,{min:f.min??0,max:f.max??1e9,dp:f.dp??2});if(n==null||(f.pos&&!(n>0))){fieldErr(e,lab+' must be a '+(f.pos?'positive ':'')+'number');return null}if(parseFloat(raw)!=n&&(parseFloat(raw)<(f.min??0)||parseFloat(raw)>(f.max??1e9))){fieldErr(e,lab+' must be between '+(f.min??0)+' and '+(f.max??1e9));return null}o[f.k]=n}
     else if(f.t=='date'){if(raw&&!SAFE.date(raw)){fieldErr(e,lab+' is not a valid date');return null}o[f.k]=raw}
@@ -2357,13 +2384,13 @@ function setTh(t){document.body.dataset.theme=t;try{localStorage.setItem('bb_the
 function sbSync(){$('#sb').classList.toggle('has',!!$('#q').value)}
 (function shell(){
   $('#mnb').innerHTML=svg(IC.menu);$('#sbIc').outerHTML=svg(IC.search);$('#bell').insertAdjacentHTML('afterbegin',svg(IC.bell));
-  $('#nwb').innerHTML=svg(IC.plus)+'<span>New</span>';$('#scanBtn').innerHTML=svg(IC.scan)+'<span>Scan barcode</span>';
+  $('#nwb').innerHTML=svg(IC.plus)+'<span>New</span>';$('#scanBtn').innerHTML=svg(IC.scan);
   $$('.lg-w').forEach(i=>i.src=LOGO_SRC.white);$$('.lg-e').forEach(i=>i.src=LOGO_SRC.emblem);$('#fav').href=LOGO_SRC.icon;document.documentElement.style.setProperty('--hero-emblem','url("'+LOGO_SRC.emblem+'")');
   let th='light';try{th=localStorage.getItem('bb_theme')||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light')}catch(e){}setTh(th);
   $('#thb').onclick=()=>setTh(document.body.dataset.theme=='dark'?'light':'dark');
   $('#mnb').onclick=()=>document.body.classList.add('sopen');$('#scrim').onclick=()=>document.body.classList.remove('sopen');
   $('#meBtn').onclick=editProfile;$('#acct').onclick=swRole;$('#bell').onclick=()=>ncToggle(true);$('#ncbg').onclick=()=>ncToggle(false);
-  $('#scanBtn').onclick=()=>scan(found);
+  $('#scanBtn').onclick=e=>{e.preventDefault();e.stopPropagation();scan(found)};
   $('#q').addEventListener('input',e=>{q=SAFE.text(e.target.value,80).toLowerCase();Object.values(UI).forEach(s=>{if(s&&typeof s=='object'&&'page' in s)s.page=1});sbSync();clearTimeout(render.q);render.q=setTimeout(()=>render(true),120)});
   $('#qClr').onclick=()=>{$('#q').value='';q='';sbSync();render();$('#q').focus()};
   $('#nwb').onclick=e=>{e.stopPropagation();$('#nwm').classList.toggle('open')};
@@ -2878,7 +2905,7 @@ function cphTidy(){const box=$('#cphs');if(!box)return;const rows=[...box.queryS
   if(!last||last.querySelector('input').value.trim()){const used=R.map(r=>r.querySelector('select').value);box.insertAdjacentHTML('beforeend',cphRow({t:CPH.find(x=>!used.includes(x))||'Office'}))}
   [...box.querySelectorAll('.cphr')].forEach((r,i,a)=>{r.querySelector('.cphx').hidden=a.length<2||(i==a.length-1&&!r.querySelector('input').value.trim())})}
 function editContact(id,draft){const c=S.contacts.find(x=>x.id==id),v=draft||(c?{...c,phones:conPhones(c)}:{type:'Supplier',phones:[]});
-  const fld=(k,l,o={})=>`<div class="ff ${o.w||''}"><label for="c_${k}">${esc(l)}${o.req?' *':''}</label>${o.sel?`<select id="c_${k}">${o.sel.map(x=>`<option${x==(v[k]||'')?' selected':''}>${esc(x)}</option>`).join('')}</select>`:o.area?`<textarea id="c_${k}" rows="2" maxlength="${o.max||600}">${esc(v[k]||'')}</textarea>`:`<input id="c_${k}" type="${o.t||'text'}" maxlength="${o.max||120}" value="${esc(v[k]||'')}" autocomplete="off"${o.ph?` placeholder="${esc(o.ph)}"`:''}>`}</div>`;
+  const fld=(k,l,o={})=>`<div class="ff ${o.w||''}"><label for="c_${k}">${esc(l)}${MARK(o.req,o.adm)}</label>${o.sel?`<select id="c_${k}">${o.sel.map(x=>`<option${x==(v[k]||'')?' selected':''}>${esc(x)}</option>`).join('')}</select>`:o.area?`<textarea id="c_${k}" rows="2" maxlength="${o.max||600}">${esc(v[k]||'')}</textarea>`:`<input id="c_${k}" type="${o.t||'text'}" maxlength="${o.max||120}" value="${esc(v[k]||'')}" autocomplete="off"${o.ph?` placeholder="${esc(o.ph)}"`:''}>`}</div>`;
   openModal(`<button class="mx" onclick="closeModal()" aria-label="Close">&times;</button><h2>${c?'Edit Contact':'New Contact'}</h2>
    <div class="cform">
     <section><h3>Who</h3><div class="grid">${fld('co','Company',{req:1,max:80})}${fld('type','Type',{sel:CT})}${fld('name','Contact name',{max:60})}${fld('role','Job title',{max:60})}</div></section>
@@ -3184,7 +3211,7 @@ function ieFields(){const Ad=ISADM(),Own=ISOWN(),ed=ieMode=='edit',mv=!ed,r=(ieK
   ...(ieMode=='request'?[{k:'note',l:'Needed for (job, reason)',w:'full',max:160,sec:'n'}]:[{k:'notes',l:ed?'Notes':'Product notes',t:'area',w:'full',sec:'n'}])]}
 function fieldH(f,v){const val=v[f.k]??'';
   const inp=f.t=='colour'?colourField(f,v):f.t=='select'?`<select id="f_${f.k}" ${f.ro?'disabled':''}>${f.o.map(o=>`<option value="${esc(o)}" ${String(o)==String(val)?'selected':''}>${esc(o||'-')}</option>`).join('')}</select>`:f.t=='area'?`<textarea id="f_${f.k}" rows="3" maxlength="2000">${esc(val)}</textarea>`:`<input id="f_${f.k}" type="${f.t||'text'}" ${f.t=='number'?'step="any" min="0" inputmode="decimal"':`maxlength="${f.max||120}"`} value="${esc(val)}" ${f.ro?'readonly':''} ${f.list?`list="${f.list}"`:''} autocomplete="off">`;
-  return `<div class="ff ${f.w||''}" ${f.nx?`data-nx="${f.nx}"`:''} ${nxHid(f,v)?'hidden':''}><label for="f_${f.k}">${esc(f.l)}${f.req?' *':''}</label>${inp}${f.hint?`<span class="hint">${esc(f.hint)}</span>`:''}</div>`}
+  return `<div class="ff ${f.w||''}" ${f.nx?`data-nx="${f.nx}"`:''} ${nxHid(f,v)?'hidden':''}><label for="f_${f.k}">${esc(f.l)}${MARK(f.req,f.adm)}</label>${inp}${f.hint?`<span class="hint">${esc(f.hint)}</span>`:''}</div>`}
 let ieView=false;
 function itemWindow(mode,k,pre){const view=ieView=mode=='view';if(view)mode='edit';
   const r=(k&&prod(k))||null;if(mode=='edit'&&!r)return;
@@ -3828,13 +3855,13 @@ function custCompat(r){r.phone=telOf(r);r.email=mailOf(r);r.address=r.siteSame==
 
 /* ---- row-style field (label left, value right, edited in place) ---- */
 function rfH(f,v){const val=v[f.k]??'',id='f_'+f.k;let c;
-  if(f.ro)c=`<input id="${id}" value="${esc(val)}" readonly tabindex="-1">`;
+  if(f.ro||(f.adm&&!ISADM()))c=`<input id="${id}" value="${esc(val)}" readonly tabindex="-1">`;
   else if(f.t=='select')c=`<select id="${id}">${(val!==''&&!f.o.map(String).includes(String(val))?[val,...f.o]:f.o).map(o=>`<option value="${esc(o)}" ${String(o)==String(val)?'selected':''}>${esc(o||'-')}</option>`).join('')}</select>`;
   else if(f.t=='area')c=`<textarea id="${id}" rows="${f.rows||2}" maxlength="${f.max||2000}">${esc(val)}</textarea>`;
   else c=`<input id="${id}" type="${f.t=='number'?'number':f.t=='date'?'date':f.t=='time'?'time':f.t=='email'?'email':f.t=='tel'?'tel':'text'}" ${f.t=='number'?'step="any" min="0" inputmode="decimal"':`maxlength="${f.max||120}"`} value="${esc(val)}" ${f.list?`list="${f.list}"`:''} autocomplete="off">`;
   const hid=(f.dep&&(v[f.dep]||'Same as home')!='Different')||nxHid(f,v);
   if(['invSame','siteSame'].includes(f.k))c=c.replace('<select ','<select onchange="recDep(this)" ');
-  return `<label class="rf ${f.t=='area'?'ta':''}" ${f.dep?`data-dep="${f.dep}"`:''} ${f.nx?`data-nx="${f.nx}"`:''} ${hid?'hidden':''}><span>${esc(f.l)}${f.req?' *':''}</span>${c}</label>`}
+  return `<label class="rf ${f.t=='area'?'ta':''}" ${f.dep?`data-dep="${f.dep}"`:''} ${f.nx?`data-nx="${f.nx}"`:''} ${hid?'hidden':''}><span>${esc(f.l)}${MARK(f.req,f.adm)}</span>${c}</label>`}
 /* each group reads as a plain question; fields marked adv fold away under "More details" */
 const GQ={'Customer':'Who Is The Customer?','Phone Numbers':'How Can We Phone Them?','Email':'Their Email Address','Home Address':'Where Do They Live?','Invoice Address':'Where Should The Invoice Go?','Site Address':'Where Is The Work Being Done?',
   'Lead':'About This Lead','Source And Interest':'How They Found Us And What They Want','Result':'What Happens Next','Next Visit':'The Next Visit',
@@ -3896,7 +3923,7 @@ function recOpen(kind,id){const D=REC[kind],r=id?D.get(id):null;if(id&&!r)return
    <div class="rw-h"><div><small>${esc(D.label)}${W.isNew?' · New':''}</small><h2>${esc(D.heading(W))}</h2>${W.isNew?'':`<div class="rw-hc">${telOf(W.v)?`<a class="nocap" href="tel:${esc(telOf(W.v).replace(/[^\d+]/g,''))}">${svg('M5 4h4l2 5-2.5 1.5a11 11 0 005 5L15 13l5 2v4a2 2 0 01-2 2A16 16 0 013 6a2 2 0 012-2')}${esc(telOf(W.v))}</a>`:''}${mailOf(W.v)?`<a class="nocap" href="mailto:${esc(mailOf(W.v))}">${svg('M4 6h16v12H4zM4 7l8 6 8-6')}${esc(mailOf(W.v))}</a>`:''}${W.v.town?`<span>${svg('M12 21s-7-6-7-11a7 7 0 0114 0c0 5-7 11-7 11zM12 12a2 2 0 100-4 2 2 0 000 4z')}${esc(W.v.town)}</span>`:''}</div>`}</div><div class="rw-hk">${D.headStats(W)}</div></div>
    <div class="rw-x"><aside class="rw-rail"><div class="rw-prog"><span id="rwPct"></span><i><b id="rwBar"></b></i></div>
      <ol class="rw-steps">${tabs.map((t,i)=>`<li><button type="button" data-t="${t.k}" class="${t.k==tab?'on':''}" ${A('recTab',t.k)}><i>${i+1}</i><span><b>${esc(nm(t.k))}${REC_OPTIONAL.includes(t.k)?'<em class="rw-opt">Optional</em>':''}</b><small data-st="${t.k}"></small></span></button></li>`).join('')}</ol></aside>
-    <div class="rw-main"><div class="rw-b">${tabs.map((t,i)=>`<div class="rw-p ${t.k==tab?'on':''}" data-t="${t.k}" role="tabpanel"><div class="rw-sh"><small>Step ${i+1} of ${tabs.length}</small><h3>${esc(nm(t.k))}</h3><p>${esc(hint(t.k))}</p>${t.k=='customer'||t.k=='details'?'<p class="rw-req">Boxes marked * must be filled in.</p>':''}<div class="rw-todo" data-td="${t.k}" aria-live="polite"></div></div>${t.h(W)}</div>`).join('')}</div>
+    <div class="rw-main"><div class="rw-b">${tabs.map((t,i)=>`<div class="rw-p ${t.k==tab?'on':''}" data-t="${t.k}" role="tabpanel"><div class="rw-sh"><small>Step ${i+1} of ${tabs.length}</small><h3>${esc(nm(t.k))}</h3><p>${esc(hint(t.k))}</p>${t.k=='customer'||t.k=='details'?`<p class="rw-req">Boxes marked <span class="rq">*</span> must be filled in. Boxes with ${MARK(0,1)} can only be changed by an administrator.</p>`:''}<div class="rw-todo" data-td="${t.k}" aria-live="polite"></div></div>${t.h(W)}</div>`).join('')}</div>
      <div class="rw-foot"><button type="button" class="btn ghost" id="rwPrev" onclick="recStep(-1)"></button><span class="rw-sp"></span><button type="button" class="btn ghost" onclick="recSave(false)">Save</button><button type="button" class="btn" id="rwNext" onclick="recStep(1)"></button></div></div></div></div>`,'full');
   W.nm=nm;recThumbs();recDocs();recFoot();recRail();
   if(!W.isNew){const todo=W.steps.find(k=>{const b=$(`#mbox .rw-steps button[data-t="${k}"]`);return b&&!b.classList.contains('ok')&&!REC_OPTIONAL.includes(k)});recTab(todo||W.steps[0])}grpInit($('#mbox .rw-p.on'));
@@ -4077,7 +4104,7 @@ const CDETF=W=>[
   {k:'onHold',l:'On hold',t:'select',o:YN,g:'Contract'},{k:'cancelled',l:'Cancelled',t:'select',o:YN,g:'Contract'},{k:'product',l:'Work / products summary',t:'area',max:300,g:'Contract'},{k:'flash',l:'Flash note (shows in red)',max:160,g:'Contract'},
   {k:'lead',l:'Lead number',ro:1,g:'Sales Information'},{k:'salesArea',l:'Sales area',t:'select',o:['',...BRANCHES],g:'Sales Information'},{k:'soldBy',l:'Salesperson',t:'select',o:[...OWNERS(),RANDOM_SP],g:'Sales Information'},
   {k:'source',l:'Lead source',t:'select',o:['',...SOURCES],g:'Sales Information'},{k:'subSource',l:'Sub source',g:'Sales Information'},{k:'createdBy',l:'Created by',ro:1,g:'Sales Information'},{k:'approvals',l:'Contract approvals',g:'Sales Information'}];
-const CFINF=()=>[{k:'value',l:'Contract value, including VAT (£)',t:'number',g:'Money'},{k:'vatRate',l:'VAT rate (%)',t:'select',o:['20','5','0'],g:'Money'},{k:'deposit',l:'Deposit asked for (£)',t:'number',g:'Money'},{k:'depDue',l:'Deposit due by',t:'date',g:'Money'},{k:'balDue',l:'Balance due by',t:'date',g:'Money'},{k:'paid',l:'Paid so far (£)',t:'number',g:'Money'},...(ISADM()?[{k:'cost',l:'Job cost (£)',t:'number',g:'Money'}]:[]),{k:'payMethod',l:'Main payment method',t:'select',o:['','Cash','Bank transfer','Card','Finance','Cheque'],g:'Money'},
+const CFINF=()=>[{k:'value',l:'Contract value, including VAT (£)',t:'number',g:'Money'},{k:'vatRate',l:'VAT rate (%)',t:'select',o:['20','5','0'],g:'Money'},{k:'deposit',l:'Deposit asked for (£)',t:'number',g:'Money'},{k:'depDue',l:'Deposit due by',t:'date',g:'Money'},{k:'balDue',l:'Balance due by',t:'date',g:'Money'},{k:'paid',l:'Paid so far (£)',t:'number',g:'Money',adm:1},...(ISADM()?[{k:'cost',l:'Job cost (£)',t:'number',g:'Money',adm:1}]:[]),{k:'payMethod',l:'Main payment method',t:'select',o:['','Cash','Bank transfer','Card','Finance','Cheque'],g:'Money'},
   {k:'finCo',l:'Finance company',g:'Finance Plan'},{k:'finRef',l:'Finance reference',g:'Finance Plan'},{k:'finStatus',l:'Finance status',t:'select',o:['','Applied','Approved','Declined','Paid out'],g:'Finance Plan'},{k:'invoiced',l:'Invoiced',t:'select',o:YN,g:'Invoice'},{k:'invoiceNo',l:'Invoice number',g:'Invoice'},{k:'invoiceDate',l:'Invoice date',t:'date',g:'Invoice'}];
 const CFITF=()=>[{k:'survey',l:'Survey date',t:'date',g:'Dates'},{k:'order',l:'Order date',t:'date',g:'Dates'},{k:'delDate',l:'Delivery date',t:'date',g:'Dates'},{k:'fit',l:'Fit date',t:'date',g:'Dates'},
   ...[1,2,3,4,5,6].map(i=>({k:'fitter'+i,l:i==1?'Fitter 1 (lead fitter)':'Fitter '+i,t:'select',o:['',...FITL()],g:'Team'})),{k:'installMgr',l:'Installation manager',t:'select',o:staffNames(),g:'Team'},{k:'surveyor',l:'Assigned surveyor',t:'select',o:staffNames(),g:'Team'},{k:'fitNotes',l:'Fitting notes',t:'area',max:600,g:'Team'},
@@ -4539,7 +4566,7 @@ function vSettings(){const own=ISOWN(),p=S.profile||{},dark=document.body.datase
    <section class="panel set-c"><h2><span class="set-ic">${svg(IC.user)}</span><span>My Settings</span></h2>
     ${row('My Details',esc([p.name,p.phone||p.mobile].filter(Boolean).join(' · '))||'Name and phone','<button class="btn ghost sm" onclick="editProfile()">Edit</button>')}
     ${row('Light Or Dark','How the site looks for you',`<span class="seg"><button class="${dark?'':'on'}" ${A('setThR','light')}>Light</button><button class="${dark?'on':''}" ${A('setThR','dark')}>Dark</button></span>`)}
-    ${row('Page Background And Greeting Box','Patterns and colours','<button class="btn ghost sm" onclick="lookPop(true)">Change</button>')}
+    ${row('Page Background And Greeting Box','Patterns and colours','<button class="btn ghost sm" onclick="event.stopPropagation();lookPop(true)">Change</button>')}
     ${row('Fewer Animations','Turns off movement and glow effects',`<label class="tsw"><input type="checkbox" ${rm?'checked':''} ${AC('onchange','motionSet','this.checked')}><span></span></label>`)}
     ${row('Help Tour','A short guide to the site','<button class="btn ghost sm" onclick="startTour()">Start</button>')}
     ${row('Account','Signed in as '+esc(ROLES[ROLE].n),'<button class="btn ghost sm" onclick="swRole()">Switch</button>')}

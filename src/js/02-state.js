@@ -75,6 +75,7 @@ const ikey=r=>[r.item,r.length,r.cInName,r.cOutName].map(v=>{v=String(v||'').tri
   S.contracts.forEach(fitSync);
   S.brand=S.brand||{};S.brand.tp=S.brand.tp||{score:4.5,count:'',url:'https://uk.trustpilot.com/review/broadlandwindows.co.uk'};S.brand.g=S.brand.g||{score:4.5,count:'',url:''};
   /* review sites figures as published (Nov 2026); admins update them in Admin Console > Reviews */
+  if(!S.brand.tp.count)S.brand.tp.count='21';
   S.brand.tt=S.brand.tt||{score:4.9,count:'613',url:'https://trustedtrader.team/Norfolk/Broadland-Windows-0000015.html'};
   S.brand.rl=S.brand.rl||{score:9.6,count:'650',rec:'99',url:'https://www.referenceline.com/replacement_doors_windows_conservatories-in-norwich-broadlandwindowsltd-24531'};
   /* short quotes from public reviews; names of reviewers are deliberately not stored */

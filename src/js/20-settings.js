@@ -23,7 +23,7 @@ function vSettings(){const own=ISOWN(),p=S.profile||{},dark=document.body.datase
    <section class="panel set-c"><h2><span class="set-ic">${svg(IC.user)}</span><span>My Settings</span></h2>
     ${row('My Details',esc([p.name,p.phone||p.mobile].filter(Boolean).join(' · '))||'Name and phone','<button class="btn ghost sm" onclick="editProfile()">Edit</button>')}
     ${row('Light Or Dark','How the site looks for you',`<span class="seg"><button class="${dark?'':'on'}" ${A('setThR','light')}>Light</button><button class="${dark?'on':''}" ${A('setThR','dark')}>Dark</button></span>`)}
-    ${row('Page Background And Greeting Box','Patterns and colours','<button class="btn ghost sm" onclick="lookPop(true)">Change</button>')}
+    ${row('Page Background And Greeting Box','Patterns and colours','<button class="btn ghost sm" onclick="event.stopPropagation();lookPop(true)">Change</button>')}
     ${row('Fewer Animations','Turns off movement and glow effects',`<label class="tsw"><input type="checkbox" ${rm?'checked':''} ${AC('onchange','motionSet','this.checked')}><span></span></label>`)}
     ${row('Help Tour','A short guide to the site','<button class="btn ghost sm" onclick="startTour()">Start</button>')}
     ${row('Account','Signed in as '+esc(ROLES[ROLE].n),'<button class="btn ghost sm" onclick="swRole()">Switch</button>')}
