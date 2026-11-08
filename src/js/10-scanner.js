@@ -8,10 +8,10 @@ async function scan(cb){
   scanCb=cb;$('#scanner').classList.add('open');$('#manual').value='';$('#scanMsg').textContent='Point the camera at a barcode.';
   if(!window.isSecureContext||!navigator.mediaDevices){$('#scanMsg').textContent='The camera needs a secure (https) connection. You can still type the code below.';return}
   const v=$('#vid');
-  try{stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});v.srcObject=stream;await v.play()}
+  try{stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});v.srcObject=stream;await v.play();if(!$('#scanner').classList.contains('open')){stream.getTracks().forEach(t=>t.stop());stream=null;return}}
   catch(e){$('#scanMsg').textContent='Camera not available. Allow camera permission, or type the code below.';return}
   scanning=true;
-  if('BarcodeDetector' in window){const d=new BarcodeDetector();const loop=async()=>{if(!scanning)return;try{const r=await d.detect(v);if(r.length)return got(r[0].rawValue)}catch(e){}setTimeout(loop,250)};loop()}
+  if('BarcodeDetector' in window){const d=new BarcodeDetector();const loop=async()=>{if(!scanning)return;try{const r=await d.detect(v);if(r.length){got(r[0].rawValue);if(!scanning)return}}catch(e){}setTimeout(loop,250)};loop()}
   else{try{await loadZX();stream.getTracks().forEach(t=>t.stop());stream=null;reader=new ZXing.BrowserMultiFormatReader();reader.decodeFromVideoDevice(null,'vid',r=>{if(r)got(r.getText())})}
     catch(e){$('#scanMsg').textContent='Scanner library could not load. Type the code below instead.'}}}
 function stopScan(){scanning=false;try{reader&&reader.reset()}catch(e){}reader=null;if(stream)stream.getTracks().forEach(t=>t.stop());stream=null;$('#scanner').classList.remove('open')}

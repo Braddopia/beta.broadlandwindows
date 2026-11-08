@@ -5,7 +5,7 @@ const nid=(p,a)=>p=='S'?'S-'+String(Math.max(0,...a.map(x=>parseInt(String(x.id)
 /* deleting is admin-only, and only for these lists */
 const DEL_RULE={contracts:[ISOWN,'Deleting contracts'],staff:[ISOWN,'Removing staff'],calls:[ISOWN,'Deleting service calls'],contacts:[ISOWN,'Deleting contacts'],fin:[ISADM,'Deleting bills']};
 function del(k,id){const r=DEL_RULE[k];if(!r||!Array.isArray(S[k])||!need(r[0],r[1]))return;
-  askYes('Delete '+id+'?','This cannot be undone.','Delete',()=>{S[k]=S[k].filter(x=>x.id!=id);audit('Deleted',k+' '+id,'');store();render()},true)}
+  askYes('Delete '+id+'?','This cannot be undone.','Delete',()=>{S[k]=S[k].filter(x=>x.id!=id);if(k=='staff'){S.hols=S.hols.filter(h=>h.sid!=id);if(S.abs)delete S.abs[id]}audit('Deleted',k+' '+id,'');store();render()},true)}
 
 /* ---------------- leads ----------------
    Lead refs are L0001, L0002... A converted lead moves into its new contract
@@ -114,7 +114,7 @@ const SVCF=()=>[{t:'h',l:'The Call'},{k:'takenBy',l:'Call taken by',t:'select',o
   {t:'h',l:'The Visit'},{k:'fitter',l:'Service engineer attending',t:'select',o:['',...FITL()]},{k:'status',l:'Status',t:'select',o:SVC_ST},{k:'visit',l:'Visit date',t:'date'},{k:'visitTime',l:'Visit time',t:'time'},{k:'arrived',l:'Arrived on site',t:'time'},{k:'left',l:'Left site',t:'time'},
   {t:'h',l:'Work Done'},{k:'notes',l:'Work carried out',t:'area',w:'full'},{k:'parts',l:'Parts used or ordered',t:'area',w:'full',max:400},{k:'followUp',l:'Another visit needed?',t:'select',o:['','No','Yes']},{k:'followNote',l:'What the next visit is for',max:200},
   {k:'charge',l:'Charge to customer (£)',t:'number',hint:'Leave at 0 if covered by the guarantee'},{k:'signed',l:'Customer signed off?',t:'select',o:['','Yes','No']},{k:'doneAt',l:'Date completed',t:'date'}];
-function editCall(id,cid){const c=S.calls.find(x=>x.id==id),k=S.contracts.find(x=>x.id==cid)||{};if(cid)go('service');if(id&&!c)return;
+function editCall(id,cid){const c=S.calls.find(x=>x.id==id),k=S.contracts.find(x=>x.id==cid)||{};if(cid&&canSee('service'))go('service');if(id&&!c)return;
   const v=c||{name:k.name||'',phone:telOf(k)||'',email:mailOf(k)||'',address:addrOf(k)||'',town:k.town||'',contract:k.id||'',priority:'Normal',status:'Open',takenBy:USER,takenAt:today(),takenTime:new Date().toTimeString().slice(0,5),guarantee:k.id?'Yes':''};
   form(c?'Service Call '+c.id:'New Service Call',SVCF(),v,o=>{if(o.status=='Complete'&&!o.doneAt)o.doneAt=today();if(o.visit&&o.status=='Open')o.status='Booked';
     if(c){Object.assign(c,o);audit('Service call edited',c.id,o.status)}else{const n={id:nid('S',S.calls),...o};S.calls.unshift(n);audit('Service call added',n.id,o.name)}},true,'lg');
@@ -167,7 +167,7 @@ function editContact(id,draft){const c=S.contacts.find(x=>x.id==id),v=draft||(c?
   const box=$('#cphs');cphTidy();
   box.addEventListener('input',cphTidy);box.addEventListener('focusout',()=>setTimeout(cphTidy,0));
   box.addEventListener('click',e=>{const x=e.target.closest('.cphx');if(!x)return;x.closest('.cphr').remove();cphTidy()});
-  $('#saveBtn').onclick=()=>{const g=k=>($('#c_'+k).value||'').trim(),o={co:SAFE.text(g('co'),80),type:CT.includes(g('type'))?g('type'):'Other',name:SAFE.text(g('name'),60),role:SAFE.text(g('role'),60),email:g('email').toLowerCase(),email2:g('email2').toLowerCase(),web:g('web').toLowerCase(),addr:SAFE.text(g('addr'),200),town:SAFE.text(g('town'),60),pc:SAFE.text(g('pc'),10).toUpperCase(),notes:SAFE.text(g('notes'),600)};
+  $('#saveBtn').onclick=()=>{const g=k=>($('#c_'+k).value||'').trim(),o={co:SAFE.text(g('co'),80),type:CT.includes(g('type'))?g('type'):'Other',name:SAFE.text(g('name'),60),role:SAFE.text(g('role'),60),email:g('email').toLowerCase(),email2:g('email2').toLowerCase(),web:SAFE.url(g('web'))?SAFE.text(g('web'),200):'',addr:SAFE.text(g('addr'),200),town:SAFE.text(g('town'),60),pc:SAFE.text(g('pc'),10).toUpperCase(),notes:SAFE.text(g('notes'),600)};
     o.phones=[...$$('#cphs .cphr')].map(r=>({t:CPH.includes(r.querySelector('select').value)?r.querySelector('select').value:'Office',n:SAFE.text(r.querySelector('input').value,30)})).filter(p=>p.n);
     const bad=(m,k)=>{toast(m);const e=k?$('#c_'+k):$('#cphs input');e&&e.focus();return false};
     if(!o.co)return bad('Company is required','co');

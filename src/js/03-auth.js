@@ -5,7 +5,7 @@
    ========================================================================== */
 const FOCUS=['home','messages','live','deliveries','stock','suppliers','downloads','settings'];
 const ROLES={
-  admin:  {n:'Administrator',     d:'Everything a standard user has, plus staff and holidays',v:[...FOCUS,'leads','contracts','staff','holidays']},
+  admin:  {n:'Administrator',     d:'Everything a standard user has, plus staff, holidays, reports and the admin console',v:[...FOCUS,'leads','contracts','fitting','service','contacts','staff','holidays','reports','admin']},
   staff:  {n:'Standard user',     d:'Overview, leads, contracts, calendar, service calls, contacts, live analytics, inventory and files',v:[...FOCUS,'leads','contracts','fitting','service','contacts']},
   beta:   {n:'Beta (all features)',d:'Leads, contracts, finance, staff and everything else',v:'*'}};
 const RL={admin:'Administrator',staff:'Team Member',beta:'Beta Access'};
@@ -88,5 +88,5 @@ function saveProfile(){
   const old=p.name;Object.assign(p,{name,email:em,phone:v('p_phone'),mobile:v('p_mobile'),emergency:v('p_emer'),signature:v('p_sig')});
   if(m){p.sid=m.id;Object.assign(m,{name,email:em||m.email,phone:p.phone||m.phone});
     if(ISOWN()){m.role=v('p_role')||m.role;m.team=v('p_team')=='None'?'':v('p_team');m.start=SAFE.date(v('p_start'))||m.start;const al=SAFE.num(v('p_allow'),{max:60,dp:0});if(al!=null)m.allow=al}}
-  if(old!=name){/* keep authored records pointing at the new name */S.items.forEach(r=>{if(r.user==old)r.user=name});(S.notes||[]).forEach(n=>{if(n.to==old)n.to=name;if(n.by==old)n.by=name})}
+  if(old!=name)renamePerson(old,name);
   audit('Profile updated',name,old!=name?'Renamed from '+old:'');store();closeModal();render();toast('Your details are saved')}

@@ -14,7 +14,7 @@ const msDots=x=>Array.isArray(x.ms)&&x.ms.length?`<span class="ms">${x.ms.map(m=
 
 /* ---------------- factory floor ---------------- */
 function liveData(){const td=today(),D=S.deliveries.filter(x=>x.status!='Received').sort((a,b)=>a.due.localeCompare(b.due)),J=S.contracts.filter(c=>c.stage!='Complete'&&c.stage!='Deposit due').sort((a,b)=>(a.fit||'9').localeCompare(b.fit||'9'));
-  return{td,D,J,od:D.filter(x=>x.due<td&&x.status!='In transit'),dt:D.filter(x=>x.due==td),dw:S.deliveries.filter(x=>inWeek(x.due)),jw:J.filter(c=>c.fit&&inWeek(c.fit))}}
+  return{td,D,J,od:D.filter(dLate),dt:D.filter(dDueToday),dw:S.deliveries.filter(x=>inWeek(x.due)),jw:J.filter(c=>c.fit&&inWeek(c.fit))}}
 function vLive(){if(UI.board!='factory')return vBoard(UI.board);
   const{td,D,J,od,dt,dw,jw}=liveData(),wDone=dw.filter(x=>x.status=='Received').length,tv=document.body.classList.contains('tv');
   const lowN=products().filter(isLow).length,callN=S.calls.filter(c=>c.status!='Complete').length,reqN=S.items.filter(r=>r.type=='request'&&r.reqStatus=='Pending').length,offN=S.staff.filter(s=>['H','H1','H2','S','M','C','A','U'].includes(absCode(s,td))).length;
@@ -82,7 +82,7 @@ function boardEdit(b){if(!need(ISOWN,'Changing the floor boards'))return;const d
 /* ranked to-do list for the floor: 1 = act now, 2 = today / soon */
 function priorities(){const td=today(),d3=addDays(3),o=[];
   S.calls.filter(c=>c.status!='Complete'&&c.priority=='Urgent').forEach(c=>o.push({p:1,k:'Urgent Call',t:c.name+': '+c.issue,s:c.visit?'Visit '+fd(c.visit):'No visit booked',o:c.visit||'0'}));
-  S.deliveries.filter(x=>x.status=='Due'&&x.due<td).forEach(x=>o.push({p:1,k:'Overdue',t:x.supplier+': '+x.items,s:'Was due '+fd(x.due),o:x.due}));
+  S.deliveries.filter(dLate).forEach(x=>o.push({p:1,k:'Overdue',t:x.supplier+': '+x.items,s:'Was due '+fd(x.due),o:x.due}));
   products().filter(r=>r.stock<=0).forEach(r=>o.push({p:1,k:'Out Of Stock',t:r.item+' '+(r.length!='-'?r.length:''),s:(r.supplier||'No supplier')+', '+(hasLoc(r)?r.location:'no location'),o:'1'}));
   S.contracts.filter(c=>c.fit&&c.fit>=td&&c.fit<=d3&&!['Fitted','Complete'].includes(c.stage)).forEach(c=>o.push({p:c.fit==td?1:2,k:c.fit==td?'Fitting Today':'Fitting Soon',t:c.name+' #'+c.id,s:c.product+', '+fd(c.fit)+', '+c.stage,o:c.fit}));
   S.deliveries.filter(x=>x.status!='Received'&&x.due==td).forEach(x=>o.push({p:2,k:'Due Today',t:x.supplier+': '+x.items,s:x.status,o:td}));
@@ -106,7 +106,8 @@ function liveReport(){const{td,D,J,od,dt,dw,jw}=liveData();
 /* ---------------- deliveries ---------------- */
 /* delivery time windows: overdue, today, rest of this week (to Sunday; at weekends the coming week), rest of this month, later, received */
 const DWIN=[['od','Overdue','r'],['td','Due Today','y'],['wk','Due This Week',''],['mo','Due This Month',''],['lt','Later',''],['rec','Received','g']];
-function delWin(x){if(x.status=='Received')return 'rec';const td=today();if(x.due<td)return 'od';if(x.due==td)return 'td';
+const dLate=x=>x.status!='Received'&&x.status!='In transit'&&x.due<today(),dDueToday=x=>x.status!='Received'&&(x.due==today()||(x.status=='In transit'&&x.due<today()));
+function delWin(x){if(x.status=='Received')return 'rec';const td=today();if(x.due<td)return x.status=='In transit'?'td':'od';if(x.due==td)return 'td';
   const d=new Date(td+'T00:00'),we=new Date(d);we.setDate(d.getDate()+((7-d.getDay())%7)+(d.getDay()==6||d.getDay()==0?7:0)); /* at the weekend, 'this week' means the coming working week */const me=new Date(d.getFullYear(),d.getMonth()+1,0),iso=z=>z.getFullYear()+'-'+String(z.getMonth()+1).padStart(2,'0')+'-'+String(z.getDate()).padStart(2,'0');
   return x.due<=iso(we)?'wk':x.due<=iso(me)?'mo':'lt'}
 function vDeliveries(){const td=today(),F=UI.del,all=S.deliveries.slice().sort((a,b)=>a.due.localeCompare(b.due)),sn=[...new Set(all.map(x=>x.supplier))];
@@ -191,7 +192,7 @@ function supReorder(i){const x=S.suppliers[i];if(!x)return;const s=supStats(x),n
   if(!need.length){toast('Everything low already has a request');return}
   askIn('Create '+need.length+' stock request'+(need.length>1?'s':'')+'?','For '+x.name+'. They go to an administrator for approval.','Create',()=>supReorderGo(x,need))}
 function supReorderGo(x,need){
-  need.forEach(r=>{const q=r.reorderQty||Math.max(ro(r)*2-r.stock,1);S.items.unshift(moveRow(r,'request',q,r.stock,{reqStatus:'Pending',ord:nextOrd('P'),note:'Reorder from '+x.name}))});
+  need.forEach(r=>{const q=reorderQty(r);S.items.unshift(moveRow(r,'request',q,r.stock,{reqStatus:'Pending',ord:nextOrd('P'),note:'Reorder from '+x.name}))});
   audit('Reorder requested',x.name,need.length+' lines');store();render();toast(need.length+' requests sent for approval')}
 function supDetail(i){const x=S.suppliers[i];if(!x)return;const s=supStats(x),so=supOrders(x);
   openModal(`<button class="mx" onclick="closeModal()" aria-label="Close">&times;</button><h2>${esc(x.name)}</h2><p class="muted" style="margin-top:-.4rem">${x.account?'Account '+esc(x.account):''}${x.terms?' · '+esc(x.terms):''}</p><h3>Items Supplied (${s.L.length})</h3>${s.L.map(r=>`<div class="row"><span><b>${esc(r.item)}</b> <span class="muted">${esc(r.length)}, ${esc(colTxt(r))}</span></span><span class="acts"><span class="tag ${r.stock<=0?'r':isLow(r)?'y':'g'}">${r.stock} ${esc(unitOf(r))}</span><button class="mini" ${A('stockForm','request',r.pid)}>Request</button></span></div>`).join('')||'<p class="empty">No items linked yet. Set the supplier on an item.</p>'}<h3>Open Requests</h3>${s.req.map(r=>`<div class="row"><span>${ordTag(r)} ${r.qty} ${esc(unitOf(r))} x ${esc(r.item)}</span>${reqTag(r)}</div>`).join('')||'<p class="empty">None.</p>'}<h3>Open Deliveries</h3>${s.D.map(d=>`<div class="row"><span><b>${esc(d.items)}</b><br><span class="muted">${esc(d.contract||'-')}</span></span>${dTag(d)}</div>`).join('')||'<p class="empty">Nothing outstanding.</p>'}${so.length?'<h3>Imported Orders</h3>'+so.map(o=>`<div class="row"><span><b>${esc(o.ref)}</b> ${esc(o.customer)}<br><span class="muted">${esc(o.desc)}${o.due?', due '+fd(o.due):''}</span></span><span class="tag">${esc(o.status||'-')}</span></div>`).join(''):''}<div class="mact"><button class="btn ghost" ${A('editSup',i)}>Edit</button><button class="btn ghost" ${A('editDel',null,x.name)}>New Delivery</button><button class="btn" onclick="closeModal()">Close</button></div>`,'lg')}
@@ -259,5 +260,5 @@ function ordNext(){const t=$('#ordTxt').value.trim();if(!t){toast('Nothing to im
 function ordBuild(){const c={};OF.forEach(([k])=>c[k]=+$('#om_'+k).value);const g=(r,k)=>c[k]>=0?SAFE.text(r[c[k]],120):'',d=$('#om_dsup').value;return ordRows.slice(1).map(r=>({ref:g(r,'ref'),customer:g(r,'cust'),desc:g(r,'desc'),due:ordDate(g(r,'due')),status:g(r,'status'),supplier:g(r,'sup')||d})).filter(o=>o.ref||o.customer)}
 function ordPrev(){$('#om_prev').innerHTML=ordBuild().slice(0,3).map(o=>`<div class="row"><span><b>${esc(o.ref)}</b> ${esc(o.customer)}<br><span class="muted">${esc(o.desc)}, ${o.due?fd(o.due):'no date'}, ${esc(o.status||'no status')}, ${esc(o.supplier)}</span></span></div>`).join('')||'<p class="empty">Nothing found, check the columns.</p>'}
 function ordGo(){const O=ordBuild();if(!O.length){toast('Nothing found, check the columns');return}S.ordMap={h:ordRows[0].join('|')};OF.forEach(([k])=>S.ordMap[k]=+$('#om_'+k).value);S.orders=O;ordSync();audit('Orders imported','Smart Orders',O.length+' orders');store();closeModal();render();toast(O.length+' orders imported')}
-function ordSync(){S.deliveries=S.deliveries.filter(d=>!d.so);S.orders.forEach(o=>{if(!o.due)return;S.deliveries.push({id:'SO-'+o.ref,supplier:o.supplier||'Smart Systems',items:(o.desc||'Smart order')+(o.customer?', '+o.customer:''),contract:o.ref,due:o.due,status:ORDDONE.test(o.status)?'Received':'Due',stage:o.status||'Ordered',so:1})})}
+function ordSync(){const old=new Map(S.deliveries.filter(d=>d.so).map(d=>[d.id,d])),seen=new Set();S.deliveries=S.deliveries.filter(d=>!d.so);S.orders.forEach((o,i)=>{if(!o.due)return;let id='SO-'+(o.ref||'row'+(i+1));if(seen.has(id))id+='-'+(i+1);seen.add(id);const p=old.get(id);S.deliveries.push({id,supplier:o.supplier||'Smart Systems',items:(o.desc||'Smart order')+(o.customer?', '+o.customer:''),contract:o.ref,due:o.due,status:ORDDONE.test(o.status)||(p&&p.status=='Received')?'Received':(p&&p.status)||'Due',stage:o.status||'Ordered',so:1})})}
 function ordClear(){askYes('Clear imported orders?','The Smart Orders list will be emptied. Import again to bring them back.','Clear orders',()=>{S.orders=[];ordSync();audit('Orders cleared','Smart Orders','');store();render()},true)}

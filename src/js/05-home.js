@@ -4,7 +4,7 @@
 function vHome(){
   const td=today(),R=ROLE,first=USER.split(' ')[0],m=me();
   const open=S.leads.filter(l=>!['Won','Lost'].includes(l.stage)),pipe=sum(open,l=>l.value),live=S.contracts.filter(c=>c.stage!='Complete'),bal=sum(live,c=>c.value-c.paid),oc=S.calls.filter(c=>c.status!='Complete'),urgent=oc.filter(c=>c.priority=='Urgent').length;
-  const P=products(),low=P.filter(isLow),out=P.filter(r=>r.stock<=0).length,sv=sum(P,r=>r.stock*r.cost),D=S.deliveries.filter(x=>x.status!='Received'),dToday=D.filter(x=>x.due==td&&x.status!='In transit').length,dOver=D.filter(x=>x.due<td&&x.status!='In transit').length;
+  const P=products(),low=P.filter(isLow),out=P.filter(r=>r.stock<=0).length,sv=sum(P,r=>r.stock*r.cost),D=S.deliveries.filter(x=>x.status!='Received'),dToday=D.filter(dDueToday).length,dOver=D.filter(dLate).length;
   const fits=S.contracts.filter(c=>c.fit&&c.stage!='Complete'&&c.fit>=td).sort((a,b)=>a.fit.localeCompare(b.fit)),fitWk=S.contracts.filter(c=>c.fit&&inWeek(c.fit)&&c.stage!='Complete').length;
   const bills=S.fin.filter(b=>b.status=='Unpaid').sort((a,b)=>a.due.localeCompare(b.due)),billsOver=bills.filter(b=>b.due<td),fol=open.filter(l=>l.followup&&l.followup<=td),quoted=S.leads.filter(l=>l.stage=='Quoted').length,won=allLeads().filter(l=>l.stage=='Won').length,lost=allLeads().filter(l=>l.stage=='Lost').length;
   const fort=addDays(14),dueFit=live.filter(c=>c.value-c.paid>0&&c.fit&&c.fit>=td&&c.fit<=fort),dep=S.contracts.filter(c=>c.stage=='Deposit due'),reqP=S.items.filter(r=>r.type=='request'&&r.reqStatus=='Pending').length;
@@ -54,7 +54,7 @@ function dashDraw(){const L=(g,t)=>`<section class="dz"><h3>${t}</h3>${DZ[g].map
 function dashTog(g,x){const k=g+':'+x;DZ.on.has(k)?DZ.on.delete(k):DZ.on.add(k);dashDraw()}
 function dashMv(g,i,d){const a=DZ[g],j=i+d;if(j<0||j>=a.length)return;[a[i],a[j]]=[a[j],a[i]];dashDraw()}
 function dashSave(){LAY[DZ.w].set({k:DZ.k.filter(x=>DZ.on.has('k:'+x)),p:DZ.p.filter(x=>DZ.on.has('p:'+x))});audit('Layout changed',DZ.w=='fl'?'Factory floor':'Overview','');store();closeModal();render();toast('Layout saved')}
-function dashReset(){LAY[DZ.w].reset();store();closeModal();render();toast('Back to the default layout')}
+function dashReset(){LAY[DZ.w].reset();audit('Layout reset',DZ.w,'');store();closeModal();render();toast('Back to the default layout')}
 function bookMine(){const m=me();if(!m){toast('Your name is not in the staff list yet');return}holBook(m.id);if(!ISOWN()){const s=$('#hs');if(s){[...s.options].forEach(o=>{if(o.value!=m.id)o.remove()});s.disabled=true}}}
 const prTag=p=>`<span class="tag ${p=='Urgent'?'r':p=='Normal'?'y':'n'}">${esc(p)}</span>`;
 

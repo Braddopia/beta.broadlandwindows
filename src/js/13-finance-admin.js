@@ -11,6 +11,8 @@ function vFinance(){if(!ISADM())return '<p class="empty">Finance is for administ
   return `<div class="head"><h1>Finance</h1><div class="tools">${F.t=='payables'?'<button class="btn" onclick="editBill()">New bill</button>':''}${F.t=='payroll'&&Own?`<button class="btn" ${A('payAll',mk)}>Pay everyone</button>`:''}</div></div>
   <div class="kpis">${K.map(k=>`<div class="kpi"><small>${k[0]}</small><b>${k[1]}</b></div>`).join('')}</div>
   <div class="chips">${[['debtors','Money owed to us'],['payables','Suppliers & job costs'],['payroll','Employees']].map(([k,t])=>`<button class="chip ${F.t==k?'on':''}" ${A('setUI','fin.t',k)}>${t}</button>`).join('')}${F.t=='payroll'?`<span style="margin-left:auto;display:flex;gap:.4rem;align-items:center"><button class="mini" ${A('setUI','fin.pm',F.pm-1)}>&lsaquo;</button><b>${mo.toLocaleDateString('en-GB',{month:'long',year:'numeric'})}</b><button class="mini" ${A('setUI','fin.pm',F.pm+1)}>&rsaquo;</button></span>`:''}</div>${tabs[F.t]}`}
+/* 'Record payment' on Money owed to us: open the contract on its Finance step with the payment box ready */
+function addPay(id){if(!need(ISADM,'Taking payments'))return;openContract(id);recTab('finance');setTimeout(()=>{if($('#finPay')&&$('#finPay').hidden)payOpen()},80)}
 function payBill(id){if(!need(ISADM,'Paying bills'))return;const b=S.fin.find(x=>x.id==id);b.status='Paid';b.paidOn=today();audit('Bill paid',b.payee,money(b.amount)+' '+b.ref);store();render();toast('Marked as paid')}
 function payStaff(id,mk){if(!need(ISOWN,'Payroll'))return;S.pay[mk]=S.pay[mk]||{};if(S.pay[mk][id])delete S.pay[mk][id];else S.pay[mk][id]=today();audit('Payroll updated',staffName(id),mk);store();render()}
 function payAll(mk){if(!need(ISOWN,'Payroll'))return;S.pay[mk]=S.pay[mk]||{};S.staff.forEach(x=>{S.pay[mk][x.id]=S.pay[mk][x.id]||today()});audit('Payroll paid','Everyone',mk);store();render();toast('Payroll marked as paid')}
@@ -19,7 +21,7 @@ function editBill(id){if(!need(ISADM,'Bills'))return;const b=S.fin.find(x=>x.id=
 
 /* ---------------- admin console ---------------- */
 function vAdmin(){if(!ISOWN())return '';
-  const td=today(),owed=sum(S.contracts,c=>Math.max(0,c.value-c.paid)),bills=S.fin.filter(b=>b.status=='Unpaid'),pr=sum(S.staff,x=>x.salary/12),pend=S.hols.filter(h=>h.status=='Pending'),od=bills.filter(b=>b.due<td),won=S.leads.filter(l=>l.stage=='Won').length,tot=S.leads.length||1,rev=sum(S.contracts,c=>c.value),paid=sum(S.contracts,c=>c.paid),reqs=S.items.filter(r=>r.type=='request'&&r.reqStatus=='Pending');
+  const td=today(),owed=sum(S.contracts,c=>Math.max(0,c.value-c.paid)),bills=S.fin.filter(b=>b.status=='Unpaid'),pr=sum(S.staff,x=>x.salary/12),pend=S.hols.filter(h=>h.status=='Pending'),od=bills.filter(b=>b.due<td),won=allLeads().filter(l=>l.stage=='Won').length,lost=allLeads().filter(l=>l.stage=='Lost').length,tot=(won+lost)||1,rev=sum(S.contracts,c=>c.value),paid=sum(S.contracts,c=>c.paid),reqs=S.items.filter(r=>r.type=='request'&&r.reqStatus=='Pending');
   let size=storeSize||JSON.stringify(S).length;
   const ph=Object.values(S.pphotos).reduce((a,x)=>a+x.length,0),defPins=Object.entries(S.sec.pins).filter(([,p])=>p.def).map(([k])=>ROLES[k].n);
   const AU=UI.audit,pg=paginate(AU,S.audit.filter(hit));

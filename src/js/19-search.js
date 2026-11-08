@@ -15,12 +15,12 @@ function srchText(o,d=0){if(o==null||d>3)return'';if(typeof o!='object')return t
 function srchMatch(txt,query){const t=txt.toLowerCase(),td=t.replace(/[\s()-]/g,'');
   return query.split(/\s+/).filter(Boolean).every(w=>t.includes(w)||(/^[\d+]{4,}$/.test(w)&&td.includes(w)))}
 const SRCH=[
-  ['leads','Leads',()=>allLeads(),l=>[l.name||'Lead '+l.id,['Lead '+l.id,l.stage,l.town,l.postcode||l.pc].filter(Boolean).join(' · ')],l=>openLead(l.id)],
+  ['leads','Leads',()=>allLeads(),l=>[l.name||'Lead '+l.id,['Lead '+l.id,l.stage,l.town,l.homePc].filter(Boolean).join(' · ')],l=>{const a=(S.leadArchive||[]).find(x=>x.id==l.id&&x.convertedTo);if(a&&!S.leads.some(x=>x.id==l.id))openContract(a.convertedTo);else openLead(l.id)}],
   ['contracts','Contracts',()=>S.contracts,c=>[c.name||'Contract '+c.id,['Contract '+c.id,c.stage,c.town].filter(Boolean).join(' · ')],c=>openContract(c.id)],
   ['service','Service Calls',()=>S.calls,c=>[c.name||c.id,[c.id,c.issue,c.status].filter(Boolean).join(' · ')],c=>editCall(c.id)],
   ['contacts','Contact Book',()=>S.contacts,c=>[c.co||c.name,[c.co?c.name:'',c.type,c.phone].filter(Boolean).join(' · ')],c=>editContact(c.id)],
   ['suppliers','Suppliers',()=>S.suppliers.map((x,i)=>({...x,_i:i})),x=>[x.name,[x.account,x.contact,x.phone].filter(Boolean).join(' · ')],x=>editSup(x._i)],
-  ['stock','Inventory',()=>products(),r=>[r.item||r.pid,['Stock ID '+r.pid,r.supplier,r.loc].filter(Boolean).join(' · ')],r=>viewItem(r.pid)],
+  ['stock','Inventory',()=>products(),r=>[r.item||r.pid,['Stock ID '+r.pid,r.supplier,r.location].filter(Boolean).join(' · ')],r=>viewItem(r.pid)],
   ['staff','Staff',()=>S.staff,s=>[s.name,[s.role,s.team].filter(Boolean).join(' · ')],s=>editStaff(s.id)],
   ['downloads','Files And Manuals',()=>{const H=S.fileHide||{};return[...DL.filter(d=>!H[d.url]).map(d=>({t:d.title,s:'Brochure · '+d.cat,u:d.url})),...SSM.filter(m=>!H[m.u]).map(m=>({t:m.t,s:'Manual · '+m.f,u:m.u})),...MF.filter(f=>!/^brand asset$/i.test(f.cat)).map(f=>({t:f.name,s:'File · '+tc(f.cat),id:f.id}))]},
     f=>[f.t,f.s],f=>{if(f.id){manOpen(f.id);return}const u=SAFE.url(f.u);if(u)window.open(u,'_blank','noopener,noreferrer')}]];
@@ -61,7 +61,7 @@ function recFind(q,kinds){q=String(q||'').trim().toLowerCase();if(!q)return[];co
   if(kinds.includes('l')&&canSee('leads'))S.leads.forEach(l=>{if(String(l.id).toLowerCase()==q||srchMatch(srchText(l),q))o.push({k:'l',r:l,id:l.id,n:l.name||'Lead '+l.id,x:String(l.id).toLowerCase()==q})});
   if(kinds.includes('k')&&canSee('contacts'))S.contacts.forEach(c=>{if(srchMatch(srchText(c),q))o.push({k:'k',r:c,id:c.id,n:c.co||c.name})});
   return o.sort((a,b)=>(b.x?1:0)-(a.x?1:0)).slice(0,5)}
-function cmdSmart(query){const out=[],m=(re)=>query.match(re);let x;
+function cmdSmart(query){const out=[],m=re=>query.match(new RegExp(re.source,'i'));let x;
   if((x=m(/^(?:pay|payment|take payment|paid)\s+£?(\d+(?:\.\d{1,2})?)\s+(.+)$/))&&ISADM()){const amt=SAFE.num(x[1],{max:1e7});recFind(x[2],'c').forEach(f=>out.push(['Record '+money(amt)+' Payment On '+f.id,f.n+' · balance '+money((+f.r.value||0)-(+f.r.paid||0)),()=>quickPay(f.id,amt),IC.finance]))}
   else if((x=m(/^(?:pay|payment|take payment)\s+(.+)$/))&&ISADM())recFind(x[1],'c').forEach(f=>out.push(['Take A Payment On '+f.id,f.n+' · balance '+money((+f.r.value||0)-(+f.r.paid||0)),()=>{openContract(f.id);recTab('finance');setTimeout(payOpen,80)},IC.finance]));
   if((x=m(/^(?:call|ring|phone)\s+(.+)$/)))recFind(x[1],'clk').forEach(f=>{const n=f.k=='k'?f.r.phone:telOf(f.r);if(n)out.push(['Call '+f.n,n,()=>{location.href='tel:'+String(n).replace(/[^\d+]/g,'')},'M5 4h4l2 5-2.5 1.5a11 11 0 005 5L15 13l5 2v4a2 2 0 01-2 2A16 16 0 013 6a2 2 0 012-2'])});
@@ -69,13 +69,14 @@ function cmdSmart(query){const out=[],m=(re)=>query.match(re);let x;
   if((x=m(/^(?:mark\s+)?(won|lost)\s+(.+)$/)))recFind(x[2],'l').forEach(f=>out.push(['Mark '+f.id+' As '+tc(x[1]),f.n+' · now '+(f.r.stage||'New'),()=>leadQuick(f.id,tc(x[1])),x[1]=='won'?'M5 12l5 5L20 7':'M6 6l12 12M18 6L6 18']));
   if((x=m(/^note\s+(\S+)\s+(.{2,})$/)))recFind(x[1],'cl').filter(f=>f.x).forEach(f=>out.push(['Add Note To '+f.id,'“'+x[2].slice(0,60)+'”',()=>noteQuick(f.k,f.id,x[2]),IC.edit]));
   return out}
-function quickPay(id,amt){if(!need(ISADM,'Taking payments'))return;const c=S.contracts.find(x=>x.id==id);if(!c||!(amt>0))return;
+const recIsOpen=id=>RW&&$('#modal').classList.contains('open')&&String(RW.id)==String(id);
+function quickPay(id,amt){if(!need(ISADM,'Taking payments'))return;if(recIsOpen(id)){toast('That contract is open. Use its Finance step, or close it first');return}const c=S.contracts.find(x=>x.id==id);if(!c||!(amt>0))return;
   askIn('Record a '+money(amt)+' payment?','On contract '+id+(c.name?' ('+c.name+')':'')+'.','Record Payment',()=>quickPayGo(id,amt))}
 function quickPayGo(id,amt){const c=S.contracts.find(x=>x.id==id);if(!c||!need(ISADM,'Taking payments'))return;c.pay=c.pay||[];c.pay.push({amt,date:today(),method:'Bank transfer',kind:(+c.paid||0)?'Stage payment':'Deposit',ref:'From search',by:USER});
   c.paid=Math.round(((+c.paid||0)+amt)*100)/100;audit('Payment recorded',id,money(amt));store();render(true);toast(money(amt)+' recorded on '+id+'. Balance now '+money((+c.value||0)-c.paid)+'.')}
-function leadQuick(id,st){const l=S.leads.find(x=>x.id==id);if(!l)return;const a=l.stage;if(a==st){toast(id+' is already '+st);return}l.stage=st;l.prob=st=='Won'?100:0;l.log=l.log||[];l.log.unshift({d:today(),t:'Stage: '+(a||'New')+' to '+st,by:USER});
+function leadQuick(id,st){const l=S.leads.find(x=>x.id==id);if(!l)return;if(recIsOpen(id)){toast('That lead is open. Use the stage bar in it, or close it first');return}const a=l.stage;if(a==st){toast(id+' is already '+st);return}l.stage=st;l.prob=st=='Won'?100:0;l.log=l.log||[];l.log.unshift({d:today(),t:'Stage: '+(a||'New')+' to '+st,by:USER});
   audit('Lead edited',id,'Stage '+st);store();render(true);toast(id+' marked as '+st)}
-function noteQuick(k,id,txt){const r=(k=='c'?S.contracts:S.leads).find(x=>x.id==id);txt=SAFE.text(txt,300);if(!r||!txt)return;r.log=r.log||[];r.log.unshift({t:'Note',n:txt,by:USER,at:today()});audit('Note added',id,txt.slice(0,60));store();render(true);toast('Note added to '+id)}
+function noteQuick(k,id,txt){if(recIsOpen(id)){toast('That record is open. Add the note in it, or close it first');return}const r=(k=='c'?S.contracts:S.leads).find(x=>x.id==id);txt=SAFE.text(txt,300);if(!r||!txt)return;r.log=r.log||[];r.log.unshift({t:'Note',n:txt,by:USER,at:today()});audit('Note added',id,txt.slice(0,60));store();render(true);toast('Note added to '+id)}
 function cmdkSet(v){cmdk(true);setTimeout(()=>{const ci=$('#cq');if(ci){ci.value=v;cmdkRun(v);ci.focus()}},30)}
 /* uploaded files live in the browser database: read them once so they can be found from any page */
 function srchFiles(){if(srchFiles.done||MF.length)return;srchFiles.done=1;try{fx('readonly',s=>s.getAll()).then(r=>{MF=(r||[]).filter(f=>!f.ref).sort((x,y)=>y.time-x.time)}).catch(()=>{})}catch(e){}}
@@ -83,7 +84,7 @@ function srchFiles(){if(srchFiles.done||MF.length)return;srchFiles.done=1;try{fx
 /* one search engine for the top bar list and the big Ctrl+K box */
 function srchBuild(raw,big){const RUN=[],grp=[],q0=String(raw||'').trim().toLowerCase(),cmdOnly=q0.startsWith('>'),query=cmdOnly?q0.slice(1).trim():q0;
   const row=(t,s,fn,ic)=>{const i=RUN.length;RUN.push(fn);return `<button type="button" class="sri" data-i="${i}" role="option">${ic?`<span class="sri-ic">${svg(ic)}</span>`:''}<span class="sri-t"><b>${esc(tc(String(t||'')))}</b>${s?`<small>${esc(s)}</small>`:''}</span></button>`};
-  const SM=cmdOnly?[]:cmdSmart(query);if(SM.length)grp.push(`<div class="srg">Do It Now<span>${SM.length}</span></div>`+SM.map(s=>row(s[0],s[1],s[2],s[3])).join(''));
+  const SM=cmdOnly?[]:cmdSmart(String(raw||'').trim());if(SM.length)grp.push(`<div class="srg">Do It Now<span>${SM.length}</span></div>`+SM.map(s=>row(s[0],s[1],s[2],s[3])).join(''));
   const C=CMDS().filter(c=>!query||srchMatch(c[0]+' '+c[1],query));
   if(cmdOnly||(big&&!query)||(query.length>=2&&C.length)){const L=(cmdOnly||!query)?C:C.slice(0,4);
     if(L.length)grp.push(`<div class="srg">Actions<span>${L.length}</span></div>`+L.map(c=>row(c[0],'',c[2],/^New|^Add|^Request|^Book/.test(c[0])?IC.plus:/^Go To/.test(c[0])?'M5 12h14M13 6l6 6-6 6':/^Scan/.test(c[0])?IC.scan:'M12 3v3M12 18v3M3 12h3M18 12h3')).join(''))}

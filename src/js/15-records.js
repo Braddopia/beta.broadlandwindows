@@ -14,15 +14,15 @@ const staffNames=()=>['',...new Set(S.staff.map(s=>s.name))];
 
 /* ---- customer information: same fields on leads and contracts ---- */
 const CUSTF=[
-  {k:'title',l:'Title',t:'select',o:['','Mr','Mrs','Miss','Ms','Mr & Mrs','Dr','Company'],req:1,g:'Customer'},
+  {k:'title',l:'Title',t:'select',o:['','Mr','Mrs','Miss','Ms','Mr & Mrs','Dr','Company'],g:'Customer'},
   {k:'name',l:'Customer / contact name',req:1,g:'Customer'},{k:'salutation',adv:1,l:'Letters start "Dear ..."',g:'Customer'},{k:'company',adv:1,l:'Company (if a business)',g:'Customer'},
   {k:'prefContact',l:'Best way to contact them',t:'select',o:['','Mobile','Home phone','Work phone','Email','Post'],g:'Customer'},
   {k:'mob1',l:'Mobile',t:'tel',max:30,g:'Phone Numbers',any:1},{k:'mob2',nx:'mob1',l:'Mobile 2',t:'tel',max:30,g:'Phone Numbers'},{k:'mob3',nx:'mob2',l:'Mobile 3',t:'tel',max:30,g:'Phone Numbers'},
   {k:'home1',l:'Home phone',t:'tel',max:30,g:'Phone Numbers',any:1},{k:'home2',nx:'home1',l:'Home phone 2',t:'tel',max:30,g:'Phone Numbers'},{k:'home3',nx:'home2',l:'Home phone 3',t:'tel',max:30,g:'Phone Numbers'},
   {k:'work',l:'Work phone',t:'tel',max:30,g:'Phone Numbers',any:1},{k:'work2',nx:'work',l:'Work phone 2',t:'tel',max:30,g:'Phone Numbers'},{k:'work3',nx:'work2',l:'Work phone 3',t:'tel',max:30,g:'Phone Numbers'},
-  {k:'email1',l:'Email',t:'email',req:1,g:'Email'},{k:'email2',nx:'email1',l:'Email 2',t:'email',g:'Email'},{k:'email3',nx:'email2',l:'Email 3',t:'email',g:'Email'},
-  {k:'addrType',l:'Address type',t:'select',o:['','Home','Business'],req:1,g:'Home Address'},{k:'homeAddr',l:'Address line 1',req:1,max:120,g:'Home Address'},{k:'homeAddr2',l:'Address line 2',max:120,g:'Home Address'},
-  {k:'town',l:'Town / city',req:1,max:60,g:'Home Address'},{k:'county',adv:1,l:'County',max:60,g:'Home Address'},{k:'homePc',l:'Postcode',req:1,max:10,g:'Home Address'},
+  {k:'email1',l:'Email',t:'email',g:'Email'},{k:'email2',nx:'email1',l:'Email 2',t:'email',g:'Email'},{k:'email3',nx:'email2',l:'Email 3',t:'email',g:'Email'},
+  {k:'addrType',l:'Address type',t:'select',o:['','Home','Business'],g:'Home Address'},{k:'homeAddr',l:'Address line 1',max:120,g:'Home Address'},{k:'homeAddr2',l:'Address line 2',max:120,g:'Home Address'},
+  {k:'town',l:'Town / city',max:60,g:'Home Address'},{k:'county',adv:1,l:'County',max:60,g:'Home Address'},{k:'homePc',l:'Postcode',max:10,g:'Home Address'},
   {k:'invSame',l:'Send the invoice to',t:'select',o:['Same as home','Different'],g:'Invoice Address'},{k:'invAddr',dep:'invSame',l:'Address line 1',max:120,g:'Invoice Address'},{k:'invAddr2',dep:'invSame',l:'Address line 2',max:120,g:'Invoice Address'},
   {k:'invTown',dep:'invSame',l:'Town / city',max:60,g:'Invoice Address'},{k:'invCounty',dep:'invSame',adv:1,l:'County',max:60,g:'Invoice Address'},{k:'invPc',dep:'invSame',l:'Postcode',max:10,g:'Invoice Address'},
   {k:'siteSame',l:'Where the work is',t:'select',o:['Same as home','Different'],g:'Site Address'},{k:'siteAddr',dep:'siteSame',l:'Address line 1',max:120,g:'Site Address'},{k:'siteAddr2',dep:'siteSame',l:'Address line 2',max:120,g:'Site Address'},
@@ -177,7 +177,6 @@ function stgSet(st){if(!RW)return;const e=$('#f_stage'),cur=stgCur();if(!e||st==
   askIn(st=='Won'?'Mark this lead as won?':bad?'Mark this lead as lost?':'Move this '+lab+' to '+nm+'?',st=='Won'?'Next you can turn it into a contract. It is saved straight away.':bad?'You can reopen it later if they come back. It is saved straight away.':'It is saved straight away.',st=='Won'?'Yes, Won':bad?'Yes, Lost':'Move To '+nm,()=>stgGo(st,cur,nm),bad)}
 function stgGo(st,cur,nm){const e=$('#f_stage');if(!RW||!e)return;
   e.value=st;e.dispatchEvent(new Event('change',{bubbles:true}));
-  if(RW.kind=='contract')RW.v.log.unshift({t:'Stage',n:(cur||'-')+' to '+st,by:USER,at:today()});
   if(st=='Won'||st=='Lost'){const p=$('#f_prob');if(p)p.value=st=='Won'?100:0}
   if(recSave(false))setTimeout(()=>{const s=$('#rwStg .path li.on');if(s)s.classList.add('pop');toast('Moved to '+nm)},60);else stgDraw()}
 /* activity: a timeline you can open or close, remembered per browser */
@@ -200,7 +199,7 @@ function recRead(){const D=REC[RW.kind],o=readFields(D.fields(RW));if(!o)return 
   const at={...(RW.v.chkAt||{})};$$('#mbox .rck').forEach(c=>{const k=c.dataset.k;(o.chk=o.chk||{})[k]=c.checked;if(c.checked&&!at[k])at[k]={d:today(),by:USER};if(!c.checked)delete at[k]});o.chkAt=at;
   o.phTags=(RW.v.phTags||[]).slice(0,MAX_PHOTOS);if($('#mbox .pl'))o.lines=readLines();if($('#mbox .op')||RW.v.openings)o.openings=$('#mbox .op')?readOps():RW.v.openings;o.photos=tmp.slice(0,MAX_PHOTOS);return o}
 function recSave(close){busyBtn($('#mbox .rw-bar .sv'));RW.closeAfter=close;const D=REC[RW.kind],o=recRead();if(!o){const a=document.activeElement,p=a&&a.closest&&a.closest('.rw-p');if(p&&!p.classList.contains('on')){recTab(p.dataset.t);setTimeout(()=>a.focus(),30)}return false}const e=D.check&&D.check(RW,o);if(e=='ASK')return false;if(e){toast(e.replace(/ \(.*step\)$/,''));if(/Customer step/.test(e)){recTab('customer');if(/phone/i.test(e)){const f=$('#f_mob1')||$('#f_home1');if(f)fieldErr(f,'Fill in at least one phone number')}else if(/name/i.test(e)){const f=$('#f_name');if(f)fieldErr(f,'Type the customer name')}}return false}
-  const id=D.save(RW,o);store();if(close){closeModal();render()}else{render();recOpen(RW.kind,id)}toast('Saved');return true}
+  const id=D.save(RW,o);if(id==null){toast('This record no longer exists. It may have been deleted on another screen.');return false}store();if(close){closeModal();render()}else{render();recOpen(RW.kind,id)}toast('Saved');return true}
 function recNav(d){const L=RW.list,i=L.indexOf(RW.id),n=d=='first'?0:d=='last'?L.length-1:i+d;if(n<0||n>=L.length)return;const kind=RW.kind;if(RW.dirty&&!recSave(false))return;recOpen(kind,L[n])}
 /* small inline lists inside a record */
 function recAdd(list,fs,tab){const o={};for(const k of fs){const e=$('#ra_'+k);o[k]=e?SAFE.text(e.value,300):''}if(!Object.values(o).some(Boolean)){toast('Fill in the details first');return}
@@ -299,8 +298,8 @@ function apptSend(i,how){const a=apptGet(i),c=apptCust();if(!a.d){toast('Set the
   if(how=='email'){if(!c.em){toast('Add the customer email on the Customer step');return}location.href='mailto:'+encodeURIComponent(c.em)+'?subject='+encodeURIComponent('Your Broadland Windows appointment, '+apptWhen(a))+'&body='+encodeURIComponent(txt+'\n\nKind regards,\nBroadland Windows')}
   else if(how=='sms'){if(!c.mob){toast('Add a mobile number on the Customer step');return}location.href='sms:'+c.mob.replace(/[^\d+]/g,'')+'?&body='+encodeURIComponent(txt)}
   else if(how=='copy')copyText(txt);
-  else if(how=='ics'){const p=n=>String(n).padStart(2,'0'),d=a.d.replace(/-/g,''),tm=(a.tm||'09:00').replace(':','')+'00',e=new Date(a.d+'T'+(a.tm||'09:00'));e.setHours(e.getHours()+1);const end=d+'T'+p(e.getHours())+p(e.getMinutes())+'00';
-    const ics=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Broadland Windows//CRM//EN','BEGIN:VEVENT','UID:'+uuid()+'@broadland-crm','DTSTAMP:'+new Date().toISOString().replace(/[-:]/g,'').slice(0,15)+'Z','DTSTART:'+d+'T'+tm,'DTEND:'+end,'SUMMARY:'+(a.ty||'Appointment')+': '+c.nm,'LOCATION:'+c.addr.replace(/[,;]/g,'\\$&'),'DESCRIPTION:'+(a.w?'With '+a.w:''),'END:VEVENT','END:VCALENDAR'].join('\r\n');
+  else if(how=='ics'){const p=n=>String(n).padStart(2,'0'),d=a.d.replace(/-/g,''),tm=(a.tm||'09:00').replace(':','')+'00',e=new Date(a.d+'T'+(a.tm||'09:00'));e.setHours(e.getHours()+1);const end=iso(e).replace(/-/g,'')+'T'+p(e.getHours())+p(e.getMinutes())+'00',ix=s=>String(s||'').replace(/[\\,;]/g,'\\$&').replace(/\n/g,'\\n');
+    const ics=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Broadland Windows//CRM//EN','BEGIN:VEVENT','UID:'+uuid()+'@broadland-crm','DTSTAMP:'+new Date().toISOString().replace(/[-:]/g,'').slice(0,15)+'Z','DTSTART:'+d+'T'+tm,'DTEND:'+end,'SUMMARY:'+ix((a.ty||'Appointment')+': '+c.nm),'LOCATION:'+ix(c.addr),'DESCRIPTION:'+ix(a.w?'With '+a.w:''),'END:VEVENT','END:VCALENDAR'].join('\r\n');
     download('appointment-'+a.d+'.ics',new Blob([ics],{type:'text/calendar'}))}
   if(how!='copy'){(RW.v.log=RW.v.log||[]).unshift({d:today(),t:how=='ics'?'Calendar file made':how=='sms'?'Text reminder':'Email reminder',n:(a.ty||'')+' '+apptWhen(a),by:USER});RW.dirty=1;recRedraw('notes')}}
 const apptBtns=i=>`<div class="apb"><button type="button" class="mini pri" ${A('apptSend',i,'email')}>Email reminder</button><button type="button" class="mini" ${A('apptSend',i,'sms')}>Text reminder</button><button type="button" class="mini" ${A('apptSend',i,'ics')}>Add to calendar</button><button type="button" class="mini" ${A('apptSend',i,'copy')}>Copy</button></div>`;
@@ -345,7 +344,7 @@ const CFITF=()=>[{k:'survey',l:'Survey date',t:'date',g:'Dates'},{k:'order',l:'O
   {k:'winCount',l:'Window count',t:'number',dp:0,g:'Info For FENSA'},{k:'doorCount',l:'Door count',t:'number',dp:0,g:'Info For FENSA'},{k:'conservatory',l:'Conservatory',t:'select',o:YN,g:'Info For FENSA'},{k:'roofline',l:'Roofline',t:'select',o:YN,g:'Info For FENSA'},{k:'fensaExported',l:'Exported to FENSA',t:'select',o:YN,g:'Info For FENSA'},{k:'fensaNA',l:'FENSA not required',t:'select',o:YN,g:'Info For FENSA'}];
 REC.contract={label:'Contract',
   get:id=>S.contracts.find(c=>c.id==id),order:()=>ctrList().map(c=>c.id),
-  blank:()=>({id:nid('C',S.contracts),cdate:today(),stage:'Deposit due',fitter:'',vatRate:String(CO.vat??'20'),contractType:CTYPES[0],soldBy:USER,createdBy:USER,invSame:'Same as home',siteSame:'Same as home',addrType:'Home',pay:[],chk:{},lines:[],log:[]}),
+  blank:()=>({id:nid('C',S.contracts),cdate:today(),stage:'Deposit due',value:0,paid:0,fitter:'',vatRate:String(CO.vat??'20'),contractType:CTYPES[0],soldBy:USER,createdBy:USER,invSame:'Same as home',siteSame:'Same as home',addrType:'Home',pay:[],chk:{},lines:[],log:[]}),
   heading:W=>`${W.v.id}  ${[W.v.title,W.v.name].filter(Boolean).join(' ')||'New contract'}${W.v.company?' · '+W.v.company:''}`,
   headStats:W=>`${W.v.flash?`<span class="flash">${esc(W.v.flash)}</span>`:''}<span><small>Value</small><b>${m0(W.v.value)}</b></span><span><small>Paid</small><b>${m0(W.v.paid)}</b></span><span class="${(+W.v.value||0)-(+W.v.paid||0)>0?'hk-due':'hk-ok'}"><small>Outstanding</small><b>${(+W.v.value||0)-(+W.v.paid||0)>0?m0((+W.v.value||0)-(+W.v.paid||0)):'Paid'}</b></span><span><small>Fit</small><b>${W.v.fit?fd(W.v.fit):'-'}</b></span>`,
   actions:W=>`<button class="rb1" ${A('reportContract',W.id)}>${svg(IC.reports)}Reports</button><button class="rb1" ${A('recCall')}>${svg(IC.service)}Service call</button>${ISOWN()?`<button class="rb1 dl" ${A('del','contracts',W.id)}>${svg('M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3')}Delete</button>`:''}`,
@@ -365,7 +364,7 @@ REC.contract={label:'Contract',
     {k:'gdpr',t:'GDPR',h:W=>`<div class="rcols">${grpH('Marketing Consent',GDPRF,W.v)}</div>`}]},
   check:(W,o)=>{if(!o.name)return 'Customer name is needed (Customer step)';if(!PHONES.some(k=>o[k]))return 'Add at least one phone number (Customer step)';if(o.paid>o.value&&o.value>0&&!W.okOver){askIn('Paid is more than the contract value','Save it anyway?','Save Anyway',()=>{W.okOver=1;recSave(W.closeAfter)});return 'ASK'}},
   save:(W,o)=>{const isNew=W.isNew,c=isNew?{id:W.v.id}:S.contracts.find(x=>x.id==W.id);if(!c)return;delete o.id;delete o.lead;delete o.createdBy;
-    const np=(W.v.pay||[]).length-((c.pay||[]).length);if(np>0)audit('Payment recorded',c.id||W.v.id,np+' payment'+(np>1?'s':'')+', '+money(sum((W.v.pay||[]).slice(-np),x=>x.amt)));if(!ISADM())delete o.cost;Object.assign(c,o,{pay:W.v.pay||[],log:W.v.log||[],createdBy:c.createdBy||W.v.createdBy||USER});c.fitter=[1,2,3,4,5,6].map(i=>c['fitter'+i]).filter(Boolean).join(', ');if(isNew){if(S.contracts.some(x=>x.id==c.id))c.id=nid('C',S.contracts);S.contracts.unshift(c)}
+    const np=(W.v.pay||[]).length-((c.pay||[]).length),dp=Math.round(((+o.paid||0)-(+c.paid||0))*100)/100,a0=c.stage;if(np>0)audit('Payment recorded',c.id||W.v.id,np+' payment'+(np>1?'s':'')+', '+money(sum((W.v.pay||[]).slice(-np),x=>x.amt)));else if(o.paid!==undefined&&dp)audit(dp>0?'Paid amount raised':'Payment removed',c.id||W.v.id,money(Math.abs(dp)));if(!ISADM())delete o.cost;Object.assign(c,o,{pay:W.v.pay||[],log:W.v.log||[],createdBy:c.createdBy||W.v.createdBy||USER});c.fitter=[1,2,3,4,5,6].map(i=>c['fitter'+i]).filter(Boolean).join(', ');c.paid=+c.paid||0;c.value=+c.value||0;if(!isNew&&a0&&c.stage&&a0!=c.stage)(c.log=c.log||[]).unshift({t:'Stage',n:a0+' to '+c.stage,by:USER,at:today()});if(isNew){if(S.contracts.some(x=>x.id==c.id))c.id=nid('C',S.contracts);S.contracts.unshift(c)}
     custCompat(c);audit(isNew?'Contract added':'Contract edited',c.id,c.name);return c.id}};
 /* ---- finance step: balance at a glance, then Make A Payment ---- */
 const PAYM=['Bank transfer','Card','Cheque','Cash','Finance'],PAYK=['Deposit','Stage payment','Final balance','Other'];
@@ -386,7 +385,7 @@ function finSum(){const el=$('#finSum');if(!el||!RW)return;const n=finNums(),pc=
   const depLeft=Math.max(0,n.dep-n.paid),late=d=>d&&d<td;
   const st=!n.val?['No contract value yet','']:n.bal<=0?['Paid in full','g']:late(n.balDue)?['Balance overdue','r']:depLeft>0&&late(n.depDue)?['Deposit overdue','r']:depLeft>0?['Deposit to collect','y']:['Balance to collect','y'];
   const h=`<div class="fin-top"><div class="fin-big"><small>Outstanding Balance</small><b>${money(Math.max(0,n.bal))}</b><span class="tag ${st[1]}">${esc(st[0])}</span></div>
-   <div class="fin-act"><button type="button" class="btn green fin-pb" ${adm?'onclick="payOpen()"':'disabled title="Only administrators can take payments"'}>${svg(adm?IC.plus:IC.lock)}Make A Payment</button>${RW.isNew?'':`<button type="button" class="btn ghost" ${A('reportContract',RW.id)}>${svg(IC.reports)}Invoice Or Receipt</button>`}</div></div>
+   <div class="fin-act"><button type="button" class="btn green fin-pb" ${adm?'onclick="payOpen()"':'disabled title="Only administrators can take payments"'}>${svg(adm?IC.plus:IC.lock)}Make A Payment</button>${RW.isNew?'':`<button type="button" class="btn ghost" ${A('invoicePrint',RW.id)}>${svg(IC.reports)}Print Invoice</button>`}</div></div>
    <div class="fin-bar" role="progressbar" aria-valuenow="${pc}" aria-valuemin="0" aria-valuemax="100"><i style="width:${pc}%"></i></div><small class="muted">${money(n.paid)} paid of ${money(n.val)} (${pc}%)</small>
    <dl class="fin-g"><div><dt>Contract Value</dt><dd>${money(n.val)}</dd></div><div><dt>VAT At ${n.rate}%</dt><dd>${money(n.vat)}</dd></div><div><dt>Before VAT</dt><dd>${money(n.net)}</dd></div>
     <div><dt>Deposit</dt><dd>${n.dep?money(n.dep)+(depLeft>0?'':' ✓'):'-'}${n.depDue?`<small>by ${fd(n.depDue)}</small>`:''}</dd></div><div><dt>Balance Due</dt><dd>${n.balDue?fd(n.balDue):'-'}</dd></div></dl>`;

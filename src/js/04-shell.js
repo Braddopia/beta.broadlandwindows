@@ -106,7 +106,7 @@ function askIn(title,msg,okLabel,cb,danger){if(ASKI)ASKI.remove();const o=docume
   document.addEventListener('keydown',key,true);ASKI=o;document.body.appendChild(o);o.querySelector('[data-a="1"]').focus()}
 function askNo(){const f=ASK_NO;ASK=ASK_NO=null;closeModal();if(f)f()}
 function askGo(){const f=ASK;ASK=null;closeModal();if(f)f()}
-function closeModal(){$('#modal').classList.remove('open');const a=document.activeElement;if(a&&a!==document.body&&!a.closest('#modal'))a.blur()}
+function closeModal(){$('#modal').classList.remove('open');if(typeof syncPend!='undefined'&&syncPend)setTimeout(syncPull,0);const a=document.activeElement;if(a&&a!==document.body&&!a.closest('#modal'))a.blur()}
 $('#modal').addEventListener('mousedown',e=>{if(e.target.id=='modal')closeModal()});
 
 /* update the page in place: only the parts that changed are replaced, so glass panels are not rebuilt */
@@ -242,7 +242,7 @@ function sbSync(){$('#sb').classList.toggle('has',!!$('#q').value)}
   $('#nwm').onclick=e=>{const b=e.target.closest('button');if(!b)return;({lead:()=>editLead(),call:()=>editCall(),contact:()=>editContact(),stock:()=>{go('stock');stockForm('add')},request:()=>{go('stock');stockForm('request')},hol:()=>holBook(),doc:()=>docOpen('guarantee'),files:()=>go('downloads')})[b.dataset.a]()};
   $('#manualGo').onclick=()=>got($('#manual').value);$('#manual').onkeydown=e=>{if(e.key=='Enter')got(e.target.value)};$('#scanClose').onclick=stopScan;
   document.addEventListener('keydown',e=>{
-    if(e.key=='Escape'){closeModal();stopScan();ncToggle(false);closeFpop();document.body.classList.remove('sopen');if(document.body.classList.contains('tv'))toggleTV()}
+    if(e.key=='Escape'){if(typeof ASKI!='undefined'&&ASKI)return;if($('#modal.open .rw')&&RW&&RW.dirty){if(!$('#rwAsk'))recClose();return}closeModal();stopScan();ncToggle(false);closeFpop();document.body.classList.remove('sopen');if(document.body.classList.contains('tv'))toggleTV()}
     if((e.key=='Enter'||e.key==' ')&&e.target.dataset&&e.target.dataset.rc){e.preventDefault();e.target.click()}
     if(e.key=='/'&&!/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)&&!$('.ov.open')){e.preventDefault();$('#q').focus()}});
 })();

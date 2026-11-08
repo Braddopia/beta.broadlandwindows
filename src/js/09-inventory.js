@@ -13,6 +13,7 @@ const products=()=>{const m=new Map();S.items.forEach(r=>{if(!m.has(r.pid))m.set
 const prodRows=k=>S.items.filter(x=>x.pid==k);
 const prod=k=>S.items.find(x=>x.pid==k);
 const ro=r=>r.reorder==null||r.reorder===''?LOW:+r.reorder||0;
+const reorderQty=r=>+r.reorderQty||Math.max(ro(r)*2-r.stock,1);
 const isLow=r=>r.stock<ro(r);
 const hasLoc=r=>r.location&&r.location!='-';
 const unitOf=r=>UNITS.includes(r.unit)?r.unit:'Each';
@@ -48,7 +49,7 @@ function vProducts(tog){
   ${n?`<div class="selbar"><b>${n} Selected</b><button class="mini pri" ${A('invBatch','add')}>Add Stock</button><button class="mini" ${A('invBatch','remove')}>Remove Stock</button><button class="mini" ${A('invSetF','location')}>Set Location</button><button class="mini" ${A('invSetF','supplier')}>Set Supplier</button><button class="mini" ${A('invSetF','unit')}>Set Unit</button><button class="mini" onclick="invRep()">Report</button><button class="mini" onclick="invLabels()">Labels</button><button class="mini" ${A('invCsv',1)}>Export</button>${ISOWN()?'<button class="mini del" onclick="invDel()">Delete</button>':''}<button class="mini" onclick="SEL.clear();render()">Clear</button></div>`:''}
   <div class="tw"><table class="ptb"><thead><tr><th><input type="checkbox" aria-label="Select all on this page" ${pg.rows.length&&pg.rows.every(r=>SEL.has(key(r)))?'checked':''} ${AC('onchange','invAll','this.checked')}></th>${thS('inv','pid','ID')}${thS('inv','item','Item')}${thS('inv','length','Length','c-sm')}${thS('inv','colours','Colours','c-md')}${thS('inv','unit','Unit')}${thS('inv','location','Location','c-md')}${thS('inv','stock','Stock','n')}${thS('inv','supplier','Supplier','c-sm')}${thS('inv','cost','Cost','n c-sm')}${Ad?thS('inv','value','Value','n c-md'):''}<th class="ac"><span class="srt" ${A('sortBy','inv','status')} style="cursor:pointer;margin-right:.5rem">Status${UI.inv.sort=='status'?`<span class="ar">${UI.inv.dir>0?'▲':'▼'}</span>`:''}</span><button class="fbtn ${filtersOn?'on':''}" id="invF" title="Sort and filter" aria-label="Sort and filter" onclick="invFilter(this)">${svg(IC.filter)}</button></th></tr></thead><tbody>${rows||`<tr><td colspan="14" class="empty">${emptyArt('stock','No products match.')}</td></tr>`}</tbody></table></div>
   ${pagerH('inv',pg,'products')}
-  <div class="two" style="margin-top:1.1rem"><div class="panel"><h2>Reorder List</h2>${need.slice(0,8).map(r=>`<div class="row"><span><b>${esc(r.item)}</b> <span class="muted">${esc(r.supplier||'No supplier')}</span><br><span class="muted">${r.stock} ${esc(unitOf(r))} left, suggest ${r.reorderQty||Math.max(LOW*2-r.stock,LOW)}</span></span><button class="mini pri" ${A('stockForm','request',r.pid)}>Request</button></div>`).join('')||'<p class="empty">Nothing needs reordering.</p>'}${need.length>8?`<p class="muted">+${need.length-8} more, use the Low filter.</p>`:''}</div>${suppliersPanel()}</div>`}
+  <div class="two" style="margin-top:1.1rem"><div class="panel"><h2>Reorder List</h2>${need.slice(0,8).map(r=>`<div class="row"><span><b>${esc(r.item)}</b> <span class="muted">${esc(r.supplier||'No supplier')}</span><br><span class="muted">${r.stock} ${esc(unitOf(r))} left, suggest ${r.reorderQty||reorderQty(r)}</span></span><button class="mini pri" ${A('stockForm','request',r.pid)}>Request</button></div>`).join('')||'<p class="empty">Nothing needs reordering.</p>'}${need.length>8?`<p class="muted">+${need.length-8} more, use the Low filter.</p>`:''}</div>${suppliersPanel()}</div>`}
 function invMoves(f){UI.inv.v='moves';UI.mov.f=f;UI.mov.page=1;render()}
 function invReset(){Object.assign(UI.inv,{sup:'all',loc:'all',unit:'all',f:'all',page:1});closeFpop();render()}
 
@@ -68,7 +69,7 @@ function invSel(k,on){on?SEL.add(k):SEL.delete(k);render()}
 function invAll(on){paginate(UI.inv,invFiltered()).rows.forEach(r=>on?SEL.add(key(r)):SEL.delete(key(r)));render()}
 function moveRow(b,kind,qty,stock,extra){return{...b,at:Date.now(),time:nowT(),type:kind,flag:false,cleared:false,uid:uuid(),user:USER,qty,stock,reqStatus:undefined,ord:undefined,pref:undefined,note:undefined,...(extra||{})}}
 function invBatch(kind){form((kind=='add'?'Add Stock To ':'Remove Stock From ')+SEL.size+' Items',[{k:'qty',l:'Quantity for each item',t:'number',req:1,pos:1,w:'full',max:1e6}],{qty:1},o=>{
-  SEL.forEach(k=>{const b=prod(k);if(!b)return;const st=kind=='add'?b.stock+o.qty:Math.max(0,b.stock-o.qty);prodRows(k).forEach(x=>x.stock=st);S.items.unshift(moveRow(b,kind,o.qty,st))});audit('Batch '+kind,SEL.size+' products','Qty '+o.qty+' each')})}
+  SEL.forEach(k=>{const b=prod(k);if(!b)return;const st=kind=='add'?b.stock+o.qty:Math.max(0,b.stock-o.qty);S.items.unshift(moveRow(b,kind,o.qty,st))});audit('Batch '+kind,SEL.size+' products','Qty '+o.qty+' each')})}
 function invSetF(f){const L={location:'Location (Bay, Bin, Shelf, Rack)',supplier:'Supplier',unit:'Unit'}[f];
   form('Set '+L.replace(/ \(.*/,'')+' For '+SEL.size+' Items',[f=='location'?{k:'v',l:L,w:'full',req:1,list:'locs',max:60}:{k:'v',l:L,t:'select',o:f=='unit'?UNITS:SUPN(),w:'full',req:1}],{},o=>{S.items.forEach(x=>{if(SEL.has(key(x)))x[f]=o.v});audit('Batch set '+f,SEL.size+' products',o.v)})}
 function invDel(){const n=SEL.size;if(!n||!need(ISOWN,'Deleting products'))return;askYes('Delete '+n+' product'+(n>1?'s':'')+'?','All of their stock history goes too. This cannot be undone.','Delete',()=>{
@@ -78,8 +79,8 @@ function invNewRun(){const lines=$('#bn').value.split(/\r?\n/).map(l=>l.trim()).
   lines.forEach((l,i)=>{const c=l.split(/\t|,/).map(x=>SAFE.text(x,60));if(i==0&&/^item/i.test(c[0]))return;const[item,q,cost,sup,loc,len,ci,co,un]=c,qty=SAFE.num(q,{max:1e6}),cs=SAFE.num(cost,{max:1e6});
     if(!SAFE.code(item)||!(qty>0)||!(cs>0)||!sup){bad.push(i+1);return}const unit=UNITS.find(u=>u.toLowerCase()==String(un||'').toLowerCase())||'Each';ok.push({item:SAFE.code(item),qty,cost:cs,supplier:sup,location:loc||'',length:len||'-',cInName:ci||'-',cOutName:co||'-',unit})});
   if(bad.length){toast('Check line'+(bad.length>1?'s ':' ')+bad.slice(0,8).join(', ')+': item, quantity, cost and supplier are required');return}if(!ok.length){toast('Nothing to add');return}
-  ok.forEach(o=>{const ex=S.items.find(x=>ikey(x)==ikey(o)),pid=ex?ex.pid:stkId(),st=(ex?ex.stock:0)+o.qty;prodRows(pid).forEach(x=>x.stock=st);if(!S.suppliers.some(s=>s.name==o.supplier))S.suppliers.push({name:o.supplier});
-    S.items.unshift({at:Date.now(),time:nowT(),type:'add',flag:false,uid:uuid(),pid,user:USER,qty:o.qty,unit:o.unit,item:o.item,length:o.length,cInName:o.cInName,cIn:hex(o.cInName),cOutName:o.cOutName,cOut:hex(o.cOutName),stock:st,cost:o.cost,location:o.location||(ex?ex.location:'-'),barcode:ex?ex.barcode:'',supplier:o.supplier,reorder:ex&&ex.reorder,lead:ex&&ex.lead})});
+  ok.forEach(o=>{const ex=S.items.find(x=>ikey(x)==ikey(o)),pid=ex?ex.pid:stkId(),st=(ex?ex.stock:0)+o.qty;if(!S.suppliers.some(s=>s.name==o.supplier))S.suppliers.push({name:o.supplier});
+    S.items.unshift({at:Date.now(),time:nowT(),type:'add',flag:false,uid:uuid(),pid,user:USER,qty:o.qty,unit:o.unit,item:o.item,length:o.length,cInName:o.cInName,cIn:hex(o.cInName),cOutName:o.cOutName,cOut:hex(o.cOutName),stock:st,cost:o.cost,location:o.location||(ex?ex.location:'-'),barcode:ex?ex.barcode:'',supplier:o.supplier,reorder:ex?ex.reorder:undefined,lead:ex&&ex.lead})});
   audit('Batch add',ok.length+' products','');store();closeModal();render();toast(ok.length+' product'+(ok.length>1?'s':'')+' added')}
 function invCsv(onlySel){const Ad=ISADM(),P=(onlySel?products().filter(r=>SEL.has(key(r))):invFiltered());
   csvDownload('broadland-stock-'+today()+'.csv',[['Stock ID','Item','Length','Colour In','Colour Out','Unit','Location','Stock','Reorder Level','Supplier','Barcode',...(Ad?['Cost Each','Stock Value']:[])],...P.map(r=>[r.pid,r.item,r.length,r.cInName,r.cOutName,unitOf(r),r.location,r.stock,ro(r),r.supplier||'',r.barcode||r.item,...(Ad?[r.cost,(r.stock*r.cost).toFixed(2)]:[])])]);toast('Exported '+P.length+' products')}
@@ -104,7 +105,7 @@ function reqApprove(u){if(!need(ISADM,'Approving requests'))return;const r=byUid
   audit('Request approved',r.item,r.pref+' became order '+r.ord);store();render();toast('Approved: '+r.pref+' is now order '+r.ord)}
 function reqReject(u){if(!need(ISADM,'Rejecting requests'))return;const r=byUid(u);if(!r)return;r.reqStatus='Rejected';r.flag=false;audit('Request rejected',r.item,r.ord);store();render()}
 function reqReceive(u){const r=byUid(u);if(!r)return;stockForm('add',r.pid,{qty:r.qty,fromReq:u})}
-function moveClear(u){const r=byUid(u);if(!r)return;r.cleared=true;r.flag=false;if(r.type=='request'&&r.reqStatus!='Pending')r.reqStatus='Cleared';store();render()}
+function moveClear(u){const r=byUid(u);if(!r)return;r.cleared=true;r.flag=false;if(r.type=='request'&&r.reqStatus!='Pending')r.reqStatus='Cleared';audit('Movement cleared',r.item,r.ord||r.type);store();render()}
 function moveDel(u){if(!need(ISOWN,'Deleting history'))return;const r=byUid(u);if(!r)return;askYes('Delete this entry?','Stock levels are not changed.','Delete entry',()=>{S.items=S.items.filter(x=>x!==r);audit('Movement deleted',r.item,r.type+' '+r.qty+(r.ord?' '+r.ord:''));store();render()},true)}
 
 /* ---------------- one wide item window for Edit, Add, Remove and Request ---------------- */
@@ -132,7 +133,7 @@ function itemWindow(mode,k,pre){const view=ieView=mode=='view';if(view)mode='edi
   const r=(k&&prod(k))||null;if(mode=='edit'&&!r)return;
   ieMode=mode;ieKey=r?r.pid:null;iePre=pre||{};ieIdx=0;tmp=r?pphotos(r.pid).slice():[];tmpDraw=ieDraw;
   const ed=mode=='edit',clean=x=>x&&x!='-'?x:'';
-  const v=r?{...r,length:clean(r.length),cInName:clean(r.cInName),cOutName:clean(r.cOutName),location:hasLoc(r)?r.location:'',unit:unitOf(r),reorder:r.reorder??0,qty:iePre.qty||1,cost:ed?r.cost:0,barcode:r.barcode||r.item,notes:r.notes||''}
+  const v=r?{...r,length:clean(r.length),cInName:clean(r.cInName),cOutName:clean(r.cOutName),location:hasLoc(r)?r.location:'',unit:unitOf(r),reorder:ro(r),qty:iePre.qty||1,cost:ed?r.cost:0,barcode:r.barcode||r.item,notes:r.notes||''}
              :{pid:stkId(),item:'',unit:'Each',qty:1,length:'',cInName:'',cOutName:'',cIn:'',cOut:'',reorder:0,cost:0,location:'',supplier:'',barcode:''};
   const F=ieFields(),sec=(t,s,cls)=>{const L=F.filter(f=>f.sec==s);return L.length?`<fieldset><legend>${t}</legend><div class="grid ${cls||''}">${L.map(f=>fieldH(f,v)).join('')}</div></fieldset>`:''};
   const T={edit:(view?'':'Edit ')+(r?r.item:''),add:'Add Stock',remove:'Remove Stock',request:'Request Stock'}[mode],B={edit:'Save changes',add:'Add stock',remove:'Remove stock',request:'Send request'}[mode];
@@ -165,7 +166,7 @@ function ieSave(){const mode=ieMode,o=readFields(ieFields());if(!o)return;
     const nm=Ad?o.item:r.item,probe={item:nm,length:o.length||'-',cInName:o.cInName||'-',cOutName:o.cOutName||'-'};
     if(S.items.some(x=>x.pid!=k&&ikey(x)==ikey(probe))){toast('Another product already has this item code, length and colours');return}
     const changed=o.stock!=r.stock;
-    const upd={pid:np,item:nm,unit:o.unit,length:o.length||'-',cInName:o.cInName||'-',cIn:o.cInNameHex,cOutName:o.cOutName||'-',cOut:o.cOutNameHex,stock:o.stock,reorder:o.reorder,reorderQty:o.reorderQty||undefined,lead:o.lead||undefined,location:o.location||'-',supplier:o.supplier,barcode:bc,notes:o.notes,...(Ad?{cost:o.cost}:{})};
+    const upd={pid:np,item:nm,unit:o.unit,length:o.length||'-',cInName:o.cInName||'-',cIn:o.cInNameHex,cOutName:o.cOutName||'-',cOut:o.cOutNameHex,reorder:o.reorder,reorderQty:o.reorderQty||undefined,lead:o.lead||undefined,location:o.location||'-',supplier:o.supplier,barcode:bc,notes:o.notes,...(Ad?{cost:o.cost}:{})};
     prodRows(k).forEach(x=>Object.assign(x,upd));
     if(changed)S.items.unshift(moveRow(prod(np),o.stock>r.stock?'add':'remove',Math.abs(o.stock-r.stock),o.stock,{note:'Stock adjusted in editor'}));
     iePhotos(np);if(np!=k)delete S.pphotos[k];if(SEL.has(k)&&np!=k){SEL.delete(k);SEL.add(np)}
@@ -177,7 +178,7 @@ function ieSave(){const mode=ieMode,o=readFields(ieFields());if(!o)return;
   if(kind=='remove'&&o.qty>cur){askIn('Only '+cur+' in stock','Remove all '+cur+' instead?','Remove '+cur,()=>{const q=$('#f_qty');if(q){q.value=cur;ieSave()}});return}
   const st=kind=='add'?cur+o.qty:kind=='remove'?Math.max(0,cur-o.qty):cur;
   const base={pid,item:o.item,unit:o.unit,length:o.length||'-',cInName:o.cInName||'-',cIn:o.cInNameHex,cOutName:o.cOutName||'-',cOut:o.cOutNameHex,cost:o.cost||(ex?ex.cost:0),location:o.location||(ex?ex.location:'-'),barcode:bc||(ex?ex.barcode:''),supplier:o.supplier||(ex?ex.supplier:''),reorder:o.reorder!=null&&kind!='remove'?o.reorder:(ex?ex.reorder:0),lead:o.lead||(ex?ex.lead:undefined),reorderQty:o.reorderQty||(ex&&ex.reorderQty),notes:o.notes||(ex&&ex.notes)};
-  if(kind!='request')prodRows(pid).forEach(x=>{x.stock=st;['supplier','location','unit','lead','reorderQty','notes'].forEach(f=>{if(o[f])x[f]=o[f]});if(kind=='add'){x.reorder=base.reorder;if(o.cost)x.cost=o.cost}if(bc)x.barcode=bc});
+  if(kind!='request')prodRows(pid).forEach(x=>{['supplier','location','unit','lead','reorderQty','notes'].forEach(f=>{if(o[f])x[f]=o[f]});if(kind=='add'){x.reorder=base.reorder;if(o.cost)x.cost=o.cost}if(bc)x.barcode=bc});
   const row=moveRow(base,kind,o.qty,st,kind=='request'?{reqStatus:'Pending',ord:nextOrd('P'),note:o.note}:{});
   S.items.unshift(row);iePhotos(pid);
   if(iePre.fromReq){const q=byUid(iePre.fromReq);if(q){q.reqStatus='Cleared';q.cleared=true;q.receivedAt=Date.now()}}

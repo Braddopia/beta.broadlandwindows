@@ -130,5 +130,7 @@ function audit(action,target,detail){
   if(S.audit.length>MAX_LOG)S.audit.length=MAX_LOG}
 
 /* ---- cross-tab sync ---- */
-if(BC)BC.onmessage=()=>{sdb().then(d=>{const g=d.transaction('s','readonly').objectStore('s').get(KEY);g.onsuccess=()=>{try{const n=JSON.parse(g.result);if(n&&Array.isArray(n.items)&&!$('.ov.open')){S=n;render()}}catch(x){}}})};
+let syncPend=0;
+function syncPull(){sdb().then(d=>{const g=d.transaction('s','readonly').objectStore('s').get(KEY);g.onsuccess=()=>{try{const n=JSON.parse(g.result);if(!n||!Array.isArray(n.items))return;if($('.ov.open')){syncPend=1;return}syncPend=0;S=n;render()}catch(x){}}})}
+if(BC)BC.onmessage=()=>{if($('.ov.open')){syncPend=1;return}syncPull()};
 window.addEventListener('storage',e=>{if(!BC&&e.key==KEY&&e.newValue){try{const n=JSON.parse(e.newValue);if(n&&Array.isArray(n.items)){S=n;render()}}catch(x){}}});

@@ -29,7 +29,7 @@ function ncAct(a,x){
   else if(a=='del')S.notes=S.notes.filter(n=>n.id!=x);
   else if(a=='readall'){ncData().mov.forEach(m=>S.seen[m.r.uid]=1);S.notes.forEach(n=>{if(n.to==USER)n.read=true})}
   else if(a=='clrall'){const d=ncData(),T=UI.nc.t,all=T=='All';
-    if(all||T=='Requests')d.req.filter(r=>r.reqStatus!='Pending').forEach(r=>{r.cleared=true;r.reqStatus='Cleared'});
+    if(all||(T=='Requests'||T=='My Requests'))d.req.filter(r=>r.reqStatus!='Pending').forEach(r=>{r.cleared=true;r.reqStatus='Cleared'});
     if(all||T=='Alerts')d.alr.forEach(q=>{if(q.uid){const r=byUid(q.uid);if(r){r.cleared=true;r.flag=false}}else if(q.key)S.dis[q.key]=q.stock});
     if(all||T=='Mentions')S.notes=S.notes.filter(n=>n.to!=USER);
     if(all||T=='Stock In/Out')d.mov.forEach(m=>S.seen[m.r.uid]=1)}
@@ -48,7 +48,7 @@ function vMessages(){const N=(S.notes||[]).slice().sort((a,b)=>a.at-b.at),me2=US
   const conv=w=>w=='Everyone'?N.filter(n=>n.to=='Everyone'):N.filter(n=>(n.by==me2&&n.to==w)||(n.by==w&&n.to==me2));
   const unreadIn=w=>conv(w).filter(n=>n.by!=me2&&!msgRead(n)).length;
   const chats=['Everyone',...people].map(w=>{const L=conv(w);return{w,last:L[L.length-1],un:unreadIn(w)}}).filter(c=>c.w=='Everyone'||c.last||c.w==UI.msg.to).sort((a,b)=>(b.last?b.last.at:0)-(a.last?a.last.at:0)).filter(c=>!q||c.w.toLowerCase().includes(q)||(c.last&&c.last.t.toLowerCase().includes(q)));
-  const cur=UI.msg.to||'Everyone',L=conv(cur);L.filter(n=>n.by!=me2&&!msgRead(n)).forEach(n=>{if(n.to=='Everyone'){n.readBy=n.readBy||[];n.readBy.push(me2)}else n.read=true});if(L.length)store();
+  const cur=UI.msg.to||'Everyone',L=conv(cur);const nu=L.filter(n=>n.by!=me2&&!msgRead(n));nu.forEach(n=>{if(n.to=='Everyone'){n.readBy=n.readBy||[];n.readBy.push(me2)}else n.read=true});if(nu.length)store();
   const ago=t=>{const m=Math.round((Date.now()-t)/6e4);return m<1?'now':m<60?m+'m':m<1440?Math.round(m/60)+'h':new Date(t).toLocaleDateString('en-GB',{day:'numeric',month:'short'})};
   const av=n=>`<span class="mav ${n=='Everyone'?'all':''}">${n=='Everyone'?'★':esc(initials(n))}</span>`;
   let lastDay='';

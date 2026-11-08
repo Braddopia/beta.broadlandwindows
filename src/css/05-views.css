@@ -1405,3 +1405,5 @@ body[data-theme=dark] .mb.full .rg.fg.gc,body[data-theme=dark] .mb.full .fin-sum
 .grid .fsec{grid-column:1/-1;margin:.9rem 0 .1rem;padding-top:.8rem;border-top:1px solid var(--line);font:600 1.02rem var(--head);color:var(--navy)}
 .grid .fsec:first-child{margin-top:0;padding-top:0;border-top:0}
 td b.od{color:var(--red)}
+body[data-theme=dark] .path li.on button{background:#2f6fd0;color:#fff}body[data-theme=dark] .path li.done button{background:#0f3a29;color:#7fe0aa}
+@media(max-width:900px){.path{min-width:max-content}.path li{flex:0 0 auto}.path button{padding:0 1.1rem}}
