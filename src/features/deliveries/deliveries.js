@@ -19,6 +19,7 @@ import { askYes, openModal } from '../../ui/modal.js';
 import { hit, render } from '../../ui/shell/router.js';
 import { toast } from '../../ui/toast.js';
 import { uiState } from '../../ui/ui-state.js';
+import * as repos from '../../data/repository.js';
 
 export function vDeliveries() {
   const F = uiState.del,
@@ -152,8 +153,8 @@ export function editDel(id, supName, con) {
           return false;
         }
       }
-      if (x) Object.assign(x, o);
-      else state.deliveries.push({ id: shortId('D'), ...o });
+      if (x) repos.deliveries.changed(Object.assign(x, o));
+      else repos.deliveries.add({ id: shortId('D'), ...o });
       audit(
         x ? 'Delivery edited' : 'Delivery added',
         o.supplier,
@@ -176,7 +177,7 @@ export function delDel(id) {
     x.supplier + ': ' + x.items + '. This cannot be undone.',
     'Delete delivery',
     () => {
-      state.deliveries = state.deliveries.filter((d) => d.id != id);
+      repos.deliveries.remove((d) => d.id == id);
       audit('Delivery deleted', x.supplier, x.items);
       store();
       render();

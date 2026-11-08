@@ -18,6 +18,7 @@ import { askYes, closeModal, doneIn, openModal } from '../../ui/modal.js';
 import { hit, render } from '../../ui/shell/router.js';
 import { toast } from '../../ui/toast.js';
 import { uiState } from '../../ui/ui-state.js';
+import * as repos from '../../data/repository.js';
 
 /* ---------------- contact book ---------------- */
 export function vContacts() {
@@ -188,8 +189,8 @@ export function editContact(id, draft, after) {
     o.phone = o.phones[0].n;
     const go = () => {
       const oldCo = c ? c.co : o.co;
-      if (c) Object.assign(c, o);
-      else state.contacts.push({ id: shortId('K'), ...o });
+      if (c) repos.contacts.changed(Object.assign(c, o));
+      else repos.contacts.add({ id: shortId('K'), ...o });
       if (
         (c || o).type == 'Supplier' ||
         state.suppliers.some((s) => s.name.toLowerCase() == String(oldCo).toLowerCase())
@@ -232,7 +233,7 @@ export function impCust() {
   state.contracts.forEach((c) => {
     if (!state.contacts.some((k) => k.co == c.name)) {
       n++;
-      state.contacts.push({
+      repos.contacts.add({
         id: shortId('K'),
         co: c.name,
         name: c.name,

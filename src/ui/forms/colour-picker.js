@@ -1,24 +1,9 @@
 /* ui/forms/colour-picker: The colour picker (RAL colours and finishes). */
 import { onClick } from '../../core/actions.js';
 import { $, esc } from '../../core/dom.js';
+import { PRE } from '../../config/colours.js';
 import { SAFE } from '../../data/sanitize.js';
 
-export const PRE = [
-  ['Black', '#3a3a3a'],
-  ['Grey', '#8a8a8a'],
-  ['Anthracite', '#383e42'],
-  ['White', '#e8e6e0'],
-  ['Cream', '#efe3c6'],
-  ['Gold', '#c9a24b'],
-  ['Silver', '#b9b9b9'],
-  ['Brown', '#6b4a2f'],
-  ['Oak', '#b07a3c'],
-  ['Green', '#2f6b4a'],
-  ['Red', '#a33030'],
-  ['Blue', '#034ea2'],
-];
-export const hex = (n) =>
-  Object.fromEntries(PRE.map(([a, b]) => [a.toLowerCase(), b]))[String(n).trim().toLowerCase()] || '#c9c6bd';
 export function colourField(f, v) {
   const base = f.k.slice(0, -4),
     hx = SAFE.hex(v[base] || '#8a8a8a');

@@ -1,6 +1,6 @@
 /* ui/modal: Popups: opening and closing, our own confirm box, the "saved" tick, and returning to an open record. */
 import { $, esc } from '../core/dom.js';
-import { syncPend, syncPull } from '../data/persistence.js';
+import { syncIfPending } from '../data/sync.js';
 import { recReturn, recordWin, setRecordWin } from '../features/records/record-window.js';
 
 /* ---- modal ---- */
@@ -110,7 +110,7 @@ export function closeModal() {
     return;
   }
   $('#modal').classList.remove('open');
-  if (typeof syncPend != 'undefined' && syncPend) setTimeout(syncPull, 0);
+  syncIfPending();
   const a = document.activeElement;
   if (a && a !== document.body && !a.closest('#modal')) a.blur();
 }

@@ -21,6 +21,7 @@ import { phCount } from '../../ui/forms/photos.js';
 import { hit } from '../../ui/shell/router.js';
 import { toast } from '../../ui/toast.js';
 import { uiState } from '../../ui/ui-state.js';
+import * as repos from '../../data/repository.js';
 
 /* at a glance: does the customer still owe money on their contract? */
 export const svcBal = (c) => {
@@ -156,11 +157,11 @@ export function editCall(id, cid) {
       if (o.status != 'Complete') o.doneAt = '';
       if (o.visit && o.status == 'Open') o.status = 'Booked';
       if (c) {
-        Object.assign(c, o);
+        repos.calls.changed(Object.assign(c, o));
         audit('Service call edited', c.id, o.status);
       } else {
         const n = { id: nid('S', state.calls), ...o };
-        state.calls.unshift(n);
+        repos.calls.add(n, { first: true });
         audit('Service call added', n.id, o.name);
       }
     },

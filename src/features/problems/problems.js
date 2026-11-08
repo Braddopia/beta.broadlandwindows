@@ -10,6 +10,7 @@ import { need } from '../auth/session.js';
 import { form } from '../../ui/forms/form.js';
 import { askIn, closeModal } from '../../ui/modal.js';
 import { VIEWS, render, view } from '../../ui/shell/router.js';
+import * as repos from '../../data/repository.js';
 
 export function bugReport() {
   const views = Object.values(VIEWS).map((v) => v.t);
@@ -39,7 +40,7 @@ export function bugReport() {
     (o) => {
       const n = state.bugs.reduce((m, b) => Math.max(m, parseInt(String(b.id).slice(2)) || 0), 0) + 1,
         b = { id: 'P-' + String(n).padStart(3, '0'), at: Date.now(), by: USER, role: ROLE, status: 'Open', ...o };
-      state.bugs.unshift(b);
+      repos.problems.add(b, { first: true });
       audit('Problem reported', b.id, o.what.slice(0, 60));
     },
     'A screenshot or photo of the screen helps us fix it faster.'
@@ -79,7 +80,7 @@ export function bugDel(id) {
     'It is removed for everyone.',
     'Delete',
     () => {
-      state.bugs = state.bugs.filter((x) => x.id != id);
+      repos.problems.remove((x) => x.id == id);
       audit('Problem deleted', id, '');
       store();
       closeModal();

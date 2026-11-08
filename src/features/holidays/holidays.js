@@ -30,6 +30,7 @@ import { closeModal, openModal } from '../../ui/modal.js';
 import { render } from '../../ui/shell/router.js';
 import { toast } from '../../ui/toast.js';
 import { uiState } from '../../ui/ui-state.js';
+import * as repos from '../../data/repository.js';
 
 /* typing a code into a day on the holiday chart */
 export function hcSet(sid, k, raw) {
@@ -420,7 +421,7 @@ export function holSave() {
     toast('You can only request your own holiday');
     return;
   }
-  state.hols.push({
+  repos.holidays.add({
     id: shortId('H'),
     sid,
     from: f,
@@ -451,7 +452,7 @@ export function holDel(id) {
     toast('Only an administrator can remove this');
     return;
   }
-  state.hols = state.hols.filter((x) => x.id != id);
+  repos.holidays.remove((x) => x.id == id);
   audit('Holiday removed', staffName(h.sid), h.from + ' to ' + h.to);
   store();
   closeModal();

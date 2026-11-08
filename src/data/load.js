@@ -2,7 +2,7 @@
 import { KEY } from '../config/constants.js';
 import { seed } from './seed.js';
 import { replaceState, state } from './state.js';
-import { toast } from '../ui/toast.js';
+import { emit } from '../core/events.js';
 
 export function load() {
   /* two copies may exist (browser database and localStorage): use the most recently saved one */
@@ -25,7 +25,7 @@ export function load() {
       try {
         localStorage.setItem(KEY + '_unreadable_' + Date.now(), raw);
       } catch (x) {}
-      setTimeout(() => toast('Saved data could not be read. A copy was kept and demo data loaded.'), 1800);
+      setTimeout(() => emit('notice', 'Saved data could not be read. A copy was kept and demo data loaded.'), 1800);
     }
   }
   if (!state || typeof state != 'object' || !Array.isArray(state.items)) replaceState(seed());

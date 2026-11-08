@@ -28,6 +28,7 @@ import { askYes, closeModal } from '../../ui/modal.js';
 import { go, hit, render } from '../../ui/shell/router.js';
 import { toast } from '../../ui/toast.js';
 import { uiState } from '../../ui/ui-state.js';
+import * as repos from '../../data/repository.js';
 
 export function mvLead(id, d) {
   const l = state.leads.find((x) => x.id == id),
@@ -49,7 +50,7 @@ export function delLead(id) {
     l.name + ' will be removed. This cannot be undone.',
     'Delete lead',
     () => {
-      state.leads = state.leads.filter((x) => x.id != id);
+      repos.leads.remove((x) => x.id == id);
       audit('Lead deleted', id, l.name);
       store();
       render();
@@ -132,10 +133,9 @@ export function convertLead(id) {
       custCompat(c);
       if (o.phone) c.phone = o.phone;
       if (o.address) c.address = o.address;
-      state.contracts.unshift(c);
-      state.leadArchive = state.leadArchive || [];
-      state.leadArchive.push({ ...l, stage: 'Won', convertedTo: c.id, convertedOn: today() });
-      state.leads = state.leads.filter((x) => x.id != l.id);
+      repos.contracts.add(c, { first: true });
+      repos.leadArchive.add({ ...l, stage: 'Won', convertedTo: c.id, convertedOn: today() }, { keepMeta: true });
+      repos.leads.remove((x) => x.id == l.id);
       audit('Lead converted', l.id, 'Became contract ' + c.id);
       docsMove('lead:' + l.id, 'contract:' + c.id);
       c.phTags = (l.phTags || []).slice();
@@ -277,7 +277,7 @@ export function leadWizard() {
         };
       l.owner = spResolve(l.owner);
       custCompat(l);
-      state.leads.push(l);
+      repos.leads.add(l);
       audit('Lead added', lid, l.name + ' · ' + l.owner);
       toast(lid + ' created and given to ' + l.owner + '. Open it any time to add more.');
     },

@@ -53,7 +53,7 @@ export function srchText(o, d = 0) {
   if (o == null || d > 3) return '';
   if (typeof o != 'object') return typeof o == 'string' && (o.length > 300 || o.startsWith('data:')) ? '' : String(o);
   return Object.entries(o)
-    .filter(([k]) => !/^(photos|files|docs|sig|signature|pay|audit|appts|lines|ck)$/.test(k))
+    .filter(([k]) => !/^(photos|files|docs|sig|signature|pay|audit|appts|lines|ck|_meta)$/.test(k))
     .map(([, v]) => srchText(v, d + 1))
     .join(' ');
 }

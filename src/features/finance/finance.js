@@ -19,6 +19,7 @@ import { form } from '../../ui/forms/form.js';
 import { render } from '../../ui/shell/router.js';
 import { toast } from '../../ui/toast.js';
 import { uiState } from '../../ui/ui-state.js';
+import * as repos from '../../data/repository.js';
 
 /* ==========================================================================
    13 · Finance (admin/finance) and Admin console (owner accounts)
@@ -125,8 +126,8 @@ export function editBill(id) {
     ],
     b || { type: 'Supplier', due: today() },
     (o) => {
-      if (b) Object.assign(b, o);
-      else state.fin.push({ id: shortId('B'), status: 'Unpaid', ...o });
+      if (b) repos.bills.changed(Object.assign(b, o));
+      else repos.bills.add({ id: shortId('B'), status: 'Unpaid', ...o });
       audit(b ? 'Bill edited' : 'Bill added', o.payee, money(o.amount));
     }
   );

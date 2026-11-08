@@ -19,6 +19,7 @@ import { askIn, askYes, openModal } from '../../ui/modal.js';
 import { go, hit, render } from '../../ui/shell/router.js';
 import { toast } from '../../ui/toast.js';
 import { uiState } from '../../ui/ui-state.js';
+import * as repos from '../../data/repository.js';
 
 export const sups = () => state.suppliers;
 export const SUPN = (cur) => ['', ...new Set([...sups().map((x) => x.name), cur || ''].filter(Boolean))];
@@ -479,13 +480,13 @@ export function editSup(i, pre) {
         if (v[k] !== undefined) o[k] = v[k];
       });
       if (i == null) {
-        state.suppliers.push(o);
+        repos.suppliers.add(o);
         contactFromSup(o.name, o);
         audit('Supplier added', o.name, '');
         toast(o.name + ' added');
       } else {
         const old = x.name;
-        Object.assign(x, o);
+        repos.suppliers.changed(Object.assign(x, o));
         contactFromSup(old, x);
         if (old != o.name) {
           state.items.forEach((y) => {
@@ -510,7 +511,7 @@ export function delSup(i) {
     'Stock items keep the supplier name. This cannot be undone.',
     'Delete supplier',
     () => {
-      state.suppliers.splice(state.suppliers.indexOf(x), 1);
+      repos.suppliers.remove((s) => s === x);
       audit('Supplier deleted', x.name, '');
       store();
       render();

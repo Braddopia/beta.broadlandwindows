@@ -5,7 +5,7 @@ import { fd, today } from '../../core/dates.js';
 import { esc } from '../../core/dom.js';
 import { csvDownload } from '../../ui/download.js';
 import { kb, m0, money, pc, sum } from '../../core/format.js';
-import { storeSize } from '../../data/persistence.js';
+import { savedSize } from '../../data/persistence.js';
 import { state } from '../../data/state.js';
 import { allLeads } from '../../domain/leads.js';
 import { staffName } from '../../domain/people.js';
@@ -34,7 +34,7 @@ export function vAdmin() {
     rev = sum(state.contracts, (c) => c.value),
     paid = sum(state.contracts, (c) => c.paid),
     reqs = state.items.filter((r) => r.type == 'request' && r.reqStatus == 'Pending');
-  let size = storeSize || JSON.stringify(state).length;
+  let size = savedSize() || JSON.stringify(state).length;
   const ph = Object.values(state.pphotos).reduce((a, x) => a + x.length, 0),
     defPins = Object.entries(state.sec.pins)
       .filter(([, p]) => p.def)

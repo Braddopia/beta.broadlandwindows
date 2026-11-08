@@ -10,6 +10,7 @@ import * as coreDates from './core/dates.js';
 import * as coreDom from './core/dom.js';
 import * as uiDownload from './ui/download.js';
 import * as coreFormat from './core/format.js';
+import * as coreEvents from './core/events.js';
 import * as coreHaptics from './core/haptics.js';
 import * as coreHttps from './core/https.js';
 import * as coreIcons from './core/icons.js';
@@ -21,9 +22,13 @@ import * as featuresRecordsDelete from './features/records/delete.js';
 import * as startMigrations from './start/migrations.js';
 import * as dataPersistence from './data/persistence.js';
 import * as dataPhotos from './data/photos.js';
+import * as configColours from './config/colours.js';
 import * as dataSeed from './data/seed.js';
 import * as dataLoad from './data/load.js';
+import * as dataRepository from './data/repository.js';
 import * as dataSession from './data/session.js';
+import * as dataSync from './data/sync.js';
+import * as dataSourcesDataSource from './data/sources/data-source.js';
 import * as dataState from './data/state.js';
 import * as domainChecklists from './domain/checklists.js';
 import * as domainCustomers from './domain/customers.js';
@@ -100,6 +105,7 @@ import * as uiFormsPhotos from './ui/forms/photos.js';
 import * as uiFormsWizard from './ui/forms/wizard.js';
 import * as uiModal from './ui/modal.js';
 import * as uiMorph from './ui/morph.js';
+import * as uiShellDataEvents from './ui/shell/data-events.js';
 import * as uiShellLooks from './ui/shell/looks.js';
 import * as uiShellRouter from './ui/shell/router.js';
 import * as uiShellShell from './ui/shell/shell.js';
@@ -110,6 +116,7 @@ import { ACTIONS } from './core/actions.js';
 
 const modules = {
   dataCompany,
+  configColours,
   configConstants,
   configRoles,
   coreActions,
@@ -119,6 +126,7 @@ const modules = {
   coreDom,
   uiDownload,
   coreFormat,
+  coreEvents,
   coreHaptics,
   coreHttps,
   coreIcons,
@@ -132,7 +140,10 @@ const modules = {
   dataPhotos,
   dataLoad,
   dataSeed,
+  dataRepository,
   dataSession,
+  dataSync,
+  dataSourcesDataSource,
   dataState,
   domainChecklists,
   domainCustomers,
@@ -209,6 +220,7 @@ const modules = {
   uiFormsWizard,
   uiModal,
   uiMorph,
+  uiShellDataEvents,
   uiShellLooks,
   uiShellRouter,
   uiShellShell,
@@ -231,11 +243,12 @@ window.CRM = Object.freeze(CRM);
 /* start-up, in order */
 coreHttps.forceHttps();
 coreActions.listenForActions();
+uiShellDataEvents.connectDataToScreen();
 dataLoad.load();
 startMigrations.migrate();
 dataLoad.defineCurrentUser();
 dataPersistence.askBrowserToKeepData();
-dataPersistence.listenForOtherTabs();
+dataSync.listenForOtherTabs();
 featuresAuthSession.restoreRole();
 featuresAuthSession.watchForIdle();
 uiFormsForm.listenForFormChanges();

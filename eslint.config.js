@@ -44,6 +44,33 @@ module.exports = [
       'no-unused-vars': ['error', { caughtErrors: 'none' }],
     },
   },
+  // Layers: imports only point down (core/config -> data -> domain -> ui/integrations/print -> features -> start).
+  ...[
+    [
+      ['src/core/**', 'src/config/**'],
+      ['data', 'domain', 'ui', 'integrations', 'print', 'features', 'start'],
+    ],
+    [['src/data/**'], ['domain', 'ui', 'integrations', 'print', 'features', 'start']],
+    [['src/domain/**'], ['ui', 'integrations', 'print', 'features', 'start']],
+  ].map(([files, above]) => ({
+    files,
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: above.map((d) => ({
+            group: ['**/' + d + '/**'],
+            message: 'This layer may not import from src/' + d + ' (see CLAUDE.md, code layout).',
+          })),
+        },
+      ],
+    },
+  })),
+  {
+    files: ['tests/unit/**/*.mjs'],
+    languageOptions: { ecmaVersion: 2022, sourceType: 'module', globals: { ...globals.node } },
+    rules: { ...js.configs.recommended.rules },
+  },
   {
     files: ['scripts/**/*.mjs'],
     languageOptions: { ecmaVersion: 2022, sourceType: 'module', globals: { ...globals.node } },

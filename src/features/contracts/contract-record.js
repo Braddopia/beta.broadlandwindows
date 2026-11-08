@@ -25,6 +25,7 @@ import { RECORDS, recSave } from '../records/record-window.js';
 import { opsTab } from '../records/survey.js';
 import { dTag, prTag } from '../../ui/components/tags.js';
 import { askIn } from '../../ui/modal.js';
+import * as repos from '../../data/repository.js';
 
 /* start-up step (run once by main.js) */
 export function defineContractRecord() {
@@ -143,8 +144,8 @@ export function defineContractRecord() {
         (c.log = c.log || []).unshift({ t: 'Stage', n: a0 + ' to ' + c.stage, by: USER, at: today() });
       if (isNew) {
         if (state.contracts.some((x) => x.id == c.id)) c.id = nid('C', state.contracts);
-        state.contracts.unshift(c);
-      }
+        repos.contracts.add(c, { first: true });
+      } else repos.contracts.changed(c);
       custCompat(c);
       audit(isNew ? 'Contract added' : 'Contract edited', c.id, c.name);
       return c.id;

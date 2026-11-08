@@ -1,6 +1,6 @@
 /* data/seed: Sample data for a brand-new install (sample names only). */
 import { addDays } from '../core/dates.js';
-import { hex } from '../ui/forms/colour-picker.js';
+import { hex } from '../config/colours.js';
 
 /* ---- seed data ---- */
 export function seed() {

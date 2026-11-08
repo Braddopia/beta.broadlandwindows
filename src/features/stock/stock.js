@@ -36,7 +36,7 @@ import { emptyArt } from '../../ui/components/art.js';
 import { closeFpop, openFpop } from '../../ui/components/popover.js';
 import { cmp, pagerH, paginate, thS } from '../../ui/components/table.js';
 import { ordTag, reqTag } from '../../ui/components/tags.js';
-import { hex } from '../../ui/forms/colour-picker.js';
+import { hex } from '../../config/colours.js';
 import { form } from '../../ui/forms/form.js';
 import { askYes, closeModal, openModal } from '../../ui/modal.js';
 import { hit, render } from '../../ui/shell/router.js';

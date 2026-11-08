@@ -22,6 +22,7 @@ import { wizard } from '../../ui/forms/wizard.js';
 import { hit, render } from '../../ui/shell/router.js';
 import { toast } from '../../ui/toast.js';
 import { uiState } from '../../ui/ui-state.js';
+import * as repos from '../../data/repository.js';
 
 export function ckpi(L) {
   const v = sum(L, (c) => c.value),
@@ -131,7 +132,7 @@ export function contractWizard() {
       if (c.value) c.deposit = Math.round(c.value * depPct(c)) / 100;
       fitSync(c);
       custCompat(c);
-      state.contracts.unshift(c);
+      repos.contracts.add(c, { first: true });
       audit('Contract added', c.id, c.name + ' · ' + c.soldBy);
       setTimeout(() => openContract(c.id), 80);
     },

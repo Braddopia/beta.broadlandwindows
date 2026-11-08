@@ -3,7 +3,8 @@ import { KEY } from '../../config/constants.js';
 import { today } from '../../core/dates.js';
 import { download } from '../../ui/download.js';
 import { audit } from '../../data/audit.js';
-import { sdb, store } from '../../data/persistence.js';
+import { store } from '../../data/persistence.js';
+import { source } from '../../data/sources/data-source.js';
 import { PHC, phIsRef, phLoad, phRefs } from '../../data/photos.js';
 import { state } from '../../data/state.js';
 import { need } from '../auth/session.js';
@@ -68,17 +69,9 @@ export function backupApply(n) {
     delete n.constructor; /* a backup never brings its own PINs */
     try {
       const j = JSON.stringify(n);
-      sdb()
-        .then((d) => {
-          const t = d.transaction('s', 'readwrite');
-          t.objectStore('s').put(j, KEY);
-          t.oncomplete = () => {
-            try {
-              localStorage.removeItem(KEY);
-            } catch (e) {}
-            location.reload();
-          };
-        })
+      source
+        .replaceAll(j)
+        .then(() => location.reload())
         .catch(() => toast('Could not restore here'));
     } catch (e) {
       toast('Could not restore here');

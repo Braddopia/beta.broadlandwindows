@@ -14,6 +14,7 @@ import { need } from '../auth/session.js';
 import { form } from '../../ui/forms/form.js';
 import { hit } from '../../ui/shell/router.js';
 import { uiState } from '../../ui/ui-state.js';
+import * as repos from '../../data/repository.js';
 
 /* ---------------- staff ---------------- */
 export function vStaff() {
@@ -69,8 +70,8 @@ export function editStaff(id) {
     x || { allow: 25, pension: 0, carry: 0, team: '', cat: uiState.staff.c != 'all' ? uiState.staff.c : 'Office' },
     (o) => {
       const old = x && x.name;
-      if (x) Object.assign(x, o);
-      else state.staff.push({ id: shortId('U'), ...o });
+      if (x) repos.staff.changed(Object.assign(x, o));
+      else repos.staff.add({ id: shortId('U'), ...o });
       if (old && old != o.name) renamePerson(old, o.name);
       audit(x ? 'Staff edited' : 'Staff added', o.name, old && old != o.name ? 'Renamed from ' + old : '');
     }

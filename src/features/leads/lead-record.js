@@ -21,6 +21,7 @@ import { photoTab } from '../records/photos-docs.js';
 import { RECORDS } from '../records/record-window.js';
 import { opsTab } from '../records/survey.js';
 import { toast } from '../../ui/toast.js';
+import * as repos from '../../data/repository.js';
 
 /* start-up step (run once by main.js) */
 export function defineLeadRecord() {
@@ -99,8 +100,8 @@ export function defineLeadRecord() {
       if (!isNew && a != o.stage) l.log.unshift({ d: today(), t: 'Stage: ' + a + ' to ' + o.stage, by: USER });
       if (isNew) {
         l.log = [...W.v.log, { d: today(), t: 'Lead created', by: USER }];
-        state.leads.push(l);
-      }
+        repos.leads.add(l);
+      } else repos.leads.changed(l);
       custCompat(l);
       audit(isNew ? 'Lead added' : 'Lead edited', l.id, l.name);
       return l.id;

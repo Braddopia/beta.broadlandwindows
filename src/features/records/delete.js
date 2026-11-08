@@ -7,6 +7,7 @@ import { need } from '../auth/session.js';
 import { recordWin } from './record-window.js';
 import { askYes, closeModal } from '../../ui/modal.js';
 import { render } from '../../ui/shell/router.js';
+import * as repos from '../../data/repository.js';
 
 /* deleting is admin-only, and only for these lists */
 export const DEL_RULE = {
@@ -26,7 +27,7 @@ export function del(k, id) {
     () => {
       state[k] = state[k].filter((x) => x.id != id);
       if (k == 'staff') {
-        state.hols = state.hols.filter((h) => h.sid != id);
+        repos.holidays.remove((h) => h.sid == id);
         if (state.abs) delete state.abs[id];
       }
       audit('Deleted', k + ' ' + id, '');
