@@ -11,8 +11,9 @@ button,input,select,textarea{font:inherit;color:inherit}
 img{max-width:100%}
 a{color:var(--blue)}
 
-/* House style: Title Case labels. URLs, emails, codes and typed text are left alone. */
-body,body *{text-transform:capitalize}
+/* House style: Title Case for headings, labels, buttons, tabs, menus and status tags.
+   Everything else (table cells, paragraphs, messages, typed text) shows exactly as written. */
+h1,h2,h3,h4,h5,h6,label,legend,th,summary,button,select,.btn,.mini,.chip,.tag,.nav,.seg,.tab,.kpi small,.mt{text-transform:capitalize}
 input,textarea,code,kbd,.nocap,.nocap *,a[href^="mailto"],a[href^="http"],a[href^="tel"]{text-transform:none!important}
 
 h1{font:600 1.35rem var(--head);margin:0;letter-spacing:-.015em;color:var(--navy)}
