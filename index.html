@@ -1601,6 +1601,105 @@ body.rm #splash{display:none}
 .fin .rcols{max-width:none}
 .ck-b::after{display:none}.ck-b{box-shadow:inset 0 1px 0 #fff,0 30px 80px -30px rgba(1,30,70,.55),0 0 50px -18px rgba(120,115,245,.45)}
 
+/* ==== round 10: lead/contract window, stage bar layout ==== */
+.rw2 .rw-x{grid-template-columns:minmax(0,1fr) 20rem}
+.rw2 .rw-b{padding:1.2rem 1.4rem 2rem}
+/* stage bar */
+.rw-stg{display:flex;align-items:center;gap:.6rem 1rem;flex-wrap:wrap;padding:.4rem 1.6rem .9rem}
+.stg{list-style:none;margin:0;padding:0;display:flex;flex:1;min-width:0;counter-reset:s}
+.stg li{flex:1;position:relative;min-width:0}
+.stg li+li::before{content:"";position:absolute;left:-50%;right:50%;top:1.05rem;height:3px;margin:0 1.2rem;border-radius:3px;background:var(--line);z-index:0}
+.stg li.done::before,.stg li.on::before{background:#12794c}
+.stg button{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:.3rem;width:100%;border:0;background:none;padding:0;cursor:pointer;color:var(--muted);font:500 .82rem var(--body)}
+.stg i{display:grid;place-items:center;width:2.1rem;height:2.1rem;border-radius:50%;font:600 .85rem var(--body);font-style:normal;background:var(--card);border:2px solid var(--line);color:var(--muted);transition:transform .15s,box-shadow .2s}
+.stg i svg{width:1rem;height:1rem}
+.stg span{text-align:center;line-height:1.2}
+.stg li.done i{background:#12794c;border-color:#12794c;color:#fff}
+.stg li.done span{color:var(--ink)}
+.stg li.on i{background:#034ea2;border-color:#034ea2;color:#fff;box-shadow:0 0 0 5px rgba(3,78,162,.16)}
+.stg li.on span{color:var(--navy);font-weight:700}
+.stg li.pop i{animation:tagPop .5s}
+.stg button:hover i{box-shadow:0 0 0 4px rgba(3,78,162,.12)}
+.stg button:focus-visible{outline:none}.stg button:focus-visible i{outline:2px solid var(--blue);outline-offset:2px}
+.stg.lost{opacity:.55}
+.stg-x{border:1px solid var(--line);background:var(--card);color:var(--muted);border-radius:10px;padding:.45rem .8rem;font:500 .82rem var(--body);cursor:pointer}
+.stg-x:hover{color:var(--red);border-color:var(--red)}
+body[data-theme=dark] .stg li.on span{color:#fff}
+/* NOW card */
+.now{max-width:56rem;padding:1.3rem 1.4rem 1.2rem;margin:0 0 1.6rem;border-radius:20px;background:var(--card);border:2px solid #034ea2;box-shadow:0 18px 40px -26px rgba(3,78,162,.6);position:relative;overflow:hidden}
+.now::before{content:"";position:absolute;inset:0 0 auto 0;height:5px;background:linear-gradient(90deg,#034ea2,#5aa0ff)}
+.now.fin2{border-color:#12794c}.now.fin2::before{background:linear-gradient(90deg,#12794c,#33b37a)}
+.now.lost{border-color:var(--red)}.now.lost::before{background:var(--red)}
+.now-n{font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:var(--blue)}
+.now-h h3{margin:.2rem 0 .3rem;font:700 1.6rem/1.15 var(--head);color:var(--navy);text-wrap:balance}
+.now-h p{margin:0;font-size:1.08rem;color:var(--ink)}
+.now-f{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,15rem),1fr));gap:.2rem 1.2rem;margin-top:1rem}
+.now-f .rf{grid-template-columns:1fr;gap:.25rem;border:0;padding:.25rem 0}
+.now-f .rf>span{font-size:.84rem;font-weight:600;color:var(--ink)}
+.now-f input,.now-f select,.now-f textarea{min-height:2.7rem;font-size:1rem}
+.now-ck{margin-top:1rem;padding:.8rem .9rem;border-radius:14px;background:var(--card2);border:1px solid var(--line);display:grid;gap:.2rem}
+.now-ck>b{font-size:.8rem;color:var(--muted);margin-bottom:.2rem}
+.now-ck .ck-i{padding:.35rem .2rem}
+.now-a{display:flex;flex-wrap:wrap;align-items:center;gap:.6rem;margin-top:1.1rem}
+.now-a .btn{min-height:3rem;padding:.7rem 1.3rem;font-size:1.02rem;border-radius:13px}
+.now-go{background:#12794c}.now-go:hover{background:#0d5e3b}.now-go svg{width:1.1rem;height:1.1rem}
+.now-note{margin:.9rem 0 0;color:var(--muted)}
+/* all details: sections as tiles */
+.rw-all{max-width:56rem;margin:0 0 1.2rem}
+.rw-allh{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;margin-bottom:.6rem}
+.rw-allh h3{margin:0;font:600 1.15rem var(--head);color:var(--navy)}
+.rw2 .rw-prog{display:flex;align-items:center;gap:.6rem;margin:0;min-width:12rem}.rw2 .rw-prog i{flex:1;margin:0}
+.rw2 .rw-steps{display:grid;grid-template-columns:repeat(auto-fill,minmax(10.5rem,1fr));gap:.45rem}
+.rw2 .rw-steps button{padding:.55rem .6rem;border:1px solid var(--line);background:var(--card);border-radius:12px;gap:.55rem;height:100%}
+.rw2 .rw-steps button:hover{border-color:var(--blue);background:var(--card)}
+.rw2 .rw-steps button.on{outline:0;border-color:#034ea2;box-shadow:0 0 0 3px rgba(3,78,162,.14)}
+.rw2 .rw-steps i{width:1.6rem;height:1.6rem;font-size:.75rem}
+.rw2 .rw-steps b{font-size:.88rem}.rw2 .rw-steps small{font-size:.74rem}
+.rw2 .rw-p{max-width:56rem;padding-top:.4rem;border-top:1px dashed var(--line)}
+.rw2 .rw-sh h3{font-size:1.2rem}
+/* activity */
+.rw-act{border-left:1px solid var(--line);overflow:auto;padding:1.1rem 1.1rem 2rem;background:rgba(1,43,89,.02)}
+body[data-theme=dark] .rw-act{background:rgba(255,255,255,.02)}
+.rw-act h3{margin:0 0 .7rem;font:600 1.1rem var(--head);color:var(--navy)}
+.act-add{display:grid;grid-template-columns:auto 1fr;gap:.4rem;margin-bottom:1rem}
+.act-add input{grid-column:1/-1;min-height:2.6rem}
+.act-add select{min-height:2.4rem}
+.act-add .btn{min-height:2.4rem;border-radius:10px}
+.act-g{margin:.6rem 0 .35rem;font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:var(--muted)}
+.act{list-style:none;margin:0;padding:0;position:relative}
+.act::before{content:"";position:absolute;left:.95rem;top:.4rem;bottom:.4rem;width:2px;background:var(--line)}
+.act li{position:relative;display:flex;gap:.65rem;padding:.4rem 0}
+.act li>i{position:relative;z-index:1;flex:0 0 auto;display:grid;place-items:center;width:1.9rem;height:1.9rem;border-radius:50%;background:var(--card);border:1.5px solid var(--line);color:var(--blue)}
+.act li>i svg{width:.9rem;height:.9rem}
+.act li.act-stg>i{background:#034ea2;border-color:#034ea2;color:#fff}
+.act li.act-pay>i{background:#12794c;border-color:#12794c;color:#fff}
+.act li div{min-width:0}.act b{font-size:.88rem}.act p{margin:.05rem 0;font-size:.85rem;color:var(--ink);overflow-wrap:anywhere}.act small{font-size:.74rem;color:var(--muted)}
+.act-e{color:var(--muted);font-size:.85rem;padding-left:2.6rem!important}
+@media(max-width:1100px){.rw2 .rw-x{grid-template-columns:1fr;grid-template-rows:none;overflow:auto}.rw2 .rw-main{min-height:auto}.rw2 .rw-b{overflow:visible}.rw-act{border-left:0;border-top:1px solid var(--line);overflow:visible}}
+@media(max-width:640px){.rw-stg{padding:.3rem .8rem .7rem;overflow-x:auto;flex-wrap:nowrap}.stg{min-width:30rem}.stg span{font-size:.72rem}.now{padding:1rem}.now-h h3{font-size:1.35rem}.now-a .btn{width:100%;justify-content:center}.rw2 .rw-b{padding:1rem .8rem}}
+
+.now-f input,.now-f select,.now-f textarea{border:1.5px solid var(--line);border-radius:10px;background:var(--card);padding:.45rem .7rem;width:100%;box-sizing:border-box}
+.now-f input:focus,.now-f select:focus,.now-f textarea:focus{border-color:var(--blue);outline:none;box-shadow:0 0 0 3px rgba(3,78,162,.15)}
+.rw2 .now,.rw2 .rw-all,.rw2 .rw-p,.rw2 .fin,.rw2 .fin>*,.rw2 .rw-todo,.mb.full .rw2 .rcols{max-width:none}
+.rw2 .rw-x{grid-template-columns:minmax(0,1fr) 22rem}
+
+/* list pages: stage pipeline */
+.pipe{display:grid;grid-template-columns:repeat(auto-fit,minmax(9.5rem,1fr));gap:.5rem;margin:0 0 1rem}
+.pp{position:relative;display:flex;align-items:center;gap:.6rem;padding:.7rem .8rem;border-radius:14px;border:1px solid var(--line);background:var(--card);cursor:pointer;text-align:left;color:var(--ink);transition:border-color .15s,box-shadow .15s}
+.pp:hover{border-color:var(--blue)}
+.pp i{flex:0 0 auto;display:grid;place-items:center;width:1.9rem;height:1.9rem;border-radius:50%;font:600 .8rem var(--body);font-style:normal;background:var(--blue-bg);color:var(--blue)}
+.pp span{display:flex;flex-direction:column;min-width:0}.pp b{font-size:.9rem}.pp small{font-size:.76rem;color:var(--muted);white-space:nowrap}
+.pp.pw i{background:var(--green-bg);color:var(--green)}.pp.pl i{background:var(--red-bg);color:var(--red)}
+.pp.on{border-color:#034ea2;box-shadow:0 0 0 3px rgba(3,78,162,.16)}
+.pp.on i{background:#034ea2;color:#fff}
+.pipe-f{margin:-.4rem 0 1rem;font-size:.88rem;color:var(--muted);display:flex;align-items:center;gap:.6rem}
+.sdots{display:inline-flex;gap:3px;align-items:center;margin-right:.4rem}
+.sdots i{width:7px;height:7px;border-radius:50%;background:var(--line)}
+.sdots i.d{background:#12794c}.sdots i.o{background:#034ea2;box-shadow:0 0 0 2px rgba(3,78,162,.2)}
+.sdots.lost i{background:var(--red-bg)}
+.act-add{grid-template-columns:1fr auto}.act-add select{grid-row:1;grid-column:1}.act-add .btn{grid-row:1;grid-column:2}.act-add input{grid-row:2}
+@media(max-width:640px){.pipe{grid-template-columns:repeat(2,1fr)}}
+
 /* ==========================================================================
    06 · Adaptive layout
    Breakpoints: 1400 (laptop) · 1100 (small laptop / tablet landscape)
@@ -3916,20 +4015,21 @@ function recOpen(kind,id){const D=REC[kind],r=id?D.get(id):null;if(id&&!r)return
   W.v.log=W.v.log||[];W.v.photos=(W.v.photos||[]).filter(SAFE.img);tmp=W.v.photos;tmpDraw=()=>{recThumbs();recRail()};
   const ord=RSTEPS[kind],tabs=D.tabs(W).sort((a,b)=>ord.indexOf(a.k)-ord.indexOf(b.k)),tab=tabs.some(t=>t.k==RTAB[kind])?RTAB[kind]:tabs[0].k,pos=W.list.indexOf(W.id);W.steps=tabs.map(t=>t.k);
   const nm=k=>(RNAME[kind]||{})[k]||tabs.find(t=>t.k==k).t,hint=k=>{const h=RHINT[k];return typeof h=='object'?h[kind]:h||''};
-  openModal(`<div class="rw">
+  openModal(`<div class="rw rw2">
    <div class="rw-bar"><button class="rb1 sv" onclick="recSave(false)">${svg('M5 12l5 5L20 7')}Save</button>${W.isNew?'':D.actions(W)}<span class="rw-sp"></span>
     ${W.isNew||W.list.length<2?'':`<button class="rb1" title="Save this one and open the previous ${esc(D.label.toLowerCase())}" ${A('recNav',-1)} ${pos<=0?'disabled':''}>&lsaquo; Previous</button><span class="rw-pos">${esc(D.label)} ${pos+1} of ${W.list.length}</span><button class="rb1" title="Save this one and open the next ${esc(D.label.toLowerCase())}" ${A('recNav',1)} ${pos>=W.list.length-1?'disabled':''}>Next &rsaquo;</button>`}
     <button class="rb1 cl" onclick="recClose()">${svg('M6 6l12 12M18 6L6 18')}Close</button></div>
    <div class="rw-h"><div><small>${esc(D.label)}${W.isNew?' · New':''}</small><h2>${esc(D.heading(W))}</h2>${W.isNew?'':`<div class="rw-hc">${telOf(W.v)?`<a class="nocap" href="tel:${esc(telOf(W.v).replace(/[^\d+]/g,''))}">${svg('M5 4h4l2 5-2.5 1.5a11 11 0 005 5L15 13l5 2v4a2 2 0 01-2 2A16 16 0 013 6a2 2 0 012-2')}${esc(telOf(W.v))}</a>`:''}${mailOf(W.v)?`<a class="nocap" href="mailto:${esc(mailOf(W.v))}">${svg('M4 6h16v12H4zM4 7l8 6 8-6')}${esc(mailOf(W.v))}</a>`:''}${W.v.town?`<span>${svg('M12 21s-7-6-7-11a7 7 0 0114 0c0 5-7 11-7 11zM12 12a2 2 0 100-4 2 2 0 000 4z')}${esc(W.v.town)}</span>`:''}</div>`}</div><div class="rw-hk">${D.headStats(W)}</div></div>
-   <div class="rw-x"><aside class="rw-rail"><div class="rw-prog"><span id="rwPct"></span><i><b id="rwBar"></b></i></div>
-     <ol class="rw-steps">${tabs.map((t,i)=>`<li><button type="button" data-t="${t.k}" class="${t.k==tab?'on':''}" ${A('recTab',t.k)}><i>${i+1}</i><span><b>${esc(nm(t.k))}${REC_OPTIONAL.includes(t.k)?'<em class="rw-opt">Optional</em>':''}</b><small data-st="${t.k}"></small></span></button></li>`).join('')}</ol></aside>
-    <div class="rw-main"><div class="rw-b">${tabs.map((t,i)=>`<div class="rw-p ${t.k==tab?'on':''}" data-t="${t.k}" role="tabpanel"><div class="rw-sh"><small>Step ${i+1} of ${tabs.length}</small><h3>${esc(nm(t.k))}</h3><p>${esc(hint(t.k))}</p>${t.k=='customer'||t.k=='details'?`<p class="rw-req">Boxes marked <span class="rq">*</span> must be filled in. Boxes with ${MARK(0,1)} can only be changed by an administrator.</p>`:''}<div class="rw-todo" data-td="${t.k}" aria-live="polite"></div></div>${t.h(W)}</div>`).join('')}</div>
-     <div class="rw-foot"><button type="button" class="btn ghost" id="rwPrev" onclick="recStep(-1)"></button><span class="rw-sp"></span><button type="button" class="btn ghost" onclick="recSave(false)">Save</button><button type="button" class="btn" id="rwNext" onclick="recStep(1)"></button></div></div></div></div>`,'full');
-  W.nm=nm;recThumbs();recDocs();recFoot();recRail();
+   <div class="rw-stg" id="rwStg"></div>
+   <div class="rw-x"><div class="rw-main"><div class="rw-b"><section class="now" id="rwNow" aria-live="polite"></section>
+     <section class="rw-all" id="rwAll"><div class="rw-allh"><h3>All Details</h3><div class="rw-prog"><span id="rwPct"></span><i><b id="rwBar"></b></i></div></div><ol class="rw-steps">${tabs.map((t,i)=>`<li><button type="button" data-t="${t.k}" class="${t.k==tab?'on':''}" ${A('recTab',t.k)}><i>${i+1}</i><span><b>${esc(nm(t.k))}${REC_OPTIONAL.includes(t.k)?'<em class="rw-opt">Optional</em>':''}</b><small data-st="${t.k}"></small></span></button></li>`).join('')}</ol></section>
+    ${tabs.map((t,i)=>`<div class="rw-p ${t.k==tab?'on':''}" data-t="${t.k}" role="tabpanel"><div class="rw-sh"><h3>${esc(nm(t.k))}</h3><p>${esc(hint(t.k))}</p>${t.k=='customer'||t.k=='details'?`<p class="rw-req">Boxes marked <span class="rq">*</span> must be filled in. Boxes with ${MARK(0,1)} can only be changed by an administrator.</p>`:''}<div class="rw-todo" data-td="${t.k}" aria-live="polite"></div></div>${t.h(W)}</div>`).join('')}</div></div>
+    <aside class="rw-act" id="rwAct" aria-label="Activity"></aside></div></div>`,'full');
+  W.nm=nm;recThumbs();recDocs();recFoot();recRail();stgDraw();nowDraw();fitReveal();actDraw();
   if(!W.isNew){const todo=W.steps.find(k=>{const b=$(`#mbox .rw-steps button[data-t="${k}"]`);return b&&!b.classList.contains('ok')&&!REC_OPTIONAL.includes(k)});recTab(todo||W.steps[0])}grpInit($('#mbox .rw-p.on'));
-  $('#mbox .rw-x').addEventListener('change',e=>{const g=e.target.closest&&e.target.closest('.rg.gc');if(g)grpRefresh(g)});$('#mbox .rw-x').addEventListener('input',()=>{RW.dirty=1;clearTimeout(recRail.t);recRail.t=setTimeout(recRail,250)});$('#mbox .rw-x').addEventListener('change',e=>{RW.dirty=1;const c=e.target;if(c.classList&&c.classList.contains('rck')){const w=c.parentElement.querySelector('.ck-w');if(w)w.textContent=c.checked?'Done today by '+USER:''}recRail()});
-  drawThumbs()}
-function recTab(k){RTAB[RW.kind]=k;$$('#mbox .rw-steps button').forEach(b=>b.classList.toggle('on',b.dataset.t==k));$$('#mbox .rw-p').forEach(p=>p.classList.toggle('on',p.dataset.t==k));grpInit($('#mbox .rw-p.on'));$('#mbox .rw-b').scrollTop=0;recFoot();recRail();const b=$(`#mbox .rw-steps button[data-t="${k}"]`);if(b&&b.scrollIntoView)b.scrollIntoView({block:'nearest',inline:'nearest'})}
+  $('#mbox .rw-x').addEventListener('change',e=>{const g=e.target.closest&&e.target.closest('.rg.gc');if(g)grpRefresh(g)});$('#mbox .rw-x').addEventListener('input',e=>{nowSync(e);RW.dirty=1;clearTimeout(recRail.t);recRail.t=setTimeout(recRail,250)});$('#mbox .rw-x').addEventListener('change',e=>{nowSync(e);RW.dirty=1;const c=e.target;if(c.classList&&c.classList.contains('rck')){const w=c.parentElement.querySelector('.ck-w');if(w)w.textContent=c.checked?'Done today by '+USER:''}recRail()});
+  RW.ready=1;drawThumbs()}
+function recTab(k){RTAB[RW.kind]=k;$$('#mbox .rw-steps button').forEach(b=>b.classList.toggle('on',b.dataset.t==k));$$('#mbox .rw-p').forEach(p=>p.classList.toggle('on',p.dataset.t==k));grpInit($('#mbox .rw-p.on'));recFoot();recRail();const al=$('#rwAll');if(RW.ready&&al&&al.scrollIntoView)al.scrollIntoView({block:'start',behavior:'smooth'})}
 function recStep(d){const S2=RW.steps,i=S2.indexOf(RTAB[RW.kind]);if(d>0&&i==S2.length-1){recSave(true);return}const n=S2[i+d];if(n)recTab(n)}
 function recFoot(){const S2=RW.steps,i=S2.indexOf(RTAB[RW.kind]),p=$('#rwPrev'),n=$('#rwNext');if(!p)return;
   p.hidden=i<=0;p.innerHTML=i>0?'&larr; Back: '+esc(RW.nm(S2[i-1])):'';n.innerHTML=i<S2.length-1?'Next: '+esc(RW.nm(S2[i+1]))+' &rarr;':'Save and finish';n.classList.toggle('green',i==S2.length-1)}
@@ -3962,6 +4062,73 @@ function recTodo(N){$$('#mbox .rw-todo').forEach(el=>{const k=el.dataset.td,m=(N
   if(el.dataset.h!==h){const was=el.dataset.h&&!el.querySelector('.td-ok');el.dataset.h=h;el.innerHTML=h;if(ok&&was)el.firstChild.classList.add('pop')}})}
 function recGo(id){const f=$('#f_'+id);if(!f)return;const p=f.closest('.rw-p');if(p&&!p.classList.contains('on'))recTab(p.dataset.t);const g=f.closest('.rg.gc');if(g&&g.classList.contains('shut'))grpOpen(g);
   setTimeout(()=>{f.scrollIntoView({block:'center',behavior:'smooth'});f.focus({preventScroll:true});const w=f.closest('.rf,.ff')||f;w.classList.remove('flash');void w.offsetWidth;w.classList.add('flash')},60)}
+/* ======== stages: where the job is now and what to do next ======== */
+const STG={lead:[
+  {s:'New',n:'Enquiry',todo:'Ring them back and book a home visit.',f:['source','productType','apptDate','apptTime','apptWith'],ck:['Customer called back within 24 hours','Survey appointment booked'],go:'Visit Done'},
+  {s:'Surveyed',n:'Home Visit',todo:'Write up what they want and send the quote.',f:['product','value','quoteType','followup'],ck:['Home survey carried out','Colour and glass samples shown','Brochure left with customer'],go:'Quote Sent'},
+  {s:'Quoted',n:'Quote',todo:'Follow up and win the job.',f:['followup','next','payMethod','result'],ck:['Payment and finance options explained','Written quote sent','Follow-up call made after quote'],go:'Mark As Won'},
+  {s:'Won',n:'Won',todo:'Turn it into a contract so the job can be ordered.',f:['value','payMethod'],ck:[],go:''}],
+ contract:[
+  {s:'Deposit due',n:'Deposit',todo:'Get the contract signed, take the deposit and book the check survey.',f:['value','deposit','depDue','survey','surveyor'],ck:['Contract signed by customer','Deposit taken','Survey visit booked'],pay:1,go:'Check Survey Done'},
+  {s:'Survey done',n:'Check Survey',todo:'Sizes are confirmed. Order the frames and glass.',f:['order','delDate'],ck:['Sizes measured and confirmed','Frames and glass ordered'],go:'Ordered'},
+  {s:'Ordered',n:'Ordered',todo:'Check the delivery in and agree a fitting date.',f:['delDate','fit','fitter1','fitter2'],ck:['Delivery checked in, nothing damaged','Fit date agreed with customer'],go:'Fitting Booked'},
+  {s:'Fitting booked',n:'Fitting Booked',todo:'Fit the job.',f:['fit','fitter1','fitter2','fitter3','fitNotes'],ck:['Windows and doors fitted'],go:'Fitted'},
+  {s:'Fitted',n:'Fitted',todo:'Put any snags right, collect the balance and sign off.',f:['balDue'],ck:['Snags put right','Balance paid in full','Handover form signed','Guarantee sent to customer'],pay:1,go:'Complete'},
+  {s:'Complete',n:'Complete',todo:'Job finished. Nothing more to do.',f:[],ck:[],go:''}]};
+const STG_LOST={s:'Lost',n:'Lost',todo:'This lead was lost. Note why, or reopen it if they come back.',f:['result','resultDate'],ck:[],go:''};
+const stgCur=()=>{const e=$('#f_stage');return(e&&e.value)||RW.v.stage||STG[RW.kind][0].s};
+const stgOf=s=>s=='Lost'?STG_LOST:STG[RW.kind].find(x=>x.s==s)||STG[RW.kind][0];
+const STICK='M5 12l5 5L20 7';
+function stgDraw(){const el=$('#rwStg');if(!el||!RW)return;const L=STG[RW.kind],cur=stgCur(),i=L.findIndex(x=>x.s==cur),lost=cur=='Lost',hold=RW.kind=='contract'&&RW.v.onHold=='Yes',can=RW.kind=='lead'&&!RW.isNew;
+  el.innerHTML=`<ol class="stg ${lost?'lost':''}">${L.map((x,j)=>`<li class="${j<i?'done':j==i?'on':''}"><button type="button" ${j==i?'aria-current="step"':''} ${A('stgSet',x.s)} title="${j==i?'This is where the job is now':'Move to '+esc(x.n)}"><i>${j<i?svg(STICK):j+1}</i><span>${esc(x.n)}</span></button></li>`).join('')}</ol>
+   ${lost?`<span class="tag r">Lost</span>`:''}${hold?'<span class="tag y">On Hold</span>':''}${RW.kind=='contract'&&RW.v.cancelled=='Yes'?'<span class="tag r">Cancelled</span>':''}
+   ${can&&cur!='Won'?`<button type="button" class="stg-x" ${A('stgSet',lost?'New':'Lost')}>${lost?'Reopen Lead':'Mark As Lost'}</button>`:''}`}
+/* the NOW card: what to do at this stage, the few boxes it needs, and the button to move on */
+function nowDraw(){const el=$('#rwNow');if(!el||!RW)return;const D=REC[RW.kind],cur=stgCur(),x=stgOf(cur),L=STG[RW.kind],i=L.indexOf(x),nx=L[i+1];
+  const F=D.fields(RW),vals={};x.f.forEach(k=>{const e=$('#f_'+k);vals[k]=e?e.value:RW.v[k]});
+  const box=x.f.map(k=>{const f=F.find(z=>z.k==k);if(!f||!$('#f_'+k))return'';return rfH({...f,dep:0,nx:0,adv:0},vals).replace(/id="f_/g,'id="n_').replace(/for="f_/g,'for="n_')}).join('');
+  const C=$$('#mbox .rck'),ck=x.ck.map(k=>C.find(c=>c.dataset.k==k)).filter(Boolean);
+  const list=ck.length?`<div class="now-ck"><b>Tick When Done</b>${ck.map(c=>`<label class="ck-i"><input type="checkbox" class="nck" data-k="${esc(c.dataset.k)}" ${c.checked?'checked':''}><span><b>${esc(c.dataset.k)}</b></span></label>`).join('')}</div>`:'';
+  const pay=x.pay&&ISADM()?`<button type="button" class="btn ghost" onclick="nowPay()">${svg(IC.finance)}Take A Payment</button>`:'';
+  const go=RW.kind=='lead'&&cur=='Won'?(canSee('contracts')?`<button type="button" class="btn now-go" onclick="recConvert()">Convert To Contract ${svg('M5 12h14M13 6l6 6-6 6')}</button>`:'')
+    :x.go&&nx?`<button type="button" class="btn now-go" ${A('stgSet',nx.s)}>${esc(x.go)} ${svg('M5 12h14M13 6l6 6-6 6')}</button>`:'';
+  const lost=RW.kind=='lead'&&cur=='Lost'?`<button type="button" class="btn now-go" ${A('stgSet','New')}>Reopen Lead</button>`:'';
+  el.className='now'+(cur=='Complete'||cur=='Won'?' fin2':cur=='Lost'?' lost':'');
+  el.innerHTML=`<div class="now-h"><span class="now-n">${i>=0?'Stage '+(i+1)+' of '+L.length:'Closed'}</span><h3>${esc(x.n)}</h3><p>${esc(x.todo)}</p></div>
+   ${box?`<div class="now-f">${box}</div>`:''}${list}
+   ${RW.isNew?'<p class="now-note">Fill in the customer below first, then press Save.</p>':''}
+   <div class="now-a">${pay}<span class="rw-sp"></span>${lost||go}</div>`}
+function nowSync(e){const t=e.target;if(!t||!t.classList)return;
+  if(t.classList.contains('nck')){const c=$$('#mbox .rck').find(z=>z.dataset.k==t.dataset.k);if(c&&c.checked!=t.checked){c.checked=t.checked;c.dispatchEvent(new Event('change',{bubbles:true}))}return}
+  if(!t.id){if(t.classList.contains('rck')){const n=$$('#rwNow .nck').find(z=>z.dataset.k==t.dataset.k);if(n)n.checked=t.checked}return}
+  if(t.id.startsWith('n_')){const r=$('#f_'+t.id.slice(2));if(r&&r.value!==t.value){r.value=t.value;r.dispatchEvent(new Event(e.type,{bubbles:true}))}}
+  else if(t.id.startsWith('f_')){const n=$('#n_'+t.id.slice(2));if(n&&n.value!==t.value)n.value=t.value}
+  else if(t.classList.contains('rck')){const n=$$('#rwNow .nck').find(z=>z.dataset.k==t.dataset.k);if(n)n.checked=t.checked}}
+function nowPay(){recTab('finance');setTimeout(()=>{if($('#finPay')&&$('#finPay').hidden)payOpen()},120)}
+/* move the job to a stage, then save so everyone sees it */
+function stgSet(st){if(!RW)return;const e=$('#f_stage'),cur=stgCur();if(!e||st==cur)return;
+  if(![...e.options].some(o=>o.value==st)){toast('That stage is not available');return}
+  const L=STG[RW.kind],a=L.findIndex(x=>x.s==cur),b=L.findIndex(x=>x.s==st),x=stgOf(cur),nm=stgOf(st).n;
+  if(b>a&&a>=0){const left=x.ck.filter(k=>{const c=$$('#mbox .rck').find(z=>z.dataset.k==k);return c&&!c.checked}).length;
+    if(left&&!confirm(left+(left>1?' things on the list are':' thing on the list is')+' not ticked yet. Move to '+nm+' anyway?'))return}
+  else if(!confirm('Move this '+REC[RW.kind].label.toLowerCase()+' to '+nm+'?'))return;
+  e.value=st;e.dispatchEvent(new Event('change',{bubbles:true}));
+  if(RW.kind=='contract')RW.v.log.unshift({t:'Stage',n:(cur||'-')+' to '+st,by:USER,at:today()});
+  if(st=='Won'||st=='Lost'){const p=$('#f_prob');if(p)p.value=st=='Won'?100:0}
+  if(recSave(false))setTimeout(()=>{const s=$('#rwStg .stg li.on');if(s)s.classList.add('pop');toast('Moved to '+nm)},60);else{stgDraw();nowDraw()}}
+/* activity down the side: notes, calls, stage changes, payments and visits, newest first */
+function actDraw(){const el=$('#rwAct');if(!el||!RW)return;const v=RW.v,td=today(),I={Call:'M5 4h4l2 5-2.5 1.5a11 11 0 005 5L15 13l5 2v4a2 2 0 01-2 2A16 16 0 013 6a2 2 0 012-2',Email:'M4 6h16v12H4zM4 7l8 6 8-6',Visit:IC.fitting,Stage:STICK,Pay:IC.finance};
+  const E=[...(v.log||[]).map(e=>({d:e.at||e.d||'',t:/^Stage/.test(e.t)?'Stage':e.t||'Note',n:/^Stage: /.test(e.t)?e.t.slice(7):e.n||'',by:e.by||''})),
+    ...(RW.kind=='contract'?(v.pay||[]).map(p=>({d:p.date,t:'Pay',n:money(p.amt)+(p.kind?' · '+p.kind:''),by:p.by||''})):[]),
+    ...(v.apptDate?[{d:v.apptDate,t:'Visit',n:[v.apptType,v.apptTime,v.apptWith].filter(Boolean).join(' · '),by:''}]:[]),
+    ...(RW.kind=='contract'&&v.fit?[{d:v.fit,t:'Visit',n:'Fitting'+(v.fitter?' · '+v.fitter:''),by:''}]:[]),
+    ...((v.created||v.cdate)?[{d:v.created||v.cdate,t:'Stage',n:REC[RW.kind].label+' created',by:v.takenBy||v.createdBy||''}]:[])].filter(x=>x.d).sort((a,b)=>a.d<b.d?1:a.d>b.d?-1:0);
+  const up=E.filter(x=>x.d>td),past=E.filter(x=>x.d<=td);
+  const row=x=>`<li class="act-${esc(x.t=='Pay'?'pay':x.t=='Stage'?'stg':'n')}"><i>${svg(I[x.t]||IC.edit)}</i><div><b>${esc(x.t=='Pay'?'Payment':x.t)}</b>${x.n?`<p>${esc(x.n)}</p>`:''}<small>${fd(x.d)}${x.by?' · '+esc(x.by):''}</small></div></li>`;
+  el.innerHTML=`<h3>Activity</h3><div class="act-add"><select id="an_t" aria-label="Type">${['Note','Call','Email','Visit'].map(x=>`<option>${x}</option>`).join('')}</select><input id="an_n" maxlength="300" placeholder="What happened?" aria-label="What happened" onkeydown="if(event.key=='Enter'){event.preventDefault();actAdd()}"><button type="button" class="btn sm" onclick="actAdd()">Add</button></div>
+   ${up.length?`<p class="act-g">Coming Up</p><ul class="act">${up.reverse().map(row).join('')}</ul>`:''}<p class="act-g">History</p><ul class="act">${past.map(row).join('')||'<li class="act-e">Nothing yet.</li>'}</ul>`}
+function actAdd(){const n=SAFE.text(($('#an_n')||{}).value,300);if(!n){fieldErr($('#an_n'),'Type what happened');return}const t=['Note','Call','Email','Visit'].includes($('#an_t').value)?$('#an_t').value:'Note';
+  const nt=$('#f_notes');if(nt)RW.v.notes=nt.value;RW.v.log.unshift({t,n,by:USER,at:today()});RW.dirty=1;recRedraw('notes');actDraw();const f=$('#rwAct .act li');if(f)f.classList.add('fin-in');toast(t+' added. Press Save to keep it.')}
 function recRedraw(t){const D=REC[RW.kind],x=D.tabs(RW).find(z=>z.k==t),p=$(`#mbox .rw-p[data-t="${t}"]`);if(x&&p)p.innerHTML=x.h(RW);recRail()}
 function recRead(){const D=REC[RW.kind],o=readFields(D.fields(RW));if(!o)return null;
   const at={...(RW.v.chkAt||{})};$$('#mbox .rck').forEach(c=>{const k=c.dataset.k;(o.chk=o.chk||{})[k]=c.checked;if(c.checked&&!at[k])at[k]={d:today(),by:USER};if(!c.checked)delete at[k]});o.chkAt=at;
@@ -3971,8 +4138,8 @@ function recSave(close){busyBtn($('#mbox .rw-bar .sv'));const D=REC[RW.kind],o=r
 function recNav(d){const L=RW.list,i=L.indexOf(RW.id),n=d=='first'?0:d=='last'?L.length-1:i+d;if(n<0||n>=L.length)return;const kind=RW.kind;if(RW.dirty&&!recSave(false))return;recOpen(kind,L[n])}
 /* small inline lists inside a record */
 function recAdd(list,fs,tab){const o={};for(const k of fs){const e=$('#ra_'+k);o[k]=e?SAFE.text(e.value,300):''}if(!Object.values(o).some(Boolean)){toast('Fill in the details first');return}
-  RW.v[list]=RW.v[list]||[];RW.v[list].unshift({...o,by:USER,at:today()});RW.dirty=1;recRedraw(tab)}
-function recDel(list,i,tab){RW.v[list].splice(i,1);RW.dirty=1;recRedraw(tab)}
+  RW.v[list]=RW.v[list]||[];RW.v[list].unshift({...o,by:USER,at:today()});RW.dirty=1;recRedraw(tab);actDraw()}
+function recDel(list,i,tab){RW.v[list].splice(i,1);RW.dirty=1;recRedraw(tab);actDraw()}
 /* closing with changes: ask inside the window (a separate popup would replace the record) */
 function recClose(){if(!RW||!RW.dirty){closeModal();return}const w=$('#mbox .rw');if(!w){closeModal();return}let a=$('#rwAsk');
   if(!a){w.insertAdjacentHTML('beforeend',`<div class="rw-ask" id="rwAsk" role="alertdialog" aria-modal="true" aria-labelledby="rwAskT"><div class="rw-ask-b"><h3 id="rwAskT">Save your changes?</h3><p>You have changed this ${esc(REC[RW.kind].label.toLowerCase())}. If you close without saving, the changes are lost.</p>
@@ -4137,7 +4304,7 @@ REC.contract={label:'Contract',
 const PAYM=['Bank transfer','Card','Cheque','Cash','Finance'],PAYK=['Deposit','Stage payment','Final balance','Other'];
 function fitSync(c){if(c&&c.fitter&&![1,2,3,4,5,6].some(i=>c['fitter'+i]))String(c.fitter).split(/,\s*/).slice(0,6).forEach((x,i)=>c['fitter'+(i+1)]=x)}
 /* fitters 2 to 6 only appear once the one before is filled in */
-function fitReveal(){if(!RW||RW.kind!='contract')return;for(let i=2;i<=6;i++){const e=$('#f_fitter'+i),pv=$('#f_fitter'+(i-1));if(!e)continue;const w=e.closest('.rf')||e,pw=pv&&(pv.closest('.rf')||pv);
+function fitReveal(){if(!RW||RW.kind!='contract')return;for(const P of ['f_','n_'])for(let i=2;i<=6;i++){const e=$('#'+P+'fitter'+i),pv=$('#'+P+'fitter'+(i-1))||$('#f_fitter'+(i-1));if(!e)continue;const w=e.closest('.rf')||e,pw=pv&&(pv.closest('.rf')||pv);
   const show=!!e.value||!!(pv&&pv.value&&!(pw&&pw.hidden));if(w.hidden==show){w.hidden=!show;if(show){w.classList.remove('fin-in');void w.offsetWidth;w.classList.add('fin-in')}}}}
 function finNums(){const g=k=>{const e=$('#f_'+k);return e?e.value:RW.v[k]},val=+g('value')||0,paid=+g('paid')||0,rate=+(g('vatRate')??CO.vat??20)||0,dep=+g('deposit')||0;
   const vat=Math.round((val-val/(1+rate/100))*100)/100;return{val,paid,rate,vat,net:val-vat,bal:Math.round((val-paid)*100)/100,dep,depDue:g('depDue'),balDue:g('balDue')}}
@@ -4173,7 +4340,7 @@ function finKeep(){const cur=readFields(CFINF());if(!cur)return false;Object.ass
 function recPay(){if(!need(ISADM,'Recording payments'))return;const e=$('#ra_amt'),amt=SAFE.num(e.value,{max:1e7});if(!(amt>0)){fieldErr(e,'Type the amount paid');return}
   if(!finKeep())return;const n=finNums();if(amt>n.bal+0.005&&n.val>0&&!confirm('That is more than the balance of '+money(n.bal)+'. Record it anyway?'))return;
   RW.v.pay=RW.v.pay||[];RW.v.pay.push({amt,date:SAFE.date($('#ra_date').value)||today(),method:PAYM.includes($('#ra_method').value)?$('#ra_method').value:'Other',kind:PAYK.includes($('#ra_kind').value)?$('#ra_kind').value:'Other',ref:SAFE.text($('#ra_ref').value,60),by:USER});
-  RW.v.paid=Math.round(((+RW.v.paid||0)+amt)*100)/100;RW.dirty=1;recRedraw('finance');finRe();
+  RW.v.paid=Math.round(((+RW.v.paid||0)+amt)*100)/100;RW.dirty=1;recRedraw('finance');finRe();actDraw();
   const b=$('#finSum .fin-big');if(b)b.classList.add('pop');toast(money(amt)+' payment added. Press Save to keep it.')}
 function recPayDel(i){if(!need(ISADM,'Removing payments'))return;const p=(RW.v.pay||[])[i];if(!p||!confirm('Remove the '+money(p.amt)+' payment from '+fd(p.date)+'?'))return;if(!finKeep())return;
   RW.v.pay.splice(i,1);RW.v.paid=Math.max(0,Math.round(((+RW.v.paid||0)-p.amt)*100)/100);RW.dirty=1;recRedraw('finance');finRe();toast('Payment removed. Press Save to keep the change.')}
@@ -4202,17 +4369,24 @@ function leadList(){const U=UI.lead,td=today(),tm=addDays(1),yd=addDays(-1),[ws,
   const V={live:isOpen,web:l=>isOpen(l)&&l.source=='Website'&&l.stage=='New',today:l=>ap(l).includes(td),tom:l=>ap(l).includes(tm),yest:l=>ap(l).includes(yd),week:l=>ap(l).some(d=>d>=ws&&d<=we),
     unassigned:l=>isOpen(l)&&(!l.owner||l.owner=='Unassigned'||!ap(l).length),nores:l=>ap(l).some(d=>d<td)&&!l.result&&isOpen(l),due:l=>isOpen(l)&&l.followup&&l.followup<=td,won:l=>l.stage=='Won',lost:l=>l.stage=='Lost',all:()=>true}[U.f]||(()=>true);
   const val={id:l=>l.id,created:l=>l.created||'',name:l=>l.name,town:l=>addrOf(l),pc:l=>l.homePc||'',tel:telOf,email:mailOf,owner:l=>l.owner||'~',source:l=>l.source,value:l=>+l.value,followup:l=>l.followup||'9999',stage:l=>STAGES.indexOf(l.stage),appt:l=>nextAppt(l)||'9999'}[U.sort]||(l=>l.id);
-  return S.leads.filter(l=>V(l)&&(U.src=='all'||l.source==U.src)&&(U.own=='all'||(l.owner||'Unassigned')==U.own)&&hit(l)).sort((a,b)=>cmp(val(a),val(b))*U.dir||cmp(a.id,b.id))}
+  return S.leads.filter(l=>V(l)&&(!U.st||(l.stage||'New')==U.st)&&(U.src=='all'||l.source==U.src)&&(U.own=='all'||(l.owner||'Unassigned')==U.own)&&hit(l)).sort((a,b)=>cmp(val(a),val(b))*U.dir||cmp(a.id,b.id))}
+/* ---- list pages: the same stages as the window, with counts; click one to show only those ---- */
+function pipeSet(key,s){const U=UI[key];U.st=U.st==s?'':s;if(U.st)U.f='all';U.page=1;render()}
+function stgPipe(kind){const key=kind=='lead'?'lead':'ctr',U=UI[key],L=kind=='lead'?[...STG.lead,STG_LOST]:STG.contract,R2=kind=='lead'?S.leads:S.contracts.filter(c=>c.cancelled!='Yes'),f0=L[0].s;
+  return `<div class="pipe" role="group" aria-label="Stages">${L.map((x,i)=>{const B=R2.filter(r=>(r.stage||f0)==x.s),on=U.st==x.s;return `<button type="button" class="pp ${on?'on':''} ${x.s=='Lost'?'pl':''} ${x.s=='Won'||x.s=='Complete'?'pw':''}" aria-pressed="${on}" ${A('pipeSet',key,x.s)}><i>${x.s=='Lost'?'×':i+1}</i><span><b>${esc(x.n)}</b><small>${B.length} · ${m0(sum(B,r=>+r.value||0))}</small></span></button>`}).join('')}</div>
+   ${U.st?`<p class="pipe-f">Showing only <b>${esc((L.find(x=>x.s==U.st)||{}).n||U.st)}</b> <button type="button" class="mini" ${A('pipeSet',key,U.st)}>Show all stages</button></p>`:''}`}
+function stDots(kind,s){const L=STG[kind],i=L.findIndex(x=>x.s==s);return `<span class="sdots ${s=='Lost'?'lost':''}" title="${esc(s||'')}" aria-hidden="true">${L.map((x,j)=>`<i class="${j<i?'d':j==i?'o':''}"></i>`).join('')}</span>`}
 const LVIEWS=[['live','Active Leads'],['due','Next Action Due'],['won','Won, To Convert'],['lost','Lost'],['all','All Leads']];
 function vLeads(){const U=UI.lead,td=today(),open=S.leads.filter(l=>!['Won','Lost'].includes(l.stage)),pipe=sum(open,l=>l.value),wt=sum(open,l=>l.value*leadProb(l)/100),due=open.filter(l=>l.followup&&l.followup<=td),A2=allLeads(),won=A2.filter(l=>l.stage=='Won').length,lost=A2.filter(l=>l.stage=='Lost').length,ready=S.leads.filter(l=>l.stage=='Won');
   const L=leadList(),pg=paginate(U,L),cnt=k=>{const f=U.f;U.f=k;const n=leadList().length;U.f=f;return n};
   const sel=(k,arr,all)=>`<select class="fsel" ${AC('onchange','setUI','lead.'+k,'this.value')}><option value="all">${all}</option>${arr.map(x=>`<option ${U[k]==x?'selected':''}>${esc(x)}</option>`).join('')}</select>`;
   const tog=`<div class="seg2"><button class="${U.v=='list'?'on':''}" ${A('setUI','lead.v','list')}>List</button><button class="${U.v=='board'?'on':''}" ${A('setUI','lead.v','board')}>Board</button></div>`;
   const list=`<div class="tw"><table class="ptb abt"><thead><tr>${thS('lead','id','Lead No')}${thS('lead','name','Customer')}${thS('lead','town','Address','c-md')}${thS('lead','tel','Contact','c-sm')}${thS('lead','owner','Salesperson','c-md')}${thS('lead','source','Source','c-xl')}${thS('lead','appt','Next Visit','c-sm')}${thS('lead','value','Value','n')}<th class="ac"><span class="srt" ${A('sortBy','lead','stage')} style="cursor:pointer">Stage${U.sort=='stage'?`<span class="ar">${U.dir>0?'▲':'▼'}</span>`:''}</span></th></tr></thead><tbody>
-   ${pg.rows.map(l=>`<tr ${A('openLead',l.id)} class="clk-r"><td><b class="lref">${esc(l.id)}</b>${l.created?`<small class="sub">${fd(l.created)}</small>`:''}</td><td><b>${esc(([l.title,l.name].filter(Boolean).join(' ')))}</b>${l.company?`<small class="sub">${esc(l.company)}</small>`:''}</td><td class="c-md"><span class="cl2">${esc(addrOf(l)||'-')}</span>${l.homePc?`<small class="sub">${esc(l.homePc)}</small>`:''}</td><td class="c-sm">${esc(telOf(l)||'-')}${mailOf(l)?`<small class="sub nocap">${esc(mailOf(l))}</small>`:''}</td><td class="c-md">${esc(l.owner||'Unassigned')}</td><td class="c-xl">${esc(l.source||'-')}</td><td class="c-sm">${nextAppt(l)?fd(nextAppt(l)):'-'}</td><td class="n">${m0(l.value)}</td><td class="ac" onclick="event.stopPropagation()"><div class="acts r">${leadTag(l.stage)}${l.stage!='Lost'&&canSee('contracts')?`<button class="mini ${l.stage=='Won'?'pri':''}" ${A('convertLead',l.id)}>Convert</button>`:''}</div></td></tr>`).join('')||'<tr><td colspan="9" class="empty">'+emptyArt('survey','No leads in this view.')+'</td></tr>'}</tbody></table></div>${pagerH('lead',pg,'leads')}`;
+   ${pg.rows.map(l=>`<tr ${A('openLead',l.id)} class="clk-r"><td><b class="lref">${esc(l.id)}</b>${l.created?`<small class="sub">${fd(l.created)}</small>`:''}</td><td><b>${esc(([l.title,l.name].filter(Boolean).join(' ')))}</b>${l.company?`<small class="sub">${esc(l.company)}</small>`:''}</td><td class="c-md"><span class="cl2">${esc(addrOf(l)||'-')}</span>${l.homePc?`<small class="sub">${esc(l.homePc)}</small>`:''}</td><td class="c-sm">${esc(telOf(l)||'-')}${mailOf(l)?`<small class="sub nocap">${esc(mailOf(l))}</small>`:''}</td><td class="c-md">${esc(l.owner||'Unassigned')}</td><td class="c-xl">${esc(l.source||'-')}</td><td class="c-sm">${nextAppt(l)?fd(nextAppt(l)):'-'}</td><td class="n">${m0(l.value)}</td><td class="ac" onclick="event.stopPropagation()"><div class="acts r">${stDots('lead',l.stage)}${leadTag(l.stage)}${l.stage!='Lost'&&canSee('contracts')?`<button class="mini ${l.stage=='Won'?'pri':''}" ${A('convertLead',l.id)}>Convert</button>`:''}</div></td></tr>`).join('')||'<tr><td colspan="9" class="empty">'+emptyArt('survey','No leads in this view.')+'</td></tr>'}</tbody></table></div>${pagerH('lead',pg,'leads')}`;
   const board=`<div class="kan">${STAGES.map(s=>{const B=L.filter(l=>l.stage==s);return `<div class="col"><div class="colh"><b>${esc(s)}</b><span>${B.length} leads, ${m0(sum(B,l=>l.value))}</span></div>${B.map(l=>`<div class="lc"><div class="lt"><b ${A('openLead',l.id)} title="Open lead">${esc(l.name)} <small class="muted">${esc(l.id)}</small></b><span>${m0(l.value)}</span></div><p>${esc(l.product)}</p><p class="muted">${esc(l.town||'')}, via ${esc(l.source)}</p><p class="muted">${esc(l.next||'No next action set')}</p><div class="lb"><button class="mini" aria-label="Move back" ${A('mvLead',l.id,-1)}>&lsaquo;</button><button class="mini" aria-label="Move forward" ${A('mvLead',l.id,1)}>&rsaquo;</button><button class="mini" ${A('openLead',l.id)}>Open</button>${s=='Won'&&canSee('contracts')?`<button class="mini pri" ${A('convertLead',l.id)}>Convert</button>`:''}</div></div>`).join('')||'<p class="empty">Nothing here.</p>'}</div>`}).join('')}</div>`;
   return `<div class="head"><div><h1>Leads</h1><span class="muted">${esc((LVIEWS.find(x=>x[0]==U.f)||['','All'])[1])}: ${L.length} records</span></div><div class="tools"><button class="mini" onclick="contactList('lead')">Contact list</button><button class="mini" onclick="leadCsv()">Export CSV</button><button class="btn" onclick="editLead()">New lead</button></div></div>
   <div class="subbar"><span class="sb-l">Show</span><div class="views">${LVIEWS.map(([k,t])=>`<button class="chip ${U.f==k?'on':''}" ${A('setUI','lead.f',k)}>${esc(t)} <i>${cnt(k)}</i></button>`).join('')}<span class="vs"></span><label class="fl-own">Salesperson ${sel('own',OWNERS(),'Everyone')}</label></div><span class="sb-sp"></span>${tog}</div>
+  ${stgPipe('lead')}
   <div class="kpis"><button class="kpi" ${A('setUI','lead.f','live')}><small>Open Leads</small><b>${open.length}</b></button><div class="kpi"><small>Pipeline Value</small><b>${m0(pipe)}</b></div><div class="kpi"><small>Weighted Pipeline</small><b>${m0(wt)}</b><span class="ksub">Value x win chance</span></div><button class="kpi ${due.length?'warn':''}" ${A('setUI','lead.f','due')}><small>Next Action Due</small><b>${due.length}</b></button><button class="kpi ${ready.length?'warn':''}" ${A('setUI','lead.f','won')}><small>Won, To Convert</small><b>${ready.length}</b></button><div class="kpi"><small>Conversion Rate</small><b>${pc(won,won+lost)}</b><span class="ksub">${won} won, ${lost} lost</span></div></div>
   ${U.v=='board'?board:list}`}
 
@@ -4220,16 +4394,16 @@ function ctrList(){const U=UI.ctr,[ws,we]=weekRange(),nws=iso(new Date(new Date(
   const dd=c=>c.delDate||'',cur=c=>c.stage!='Complete'&&c.cancelled!='Yes';
   const V={cur,delw:c=>dd(c)>=ws&&dd(c)<=we,deln:c=>dd(c)>=nws&&dd(c)<=nwe,bal:c=>c.value-c.paid>0,uninv:c=>cur(c)&&c.invoiced!='Yes',sf:c=>cur(c)&&c.supplyOnly!='Yes',so:c=>cur(c)&&c.supplyOnly=='Yes',hold:c=>c.onHold=='Yes',fensa:fensaDue,comp:c=>c.stage=='Complete',all:()=>true}[U.f]||(()=>true);
   const val={id:c=>c.id,name:c=>c.name,addr:c=>addrOf(c),sold:c=>c.soldBy||'',office:c=>c.officeRef||'',site:siteOf,stage:c=>CSTAGES.indexOf(c.stage),fit:c=>c.fit||'9999',value:c=>+c.value,bal:c=>c.value-c.paid}[U.sort]||(c=>c.id);
-  return S.contracts.filter(c=>V(c)&&hit(c)).sort((a,b)=>cmp(val(a),val(b))*U.dir||cmp(a.id,b.id))}
+  return S.contracts.filter(c=>V(c)&&(!U.st||(c.stage||'Deposit due')==U.st)&&hit(c)).sort((a,b)=>cmp(val(a),val(b))*U.dir||cmp(a.id,b.id))}
 const CVIEWS=[['cur','All Current'],['delw','Deliveries This Week'],['deln','Deliveries Next Week'],['bal','Balances Outstanding'],['uninv','Uninvoiced'],['sf','Supply & Fit'],['so','Supply Only'],['hold','On Hold'],['fensa','FENSA To Notify'],['comp','Complete'],['all','All']];
 function vContracts(){const U=UI.ctr,L=ctrList(),pg=paginate(U,L),tv=sum(L,c=>c.value),bal=sum(L,c=>c.value-c.paid),cnt=k=>{const f=U.f;U.f=k;const n=ctrList().length;U.f=f;return n};
   const tog=`<div class="seg2"><button class="${U.v=='list'?'on':''}" ${A('setUI','ctr.v','list')}>List</button><button class="${U.v=='board'?'on':''}" ${A('setUI','ctr.v','board')}>Board</button></div>`;
   const board=`<div class="kan" style="grid-template-columns:repeat(${CSTAGES.length},minmax(11rem,1fr))">${CSTAGES.map(s=>{const B=L.filter(c=>c.stage==s);return `<div class="col"><div class="colh"><b>${esc(s)}</b><span>${B.length}, ${m0(sum(B,c=>c.value))}</span></div>${B.map(c=>`<div class="lc"><div class="lt"><b ${A('openContract',c.id)}>${esc(c.name)} <small class="muted">${esc(c.id)}</small></b><span>${m0(c.value)}</span></div><p>${esc(c.product)}</p><p class="muted">${esc(c.town||'')}${c.fit?', fit '+fd(c.fit):''}</p>${c.value-c.paid>0?`<p class="muted">Balance ${m0(c.value-c.paid)}</p>`:'<p><span class="tag g">Paid</span></p>'}</div>`).join('')||'<p class="empty">Nothing here.</p>'}</div>`}).join('')}</div>`;
   const list=`<div class="tw"><table class="ptb abt"><thead><tr>${thS('ctr','id','Contract No')}${thS('ctr','name','Cust Name')}${thS('ctr','addr','Address','c-md')}${thS('ctr','sold','Sold By','c-sm')}${thS('ctr','office','Office Ref','c-xl')}${thS('ctr','site','Site Address','c-xl')}${thS('ctr','fit','Fit Date','c-sm')}${thS('ctr','value','Value','n')}${thS('ctr','bal','Balance','n c-sm')}<th class="ac"><span class="srt" ${A('sortBy','ctr','stage')} style="cursor:pointer">Stage${U.sort=='stage'?`<span class="ar">${U.dir>0?'▲':'▼'}</span>`:''}</span></th></tr></thead><tbody>
-   ${pg.rows.map(c=>`<tr ${A('openContract',c.id)} class="clk-r"><td><b class="lref">${esc(c.id)}</b>${c.lead?`<br><span class="muted" style="font-size:.7rem">From ${esc(c.lead)}</span>`:''}</td><td><b>${esc(c.name)}</b>${c.flash?`<br><span class="flash">${esc(c.flash)}</span>`:''}</td><td class="c-md wrapc">${esc(addrOf(c)||'-')}</td><td class="c-sm">${esc(c.soldBy||'-')}</td><td class="c-xl">${esc(c.officeRef||'')}</td><td class="c-xl wrapc">${esc(siteOf(c)||'-')}</td><td class="c-sm">${fd(c.fit)}</td><td class="n">${m0(c.value)}</td><td class="n c-sm">${m0(c.value-c.paid)}</td><td class="ac"><div class="acts r">${stTag(c.stage)}</div></td></tr>`).join('')||'<tr><td colspan="10" class="empty">'+emptyArt('files','No contracts in this view.')+'</td></tr>'}</tbody></table></div>${pagerH('ctr',pg,'contracts')}`;
+   ${pg.rows.map(c=>`<tr ${A('openContract',c.id)} class="clk-r"><td><b class="lref">${esc(c.id)}</b>${c.lead?`<br><span class="muted" style="font-size:.7rem">From ${esc(c.lead)}</span>`:''}</td><td><b>${esc(c.name)}</b>${c.flash?`<br><span class="flash">${esc(c.flash)}</span>`:''}</td><td class="c-md wrapc">${esc(addrOf(c)||'-')}</td><td class="c-sm">${esc(c.soldBy||'-')}</td><td class="c-xl">${esc(c.officeRef||'')}</td><td class="c-xl wrapc">${esc(siteOf(c)||'-')}</td><td class="c-sm">${fd(c.fit)}</td><td class="n">${m0(c.value)}</td><td class="n c-sm">${m0(c.value-c.paid)}</td><td class="ac"><div class="acts r">${stDots('contract',c.stage)}${stTag(c.stage)}</div></td></tr>`).join('')||'<tr><td colspan="10" class="empty">'+emptyArt('files','No contracts in this view.')+'</td></tr>'}</tbody></table></div>${pagerH('ctr',pg,'contracts')}`;
   return `<div class="head"><div><h1>Contracts</h1><span class="muted">${esc((CVIEWS.find(x=>x[0]==U.f)||['','All'])[1])}: ${L.length} records, ${m0(tv)} total, ${m0(bal)} to collect</span></div><div class="tools"><button class="mini" onclick="contactList('contract')">Contact list</button><button class="btn" onclick="editContract()">New contract</button></div></div>
   <div class="subbar"><span class="sb-l">Show</span><div class="views">${CVIEWS.map(([k,t])=>`<button class="chip ${U.f==k?'on':''}" ${A('setUI','ctr.f',k)}>${esc(t)} <i>${cnt(k)}</i></button>`).join('')}</div><span class="sb-sp"></span>${tog}</div>
-  ${ckpi(L)}${U.v=='board'?board:list}`}
+  ${stgPipe('contract')}${ckpi(L)}${U.v=='board'?board:list}`}
 
 /* ==========================================================================
    16 · Illustrations, empty states and the welcome tour
@@ -4472,7 +4646,7 @@ function quickPay(id,amt){if(!need(ISADM,'Taking payments'))return;const c=S.con
   c.paid=Math.round(((+c.paid||0)+amt)*100)/100;audit('Payment recorded',id,money(amt));store();render(true);toast(money(amt)+' recorded on '+id+'. Balance now '+money((+c.value||0)-c.paid)+'.')}
 function leadQuick(id,st){const l=S.leads.find(x=>x.id==id);if(!l)return;const a=l.stage;if(a==st){toast(id+' is already '+st);return}l.stage=st;l.prob=st=='Won'?100:0;l.log=l.log||[];l.log.unshift({d:today(),t:'Stage: '+(a||'New')+' to '+st,by:USER});
   audit('Lead edited',id,'Stage '+st);store();render(true);toast(id+' marked as '+st)}
-function noteQuick(k,id,txt){const r=(k=='c'?S.contracts:S.leads).find(x=>x.id==id);txt=SAFE.text(txt,300);if(!r||!txt)return;r.log=r.log||[];r.log.unshift({d:today(),t:txt,by:USER});audit('Note added',id,txt.slice(0,60));store();render(true);toast('Note added to '+id)}
+function noteQuick(k,id,txt){const r=(k=='c'?S.contracts:S.leads).find(x=>x.id==id);txt=SAFE.text(txt,300);if(!r||!txt)return;r.log=r.log||[];r.log.unshift({t:'Note',n:txt,by:USER,at:today()});audit('Note added',id,txt.slice(0,60));store();render(true);toast('Note added to '+id)}
 function cmdkSet(v){cmdk(true);setTimeout(()=>{const ci=$('#cq');if(ci){ci.value=v;cmdkRun(v);ci.focus()}},30)}
 /* uploaded files live in the browser database: read them once so they can be found from any page */
 function srchFiles(){if(srchFiles.done||MF.length)return;srchFiles.done=1;try{fx('readonly',s=>s.getAll()).then(r=>{MF=(r||[]).filter(f=>!f.ref).sort((x,y)=>y.time-x.time)}).catch(()=>{})}catch(e){}}
