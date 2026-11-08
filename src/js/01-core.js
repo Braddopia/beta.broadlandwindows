@@ -21,7 +21,7 @@ const AC=(ev,fn,...a)=>`${ev}="${esc(fn+'('+a.map(x=>x==='this'||x==='this.value
 /* ---- validation / sanitising ---- */
 const SAFE={
   hex:v=>/^#[0-9a-f]{6}$/i.test(String(v||''))?v:'#c9c6bd',
-  img:v=>/^data:image\/(png|jpe?g|webp|gif);base64,[A-Za-z0-9+/=]+$/.test(String(v||''))?v:'',
+  img:v=>{v=String(v||'');if(phIsRef(v)){const id=v.slice(3),c=PHC.get(id);if(c)return c;phWant(id);return PH_BLANK}return PH_OK(v)?v:''},
   url:v=>{try{const u=new URL(String(v||''),location.href);return /^https?:$/.test(u.protocol)?u.href:''}catch(e){return ''}},
   text:(v,max=200)=>String(v??'').replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/g,'').trim().slice(0,max),
   num:(v,o={})=>{const{min=0,max=1e9,dp=2}=o;let n=parseFloat(v);if(!isFinite(n))return null;n=Math.min(max,Math.max(min,n));const f=10**dp;return Math.round(n*f)/f},
@@ -56,6 +56,27 @@ const greet=()=>{const h=new Date().getHours();return h<12?'Good morning':h<18?'
 const BH={'2026-01-01':"New Year's Day",'2026-04-03':'Good Friday','2026-04-06':'Easter Monday','2026-05-04':'Early May bank holiday','2026-05-25':'Spring bank holiday','2026-08-31':'Summer bank holiday','2026-12-25':'Christmas Day','2026-12-28':'Boxing Day (substitute)','2027-01-01':"New Year's Day",'2027-03-26':'Good Friday','2027-03-29':'Easter Monday','2027-05-03':'Early May bank holiday','2027-05-31':'Spring bank holiday','2027-08-30':'Summer bank holiday','2027-12-27':'Christmas Day (substitute)','2027-12-28':'Boxing Day (substitute)'};
 
 /* ---- ids ---- */
+/* ---- photos live in their own browser database; records keep only a short "ph:<id>" reference.
+   The main save stays small however many years of jobs and photos build up. ---- */
+const PHC=new Map(),PH_BLANK='data:image/gif;base64,R0lGODlhAQABAIAAAMLCwgAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==',phWait=new Set();
+let PH_OFF=false,phDbP=null,phT=0;
+const PH_OK=v=>/^data:image\/(png|jpe?g|webp|gif);base64,[A-Za-z0-9+/=]+$/.test(String(v||'')),phIsRef=v=>/^ph:[A-Za-z0-9-]{6,48}$/.test(String(v||''));
+function phDb(){if(!phDbP)phDbP=new Promise((ok,no)=>{try{const r=indexedDB.open('broadland_photos',1);r.onupgradeneeded=()=>r.result.createObjectStore('p');r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)}catch(e){no(e)}});return phDbP}
+function phPutMany(N){return phDb().then(d=>new Promise((ok,no)=>{const t=d.transaction('p','readwrite'),s=t.objectStore('p');N.forEach(([id,v])=>s.put(v,id));t.oncomplete=()=>ok();t.onerror=()=>no(t.error);t.onabort=()=>no(t.error)}))}
+function phGetMany(ids){return phDb().then(d=>new Promise((ok,no)=>{const t=d.transaction('p','readonly'),s=t.objectStore('p'),o={};ids.forEach(id=>{const g=s.get(id);g.onsuccess=()=>{o[id]=g.result}});t.oncomplete=()=>ok(o);t.onerror=()=>no(t.error)}))}
+function phWant(id){if(PHC.has(id)||phWait.has(id))return;phWait.add(id);clearTimeout(phT);phT=setTimeout(phFlush,0)}
+function phFlush(){const ids=[...phWait];if(!ids.length)return;phGetMany(ids).then(o=>{ids.forEach(id=>{phWait.delete(id);PHC.set(id,PH_OK(o[id])?o[id]:PH_BLANK)});phRefresh()}).catch(()=>ids.forEach(id=>{phWait.delete(id);PHC.set(id,PH_BLANK)}))}
+/* load photos before something needs them all at once (printing, backups) */
+function phLoad(list){const ids=[...new Set((list||[]).filter(phIsRef).map(r=>r.slice(3)))].filter(id=>!PHC.has(id));if(!ids.length)return Promise.resolve();
+  return phGetMany(ids).then(o=>ids.forEach(id=>PHC.set(id,PH_OK(o[id])?o[id]:PH_BLANK))).catch(()=>{})}
+function phRefresh(){try{if($('#modal.open')&&typeof tmpDraw=='function'&&tmpDraw)tmpDraw()}catch(e){}try{render(true)}catch(e){}}
+/* every list of photos in the data, so they can be moved out, put back or gathered */
+function phLists(){const L=[];['leads','contracts','calls','deliveries','bugs','leadArchive'].forEach(k=>(S[k]||[]).forEach(r=>{if(r&&Array.isArray(r.photos))L.push(r.photos)}));Object.values(S.pphotos||{}).forEach(a=>{if(Array.isArray(a))L.push(a)});return L}
+function phOut(){if(PH_OFF||!window.indexedDB)return[];const N=[];phLists().forEach(a=>{for(let i=0;i<a.length;i++){const p=a[i];if(typeof p=='string'&&p.startsWith('data:image/')&&PH_OK(p)){const id=uuid();PHC.set(id,p);N.push([id,p]);a[i]='ph:'+id}}});return N}
+function phBack(N){const m=new Map(N.map(([id,p])=>['ph:'+id,p]));phLists().forEach(a=>{for(let i=0;i<a.length;i++)if(m.has(a[i]))a[i]=m.get(a[i])})}
+function phRefs(){return phLists().flat().filter(phIsRef)}
+/* remove stored photos that no record uses any more */
+function phTidy(){const used=new Set(phRefs().map(r=>r.slice(3)));return phDb().then(d=>new Promise(ok=>{const t=d.transaction('p','readwrite'),s=t.objectStore('p'),k=s.getAllKeys();let n=0;k.onsuccess=()=>{(k.result||[]).forEach(id=>{if(!used.has(id)){s.delete(id);n++}})};t.oncomplete=()=>ok(n);t.onerror=()=>ok(0)}))}
 const uuid=()=>(window.crypto&&crypto.randomUUID)?crypto.randomUUID():'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{const r=Math.random()*16|0;return(c=='x'?r:r&3|8).toString(16)});
 const shortId=p=>p+'-'+Date.now().toString(36)+Math.random().toString(36).slice(2,5);
 

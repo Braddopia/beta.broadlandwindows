@@ -120,7 +120,9 @@ function saveRaw(j){storeSize=j.length;
     else os.put(j,KEY);t.oncomplete=()=>{BC&&BC.postMessage('saved')};t.onerror=()=>toast('Could not save. Export a backup from Admin Console.')}).catch(()=>{});
   if(window.__BOOT_MISS)return; /* wait until the database check above has passed */
   try{if(j.length<4.5e6)localStorage.setItem(KEY,j);else localStorage.removeItem(KEY)}catch(e){try{localStorage.removeItem(KEY)}catch(x){}}}
-function store(){try{delete S._saved;S._saved=Date.now();saveRaw(JSON.stringify(S))}catch(e){toast('Could not save: '+e.message)}}
+function store(){try{delete S._saved;S._saved=Date.now();const N=phOut();if(!N.length){saveRaw(JSON.stringify(S));return}
+  /* new photos go to the photo store first; if that fails they stay inside the record */
+  phPutMany(N).then(()=>saveRaw(JSON.stringify(S)),()=>{PH_OFF=true;phBack(N);saveRaw(JSON.stringify(S))})}catch(e){toast('Could not save: '+e.message)}}
 /* ask the browser to keep the data even when the disk is low */
 try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}
 

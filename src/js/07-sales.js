@@ -1,11 +1,12 @@
 /* ==========================================================================
    07 · Sales & service: leads, contracts, service calls, contact book
    ========================================================================== */
-const nid=(p,a)=>p=='S'?'S-'+String(Math.max(0,...a.map(x=>parseInt(String(x.id).split('-')[1])||0))+1).padStart(4,'0'):String(Math.max(p=='C'?2400000:1000,...a.map(x=>parseInt(x.id)||0))+1);
+/* new numbers: one more than the highest used, or the start an administrator set in Settings > Numbering */
+const nid=(p,a)=>{const N=(typeof S!='undefined'&&S.num)||{};return p=='S'?'S-'+String(Math.max(0,(+N.call||1)-1,...a.map(x=>parseInt(String(x.id).split('-')[1])||0))+1).padStart(4,'0'):String(Math.max(p=='C'?Math.max(2400000,(+N.contract||1)-1):1000,...a.map(x=>parseInt(x.id)||0))+1)};
 /* deleting is admin-only, and only for these lists */
 const DEL_RULE={contracts:[ISOWN,'Deleting contracts'],staff:[ISOWN,'Removing staff'],calls:[ISOWN,'Deleting service calls'],contacts:[ISOWN,'Deleting contacts'],fin:[ISADM,'Deleting bills']};
 function del(k,id){const r=DEL_RULE[k];if(!r||!Array.isArray(S[k])||!need(r[0],r[1]))return;
-  askYes('Delete '+id+'?','This cannot be undone.','Delete',()=>{S[k]=S[k].filter(x=>x.id!=id);if(k=='staff'){S.hols=S.hols.filter(h=>h.sid!=id);if(S.abs)delete S.abs[id]}audit('Deleted',k+' '+id,'');store();render()},true)}
+  askYes('Delete '+id+'?','This cannot be undone.','Delete',()=>{S[k]=S[k].filter(x=>x.id!=id);if(k=='staff'){S.hols=S.hols.filter(h=>h.sid!=id);if(S.abs)delete S.abs[id]}audit('Deleted',k+' '+id,'');store();render();if(typeof RW!='undefined'&&RW&&String(RW.id)==String(id)&&$('#mbox .rw')){RW.dirty=0;closeModal()}},true)}
 
 /* ---------------- leads ----------------
    Lead refs are L0001, L0002... A converted lead moves into its new contract
@@ -24,13 +25,13 @@ const PROB={New:10,Surveyed:30,Quoted:55,Won:100,Lost:0};
 (function migrateLeads(){if(S.leadsV2)return;S.leadArchive=S.leadArchive||[];
   const conv=S.leads.filter(l=>l.contract);S.leadArchive.push(...conv.map(l=>({...l,convertedTo:(S.contracts.find(c=>c.lead==l.id)||{}).id||''})));
   let n=0;S.leads=S.leads.filter(l=>!l.contract).map(l=>{const old=l.id;l.id='L'+String(++n).padStart(4,'0');l.oldRef=old;S.contracts.forEach(c=>{if(c.lead==old)c.lead=l.id});return l});S.leadsV2=1;store()})();
-function nextLeadId(){const used=new Set(S.leads.map(l=>l.id));let n=1;while(used.has('L'+String(n).padStart(4,'0')))n++;return 'L'+String(n).padStart(4,'0')}
+function nextLeadId(){const used=new Set(S.leads.map(l=>l.id));let n=Math.max(1,+(S.num&&S.num.lead)||1);while(used.has('L'+String(n).padStart(4,'0')))n++;return 'L'+String(n).padStart(4,'0')}
 const allLeads=()=>[...S.leads,...(S.leadArchive||[]).map(l=>({...l,stage:'Won'}))];
 /* a won lead is always 100% and a lost one 0%, whatever was typed before */
 const leadProb=l=>l.stage=='Won'?100:l.stage=='Lost'?0:l.prob!=null&&l.prob!==''?+l.prob:PROB[l.stage]??0;
 const leadTag=s=>`<span class="tag fw ${s=='Won'?'g':s=='Lost'?'r':s=='Quoted'?'y':s=='New'?'n':''}">${esc(s)}</span>`;
 function mvLead(id,d){const l=S.leads.find(x=>x.id==id),i=STAGES.indexOf(l.stage)+d;if(i<0||i>=STAGES.length)return;const a=l.stage;l.stage=STAGES[i];(l.log=l.log||[]).unshift({d:today(),t:'Stage: '+a+' to '+l.stage,by:USER});audit('Lead stage',l.id,a+' to '+l.stage);store();render()}
-function delLead(id){if(!need(ISOWN,'Deleting leads'))return;const l=S.leads.find(x=>x.id==id);if(!l)return;askYes('Delete lead '+id+'?',l.name+' will be removed. This cannot be undone.','Delete lead',()=>{S.leads=S.leads.filter(x=>x.id!=id);audit('Lead deleted',id,l.name);store();render()},true)}
+function delLead(id){if(!need(ISOWN,'Deleting leads'))return;const l=S.leads.find(x=>x.id==id);if(!l)return;askYes('Delete lead '+id+'?',l.name+' will be removed. This cannot be undone.','Delete lead',()=>{S.leads=S.leads.filter(x=>x.id!=id);audit('Lead deleted',id,l.name);store();render();if(typeof RW!='undefined'&&RW&&String(RW.id)==String(id)&&$('#mbox .rw')){RW.dirty=0;closeModal()}},true)}
 /* convert: the lead becomes a contract with the next 7-digit number; its L number is freed */
 function convertLead(id){const l=S.leads.find(x=>x.id==id);if(!l)return;if(!canSee('contracts')){toast('Your account cannot create contracts');return}const cn=nid('C',S.contracts);
   form('Convert '+l.id+' to Contract '+cn,[{k:'name',l:'Customer',req:1},{k:'phone',l:'Phone',t:'tel',max:30},{k:'email',l:'Email',t:'email'},{k:'address',l:'Installation address',w:'full',max:200},{k:'town',l:'Town'},{k:'product',l:'Product / work',w:'full',req:1},{k:'value',l:'Contract value (£)',t:'number',req:1,pos:1},{k:'paid',l:'Deposit paid (£)',t:'number'},{k:'stage',l:'Stage',t:'select',o:CSTAGES},{k:'fitter',l:'Fitter',t:'select',o:FITL()},{k:'survey',l:'Survey date',t:'date'},{k:'fit',l:'Fit date',t:'date'},{k:'notes',l:'Contract notes',t:'area',w:'full'}],
@@ -98,28 +99,36 @@ function markFit(id){const c=S.contracts.find(x=>x.id==id);c.stage='Fitted';audi
 /* ---------------- service calls ---------------- */
 const SVC_ST=['Open','Booked','Awaiting parts','Complete'],SVC_CAT=['Misted or broken glass','Lock, handle or hinge','Leak or water coming in','Draught','Door or window sticking','Damage','Keys','Roof or conservatory','Other'],SVC_PR=['Urgent','Normal','Low'];
 const svcOpen=c=>c.status!='Complete',svcMine=c=>{const m=me();return !!m&&forPerson(m,c.fitter)};
-const SVCV=()=>[['open','Open',svcOpen],['today','Visits Today',c=>svcOpen(c)&&c.visit==today()],['urgent','Urgent',c=>svcOpen(c)&&c.priority=='Urgent'],['parts','Awaiting Parts',c=>c.status=='Awaiting parts'],['nobook','Not Booked',c=>svcOpen(c)&&!c.visit],['mine','My Calls',c=>svcOpen(c)&&svcMine(c)],['done','Complete',c=>!svcOpen(c)],['all','All',()=>true]];
+const SVCV=()=>[['open','Open',svcOpen],['today','Visits Today',c=>svcOpen(c)&&c.visit==today()],['urgent','Urgent',c=>svcOpen(c)&&c.priority=='Urgent'],['parts','Awaiting Parts',c=>c.status=='Awaiting parts'],['nobook','Not Booked',c=>svcOpen(c)&&!c.visit],['mine','My Calls',c=>svcOpen(c)&&svcMine(c)],['done','Past Tickets',c=>!svcOpen(c)],['all','All',()=>true]];
+/* at a glance: does the customer still owe money on their contract? */
+const svcBal=c=>{const k=c.contract&&S.contracts.find(x=>x.id==c.contract);if(!k)return '';const b=(+k.value||0)-(+k.paid||0);return b>0?`<span class="tag r svb" title="Contract ${esc(k.id)} still has a balance">${m0(b)} owed</span>`:'<span class="tag g svb">Paid up</span>'};
 const svcTag=s=>`<span class="tag ${s=='Complete'?'g':s=='Booked'?'':s=='Awaiting parts'?'n':'y'}">${esc(s||'Open')}</span>`;
 function vService(){const U=UI.svc,V=SVCV(),f=(V.find(x=>x[0]==U.f)||V[0])[2],td=today(),O=S.calls.filter(svcOpen);
-  const L=S.calls.filter(c=>f(c)&&hit(c)).sort((a,b)=>svcOpen(b)-svcOpen(a)||SVC_PR.indexOf(a.priority)-SVC_PR.indexOf(b.priority)||String(a.visit||'9').localeCompare(String(b.visit||'9')));
+  const L0=S.calls.filter(c=>f(c)&&hit(c)).sort((a,b)=>svcOpen(b)-svcOpen(a)||SVC_PR.indexOf(a.priority)-SVC_PR.indexOf(b.priority)||String(a.visit||'9').localeCompare(String(b.visit||'9')));
+  const L=L0,pg=paginate(U,L0);
   const k=(t,n,key,cls)=>`<button class="kpi ${cls||''}" ${A('setUI','svc.f',key)}><small>${t}</small><b>${n}</b></button>`;
   return `<div class="head"><div><h1>Service Calls</h1><span class="muted">${esc((V.find(x=>x[0]==U.f)||V[0])[1])}: ${L.length}</span></div><div class="tools"><button class="mini" ${A('svcDaySheet',td)}>Today's Day Sheet</button><button class="mini" onclick="svcReport()">Service Report</button><button class="btn" onclick="editCall()">New Service Call</button></div></div>
   <div class="subbar"><span class="sb-l">Show</span><div class="views">${V.map(([key,n,fn])=>`<button class="chip ${U.f==key?'on':''}" ${A('setUI','svc.f',key)}>${esc(n)} <i>${S.calls.filter(fn).length}</i></button>`).join('')}</div></div>
   <div class="kpis">${k('Open Calls',O.length,'open')}${k('Urgent',O.filter(c=>c.priority=='Urgent').length,'urgent',O.some(c=>c.priority=='Urgent')?'bad':'')}${k('Visits Today',O.filter(c=>c.visit==td).length,'today')}${k('Awaiting Parts',O.filter(c=>c.status=='Awaiting parts').length,'parts')}${k('Not Booked Yet',O.filter(c=>!c.visit).length,'nobook',O.some(c=>!c.visit)?'warn':'')}${k('Overdue Visits',O.filter(c=>c.visit&&c.visit<td).length,'open',O.some(c=>c.visit&&c.visit<td)?'bad':'')}</div>
   <div class="tw"><table class="ptb abt"><thead><tr><th>Ref</th><th>Customer</th><th>Problem</th><th>Priority</th><th>Status</th><th class="c-sm">Visit</th><th class="c-md">Engineer</th><th class="ac"></th></tr></thead><tbody>
-  ${L.map(c=>`<tr class="clk-r" ${RC('editCall',c.id)}><td><b class="lref">${esc(c.id)}</b>${c.contract?`<small class="sub">${esc(c.contract)}</small>`:''}</td><td><b>${esc(c.name)}</b><small class="sub">${esc([c.town,c.phone].filter(Boolean).join(' · '))}</small></td><td><span class="cl2">${esc(c.issue)}</span><small class="sub">${esc(c.cat||'')}${c.cat&&c.photos&&c.photos.length?' · ':''}${phCount(c.photos)}</small></td><td>${prTag(c.priority)}</td><td>${svcTag(c.status)}</td><td class="c-sm">${c.visit?`<b class="${svcOpen(c)&&c.visit<td?'od':''}">${fd(c.visit)}</b>${c.visitTime?`<small class="sub">${esc(c.visitTime)}</small>`:''}`:'<span class="muted">Not booked</span>'}</td><td class="c-md">${esc(c.fitter||'-')}</td><td class="ac"><div class="acts r"><button class="mini" ${A('reportCall',c.id)}>Report</button>${ISOWN()?`<button class="mini del" ${A('del','calls',c.id)}>Delete</button>`:''}</div></td></tr>`).join('')||'<tr><td colspan="8" class="empty">No service calls here.</td></tr>'}
-  </tbody></table></div>`}
+  ${pg.rows.map(c=>`<tr class="clk-r" ${RC('editCall',c.id)}><td><b class="lref">${esc(c.id)}</b>${c.contract?`<small class="sub">${esc(c.contract)}</small>`:''}</td><td><b>${esc(c.name)}</b><small class="sub">${esc([c.town,c.phone].filter(Boolean).join(' · '))}</small>${svcBal(c)}</td><td><span class="cl2">${esc(c.issue)}</span><small class="sub">${esc(c.cat||'')}${c.cat&&c.photos&&c.photos.length?' · ':''}${phCount(c.photos)}</small></td><td>${prTag(c.priority)}</td><td>${svcTag(c.status)}</td><td class="c-sm">${c.visit?`<b class="${svcOpen(c)&&c.visit<td?'od':''}">${fd(c.visit)}</b>${c.visitTime?`<small class="sub">${esc(c.visitTime)}</small>`:''}`:'<span class="muted">Not booked</span>'}</td><td class="c-md">${esc(c.fitter||'-')}</td><td class="ac"><div class="acts r"><button class="mini" ${A('reportCall',c.id)}>Report</button>${ISOWN()?`<button class="mini del" ${A('del','calls',c.id)}>Delete</button>`:''}</div></td></tr>`).join('')||'<tr><td colspan="8" class="empty">No service calls here.</td></tr>'}
+  </tbody></table></div>${pagerH('svc',pg,'calls')}`}
 /* the call sheet: who rang, what is wrong, who is going, what was done */
-const SVCF=()=>[{t:'h',l:'The Call'},{k:'takenBy',l:'Call taken by',t:'select',o:['',...staffNames().filter(Boolean)],req:1},{k:'takenAt',l:'Date taken',t:'date',req:1},{k:'takenTime',l:'Time taken',t:'time'},
-  {k:'name',l:'Customer',req:1},{k:'phone',l:'Phone',t:'tel',max:30},{k:'email',l:'Email',t:'email'},{k:'address',l:'Address',w:'full',max:200},{k:'town',l:'Town'},{k:'contract',l:'Contract number',max:30,hint:'Fills in the customer when it matches a contract'},
+const SVCF=()=>[{t:'h',l:'The Call'},{k:'existing',l:'Existing customer?',t:'select',o:['Yes, we fitted it','No, new customer'],req:1,w:'full'},{k:'takenBy',l:'Call taken by',t:'select',o:['',...staffNames().filter(Boolean)],req:1},{k:'takenAt',l:'Date taken',t:'date',req:1},{k:'takenTime',l:'Time taken',t:'time'},
+  {k:'contract',l:'Contract number',max:30,list:'dlCon',hint:'Type the number or pick the customer: their details fill in'},{k:'name',l:'Customer',req:1},{k:'phone',l:'Phone',t:'tel',max:30,hint:'Needed for a new customer'},{k:'email',l:'Email',t:'email'},{k:'address',l:'Address',w:'full',max:200,hint:'Needed for a new customer'},{k:'town',l:'Town',hint:'Needed for a new customer'},
   {t:'h',l:'The Problem'},{k:'cat',l:'Type of problem',t:'select',o:['',...SVC_CAT],req:1},{k:'priority',l:'Priority',t:'select',o:SVC_PR},{k:'issue',l:'What is wrong (in their words)',t:'area',w:'full',req:1},{k:'guarantee',l:'Under guarantee?',t:'select',o:['','Yes','No','Not sure']},
   {t:'h',l:'The Visit'},{k:'fitter',l:'Service engineer attending',t:'select',o:['',...FITL()]},{k:'status',l:'Status',t:'select',o:SVC_ST},{k:'visit',l:'Visit date',t:'date'},{k:'visitTime',l:'Visit time',t:'time'},{k:'arrived',l:'Arrived on site',t:'time'},{k:'left',l:'Left site',t:'time'},
   {t:'h',l:'Work Done'},{k:'notes',l:'Work carried out',t:'area',w:'full'},{k:'parts',l:'Parts used or ordered',t:'area',w:'full',max:400},{k:'followUp',l:'Another visit needed?',t:'select',o:['','No','Yes']},{k:'followNote',l:'What the next visit is for',max:200},
-  {k:'charge',l:'Charge to customer (£)',t:'number',hint:'Leave at 0 if covered by the guarantee'},{k:'signed',l:'Customer signed off?',t:'select',o:['','Yes','No']},{k:'doneAt',l:'Date completed',t:'date'}];
-function editCall(id,cid){const c=S.calls.find(x=>x.id==id),k=S.contracts.find(x=>x.id==cid)||{};if(cid&&canSee('service'))go('service');if(id&&!c)return;
-  const v=c||{name:k.name||'',phone:telOf(k)||'',email:mailOf(k)||'',address:addrOf(k)||'',town:k.town||'',contract:k.id||'',priority:'Normal',status:'Open',takenBy:USER,takenAt:today(),takenTime:new Date().toTimeString().slice(0,5),guarantee:k.id?'Yes':''};
-  form(c?'Service Call '+c.id:'New Service Call',SVCF(),v,o=>{if(o.status=='Complete'&&!o.doneAt)o.doneAt=today();if(o.visit&&o.status=='Open')o.status='Booked';
-    if(c){Object.assign(c,o);audit('Service call edited',c.id,o.status)}else{const n={id:nid('S',S.calls),...o};S.calls.unshift(n);audit('Service call added',n.id,o.name)}},true,'lg');
+  {k:'charge',l:'Charge to customer (£)',t:'number',hint:'Leave at 0 if covered by the guarantee'},{k:'signed',l:'Customer signed off?',t:'select',o:['','Yes','No']},{k:'doneAt',l:'Date completed',t:'date',hint:'Needed to close the call. It then moves to Past Tickets and stays on the contract history'}];
+function editCall(id,cid){const c=S.calls.find(x=>x.id==id),k=S.contracts.find(x=>x.id==cid)||{};if(id&&!c)return;
+  const v=c?{...c,existing:c.existing||(S.contracts.some(x=>x.id==c.contract)?'Yes, we fitted it':'No, new customer')}:{name:k.name||'',phone:telOf(k)||'',email:mailOf(k)||'',address:addrOf(k)||'',town:k.town||'',contract:k.id||'',priority:'Normal',status:'Open',takenBy:USER,takenAt:today(),takenTime:new Date().toTimeString().slice(0,5),guarantee:k.id?'Yes':'',existing:k.id?'Yes, we fitted it':'No, new customer'};
+  form(c?'Service Call '+c.id:'New Service Call',SVCF(),v,o=>{const bad=(k,m)=>{const e=$('#f_'+k);if(e)fieldErr(e,m);return false};
+    if(/^Yes/.test(o.existing)){const x=S.contracts.find(z=>z.id==o.contract.trim());if(!x)return bad('contract','Pick the contract for this customer');o.contract=x.id}
+    else{if(!o.phone)return bad('phone','Add a phone number for a new customer');if(!o.address)return bad('address','Add the address for a new customer');if(!o.town)return bad('town','Add the town for a new customer')}
+    if(o.status=='Complete'&&!o.doneAt)return bad('doneAt','Enter the date the work was completed');if(o.status!='Complete')o.doneAt='';if(o.visit&&o.status=='Open')o.status='Booked';
+    if(c){Object.assign(c,o);audit('Service call edited',c.id,o.status)}else{const n={id:nid('S',S.calls),...o};S.calls.unshift(n);audit('Service call added',n.id,o.name)}},'Up to 8 photos. They print with the service report and stay on the call.','lg');
+  setTimeout(()=>{const g=$('#mbox .grid');if(g&&!$('#dlCon'))g.insertAdjacentHTML('beforeend',`<datalist id="dlCon">${S.contracts.map(x=>`<option value="${esc(x.id)}">${esc([x.name,x.town].filter(Boolean).join(', '))}</option>`).join('')}</datalist>`);
+    const ex=$('#f_existing'),cw=$('#f_contract')&&$('#f_contract').closest('.ff'),sync=()=>{if(cw)cw.hidden=!/^Yes/.test(ex.value)};if(ex){ex.addEventListener('change',sync);sync()}},20);
   setTimeout(()=>{const ct=$('#f_contract');if(ct)ct.addEventListener('change',()=>{const x=S.contracts.find(z=>z.id==ct.value.trim());if(!x)return;[['name',x.name],['phone',telOf(x)],['email',mailOf(x)],['address',addrOf(x)],['town',x.town]].forEach(([f,val])=>{const e=$('#f_'+f);if(e&&!e.value&&val)e.value=val});const g=$('#f_guarantee');if(g&&!g.value)g.value='Yes';toast('Filled in from contract '+x.id)})},30)}
 function reportCall(id,mode){const c=S.calls.find(x=>x.id==id);if(!c)return;const j=JSON.stringify(id);
   if(!mode){docChoice('Service Call '+c.id,'reportCall('+j+',"c")','reportCall('+j+',"i")');return}
@@ -145,42 +154,48 @@ function vContacts(){const F=UI.con.f,L=S.contacts.filter(c=>(F=='all'||c.type==
 function azGo(x){const e=document.getElementById('az-'+(x=='#'?'0':x));if(e)e.scrollIntoView({behavior:'smooth',block:'start'})}
 /* ---- contact window: tidy two-column layout, any number of labelled phone numbers ----
    c.phones=[{t:'Office',n:'01632 ...'}]; c.phone mirrors the first one (used by lists, suppliers, search) */
-const CPH=['Office','Accounts','Sales rep','Direct DDI','Mobile','Orders','Out of hours','Fax'];
+const CPH=['Office','Mobile','Direct DDI','Accounts','Sales rep','Orders','Out of hours'],CPH_ALL=[...CPH,'Fax','Home'];
 const conPhones=c=>Array.isArray(c&&c.phones)&&c.phones.length?c.phones.filter(p=>p&&p.n):c&&c.phone?[{t:'Office',n:c.phone}]:[];
 const telHref=n=>'tel:'+String(n).replace(/[^\d+]/g,'');
-function cphRow(p){const t=p&&p.t||'';return `<div class="cphr"><select aria-label="Number type">${CPH.map(x=>`<option${x==t?' selected':''}>${esc(x)}</option>`).join('')}</select><input type="tel" inputmode="tel" maxlength="30" placeholder="Phone number" aria-label="Phone number" value="${esc(p&&p.n||'')}"><button type="button" class="cphx" title="Remove this number" aria-label="Remove this number">&times;</button></div>`}
+function cphRow(p){const t=p&&p.t||'';return `<div class="cphr"><select aria-label="Number type">${(t&&!CPH.includes(t)?[t,...CPH]:CPH).map(x=>`<option${x==t?' selected':''}>${esc(x)}</option>`).join('')}</select><input type="tel" inputmode="tel" maxlength="30" placeholder="Phone number" aria-label="Phone number" value="${esc(p&&p.n||'')}"><button type="button" class="cphx" title="Remove this number" aria-label="Remove this number">&times;</button></div>`}
 /* always one empty row at the end: the next box only appears once the last one is filled */
 function cphTidy(){const box=$('#cphs');if(!box)return;const rows=[...box.querySelectorAll('.cphr')];
   rows.forEach((r,i)=>{if(i<rows.length-1&&!r.querySelector('input').value.trim()&&rows.length>1&&document.activeElement!=r.querySelector('input'))r.remove()});
   const R=[...box.querySelectorAll('.cphr')],last=R[R.length-1];
   if(!last||last.querySelector('input').value.trim()){const used=R.map(r=>r.querySelector('select').value);box.insertAdjacentHTML('beforeend',cphRow({t:CPH.find(x=>!used.includes(x))||'Office'}))}
   [...box.querySelectorAll('.cphr')].forEach((r,i,a)=>{r.querySelector('.cphx').hidden=a.length<2||(i==a.length-1&&!r.querySelector('input').value.trim())})}
-function editContact(id,draft){const c=S.contacts.find(x=>x.id==id),v=draft||(c?{...c,phones:conPhones(c)}:{type:'Supplier',phones:[]});
-  const fld=(k,l,o={})=>`<div class="ff ${o.w||''}"><label for="c_${k}">${esc(l)}${MARK(o.req,o.adm)}</label>${o.sel?`<select id="c_${k}">${o.sel.map(x=>`<option${x==(v[k]||'')?' selected':''}>${esc(x)}</option>`).join('')}</select>`:o.area?`<textarea id="c_${k}" rows="2" maxlength="${o.max||600}">${esc(v[k]||'')}</textarea>`:`<input id="c_${k}" type="${o.t||'text'}" maxlength="${o.max||120}" value="${esc(v[k]||'')}" autocomplete="off"${o.ph?` placeholder="${esc(o.ph)}"`:''}>`}</div>`;
+/* which boxes must be filled in depends on the type: a customer needs email and address, a company needs its name and a job title */
+const cReq=t=>({type:1,co:t!='Customer',name:1,role:t!='Customer',email:t=='Customer',addr:t=='Customer',town:t=='Customer',pc:t=='Customer'});
+function cReqDraw(){const t=($('#c_type')||{}).value||'Supplier',R=cReq(t);$$('#mbox [data-rq]').forEach(s=>{s.innerHTML=R[s.dataset.rq]?MARK(1):''})}
+function editContact(id,draft,after){const c=S.contacts.find(x=>x.id==id),v=draft||(c?{...c,phones:conPhones(c)}:{type:'Supplier',phones:[]});
+  const fld=(k,l,o={})=>`<div class="ff ${o.w||''}"><label for="c_${k}">${esc(l)}<span data-rq="${k}"></span>${MARK(0,o.adm)}</label>${o.sel?`<select id="c_${k}">${o.sel.map(x=>`<option${x==(v[k]||'')?' selected':''}>${esc(x)}</option>`).join('')}</select>`:o.area?`<textarea id="c_${k}" rows="2" maxlength="${o.max||600}">${esc(v[k]||'')}</textarea>`:`<input id="c_${k}" type="${o.t||'text'}" maxlength="${o.max||120}" value="${esc(v[k]||'')}" autocomplete="off"${o.ph?` placeholder="${esc(o.ph)}"`:''}${o.t=='email'||k=='web'?' class="nocap"':''}>`}</div>`;
   openModal(`<button class="mx" onclick="closeModal()" aria-label="Close">&times;</button><h2>${c?'Edit Contact':'New Contact'}</h2>
    <div class="cform">
-    <section><h3>Who</h3><div class="grid">${fld('co','Company',{req:1,max:80})}${fld('type','Type',{sel:CT})}${fld('name','Contact name',{max:60})}${fld('role','Job title',{max:60})}</div></section>
+    <section><h3>Who</h3><div class="grid">${fld('type','Type',{sel:CT})}${fld('co','Company',{max:80})}${fld('name','Contact name',{max:60})}${fld('role','Job title',{max:60})}</div></section>
     <section><h3>Phone Numbers <small>At least one *</small></h3><div id="cphs" class="cphs">${v.phones.map(cphRow).join('')}</div><p class="hint">Pick what each number is for. Another box appears when you fill one in.</p></section>
     <section><h3>Email And Web</h3><div class="grid">${fld('email','Main email',{t:'email'})}${fld('email2','Accounts email',{t:'email'})}${fld('web','Website',{w:'full',max:200,ph:'https://'})}</div></section>
     <section><h3>Address</h3><div class="grid">${fld('addr','Address',{w:'full',max:200})}${fld('town','Town',{max:60})}${fld('pc','Postcode',{max:10})}</div></section>
     <section><h3>Notes</h3>${fld('notes','Notes',{area:1,w:'full'})}</section>
    </div>
    <div class="mact"><button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn" id="saveBtn">${c?'Save changes':'Add contact'}</button></div>`,'md');
+  const tsel=$('#c_type');tsel.previousElementSibling.querySelector('[data-rq]').innerHTML=MARK(1);tsel.addEventListener('change',cReqDraw);cReqDraw();
   const box=$('#cphs');cphTidy();
   box.addEventListener('input',cphTidy);box.addEventListener('focusout',()=>setTimeout(cphTidy,0));
   box.addEventListener('click',e=>{const x=e.target.closest('.cphx');if(!x)return;x.closest('.cphr').remove();cphTidy()});
   $('#saveBtn').onclick=()=>{const g=k=>($('#c_'+k).value||'').trim(),o={co:SAFE.text(g('co'),80),type:CT.includes(g('type'))?g('type'):'Other',name:SAFE.text(g('name'),60),role:SAFE.text(g('role'),60),email:g('email').toLowerCase(),email2:g('email2').toLowerCase(),web:SAFE.url(g('web'))?SAFE.text(g('web'),200):'',addr:SAFE.text(g('addr'),200),town:SAFE.text(g('town'),60),pc:SAFE.text(g('pc'),10).toUpperCase(),notes:SAFE.text(g('notes'),600)};
-    o.phones=[...$$('#cphs .cphr')].map(r=>({t:CPH.includes(r.querySelector('select').value)?r.querySelector('select').value:'Office',n:SAFE.text(r.querySelector('input').value,30)})).filter(p=>p.n);
+    o.phones=[...$$('#cphs .cphr')].map(r=>({t:CPH_ALL.includes(r.querySelector('select').value)?r.querySelector('select').value:'Office',n:SAFE.text(r.querySelector('input').value,30)})).filter(p=>p.n);
     const bad=(m,k)=>{toast(m);const e=k?$('#c_'+k):$('#cphs input');e&&e.focus();return false};
-    if(!o.co)return bad('Company is required','co');
+    const R=cReq(o.type);if(R.co&&!o.co)return bad('Company name is required','co');if(!o.name)return bad('Contact name is required','name');if(R.role&&!o.role)return bad('Job title is required','role');
+    if(!o.co)o.co=o.name;
     if(!o.phones.length)return bad('Add at least one phone number');
     const wrong=o.phones.find(p=>!/^[\d +()-]{6,30}$/.test(p.n)||(p.n.match(/\d/g)||[]).length<6);if(wrong)return bad(wrong.n+' does not look like a phone number');
     if(o.email&&!SAFE.email(o.email))return bad('Main email does not look like an email address','email');
     if(o.email2&&!SAFE.email(o.email2))return bad('Accounts email does not look like an email address','email2');
     if(o.web&&!SAFE.url(o.web))return bad('The website must start with https://','web');
+    if(R.email&&!o.email)return bad('Main email is required for a customer','email');if(R.addr&&!o.addr)return bad('Address is required for a customer','addr');if(R.town&&!o.town)return bad('Town is required for a customer','town');if(R.pc&&!o.pc)return bad('Postcode is required for a customer','pc');
     o.phone=o.phones[0].n;
     const go=()=>{const oldCo=c?c.co:o.co;if(c)Object.assign(c,o);else S.contacts.push({id:shortId('K'),...o});if((c||o).type=='Supplier'||S.suppliers.some(s=>s.name.toLowerCase()==String(oldCo).toLowerCase()))supFromContact(oldCo,c||o);audit(c?'Contact edited':'Contact added',o.co,'')};
-    const done=()=>{store();closeModal();render();toast('Contact saved')};
-    if(!ISOWN()){closeModal();askYes(c?'Save changes to '+(c.co||'this contact')+'?':'Add '+o.co+' to the contact book?',c?'The contact details will be updated for everyone'+(S.suppliers.some(s=>s.name.toLowerCase()==String(c.co).toLowerCase())?', and on the supplier page too.':'.'):'Everyone will be able to see this contact.','Yes, save',()=>{go();done()},false,()=>editContact(id,o));return}
+    const done=()=>{store();render();if(after)after(o.co);else doneIn('Contact saved')};
+    if(!ISOWN()){closeModal();askYes(c?'Save changes to '+(c.co||'this contact')+'?':'Add '+o.co+' to the contact book?',c?'The contact details will be updated for everyone'+(S.suppliers.some(s=>s.name.toLowerCase()==String(c.co).toLowerCase())?', and on the supplier page too.':'.'):'Everyone will be able to see this contact.','Yes, save',()=>{go();done()},false,()=>editContact(id,o,after));return}
     go();done()}}
 function impCust(){let n=0;S.contracts.forEach(c=>{if(!S.contacts.some(k=>k.co==c.name)){n++;S.contacts.push({id:shortId('K'),co:c.name,name:c.name,role:'Contract '+c.id,type:'Customer',phone:c.phone||'',email:c.email||'',addr:c.address||c.town})}});audit('Customers imported','Contact book',n+' added');store();render();toast(n+' customer'+(n==1?'':'s')+' added')}

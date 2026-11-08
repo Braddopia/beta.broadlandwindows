@@ -15,7 +15,7 @@ const holTag=h=>`<span class="tag ${h.status=='Approved'?'g':h.status=='Rejected
 /* ---------------- calendar ---------------- */
 function evs(k){const e=[],L=UI.cal.ly,Ad=ISOWN(),m=me(),mine=x=>Ad||(m&&forPerson(m,x));
   if(L.fit)S.contracts.filter(c=>c.fit==k&&c.stage!='Complete'&&(Ad||mine(c.fitter)||c.soldBy==USER)).forEach(c=>e.push({c:'fit',t:c.name,s:c.product+' ('+(c.fitter||'no fitter')+')',f:['openContract',c.id],k:'Fitting'}));
-  if(L.svc)S.calls.filter(c=>c.visit==k&&c.status!='Complete'&&(Ad||mine(c.fitter))).forEach(c=>e.push({c:'svc',t:'Service: '+c.name,s:c.issue,f:['editCall',c.id],k:'Service visit'}));
+  if(L.svc)S.calls.filter(c=>c.visit==k&&c.status!='Complete'&&(Ad||canSee('service')||mine(c.fitter))).forEach(c=>e.push({c:'svc',t:(c.visitTime?c.visitTime+' ':'')+'Service: '+c.name,s:c.issue,f:['editCall',c.id],k:'Service visit'}));
   if(L.del&&Ad)S.deliveries.filter(d=>d.due==k&&d.status!='Received').forEach(d=>e.push({c:'del',t:'Delivery: '+d.supplier,s:d.items,f:['go','deliveries'],k:'Delivery'}));
   if(L.hol&&isWk(k))S.hols.filter(h=>h.status!='Rejected'&&h.from<=k&&h.to>=k&&(Ad||(m&&h.sid==m.id))).forEach(h=>{const n=staffName(h.sid);e.push({c:'hol'+(h.status=='Pending'?' pd':''),t:n.split(' ')[0]+' off',s:n+' on holiday'+(h.status=='Pending'?' (pending)':''),f:['holEdit',h.id],k:'Holiday'})});
   return e}

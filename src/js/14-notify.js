@@ -8,7 +8,7 @@ function ncData(){const td=today(),req=[],mov=[],alr=[];
   const Ad=ISADM();S.items.forEach(r=>{if(r.type=='request'){if(['Pending','Approved'].includes(r.reqStatus)&&!r.cleared&&(Ad||r.user==USER))req.push(r)}else if(Ad){mov.push({r,n:!S.seen[r.uid]});if(r.flag&&!r.cleared)alr.push({k:'Alert',t:r.item+': '+r.type+' '+r.qty,s:r.user+', '+r.time,uid:r.uid})}});
   products().forEach(r=>{const k='low:'+r.pid;if(isLow(r)&&S.dis[k]!==r.stock)alr.push({k:'Low Stock',t:r.item,s:r.stock+' '+unitOf(r)+' left at '+(hasLoc(r)?r.location:'no location'),key:k,stock:r.stock})});
   S.contracts.filter(c=>fensaDue(c)&&c.fit&&c.fit<=addDays(-14)).forEach(c=>{const g=Math.round((new Date(td)-new Date(c.fit))/864e5);alr.push({k:'FENSA',t:c.name+' #'+c.id,s:'Fitted '+g+' days ago. Notify FENSA within 30 days of fitting.',go:'contracts',key:'fensa:'+c.id,stock:1})});
-  S.deliveries.filter(d=>d.status=='Due'&&d.due<=td).forEach(d=>alr.push({k:'Delivery',t:d.supplier+': '+d.items,s:d.due<td?'Overdue since '+fd(d.due):'Due today',go:'deliveries',key:'del:'+d.id+':'+d.due,stock:1}));
+  S.deliveries.filter(d=>d.status!='Received'&&d.due<=td).forEach(d=>alr.push({k:'Delivery',t:d.supplier+': '+d.items,s:d.due<td?'Overdue since '+fd(d.due):'Due today',go:'deliveries',key:'del:'+d.id+':'+d.due,stock:1}));
   return{req,mov:Ad?mov.slice(0,20):[],alr:alr.filter(x=>(Ad||!['FENSA','Alert'].includes(x.k))&&!(x.stock===1&&S.dis[x.key]===1)),men:[]}}
 function ncCount(){const d=ncData();return d.req.filter(r=>ISADM()?r.reqStatus=='Pending':r.reqStatus=='Approved').length+d.mov.filter(x=>x.n).length+d.alr.length+d.men.filter(n=>!n.read).length}
 function ncDraw(){const nc=$('#nc'),d=ncData(),T=UI.nc.t,show=k=>T=='All'||T==k||(k=='Requests'&&T=='My Requests'),Ad=ISADM();ncAlerts=d.alr;

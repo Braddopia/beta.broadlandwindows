@@ -4,7 +4,7 @@
    ========================================================================== */
 /* All page-level UI state lives here (instead of a dozen loose globals) */
 const UI={
-  svc:{f:'open'},
+  svc:{f:'open',page:1,per:50},
   inv:{v:'products',f:'all',sup:'all',loc:'all',unit:'all',sort:'item',dir:1,page:1,per:50},
   mov:{f:'all',sort:'',dir:1,page:1,per:50},
   cal:{m:'month',o:0,sd:null,ly:{fit:1,svc:1,del:1,hol:1}},
@@ -87,11 +87,14 @@ function busyBtn(b,ms){if(!b||b.classList.contains('busy'))return;b.classList.ad
 function toast(t){if(document.body.classList.contains('tv'))return;const e=$('#toast');e.textContent=t;e.style.display='block';clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.display='none',3400)}
 
 /* ---- modal ---- */
-function openModal(h,size){const b=$('#mbox');b.className='mb '+(size||'md'); /* one standard width unless a window needs another */b.innerHTML=h;$('#modal').classList.add('open');b.scrollTop=0;
+let REC_STASH=null;
+function openModal(h,size){const b=$('#mbox'),isRec=/^\s*<div class="rw[ "]/.test(h);
+  if(isRec)REC_STASH=null;else if(!REC_STASH&&$('#modal').classList.contains('open')&&typeof RW!='undefined'&&RW){const rw=b.querySelector(':scope>.rw');if(rw){const rb=rw.querySelector('.rw-b');REC_STASH={node:rw,cls:b.className,rw:RW,sy:rb?rb.scrollTop:0};rw.remove()}}
+  b.className='mb '+(size||'md'); /* one standard width unless a window needs another */b.innerHTML=h;$('#modal').classList.add('open');b.scrollTop=0;
   if(size!='full')setTimeout(()=>{const f=b.querySelector('input:not([readonly]):not([type=hidden]):not([type=checkbox]),select,textarea');if(f&&matchMedia('(pointer:fine)').matches)f.focus({preventScroll:true})},60)}
 /* "next" fields: Mobile 2 shows once Mobile 1 has something in it, and so on */
 const nxHid=(f,v)=>!!f.nx&&!String(v[f.nx]??'').trim()&&!String(v[f.k]??'').trim();
-document.addEventListener('change',e=>{const el=e.target;if(el.tagName=='SELECT'&&el.value===RANDOM_SP){const L=OWNERS().filter(x=>x!='Unassigned');const pick=L[Math.floor(Math.random()*L.length)]||'Unassigned';el.value=pick;toast('Picked at random: '+pick)}});
+document.addEventListener('change',e=>{const el=e.target;if(el.tagName=='SELECT'&&typeof NEWCO!='undefined'&&el.value===NEWCO){supNewCo();return}if(el.tagName=='SELECT'&&el.value===RANDOM_SP){const L=OWNERS().filter(x=>x!='Unassigned');const pick=L[Math.floor(Math.random()*L.length)]||'Unassigned';el.value=pick;toast('Picked at random: '+pick)}});
 document.addEventListener('input',e=>{const el=e.target;if(!el.id||!el.id.startsWith('f_'))return;const k=el.id.slice(2);
   $$(`#mbox [data-nx="${k}"]`).forEach(r=>{const own=r.querySelector('input,select,textarea');r.hidden=!el.value.trim()&&!(own&&own.value.trim())})});
 /* styled confirmation instead of the browser's own box */
@@ -104,9 +107,14 @@ function askIn(title,msg,okLabel,cb,danger){if(ASKI)ASKI.remove();const o=docume
   const key=e=>{if(e.key=='Escape'){e.stopPropagation();e.preventDefault();done(false)}},done=ok=>{o.remove();document.removeEventListener('keydown',key,true);if(ASKI===o)ASKI=null;if(ok&&cb)cb()};
   o.addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(b)done(b.dataset.a=='1');else if(e.target==o)done(false)});
   document.addEventListener('keydown',key,true);ASKI=o;document.body.appendChild(o);o.querySelector('[data-a="1"]').focus()}
+/* "done" shown inside the same window with a tick, then it closes by itself */
+function doneIn(msg){if(!$('#modal').classList.contains('open'))return;const b=$('#mbox'),id='dn'+Date.now();b.className='mb sm';
+  b.innerHTML=`<div class="donein" id="${id}" role="status" aria-live="polite"><svg viewBox="0 0 52 52" class="dn-svg" aria-hidden="true"><circle cx="26" cy="26" r="23"/><path d="M15 27l7 7 15-15"/></svg><h2>${esc(msg||'Saved')}</h2></div>`;
+  setTimeout(()=>{if($('#'+id))closeModal()},1150)}
 function askNo(){const f=ASK_NO;ASK=ASK_NO=null;closeModal();if(f)f()}
 function askGo(){const f=ASK;ASK=null;closeModal();if(f)f()}
-function closeModal(){$('#modal').classList.remove('open');if(typeof syncPend!='undefined'&&syncPend)setTimeout(syncPull,0);const a=document.activeElement;if(a&&a!==document.body&&!a.closest('#modal'))a.blur()}
+function closeModal(){if(REC_STASH){const s=REC_STASH,b=$('#mbox');REC_STASH=null;b.innerHTML='';b.className=s.cls;b.appendChild(s.node);RW=s.rw;$('#modal').classList.add('open');const rb=b.querySelector('.rw-b');if(rb)rb.scrollTop=s.sy;if(typeof recReturn=='function')recReturn();return}
+  $('#modal').classList.remove('open');if(typeof syncPend!='undefined'&&syncPend)setTimeout(syncPull,0);const a=document.activeElement;if(a&&a!==document.body&&!a.closest('#modal'))a.blur()}
 $('#modal').addEventListener('mousedown',e=>{if(e.target.id=='modal')closeModal()});
 
 /* update the page in place: only the parts that changed are replaced, so glass panels are not rebuilt */
@@ -126,12 +134,12 @@ function form(title,fields,v,cb,photos,size){
   v=v||{};tmp=photos?(v.photos||[]).filter(SAFE.img).slice():null;tmpDraw=drawThumbs;
   const sel=f=>{const cur=v[f.k]??'',has=f.o.some(o=>String(Array.isArray(o)?o[0]:o)==String(cur));return `<select id="f_${f.k}" ${f.ro?'disabled':''}>${(cur!==''&&!has?[cur,...f.o]:f.o).map(o=>{const[val,lab]=Array.isArray(o)?o:[o,o||'-'];return `<option value="${esc(val)}"${String(val)==String(v[f.k]??'')?' selected':''}>${esc(lab)}</option>`}).join('')}</select>`};
   const inp=f=>f.t=='colour'?colourField(f,v):f.t=='select'?sel(f):f.t=='area'?`<textarea id="f_${f.k}" rows="3" maxlength="${f.max||2000}">${esc(v[f.k]||'')}</textarea>`
-    :`<input id="f_${f.k}" type="${f.t||'text'}"${f.t=='number'?` step="any" min="${f.min??0}"${f.max?` max="${f.max}"`:''} inputmode="decimal"`:` maxlength="${f.max||120}"`} value="${esc(v[f.k]??'')}"${f.ro?' readonly':''}${f.list?` list="${f.list}"`:''} autocomplete="off">`;
-  openModal(`<h2>${esc(title)}</h2><div class="grid">${fields.map(f=>f.t=='h'?`<h3 class="fsec full">${esc(f.l)}</h3>`:`<div class="ff ${f.w||''}"><label for="f_${f.k}">${esc(f.l)}${MARK(f.req,f.adm)}</label>${f.scan?`<div class="inl">${inp(f)}<button type="button" class="btn scan sm" ${A('scanInto','f_'+f.k)}>Scan</button></div>`:inp(f)}${f.hint?`<span class="hint">${esc(f.hint)}</span>`:''}</div>`).join('')}
-   ${photos?`<div class="ff full"><label>Photos <span class="muted">(up to ${MAX_PHOTOS})</span></label><div class="thumbs" id="thumbs"></div><div class="prow"><label class="btn ghost sm">Take photo<input type="file" accept="image/*" capture="environment" hidden onchange="addPh(this)"></label><label class="btn ghost sm">Choose from gallery<input type="file" accept="image/*" multiple hidden onchange="addPh(this)"></label></div></div>`:''}</div>
+    :`<input id="f_${f.k}" type="${f.t||'text'}"${f.t=='number'?` step="any" min="${f.min??0}"${f.max?` max="${f.max}"`:''} inputmode="decimal"`:` maxlength="${f.max||120}"`} value="${esc(v[f.k]??'')}"${f.ro?' readonly':''}${f.list?` list="${f.list}"`:''}${f.t=='email'||/url|web|portal|feed|link/i.test(f.k)?' class="nocap"':''} autocomplete="off">`;
+  openModal(`<h2>${esc(title)}</h2><div class="grid">${fields.map(f=>f.t=='h'?`<h3 class="fsec full">${esc(f.l)}</h3>`:`<div class="ff ${f.w||''}"><label for="f_${f.k}">${esc(f.l)}${MARK(f.req,f.adm)}</label>${f.scan?`<div class="inl">${inp(f)}<button type="button" class="btn scan sm" ${A('scanInto','f_'+f.k)}>Scan</button></div>`:inp(f)}${f.hint?`<span class="hint ${/https?:|@/.test(f.hint)?'nocap':''}">${esc(f.hint)}</span>`:''}</div>`).join('')}
+   ${photos?`<div class="ff full"><label>Photos <span class="muted">(up to ${MAX_PHOTOS})</span></label>${typeof photos=='string'?`<span class="hint">${esc(photos)}</span>`:''}<div class="thumbs phg" id="thumbs"></div><div class="prow"><label class="btn ghost sm">Take photo<input type="file" accept="image/*" capture="environment" hidden onchange="addPh(this)"></label><label class="btn ghost sm">Choose from gallery<input type="file" accept="image/*" multiple hidden onchange="addPh(this)"></label></div></div>`:''}</div>
    <div class="mact"><button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn" id="saveBtn">Save changes</button></div>`,size||'md'); /* every plain form is the same width */
   if(photos)drawThumbs();
-  $('#saveBtn').onclick=()=>{const o=readFields(fields);if(!o)return;if(photos)o.photos=tmp;if(cb(o)===false)return;store();closeModal();render()}}
+  $('#saveBtn').onclick=()=>{const o=readFields(fields);if(!o)return;if(photos)o.photos=tmp;const bx=$('#mbox'),mk=bx.firstElementChild;if(cb(o)===false)return;store();render();if($('#modal').classList.contains('open')&&bx.firstElementChild===mk)doneIn('Saved')}}
 /* read + validate form fields; returns null (and focuses the field) when invalid */
 /* show a problem next to the box itself (and still as a message at the bottom) */
 function fieldErr(e,msg){toast(msg);const w=e.closest('.rf,.ff');if(w){w.classList.add('err');let m=w.querySelector('.ferr');if(!m){m=document.createElement('em');m.className='ferr';w.appendChild(m)}m.textContent=msg;
@@ -188,7 +196,9 @@ function cpPick(n,h){pickC(CP.k,n,h);$('#cpop').classList.remove('open')}
 function scanInto(id){scan(c=>{const e=$('#'+id);if(e){e.value=c;e.dispatchEvent(new Event('input'))}})}
 
 /* ---- photos: resized + compressed before storing, capped per record ---- */
-function drawThumbs(){const t=$('#thumbs');if(!t)return;t.innerHTML=tmp.map((p,i)=>`<div class="th"><img src="${SAFE.img(p)}" alt="Photo ${i+1}"><button type="button" aria-label="Remove photo" ${A('rmPh',i)}>&times;</button></div>`).join('')||'<span class="muted">No photos yet.</span>'}
+/* photos as a grid of 8 glass boxes (2 rows of 4): filled ones show the photo, the next empty one adds more */
+function drawThumbs(){const t=$('#thumbs');if(!t)return;if(t.classList.contains('phg')){const n=tmp.length;t.innerHTML=Array.from({length:MAX_PHOTOS},(_,i)=>i<n?`<div class="phb on"><img src="${SAFE.img(tmp[i])}" alt="Photo ${i+1}" ${A('viewPhoto',tmp[i])}><button type="button" aria-label="Remove photo ${i+1}" ${A('rmPh',i)}>&times;</button></div>`:i==n?`<label class="phb add" title="Add photos"><input type="file" accept="image/*" multiple hidden onchange="addPh(this)">${svg(IC.plus)}<span>Add</span></label>`:'<div class="phb" aria-hidden="true"></div>').join('');return}
+  t.innerHTML=tmp.map((p,i)=>`<div class="th"><img src="${SAFE.img(p)}" alt="Photo ${i+1}"><button type="button" aria-label="Remove photo" ${A('rmPh',i)}>&times;</button></div>`).join('')||'<span class="muted">No photos yet.</span>'}
 function rmPh(i){tmp.splice(i,1);tmpDraw&&tmpDraw()}
 function addPh(inp){const files=[...inp.files].filter(f=>/^image\//.test(f.type));inp.value='';
   const room=MAX_PHOTOS-tmp.length;if(room<=0){toast('Up to '+MAX_PHOTOS+' photos per record');return}
@@ -196,7 +206,7 @@ function addPh(inp){const files=[...inp.files].filter(f=>/^image\//.test(f.type)
   files.slice(0,room).forEach(f=>{if(f.size>25e6){toast(f.name+' is too large');return}const img=new Image();
     img.onload=()=>{const s=Math.min(1,1280/Math.max(img.width,img.height)),c=document.createElement('canvas');c.width=Math.round(img.width*s);c.height=Math.round(img.height*s);c.getContext('2d').drawImage(img,0,0,c.width,c.height);tmp.push(c.toDataURL('image/jpeg',.7));URL.revokeObjectURL(img.src);tmpDraw&&tmpDraw()};
     img.onerror=()=>toast('That file could not be read as an image');img.src=URL.createObjectURL(f)})}
-const gallery=a=>{a=(a||[]).filter(SAFE.img);return a.length?`<div class="gal">${a.map((p,i)=>`<img src="${p}" alt="Photo ${i+1}" ${A('viewPhoto',p)}>`).join('')}</div>`:''};
+const gallery=a=>{a=(a||[]).filter(SAFE.img);return a.length?`<div class="gal">${a.map((p,i)=>`<img src="${SAFE.img(p)}" alt="Photo ${i+1}" ${A('viewPhoto',p)}>`).join('')}</div>`:''};
 function viewPhoto(p){const w=window.open('','_blank');if(!w)return;w.document.write(`<title>Photo</title><body style="margin:0;background:#111;display:grid;place-items:center;height:100vh"><img src="${SAFE.img(p)}" style="max-width:100%;max-height:100vh">`);w.document.close()}
 const phCount=a=>a&&a.length?`<span class="tag n">${a.length} photo${a.length>1?'s':''}</span>`:'';
 
@@ -269,4 +279,4 @@ function wzRead(){const st=WZ.steps[WZ.st];if(st.review)return true;const o=read
 function wzStep(d){if(d>0&&!wzRead())return;if(d<0){const st=WZ.steps[WZ.st];if(!st.review){const o={};st.f.forEach(f=>{const e=$('#f_'+f.k);if(!e)return;const r=(e.value||'').trim();o[f.k]=f.t=='number'?(SAFE.num(r,{min:f.min??0,max:f.max??1e9,dp:f.dp??2})??0):f.t=='date'?SAFE.date(r):SAFE.text(r,f.t=='area'?(f.max||2000):(f.max||120))});Object.assign(WZ.v,o)}}
   WZ.st=Math.max(0,Math.min(WZ.steps.length-1,WZ.st+d));WZ.seen=Math.max(WZ.seen,WZ.st);wzDraw()}
 function wzGo(i){if(i>WZ.seen&&!WZ.edit)return;if(i!=WZ.st&&!wzRead())return;WZ.st=i;WZ.seen=Math.max(WZ.seen,i);wzDraw()}
-function wzSave(){if(!wzRead())return;for(let i=0;i<WZ.steps.length;i++){const e=WZ.check&&WZ.check(i,WZ.v);if(e){WZ.st=i;wzDraw();toast(e);return}}WZ.save(WZ.v);store();closeModal();render()}
+function wzSave(){if(!wzRead())return;for(let i=0;i<WZ.steps.length;i++){const e=WZ.check&&WZ.check(i,WZ.v);if(e){WZ.st=i;wzDraw();toast(e);return}}const bx=$('#mbox'),mk=bx.firstElementChild;WZ.save(WZ.v);store();render();if($('#modal').classList.contains('open')&&bx.firstElementChild===mk)doneIn(WZ.done||'Saved')}
