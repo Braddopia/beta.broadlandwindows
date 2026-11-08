@@ -13,7 +13,9 @@ import { allowTot, hu, svcExtra, svcYears } from '../../domain/holidays.js';
 import { allLeads } from '../../domain/leads.js';
 import { me } from '../../domain/people.js';
 import { hasLoc, isLow, products } from '../../domain/stock.js';
-import { ISADM, ISOWN, ROLE, canSee, need } from '../auth/session.js';
+import { ROLE } from '../../data/session.js';
+import { can, canSee } from '../../domain/permissions.js';
+import { need } from '../auth/session.js';
 import { holBook } from '../holidays/holidays.js';
 import { ratingsH } from './reviews.js';
 import { dTag, prTag } from '../../ui/components/tags.js';
@@ -212,7 +214,7 @@ export function vHome() {
     out: ['Out Of Stock', out, out ? 'bad' : '', 'stock'],
     fol: ['Follow-Ups Due', fol.length, fol.length ? 'warn' : '', 'leads'],
     quoted: ['Quotes Out', quoted, '', 'leads'],
-    ...(ISADM()
+    ...(can('money')
       ? {
           sval: ['Stock Value', m0(sv), '', 'stock'],
           bills: ['Bills Unpaid', m0(sum(bills, (b) => b.amount)), billsOver.length ? 'bad' : '', 'finance'],
@@ -228,7 +230,7 @@ export function vHome() {
     chase: ['Leads To Chase', chaseP],
     dep: ['Awaiting Deposit', depP],
     res: ['Lead Results', resP],
-    ...(ISADM() ? { pay: ['Payments Due Before Fit', payP], bills: ['Bills To Pay', billP] } : {}),
+    ...(can('money') ? { pay: ['Payments Due Before Fit', payP], bills: ['Bills To Pay', billP] } : {}),
   };
   const okK = (k) => KP[k] && canSee(KP[k][3]),
     okP = (k) =>
@@ -343,7 +345,7 @@ export const LAY = {
   },
 };
 export function flEdit() {
-  if (!need(ISOWN, 'Changing the factory screen')) return;
+  if (!need('manage', 'Changing the factory screen')) return;
   layEdit('fl');
 }
 export function dashEdit() {
@@ -411,7 +413,7 @@ export function bookMine() {
     return;
   }
   holBook(m.id);
-  if (!ISOWN()) {
+  if (!can('manage')) {
     const s = $('#hs');
     if (s) {
       [...s.options].forEach((o) => {

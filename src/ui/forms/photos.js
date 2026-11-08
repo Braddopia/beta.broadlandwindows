@@ -3,7 +3,7 @@ import { MAX_PHOTOS } from '../../config/constants.js';
 import { onClick } from '../../core/actions.js';
 import { $ } from '../../core/dom.js';
 import { ICONS, svg } from '../../core/icons.js';
-import { SAFE } from '../../core/sanitize.js';
+import { SAFE } from '../../data/sanitize.js';
 import { toast } from '../toast.js';
 
 /* photos being edited in the open form, and how to redraw them */

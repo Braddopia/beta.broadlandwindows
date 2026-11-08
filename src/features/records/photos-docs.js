@@ -2,10 +2,10 @@
 import { DOCTYPES, MAX_PHOTOS, PHTAGS } from '../../config/constants.js';
 import { onClick, onEvent } from '../../core/actions.js';
 import { $, esc } from '../../core/dom.js';
-import { download } from '../../core/download.js';
+import { download } from '../../ui/download.js';
 import { kb } from '../../core/format.js';
 import { uuid } from '../../core/ids.js';
-import { SAFE } from '../../core/sanitize.js';
+import { SAFE } from '../../data/sanitize.js';
 import { audit } from '../../data/audit.js';
 import { store } from '../../data/persistence.js';
 import { MAX_UPLOAD, fx } from '../files/files.js';

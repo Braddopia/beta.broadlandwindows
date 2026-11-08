@@ -1,7 +1,8 @@
 /* features/tour/tour: The welcome tour. */
 import { $, esc } from '../../core/dom.js';
 import { svg } from '../../core/icons.js';
-import { ISOWN, ROLE } from '../auth/session.js';
+import { ROLE } from '../../data/session.js';
+import { can } from '../../domain/permissions.js';
 import { ART_IC } from '../../ui/components/art.js';
 import { go, render, view } from '../../ui/shell/router.js';
 import { toast } from '../../ui/toast.js';
@@ -134,7 +135,7 @@ export function tourDraw() {
   o.innerHTML = `<div class="tspot ${vis ? '' : 'none'}" style="${vis ? `left:${r.left - pad}px;top:${r.top - pad}px;width:${r.width + pad * 2}px;height:${r.height + pad * 2}px` : ''}"></div>
    <div class="tcard ${vis ? '' : 'mid'}">${!vis && s.art && ART_IC[s.art] ? `<div class="tban lkp">${svg(ART_IC[s.art])}</div>` : ''}<small>${TI + 1} of ${TOUR.length}</small><h3>${esc(s.t)}</h3><p>${esc(s.d)}</p>
     <div class="tdots">${TOUR.map((_, i) => `<i class="${i == TI ? 'on' : ''}"></i>`).join('')}</div>
-    ${ISOWN() || ROLE == 'beta' ? `<label class="ttest"><input type="checkbox" id="tourTest" ${tourTest() ? 'checked' : ''} data-onchange="tourToggle" data-args-change="[{&quot;$&quot;:&quot;checked&quot;}]"> Show every time (testing)</label>` : ''}
+    ${can('manage') || ROLE == 'beta' ? `<label class="ttest"><input type="checkbox" id="tourTest" ${tourTest() ? 'checked' : ''} data-onchange="tourToggle" data-args-change="[{&quot;$&quot;:&quot;checked&quot;}]"> Show every time (testing)</label>` : ''}
     <div class="tbtn"><button class="btn ghost sm" data-act="endTour">${last ? 'Close' : 'Skip tour'}</button><span></span>${TI ? '<button class="btn ghost sm" data-act="tourGo" data-args="[-1]">Back</button>' : ''}<button class="btn sm" ${last ? 'data-act="endTour"' : 'data-act="tourGo" data-args="[1]"'}>${last ? 'Finish' : 'Next'}</button></div></div>`;
   const c = o.querySelector('.tcard');
   const sm = innerWidth < 640;

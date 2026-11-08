@@ -1,6 +1,6 @@
 /* features/scanner/scanner: The barcode scanner. */
 import { $ } from '../../core/dom.js';
-import { SAFE } from '../../core/sanitize.js';
+import { SAFE } from '../../data/sanitize.js';
 import { audit } from '../../data/audit.js';
 import { store } from '../../data/persistence.js';
 

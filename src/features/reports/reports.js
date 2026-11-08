@@ -3,7 +3,7 @@ import { CSTAGES, SOURCES, STAGES } from '../../config/constants.js';
 import { onClick } from '../../core/actions.js';
 import { addDays, fd, today } from '../../core/dates.js';
 import { esc } from '../../core/dom.js';
-import { csvDownload } from '../../core/download.js';
+import { csvDownload } from '../../ui/download.js';
 import { grp, m0, money, pc, sum } from '../../core/format.js';
 import { state } from '../../data/state.js';
 import { DWIN, delWin } from '../../domain/deliveries.js';
@@ -11,7 +11,7 @@ import { allowTot, hu } from '../../domain/holidays.js';
 import { allLeads } from '../../domain/leads.js';
 import { callsOf, holOn, jobsOf, staffName } from '../../domain/people.js';
 import { colTxt, hasLoc, isLow, products, stt, unitOf } from '../../domain/stock.js';
-import { ISADM } from '../auth/session.js';
+import { can } from '../../domain/permissions.js';
 import { DH, delRows } from '../deliveries/deliveries.js';
 import { DOCS } from '../documents/documents.js';
 import { printDoc } from '../../print/print.js';
@@ -32,7 +32,7 @@ export const R = {
       P = products(),
       td = today(),
       att = [],
-      Ad = ISADM();
+      Ad = can('money');
     oc.filter((c) => c.priority == 'Urgent').forEach((c) =>
       att.push(['Service', c.name + ' (' + c.id + ')', c.issue, c.visit ? fd(c.visit) : 'No visit'])
     );
@@ -167,7 +167,7 @@ export const R = {
   },
   contracts() {
     const C = state.contracts,
-      Ad = ISADM(),
+      Ad = can('money'),
       v = sum(C, (c) => c.value),
       p = sum(C, (c) => c.paid),
       wc = C.filter((c) => c.cost),
@@ -355,7 +355,7 @@ export const R = {
   stock() {
     const P = products(),
       mv = state.items,
-      Ad = ISADM();
+      Ad = can('money');
     return {
       t: 'Stock',
       kpis: [
@@ -601,13 +601,13 @@ export const TABS = () => [
   ['service', 'Service'],
   ['deliveries', 'Deliveries'],
   ['stock', 'Stock'],
-  ...(ISADM() ? [['finance', 'Finance']] : []),
+  ...(can('money') ? [['finance', 'Finance']] : []),
   ['people', 'People'],
   ['docs', 'Documents'],
 ];
 export const isNum = (v) => /^[£\d.,%\-\s]+$/.test(String(v)) && String(v).trim() != '';
 export function vReports() {
-  if (uiState.rep.t == 'finance' && !ISADM()) uiState.rep.t = 'summary';
+  if (uiState.rep.t == 'finance' && !can('money')) uiState.rep.t = 'summary';
   const T = uiState.rep.t;
   let body;
   if (T == 'docs')
@@ -661,7 +661,7 @@ export function repPrint(all) {
     ds = ks.map((k) => R[k]());
   printDoc(
     all ? 'Management Report' : ds[0].t + ' Report',
-    all ? 'Sales, contracts, service, stock' + (ISADM() ? ' and finance' : '') : '',
+    all ? 'Sales, contracts, service, stock' + (can('money') ? ' and finance' : '') : '',
     [],
     [],
     { kind: all ? 'Management Report' : 'Report', sections: ds }

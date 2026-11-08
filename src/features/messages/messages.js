@@ -4,7 +4,7 @@ import { $, esc } from '../../core/dom.js';
 import { initials } from '../../core/format.js';
 import { svg } from '../../core/icons.js';
 import { shortId } from '../../core/ids.js';
-import { SAFE } from '../../core/sanitize.js';
+import { SAFE } from '../../data/sanitize.js';
 import { audit } from '../../data/audit.js';
 import { store } from '../../data/persistence.js';
 import { state } from '../../data/state.js';

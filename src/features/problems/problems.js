@@ -5,7 +5,8 @@ import { $ } from '../../core/dom.js';
 import { audit } from '../../data/audit.js';
 import { store } from '../../data/persistence.js';
 import { state } from '../../data/state.js';
-import { ISOWN, ROLE, need } from '../auth/session.js';
+import { ROLE } from '../../data/session.js';
+import { need } from '../auth/session.js';
 import { form } from '../../ui/forms/form.js';
 import { askIn, closeModal } from '../../ui/modal.js';
 import { VIEWS, render, view } from '../../ui/shell/router.js';
@@ -45,7 +46,7 @@ export function bugReport() {
   );
 }
 export function bugView(id) {
-  if (!need(ISOWN, 'Reported problems')) return;
+  if (!need('manage', 'Reported problems')) return;
   const b = state.bugs.find((x) => x.id == id);
   if (!b) return;
   form(

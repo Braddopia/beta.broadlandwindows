@@ -6,7 +6,8 @@ import { $, esc } from '../../core/dom.js';
 import { audit } from '../../data/audit.js';
 import { store } from '../../data/persistence.js';
 import { state } from '../../data/state.js';
-import { ISOWN, need, setRole } from './session.js';
+import { can } from '../../domain/permissions.js';
+import { need, setRole } from './session.js';
 import { form } from '../../ui/forms/form.js';
 import { closeModal, openModal } from '../../ui/modal.js';
 import { toast } from '../../ui/toast.js';
@@ -40,7 +41,7 @@ export function chkPin(k) {
     setRole(k);
     audit('Signed in', ROLES[k].n, '');
     store();
-    if (state.sec.pins[k].def && ISOWN())
+    if (state.sec.pins[k].def && can('manage'))
       setTimeout(() => toast('This account still uses the default PIN. Change it in Admin console.'), 800);
     return;
   }
@@ -62,7 +63,7 @@ export function chkPin(k) {
 }
 /* ---- PIN management (owner accounts) ---- */
 export function chPin() {
-  if (!need(ISOWN, 'Changing PINs')) return;
+  if (!need('manage', 'Changing PINs')) return;
   openModal(
     `<h2>Account PINs</h2><p class="muted">PINs are stored as salted SHA-256 hashes. Use 4 to 12 digits.</p>${Object.entries(
       ROLES
@@ -76,7 +77,7 @@ export function chPin() {
   );
 }
 export function setPin(k) {
-  if (!need(ISOWN, 'Changing PINs')) return;
+  if (!need('manage', 'Changing PINs')) return;
   form(
     'New PIN: ' + ROLES[k].n,
     [

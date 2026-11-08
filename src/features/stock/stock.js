@@ -3,11 +3,11 @@ import { UNITS } from '../../config/constants.js';
 import { onClick, onEvent, rowClick } from '../../core/actions.js';
 import { nowT, today } from '../../core/dates.js';
 import { $, esc } from '../../core/dom.js';
-import { csvDownload } from '../../core/download.js';
+import { csvDownload } from '../../ui/download.js';
 import { m0, money, sum } from '../../core/format.js';
 import { ICONS, svg } from '../../core/icons.js';
 import { uuid } from '../../core/ids.js';
-import { SAFE } from '../../core/sanitize.js';
+import { SAFE } from '../../data/sanitize.js';
 import { audit } from '../../data/audit.js';
 import { store } from '../../data/persistence.js';
 import { state } from '../../data/state.js';
@@ -27,7 +27,8 @@ import {
   stt,
   unitOf,
 } from '../../domain/stock.js';
-import { ISADM, ISOWN, need } from '../auth/session.js';
+import { can } from '../../domain/permissions.js';
+import { need } from '../auth/session.js';
 import { stockForm } from './item-window.js';
 import { isPhone, vPDA } from './phone-mode.js';
 import { SUPN, suppliersPanel } from '../suppliers/suppliers.js';
@@ -43,6 +44,8 @@ import { toast } from '../../ui/toast.js';
 import { uiState } from '../../ui/ui-state.js';
 
 export const SEL = new Set();
+/* a product's photos that can still be shown */
+export const pphotos = (k) => (state.pphotos[k] || []).filter(SAFE.img);
 /* ---------------- page ---------------- */
 export function vStock() {
   const v = uiState.inv.v;
@@ -84,7 +87,7 @@ export function invFiltered() {
 }
 export function vProducts(tog) {
   if (isPhone() && !uiState.inv.full) return vPDA();
-  const Ad = ISADM(),
+  const Ad = can('money'),
     I = uiState.inv,
     P = products(),
     list = invFiltered(),
@@ -125,7 +128,7 @@ export function vProducts(tog) {
   return `<div class="head"><div><h1>Inventory</h1><span class="muted">${P.length} products, ${sum(P, (r) => r.stock)} units${Ad ? ', ' + m0(sum(P, (r) => r.stock * r.cost)) : ''}</span></div><div class="tools">${tog}<span class="vs"></span><div class="seg2"><button class="g" ${onClick('stockForm', 'add')}>+ Add</button><button class="r" ${onClick('stockForm', 'remove')}>- Remove</button><button ${onClick('stockForm', 'request')}>Request</button></div><button class="mini" data-act="invNew">Batch Add</button><button class="mini" data-act="invRep">Reports</button><button class="mini" data-act="invCsv">Export CSV</button></div></div>
   <div class="kpis">${K.map(kpi).join('')}</div>
   <div class="sg2">${ch('all', 'All (' + P.length + ')')}${ch('low', 'Low (' + cnt((r) => isLow(r) && r.stock > 0) + ')')}${ch('out', 'Out (' + cnt((r) => r.stock <= 0) + ')')}${ch('noloc', 'No Location (' + cnt((r) => !hasLoc(r)) + ')')}${ch('nosup', 'No Supplier (' + cnt((r) => !r.supplier) + ')')}${filtersOn ? `<span class="vs"></span><button class="chip on" data-act="invReset">Filters on &times;</button>` : ''}</div>
-  ${n ? `<div class="selbar"><b>${n} Selected</b><button class="mini pri" ${onClick('invBatch', 'add')}>Add Stock</button><button class="mini" ${onClick('invBatch', 'remove')}>Remove Stock</button><button class="mini" ${onClick('invSetF', 'location')}>Set Location</button><button class="mini" ${onClick('invSetF', 'supplier')}>Set Supplier</button><button class="mini" ${onClick('invSetF', 'unit')}>Set Unit</button><button class="mini" data-act="invRep">Report</button><button class="mini" data-act="invLabels">Labels</button><button class="mini" ${onClick('invCsv', 1)}>Export</button>${ISOWN() ? '<button class="mini del" data-act="invDel">Delete</button>' : ''}<button class="mini" data-act="invSelClear">Clear</button></div>` : ''}
+  ${n ? `<div class="selbar"><b>${n} Selected</b><button class="mini pri" ${onClick('invBatch', 'add')}>Add Stock</button><button class="mini" ${onClick('invBatch', 'remove')}>Remove Stock</button><button class="mini" ${onClick('invSetF', 'location')}>Set Location</button><button class="mini" ${onClick('invSetF', 'supplier')}>Set Supplier</button><button class="mini" ${onClick('invSetF', 'unit')}>Set Unit</button><button class="mini" data-act="invRep">Report</button><button class="mini" data-act="invLabels">Labels</button><button class="mini" ${onClick('invCsv', 1)}>Export</button>${can('manage') ? '<button class="mini del" data-act="invDel">Delete</button>' : ''}<button class="mini" data-act="invSelClear">Clear</button></div>` : ''}
   <div class="tw"><table class="ptb"><thead><tr><th><input type="checkbox" aria-label="Select all on this page" ${pg.rows.length && pg.rows.every((r) => SEL.has(key(r))) ? 'checked' : ''} ${onEvent('onchange', 'invAll', 'this.checked')}></th>${thS('inv', 'pid', 'ID')}${thS('inv', 'item', 'Item')}${thS('inv', 'length', 'Length', 'c-sm')}${thS('inv', 'colours', 'Colours', 'c-md')}${thS('inv', 'unit', 'Unit')}${thS('inv', 'location', 'Location', 'c-md')}${thS('inv', 'stock', 'Stock', 'n')}${thS('inv', 'supplier', 'Supplier', 'c-sm')}${thS('inv', 'cost', 'Cost', 'n c-sm')}${Ad ? thS('inv', 'value', 'Value', 'n c-md') : ''}<th class="ac"><span class="srt" ${onClick('sortBy', 'inv', 'status')} style="cursor:pointer;margin-right:.5rem">Status${uiState.inv.sort == 'status' ? `<span class="ar">${uiState.inv.dir > 0 ? '▲' : '▼'}</span>` : ''}</span><button class="fbtn ${filtersOn ? 'on' : ''}" id="invF" title="Sort and filter" aria-label="Sort and filter" data-act="invFilter" data-args="[{&quot;$&quot;:&quot;this&quot;}]">${svg(ICONS.filter)}</button></th></tr></thead><tbody>${rows || `<tr><td colspan="14" class="empty">${emptyArt('stock', 'No products match.')}</td></tr>`}</tbody></table></div>
   ${pagerH('inv', pg, 'products')}
   <div style="margin-top:1.1rem">${suppliersPanel()}</div>`;
@@ -145,7 +148,7 @@ export function invReset() {
 export function invFilter(btn) {
   const I = uiState.inv,
     P = products(),
-    Ad = ISADM(),
+    Ad = can('money'),
     opts = (a, cur, all) =>
       `<option value="all">${all}</option>` +
       a.map((x) => `<option value="${esc(x)}" ${x == cur ? 'selected' : ''}>${esc(x)}</option>`).join('');
@@ -234,7 +237,7 @@ export function invSetF(f) {
 }
 export function invDel() {
   const n = SEL.size;
-  if (!n || !need(ISOWN, 'Deleting products')) return;
+  if (!n || !need('manage', 'Deleting products')) return;
   askYes(
     'Delete ' + n + ' product' + (n > 1 ? 's' : '') + '?',
     'All of their stock history goes too. This cannot be undone.',
@@ -338,7 +341,7 @@ export function invNewRun() {
   toast(ok.length + ' product' + (ok.length > 1 ? 's' : '') + ' added');
 }
 export function invCsv(onlySel) {
-  const Ad = ISADM(),
+  const Ad = can('money'),
     P = onlySel ? products().filter((r) => SEL.has(key(r))) : invFiltered();
   csvDownload('broadland-stock-' + today() + '.csv', [
     [
@@ -375,7 +378,7 @@ export function invCsv(onlySel) {
 /* ---------------- movements ---------------- */
 export function vMoves(tog) {
   const M = uiState.mov,
-    Ad = ISADM();
+    Ad = can('money');
   const ok = (r) =>
     M.f == 'all' ||
     (M.f == 'alert'
@@ -395,14 +398,14 @@ export function vMoves(tog) {
       .map((r) => {
         const req = r.type == 'request',
           pend = req && r.reqStatus == 'Pending';
-        return `<tr class="clk-r" ${rowClick('viewItem', r.pid)} style="${req && ['Cleared', 'Rejected'].includes(r.reqStatus) ? 'opacity:.6' : ''}"><td>${ordTag(r) || '<span class="muted">-</span>'}</td><td>${esc(r.time)}</td><td><span class="tag ${r.type == 'add' ? 'g' : r.type == 'remove' ? 'r' : 'y'}">${esc(r.type)}</span>${req ? ' ' + reqTag(r) : ''}${r.flag && !r.cleared ? ' <span class="tag r">Alert</span>' : ''}</td><td class="c-sm">${esc(r.user)}</td><td class="n">${r.qty} ${esc(unitOf(r))}</td><td><b>${esc(r.item)}</b></td><td class="c-sm">${esc(r.length)}</td><td class="c-md">${esc(colTxt(r))}</td><td class="n c-md">${req ? '<span class="muted">-</span>' : r.stock}</td><td class="ac"><div class="acts r">${pend && Ad ? `<button class="mini pri" ${onClick('reqApprove', r.uid)}>Approve</button><button class="mini del" ${onClick('reqReject', r.uid)}>Reject</button>` : ''}${req && r.reqStatus == 'Approved' ? `<button class="mini ok" ${onClick('reqReceive', r.uid)}>Receive</button>` : ''}${(req && !['Cleared', 'Rejected'].includes(r.reqStatus) && !pend) || (r.flag && !r.cleared) ? `<button class="mini" ${onClick('moveClear', r.uid)}>Clear</button>` : ''}<button class="mini" ${onClick('viewItem', r.pid)}>View</button>${ISOWN() ? `<button class="mini del" ${onClick('moveDel', r.uid)} aria-label="Delete entry">&times;</button>` : ''}</div></td></tr>`;
+        return `<tr class="clk-r" ${rowClick('viewItem', r.pid)} style="${req && ['Cleared', 'Rejected'].includes(r.reqStatus) ? 'opacity:.6' : ''}"><td>${ordTag(r) || '<span class="muted">-</span>'}</td><td>${esc(r.time)}</td><td><span class="tag ${r.type == 'add' ? 'g' : r.type == 'remove' ? 'r' : 'y'}">${esc(r.type)}</span>${req ? ' ' + reqTag(r) : ''}${r.flag && !r.cleared ? ' <span class="tag r">Alert</span>' : ''}</td><td class="c-sm">${esc(r.user)}</td><td class="n">${r.qty} ${esc(unitOf(r))}</td><td><b>${esc(r.item)}</b></td><td class="c-sm">${esc(r.length)}</td><td class="c-md">${esc(colTxt(r))}</td><td class="n c-md">${req ? '<span class="muted">-</span>' : r.stock}</td><td class="ac"><div class="acts r">${pend && Ad ? `<button class="mini pri" ${onClick('reqApprove', r.uid)}>Approve</button><button class="mini del" ${onClick('reqReject', r.uid)}>Reject</button>` : ''}${req && r.reqStatus == 'Approved' ? `<button class="mini ok" ${onClick('reqReceive', r.uid)}>Receive</button>` : ''}${(req && !['Cleared', 'Rejected'].includes(r.reqStatus) && !pend) || (r.flag && !r.cleared) ? `<button class="mini" ${onClick('moveClear', r.uid)}>Clear</button>` : ''}<button class="mini" ${onClick('viewItem', r.pid)}>View</button>${can('manage') ? `<button class="mini del" ${onClick('moveDel', r.uid)} aria-label="Delete entry">&times;</button>` : ''}</div></td></tr>`;
       })
       .join('') || '<tr><td colspan="10" class="empty">No entries match.</td></tr>'
   }
   </tbody></table></div>${pagerH('mov', pg, 'entries')}`;
 }
 export function reqApprove(u) {
-  if (!need(ISADM, 'Approving requests')) return;
+  if (!need('money', 'Approving requests')) return;
   const r = byUid(u);
   if (!r || r.reqStatus != 'Pending') return;
   r.pref = r.ord;
@@ -417,7 +420,7 @@ export function reqApprove(u) {
   toast('Approved: ' + r.pref + ' is now order ' + r.ord);
 }
 export function reqReject(u) {
-  if (!need(ISADM, 'Rejecting requests')) return;
+  if (!need('money', 'Rejecting requests')) return;
   const r = byUid(u);
   if (!r) return;
   r.reqStatus = 'Rejected';
@@ -442,7 +445,7 @@ export function moveClear(u) {
   render();
 }
 export function moveDel(u) {
-  if (!need(ISOWN, 'Deleting history')) return;
+  if (!need('manage', 'Deleting history')) return;
   const r = byUid(u);
   if (!r) return;
   askYes(

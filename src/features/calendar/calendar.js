@@ -5,7 +5,7 @@ import { esc } from '../../core/dom.js';
 import { state } from '../../data/state.js';
 import { allowTot, hu } from '../../domain/holidays.js';
 import { forPerson, me, staffName } from '../../domain/people.js';
-import { ISOWN, canSee } from '../auth/session.js';
+import { can, canSee } from '../../domain/permissions.js';
 import { svcBox } from '../home/home.js';
 import { emptyArt } from '../../ui/components/art.js';
 import { holTag } from '../../ui/components/tags.js';
@@ -15,7 +15,7 @@ import { setUI, uiState } from '../../ui/ui-state.js';
 export function evs(k) {
   const e = [],
     L = uiState.cal.ly,
-    Ad = ISOWN(),
+    Ad = can('manage'),
     m = me(),
     mine = (x) => Ad || (m && forPerson(m, x));
   if (L.fit)
@@ -160,7 +160,7 @@ export function vCalendar() {
           .join('') || '<p class="empty">Nothing scheduled.</p>'
       }</div>`
     : '';
-  return `<div class="head"><div><h1>${ISOWN() ? 'Calendar' : 'My Calendar'}</h1>${ISOWN() ? '' : '<span class="muted">Your holidays and your jobs</span>'}</div><div class="tools">${ISOWN() ? '' : '<button class="btn" data-act="bookMine">Book holiday</button>'}<div class="seg">${[
+  return `<div class="head"><div><h1>${can('manage') ? 'Calendar' : 'My Calendar'}</h1>${can('manage') ? '' : '<span class="muted">Your holidays and your jobs</span>'}</div><div class="tools">${can('manage') ? '' : '<button class="btn" data-act="bookMine">Book holiday</button>'}<div class="seg">${[
     ['month', 'Month'],
     ['week', 'Week'],
     ['agenda', 'Agenda'],
@@ -169,9 +169,9 @@ export function vCalendar() {
     .join(
       ''
     )}</div><button class="btn ghost" aria-label="Previous" ${onClick('setUI', 'cal.o', o - 1)}>&lsaquo;</button><button class="btn ghost" ${onClick('setUI', 'cal.o', 0)}>Today</button><button class="btn ghost" aria-label="Next" ${onClick('setUI', 'cal.o', o + 1)}>&rsaquo;</button></div></div>
-  <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:.6rem;margin-bottom:.8rem;align-items:center"><h2 style="margin:0">${esc(title)}</h2><div class="chips" style="margin:0">${[['fit', 'Fittings', '#034ea2'], ['svc', 'Service visits', '#e08a00'], ...(ISOWN() ? [['del', 'Deliveries', '#7a4fd0']] : []), ['hol', 'Holidays', '#12794c']].map(([k, t, c]) => `<button class="chip ${L[k] ? 'on' : ''}" ${onClick('togUI', 'cal.ly.' + k)}><span class="ldot" style="background:${c}"></span>${t}</button>`).join('')}</div></div>${grid}${day}
+  <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:.6rem;margin-bottom:.8rem;align-items:center"><h2 style="margin:0">${esc(title)}</h2><div class="chips" style="margin:0">${[['fit', 'Fittings', '#034ea2'], ['svc', 'Service visits', '#e08a00'], ...(can('manage') ? [['del', 'Deliveries', '#7a4fd0']] : []), ['hol', 'Holidays', '#12794c']].map(([k, t, c]) => `<button class="chip ${L[k] ? 'on' : ''}" ${onClick('togUI', 'cal.ly.' + k)}><span class="ldot" style="background:${c}"></span>${t}</button>`).join('')}</div></div>${grid}${day}
   ${
-    ISOWN()
+    can('manage')
       ? `<div class="two" style="margin-top:1rem"><div class="panel"><h2>Upcoming Fittings</h2>${fits.map((c) => `<div class="row"><span><b>${fd(c.fit)}</b> ${esc(c.name)}<br><span class="muted">${esc(c.product)}, ${esc(c.town)} (${esc(c.fitter || 'no fitter')})</span></span><button class="mini pri" ${onClick('markFit', c.id)}>Mark fitted</button></div>`).join('') || '<p class="empty">No fittings booked.</p>'}</div>
   <div class="panel"><h2>Needs A Fit Date</h2>${un.map((c) => `<div class="row"><span><b>${esc(c.name)}</b> <span class="muted">#${esc(c.id)}</span><br><span class="muted">${esc(c.product)}</span></span><button class="mini" ${onClick('editContract', c.id)}>Set date</button></div>`).join('') || '<p class="empty">Everything has a date.</p>'}</div></div>`
       : calMine()

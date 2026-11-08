@@ -1,18 +1,18 @@
 /* features/contracts/contracts: The Contracts page, new contract wizard and contract actions. */
-import { company } from '../../config/company.js';
+import { company } from '../../data/company.js';
 import { CSTAGES, CTYPES, SOURCES } from '../../config/constants.js';
 import { onClick } from '../../core/actions.js';
 import { fd, iso, today, weekRange } from '../../core/dates.js';
 import { esc } from '../../core/dom.js';
 import { m0, sum } from '../../core/format.js';
-import { SAFE } from '../../core/sanitize.js';
+import { SAFE } from '../../data/sanitize.js';
 import { audit } from '../../data/audit.js';
 import { store } from '../../data/persistence.js';
 import { state } from '../../data/state.js';
 import { PHONES, addrOf, custCompat, siteOf } from '../../domain/customers.js';
 import { nid } from '../../domain/numbering.js';
 import { OWNERS, RANDOM_SP, spResolve } from '../../domain/people.js';
-import { ISADM, canSee } from '../auth/session.js';
+import { can, canSee } from '../../domain/permissions.js';
 import { fitSync } from './finance-step.js';
 import { stDots, stgPipe, yrSel } from '../records/list-parts.js';
 import { RECORDS, recOpen } from '../records/record-window.js';
@@ -28,7 +28,7 @@ export function ckpi(L) {
     p = sum(L, (c) => c.paid),
     wc = L.filter((c) => c.cost),
     mg = wc.length ? Math.round(100 * (1 - sum(wc, (c) => c.cost) / sum(wc, (c) => c.value))) : '-';
-  return `<div class="kpis">${[['Contracts', L.length], ['Total value', m0(v)], ['Collected', m0(p)], ['Outstanding', m0(v - p)], ...(ISADM() ? [['Avg margin', mg == '-' ? '-' : mg + '%']] : [])].map((k) => `<div class="kpi"><small>${k[0]}</small><b>${k[1]}</b></div>`).join('')}</div>`;
+  return `<div class="kpis">${[['Contracts', L.length], ['Total value', m0(v)], ['Collected', m0(p)], ['Outstanding', m0(v - p)], ...(can('money') ? [['Avg margin', mg == '-' ? '-' : mg + '%']] : [])].map((k) => `<div class="kpi"><small>${k[0]}</small><b>${k[1]}</b></div>`).join('')}</div>`;
 }
 export const fensaDue = (c) =>
   ['Fitted', 'Complete'].includes(c.stage) && c.fensaExported != 'Yes' && c.supplyOnly != 'Yes' && c.cancelled != 'Yes';

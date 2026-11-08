@@ -1,17 +1,17 @@
-/* data/backup: Downloading and restoring a full backup. */
-import { KEY } from '../config/constants.js';
-import { today } from '../core/dates.js';
-import { download } from '../core/download.js';
-import { audit } from './audit.js';
-import { sdb, store } from './persistence.js';
-import { PHC, phIsRef, phLoad, phRefs } from './photos.js';
-import { state } from './state.js';
-import { ISOWN, need } from '../features/auth/session.js';
-import { askIn } from '../ui/modal.js';
-import { toast } from '../ui/toast.js';
+/* features/admin/backup: Downloading and restoring a full backup. */
+import { KEY } from '../../config/constants.js';
+import { today } from '../../core/dates.js';
+import { download } from '../../ui/download.js';
+import { audit } from '../../data/audit.js';
+import { sdb, store } from '../../data/persistence.js';
+import { PHC, phIsRef, phLoad, phRefs } from '../../data/photos.js';
+import { state } from '../../data/state.js';
+import { need } from '../auth/session.js';
+import { askIn } from '../../ui/modal.js';
+import { toast } from '../../ui/toast.js';
 
 export function backupDl() {
-  if (!need(ISOWN, 'Backups')) return;
+  if (!need('manage', 'Backups')) return;
   audit('Backup downloaded', 'All data', '');
   store();
   toast('Getting the backup ready');
@@ -26,7 +26,7 @@ export function backupDl() {
   });
 }
 export function backupLoad(inp) {
-  if (!need(ISOWN, 'Restoring backups')) return;
+  if (!need('manage', 'Restoring backups')) return;
   const f = inp.files[0];
   inp.value = '';
   if (!f) return;
@@ -58,7 +58,7 @@ export function backupLoad(inp) {
   });
 }
 export function backupApply(n) {
-  if (!need(ISOWN, 'Restoring backups')) return;
+  if (!need('manage', 'Restoring backups')) return;
   {
     try {
       localStorage.setItem(KEY + '_before_restore', JSON.stringify(state));

@@ -2,7 +2,7 @@
 import { onClick, rowClick } from '../../core/actions.js';
 import { addDays, fd, today } from '../../core/dates.js';
 import { $, esc } from '../../core/dom.js';
-import { csvDownload } from '../../core/download.js';
+import { csvDownload } from '../../ui/download.js';
 import { shortId } from '../../core/ids.js';
 import { audit } from '../../data/audit.js';
 import { store } from '../../data/persistence.js';

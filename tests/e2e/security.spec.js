@@ -24,7 +24,7 @@ test('standard account cannot delete, edit staff or open admin pages', async ({ 
     return {
       same: [state.leads.length === n.l, state.contracts.length === n.c, state.staff.length === n.st],
       views,
-      adm: ISADM(),
+      adm: can('money'),
     };
   });
   expect(r.same).toEqual([true, true, true]);

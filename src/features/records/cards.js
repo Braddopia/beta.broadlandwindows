@@ -4,7 +4,7 @@ import { fd } from '../../core/dates.js';
 import { $, $$, esc } from '../../core/dom.js';
 import { money } from '../../core/format.js';
 import { ICONS, svg } from '../../core/icons.js';
-import { SAFE } from '../../core/sanitize.js';
+import { SAFE } from '../../data/sanitize.js';
 
 import { RTAB, recStep, recordWin } from './record-window.js';
 import { MARK, nxHid } from '../../ui/forms/form.js';

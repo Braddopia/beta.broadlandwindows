@@ -1,5 +1,5 @@
-/* core/download: Downloading files, CSV export and copying to the clipboard. */
-import { toast } from '../ui/toast.js';
+/* ui/download: Downloading files, CSV export and copying to the clipboard. */
+import { toast } from './toast.js';
 
 /* ---- files ---- */
 export const download = (name, blob) => {

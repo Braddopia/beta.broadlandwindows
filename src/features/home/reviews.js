@@ -1,11 +1,11 @@
 /* features/home/reviews: Review scores and quotes shown on the overview and documents. */
 import { today } from '../../core/dates.js';
 import { esc } from '../../core/dom.js';
-import { SAFE } from '../../core/sanitize.js';
+import { SAFE } from '../../data/sanitize.js';
 import { audit } from '../../data/audit.js';
 import { store } from '../../data/persistence.js';
 import { state } from '../../data/state.js';
-import { ISOWN, need } from '../auth/session.js';
+import { need } from '../auth/session.js';
 import { stars } from '../../ui/components/tags.js';
 import { form } from '../../ui/forms/form.js';
 import { askYes } from '../../ui/modal.js';
@@ -29,7 +29,7 @@ export function ratingsH() {
   return `<div class="rate">${r(state.brand.g, 'Google')}${r(state.brand.tp, 'Trustpilot')}${tt ? r(tt, 'Trusted Trader') : ''}${rl ? r10(rl, 'ReferenceLine') : ''}</div>`;
 }
 export function editRatings() {
-  if (!need(ISOWN, 'Review scores')) return;
+  if (!need('manage', 'Review scores')) return;
   const b = state.brand,
     tt = b.tt || {},
     rl = b.rl || {};
@@ -82,7 +82,7 @@ export function editRatings() {
 }
 /* review quotes for the office board (no reviewer names) */
 export function addQuote() {
-  if (!need(ISOWN, 'Review quotes')) return;
+  if (!need('manage', 'Review quotes')) return;
   form(
     'Add Review Quote',
     [
@@ -107,7 +107,7 @@ export function addQuote() {
   );
 }
 export function delQuote(i) {
-  if (!need(ISOWN, 'Review quotes')) return;
+  if (!need('manage', 'Review quotes')) return;
   askYes(
     'Remove This Quote?',
     'It will no longer show on the office board.',

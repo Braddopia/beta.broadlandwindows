@@ -1,20 +1,20 @@
-/* data/delete: Deleting records, with a permission check for each kind. */
-import { $ } from '../core/dom.js';
-import { audit } from './audit.js';
-import { store } from './persistence.js';
-import { state } from './state.js';
-import { ISADM, ISOWN, need } from '../features/auth/session.js';
-import { recordWin } from '../features/records/record-window.js';
-import { askYes, closeModal } from '../ui/modal.js';
-import { render } from '../ui/shell/router.js';
+/* features/records/delete: Deleting records, with a permission check for each kind. */
+import { $ } from '../../core/dom.js';
+import { audit } from '../../data/audit.js';
+import { store } from '../../data/persistence.js';
+import { state } from '../../data/state.js';
+import { need } from '../auth/session.js';
+import { recordWin } from './record-window.js';
+import { askYes, closeModal } from '../../ui/modal.js';
+import { render } from '../../ui/shell/router.js';
 
 /* deleting is admin-only, and only for these lists */
 export const DEL_RULE = {
-  contracts: [ISOWN, 'Deleting contracts'],
-  staff: [ISOWN, 'Removing staff'],
-  calls: [ISOWN, 'Deleting service calls'],
-  contacts: [ISOWN, 'Deleting contacts'],
-  fin: [ISADM, 'Deleting bills'],
+  contracts: ['manage', 'Deleting contracts'],
+  staff: ['manage', 'Removing staff'],
+  calls: ['manage', 'Deleting service calls'],
+  contacts: ['manage', 'Deleting contacts'],
+  fin: ['money', 'Deleting bills'],
 };
 export function del(k, id) {
   const r = DEL_RULE[k];

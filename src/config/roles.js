@@ -19,6 +19,11 @@ export const ROLES = {
   },
   beta: { n: 'Beta (all features)', d: 'Leads, contracts, finance, staff and everything else', v: '*' },
 };
+/* what each account type may do (checked by can() in domain/permissions.js) */
+export const PERMISSIONS = {
+  money: ['admin', 'beta'] /* prices, costs, payments, bills and approvals */,
+  manage: ['admin', 'beta'] /* staff, settings, numbering, deleting records */,
+};
 export const RL = { admin: 'Administrator', staff: 'Team Member', beta: 'Beta Access' };
 export const IDLE_MIN = 30,
   PIN_TRIES = 5,

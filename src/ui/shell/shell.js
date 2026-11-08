@@ -2,7 +2,7 @@
 import { LOGO_SRC } from '../../core/assets.js';
 import { $, $$ } from '../../core/dom.js';
 import { ICONS, svg } from '../../core/icons.js';
-import { SAFE } from '../../core/sanitize.js';
+import { SAFE } from '../../data/sanitize.js';
 import { swRole } from '../../features/auth/session.js';
 import { editContact } from '../../features/contacts/contacts.js';
 import { docOpen } from '../../features/documents/documents.js';

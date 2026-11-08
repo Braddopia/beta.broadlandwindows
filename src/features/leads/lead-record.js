@@ -10,7 +10,7 @@ import { LEAD_CK } from '../../domain/checklists.js';
 import { PHONES, custCompat } from '../../domain/customers.js';
 import { nextLeadId } from '../../domain/numbering.js';
 import { RANDOM_SP, spResolve } from '../../domain/people.js';
-import { ISOWN, canSee } from '../auth/session.js';
+import { can, canSee } from '../../domain/permissions.js';
 import { leadList } from './leads.js';
 import { apptTab } from '../records/appointments.js';
 import { byGroup, grpH } from '../records/cards.js';
@@ -47,7 +47,7 @@ export function defineLeadRecord() {
     headStats: (W) =>
       `<span><small>Net Value</small><b>${m0(W.v.value)}</b></span><span><small>Next Action</small><b>${W.v.followup ? fd(W.v.followup) : '-'}</b></span>`,
     actions: (W) =>
-      `<button class="rb1" ${onClick('reportCust', 'lead', W.id)}>${svg(ICONS.reports)}Customer sheet</button>${canSee('contracts') && W.v.stage != 'Lost' ? `<button class="rb1 go" ${onClick('recConvert')}>${svg('M5 12h14M13 6l6 6-6 6')}Convert to contract</button>` : ''}${ISOWN() ? `<button class="rb1 dl" ${onClick('delLead', W.id)}>${svg('M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3')}Delete</button>` : ''}`,
+      `<button class="rb1" ${onClick('reportCust', 'lead', W.id)}>${svg(ICONS.reports)}Customer sheet</button>${canSee('contracts') && W.v.stage != 'Lost' ? `<button class="rb1 go" ${onClick('recConvert')}>${svg('M5 12h14M13 6l6 6-6 6')}Convert to contract</button>` : ''}${can('manage') ? `<button class="rb1 dl" ${onClick('delLead', W.id)}>${svg('M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3')}Delete</button>` : ''}`,
     fields: (W) => [...LEADF(W), ...CUSTF, ...GDPRF, ...APPTF(), { k: 'notes', l: 'Notes', t: 'area' }],
     tabs: (W) => [
       { k: 'details', t: 'Details', h: (W) => `<div class="rcols">${byGroup(LEADF(W), W.v)}</div>` },
@@ -67,7 +67,7 @@ export function defineLeadRecord() {
     check: (W, o) => {
       if (!o.name) return 'Customer name is needed (Customer step)';
       if (!PHONES.some((k) => o[k])) return 'Add at least one phone number (Customer step)';
-      if (ISOWN() && o.id && o.id != W.id) {
+      if (can('manage') && o.id && o.id != W.id) {
         if (!/^L\d{4}$/.test(o.id)) return 'Lead numbers look like L0001';
         if (state.leads.some((x) => x.id == o.id)) return 'Lead number ' + o.id + ' is already used';
       }
@@ -85,7 +85,9 @@ export function defineLeadRecord() {
       const a = l.stage;
       if (o.prob === 0 && !($('#f_prob').value || '').trim()) o.prob = '';
       const nid2 =
-        ISOWN() && o.id && /^L\d{4}$/.test(o.id) && !state.leads.some((x) => x !== l && x.id == o.id) ? o.id : null;
+        can('manage') && o.id && /^L\d{4}$/.test(o.id) && !state.leads.some((x) => x !== l && x.id == o.id)
+          ? o.id
+          : null;
       delete o.id;
       if (nid2 && nid2 != l.id) {
         audit('Lead number changed', l.id, 'to ' + nid2);

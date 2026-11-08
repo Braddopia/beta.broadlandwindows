@@ -1,13 +1,14 @@
 /* features/contracts/finance-step: The contract Finance step: balance, VAT and taking payments. */
-import { company } from '../../config/company.js';
+import { company } from '../../data/company.js';
 import { PAYK, PAYM } from '../../config/constants.js';
 import { onClick } from '../../core/actions.js';
 import { fd, today } from '../../core/dates.js';
 import { $, esc } from '../../core/dom.js';
 import { money } from '../../core/format.js';
 import { ICONS, svg } from '../../core/icons.js';
-import { SAFE } from '../../core/sanitize.js';
-import { ISADM, need } from '../auth/session.js';
+import { SAFE } from '../../data/sanitize.js';
+import { can } from '../../domain/permissions.js';
+import { need } from '../auth/session.js';
 import { depPct } from './contracts.js';
 import { byGroup, grpInit } from '../records/cards.js';
 import { CFINF } from '../records/fields.js';
@@ -67,7 +68,7 @@ export function finNums() {
 }
 export function finTab(W) {
   const P = W.v.pay || [],
-    adm = ISADM();
+    adm = can('money');
   return `<div class="fin"><div class="fin-sum" id="finSum"></div>
    <div class="fin-pay" id="finPay" hidden></div>
    <section class="rg fin-list"><h4><span>Payments Received</span><small class="muted">${P.length} payment${P.length == 1 ? '' : 's'}</small></h4>
@@ -80,7 +81,7 @@ export function finSum() {
   if (!el || !recordWin) return;
   const n = finNums(),
     pc = n.val ? Math.min(100, Math.round((100 * n.paid) / n.val)) : 0,
-    adm = ISADM(),
+    adm = can('money'),
     td = today();
   const depLeft = Math.max(0, n.dep - n.paid),
     late = (d) => d && d < td;
@@ -106,7 +107,7 @@ export function finSum() {
   }
 }
 export function payOpen() {
-  if (!need(ISADM, 'Taking payments')) return;
+  if (!need('money', 'Taking payments')) return;
   const el = $('#finPay');
   if (!el) return;
   if (!el.hidden) {
@@ -159,7 +160,7 @@ export function finKeep() {
   return true;
 }
 export function recPay() {
-  if (!need(ISADM, 'Recording payments')) return;
+  if (!need('money', 'Recording payments')) return;
   const e = $('#ra_amt'),
     amt = SAFE.num(e.value, { max: 1e7 });
   if (!(amt > 0)) {
@@ -199,7 +200,7 @@ export function recPay() {
   toast(money(amt) + ' payment added. Press Save to keep it.');
 }
 export function recPayDel(i) {
-  if (!need(ISADM, 'Removing payments')) return;
+  if (!need('money', 'Removing payments')) return;
   const p = (recordWin.v.pay || [])[i];
   if (!p) return;
   askIn('Remove this payment?', money(p.amt) + ' from ' + fd(p.date) + '.', 'Remove', () => recPayGo(i), true);

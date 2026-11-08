@@ -2,7 +2,7 @@
 import { onClick } from '../../core/actions.js';
 import { $$, esc } from '../../core/dom.js';
 import { money, sum } from '../../core/format.js';
-import { SAFE } from '../../core/sanitize.js';
+import { SAFE } from '../../data/sanitize.js';
 import { recRedraw, recordWin } from './record-window.js';
 
 /* ---- product lines (contracts) ---- */

@@ -4,7 +4,7 @@ import { onClick } from '../../core/actions.js';
 import { $, $$, esc } from '../../core/dom.js';
 import { m0, money } from '../../core/format.js';
 import { ICONS, svg } from '../../core/icons.js';
-import { SAFE } from '../../core/sanitize.js';
+import { SAFE } from '../../data/sanitize.js';
 import { audit } from '../../data/audit.js';
 import { store } from '../../data/persistence.js';
 import { state } from '../../data/state.js';
@@ -15,7 +15,6 @@ import {
   ikey,
   moveRow,
   nextOrd,
-  pphotos,
   prod,
   prodRows,
   products,
@@ -24,8 +23,9 @@ import {
   stt,
   unitOf,
 } from '../../domain/stock.js';
-import { ISADM, ISOWN, need } from '../auth/session.js';
-import { SEL } from './stock.js';
+import { can } from '../../domain/permissions.js';
+import { need } from '../auth/session.js';
+import { SEL, pphotos } from './stock.js';
 import { SUPN } from '../suppliers/suppliers.js';
 import { fieldH, readFields } from '../../ui/forms/form.js';
 import { gallery, setPhotoList, tmp } from '../../ui/forms/photos.js';
@@ -45,8 +45,8 @@ export function editItem(k) {
   itemWindow('edit', k);
 }
 export function ieFields() {
-  const Ad = ISADM(),
-    Own = ISOWN(),
+  const Ad = can('money'),
+    Own = can('manage'),
     ed = ieMode == 'edit',
     r = (ieKey && prod(ieKey)) || {};
   return [
@@ -175,7 +175,7 @@ export function itemWindow(mode, k, pre) {
      <div class="prow"><label class="btn ghost sm">${svg(ICONS.photo)}Take photo<input type="file" accept="image/*" capture="environment" hidden data-onchange="addPh" data-args-change="[{&quot;$&quot;:&quot;this&quot;}]"></label><label class="btn ghost sm">Upload photos<input type="file" accept="image/*" multiple hidden data-onchange="addPh" data-args-change="[{&quot;$&quot;:&quot;this&quot;}]"></label><span class="muted" style="align-self:center;font-size:.75rem">Up to ${MAX_PHOTOS}, resized automatically</span></div>
      <div class="ie-stats" id="ieStats"></div></div>
    <div class="ie-f">${sec('Product', 'p', 'ie-prod')}${sec('Colours', 'c')}${sec('Stock And Ordering', 'o')}${sec('Location And Supplier', 'l')}${sec(mode == 'request' ? 'Request' : 'Notes', 'n')}</div></div>
-  ${view ? `<div class="mact"><button class="btn ghost" ${onClick('reportProd', r.pid)}>Report</button><button class="btn ghost" ${onClick('stockForm', 'request', r.pid)}>Request stock</button><button class="btn ghost" data-act="closeModal">Close</button><button class="btn" ${onClick('itemWindow', 'edit', r.pid)}>Edit</button>` : `<div class="mact">${ed && ISOWN() ? `<button class="btn ghost l" style="color:var(--red)" ${onClick('delProduct', r.pid)}>Delete product</button>` : ''}${r ? `<button class="btn ghost" ${onClick('reportProd', r.pid)}>Report</button>` : ''}<button class="btn ghost" data-act="closeModal">Cancel</button><button class="btn ${mode == 'remove' ? 'red' : mode == 'add' ? 'green' : ''}" data-act="ieSave">${B}</button>`}</div>`,
+  ${view ? `<div class="mact"><button class="btn ghost" ${onClick('reportProd', r.pid)}>Report</button><button class="btn ghost" ${onClick('stockForm', 'request', r.pid)}>Request stock</button><button class="btn ghost" data-act="closeModal">Close</button><button class="btn" ${onClick('itemWindow', 'edit', r.pid)}>Edit</button>` : `<div class="mact">${ed && can('manage') ? `<button class="btn ghost l" style="color:var(--red)" ${onClick('delProduct', r.pid)}>Delete product</button>` : ''}${r ? `<button class="btn ghost" ${onClick('reportProd', r.pid)}>Report</button>` : ''}<button class="btn ghost" data-act="closeModal">Cancel</button><button class="btn ${mode == 'remove' ? 'red' : mode == 'add' ? 'green' : ''}" data-act="ieSave">${B}</button>`}</div>`,
     'xl'
   );
   ieDraw();
@@ -223,7 +223,7 @@ export function ieStats() {
   if (!el) return;
   const r = ieKey && prod(ieKey);
   el.innerHTML = r
-    ? `<div><small>In Stock</small><b>${r.stock} ${esc(unitOf(r))}</b></div><div><small>Reorder At</small><b>${ro(r)}</b></div><div><small>${ISADM() ? 'Stock Value' : 'Cost Each'}</small><b>${ISADM() ? m0(r.stock * r.cost) : money(r.cost)}</b></div>`
+    ? `<div><small>In Stock</small><b>${r.stock} ${esc(unitOf(r))}</b></div><div><small>Reorder At</small><b>${ro(r)}</b></div><div><small>${can('money') ? 'Stock Value' : 'Cost Each'}</small><b>${can('money') ? m0(r.stock * r.cost) : money(r.cost)}</b></div>`
     : `<div style="grid-column:1/-1"><small>New Product</small><b>Not in stock yet</b></div>`;
 }
 export function ieDraw() {
@@ -264,8 +264,8 @@ export function ieSave() {
   if (mode == 'edit') {
     const k = ieKey,
       r = prod(k),
-      Ad = ISADM(),
-      Own = ISOWN();
+      Ad = can('money'),
+      Own = can('manage');
     if (!r) return;
     const np = Own ? SAFE.text(o.pid, 24) : r.pid;
     if (np != r.pid && !/^[\w.-]{1,24}$/.test(np)) {
@@ -443,7 +443,7 @@ export function bcDeco(o) {
   sync();
 }
 export function delProduct(k) {
-  if (!need(ISOWN, 'Deleting products')) return;
+  if (!need('manage', 'Deleting products')) return;
   const r = prod(k);
   if (!r) return;
   askYes(
@@ -484,7 +484,7 @@ export function found(code, pv) {
   }
   const k = r.pid;
   openModal(
-    `<h2>${esc(r.item)}</h2><p class="muted">${r.stock} ${esc(unitOf(r))} in stock at ${esc(hasLoc(r) ? r.location : 'no location')}.${ISADM() ? ' ' + money(r.cost) + ' each.' : ''}</p>${gallery(pphotos(k).slice(0, 3))}<div class="mact col"><button class="btn green" ${onClick('stockForm', 'add', k)}>Add stock</button><button class="btn red" ${onClick('stockForm', 'remove', k)}>Remove stock</button><button class="btn" ${onClick('stockForm', 'request', k)}>Request item</button><button class="btn ghost" ${onClick('editItem', k)}>Edit item and photos</button></div>`
+    `<h2>${esc(r.item)}</h2><p class="muted">${r.stock} ${esc(unitOf(r))} in stock at ${esc(hasLoc(r) ? r.location : 'no location')}.${can('money') ? ' ' + money(r.cost) + ' each.' : ''}</p>${gallery(pphotos(k).slice(0, 3))}<div class="mact col"><button class="btn green" ${onClick('stockForm', 'add', k)}>Add stock</button><button class="btn red" ${onClick('stockForm', 'remove', k)}>Remove stock</button><button class="btn" ${onClick('stockForm', 'request', k)}>Request item</button><button class="btn ghost" ${onClick('editItem', k)}>Edit item and photos</button></div>`
   );
 }
 export function newFromCode(c) {

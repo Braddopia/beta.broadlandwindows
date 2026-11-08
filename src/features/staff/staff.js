@@ -9,7 +9,8 @@ import { audit } from '../../data/audit.js';
 import { state } from '../../data/state.js';
 import { allowTot, hu } from '../../domain/holidays.js';
 import { callsOf, jobsOf, renamePerson } from '../../domain/people.js';
-import { ISOWN, need } from '../auth/session.js';
+import { can } from '../../domain/permissions.js';
+import { need } from '../auth/session.js';
 import { form } from '../../ui/forms/form.js';
 import { hit } from '../../ui/shell/router.js';
 import { uiState } from '../../ui/ui-state.js';
@@ -17,7 +18,7 @@ import { uiState } from '../../ui/ui-state.js';
 /* ---------------- staff ---------------- */
 export function vStaff() {
   const td = today(),
-    Ad = ISOWN(),
+    Ad = can('manage'),
     U = uiState.staff,
     L = state.staff.filter((s) => hit(s) && (U.c == 'all' || s.cat == U.c)),
     off = state.hols.filter((h) => h.status == 'Approved' && h.from <= td && h.to >= td).length,
@@ -41,7 +42,7 @@ export function vStaff() {
   }</tbody></table></div>`;
 }
 export function editStaff(id) {
-  if (!need(ISOWN, 'Editing staff')) return;
+  if (!need('manage', 'Editing staff')) return;
   const x = state.staff.find((u) => u.id == id);
   form(
     x ? 'Edit ' + x.name : 'Add Staff Member',

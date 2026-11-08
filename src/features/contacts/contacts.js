@@ -6,11 +6,11 @@ import { $, $$, esc } from '../../core/dom.js';
 import { initials } from '../../core/format.js';
 import { svg } from '../../core/icons.js';
 import { shortId } from '../../core/ids.js';
-import { SAFE } from '../../core/sanitize.js';
+import { SAFE } from '../../data/sanitize.js';
 import { audit } from '../../data/audit.js';
 import { store } from '../../data/persistence.js';
 import { state } from '../../data/state.js';
-import { ISOWN } from '../auth/session.js';
+import { can } from '../../domain/permissions.js';
 import { supFromContact } from '../suppliers/suppliers.js';
 import { emptyArt } from '../../ui/components/art.js';
 import { MARK } from '../../ui/forms/form.js';
@@ -43,8 +43,8 @@ export function vContacts() {
       .join(
         ''
       )}${c.email ? `<a class="nocap" href="mailto:${esc(c.email)}">${svg('M4 6h16v12H4zM4 7l8 6 8-6')}${esc(c.email)}</a>` : ''}${c.email2 ? `<a class="nocap" href="mailto:${esc(c.email2)}">${svg('M4 6h16v12H4zM4 7l8 6 8-6')}<span class="cpl">Accounts</span>${esc(c.email2)}</a>` : ''}${c.addr || c.town || c.pc ? `<span>${svg('M12 21s-7-6-7-11a7 7 0 0114 0c0 5-7 11-7 11zM12 12a2 2 0 100-4 2 2 0 000 4z')}${esc([c.addr, c.town, c.pc].filter(Boolean).join(', '))}</span>` : ''}${!c.phone && !c.email && !c.addr ? '<span class="muted">No details yet</span>' : ''}</div>
-    <div class="cc2-f"><button class="mini" ${onClick('editContact', c.id)}>Edit</button>${ISOWN() ? `<button class="mini del" ${onClick('del', 'contacts', c.id)}>Delete</button>` : ''}</div></div>`;
-  return `<div class="head"><div><h1>Contact Book</h1><span class="muted">${L.length} of ${state.contacts.length} contacts</span></div><div class="tools">${ISOWN() ? '<button class="btn ghost" data-act="impCust">Import customers</button>' : ''}<button class="btn" data-act="editContact">New contact</button></div></div>
+    <div class="cc2-f"><button class="mini" ${onClick('editContact', c.id)}>Edit</button>${can('manage') ? `<button class="mini del" ${onClick('del', 'contacts', c.id)}>Delete</button>` : ''}</div></div>`;
+  return `<div class="head"><div><h1>Contact Book</h1><span class="muted">${L.length} of ${state.contacts.length} contacts</span></div><div class="tools">${can('manage') ? '<button class="btn ghost" data-act="impCust">Import customers</button>' : ''}<button class="btn" data-act="editContact">New contact</button></div></div>
   <div class="subbar"><span class="sb-l">Show</span><div class="views">${['all', ...CT].map((k) => `<button class="chip ${F == k ? 'on' : ''}" ${onClick('setUI', 'con.f', k)}>${k == 'all' ? 'All' : esc(k)} <i>${k == 'all' ? state.contacts.length : state.contacts.filter((c) => c.type == k).length}</i></button>`).join('')}</div></div>
   <div class="azbar">${AZ.map((x) => (have.has(x) ? `<button ${onClick('azGo', x)}>${x}</button>` : `<span>${x}</span>`)).join('')}</div>
   <div class="cbook">${
@@ -203,7 +203,7 @@ export function editContact(id, draft, after) {
       if (after) after(o.co);
       else doneIn('Contact saved');
     };
-    if (!ISOWN()) {
+    if (!can('manage')) {
       closeModal();
       askYes(
         c ? 'Save changes to ' + (c.co || 'this contact') + '?' : 'Add ' + o.co + ' to the contact book?',

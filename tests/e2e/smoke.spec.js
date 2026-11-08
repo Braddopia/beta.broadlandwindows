@@ -9,7 +9,9 @@ for (const role of ['staff', 'admin', 'beta']) {
     test(`every page renders: ${role} at ${size}`, async ({ app }) => {
       await app.page.setViewportSize({ width: w, height: h });
       await app.role(role);
-      const views = await app.run(() => Object.keys(VIEWS).filter((k) => canSee(k) && (k !== 'admin' || ISOWN())));
+      const views = await app.run(() =>
+        Object.keys(VIEWS).filter((k) => canSee(k) && (k !== 'admin' || can('manage')))
+      );
       expect(views.length).toBeGreaterThan(5);
       for (const v of views) {
         await app.go(v);

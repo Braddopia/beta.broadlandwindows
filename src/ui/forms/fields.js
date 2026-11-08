@@ -4,7 +4,7 @@
    A field is described as { k: key, l: label, t: type, o: options, max, min, rows, ro, adm, list, ph }.
    Select options are plain values, or [value, label] pairs. */
 import { html, raw } from '../../core/html.js';
-import { ISADM } from '../../features/auth/session.js';
+import { can } from '../../domain/permissions.js';
 import { colourField } from './colour-picker.js';
 
 /* boxes for links and emails keep their lower case (the site title-cases everything else) */
@@ -14,7 +14,7 @@ const when = (test, markup) => raw(test ? String(markup) : '');
 /** options: id (default f_<key>), rows (text areas, default 3), lockedAsText (admin-only/read-only shown as plain text box) */
 export function fieldControl(f, value, { id = 'f_' + f.k, rows = 3, lockedAsText = false } = {}) {
   const val = value ?? '';
-  if (lockedAsText && (f.ro || (f.adm && !ISADM())))
+  if (lockedAsText && (f.ro || (f.adm && !can('money'))))
     return String(html`<input id="${id}" value="${val}" readonly tabindex="-1">`);
   if (f.t == 'colour') return colourField(f, { [f.k]: val });
   if (f.t == 'select') {

@@ -1,5 +1,5 @@
-/* config/company: Company details, with the values saved in Settings laid over the defaults. */
-import { state } from '../data/state.js';
+/* data/company: Company details, with the values saved in Settings laid over the defaults. */
+import { state } from './state.js';
 
 export const company = {
   name: 'Broadland Windows, Doors & Garden Rooms',

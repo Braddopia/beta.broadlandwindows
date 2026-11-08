@@ -1,5 +1,5 @@
 /* features/contracts/contract-record: The contract window: its steps, fields and saving. */
-import { company } from '../../config/company.js';
+import { company } from '../../data/company.js';
 import { CTYPES } from '../../config/constants.js';
 import { onClick, rowClick } from '../../core/actions.js';
 import { fd, today } from '../../core/dates.js';
@@ -12,7 +12,7 @@ import { CK } from '../../domain/checklists.js';
 import { PHONES, custCompat } from '../../domain/customers.js';
 import { nid } from '../../domain/numbering.js';
 import { RANDOM_SP, spResolve } from '../../domain/people.js';
-import { ISADM, ISOWN } from '../auth/session.js';
+import { can } from '../../domain/permissions.js';
 import { ctrList } from './contracts.js';
 import { finTab } from './finance-step.js';
 import { byGroup, grpH } from '../records/cards.js';
@@ -56,7 +56,7 @@ export function defineContractRecord() {
     headStats: (W) =>
       `${W.v.flash ? `<span class="flash">${esc(W.v.flash)}</span>` : ''}<span><small>Value</small><b>${m0(W.v.value)}</b></span><span><small>Paid</small><b>${m0(W.v.paid)}</b></span><span class="${(+W.v.value || 0) - (+W.v.paid || 0) > 0 ? 'hk-due' : 'hk-ok'}"><small>Outstanding</small><b>${(+W.v.value || 0) - (+W.v.paid || 0) > 0 ? m0((+W.v.value || 0) - (+W.v.paid || 0)) : 'Paid'}</b></span><span><small>Fit</small><b>${W.v.fit ? fd(W.v.fit) : '-'}</b></span>`,
     actions: (W) =>
-      `<button class="rb1" ${onClick('reportContract', W.id)}>${svg(ICONS.reports)}Reports</button><button class="rb1" ${onClick('recCall')}>${svg(ICONS.service)}Service call</button>${ISOWN() ? `<button class="rb1 dl" ${onClick('del', 'contracts', W.id)}>${svg('M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3')}Delete</button>` : ''}`,
+      `<button class="rb1" ${onClick('reportContract', W.id)}>${svg(ICONS.reports)}Reports</button><button class="rb1" ${onClick('recCall')}>${svg(ICONS.service)}Service call</button>${can('manage') ? `<button class="rb1 dl" ${onClick('del', 'contracts', W.id)}>${svg('M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3')}Delete</button>` : ''}`,
     fields: (W) => [...CDETF(W), ...CUSTF, ...GDPRF, ...CFINF(), ...CFITF(), { k: 'notes', l: 'Notes', t: 'area' }],
     tabs: (W) => {
       const calls = state.calls.filter((c) => c.contract == W.v.id),
@@ -131,7 +131,7 @@ export function defineContractRecord() {
         );
       else if (o.paid !== undefined && dp)
         audit(dp > 0 ? 'Paid amount raised' : 'Payment removed', c.id || W.v.id, money(Math.abs(dp)));
-      if (!ISADM()) delete o.cost;
+      if (!can('money')) delete o.cost;
       Object.assign(c, o, { pay: W.v.pay || [], log: W.v.log || [], createdBy: c.createdBy || W.v.createdBy || USER });
       c.fitter = [1, 2, 3, 4, 5, 6]
         .map((i) => c['fitter' + i])

@@ -1,24 +1,17 @@
 /* features/auth/session: The current account type, switching account and the idle sign-out. */
 import { IDLE_MIN, ROLES } from '../../config/roles.js';
+import { ROLE, setRoleValue } from '../../data/session.js';
+import { can, canSee } from '../../domain/permissions.js';
 import { onClick, onEvent } from '../../core/actions.js';
 import { $, esc } from '../../core/dom.js';
 import { closeModal, openModal } from '../../ui/modal.js';
 import { render, setView, view } from '../../ui/shell/router.js';
 import { toast } from '../../ui/toast.js';
 
-export let ROLE = 'staff';
-export const canSee = (k) => {
-  const v = ROLES[ROLE].v;
-  return v == '*' || v.includes(k);
-};
-export const ISADM = () => ['admin', 'beta'].includes(ROLE);
-/* money + approvals */
-export const ISOWN = () => ['admin', 'beta'].includes(ROLE);
-/* people + settings */
 export const HOME = () => (canSee('home') ? 'home' : 'live');
 /* guard for privileged actions: checked again inside the action, not just by hiding buttons */
-export function need(test, what) {
-  if (test()) return true;
+export function need(permission, what) {
+  if (can(permission)) return true;
   toast((what || 'That') + ' needs an administrator account');
   return false;
 }
@@ -26,9 +19,6 @@ export function need(test, what) {
 export let pendView = null;
 export function setPendView(v) {
   pendView = v;
-}
-export function setRoleValue(r) {
-  ROLE = r;
 }
 export function swRole() {
   openModal(
@@ -59,14 +49,14 @@ export function pickRole(k) {
   }, 50);
 }
 export function setRole(r) {
-  ROLE = r;
+  setRoleValue(r);
   try {
     sessionStorage.setItem('bb_role', r);
     sessionStorage.setItem('bb_role_at', Date.now());
   } catch (e) {}
-  if (pendView && canSee(pendView) && (pendView != 'admin' || ISOWN())) setView(pendView);
+  if (pendView && canSee(pendView) && (pendView != 'admin' || can('manage'))) setView(pendView);
   pendView = null;
-  if (!canSee(view) || (view == 'admin' && !ISOWN())) setView(HOME());
+  if (!canSee(view) || (view == 'admin' && !can('manage'))) setView(HOME());
   render();
   toast('Signed in as ' + ROLES[r].n);
 }
@@ -77,7 +67,7 @@ export function restoreRole() {
   try {
     const r = sessionStorage.getItem('bb_role'),
       at = +sessionStorage.getItem('bb_role_at') || 0;
-    if (ROLES[r] && (r == 'staff' || Date.now() - at < IDLE_MIN * 6e4)) ROLE = r;
+    if (ROLES[r] && (r == 'staff' || Date.now() - at < IDLE_MIN * 6e4)) setRoleValue(r);
   } catch (e) {}
 }
 /* start-up step (run once by main.js) */

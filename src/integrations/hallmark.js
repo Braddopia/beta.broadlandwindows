@@ -1,7 +1,7 @@
 /* integrations/hallmark: Hallmark job feed: importing and syncing hardwood deliveries. */
 import { today } from '../core/dates.js';
 import { $, esc } from '../core/dom.js';
-import { SAFE } from '../core/sanitize.js';
+import { SAFE } from '../data/sanitize.js';
 import { store } from '../data/persistence.js';
 import { state } from '../data/state.js';
 import { sups } from '../features/suppliers/suppliers.js';

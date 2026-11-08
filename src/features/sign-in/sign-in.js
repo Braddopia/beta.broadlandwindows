@@ -4,12 +4,14 @@ import { onClick, onEvent } from '../../core/actions.js';
 import { LOGO_SRC } from '../../core/assets.js';
 import { $, esc } from '../../core/dom.js';
 import { svg } from '../../core/icons.js';
-import { SAFE } from '../../core/sanitize.js';
+import { SAFE } from '../../data/sanitize.js';
 import { audit } from '../../data/audit.js';
 import { store } from '../../data/persistence.js';
 import { state } from '../../data/state.js';
 import { staffName } from '../../domain/people.js';
-import { ISOWN, ROLE, lastAct, need, pickRole, setRoleValue } from '../auth/session.js';
+import { ROLE, setRoleValue } from '../../data/session.js';
+import { can } from '../../domain/permissions.js';
+import { lastAct, need, pickRole } from '../auth/session.js';
 import { closeModal, openModal } from '../../ui/modal.js';
 import { render } from '../../ui/shell/router.js';
 import { toast } from '../../ui/toast.js';
@@ -219,7 +221,7 @@ export function gatePin() {
   const t = setInterval(() => {
     if (!$('#modal.open')) {
       clearInterval(t);
-      if (ISOWN()) {
+      if (can('manage')) {
         window.SSO = { email: '', name: USER, sid: '', role: ROLE, via: 'PIN', exp: Date.now() + SSO_HOURS * 36e5 };
         try {
           sessionStorage.setItem('bb_sso', JSON.stringify(SSO));
@@ -260,7 +262,7 @@ export function authPanel() {
 }
 export let AZD = null;
 export function authEdit() {
-  if (!need(ISOWN, 'Setting up sign-in')) return;
+  if (!need('manage', 'Setting up sign-in')) return;
   AZD = JSON.parse(JSON.stringify(authCfg()));
   authDraw();
 }
@@ -322,7 +324,7 @@ export function azDel(i) {
   authDraw();
 }
 export function azSave() {
-  if (!need(ISOWN, 'Setting up sign-in')) return;
+  if (!need('manage', 'Setting up sign-in')) return;
   azRead();
   const d = AZD;
   d.users = d.users.filter((u) => u.email);

@@ -1,10 +1,10 @@
 /* features/records/appointments: Appointments and reminders on a lead. */
-import { company } from '../../config/company.js';
+import { company } from '../../data/company.js';
 import { ATYPES } from '../../config/constants.js';
 import { onClick } from '../../core/actions.js';
 import { iso, today } from '../../core/dates.js';
 import { $, esc } from '../../core/dom.js';
-import { copyText, download } from '../../core/download.js';
+import { copyText, download } from '../../ui/download.js';
 import { uuid } from '../../core/ids.js';
 import { siteOf } from '../../domain/customers.js';
 import { staffNames } from '../../domain/people.js';

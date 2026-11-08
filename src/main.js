@@ -1,6 +1,6 @@
 /* main: the entry point. Loads every module, registers the actions buttons can run,
    then runs the start-up steps in a fixed order (load data, update old data, wire the page, first draw). */
-import * as configCompany from './config/company.js';
+import * as dataCompany from './data/company.js';
 import * as configConstants from './config/constants.js';
 import * as configRoles from './config/roles.js';
 import * as coreActions from './core/actions.js';
@@ -8,20 +8,22 @@ import * as coreAssets from './core/assets.js';
 import * as coreCrypto from './core/crypto.js';
 import * as coreDates from './core/dates.js';
 import * as coreDom from './core/dom.js';
-import * as coreDownload from './core/download.js';
+import * as uiDownload from './ui/download.js';
 import * as coreFormat from './core/format.js';
 import * as coreHaptics from './core/haptics.js';
 import * as coreHttps from './core/https.js';
 import * as coreIcons from './core/icons.js';
 import * as coreIds from './core/ids.js';
-import * as coreSanitize from './core/sanitize.js';
+import * as dataSanitize from './data/sanitize.js';
 import * as dataAudit from './data/audit.js';
-import * as dataBackup from './data/backup.js';
-import * as dataDelete from './data/delete.js';
-import * as dataMigrations from './data/migrations.js';
+import * as featuresAdminBackup from './features/admin/backup.js';
+import * as featuresRecordsDelete from './features/records/delete.js';
+import * as startMigrations from './start/migrations.js';
 import * as dataPersistence from './data/persistence.js';
 import * as dataPhotos from './data/photos.js';
 import * as dataSeed from './data/seed.js';
+import * as dataLoad from './data/load.js';
+import * as dataSession from './data/session.js';
 import * as dataState from './data/state.js';
 import * as domainChecklists from './domain/checklists.js';
 import * as domainCustomers from './domain/customers.js';
@@ -29,8 +31,8 @@ import * as domainDeliveries from './domain/deliveries.js';
 import * as domainHolidays from './domain/holidays.js';
 import * as domainLeads from './domain/leads.js';
 import * as domainNumbering from './domain/numbering.js';
+import * as domainPermissions from './domain/permissions.js';
 import * as domainPeople from './domain/people.js';
-import * as domainSearchQuery from './domain/search-query.js';
 import * as domainService from './domain/service.js';
 import * as domainStock from './domain/stock.js';
 import * as featuresAdminAdmin from './features/admin/admin.js';
@@ -71,6 +73,7 @@ import * as featuresReportsReports from './features/reports/reports.js';
 import * as featuresScannerScanner from './features/scanner/scanner.js';
 import * as featuresSearchAnswers from './features/search/answers.js';
 import * as featuresSearchCommands from './features/search/commands.js';
+import * as featuresSearchQuestions from './features/search/questions.js';
 import * as featuresSearchSearch from './features/search/search.js';
 import * as featuresServiceService from './features/service/service.js';
 import * as featuresSettingsSettings from './features/settings/settings.js';
@@ -84,7 +87,7 @@ import * as featuresSuppliersSuppliers from './features/suppliers/suppliers.js';
 import * as featuresTourTour from './features/tour/tour.js';
 import * as integrationsHallmark from './integrations/hallmark.js';
 import * as integrationsSmartOrders from './integrations/smart-orders.js';
-import * as mainStart from './main-start.js';
+import * as startBoot from './start/boot.js';
 import * as printPrint from './print/print.js';
 import * as uiComponentsArt from './ui/components/art.js';
 import * as uiComponentsKpi from './ui/components/kpi.js';
@@ -106,7 +109,7 @@ import * as uiUiState from './ui/ui-state.js';
 import { ACTIONS } from './core/actions.js';
 
 const modules = {
-  configCompany,
+  dataCompany,
   configConstants,
   configRoles,
   coreActions,
@@ -114,20 +117,22 @@ const modules = {
   coreCrypto,
   coreDates,
   coreDom,
-  coreDownload,
+  uiDownload,
   coreFormat,
   coreHaptics,
   coreHttps,
   coreIcons,
   coreIds,
-  coreSanitize,
+  dataSanitize,
   dataAudit,
-  dataBackup,
-  dataDelete,
-  dataMigrations,
+  featuresAdminBackup,
+  featuresRecordsDelete,
+  startMigrations,
   dataPersistence,
   dataPhotos,
+  dataLoad,
   dataSeed,
+  dataSession,
   dataState,
   domainChecklists,
   domainCustomers,
@@ -136,7 +141,7 @@ const modules = {
   domainLeads,
   domainNumbering,
   domainPeople,
-  domainSearchQuery,
+  domainPermissions,
   domainService,
   domainStock,
   featuresAdminAdmin,
@@ -177,6 +182,7 @@ const modules = {
   featuresScannerScanner,
   featuresSearchAnswers,
   featuresSearchCommands,
+  featuresSearchQuestions,
   featuresSearchSearch,
   featuresServiceService,
   featuresSettingsSettings,
@@ -190,7 +196,7 @@ const modules = {
   featuresTourTour,
   integrationsHallmark,
   integrationsSmartOrders,
-  mainStart,
+  startBoot,
   printPrint,
   uiComponentsArt,
   uiComponentsKpi,
@@ -225,9 +231,9 @@ window.CRM = Object.freeze(CRM);
 /* start-up, in order */
 coreHttps.forceHttps();
 coreActions.listenForActions();
-dataState.load();
-dataMigrations.migrate();
-dataState.defineCurrentUser();
+dataLoad.load();
+startMigrations.migrate();
+dataLoad.defineCurrentUser();
 dataPersistence.askBrowserToKeepData();
 dataPersistence.listenForOtherTabs();
 featuresAuthSession.restoreRole();
@@ -238,17 +244,17 @@ uiComponentsPopover.listenForOutsideClicks();
 uiShellShell.shell();
 featuresLiveBoardsLiveBoards.listenForTvKeys();
 featuresLiveBoardsLiveBoards.startBoardTimers();
-dataMigrations.supCon();
-dataMigrations.staffCats();
-dataMigrations.salesABC();
-dataMigrations.migrateLeads();
-dataMigrations.ckReword();
-dataMigrations.ckReword3();
-dataMigrations.holV2();
+startMigrations.supCon();
+startMigrations.staffCats();
+startMigrations.salesABC();
+startMigrations.migrateLeads();
+startMigrations.ckReword();
+startMigrations.ckReword3();
+startMigrations.holV2();
 featuresHolidaysHolidays.listenForHolidayChart();
-dataMigrations.migratePhotos();
+startMigrations.migratePhotos();
 featuresStockPhoneMode.watchPhoneSize();
-dataMigrations.migrateCustomers();
+startMigrations.migrateCustomers();
 featuresLeadsLeadRecord.defineLeadRecord();
 featuresContractsContractRecord.defineContractRecord();
 featuresTourTour.listenForTourKeys();
@@ -257,5 +263,5 @@ featuresSignInSignIn.watchSignInExpiry();
 uiShellLooks.looks();
 featuresSearchSearch.search();
 featuresSettingsSettings.restoreMotionSetting();
-mainStart.boot();
+startBoot.boot();
 coreHaptics.listenForTaps();

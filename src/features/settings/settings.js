@@ -1,12 +1,12 @@
 /* features/settings/settings: The Settings page. */
-import { company } from '../../config/company.js';
+import { company } from '../../data/company.js';
 import { ROLES } from '../../config/roles.js';
 import { onClick, onEvent } from '../../core/actions.js';
 import { today } from '../../core/dates.js';
 import { esc } from '../../core/dom.js';
-import { csvDownload } from '../../core/download.js';
+import { csvDownload } from '../../ui/download.js';
 import { ICONS, svg } from '../../core/icons.js';
-import { SAFE } from '../../core/sanitize.js';
+import { SAFE } from '../../data/sanitize.js';
 import { audit } from '../../data/audit.js';
 import { store } from '../../data/persistence.js';
 import { phRefs, phTidy } from '../../data/photos.js';
@@ -15,7 +15,9 @@ import { mailOf, telOf } from '../../domain/customers.js';
 import { dAuto } from '../../domain/deliveries.js';
 import { numNext } from '../../domain/numbering.js';
 import { products, unitOf } from '../../domain/stock.js';
-import { ISOWN, ROLE, need } from '../auth/session.js';
+import { ROLE } from '../../data/session.js';
+import { can } from '../../domain/permissions.js';
+import { need } from '../auth/session.js';
 import { leadCsv } from '../leads/leads.js';
 import { form } from '../../ui/forms/form.js';
 import { lookPop } from '../../ui/shell/looks.js';
@@ -50,7 +52,7 @@ export const SET_MONEY = [
   { k: 'acct', l: 'Account number', max: 12 },
 ];
 export function coEdit(title, F) {
-  if (!need(ISOWN, 'Company settings')) return;
+  if (!need('manage', 'Company settings')) return;
   form(title, F, { ...company }, (o) => {
     Object.keys(o).forEach((k) => {
       if (typeof o[k] == 'string') o[k] = SAFE.text(o[k], 200);
@@ -68,7 +70,7 @@ export function motionSet(on) {
   document.body.classList.toggle('rm', !!on);
 }
 export function vSettings() {
-  const own = ISOWN(),
+  const own = can('manage'),
     p = state.profile || {},
     dark = document.body.dataset.theme == 'dark',
     rm = document.body.classList.contains('rm');
@@ -135,7 +137,7 @@ export const NUMS = [
   ['call', 'Service call numbers'],
 ];
 export function numEdit() {
-  if (!need(ISOWN, 'Numbering')) return;
+  if (!need('manage', 'Numbering')) return;
   form(
     'Numbering',
     [
@@ -176,7 +178,7 @@ export function numEdit() {
   );
 }
 export function numReset(k) {
-  if (!need(ISOWN, 'Numbering')) return;
+  if (!need('manage', 'Numbering')) return;
   delete state.num[k];
   audit('Numbering reset', k, '');
   store();
@@ -184,7 +186,7 @@ export function numReset(k) {
   toast('Back to automatic numbering');
 }
 export function phTidyGo() {
-  if (!need(ISOWN, 'Photo storage')) return;
+  if (!need('manage', 'Photo storage')) return;
   phTidy().then((n) => {
     toast(n ? n + ' unused photo' + (n > 1 ? 's' : '') + ' removed' : 'Nothing to tidy');
     render(true);
@@ -192,7 +194,7 @@ export function phTidyGo() {
 }
 /* ---- export any list as a spreadsheet ---- */
 export function csvAll(k) {
-  if (!need(ISOWN, 'Exporting data')) return;
+  if (!need('manage', 'Exporting data')) return;
   const d = today();
   const T = {
     leads: () => {

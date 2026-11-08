@@ -2,14 +2,15 @@
 import { onClick, onEvent } from '../../core/actions.js';
 import { LOGO_SRC } from '../../core/assets.js';
 import { $, esc } from '../../core/dom.js';
-import { copyText, download } from '../../core/download.js';
+import { copyText, download } from '../../ui/download.js';
 import { kb, tc } from '../../core/format.js';
 import { uuid } from '../../core/ids.js';
-import { SAFE } from '../../core/sanitize.js';
+import { SAFE } from '../../data/sanitize.js';
 import { audit } from '../../data/audit.js';
 import { store } from '../../data/persistence.js';
 import { state } from '../../data/state.js';
-import { ISOWN, need } from '../auth/session.js';
+import { can } from '../../domain/permissions.js';
+import { need } from '../auth/session.js';
 import { emptyArt } from '../../ui/components/art.js';
 import { pagerH, paginate } from '../../ui/components/table.js';
 import { form } from '../../ui/forms/form.js';
@@ -179,10 +180,10 @@ export function vFiles() {
   return `<div class="head"><div><h1>Broadland Brochures</h1><span class="muted">${L.length} of ${DL.length} brochures from <span class="nocap">broadlandwindows.co.uk</span></span></div><div class="tools"><button class="btn ghost" data-act="copyAllBrochures">Copy all links</button><a class="btn" href="https://www.broadlandwindows.co.uk/brochures/" target="_blank" rel="noopener noreferrer">Brochure Website</a></div></div>
   <div class="chips">${cats.map((c) => `<button class="chip ${F.cat == c ? 'on' : ''}" ${onClick('setUI', 'files.cat', c)}>${c == 'all' ? 'All brochures' : esc(c)}</button>`).join('')}<span class="vs"></span><button class="chip ${F.az ? 'on' : ''}" ${onClick('togUI', 'files.az')}>Sort A to Z</button><button class="chip ${F.list ? 'on' : ''}" ${onClick('togUI', 'files.list')}>List view</button></div>
   ${rc.length ? `<div class="panel" style="margin-bottom:1rem"><h2>Recently Opened</h2>${rc.map((x) => `<div class="row"><span>${esc(x.t)}</span><a class="mini pri" href="${esc(SAFE.url(x.u))}" target="_blank" rel="noopener noreferrer">Open</a></div>`).join('')}</div>` : ''}
-  <div class="book ${F.list ? 'lst' : ''}">${L.map((d) => `<div class="bc" style="position:relative"><div class="cvw">${cover(d)}<img src="${esc(coverUrl(d))}" alt="${esc(d.title)} cover" loading="lazy" referrerpolicy="no-referrer" data-alt="${esc(coverAlt(d))}" data-onerror="coverNext" data-args-error="[{&quot;$&quot;:&quot;this&quot;}]"></div><button class="mini covb" ${onClick('setCover', d.url)}>Set cover</button><div class="bb"><b>${esc(d.title)}</b><span class="tag n" style="align-self:flex-start">${esc(d.cat)}</span><div class="acts"><a class="mini pri" href="${esc(d.url)}" target="_blank" rel="noopener noreferrer" ${onClick('recent', d.url, d.title)}>Open</a><button class="mini" ${onClick('dlf', d.url)}>Download</button><a class="mini" href="mailto:?subject=${encodeURIComponent('Broadland brochure: ' + d.title)}&amp;body=${encodeURIComponent(d.url)}">Email</a>${ISOWN() ? `<button class="mini del" ${onClick('fileHide', d.url, d.title)}>Remove</button>` : ''}</div></div></div>`).join('') || emptyArt('files', 'No brochures match.')}</div>
-  <div class="panel" style="margin-top:1.2rem"><h2><span>Smart Systems Manuals <span class="muted">(${SSM.filter((m) => !HID[m.u]).length} technical fabrication manuals)</span></span>${ISOWN() && Object.keys(HID).length ? `<button class="btn ghost sm" data-act="fileHidden">Removed (${Object.keys(HID).length})</button>` : ''}<a class="btn ghost sm" href="https://previous.smartsystems.co.uk/documentlibrary/?c=35" target="_blank" rel="noopener noreferrer">Open Smart Systems library</a></h2>
+  <div class="book ${F.list ? 'lst' : ''}">${L.map((d) => `<div class="bc" style="position:relative"><div class="cvw">${cover(d)}<img src="${esc(coverUrl(d))}" alt="${esc(d.title)} cover" loading="lazy" referrerpolicy="no-referrer" data-alt="${esc(coverAlt(d))}" data-onerror="coverNext" data-args-error="[{&quot;$&quot;:&quot;this&quot;}]"></div><button class="mini covb" ${onClick('setCover', d.url)}>Set cover</button><div class="bb"><b>${esc(d.title)}</b><span class="tag n" style="align-self:flex-start">${esc(d.cat)}</span><div class="acts"><a class="mini pri" href="${esc(d.url)}" target="_blank" rel="noopener noreferrer" ${onClick('recent', d.url, d.title)}>Open</a><button class="mini" ${onClick('dlf', d.url)}>Download</button><a class="mini" href="mailto:?subject=${encodeURIComponent('Broadland brochure: ' + d.title)}&amp;body=${encodeURIComponent(d.url)}">Email</a>${can('manage') ? `<button class="mini del" ${onClick('fileHide', d.url, d.title)}>Remove</button>` : ''}</div></div></div>`).join('') || emptyArt('files', 'No brochures match.')}</div>
+  <div class="panel" style="margin-top:1.2rem"><h2><span>Smart Systems Manuals <span class="muted">(${SSM.filter((m) => !HID[m.u]).length} technical fabrication manuals)</span></span>${can('manage') && Object.keys(HID).length ? `<button class="btn ghost sm" data-act="fileHidden">Removed (${Object.keys(HID).length})</button>` : ''}<a class="btn ghost sm" href="https://previous.smartsystems.co.uk/documentlibrary/?c=35" target="_blank" rel="noopener noreferrer">Open Smart Systems library</a></h2>
    <div class="upl"><input placeholder="Search" value="${esc(F.ssq)}" maxlength="60" ${onEvent('oninput', 'ssqSet', 'this.value')} id="ssqI" style="min-width:min(16rem,100%)"></div>
-   ${fhead('Manual', 'Category', 'Size')}<div class="flist">${pg.rows.map((m) => `<div class="frow"><b>${esc(m.t)}</b><span class="tag">${esc(m.f)}</span><span class="sz">${esc(m.s)}</span><span class="acts"><a class="mini pri" href="${esc(m.u)}" target="_blank" rel="noopener noreferrer">Open</a><button class="mini" ${onClick('dlf', m.u)}>Download</button><button class="mini" ${onClick('copyText', m.u)}>Copy link</button>${ISOWN() ? `<button class="mini del" ${onClick('fileHide', m.u, m.t)}>Remove</button>` : ''}</span></div>`).join('') || '<p class="empty">No manuals match.</p>'}</div>${pagerH('files', pg, 'manuals')}</div>
+   ${fhead('Manual', 'Category', 'Size')}<div class="flist">${pg.rows.map((m) => `<div class="frow"><b>${esc(m.t)}</b><span class="tag">${esc(m.f)}</span><span class="sz">${esc(m.s)}</span><span class="acts"><a class="mini pri" href="${esc(m.u)}" target="_blank" rel="noopener noreferrer">Open</a><button class="mini" ${onClick('dlf', m.u)}>Download</button><button class="mini" ${onClick('copyText', m.u)}>Copy link</button>${can('manage') ? `<button class="mini del" ${onClick('fileHide', m.u, m.t)}>Remove</button>` : ''}</span></div>`).join('') || '<p class="empty">No manuals match.</p>'}</div>${pagerH('files', pg, 'manuals')}</div>
   <div class="panel" style="margin-top:1rem"><h2>Other Content</h2><div class="upl"><select id="mcat" aria-label="Category">${MC.map((c) => `<option>${c}</option>`).join('')}</select><label class="btn sm" style="cursor:pointer">Upload files<input type="file" multiple hidden data-onchange="manUp" data-args-change="[{&quot;$&quot;:&quot;this&quot;}]"></label><span class="muted">Stored on this device only</span></div>${fhead('File', 'Category', 'Size')}<div id="mans" class="flist">Loading</div></div>
   <div class="panel" style="margin-top:1rem"><h2>Brand And Print Assets</h2><div class="upl"><label class="btn sm" style="cursor:pointer">Upload files<input type="file" multiple hidden ${onEvent('onchange', 'manUp', 'this', 'Brand Asset')}></label><span class="muted">Stored on this device only</span></div>${fhead('File', 'Category', 'Size')}<div id="assets" class="flist">Loading</div></div>`;
 }
@@ -341,7 +342,7 @@ export async function loadMan() {
           .filter(fl)
           .map(
             (b) =>
-              `<div class="frow"><b>${esc(b.name)}</b><span class="tag g">Built-in</span><span class="sz">${kb(b.size)}</span><span class="acts"><a class="mini pri" href="${esc(b.src)}" download="${esc(b.file)}">Download</a><button class="mini" ${onClick('builtinOpen', b.key)}>Open</button>${ISOWN() ? `<button class="mini del" ${onClick('fileHide', 'asset:' + b.key, b.name)}>Remove</button>` : ''}</span></div>`
+              `<div class="frow"><b>${esc(b.name)}</b><span class="tag g">Built-in</span><span class="sz">${kb(b.size)}</span><span class="acts"><a class="mini pri" href="${esc(b.src)}" download="${esc(b.file)}">Download</a><button class="mini" ${onClick('builtinOpen', b.key)}>Open</button>${can('manage') ? `<button class="mini del" ${onClick('fileHide', 'asset:' + b.key, b.name)}>Remove</button>` : ''}</span></div>`
           )
           .join('') +
         (MF.filter((f) => /^brand asset$/i.test(f.cat) && fl(f))
@@ -356,7 +357,7 @@ export async function loadMan() {
 }
 /* set a brochure cover: paste the image address from the website (right-click the cover > Copy image address) */
 export function fileHide(u, t) {
-  if (!need(ISOWN, 'Removing files')) return;
+  if (!need('manage', 'Removing files')) return;
   askYes(
     'Remove ' + t + '?',
     'It will no longer show on the Files page for anyone. You can bring it back later from the Removed list.',
@@ -387,7 +388,7 @@ export function fileHidden() {
   );
 }
 export function fileShow(u) {
-  if (!need(ISOWN, 'Restoring files')) return;
+  if (!need('manage', 'Restoring files')) return;
   const t = (state.fileHide || {})[u];
   delete state.fileHide[u];
   audit('File restored', t || u, '');

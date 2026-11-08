@@ -1,7 +1,7 @@
 /* integrations/smart-orders: Importing Smart Systems order exports as deliveries. */
 import { fd, iso } from '../core/dates.js';
 import { $, esc } from '../core/dom.js';
-import { SAFE } from '../core/sanitize.js';
+import { SAFE } from '../data/sanitize.js';
 import { audit } from '../data/audit.js';
 import { store } from '../data/persistence.js';
 import { state } from '../data/state.js';

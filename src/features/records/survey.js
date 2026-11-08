@@ -2,7 +2,7 @@
 import { onClick } from '../../core/actions.js';
 import { $, $$, esc } from '../../core/dom.js';
 import { sum } from '../../core/format.js';
-import { SAFE } from '../../core/sanitize.js';
+import { SAFE } from '../../data/sanitize.js';
 import { OPF } from './fields.js';
 import { recRedraw, recordWin } from './record-window.js';
 import { toast } from '../../ui/toast.js';

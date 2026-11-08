@@ -3,14 +3,15 @@ import { IDLE_MIN, ROLES } from '../../config/roles.js';
 import { onClick, onEvent } from '../../core/actions.js';
 import { fd, today } from '../../core/dates.js';
 import { esc } from '../../core/dom.js';
-import { csvDownload } from '../../core/download.js';
+import { csvDownload } from '../../ui/download.js';
 import { kb, m0, money, pc, sum } from '../../core/format.js';
 import { storeSize } from '../../data/persistence.js';
 import { state } from '../../data/state.js';
 import { allLeads } from '../../domain/leads.js';
 import { staffName } from '../../domain/people.js';
 import { unitOf } from '../../domain/stock.js';
-import { ISOWN, need } from '../auth/session.js';
+import { can } from '../../domain/permissions.js';
+import { need } from '../auth/session.js';
 import { authPanel } from '../sign-in/sign-in.js';
 import { tourTest } from '../tour/tour.js';
 import { pagerH, paginate } from '../../ui/components/table.js';
@@ -20,7 +21,7 @@ import { uiState } from '../../ui/ui-state.js';
 
 /* ---------------- admin console ---------------- */
 export function vAdmin() {
-  if (!ISOWN()) return '';
+  if (!can('manage')) return '';
   const td = today(),
     owed = sum(state.contracts, (c) => Math.max(0, c.value - c.paid)),
     bills = state.fin.filter((b) => b.status == 'Unpaid'),
@@ -71,7 +72,7 @@ export function vAdmin() {
    <div class="tw" style="border:0;box-shadow:none;border-radius:0"><table class="audit"><thead><tr><th>When</th><th>Who</th><th class="c-sm">Account</th><th>Action</th><th>Detail</th></tr></thead><tbody>${pg.rows.map((e) => `<tr><td>${new Date(e.at).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</td><td>${esc(e.by)}</td><td class="c-sm">${esc((ROLES[e.role] || {}).n || e.role)}</td><td><b>${esc(e.a)}</b></td><td>${esc(e.t)}${e.d ? ' <span class="muted">' + esc(e.d) + '</span>' : ''}</td></tr>`).join('') || '<tr><td colspan="5" class="empty">Nothing logged yet. Changes made from now on are recorded here.</td></tr>'}</tbody></table></div><div style="padding:0 1rem 1rem">${pagerH('audit', pg, 'entries')}</div></div>`;
 }
 export function auditCsv() {
-  if (!need(ISOWN, 'The audit log')) return;
+  if (!need('manage', 'The audit log')) return;
   csvDownload('broadland-audit-' + today() + '.csv', [
     ['When', 'Who', 'Account', 'Action', 'Target', 'Detail'],
     ...state.audit.map((e) => [new Date(e.at).toISOString(), e.by, e.role, e.a, e.t, e.d]),

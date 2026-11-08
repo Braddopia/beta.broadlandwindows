@@ -1,7 +1,7 @@
 /* ui/forms/colour-picker: The colour picker (RAL colours and finishes). */
 import { onClick } from '../../core/actions.js';
 import { $, esc } from '../../core/dom.js';
-import { SAFE } from '../../core/sanitize.js';
+import { SAFE } from '../../data/sanitize.js';
 
 export const PRE = [
   ['Black', '#3a3a3a'],

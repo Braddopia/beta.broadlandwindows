@@ -1,9 +1,9 @@
 /* features/documents/documents: Customer documents: guarantee, handover, letters. */
-import { company } from '../../config/company.js';
+import { company } from '../../data/company.js';
 import { LOGO_SRC } from '../../core/assets.js';
 import { dslash, fdl, today } from '../../core/dates.js';
 import { $, esc } from '../../core/dom.js';
-import { SAFE } from '../../core/sanitize.js';
+import { SAFE } from '../../data/sanitize.js';
 import { audit } from '../../data/audit.js';
 import { store } from '../../data/persistence.js';
 import { state } from '../../data/state.js';

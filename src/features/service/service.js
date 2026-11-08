@@ -4,14 +4,14 @@ import { onClick, rowClick } from '../../core/actions.js';
 import { fd, fdl, today } from '../../core/dates.js';
 import { $, esc } from '../../core/dom.js';
 import { m0, money } from '../../core/format.js';
-import { SAFE } from '../../core/sanitize.js';
+import { SAFE } from '../../data/sanitize.js';
 import { audit } from '../../data/audit.js';
 import { state } from '../../data/state.js';
 import { addrOf, mailOf, telOf } from '../../domain/customers.js';
 import { nid } from '../../domain/numbering.js';
 import { FITL, staffNames } from '../../domain/people.js';
 import { SVCV, svcOpen } from '../../domain/service.js';
-import { ISOWN } from '../auth/session.js';
+import { can } from '../../domain/permissions.js';
 import { R } from '../reports/reports.js';
 import { docChoice, printDoc } from '../../print/print.js';
 import { pagerH, paginate } from '../../ui/components/table.js';
@@ -53,7 +53,7 @@ export function vService() {
   <div class="subbar"><span class="sb-l">Show</span><div class="views">${V.map(([key, n, fn]) => `<button class="chip ${U.f == key ? 'on' : ''}" ${onClick('setUI', 'svc.f', key)}>${esc(n)} <i>${state.calls.filter(fn).length}</i></button>`).join('')}</div></div>
   <div class="kpis">${k('Open Calls', O.length, 'open')}${k('Urgent', O.filter((c) => c.priority == 'Urgent').length, 'urgent', O.some((c) => c.priority == 'Urgent') ? 'bad' : '')}${k('Visits Today', O.filter((c) => c.visit == td).length, 'today')}${k('Awaiting Parts', O.filter((c) => c.status == 'Awaiting parts').length, 'parts')}${k('Not Booked Yet', O.filter((c) => !c.visit).length, 'nobook', O.some((c) => !c.visit) ? 'warn' : '')}${k('Overdue Visits', O.filter((c) => c.visit && c.visit < td).length, 'open', O.some((c) => c.visit && c.visit < td) ? 'bad' : '')}</div>
   <div class="tw"><table class="ptb abt"><thead><tr><th>Ref</th><th>Customer</th><th>Problem</th><th>Priority</th><th>Status</th><th class="c-sm">Visit</th><th class="c-md">Engineer</th><th class="ac"></th></tr></thead><tbody>
-  ${pg.rows.map((c) => `<tr class="clk-r" ${rowClick('editCall', c.id)}><td><b class="lref">${esc(c.id)}</b>${c.contract ? `<small class="sub">${esc(c.contract)}</small>` : ''}</td><td><b>${esc(c.name)}</b><small class="sub">${esc([c.town, c.phone].filter(Boolean).join(' · '))}</small>${svcBal(c)}</td><td><span class="cl2">${esc(c.issue)}</span><small class="sub">${esc(c.cat || '')}${c.cat && c.photos && c.photos.length ? ' · ' : ''}${phCount(c.photos)}</small></td><td>${prTag(c.priority)}</td><td>${svcTag(c.status)}</td><td class="c-sm">${c.visit ? `<b class="${svcOpen(c) && c.visit < td ? 'od' : ''}">${fd(c.visit)}</b>${c.visitTime ? `<small class="sub">${esc(c.visitTime)}</small>` : ''}` : '<span class="muted">Not booked</span>'}</td><td class="c-md">${esc(c.fitter || '-')}</td><td class="ac"><div class="acts r"><button class="mini" ${onClick('reportCall', c.id)}>Report</button>${ISOWN() ? `<button class="mini del" ${onClick('del', 'calls', c.id)}>Delete</button>` : ''}</div></td></tr>`).join('') || '<tr><td colspan="8" class="empty">No service calls here.</td></tr>'}
+  ${pg.rows.map((c) => `<tr class="clk-r" ${rowClick('editCall', c.id)}><td><b class="lref">${esc(c.id)}</b>${c.contract ? `<small class="sub">${esc(c.contract)}</small>` : ''}</td><td><b>${esc(c.name)}</b><small class="sub">${esc([c.town, c.phone].filter(Boolean).join(' · '))}</small>${svcBal(c)}</td><td><span class="cl2">${esc(c.issue)}</span><small class="sub">${esc(c.cat || '')}${c.cat && c.photos && c.photos.length ? ' · ' : ''}${phCount(c.photos)}</small></td><td>${prTag(c.priority)}</td><td>${svcTag(c.status)}</td><td class="c-sm">${c.visit ? `<b class="${svcOpen(c) && c.visit < td ? 'od' : ''}">${fd(c.visit)}</b>${c.visitTime ? `<small class="sub">${esc(c.visitTime)}</small>` : ''}` : '<span class="muted">Not booked</span>'}</td><td class="c-md">${esc(c.fitter || '-')}</td><td class="ac"><div class="acts r"><button class="mini" ${onClick('reportCall', c.id)}>Report</button>${can('manage') ? `<button class="mini del" ${onClick('del', 'calls', c.id)}>Delete</button>` : ''}</div></td></tr>`).join('') || '<tr><td colspan="8" class="empty">No service calls here.</td></tr>'}
   </tbody></table></div>${pagerH('svc', pg, 'calls')}`;
 }
 /* the call sheet: who rang, what is wrong, who is going, what was done */

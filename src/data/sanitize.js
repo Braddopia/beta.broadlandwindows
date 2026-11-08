@@ -1,5 +1,5 @@
-/* core/sanitize: Cleaning anything typed in before it is stored (text, numbers, dates, emails, links, images). */
-import { PHC, PH_BLANK, PH_OK, phIsRef, phWant } from '../data/photos.js';
+/* data/sanitize: Cleaning anything typed in before it is stored (text, numbers, dates, emails, links, images). */
+import { PHC, PH_BLANK, PH_OK, phIsRef, phWant } from './photos.js';
 
 /* ---- validation / sanitising ---- */
 export const SAFE = {

@@ -4,7 +4,7 @@ import { BH, fd, isWk, today } from '../../core/dates.js';
 import { $, $$, esc } from '../../core/dom.js';
 import { pad, sum } from '../../core/format.js';
 import { shortId } from '../../core/ids.js';
-import { SAFE } from '../../core/sanitize.js';
+import { SAFE } from '../../data/sanitize.js';
 import { audit } from '../../data/audit.js';
 import { store } from '../../data/persistence.js';
 import { state } from '../../data/state.js';
@@ -23,7 +23,8 @@ import {
   yearCounts,
 } from '../../domain/holidays.js';
 import { forPerson, holOn, me, staffName } from '../../domain/people.js';
-import { ISOWN, need } from '../auth/session.js';
+import { can } from '../../domain/permissions.js';
+import { need } from '../auth/session.js';
 import { holTag } from '../../ui/components/tags.js';
 import { closeModal, openModal } from '../../ui/modal.js';
 import { render } from '../../ui/shell/router.js';
@@ -32,7 +33,7 @@ import { uiState } from '../../ui/ui-state.js';
 
 /* typing a code into a day on the holiday chart */
 export function hcSet(sid, k, raw) {
-  if (!ISOWN()) return false;
+  if (!can('manage')) return false;
   const s = state.staff.find((x) => x.id == sid);
   if (!s || !SAFE.date(k)) return false;
   let v = String(raw || '')
@@ -58,7 +59,7 @@ export function hcSet(sid, k, raw) {
   return true;
 }
 export function hcPaint(sid, k) {
-  if (!need(ISOWN, 'Editing the holiday chart')) return;
+  if (!need('manage', 'Editing the holiday chart')) return;
   const b = uiState.hol.brush,
     s = state.staff.find((x) => x.id == sid);
   if (!s) return;
@@ -79,7 +80,7 @@ export function hcPaint(sid, k) {
   render();
 }
 export function shutEdit() {
-  if (!need(ISOWN, 'Changing the Christmas shutdown')) return;
+  if (!need('manage', 'Changing the Christmas shutdown')) return;
   const y = uiState.hol.y,
     cur = shutDays(y),
     days = Array.from({ length: 17 }, (_, i) => y + '-12-' + pad(15 + i)).filter((k) => isWk(k));
@@ -90,7 +91,7 @@ export function shutEdit() {
   );
 }
 export function shutSave(y) {
-  if (!need(ISOWN, 'Changing the Christmas shutdown')) return;
+  if (!need('manage', 'Changing the Christmas shutdown')) return;
   state.shut[y] = $$('#mbox .shd:checked')
     .map((e) => SAFE.date(e.value))
     .filter(Boolean);
@@ -100,7 +101,7 @@ export function shutSave(y) {
   render();
 }
 export function shutReset(y) {
-  if (!need(ISOWN, 'Changing the Christmas shutdown')) return;
+  if (!need('manage', 'Changing the Christmas shutdown')) return;
   delete state.shut[y];
   audit('Christmas shutdown', String(y), 'Reset to default');
   store();
@@ -114,7 +115,7 @@ export function holSheet() {
     y = H.y,
     mo = H.cm,
     td = today(),
-    Ad = ISOWN(),
+    Ad = can('manage'),
     mine = me();
   const grp = HGRP.map((g) => [g, state.staff.filter((s) => (s.cat || 'Office') == g)]).filter((x) => x[1].length);
   const last = (state.audit || []).find((a) => /Holiday chart|Holiday approved|Christmas shutdown/i.test(a.a || ''));
@@ -230,7 +231,7 @@ export function clashes() {
 export function vHolidays() {
   if (uiState.hol.v == 'chart') {
     const H = uiState.hol,
-      Ad = ISOWN(),
+      Ad = can('manage'),
       pend = state.hols.filter((h) => h.status == 'Pending');
     return `<div class="head"><h1>Holiday Planner</h1><div class="tools"><div class="seg">${[
       ['chart', 'Chart'],
@@ -251,7 +252,7 @@ export function vHolidays() {
     mo = b.getMonth(),
     dim = new Date(y, mo + 1, 0).getDate(),
     td = today(),
-    Ad = ISOWN(),
+    Ad = can('manage'),
     pend = state.hols.filter((h) => h.status == 'Pending'),
     cl = clashes();
   const off = state.staff.filter((s) => holOn(s.id, td)).length,
@@ -354,7 +355,7 @@ export function holSetClose(id, st) {
   closeModal();
 }
 export function holSet(id, st) {
-  if (!need(ISOWN, 'Approving holiday')) return;
+  if (!need('manage', 'Approving holiday')) return;
   const h = state.hols.find((x) => x.id == id);
   if (!h) return;
   h.status = st;
@@ -364,12 +365,12 @@ export function holSet(id, st) {
 }
 export function holBook(sid, day) {
   const d = day || today();
-  if (!sid && !ISOWN()) {
+  if (!sid && !can('manage')) {
     const m = me();
     if (m) sid = m.id;
   }
   openModal(
-    `<h2>Book Holiday</h2><div class="dfm"><label>Staff member<select id="hs" data-onchange="holChk">${state.staff.map((s) => `<option value="${esc(s.id)}" ${s.id == sid ? 'selected' : ''}>${esc(s.name)}</option>`).join('')}</select></label><label>From<input type="date" id="hf" value="${esc(d)}" data-onchange="holChk"></label><label>To<input type="date" id="ht" value="${esc(d)}" data-onchange="holChk"></label><label>Note (optional)<input id="hn" maxlength="120"></label><div id="hi" style="margin-top:.7rem;font-size:.88rem"></div></div><div class="mact"><button class="btn ghost" data-act="closeModal">Cancel</button><button class="btn" data-act="holSave">${ISOWN() ? 'Book holiday' : 'Send request'}</button></div>`
+    `<h2>Book Holiday</h2><div class="dfm"><label>Staff member<select id="hs" data-onchange="holChk">${state.staff.map((s) => `<option value="${esc(s.id)}" ${s.id == sid ? 'selected' : ''}>${esc(s.name)}</option>`).join('')}</select></label><label>From<input type="date" id="hf" value="${esc(d)}" data-onchange="holChk"></label><label>To<input type="date" id="ht" value="${esc(d)}" data-onchange="holChk"></label><label>Note (optional)<input id="hn" maxlength="120"></label><div id="hi" style="margin-top:.7rem;font-size:.88rem"></div></div><div class="mact"><button class="btn ghost" data-act="closeModal">Cancel</button><button class="btn" data-act="holSave">${can('manage') ? 'Book holiday' : 'Send request'}</button></div>`
   );
   holChk();
 }
@@ -415,7 +416,7 @@ export function holSave() {
     toast('Only ' + left + ' days left');
     return;
   }
-  if (!ISOWN() && me() && sid != me().id) {
+  if (!can('manage') && me() && sid != me().id) {
     toast('You can only request your own holiday');
     return;
   }
@@ -425,19 +426,19 @@ export function holSave() {
     from: f,
     to: t,
     days: n,
-    status: ISOWN() ? 'Approved' : 'Pending',
+    status: can('manage') ? 'Approved' : 'Pending',
     note: SAFE.text($('#hn').value, 120),
   });
-  audit(ISOWN() ? 'Holiday booked' : 'Holiday requested', s.name, f + ' to ' + t);
+  audit(can('manage') ? 'Holiday booked' : 'Holiday requested', s.name, f + ' to ' + t);
   store();
   closeModal();
   render();
-  toast(ISOWN() ? 'Holiday booked' : 'Request sent for approval');
+  toast(can('manage') ? 'Holiday booked' : 'Request sent for approval');
 }
 export function holEdit(id) {
   const h = state.hols.find((x) => x.id == id);
   if (!h) return;
-  const Ad = ISOWN(),
+  const Ad = can('manage'),
     mine = me() && me().id == h.sid;
   openModal(
     `<h2>${esc(staffName(h.sid))}</h2><p>${fd(h.from)} to ${fd(h.to)}, ${h.days} working day${h.days == 1 ? '' : 's'}<br>${holTag(h)}</p>${h.note ? `<p class="muted">${esc(h.note)}</p>` : ''}<div class="mact"><button class="btn ghost" data-act="closeModal">Close</button>${Ad && h.status != 'Approved' ? `<button class="btn green" ${onClick('holSetClose', id, 'Approved')}>Approve</button>` : ''}${Ad && h.status == 'Pending' ? `<button class="btn red" ${onClick('holSetClose', id, 'Rejected')}>Reject</button>` : ''}${Ad || (mine && h.status == 'Pending') ? `<button class="btn ghost" ${onClick('holDel', id)}>${h.status == 'Pending' && !Ad ? 'Cancel request' : 'Delete'}</button>` : ''}</div>`
@@ -446,7 +447,7 @@ export function holEdit(id) {
 export function holDel(id) {
   const h = state.hols.find((x) => x.id == id);
   if (!h) return;
-  if (!ISOWN() && !(me() && me().id == h.sid && h.status == 'Pending')) {
+  if (!can('manage') && !(me() && me().id == h.sid && h.status == 'Pending')) {
     toast('Only an administrator can remove this');
     return;
   }

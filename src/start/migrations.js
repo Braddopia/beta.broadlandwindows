@@ -1,11 +1,11 @@
-/* data/migrations: One-off updates that bring older saved data up to date. Each runs once, in order. */
-import { coLoad } from '../config/company.js';
+/* start/migrations: One-off updates that bring older saved data up to date. Each runs once, in order. */
+import { coLoad } from '../data/company.js';
 import { LOW, MAX_PHOTOS, SCATS, UNITS, guessCat } from '../config/constants.js';
 import { shortId, uuid } from '../core/ids.js';
-import { SAFE } from '../core/sanitize.js';
-import { store } from './persistence.js';
-import { seed } from './seed.js';
-import { state } from './state.js';
+import { SAFE } from '../data/sanitize.js';
+import { store } from '../data/persistence.js';
+import { seed } from '../data/seed.js';
+import { state } from '../data/state.js';
 import { CK3, CK_OLD } from '../domain/checklists.js';
 import { ikey, stkId } from '../domain/stock.js';
 import { pinHash } from '../features/auth/pins.js';

@@ -2,14 +2,16 @@
 import { $, $$, esc } from '../../core/dom.js';
 import { tc } from '../../core/format.js';
 import { ICONS, svg } from '../../core/icons.js';
-import { SAFE } from '../../core/sanitize.js';
-import { backupDl } from '../../data/backup.js';
+import { SAFE } from '../../data/sanitize.js';
+import { backupDl } from '../admin/backup.js';
 import { state } from '../../data/state.js';
 import { allLeads } from '../../domain/leads.js';
-import { nlq } from '../../domain/search-query.js';
+import { nlq } from './questions.js';
 import { products } from '../../domain/stock.js';
 import { chPin } from '../auth/pins.js';
-import { ISADM, ISOWN, ROLE, canSee, setRole, swRole } from '../auth/session.js';
+import { ROLE } from '../../data/session.js';
+import { can, canSee } from '../../domain/permissions.js';
+import { setRole, swRole } from '../auth/session.js';
 import { editContact } from '../contacts/contacts.js';
 import { editContract, openContract } from '../contracts/contracts.js';
 import { editDel } from '../deliveries/deliveries.js';
@@ -169,7 +171,7 @@ export const CMDS = () =>
       'Take A Payment',
       'pay money deposit balance receipt',
       () => cmdkSet('pay '),
-      () => ISADM() && canSee('contracts'),
+      () => can('money') && canSee('contracts'),
     ],
     ['Call Someone', 'ring phone dial', () => cmdkSet('call '), () => true],
     ['Email Someone', 'mail send', () => cmdkSet('email '), () => true],
@@ -228,19 +230,24 @@ export const CMDS = () =>
     ['Book Holiday', 'holiday leave time off', () => bookMine(), () => true],
     ['Scan Barcode', 'scan camera code', () => scan(found), () => true],
     ...Object.entries(VIEWS)
-      .filter(([k]) => canSee(k) && (k != 'admin' || ISOWN()))
+      .filter(([k]) => canSee(k) && (k != 'admin' || can('manage')))
       .map(([k, v]) => ['Go To ' + v.t, 'open page show ' + k, () => go(k), () => true]),
     ['Settings', 'preferences options company my', () => go('settings'), () => true],
-    ['Company Details', 'settings address phone vat number', () => coEditK('co'), () => ISOWN()],
-    ['VAT And Invoice Settings', 'settings vat deposit bank invoice terms', () => coEditK('money'), () => ISOWN()],
+    ['Company Details', 'settings address phone vat number', () => coEditK('co'), () => can('manage')],
+    [
+      'VAT And Invoice Settings',
+      'settings vat deposit bank invoice terms',
+      () => coEditK('money'),
+      () => can('manage'),
+    ],
     [
       'Update Review Scores',
       'reviews google trustpilot trusted trader referenceline',
       () => editRatings(),
-      () => ISOWN(),
+      () => can('manage'),
     ],
-    ['Change PINs', 'security pin password', () => chPin(), () => ISOWN()],
-    ['Download Backup', 'export save data', () => backupDl(), () => ISOWN()],
+    ['Change PINs', 'security pin password', () => chPin(), () => can('manage')],
+    ['Download Backup', 'export save data', () => backupDl(), () => can('manage')],
     [
       'Fewer Animations On Or Off',
       'motion reduce glow',

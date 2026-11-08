@@ -3,7 +3,7 @@ import { CSTAGES, CTYPES, PTYPES, SOURCES, STAGES } from '../../config/constants
 import { onClick, onEvent } from '../../core/actions.js';
 import { addDays, fd, today, weekRange } from '../../core/dates.js';
 import { $, esc } from '../../core/dom.js';
-import { csvDownload } from '../../core/download.js';
+import { csvDownload } from '../../ui/download.js';
 import { m0, pc, sum } from '../../core/format.js';
 import { audit } from '../../data/audit.js';
 import { store } from '../../data/persistence.js';
@@ -12,7 +12,8 @@ import { PHONES, addrOf, custCompat, mailOf, siteOf, telOf } from '../../domain/
 import { allLeads, leadProb } from '../../domain/leads.js';
 import { nextLeadId, nid } from '../../domain/numbering.js';
 import { FITL, OWNERS, RANDOM_SP, spResolve } from '../../domain/people.js';
-import { ISOWN, canSee, need } from '../auth/session.js';
+import { canSee } from '../../domain/permissions.js';
+import { need } from '../auth/session.js';
 import { openContract } from '../contracts/contracts.js';
 import { nextAppt } from '../records/appointments.js';
 import { CUSTK } from '../records/fields.js';
@@ -40,7 +41,7 @@ export function mvLead(id, d) {
   render();
 }
 export function delLead(id) {
-  if (!need(ISOWN, 'Deleting leads')) return;
+  if (!need('manage', 'Deleting leads')) return;
   const l = state.leads.find((x) => x.id == id);
   if (!l) return;
   askYes(

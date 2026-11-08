@@ -4,10 +4,10 @@ import { MAX_PHOTOS } from '../../config/constants.js';
 import { onClick } from '../../core/actions.js';
 import { $, $$, esc } from '../../core/dom.js';
 import { ICONS, svg } from '../../core/icons.js';
-import { SAFE } from '../../core/sanitize.js';
+import { SAFE } from '../../data/sanitize.js';
 import { store } from '../../data/persistence.js';
 import { OWNERS, RANDOM_SP } from '../../domain/people.js';
-import { ISADM } from '../../features/auth/session.js';
+import { can } from '../../domain/permissions.js';
 import { recTab } from '../../features/records/record-window.js';
 import { scan } from '../../features/scanner/scanner.js';
 import { NEWCO, supNewCo } from '../../features/suppliers/suppliers.js';
@@ -85,7 +85,7 @@ export function readFields(fields) {
     if (f.t == 'h') continue;
     const e = $('#f_' + f.k);
     if (!e) continue;
-    if (f.adm && !ISADM()) continue;
+    if (f.adm && !can('money')) continue;
     const raw = (e.value || '').trim(),
       lab = f.l.replace(/ \(.*\)/, '');
     if (f.req && !raw) {

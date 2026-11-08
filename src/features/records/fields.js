@@ -14,7 +14,7 @@ import {
   YN,
 } from '../../config/constants.js';
 import { FITL, OWNERS, RANDOM_SP, staffNames } from '../../domain/people.js';
-import { ISADM, ISOWN } from '../auth/session.js';
+import { can } from '../../domain/permissions.js';
 
 /* ---- customer information: same fields on leads and contracts ---- */
 export const CUSTF = [
@@ -92,7 +92,13 @@ export const OPF = [
 ];
 /* ======================= LEAD record ======================= */
 export const LEADF = (W) => [
-  { k: 'id', l: ISOWN() ? 'Lead number (admin can change)' : 'Lead number', ro: !ISOWN(), max: 5, g: 'Lead' },
+  {
+    k: 'id',
+    l: can('manage') ? 'Lead number (admin can change)' : 'Lead number',
+    ro: !can('manage'),
+    max: 5,
+    g: 'Lead',
+  },
   { k: 'created', l: 'Lead date', t: 'date', g: 'Lead' },
   { k: 'officeRef', adv: 1, l: 'Office reference', g: 'Lead' },
   { k: 'takenBy', adv: 1, l: 'Taken by', t: 'select', o: staffNames(), g: 'Lead' },
@@ -164,7 +170,7 @@ export const CFINF = () => [
   { k: 'depDue', l: 'Deposit due by', t: 'date', g: 'Money' },
   { k: 'balDue', l: 'Balance due by', t: 'date', g: 'Money' },
   { k: 'paid', l: 'Paid so far (£)', t: 'number', g: 'Money', adm: 1 },
-  ...(ISADM() ? [{ k: 'cost', l: 'Job cost (£)', t: 'number', g: 'Money', adm: 1 }] : []),
+  ...(can('money') ? [{ k: 'cost', l: 'Job cost (£)', t: 'number', g: 'Money', adm: 1 }] : []),
   {
     k: 'payMethod',
     l: 'Main payment method',

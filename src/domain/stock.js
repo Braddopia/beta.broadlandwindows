@@ -2,7 +2,6 @@
 import { LOW, UNITS } from '../config/constants.js';
 import { nowT } from '../core/dates.js';
 import { uuid } from '../core/ids.js';
-import { SAFE } from '../core/sanitize.js';
 import { state } from '../data/state.js';
 
 /* ---- migrate older versions, fill gaps ---- */
@@ -41,7 +40,6 @@ export const hasLoc = (r) => r.location && r.location != '-';
 export const unitOf = (r) => (UNITS.includes(r.unit) ? r.unit : 'Each');
 export const colTxt = (r) => [r.cInName, r.cOutName].filter((x) => x && x != '-').join(' / ') || '-';
 export const stt = (r) => (r.stock <= 0 ? ['Out', 'r'] : isLow(r) ? ['Low', 'y'] : ['OK', 'g']);
-export const pphotos = (k) => (state.pphotos[k] || []).filter(SAFE.img);
 export function moveRow(b, kind, qty, stock, extra) {
   return {
     ...b,

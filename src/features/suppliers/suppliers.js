@@ -5,12 +5,12 @@ import { fd, today } from '../../core/dates.js';
 import { esc } from '../../core/dom.js';
 import { initials, lines, m0, money, sum } from '../../core/format.js';
 import { svg } from '../../core/icons.js';
-import { SAFE } from '../../core/sanitize.js';
+import { SAFE } from '../../data/sanitize.js';
 import { audit } from '../../data/audit.js';
 import { store } from '../../data/persistence.js';
 import { state } from '../../data/state.js';
 import { colTxt, isLow, moveRow, nextOrd, products, reorderQty, stt, unitOf } from '../../domain/stock.js';
-import { ISADM } from '../auth/session.js';
+import { can } from '../../domain/permissions.js';
 import { conPhones, editContact } from '../contacts/contacts.js';
 import { emptyArt } from '../../ui/components/art.js';
 import { dTag, ordTag, reqTag } from '../../ui/components/tags.js';
@@ -62,7 +62,7 @@ export function suppliersPanel() {
   return `<div class="panel"><h2><span>Suppliers</span><span class="acts"><button class="mini" ${onClick('go', 'suppliers')}>Manage</button><button class="mini pri" data-act="editSup">Add Supplier</button></span></h2>${rows}${none ? `<p class="muted" style="margin:.6rem 0 0">${none} lines have no supplier yet.</p>` : ''}</div>`;
 }
 export function vSuppliers() {
-  const Ad = ISADM(),
+  const Ad = can('money'),
     all = sups(),
     P = products();
   const tot = {
@@ -112,7 +112,7 @@ export function supOpen(n) {
   const i = state.suppliers.indexOf(x),
     s = supStats(x),
     url = SAFE.url(x.url),
-    Ad = ISADM(),
+    Ad = can('money'),
     need = [...s.out, ...s.low];
   const row = (l, v) => (v ? `<div class="si"><span>${l}</span><b>${v}</b></div>` : '');
   /* phone numbers come from the contact book, each with its label (Office, Accounts, Sales rep...) */

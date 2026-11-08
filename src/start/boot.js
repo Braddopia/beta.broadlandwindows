@@ -1,8 +1,8 @@
-/* main-start: The last start-up step: first draw of the page and background syncs. */
-import { ssoBoot } from './features/sign-in/sign-in.js';
-import { tourBoot } from './features/tour/tour.js';
-import { seedHM, syncHM } from './integrations/hallmark.js';
-import { render } from './ui/shell/router.js';
+/* start/boot: The last start-up step: first draw of the page and background syncs. */
+import { ssoBoot } from '../features/sign-in/sign-in.js';
+import { tourBoot } from '../features/tour/tour.js';
+import { seedHM, syncHM } from '../integrations/hallmark.js';
+import { render } from '../ui/shell/router.js';
 
 /* ==========================================================================
    99 · Start-up

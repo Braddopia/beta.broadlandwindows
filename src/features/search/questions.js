@@ -1,18 +1,18 @@
-/* domain/search-query: Understanding plain-English searches such as "fittings this week". */
-import { CSTAGES, SOURCES, STAGES } from '../config/constants.js';
-import { fd, iso, today, weekRange } from '../core/dates.js';
-import { m0 } from '../core/format.js';
-import { state } from '../data/state.js';
-import { dAuto } from './deliveries.js';
-import { FITL, OWNERS } from './people.js';
-import { hasLoc, isLow, key, products, unitOf } from './stock.js';
-import { canSee } from '../features/auth/session.js';
-import { openContract } from '../features/contracts/contracts.js';
-import { editDel } from '../features/deliveries/deliveries.js';
-import { openLead } from '../features/leads/leads.js';
-import { nextAppt } from '../features/records/appointments.js';
-import { editCall } from '../features/service/service.js';
-import { viewItem } from '../features/stock/item-window.js';
+/* features/search/questions: Understanding plain-English searches such as "fittings this week". */
+import { CSTAGES, SOURCES, STAGES } from '../../config/constants.js';
+import { fd, iso, today, weekRange } from '../../core/dates.js';
+import { m0 } from '../../core/format.js';
+import { state } from '../../data/state.js';
+import { dAuto } from '../../domain/deliveries.js';
+import { FITL, OWNERS } from '../../domain/people.js';
+import { hasLoc, isLow, key, products, unitOf } from '../../domain/stock.js';
+import { canSee } from '../../domain/permissions.js';
+import { openContract } from '../contracts/contracts.js';
+import { editDel } from '../deliveries/deliveries.js';
+import { openLead } from '../leads/leads.js';
+import { nextAppt } from '../records/appointments.js';
+import { editCall } from '../service/service.js';
+import { viewItem } from '../stock/item-window.js';
 
 /* ======== plain-English search: "fittings this week", "unpaid contracts", "leads from facebook",
    "urgent service calls", "deliveries overdue", "contracts in norwich over £10000", "won leads for sales a" ======== */

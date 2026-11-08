@@ -4,12 +4,13 @@ import { fd, iso, today } from '../../core/dates.js';
 import { $, esc } from '../../core/dom.js';
 import { m0, money, sum } from '../../core/format.js';
 import { shortId } from '../../core/ids.js';
-import { SAFE } from '../../core/sanitize.js';
+import { SAFE } from '../../data/sanitize.js';
 import { audit } from '../../data/audit.js';
 import { store } from '../../data/persistence.js';
 import { state } from '../../data/state.js';
 import { staffName } from '../../domain/people.js';
-import { ISADM, ISOWN, need } from '../auth/session.js';
+import { can } from '../../domain/permissions.js';
+import { need } from '../auth/session.js';
 import { openContract } from '../contracts/contracts.js';
 import { payOpen } from '../contracts/finance-step.js';
 import { recTab } from '../records/record-window.js';
@@ -23,7 +24,7 @@ import { uiState } from '../../ui/ui-state.js';
    13 · Finance (admin/finance) and Admin console (owner accounts)
    ========================================================================== */
 export function vFinance() {
-  if (!ISADM()) return '<p class="empty">Finance is for administrators only.</p>';
+  if (!can('money')) return '<p class="empty">Finance is for administrators only.</p>';
   const td = today(),
     F = uiState.fin,
     deb = state.contracts.filter((c) => c.value - c.paid > 0),
@@ -34,7 +35,7 @@ export function vFinance() {
     mk = iso(mo).slice(0, 7),
     pr = sum(state.staff, (x) => x.salary / 12),
     paid = state.pay[mk] || {},
-    Own = ISOWN();
+    Own = can('manage');
   const K = [
     ['Owed by customers', m0(owed)],
     ['Bills to pay', m0(sum(bills, (b) => b.amount))],
@@ -72,7 +73,7 @@ export function vFinance() {
 }
 /* 'Record payment' on Money owed to us: open the contract on its Finance step with the payment box ready */
 export function addPay(id) {
-  if (!need(ISADM, 'Taking payments')) return;
+  if (!need('money', 'Taking payments')) return;
   openContract(id);
   recTab('finance');
   setTimeout(() => {
@@ -80,7 +81,7 @@ export function addPay(id) {
   }, 80);
 }
 export function payBill(id) {
-  if (!need(ISADM, 'Paying bills')) return;
+  if (!need('money', 'Paying bills')) return;
   const b = state.fin.find((x) => x.id == id);
   b.status = 'Paid';
   b.paidOn = today();
@@ -90,7 +91,7 @@ export function payBill(id) {
   toast('Marked as paid');
 }
 export function payStaff(id, mk) {
-  if (!need(ISOWN, 'Payroll')) return;
+  if (!need('manage', 'Payroll')) return;
   state.pay[mk] = state.pay[mk] || {};
   if (state.pay[mk][id]) delete state.pay[mk][id];
   else state.pay[mk][id] = today();
@@ -99,7 +100,7 @@ export function payStaff(id, mk) {
   render();
 }
 export function payAll(mk) {
-  if (!need(ISOWN, 'Payroll')) return;
+  if (!need('manage', 'Payroll')) return;
   state.pay[mk] = state.pay[mk] || {};
   state.staff.forEach((x) => {
     state.pay[mk][x.id] = state.pay[mk][x.id] || today();
@@ -110,7 +111,7 @@ export function payAll(mk) {
   toast('Payroll marked as paid');
 }
 export function editBill(id) {
-  if (!need(ISADM, 'Bills')) return;
+  if (!need('money', 'Bills')) return;
   const b = state.fin.find((x) => x.id == id);
   form(
     b ? 'Edit Bill' : 'New Bill',

@@ -1,5 +1,5 @@
 /* features/contracts/documents: Printed contract documents: summary, job sheet, customer details and invoice. */
-import { company } from '../../config/company.js';
+import { company } from '../../data/company.js';
 import { fd, fdl, today } from '../../core/dates.js';
 import { esc } from '../../core/dom.js';
 import { money, sum } from '../../core/format.js';
@@ -7,7 +7,7 @@ import { audit } from '../../data/audit.js';
 import { state } from '../../data/state.js';
 import { CK } from '../../domain/checklists.js';
 import { addrOf, mailOf, siteOf, telOf } from '../../domain/customers.js';
-import { ISADM } from '../auth/session.js';
+import { can } from '../../domain/permissions.js';
 import { ctrList, ctrSteps, yn } from './contracts.js';
 import { leadList } from '../leads/leads.js';
 import { opSafe } from '../records/survey.js';
@@ -75,7 +75,7 @@ export function reportContract(id, mode) {
     );
     return;
   }
-  const Ad = ISADM(),
+  const Ad = can('money'),
     todo = CK.filter((k) => !(c.chk || {})[k]),
     mg = c.cost && c.value ? Math.round((100 * (c.value - c.cost)) / c.value) + '%' : '';
   printDoc(

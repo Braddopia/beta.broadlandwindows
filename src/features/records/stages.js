@@ -2,7 +2,7 @@
 import { onClick } from '../../core/actions.js';
 import { $, esc } from '../../core/dom.js';
 import { svg } from '../../core/icons.js';
-import { canSee } from '../auth/session.js';
+import { canSee } from '../../domain/permissions.js';
 import { RECORDS, recSave, recordWin } from './record-window.js';
 import { askIn } from '../../ui/modal.js';
 import { toast } from '../../ui/toast.js';

@@ -1,11 +1,11 @@
 /* print/print: The printed document engine: letterhead, tables, photos and print windows. */
-import { company } from '../config/company.js';
+import { company } from '../data/company.js';
 import { actRun, onClick } from '../core/actions.js';
 import { LOGO_SRC } from '../core/assets.js';
 import { iso } from '../core/dates.js';
 import { esc } from '../core/dom.js';
 import { money } from '../core/format.js';
-import { SAFE } from '../core/sanitize.js';
+import { SAFE } from '../data/sanitize.js';
 import { PHC, PH_BLANK, phIsRef, phLoad } from '../data/photos.js';
 import { state } from '../data/state.js';
 import { closeModal, openModal } from '../ui/modal.js';

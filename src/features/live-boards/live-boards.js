@@ -9,7 +9,8 @@ import { ORDDONE, dAuto, dDueToday, dLate } from '../../domain/deliveries.js';
 import { HC, absCode } from '../../domain/holidays.js';
 import { allLeads } from '../../domain/leads.js';
 import { hasLoc, isLow, products, unitOf } from '../../domain/stock.js';
-import { ISOWN, need } from '../auth/session.js';
+import { can } from '../../domain/permissions.js';
+import { need } from '../auth/session.js';
 import { LAY, flGet, layEdit } from '../home/home.js';
 import { printDoc } from '../../print/print.js';
 import { emptyArt } from '../../ui/components/art.js';
@@ -135,7 +136,7 @@ export function vLive() {
         .join('') || emptyArt('team', 'Everyone is in today.')
     }</div>`,
   };
-  return `<div class="fl"><div class="fl-head"><div>${boardTabs()}<h1>Factory Floor</h1><span class="muted"><i class="live"></i>Live &middot; Updated <span id="upd">${new Date().toLocaleTimeString('en-GB')}</span></span></div><div class="clk" id="clk">${new Date().toLocaleTimeString('en-GB')}</div><div class="acts">${boardPick()}${ISOWN() ? '<button class="btn ghost" data-act="flEdit">Customise</button>' : ''}<button class="btn ghost" data-act="liveReport">Factory Report</button><button class="btn" data-act="toggleTV">${tv ? 'Exit Full Screen' : 'Full Screen'}</button></div></div>
+  return `<div class="fl"><div class="fl-head"><div>${boardTabs()}<h1>Factory Floor</h1><span class="muted"><i class="live"></i>Live &middot; Updated <span id="upd">${new Date().toLocaleTimeString('en-GB')}</span></span></div><div class="clk" id="clk">${new Date().toLocaleTimeString('en-GB')}</div><div class="acts">${boardPick()}${can('manage') ? '<button class="btn ghost" data-act="flEdit">Customise</button>' : ''}<button class="btn ghost" data-act="liveReport">Factory Report</button><button class="btn" data-act="toggleTV">${tv ? 'Exit Full Screen' : 'Full Screen'}</button></div></div>
   <div class="kpis">${T.filter((k, n) => FL.k.includes(TK[n]))
     .sort((a, b) => FL.k.indexOf(TK[T.indexOf(a)]) - FL.k.indexOf(TK[T.indexOf(b)]))
     .map(
@@ -367,7 +368,7 @@ export function vBoard(b) {
   const d = boardData(b),
     L = boardLay(b),
     tv = document.body.classList.contains('tv');
-  return `<div class="fl"><div class="fl-head"><div>${boardTabs()}<h1>${esc(d.t)}</h1><span class="muted"><i class="live"></i>${esc(d.s)} &middot; Updated <span id="upd">${new Date().toLocaleTimeString('en-GB')}</span></span></div><div class="clk" id="clk">${new Date().toLocaleTimeString('en-GB')}</div><div class="acts">${boardPick()}${ISOWN() ? `<button class="btn ghost" ${onClick('boardEdit', b)}>Customise</button>` : ''}<button class="btn" data-act="toggleTV">${tv ? 'Exit Full Screen' : 'Full Screen'}</button></div></div>
+  return `<div class="fl"><div class="fl-head"><div>${boardTabs()}<h1>${esc(d.t)}</h1><span class="muted"><i class="live"></i>${esc(d.s)} &middot; Updated <span id="upd">${new Date().toLocaleTimeString('en-GB')}</span></span></div><div class="clk" id="clk">${new Date().toLocaleTimeString('en-GB')}</div><div class="acts">${boardPick()}${can('manage') ? `<button class="btn ghost" ${onClick('boardEdit', b)}>Customise</button>` : ''}<button class="btn" data-act="toggleTV">${tv ? 'Exit Full Screen' : 'Full Screen'}</button></div></div>
   <div class="kpis">${L.k
     .filter((k) => d.K[k])
     .map((k) => {
@@ -384,7 +385,7 @@ export function vBoard(b) {
   }</div></div>`;
 }
 export function boardEdit(b) {
-  if (!need(ISOWN, 'Changing the floor boards')) return;
+  if (!need('manage', 'Changing the floor boards')) return;
   const d = boardData(b);
   LAY['b_' + b] = {
     t: 'Customise ' + d.t,

@@ -1,15 +1,16 @@
 /* features/profile/profile: My Details: name, contact numbers and emergency contacts. */
-import { company } from '../../config/company.js';
+import { company } from '../../data/company.js';
 import { ROLES } from '../../config/roles.js';
 import { $, esc } from '../../core/dom.js';
 import { initials } from '../../core/format.js';
 import { ICONS, svg } from '../../core/icons.js';
-import { SAFE } from '../../core/sanitize.js';
+import { SAFE } from '../../data/sanitize.js';
 import { audit } from '../../data/audit.js';
 import { store } from '../../data/persistence.js';
 import { state } from '../../data/state.js';
 import { me, renamePerson } from '../../domain/people.js';
-import { ISOWN, ROLE } from '../auth/session.js';
+import { ROLE } from '../../data/session.js';
+import { can } from '../../domain/permissions.js';
 import { MARK, fieldErr } from '../../ui/forms/form.js';
 import { doneIn, openModal } from '../../ui/modal.js';
 import { render } from '../../ui/shell/router.js';
@@ -19,7 +20,7 @@ import { toast } from '../../ui/toast.js';
 export function editProfile() {
   const p = state.profile,
     m = me() || {},
-    adm = ISOWN(),
+    adm = can('manage'),
     lk = (t) => MARK(0, 1);
   openModal(
     `<button class="mx" data-act="closeModal" aria-label="Close">&times;</button><div class="pf"><span class="av2">${esc(initials(p.name))}</span><div><h2 style="margin:0">My Details</h2><span class="muted">${esc(ROLES[ROLE].n)} account</span></div></div>
@@ -117,7 +118,7 @@ export function saveProfile() {
   if (m) {
     p.sid = m.id;
     Object.assign(m, { name, email: em || m.email, phone: p.phone || m.phone });
-    if (ISOWN()) {
+    if (can('manage')) {
       m.role = v('p_role') || m.role;
       m.team = v('p_team') == 'None' ? '' : v('p_team');
       m.start = SAFE.date(v('p_start')) || m.start;

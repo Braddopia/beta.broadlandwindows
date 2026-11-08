@@ -3,12 +3,13 @@ import { today } from '../../core/dates.js';
 import { $ } from '../../core/dom.js';
 import { money, tc } from '../../core/format.js';
 import { ICONS } from '../../core/icons.js';
-import { SAFE } from '../../core/sanitize.js';
+import { SAFE } from '../../data/sanitize.js';
 import { audit } from '../../data/audit.js';
 import { store } from '../../data/persistence.js';
 import { state } from '../../data/state.js';
 import { mailOf, telOf } from '../../domain/customers.js';
-import { ISADM, canSee, need } from '../auth/session.js';
+import { can, canSee } from '../../domain/permissions.js';
+import { need } from '../auth/session.js';
 import { openContract } from '../contracts/contracts.js';
 import { payOpen } from '../contracts/finance-step.js';
 import { recTab, recordWin } from '../records/record-window.js';
@@ -44,7 +45,7 @@ export function cmdSmart(query) {
   const out = [],
     m = (re) => query.match(new RegExp(re.source, 'i'));
   let x;
-  if ((x = m(/^(?:pay|payment|take payment|paid)\s+£?(\d+(?:\.\d{1,2})?)\s+(.+)$/)) && ISADM()) {
+  if ((x = m(/^(?:pay|payment|take payment|paid)\s+£?(\d+(?:\.\d{1,2})?)\s+(.+)$/)) && can('money')) {
     const amt = SAFE.num(x[1], { max: 1e7 });
     recFind(x[2], 'c').forEach((f) =>
       out.push([
@@ -54,7 +55,7 @@ export function cmdSmart(query) {
         ICONS.finance,
       ])
     );
-  } else if ((x = m(/^(?:pay|payment|take payment)\s+(.+)$/)) && ISADM())
+  } else if ((x = m(/^(?:pay|payment|take payment)\s+(.+)$/)) && can('money'))
     recFind(x[1], 'c').forEach((f) =>
       out.push([
         'Take A Payment On ' + f.id,
@@ -113,7 +114,7 @@ export function cmdSmart(query) {
 export const recIsOpen = (id) =>
   recordWin && $('#modal').classList.contains('open') && String(recordWin.id) == String(id);
 export function quickPay(id, amt) {
-  if (!need(ISADM, 'Taking payments')) return;
+  if (!need('money', 'Taking payments')) return;
   if (recIsOpen(id)) {
     toast('That contract is open. Use its Finance step, or close it first');
     return;
@@ -129,7 +130,7 @@ export function quickPay(id, amt) {
 }
 export function quickPayGo(id, amt) {
   const c = state.contracts.find((x) => x.id == id);
-  if (!c || !need(ISADM, 'Taking payments')) return;
+  if (!c || !need('money', 'Taking payments')) return;
   c.pay = c.pay || [];
   c.pay.push({
     amt,

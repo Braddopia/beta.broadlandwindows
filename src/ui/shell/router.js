@@ -7,7 +7,9 @@ import { ICONS, svg } from '../../core/icons.js';
 import { state } from '../../data/state.js';
 import { me } from '../../domain/people.js';
 import { vAdmin } from '../../features/admin/admin.js';
-import { HOME, ISADM, ISOWN, ROLE, canSee, setPendView, swRole } from '../../features/auth/session.js';
+import { ROLE } from '../../data/session.js';
+import { can, canSee } from '../../domain/permissions.js';
+import { HOME, setPendView, swRole } from '../../features/auth/session.js';
 import { vCalendar } from '../../features/calendar/calendar.js';
 import { vContacts } from '../../features/contacts/contacts.js';
 import { vContracts } from '../../features/contracts/contracts.js';
@@ -79,16 +81,16 @@ export function badges() {
     messages: msgUnread(),
     leads: state.leads.filter((l) => !['Won', 'Lost'].includes(l.stage)).length,
     service: state.calls.filter((c) => c.status != 'Complete').length,
-    fitting: ISOWN() ? state.contracts.filter((c) => c.fit && c.stage != 'Complete').length : 0,
+    fitting: can('manage') ? state.contracts.filter((c) => c.fit && c.stage != 'Complete').length : 0,
     stock: state.items.filter((r) => r.type == 'request' && r.reqStatus == 'Pending').length,
-    staff: ISOWN() ? state.hols.filter((h) => h.status == 'Pending').length : 0,
-    holidays: ISOWN() ? state.hols.filter((h) => h.status == 'Pending').length : 0,
+    staff: can('manage') ? state.hols.filter((h) => h.status == 'Pending').length : 0,
+    holidays: can('manage') ? state.hols.filter((h) => h.status == 'Pending').length : 0,
   };
 }
 export function navHtml(b) {
   let n = 0;
   return NG.map(([g, keys]) => {
-    const ks = keys.filter((k) => canSee(k) && (k != 'admin' || ISOWN()));
+    const ks = keys.filter((k) => canSee(k) && (k != 'admin' || can('manage')));
     const gl =
       g == 'Admin' && ks.every((k) => k == 'settings')
         ? 'You'
@@ -110,7 +112,7 @@ export function go(v) {
   document.body.classList.remove('sopen');
   closeFpop();
   if (!VIEWS[v]) return;
-  if (!canSee(v) || (v == 'admin' && !ISOWN())) {
+  if (!canSee(v) || (v == 'admin' && !can('manage'))) {
     setPendView(v);
     swRole();
     return;
@@ -122,7 +124,7 @@ export function go(v) {
   render();
 }
 export function render(soft) {
-  if (!canSee(view) || (view == 'admin' && !ISOWN())) view = HOME();
+  if (!canSee(view) || (view == 'admin' && !can('manage'))) view = HOME();
   const V = VIEWS[view];
   $('#nav').innerHTML = navHtml(badges());
   let h;
@@ -141,7 +143,7 @@ export function render(soft) {
   requestAnimationFrame(() =>
     $$('#main .kpi>b').forEach((b) => b.style.setProperty('--n', Math.max(2, b.textContent.trim().length)))
   );
-  document.body.classList.toggle('isadm', ISADM());
+  document.body.classList.toggle('isadm', can('money'));
   shellSync();
   $$('#main .kpi,#main .panel,#main .col,#main .bc,#main .cc,#main .dlane,#main .supc').forEach((e, i) =>
     e.style.setProperty('--i', Math.min(i, 14))
@@ -171,7 +173,7 @@ export function shellSync() {
   $('#acct').innerHTML = svg(ICONS.switch) + '<span>' + esc(ROLES[ROLE].n) + '</span>';
   $('#adminbar').textContent = ROLES[ROLE].n + ' account: ' + ROLES[ROLE].d;
   const sec = $('#secbar'),
-    dp = ISOWN() && Object.values(state.sec.pins).some((p) => p.def);
+    dp = can('manage') && Object.values(state.sec.pins).some((p) => p.def);
   sec.classList.toggle('on', !!(dp || !window.isSecureContext));
   sec.textContent = !window.isSecureContext
     ? 'This page is not on a secure (https) connection: the camera scanner and some protections will not work.'

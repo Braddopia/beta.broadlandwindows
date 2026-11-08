@@ -1,7 +1,7 @@
 /* ui/forms/wizard: Step-by-step forms (new lead, new contract, supplier). */
 import { onClick } from '../../core/actions.js';
 import { $, esc } from '../../core/dom.js';
-import { SAFE } from '../../core/sanitize.js';
+import { SAFE } from '../../data/sanitize.js';
 import { store } from '../../data/persistence.js';
 import { fieldH, readFields } from './form.js';
 import { doneIn, openModal } from '../modal.js';

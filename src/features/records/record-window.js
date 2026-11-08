@@ -5,7 +5,7 @@ import { fd, today } from '../../core/dates.js';
 import { $, $$, esc } from '../../core/dom.js';
 import { m0 } from '../../core/format.js';
 import { svg } from '../../core/icons.js';
-import { SAFE } from '../../core/sanitize.js';
+import { SAFE } from '../../data/sanitize.js';
 import { store } from '../../data/persistence.js';
 import { state } from '../../data/state.js';
 import { mailOf, telOf } from '../../domain/customers.js';

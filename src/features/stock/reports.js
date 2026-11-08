@@ -4,8 +4,9 @@ import { today } from '../../core/dates.js';
 import { $, esc } from '../../core/dom.js';
 import { grp, money, sum } from '../../core/format.js';
 import { state } from '../../data/state.js';
-import { colTxt, hasLoc, isLow, key, pphotos, prodRows, products, ro, stt, unitOf } from '../../domain/stock.js';
-import { ISADM } from '../auth/session.js';
+import { pphotos } from './stock.js';
+import { colTxt, hasLoc, isLow, key, prodRows, products, ro, stt, unitOf } from '../../domain/stock.js';
+import { can } from '../../domain/permissions.js';
 import { SEL } from './stock.js';
 import { c39, printDoc } from '../../print/print.js';
 import { closeModal, openModal } from '../../ui/modal.js';
@@ -16,7 +17,7 @@ export function reportProd(k) {
   const rows = prodRows(k);
   if (!rows.length) return;
   const r = rows[0],
-    Ad = ISADM(),
+    Ad = can('money'),
     sp = state.suppliers.find((s) => s.name == r.supplier) || {},
     bc = r.barcode || r.item,
     [sl] = stt(r),
@@ -118,7 +119,7 @@ export function invRep(k) {
   );
 }
 export function invRun(sc) {
-  const Ad = ISADM(),
+  const Ad = can('money'),
     P = products().sort((a, b) => a.item.localeCompare(b.item)),
     hist = $('#rhist').checked,
     ph = $('#rphoto').checked,

@@ -1,8 +1,8 @@
 /* data/audit: The audit trail: who changed what, and when. */
 import { MAX_LOG } from '../config/constants.js';
-import { SAFE } from '../core/sanitize.js';
+import { SAFE } from './sanitize.js';
 import { state } from './state.js';
-import { ROLE } from '../features/auth/session.js';
+import { ROLE } from './session.js';
 
 /* ---- audit trail: who changed what, when ---- */
 export function audit(action, target, detail) {
