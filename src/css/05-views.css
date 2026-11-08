@@ -1048,3 +1048,68 @@ body[data-theme=dark] .gc.done .rg-ic{background:#0f3a29;color:#7fe0aa}
 
 .mb .rg.fg.gc:not(.shut){padding:0 18px 18px}
 .mb .rg.fg.gc:not(.shut)>h4{margin:0 -18px}
+
+/* ==== round 7 ==== */
+/* lead/contract rail: the header already shows the customer */
+.rw-cust{display:none}
+.rw-opt{display:inline-block;margin-left:.4rem;font:600 .62rem var(--body);font-style:normal;letter-spacing:.02em;padding:.08rem .4rem;border-radius:20px;background:var(--card2);color:var(--muted);border:1px solid var(--line);vertical-align:middle}
+/* 'still to fill in' box at the top of each step */
+.rw-todo:empty{display:none}
+.rw-todo{margin-top:.75rem}
+.td-l{display:flex;flex-wrap:wrap;align-items:center;gap:.4rem;padding:.6rem .7rem;border-radius:14px;background:var(--amber-bg);border:1px solid rgba(107,85,0,.18)}
+.td-l>b{font-size:.85rem;color:var(--amber);margin-right:.2rem}
+.td-i{font:500 .85rem var(--body);padding:.34rem .7rem;border-radius:calc(14px - .7rem + .1rem);min-height:2rem;display:inline-flex;align-items:center;background:var(--card);color:var(--ink);border:1px solid var(--line)}
+button.td-i{cursor:pointer;transition:background .15s,border-color .15s}
+button.td-i:hover{border-color:var(--blue);color:var(--blue)}
+.td-ok{display:flex;align-items:center;gap:.55rem;padding:.6rem .75rem;border-radius:14px;background:var(--green-bg);color:var(--green);font-weight:600;font-size:.9rem}
+.td-ok svg{width:1.15rem;height:1.15rem;flex:0 0 auto}
+.td-ok.pop svg{animation:tick .45s cubic-bezier(.2,1.4,.4,1)}
+@keyframes tick{0%{transform:scale(0) rotate(-20deg)}100%{transform:none}}
+/* go-to field flash */
+.flash{animation:flash 1.1s ease-out}
+@keyframes flash{0%{box-shadow:0 0 0 0 rgba(3,78,162,.55)}30%{box-shadow:0 0 0 6px rgba(3,78,162,.25)}100%{box-shadow:0 0 0 0 rgba(3,78,162,0)}}
+.rf.flash,.ff.flash{border-radius:10px}
+/* step ticks pop in when a step is finished */
+.rw-steps button.ok i::after{animation:tick .4s cubic-bezier(.2,1.4,.4,1)}
+/* invalid field: small shake */
+.rf.err input,.rf.err select,.rf.err textarea,.ff.err input,.ff.err select{animation:shake .35s}
+@keyframes shake{20%,60%{transform:translateX(-4px)}40%,80%{transform:translateX(4px)}}
+
+/* side menu: calmer selected page */
+.nav.on{background:rgba(255,255,255,.42);box-shadow:inset 0 0 0 1px rgba(255,255,255,.5);-webkit-backdrop-filter:none;backdrop-filter:none}
+body[data-theme=dark] .nav.on{background:rgba(255,255,255,.06);box-shadow:inset 0 0 0 1px rgba(255,255,255,.06)}
+
+/* search: soft moving rainbow glow around the edge, Siri-style */
+@property --sa{syntax:"<angle>";inherits:false;initial-value:0deg}
+.top .sb{isolation:isolate}
+.top .sb::before{content:"";position:absolute;inset:-2px;border-radius:18px;padding:2px;z-index:-1;pointer-events:none;
+  background:conic-gradient(from var(--sa),#ff6ec4,#ffb36b,#ffe66b,#6bffb8,#5ac8ff,#7873f5,#ff6ec4);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0);
+  opacity:.55;filter:blur(.5px);animation:sa 6s linear infinite}
+.top .sb::after{left:6%;right:6%;bottom:-10px;height:16px;border-radius:50%;transform:none;opacity:.35;filter:blur(12px);
+  background:conic-gradient(from var(--sa),#ff6ec4,#ffe66b,#5ac8ff,#7873f5,#ff6ec4);animation:sa 6s linear infinite;z-index:-2}
+.top .sb:focus-within::before{opacity:1;filter:none;animation-duration:3s}
+.top .sb:focus-within::after{opacity:.8;transform:none;animation-duration:3s}
+.ck-in::after{background:conic-gradient(from var(--sa),#ff6ec4,#ffe66b,#5ac8ff,#7873f5,#ff6ec4);animation:sa 3s linear infinite;height:3px;filter:blur(1px)}
+@keyframes sa{to{--sa:360deg}}
+
+/* loading state on buttons */
+.busy{position:relative;color:transparent!important;pointer-events:none}
+.busy svg{opacity:0}
+.busy::after{content:"";position:absolute;top:50%;left:50%;width:1rem;height:1rem;margin:-.5rem 0 0 -.5rem;border-radius:50%;border:2px solid currentColor;border-color:var(--blue) transparent var(--blue) transparent;animation:spin .7s linear infinite}
+.btn.busy::after{border-color:#fff transparent #fff transparent}
+@keyframes spin{to{transform:rotate(360deg)}}
+/* button press feedback */
+.btn:active,.rb1:active,.td-i:active{transform:scale(.97)}
+
+/* nested corners: inner radius = outer radius - padding */
+.card,.panel{--ro:var(--r)}
+.card .btn,.panel .btn{border-radius:max(6px,calc(var(--ro) - .55rem))}
+.mb .mact .btn,.rg-nx .btn,.rw-foot .btn{border-radius:12px}
+/* headlines wrap evenly, long words break */
+h1,h2,h3,h4,.rw-h h2,.rg-n{text-wrap:balance;overflow-wrap:anywhere}
+p,li,small{text-wrap:pretty}
+
+@media(prefers-reduced-motion:reduce){.top .sb::before,.top .sb::after,.ck-in::after,.busy::after{animation:none}.flash,.rf.err input,.td-ok.pop svg{animation:none}}
+.rw-todo{max-width:760px}
+.rw-steps b{display:flex;flex-wrap:wrap;align-items:center;gap:.1rem .35rem}.rw-opt{margin-left:0}

@@ -1443,6 +1443,71 @@ body[data-theme=dark] .gc.done .rg-ic{background:#0f3a29;color:#7fe0aa}
 .mb .rg.fg.gc:not(.shut){padding:0 18px 18px}
 .mb .rg.fg.gc:not(.shut)>h4{margin:0 -18px}
 
+/* ==== round 7 ==== */
+/* lead/contract rail: the header already shows the customer */
+.rw-cust{display:none}
+.rw-opt{display:inline-block;margin-left:.4rem;font:600 .62rem var(--body);font-style:normal;letter-spacing:.02em;padding:.08rem .4rem;border-radius:20px;background:var(--card2);color:var(--muted);border:1px solid var(--line);vertical-align:middle}
+/* 'still to fill in' box at the top of each step */
+.rw-todo:empty{display:none}
+.rw-todo{margin-top:.75rem}
+.td-l{display:flex;flex-wrap:wrap;align-items:center;gap:.4rem;padding:.6rem .7rem;border-radius:14px;background:var(--amber-bg);border:1px solid rgba(107,85,0,.18)}
+.td-l>b{font-size:.85rem;color:var(--amber);margin-right:.2rem}
+.td-i{font:500 .85rem var(--body);padding:.34rem .7rem;border-radius:calc(14px - .7rem + .1rem);min-height:2rem;display:inline-flex;align-items:center;background:var(--card);color:var(--ink);border:1px solid var(--line)}
+button.td-i{cursor:pointer;transition:background .15s,border-color .15s}
+button.td-i:hover{border-color:var(--blue);color:var(--blue)}
+.td-ok{display:flex;align-items:center;gap:.55rem;padding:.6rem .75rem;border-radius:14px;background:var(--green-bg);color:var(--green);font-weight:600;font-size:.9rem}
+.td-ok svg{width:1.15rem;height:1.15rem;flex:0 0 auto}
+.td-ok.pop svg{animation:tick .45s cubic-bezier(.2,1.4,.4,1)}
+@keyframes tick{0%{transform:scale(0) rotate(-20deg)}100%{transform:none}}
+/* go-to field flash */
+.flash{animation:flash 1.1s ease-out}
+@keyframes flash{0%{box-shadow:0 0 0 0 rgba(3,78,162,.55)}30%{box-shadow:0 0 0 6px rgba(3,78,162,.25)}100%{box-shadow:0 0 0 0 rgba(3,78,162,0)}}
+.rf.flash,.ff.flash{border-radius:10px}
+/* step ticks pop in when a step is finished */
+.rw-steps button.ok i::after{animation:tick .4s cubic-bezier(.2,1.4,.4,1)}
+/* invalid field: small shake */
+.rf.err input,.rf.err select,.rf.err textarea,.ff.err input,.ff.err select{animation:shake .35s}
+@keyframes shake{20%,60%{transform:translateX(-4px)}40%,80%{transform:translateX(4px)}}
+
+/* side menu: calmer selected page */
+.nav.on{background:rgba(255,255,255,.42);box-shadow:inset 0 0 0 1px rgba(255,255,255,.5);-webkit-backdrop-filter:none;backdrop-filter:none}
+body[data-theme=dark] .nav.on{background:rgba(255,255,255,.06);box-shadow:inset 0 0 0 1px rgba(255,255,255,.06)}
+
+/* search: soft moving rainbow glow around the edge, Siri-style */
+@property --sa{syntax:"<angle>";inherits:false;initial-value:0deg}
+.top .sb{isolation:isolate}
+.top .sb::before{content:"";position:absolute;inset:-2px;border-radius:18px;padding:2px;z-index:-1;pointer-events:none;
+  background:conic-gradient(from var(--sa),#ff6ec4,#ffb36b,#ffe66b,#6bffb8,#5ac8ff,#7873f5,#ff6ec4);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0);
+  opacity:.55;filter:blur(.5px);animation:sa 6s linear infinite}
+.top .sb::after{left:6%;right:6%;bottom:-10px;height:16px;border-radius:50%;transform:none;opacity:.35;filter:blur(12px);
+  background:conic-gradient(from var(--sa),#ff6ec4,#ffe66b,#5ac8ff,#7873f5,#ff6ec4);animation:sa 6s linear infinite;z-index:-2}
+.top .sb:focus-within::before{opacity:1;filter:none;animation-duration:3s}
+.top .sb:focus-within::after{opacity:.8;transform:none;animation-duration:3s}
+.ck-in::after{background:conic-gradient(from var(--sa),#ff6ec4,#ffe66b,#5ac8ff,#7873f5,#ff6ec4);animation:sa 3s linear infinite;height:3px;filter:blur(1px)}
+@keyframes sa{to{--sa:360deg}}
+
+/* loading state on buttons */
+.busy{position:relative;color:transparent!important;pointer-events:none}
+.busy svg{opacity:0}
+.busy::after{content:"";position:absolute;top:50%;left:50%;width:1rem;height:1rem;margin:-.5rem 0 0 -.5rem;border-radius:50%;border:2px solid currentColor;border-color:var(--blue) transparent var(--blue) transparent;animation:spin .7s linear infinite}
+.btn.busy::after{border-color:#fff transparent #fff transparent}
+@keyframes spin{to{transform:rotate(360deg)}}
+/* button press feedback */
+.btn:active,.rb1:active,.td-i:active{transform:scale(.97)}
+
+/* nested corners: inner radius = outer radius - padding */
+.card,.panel{--ro:var(--r)}
+.card .btn,.panel .btn{border-radius:max(6px,calc(var(--ro) - .55rem))}
+.mb .mact .btn,.rg-nx .btn,.rw-foot .btn{border-radius:12px}
+/* headlines wrap evenly, long words break */
+h1,h2,h3,h4,.rw-h h2,.rg-n{text-wrap:balance;overflow-wrap:anywhere}
+p,li,small{text-wrap:pretty}
+
+@media(prefers-reduced-motion:reduce){.top .sb::before,.top .sb::after,.ck-in::after,.busy::after{animation:none}.flash,.rf.err input,.td-ok.pop svg{animation:none}}
+.rw-todo{max-width:760px}
+.rw-steps b{display:flex;flex-wrap:wrap;align-items:center;gap:.1rem .35rem}.rw-opt{margin-left:0}
+
 /* ==========================================================================
    06 · Adaptive layout
    Breakpoints: 1400 (laptop) · 1100 (small laptop / tablet landscape)
@@ -2081,6 +2146,8 @@ function shellSync(){
 }
 
 /* ---- toast ---- */
+/* short 'working' state on a button so a press always shows it was felt */
+function busyBtn(b,ms){if(!b||b.classList.contains('busy'))return;b.classList.add('busy');b.setAttribute('aria-busy','true');setTimeout(()=>{b.classList.remove('busy');b.removeAttribute('aria-busy')},ms||600)}
 function toast(t){if(document.body.classList.contains('tv'))return;const e=$('#toast');e.textContent=t;e.style.display='block';clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.display='none',3400)}
 
 /* ---- modal ---- */
@@ -3754,9 +3821,9 @@ function recOpen(kind,id){const D=REC[kind],r=id?D.get(id):null;if(id&&!r)return
     ${W.isNew||W.list.length<2?'':`<button class="rb1" title="Save this one and open the previous ${esc(D.label.toLowerCase())}" ${A('recNav',-1)} ${pos<=0?'disabled':''}>&lsaquo; Previous</button><span class="rw-pos">${esc(D.label)} ${pos+1} of ${W.list.length}</span><button class="rb1" title="Save this one and open the next ${esc(D.label.toLowerCase())}" ${A('recNav',1)} ${pos>=W.list.length-1?'disabled':''}>Next &rsaquo;</button>`}
     <button class="rb1 cl" onclick="recClose()">${svg('M6 6l12 12M18 6L6 18')}Close</button></div>
    <div class="rw-h"><div><small>${esc(D.label)}${W.isNew?' · New':''}</small><h2>${esc(D.heading(W))}</h2>${W.isNew?'':`<div class="rw-hc">${telOf(W.v)?`<a class="nocap" href="tel:${esc(telOf(W.v).replace(/[^\d+]/g,''))}">${svg('M5 4h4l2 5-2.5 1.5a11 11 0 005 5L15 13l5 2v4a2 2 0 01-2 2A16 16 0 013 6a2 2 0 012-2')}${esc(telOf(W.v))}</a>`:''}${mailOf(W.v)?`<a class="nocap" href="mailto:${esc(mailOf(W.v))}">${svg('M4 6h16v12H4zM4 7l8 6 8-6')}${esc(mailOf(W.v))}</a>`:''}${W.v.town?`<span>${svg('M12 21s-7-6-7-11a7 7 0 0114 0c0 5-7 11-7 11zM12 12a2 2 0 100-4 2 2 0 000 4z')}${esc(W.v.town)}</span>`:''}</div>`}</div><div class="rw-hk">${D.headStats(W)}</div></div>
-   <div class="rw-x"><aside class="rw-rail"><div class="rw-cust" id="rwCust"></div><div class="rw-prog"><span id="rwPct"></span><i><b id="rwBar"></b></i></div>
-     <ol class="rw-steps">${tabs.map((t,i)=>`<li><button type="button" data-t="${t.k}" class="${t.k==tab?'on':''}" ${A('recTab',t.k)}><i>${i+1}</i><span><b>${esc(nm(t.k))}</b><small data-st="${t.k}"></small></span></button></li>`).join('')}</ol></aside>
-    <div class="rw-main"><div class="rw-b">${tabs.map((t,i)=>`<div class="rw-p ${t.k==tab?'on':''}" data-t="${t.k}" role="tabpanel"><div class="rw-sh"><small>Step ${i+1} of ${tabs.length}</small><h3>${esc(nm(t.k))}</h3><p>${esc(hint(t.k))}</p>${t.k=='customer'||t.k=='details'?'<p class="rw-req">Boxes marked * must be filled in.</p>':''}</div>${t.h(W)}</div>`).join('')}</div>
+   <div class="rw-x"><aside class="rw-rail"><div class="rw-prog"><span id="rwPct"></span><i><b id="rwBar"></b></i></div>
+     <ol class="rw-steps">${tabs.map((t,i)=>`<li><button type="button" data-t="${t.k}" class="${t.k==tab?'on':''}" ${A('recTab',t.k)}><i>${i+1}</i><span><b>${esc(nm(t.k))}${REC_OPTIONAL.includes(t.k)?'<em class="rw-opt">Optional</em>':''}</b><small data-st="${t.k}"></small></span></button></li>`).join('')}</ol></aside>
+    <div class="rw-main"><div class="rw-b">${tabs.map((t,i)=>`<div class="rw-p ${t.k==tab?'on':''}" data-t="${t.k}" role="tabpanel"><div class="rw-sh"><small>Step ${i+1} of ${tabs.length}</small><h3>${esc(nm(t.k))}</h3><p>${esc(hint(t.k))}</p>${t.k=='customer'||t.k=='details'?'<p class="rw-req">Boxes marked * must be filled in.</p>':''}<div class="rw-todo" data-td="${t.k}" aria-live="polite"></div></div>${t.h(W)}</div>`).join('')}</div>
      <div class="rw-foot"><button type="button" class="btn ghost" id="rwPrev" onclick="recStep(-1)"></button><span class="rw-sp"></span><button type="button" class="btn ghost" onclick="recSave(false)">Save</button><button type="button" class="btn" id="rwNext" onclick="recStep(1)"></button></div></div></div></div>`,'full');
   W.nm=nm;recThumbs();recDocs();recFoot();recRail();
   if(!W.isNew){const todo=W.steps.find(k=>{const b=$(`#mbox .rw-steps button[data-t="${k}"]`);return b&&!b.classList.contains('ok')&&!REC_OPTIONAL.includes(k)});recTab(todo||W.steps[0])}grpInit($('#mbox .rw-p.on'));
@@ -3767,7 +3834,7 @@ function recStep(d){const S2=RW.steps,i=S2.indexOf(RTAB[RW.kind]);if(d>0&&i==S2.
 function recFoot(){const S2=RW.steps,i=S2.indexOf(RTAB[RW.kind]),p=$('#rwPrev'),n=$('#rwNext');if(!p)return;
   p.hidden=i<=0;p.innerHTML=i>0?'&larr; Back: '+esc(RW.nm(S2[i-1])):'';n.innerHTML=i<S2.length-1?'Next: '+esc(RW.nm(S2[i+1]))+' &rarr;':'Save and finish';n.classList.toggle('green',i==S2.length-1)}
 /* progress for each step, worked out from what is on screen now */
-function recRail(){if(!RW||!$('#rwCust'))return;const g=k=>{const e=$('#f_'+k);return String(e?e.value:(RW.v[k]??'')).trim()},n=s=>$$(`#mbox ${s}`).length,v=RW.v;
+function recRail(){if(!RW||!$('#rwPct'))return;const g=k=>{const e=$('#f_'+k);return String(e?e.value:(RW.v[k]??'')).trim()},n=s=>$$(`#mbox ${s}`).length,v=RW.v;
   const ck=$$('#mbox .rck'),ckd=ck.filter(c=>c.checked).length,tel=[g('mob1'),g('home1'),g('work'),g('mob2'),g('home2')].find(Boolean)||v.phone||'',em=g('email1')||v.email||'',ad=[g('homeAddr')||v.address,g('town')].filter(Boolean).join(', ');
   const ops=n('.op[data-f="ref"]'),lines=n('.pl[data-f="name"]'),val=+g('value')||0,paid=+g('paid')||0,ph=(tmp||[]).length,log=(v.log||[]).length;
   const ST={customer:[[g('name'),tel||em,ad].filter(Boolean).length+' of 3: name, contact, address',!!(g('name')&&(tel||em)&&ad)],
@@ -3778,15 +3845,27 @@ function recRail(){if(!RW||!$('#rwCust'))return;const g=k=>{const e=$('#f_'+k);r
     deliveries:[S.deliveries.filter(d=>d.contract==v.id).length+' booked',S.deliveries.some(d=>d.contract==v.id)&&S.deliveries.filter(d=>d.contract==v.id).every(d=>d.status=='Received')],
     check:[ckd+' of '+ck.length+' done',ck.length>0&&ckd==ck.length],notes:[log?log+' entr'+(log==1?'y':'ies'):g('notes')?'Notes added':'Nothing yet',!!(log||g('notes'))],
     docs:[ph+' photo'+(ph==1?'':'s')+', '+(RW.docs||[]).length+' doc'+((RW.docs||[]).length==1?'':'s'),ph>0||(RW.docs||[]).length>0],calls:[S.calls.filter(c=>c.contract==v.id).length+' calls',false],gdpr:[g('gdprDate')?'Consent '+fd(g('gdprDate')):'Not recorded',!!g('gdprDate')]};
+  const NEED={customer:[!g('name')&&['Customer name','name'],!(tel||em)&&['A phone number or email','mob1'],!ad&&['Home address','homeAddr']],
+    details:[RW.kind=='lead'?!g('source')&&['Where they found us','source']:!g('stage')&&['Contract stage','stage'],!g('product')&&['What they want','product']],
+    appts:[!(g('apptDate')||(v.appts||[]).length)&&['A visit date','apptDate']],survey:[!ops&&['At least one window or door','']],products:[!lines&&['At least one product','']],
+    finance:[!val&&['Contract value','value'],val>0&&paid<val&&['Payment still to collect','paid']],fitting:[!g('fit')&&['Fitting date','fit']],
+    check:[ck.length>ckd&&[(ck.length-ckd)+' tick'+(ck.length-ckd==1?'':'s')+' left','']],gdpr:[!g('gdprDate')&&['Consent date','gdprDate']]};
   const ckt=$('#mbox .ck-top');if(ckt){ckt.querySelector(':scope>b').textContent=ckd+' of '+ck.length+' done';ckt.querySelector('i b').style.width=Math.round(100*ckd/(ck.length||1))+'%'}
   let done=0;RW.steps.forEach(k=>{const s=ST[k]||['',false],el=$(`#mbox small[data-st="${k}"]`);if(el)el.textContent=s[0];const b=$(`#mbox .rw-steps button[data-t="${k}"]`);if(b)b.classList.toggle('ok',!!s[1]);if(s[1])done++});
   const pc=Math.round(100*done/RW.steps.length);$('#rwPct').textContent=done+' of '+RW.steps.length+' steps complete';$('#rwBar').style.width=pc+'%';
-  $('#rwCust').innerHTML=`<b>${esc([g('title'),g('name')].filter(Boolean).join(' ')||'New customer')}</b>${g('company')?`<span>${esc(g('company'))}</span>`:''}${tel?`<a class="nocap" href="tel:${esc(tel.replace(/[^\\d+]/g,''))}">${esc(tel)}</a>`:'<span class="muted">No phone yet</span>'}${em?`<a class="nocap" href="mailto:${esc(em)}">${esc(em)}</a>`:''}${ad?`<span class="muted">${esc(ad)}</span>`:''}`}
+  recTodo(NEED)}
+/* the 'still to do' box: each missing item is a button that takes you to the box to fill in */
+function recTodo(N){$$('#mbox .rw-todo').forEach(el=>{const k=el.dataset.td,m=(N[k]||[]).filter(Boolean),opt=REC_OPTIONAL.includes(k),ok=!m.length;
+  const h=ok?`<div class="td-ok">${svg('M5 12l5 5L20 7')}<span>${opt?'Nothing more needed here.':'This step is done.'} ${RW.steps.indexOf(k)<RW.steps.length-1?'Press Next when ready.':'Press Save and finish.'}</span></div>`
+   :`<div class="td-l"><b>${opt?'Optional: you can add':'Still to fill in'}</b>${m.map(x=>x[1]?`<button type="button" class="td-i" ${A('recGo',x[1])}>${esc(x[0])} &rsaquo;</button>`:`<span class="td-i">${esc(x[0])}</span>`).join('')}</div>`;
+  if(el.dataset.h!==h){const was=el.dataset.h&&!el.querySelector('.td-ok');el.dataset.h=h;el.innerHTML=h;if(ok&&was)el.firstChild.classList.add('pop')}})}
+function recGo(id){const f=$('#f_'+id);if(!f)return;const p=f.closest('.rw-p');if(p&&!p.classList.contains('on'))recTab(p.dataset.t);const g=f.closest('.rg.gc');if(g&&g.classList.contains('shut'))grpOpen(g);
+  setTimeout(()=>{f.scrollIntoView({block:'center',behavior:'smooth'});f.focus({preventScroll:true});const w=f.closest('.rf,.ff')||f;w.classList.remove('flash');void w.offsetWidth;w.classList.add('flash')},60)}
 function recRedraw(t){const D=REC[RW.kind],x=D.tabs(RW).find(z=>z.k==t),p=$(`#mbox .rw-p[data-t="${t}"]`);if(x&&p)p.innerHTML=x.h(RW);recRail()}
 function recRead(){const D=REC[RW.kind],o=readFields(D.fields(RW));if(!o)return null;
   const at={...(RW.v.chkAt||{})};$$('#mbox .rck').forEach(c=>{const k=c.dataset.k;(o.chk=o.chk||{})[k]=c.checked;if(c.checked&&!at[k])at[k]={d:today(),by:USER};if(!c.checked)delete at[k]});o.chkAt=at;
   o.phTags=(RW.v.phTags||[]).slice(0,MAX_PHOTOS);if($('#mbox .pl'))o.lines=readLines();if($('#mbox .op')||RW.v.openings)o.openings=$('#mbox .op')?readOps():RW.v.openings;o.photos=tmp.slice(0,MAX_PHOTOS);return o}
-function recSave(close){const D=REC[RW.kind],o=recRead();if(!o){const a=document.activeElement,p=a&&a.closest&&a.closest('.rw-p');if(p&&!p.classList.contains('on')){recTab(p.dataset.t);setTimeout(()=>a.focus(),30)}return false}const e=D.check&&D.check(RW,o);if(e){toast(e.replace(/ \(.*step\)$/,''));if(/Customer step/.test(e)){recTab('customer');if(/phone/i.test(e)){const f=$('#f_mob1')||$('#f_home1');if(f)fieldErr(f,'Fill in at least one phone number')}else if(/name/i.test(e)){const f=$('#f_name');if(f)fieldErr(f,'Type the customer name')}}return false}
+function recSave(close){busyBtn($('#mbox .rw-bar .sv'));const D=REC[RW.kind],o=recRead();if(!o){const a=document.activeElement,p=a&&a.closest&&a.closest('.rw-p');if(p&&!p.classList.contains('on')){recTab(p.dataset.t);setTimeout(()=>a.focus(),30)}return false}const e=D.check&&D.check(RW,o);if(e){toast(e.replace(/ \(.*step\)$/,''));if(/Customer step/.test(e)){recTab('customer');if(/phone/i.test(e)){const f=$('#f_mob1')||$('#f_home1');if(f)fieldErr(f,'Fill in at least one phone number')}else if(/name/i.test(e)){const f=$('#f_name');if(f)fieldErr(f,'Type the customer name')}}return false}
   const id=D.save(RW,o);store();if(close){closeModal();render()}else{render();recOpen(RW.kind,id)}toast('Saved');return true}
 function recNav(d){const L=RW.list,i=L.indexOf(RW.id),n=d=='first'?0:d=='last'?L.length-1:i+d;if(n<0||n>=L.length)return;const kind=RW.kind;if(RW.dirty&&!recSave(false))return;recOpen(kind,L[n])}
 /* small inline lists inside a record */
