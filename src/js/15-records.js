@@ -279,7 +279,7 @@ function lineDel(i){RW.v.lines=readLines();RW.v.lines.splice(i,1);RW.dirty=1;rec
 /* ======================= LEAD record ======================= */
 const LEADF=W=>[
   {k:'id',l:ISOWN()?'Lead number (admin can change)':'Lead number',ro:!ISOWN(),max:5,g:'Lead'},{k:'created',l:'Lead date',t:'date',g:'Lead'},{k:'officeRef',adv:1,l:'Office reference',g:'Lead'},
-  {k:'takenBy',adv:1,l:'Taken by',t:'select',o:staffNames(),g:'Lead'},{k:'branch',l:'Sales area / branch',t:'select',o:['',...BRANCHES],g:'Lead'},{k:'owner',l:'Salesperson',t:'select',o:[...OWNERS(),RANDOM_SP],g:'Lead'},
+  {k:'takenBy',adv:1,l:'Taken by',t:'select',o:staffNames(),g:'Lead'},{k:'branch',l:'Sales area / branch',t:'select',o:['',...BRANCHES],g:'Lead'},{k:'owner',l:'Salesperson',t:'select',o:[RANDOM_SP,...OWNERS()],g:'Lead'},
   {k:'stage',l:'Stage',t:'select',o:STAGES,g:'Lead'},{k:'prob',adv:1,l:'Win chance (%)',t:'number',max:100,dp:0,g:'Lead'},
   {k:'source',l:'Lead source',t:'select',o:SOURCES,req:1,g:'Source And Interest'},{k:'subSource',l:'Sub source',g:'Source And Interest'},{k:'subSubSource',adv:1,l:'Sub sub source',g:'Source And Interest'},
   {k:'productType',l:'Product type',t:'select',o:PTYPES,req:1,g:'Source And Interest'},{k:'interest1',l:'Product interest 1',g:'Source And Interest'},{k:'interest2',adv:1,l:'Product interest 2',g:'Source And Interest'},
@@ -309,7 +309,7 @@ const apptTab=W=>`<div class="rcols"><section class="rg"><h4>Next Visit</h4>${AP
 const nextAppt=l=>[l.apptDate,...(l.appts||[]).map(a=>a.d)].filter(Boolean).sort().find(d=>d>=today())||'';
 REC.lead={label:'Lead',
   get:id=>S.leads.find(l=>l.id==id),order:()=>leadList().map(l=>l.id),
-  blank:()=>({id:nextLeadId(),created:today(),stage:'New',source:'Website',owner:USER,takenBy:USER,invSame:'Same as home',siteSame:'Same as home',addrType:'Home',log:[],appts:[],chk:{}}),
+  blank:()=>({id:nextLeadId(),created:today(),stage:'New',source:'Website',owner:RANDOM_SP,takenBy:USER,invSame:'Same as home',siteSame:'Same as home',addrType:'Home',log:[],appts:[],chk:{}}),
   heading:W=>`${W.v.id}  ${[W.v.title,W.v.name].filter(Boolean).join(' ')||'New lead'}${W.v.company?' · '+W.v.company:''}`,
   headStats:W=>`<span><small>Net Value</small><b>${m0(W.v.value)}</b></span><span><small>Next Action</small><b>${W.v.followup?fd(W.v.followup):'-'}</b></span>`,
   actions:W=>`<button class="rb1" ${A('reportCust','lead',W.id)}>${svg(IC.reports)}Customer sheet</button>${canSee('contracts')&&W.v.stage!='Lost'?`<button class="rb1 go" ${A('recConvert')}>${svg('M5 12h14M13 6l6 6-6 6')}Convert to contract</button>`:''}${ISOWN()?`<button class="rb1 dl" ${A('delLead',W.id)}>${svg('M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3')}Delete</button>`:''}`,
@@ -324,7 +324,7 @@ REC.lead={label:'Lead',
     {k:'gdpr',t:'GDPR',h:W=>`<div class="rcols">${grpH('Marketing Consent',GDPRF,W.v)}<section class="rg"><h4>About GDPR</h4><p class="muted" style="font-size:.85rem">Only market to customers who said yes. Record when and how consent was given. Customers can ask to see or delete their data at any time.</p></section></div>`}],
   check:(W,o)=>{if(!o.name)return 'Customer name is needed (Customer step)';if(!PHONES.some(k=>o[k]))return 'Add at least one phone number (Customer step)';
     if(ISOWN()&&o.id&&o.id!=W.id){if(!/^L\d{4}$/.test(o.id))return 'Lead numbers look like L0001';if(S.leads.some(x=>x.id==o.id))return 'Lead number '+o.id+' is already used'}},
-  save:(W,o)=>{const isNew=W.isNew,l=isNew?{id:nextLeadId(),log:[{d:today(),t:'Lead created',by:USER}]}:S.leads.find(x=>x.id==W.id);if(!l)return;
+  save:(W,o)=>{if(o.owner==RANDOM_SP){o.owner=spResolve(o.owner);setTimeout(()=>toast('Lead given to '+o.owner),400)}const isNew=W.isNew,l=isNew?{id:nextLeadId(),log:[{d:today(),t:'Lead created',by:USER}]}:S.leads.find(x=>x.id==W.id);if(!l)return;
     const a=l.stage;if(o.prob===0&&!($('#f_prob').value||'').trim())o.prob='';const nid2=ISOWN()&&o.id&&/^L\d{4}$/.test(o.id)&&!S.leads.some(x=>x!==l&&x.id==o.id)?o.id:null;delete o.id;if(nid2&&nid2!=l.id){audit('Lead number changed',l.id,'to '+nid2);l.id=nid2}
     Object.assign(l,o,{log:W.v.log,appts:W.v.appts||[]});if(l.stage=='Won')l.prob=100;else if(l.stage=='Lost')l.prob=0;if(!isNew&&a!=o.stage)l.log.unshift({d:today(),t:'Stage: '+a+' to '+o.stage,by:USER});
     if(isNew){l.log=[...W.v.log,{d:today(),t:'Lead created',by:USER}];S.leads.push(l)}custCompat(l);audit(isNew?'Lead added':'Lead edited',l.id,l.name);return l.id}};
@@ -335,7 +335,7 @@ const CDETF=W=>[
   {k:'id',l:'Contract number',ro:1,g:'Contract'},{k:'cdate',l:'Contract date',t:'date',g:'Contract'},{k:'officeRef',l:'Office ref 1',g:'Contract'},{k:'officeRef2',l:'Office ref 2',g:'Contract'},
   {k:'contractType',l:'Contract type',t:'select',o:CTYPES,g:'Contract'},{k:'supplyOnly',l:'Supply only',t:'select',o:YN,g:'Contract'},{k:'stage',l:'Stage',t:'select',o:CSTAGES,g:'Contract'},
   {k:'onHold',l:'On hold',t:'select',o:YN,g:'Contract'},{k:'cancelled',l:'Cancelled',t:'select',o:YN,g:'Contract'},{k:'product',l:'Work / products summary',t:'area',max:300,g:'Contract'},{k:'flash',l:'Flash note (shows in red)',max:160,g:'Contract'},
-  {k:'lead',l:'Lead number',ro:1,g:'Sales Information'},{k:'salesArea',l:'Sales area',t:'select',o:['',...BRANCHES],g:'Sales Information'},{k:'soldBy',l:'Salesperson',t:'select',o:[...OWNERS(),RANDOM_SP],g:'Sales Information'},
+  {k:'lead',l:'Lead number',ro:1,g:'Sales Information'},{k:'salesArea',l:'Sales area',t:'select',o:['',...BRANCHES],g:'Sales Information'},{k:'soldBy',l:'Salesperson',t:'select',o:[RANDOM_SP,...OWNERS()],g:'Sales Information'},
   {k:'source',l:'Lead source',t:'select',o:['',...SOURCES],g:'Sales Information'},{k:'subSource',l:'Sub source',g:'Sales Information'},{k:'createdBy',l:'Created by',ro:1,g:'Sales Information'},{k:'approvals',l:'Contract approvals',g:'Sales Information'}];
 const CFINF=()=>[{k:'value',l:'Contract value, including VAT (£)',t:'number',g:'Money'},{k:'vatRate',l:'VAT rate (%)',t:'select',o:['20','5','0'],g:'Money'},{k:'deposit',l:'Deposit asked for (£)',t:'number',g:'Money'},{k:'depDue',l:'Deposit due by',t:'date',g:'Money'},{k:'balDue',l:'Balance due by',t:'date',g:'Money'},{k:'paid',l:'Paid so far (£)',t:'number',g:'Money',adm:1},...(ISADM()?[{k:'cost',l:'Job cost (£)',t:'number',g:'Money',adm:1}]:[]),{k:'payMethod',l:'Main payment method',t:'select',o:['','Cash','Bank transfer','Card','Finance','Cheque'],g:'Money'},
   {k:'finCo',l:'Finance company',g:'Finance Plan'},{k:'finRef',l:'Finance reference',g:'Finance Plan'},{k:'finStatus',l:'Finance status',t:'select',o:['','Applied','Approved','Declined','Paid out'],g:'Finance Plan'},{k:'invoiced',l:'Invoiced',t:'select',o:YN,g:'Invoice'},{k:'invoiceNo',l:'Invoice number',g:'Invoice'},{k:'invoiceDate',l:'Invoice date',t:'date',g:'Invoice'}];
@@ -363,7 +363,7 @@ REC.contract={label:'Contract',
     {k:'calls',t:'Service Calls',n:calls.length,h:W=>`<div class="rg wide"><h4><span>Service Calls</span><button class="mini pri" ${A('recCall')}>New service call</button></h4>${calls.map(c=>`<div class="row"><span><b>${esc(c.id)}</b> ${esc(c.issue)}<br><span class="muted">${esc(c.status)}, ${c.visit?'visit '+fd(c.visit):'no visit booked'}, ${esc(c.fitter||'')}</span></span>${prTag(c.priority)}</div>`).join('')||'<p class="empty">No service calls for this contract.</p>'}</div>`},
     {k:'gdpr',t:'GDPR',h:W=>`<div class="rcols">${grpH('Marketing Consent',GDPRF,W.v)}</div>`}]},
   check:(W,o)=>{if(!o.name)return 'Customer name is needed (Customer step)';if(!PHONES.some(k=>o[k]))return 'Add at least one phone number (Customer step)';if(o.paid>o.value&&o.value>0&&!W.okOver){askIn('Paid is more than the contract value','Save it anyway?','Save Anyway',()=>{W.okOver=1;recSave(W.closeAfter)});return 'ASK'}},
-  save:(W,o)=>{const isNew=W.isNew,c=isNew?{id:W.v.id}:S.contracts.find(x=>x.id==W.id);if(!c)return;delete o.id;delete o.lead;delete o.createdBy;
+  save:(W,o)=>{if(o.soldBy==RANDOM_SP)o.soldBy=spResolve(o.soldBy);const isNew=W.isNew,c=isNew?{id:W.v.id}:S.contracts.find(x=>x.id==W.id);if(!c)return;delete o.id;delete o.lead;delete o.createdBy;
     const np=(W.v.pay||[]).length-((c.pay||[]).length),dp=Math.round(((+o.paid||0)-(+c.paid||0))*100)/100,a0=c.stage;if(np>0)audit('Payment recorded',c.id||W.v.id,np+' payment'+(np>1?'s':'')+', '+money(sum((W.v.pay||[]).slice(-np),x=>x.amt)));else if(o.paid!==undefined&&dp)audit(dp>0?'Paid amount raised':'Payment removed',c.id||W.v.id,money(Math.abs(dp)));if(!ISADM())delete o.cost;Object.assign(c,o,{pay:W.v.pay||[],log:W.v.log||[],createdBy:c.createdBy||W.v.createdBy||USER});c.fitter=[1,2,3,4,5,6].map(i=>c['fitter'+i]).filter(Boolean).join(', ');c.paid=+c.paid||0;c.value=+c.value||0;if(!isNew&&a0&&c.stage&&a0!=c.stage)(c.log=c.log||[]).unshift({t:'Stage',n:a0+' to '+c.stage,by:USER,at:today()});if(isNew){if(S.contracts.some(x=>x.id==c.id))c.id=nid('C',S.contracts);S.contracts.unshift(c)}
     custCompat(c);audit(isNew?'Contract added':'Contract edited',c.id,c.name);return c.id}};
 /* ---- finance step: balance at a glance, then Make A Payment ---- */
@@ -418,15 +418,15 @@ function recDelivery(){if(!recSave(false))return;const id=RW.id;closeModal();edi
 function openLead(id){recOpen('lead',id)}
 function editLead(id){if(id)recOpen('lead',id);else leadWizard()}
 function leadWizard(){const id=nextLeadId();
-  wizard({title:'New Lead '+id,saveLabel:'Create lead',v:{title:'',source:'Website',owner:USER,siteSame:'Same as home',productType:''},steps:[
+  wizard({title:'New Lead '+id,saveLabel:'Create lead',v:{title:'',source:'Website',owner:RANDOM_SP,siteSame:'Same as home',productType:''},steps:[
     {t:'Customer',d:'Who is the customer?',f:[{k:'title',l:'Title',t:'select',o:['','Mr','Mrs','Miss','Ms','Mr & Mrs','Dr','Company'],req:1},{k:'name',l:'Name',req:1},{k:'mob1',l:'Mobile',t:'tel',max:30,hint:'Fill in at least one: a mobile or a home phone'},{k:'mob2',nx:'mob1',l:'Second mobile',t:'tel',max:30},{k:'home1',l:'Home phone',t:'tel',max:30},{k:'mob3',nx:'mob2',l:'Third mobile',t:'tel',max:30},{k:'home2',nx:'home1',l:'Second home phone',t:'tel',max:30},{k:'home3',nx:'home2',l:'Third home phone',t:'tel',max:30},{k:'email1',l:'Email',t:'email',w:'full',req:1},{k:'email2',nx:'email1',l:'Second email',t:'email',w:'full'},{k:'email3',nx:'email2',l:'Third email',t:'email',w:'full'},{k:'company',l:'Company (if business)',w:'full'}]},
     {t:'Address',d:'Where are they? Fill it in like a delivery address.',f:[{k:'homeAddr',l:'Address line 1',w:'full',max:120,req:1,hint:'House number or name and street'},{k:'homeAddr2',l:'Address line 2',w:'full',max:120},{k:'town',l:'Town / city',max:60,req:1},{k:'county',l:'County',max:60},{k:'homePc',l:'Postcode',max:10,req:1},{k:'addrType',l:'Address type',t:'select',o:['Home','Business'],req:1}]},
-    {t:'Enquiry',d:'What do they want?',f:[{k:'productType',l:'Product type',t:'select',o:PTYPES,req:1},{k:'source',l:'How did they find us?',t:'select',o:SOURCES,req:1},{k:'product',l:'Work wanted',t:'area',w:'full',max:300},{k:'value',l:'Rough value (£)',t:'number'},{k:'owner',l:'Salesperson',t:'select',o:[...OWNERS(),RANDOM_SP]}]},
+    {t:'Enquiry',d:'What do they want?',f:[{k:'productType',l:'Product type',t:'select',o:PTYPES,req:1},{k:'source',l:'How did they find us?',t:'select',o:SOURCES,req:1},{k:'product',l:'Work wanted',t:'area',w:'full',max:300},{k:'value',l:'Rough value (£)',t:'number'},{k:'owner',l:'Salesperson',t:'select',o:[RANDOM_SP,...OWNERS()]}]},
     {t:'Next Step',d:'What happens next?',f:[{k:'apptDate',l:'Appointment date',t:'date'},{k:'apptTime',l:'Appointment time',t:'time'},{k:'next',l:'Next action',w:'full',hint:'e.g. Call back Tuesday, send brochure'},{k:'followup',l:'Next action date',t:'date'}]},
     {t:'Review',d:'Check and create',review:1}],
     check:(st,v)=>{if(st==0&&!v.name)return 'Please enter the customer name';if(st==0&&!PHONES.some(k=>v[k]))return 'Add at least one phone number'},
     save:v=>{const lid=nextLeadId(),l={...v,id:lid,stage:'New',created:today(),takenBy:USER,invSame:'Same as home',addrType:v.company?'Business':'Home',log:[{d:today(),t:'Lead created',by:USER}],appts:[],chk:{}};
-      custCompat(l);S.leads.push(l);audit('Lead added',lid,l.name);toast(lid+' created. Open it any time to add more.')}})}
+      l.owner=spResolve(l.owner);custCompat(l);S.leads.push(l);audit('Lead added',lid,l.name+' · '+l.owner);toast(lid+' created and given to '+l.owner+'. Open it any time to add more.')}})}
 function openContract(id){recOpen('contract',id)}
 function editContract(id){recOpen('contract',id||null)}
 

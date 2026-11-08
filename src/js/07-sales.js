@@ -15,6 +15,8 @@ function del(k,id){const r=DEL_RULE[k];if(!r||!Array.isArray(S[k])||!need(r[0],r
 (function staffCats(){let ch=0;(S.staff||[]).forEach(s=>{if(!SCATS.includes(s.cat)){s.cat=guessCat(s.role||'');ch=1}});if(ch)store()})();
 const staffIn=c=>S.staff.filter(s=>s.cat==c).map(s=>s.name);
 const RANDOM_SP='Pick at random';
+/* 'Pick at random' stays chosen until the record is saved, then a real salesperson is appointed */
+const spResolve=v=>{if(v!==RANDOM_SP)return v;const L=OWNERS().filter(x=>x!='Unassigned');return L[Math.floor(Math.random()*L.length)]||'Unassigned'};
 (function salesABC(){if(S.salesABC)return;['Sales B','Sales C'].forEach((n,i)=>{if(!S.staff.some(s=>s.name==n))S.staff.push({id:'U-S'+(i+2),name:n,role:'Sales consultant',team:'',phone:'07700 900 '+(610+i*7),email:n.toLowerCase().replace(' ','.')+'@example.com',start:'2025-03-0'+(i+3),allow:25,salary:30000,cat:'Salespeople'})});S.salesABC=1;store()})();
 const OWNERS=()=>{const s=staffIn('Salespeople');return['Unassigned',...new Set(s.length?s:S.staff.map(x=>x.name))]};
 const FITL=()=>[...new Set([...staffIn('Fitters'),...FIT])];

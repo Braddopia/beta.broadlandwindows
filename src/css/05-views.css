@@ -1415,3 +1415,13 @@ body[data-theme=dark] .path li.on button{background:#2f6fd0;color:#fff}body[data
 .rw-sh,.rw-sh p,.td-l{max-width:100%}
 /* supplier cards: long emails wrap instead of being cut off */
 .supw-ct>span,.supw-ct .nocap{overflow-wrap:anywhere;white-space:normal}
+
+/* stage path: space between the steps and around the row */
+.rw-path{padding:.7rem 1.6rem .9rem}
+.path{gap:8px}
+/* rail progress: breathing room */
+.rw-rail .rw-prog{margin:.3rem .35rem 1rem;font-size:.74rem}
+.rw-rail .rw-prog i{margin-top:.5rem;height:6px}
+/* list pages: stage on the left of the cell, buttons pushed to the right */
+.ptb td.ac .acts.stc{justify-content:space-between;gap:1rem;min-width:15rem}
+.ptb td.ac .acts.stc .mini{margin-left:auto}
