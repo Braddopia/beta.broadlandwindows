@@ -1,0 +1,16 @@
+{
+  "name": "broadland-crm",
+  "version": "19.2.0",
+  "private": true,
+  "description": "Broadland Windows CRM: single-file web app built from src/",
+  "scripts": {
+    "build": "python3 build.py",
+    "test": "playwright test",
+    "test:e2e": "playwright test --project=e2e",
+    "test:visual": "playwright test --project=visual",
+    "test:visual:update": "playwright test --project=visual --update-snapshots"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.63.0"
+  }
+}
