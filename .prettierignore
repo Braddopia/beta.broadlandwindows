@@ -1,0 +1,7 @@
+dist/
+index.html
+tests/visual/baselines/
+src/css/
+docs/
+*.md
+package-lock.json

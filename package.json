@@ -10,13 +10,15 @@
     "test:e2e": "playwright test --project=e2e",
     "test:visual": "playwright test --project=visual",
     "test:visual:update": "playwright test --project=visual --update-snapshots",
-    "check": "npm run lint && npm run build && npm run test:e2e"
+    "check": "npm run lint && npm run build && npm run test:e2e",
+    "format": "prettier --write \"src/**/*.js\" \"scripts/**/*.{js,mjs}\" \"tests/**/*.js\" \"*.config.js\""
   },
   "devDependencies": {
     "@eslint/js": "9.39.1",
     "@playwright/test": "1.63.0",
     "esbuild": "0.28.2",
     "eslint": "9.39.1",
-    "globals": "16.5.0"
+    "globals": "16.5.0",
+    "prettier": "3.8.1"
   }
 }

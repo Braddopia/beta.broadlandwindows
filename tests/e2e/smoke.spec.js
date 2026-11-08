@@ -30,9 +30,12 @@ for (const role of ['staff', 'admin', 'beta']) {
 
 test('lead and contract windows open on every step without errors', async ({ app }) => {
   await app.role('beta');
-  for (const [kind, id] of [['lead', 'L0001'], ['contract', '2402318']]) {
+  for (const [kind, id] of [
+    ['lead', 'L0001'],
+    ['contract', '2402318'],
+  ]) {
     await app.call('recOpen', kind, id);
-    const steps = await app.run(() => RW.steps);
+    const steps = await app.run(() => recordWin.steps);
     expect(steps.length).toBeGreaterThan(6);
     for (const s of steps) {
       await app.step(s);
@@ -45,11 +48,16 @@ test('lead and contract windows open on every step without errors', async ({ app
 test('phone: record window never scrolls sideways', async ({ app }) => {
   await app.page.setViewportSize({ width: 390, height: 844 });
   await app.role('beta');
-  for (const [kind, id] of [['lead', 'L0001'], ['contract', '2402318']]) {
+  for (const [kind, id] of [
+    ['lead', 'L0001'],
+    ['contract', '2402318'],
+  ]) {
     await app.call('recOpen', kind, id);
-    for (const s of await app.run(() => RW.steps)) {
+    for (const s of await app.run(() => recordWin.steps)) {
       await app.step(s);
-      const w = await app.run(() => document.querySelector('#mbox').scrollWidth - document.querySelector('#mbox').clientWidth);
+      const w = await app.run(
+        () => document.querySelector('#mbox').scrollWidth - document.querySelector('#mbox').clientWidth
+      );
       expect(w, `${kind} ${s}`).toBeLessThanOrEqual(2);
     }
     await app.closeAll();

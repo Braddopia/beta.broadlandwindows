@@ -17,46 +17,67 @@ const test = base.extend({
     page.on('pageerror', (e) => errors.push(e.message));
     context.on('page', (p) => p.on('pageerror', (e) => errors.push('popup: ' + e.message)));
     page.on('dialog', (d) => d.accept());
-    page.on('console', (m) => { if (/Content Security Policy|Refused to (execute|run)/i.test(m.text())) errors.push('CSP: ' + m.text()); });
+    page.on('console', (m) => {
+      if (/Content Security Policy|Refused to (execute|run)/i.test(m.text())) errors.push('CSP: ' + m.text());
+    });
     await page.clock.setFixedTime(new Date(TODAY));
     await context.route(/^https?:\/\//, (r) => r.abort());
     await page.addInitScript(() => {
-      try { localStorage.setItem('bb_tour_seen', '1'); } catch (e) {}
+      try {
+        localStorage.setItem('bb_tour_seen', '1');
+      } catch (e) {}
       let seed = 42;
       Math.random = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
     });
     await page.goto(APP_URL);
-    await page.waitForFunction(() => typeof window.render === 'function' && document.querySelector('#main').children.length > 0);
+    await page.waitForFunction(() => window.CRM && document.querySelector('#main').children.length > 0);
 
-    const call = (fn, ...args) =>
-      page.evaluate(([f, a]) => {
-        const target = f.split('.').reduce((o, k) => o[k], window);
-        return target(...a);
-      }, [fn, args]);
+    // app code is reached through window.CRM (live, read-only); `run` lets test code use its names directly
+    const call = (fn, ...args) => page.evaluate(([f, a]) => window.CRM[f](...a), [fn, args]);
+    const run = (fn, arg) =>
+      page.evaluate(
+        `with (window.CRM) { (${typeof fn === 'string' ? '() => ' + fn : fn})(${arg === undefined ? '' : JSON.stringify(arg)}) }`
+      );
 
     const app = {
       page,
       errors,
       call,
       /** run code inside the page */
-      run: (fn, arg) => page.evaluate(fn, arg),
+      run,
       role: (r) => call('setRole', r),
       go: (view) => call('go', view),
       openLead: (id) => call('openLead', id),
       openContract: (id) => call('openContract', id),
       step: (k) => call('recTab', k),
-      closeAll: () => page.evaluate(() => { if (window.RW) RW.dirty = 0; closeModal(); closeModal(); }),
+      closeAll: () =>
+        run(() => {
+          if (recordWin) recordWin.dirty = 0;
+          closeModal();
+          closeModal();
+        }),
       text: (sel) => page.locator(sel).first().innerText(),
       popups: () => context.pages().filter((p) => p !== page),
       /** wait for the next popup window (printed documents) */
       nextPopup: () => context.waitForEvent('page'),
       /** fill every required box of the open record so it can be saved */
       fillRequired: () =>
-        page.evaluate(() => {
-          REC[RW.kind].fields(RW).filter((f) => f.req).forEach((f) => {
-            const e = document.querySelector('#f_' + f.k);
-            if (e && !e.value) e.value = f.t === 'select' ? f.o.find(Boolean) : f.t === 'email' ? 'a@example.com' : f.t === 'date' ? today() : 'X';
-          });
+        run(() => {
+          RECORDS[recordWin.kind]
+            .fields(recordWin)
+            .filter((f) => f.req)
+            .forEach((f) => {
+              const e = document.querySelector('#f_' + f.k);
+              if (e && !e.value)
+                e.value =
+                  f.t === 'select'
+                    ? f.o.find(Boolean)
+                    : f.t === 'email'
+                      ? 'a@example.com'
+                      : f.t === 'date'
+                        ? today()
+                        : 'X';
+            });
           const m = document.querySelector('#f_mob1');
           if (m && !m.value) m.value = '07700 900 111';
         }),
