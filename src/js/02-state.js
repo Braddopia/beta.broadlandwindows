@@ -70,6 +70,9 @@ const ikey=r=>[r.item,r.length,r.cInName,r.cOutName].map(v=>{v=String(v||'').tri
     if(!r.reqStatus)r.reqStatus=r.cleared?'Cleared':'Pending';
     if(!r.ord)r.ord='P'+String(++S.seq.pend).padStart(4,'0')});
   /* public review scores shown on the overview and customer documents (admin can update) */
+  coLoad();
+  /* one fitter field became up to six */
+  S.contracts.forEach(fitSync);
   S.brand=S.brand||{};S.brand.tp=S.brand.tp||{score:4.5,count:'',url:'https://uk.trustpilot.com/review/broadlandwindows.co.uk'};S.brand.g=S.brand.g||{score:4.5,count:'',url:''};
   /* review sites figures as published (Nov 2026); admins update them in Admin Console > Reviews */
   S.brand.tt=S.brand.tt||{score:4.9,count:'613',url:'https://trustedtrader.team/Norfolk/Broadland-Windows-0000015.html'};

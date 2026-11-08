@@ -3,7 +3,7 @@
    NOTE: this app runs entirely in the browser. These checks stop casual
    access and accidents; real protection of the data needs a server.
    ========================================================================== */
-const FOCUS=['home','messages','live','deliveries','stock','suppliers','downloads'];
+const FOCUS=['home','messages','live','deliveries','stock','suppliers','downloads','settings'];
 const ROLES={
   admin:  {n:'Administrator',     d:'Everything a standard user has, plus staff and holidays',v:[...FOCUS,'leads','contracts','staff','holidays']},
   staff:  {n:'Standard user',     d:'Overview, leads, contracts, calendar, contacts, live analytics, inventory and files',v:[...FOCUS,'leads','contracts','fitting','contacts']},

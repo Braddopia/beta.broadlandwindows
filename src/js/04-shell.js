@@ -23,9 +23,9 @@ const VIEWS={
   stock:{t:'Inventory',fn:vStock}, contacts:{t:'Contact Book',fn:vContacts},
   staff:{t:'Staff',fn:vStaff}, holidays:{t:'Holiday Planner',fn:vHolidays},
   reports:{t:'Reports',fn:vReports}, downloads:{t:'Files',fn:vFiles,after:loadMan},
-  finance:{t:'Finance',fn:vFinance}, admin:{t:'Admin Console',fn:vAdmin}
+  finance:{t:'Finance',fn:vFinance}, admin:{t:'Admin Console',fn:vAdmin}, settings:{t:'Settings',fn:vSettings}
 };
-const NG=[['Workspace',['home','messages']],['Sales',['leads','contracts']],['Operations',['live','deliveries','fitting','service']],['Stock & People',['stock','suppliers','contacts','staff','holidays']],['Insights',['reports','downloads']],['Admin',['finance','admin']]];
+const NG=[['Workspace',['home','messages']],['Sales',['leads','contracts']],['Operations',['live','deliveries','fitting','service']],['Stock & People',['stock','suppliers','contacts','staff','holidays']],['Insights',['reports','downloads']],['Admin',['finance','admin','settings']]];
 let view=HOME(),q='',lastView='';
 
 /* page filter: same matching as the top-bar search (19-search.js), so phone lists and spacing differences match too */
@@ -41,7 +41,7 @@ function badges(){const td=today();return{
   holidays:ISOWN()?S.hols.filter(h=>h.status=='Pending').length:0}}
 
 function navHtml(b){let n=0;return NG.map(([g,keys])=>{const ks=keys.filter(k=>canSee(k)&&(k!='admin'||ISOWN()));
-  const gl=g=='Stock & People'&&!ks.some(k=>['staff','holidays','contacts'].includes(k))?'Stock':g;
+  const gl=g=='Admin'&&ks.every(k=>k=='settings')?'You':g=='Stock & People'&&!ks.some(k=>['staff','holidays','contacts'].includes(k))?'Stock':g;
   return ks.length?`<div class="nl">${esc(gl)}</div>`+ks.map(k=>`<button class="nav ${k==view?'on':''}" style="--n:${n++}" title="${esc(VIEWS[k].t)}" ${A('go',k)} ${k==view?'aria-current="page"':''}>${svg(IC[k])}<span>${esc(VIEWS[k].t)}</span>${b[k]?`<i>${b[k]}</i>`:''}</button>`).join(''):''}).join('')}
 
 function go(v){
@@ -56,7 +56,7 @@ function render(soft){
   $('#nav').innerHTML=navHtml(badges());
   let h;try{h=V.fn()}catch(e){console.error(e);h=`<div class="panel"><h2>Something Went Wrong</h2><p class="muted">${esc(e.message)}</p></div>`}
   const m=$('#main');if(soft&&view==lastView)morph(m,h);else m.innerHTML=h;
-  document.body.classList.toggle('lv',view=='live');document.body.classList.toggle('vmsg',view=='messages');
+  document.body.dataset.view=view;document.body.classList.toggle('lv',view=='live');document.body.classList.toggle('vmsg',view=='messages');
   requestAnimationFrame(()=>$$('#main .kpi>b').forEach(b=>b.style.setProperty('--n',Math.max(2,b.textContent.trim().length))));
   document.body.classList.toggle('isadm',ISADM());
   shellSync();

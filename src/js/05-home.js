@@ -64,7 +64,8 @@ function svcBox(m,link){const y=svcYears(m),x=svcExtra(m),tip=m.start?(y>=15?'Ma
   return link?`<button type="button" class="svc" ${A('go',canSee('holidays')?'holidays':'fitting')} title="Open your holidays">${inner}<span class="svc-go">${canSee('holidays')?'Holiday planner':'My calendar'} &rarr;</span></button>`:`<div class="svc">${inner}</div>`}
 /* review scores (Trustpilot / Google): figures set by an admin in Admin Console > Reviews */
 function ratingsH(){const r=(x,n)=>{const u=SAFE.url(x.url),t=`${stars(x.score)} <b>${(+x.score).toFixed(1)}</b> on ${n}${x.count?' <span>('+esc(x.count)+' reviews)</span>':''}`;return u?`<a href="${esc(u)}" target="_blank" rel="noopener noreferrer">${t}</a>`:`<span>${t}</span>`};
-  return `<div class="rate">${r(S.brand.tp,'Trustpilot')}${r(S.brand.g,'Google')}</div>`}
+  const tt=S.brand.tt,rl=S.brand.rl,r10=(x,n)=>{const u=SAFE.url(x.url),t=`${stars((+x.score||0)/2)} <b>${(+x.score||0).toFixed(1)}/10</b> on ${n}${x.count?' <span>('+esc(x.count)+' reviews)</span>':''}`;return u?`<a href="${esc(u)}" target="_blank" rel="noopener noreferrer">${t}</a>`:`<span>${t}</span>`};
+  return `<div class="rate">${r(S.brand.g,'Google')}${r(S.brand.tp,'Trustpilot')}${tt?r(tt,'Trusted Trader'):''}${rl?r10(rl,'ReferenceLine'):''}</div>`}
 function editRatings(){if(!need(ISOWN,'Review scores'))return;const b=S.brand,tt=b.tt||{},rl=b.rl||{};
   form('Review Scores',[{k:'tps',l:'Trustpilot score (0 to 5)',t:'number',max:5,dp:1},{k:'tpc',l:'Trustpilot review count',max:12},{k:'tpu',l:'Trustpilot page link',w:'full',max:300},
     {k:'gs',l:'Google score (0 to 5)',t:'number',max:5,dp:1},{k:'gc',l:'Google review count',max:12},{k:'gu',l:'Google reviews link',w:'full',max:300},

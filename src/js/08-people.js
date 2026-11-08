@@ -2,7 +2,7 @@
    08 · Calendar, holiday planner, staff
    ========================================================================== */
 const hu=(s,y)=>bookedDays(s,y||new Date().getFullYear());
-const forPerson=(s,f)=>f==s.name||(s.team&&f==s.team);
+const forPerson=(s,f)=>String(f||'').split(/,\s*/).some(x=>x&&(x==s.name||(s.team&&x==s.team)));
 const jobsOf=s=>S.contracts.filter(c=>c.stage!='Complete'&&forPerson(s,c.fitter));
 const callsOf=s=>S.calls.filter(c=>c.status!='Complete'&&forPerson(s,c.fitter));
 const holOn=(sid,k)=>S.hols.find(h=>h.sid==sid&&h.status!='Rejected'&&h.from<=k&&h.to>=k&&isWk(k));

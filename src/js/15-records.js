@@ -52,20 +52,20 @@ function rfH(f,v){const val=v[f.k]??'',id='f_'+f.k;let c;
 /* each group reads as a plain question; fields marked adv fold away under "More details" */
 const GQ={'Customer':'Who Is The Customer?','Phone Numbers':'How Can We Phone Them?','Email':'Their Email Address','Home Address':'Where Do They Live?','Invoice Address':'Where Should The Invoice Go?','Site Address':'Where Is The Work Being Done?',
   'Lead':'About This Lead','Source And Interest':'How They Found Us And What They Want','Result':'What Happens Next','Next Visit':'The Next Visit',
-  'Contract':'About This Contract','Sales Information':'Who Sold It And How They Found Us','Money':'The Money','Invoice':'Invoicing','Dates':'Fitting Dates','Team':'Fitting Team','Info For FENSA':'Details For FENSA'};
+  'Contract':'About This Contract','Sales Information':'Who Sold It And How They Found Us','Money':'The Money','Finance Plan':'Paying On Finance?','Invoice':'Invoicing','Dates':'Fitting Dates','Team':'Fitting Team','Info For FENSA':'Details For FENSA'};
 const DEFV={invSame:'Same as home',siteSame:'Same as home'};
 const fval=(f,v)=>String(v[f.k]??DEFV[f.k]??'').trim();
 /* a section is finished when its required boxes are filled (and, for phones, at least one number) */
 function grpDone(fs,v){const vis=fs.filter(f=>!(f.dep&&(v[f.dep]||'Same as home')!='Different'));
   if(!vis.some(f=>f.req||f.any||DEFV[f.k]))return vis.some(f=>!f.ro&&!f.adv&&fval(f,v));
   return vis.filter(f=>f.req).every(f=>fval(f,v))&&(!vis.some(f=>f.any)||vis.some(f=>f.any&&fval(f,v)))&&vis.some(f=>fval(f,v))}
-const grpSum=(fs,v)=>fs.filter(f=>!f.adv&&!(f.dep&&(v[f.dep]||'Same as home')!='Different')).map(f=>fval(f,v)).filter(Boolean).slice(0,4).join(' · ');
+const grpSum=(fs,v)=>fs.filter(f=>!f.adv&&!(f.dep&&(v[f.dep]||'Same as home')!='Different')).map(f=>{const x=fval(f,v);if(!x||(f.t=='number'&&+x===0&&/£/.test(f.l)))return '';return f.t=='number'&&/£/.test(f.l)?money(+x):f.k=='vatRate'?'VAT '+x+'%':f.t=='date'&&SAFE.date(x)?fd(x):x}).filter(Boolean).slice(0,4).join(' · ');
 /* ---- cards that open in turn ----
    Each group is a card: icon, plain question, and "Not filled in yet" or a one-line summary with a tick.
    One card is open at a time; its Next button closes it and opens the next (or moves to the next step). */
 const GRPF={};let GID=0;
 const GIC={'Customer':IC.user,'Phone Numbers':'M5 4h4l2 5-2.5 1.5a11 11 0 005 5L15 13l5 2v4a2 2 0 01-2 2A16 16 0 013 6a2 2 0 012-2','Email':'M4 6h16v12H4zM4 7l8 6 8-6','Home Address':IC.home,
-  'Invoice Address':IC.finance,'Site Address':'M12 21s-7-6-7-11a7 7 0 0114 0c0 5-7 11-7 11zM12 12a2 2 0 100-4 2 2 0 000 4z','Lead':IC.leads,'Source And Interest':IC.search,'Result':IC.fitting,'Next Visit':IC.fitting,'Contract':IC.contracts,'Sales Information':IC.leads,'Money':IC.finance,'Invoice':IC.reports,'Dates':IC.fitting,'Team':IC.staff,'Info For FENSA':IC.admin};
+  'Invoice Address':IC.finance,'Site Address':'M12 21s-7-6-7-11a7 7 0 0114 0c0 5-7 11-7 11zM12 12a2 2 0 100-4 2 2 0 000 4z','Lead':IC.leads,'Source And Interest':IC.search,'Result':IC.fitting,'Next Visit':IC.fitting,'Contract':IC.contracts,'Sales Information':IC.leads,'Money':IC.finance,'Finance Plan':IC.finance,'Invoice':IC.reports,'Dates':IC.fitting,'Team':IC.staff,'Info For FENSA':IC.admin};
 const TICK='M5 13l4 4L19 7';
 const grpH=(t,fs,v,id,nextT)=>{GRPF[id]=fs;const main=fs.filter(f=>!f.adv),adv=fs.filter(f=>f.adv),open=adv.some(f=>String(v[f.k]??'').trim()),done=grpDone(fs,v);
   return `<section class="rg fg gc shut ${done?'done':''}" data-g="${id}" data-ic="${esc(GIC[t]||IC.edit)}"><h4><button type="button" class="rg-t" onclick="grpOpen(this.closest('.rg'))" aria-expanded="false"><span class="rg-ic">${svg(done?TICK:(GIC[t]||IC.edit))}</span><span class="rg-tt"><span class="rg-n">${esc(GQ[t]||t)}</span><small class="rg-sum nocap">${done?esc(grpSum(fs,v)):'Not filled in yet'}</small></span><em class="rg-ch">${done?'Change':'Fill in'}</em></button></h4>${fs.some(f=>f.any)?'<p class="anyh">Fill in at least one number *</p>':''}${main.map(f=>rfH(f,v)).join('')}${adv.length?`<details class="rmore"${open?' open':''}><summary>More details <span>(${adv.length})</span></summary><div class="rmore-b">${adv.map(f=>rfH(f,v)).join('')}</div></details>`:''}<div class="rg-nx"><button type="button" class="btn" onclick="grpNext(this.closest('.rg'))">${nextT?'Next: '+esc(GQ[nextT]||nextT)+' &rarr;':'Done'}</button></div></section>`};
@@ -99,7 +99,7 @@ const RSTEPS={lead:['customer','details','appts','survey','check','notes','docs'
 const RNAME={lead:{details:'Enquiry'},contract:{details:'Contract'}};
 const RHINT={customer:'Who they are, how to reach them and where the work is.',details:{lead:'Where the enquiry came from, what they want and what happens next.',contract:'Contract type, stage and sales information.'},appts:'Book the visit, then send the customer a reminder by email or text, or add it to a calendar.',survey:'Every window and door opening: sizes, type and glass.',products:'What is being supplied and fitted, with prices.',finance:'Contract value, payments and invoicing.',fitting:'Dates, fitting team and the details FENSA needs.',deliveries:'Supplier deliveries booked for this job.',check:{lead:'The steps that turn an enquiry into a sale. Tick each one as you go.',contract:'Every stage from signed contract to guarantee. Ticks record who did it and when.'},notes:'General notes and a log of calls, emails and visits.',docs:'Photos from the survey and fitting, and any documents.',calls:'Service calls raised on this job.',gdpr:'Marketing consent and data notes.'};
 function recOpen(kind,id){const D=REC[kind],r=id?D.get(id):null;if(id&&!r)return;
-  const W=RW={kind,id:r?r.id:null,isNew:!r,v:r?JSON.parse(JSON.stringify(r)):D.blank(),list:D.order()};
+  const W=RW={kind,id:r?r.id:null,isNew:!r,v:r?JSON.parse(JSON.stringify(r)):D.blank(),list:D.order()};if(kind=='contract')fitSync(W.v);
   W.v.log=W.v.log||[];W.v.photos=(W.v.photos||[]).filter(SAFE.img);tmp=W.v.photos;tmpDraw=()=>{recThumbs();recRail()};
   const ord=RSTEPS[kind],tabs=D.tabs(W).sort((a,b)=>ord.indexOf(a.k)-ord.indexOf(b.k)),tab=tabs.some(t=>t.k==RTAB[kind])?RTAB[kind]:tabs[0].k,pos=W.list.indexOf(W.id);W.steps=tabs.map(t=>t.k);
   const nm=k=>(RNAME[kind]||{})[k]||tabs.find(t=>t.k==k).t,hint=k=>{const h=RHINT[k];return typeof h=='object'?h[kind]:h||''};
@@ -135,8 +135,9 @@ function recRail(){if(!RW||!$('#rwPct'))return;const g=k=>{const e=$('#f_'+k);re
   const NEED={customer:[!g('name')&&['Customer name','name'],!(tel||em)&&['A phone number or email','mob1'],!ad&&['Home address','homeAddr']],
     details:[RW.kind=='lead'?!g('source')&&['Where they found us','source']:!g('stage')&&['Contract stage','stage'],!g('product')&&['What they want','product']],
     appts:[!(g('apptDate')||(v.appts||[]).length)&&['A visit date','apptDate']],survey:[!ops&&['At least one window or door','']],products:[!lines&&['At least one product','']],
-    finance:[!val&&['Contract value','value'],val>0&&paid<val&&['Payment still to collect','paid']],fitting:[!g('fit')&&['Fitting date','fit']],
+    finance:[!val&&['Contract value','value'],val>0&&paid<val&&['Payment still to collect','paid']],fitting:[!g('fit')&&['Fitting date','fit'],!g('fitter1')&&['Lead fitter','fitter1']],
     check:[ck.length>ckd&&[(ck.length-ckd)+' tick'+(ck.length-ckd==1?'':'s')+' left','']],gdpr:[!g('gdprDate')&&['Consent date','gdprDate']]};
+  finSum();fitReveal();
   const ckt=$('#mbox .ck-top');if(ckt){ckt.querySelector(':scope>b').textContent=ckd+' of '+ck.length+' done';ckt.querySelector('i b').style.width=Math.round(100*ckd/(ck.length||1))+'%'}
   let done=0;RW.steps.forEach(k=>{const s=ST[k]||['',false],el=$(`#mbox small[data-st="${k}"]`);if(el)el.textContent=s[0];const b=$(`#mbox .rw-steps button[data-t="${k}"]`);if(b)b.classList.toggle('ok',!!s[1]);if(s[1])done++});
   const pc=Math.round(100*done/RW.steps.length);$('#rwPct').textContent=done+' of '+RW.steps.length+' steps complete';$('#rwBar').style.width=pc+'%';
@@ -290,13 +291,14 @@ const CDETF=W=>[
   {k:'onHold',l:'On hold',t:'select',o:YN,g:'Contract'},{k:'cancelled',l:'Cancelled',t:'select',o:YN,g:'Contract'},{k:'product',l:'Work / products summary',t:'area',max:300,g:'Contract'},{k:'flash',l:'Flash note (shows in red)',max:160,g:'Contract'},
   {k:'lead',l:'Lead number',ro:1,g:'Sales Information'},{k:'salesArea',l:'Sales area',t:'select',o:['',...BRANCHES],g:'Sales Information'},{k:'soldBy',l:'Salesperson',t:'select',o:[...OWNERS(),RANDOM_SP],g:'Sales Information'},
   {k:'source',l:'Lead source',t:'select',o:['',...SOURCES],g:'Sales Information'},{k:'subSource',l:'Sub source',g:'Sales Information'},{k:'createdBy',l:'Created by',ro:1,g:'Sales Information'},{k:'approvals',l:'Contract approvals',g:'Sales Information'}];
-const CFINF=()=>[{k:'value',l:'Contract value (£)',t:'number',g:'Money'},{k:'paid',l:'Paid so far (£)',t:'number',g:'Money'},...(ISADM()?[{k:'cost',l:'Job cost (£)',t:'number',g:'Money'}]:[]),{k:'payMethod',l:'Payment method',t:'select',o:['','Cash','Bank transfer','Card','Finance','Cheque'],g:'Money'},{k:'invoiced',l:'Invoiced',t:'select',o:YN,g:'Invoice'},{k:'invoiceNo',l:'Invoice number',g:'Invoice'},{k:'invoiceDate',l:'Invoice date',t:'date',g:'Invoice'}];
+const CFINF=()=>[{k:'value',l:'Contract value, including VAT (£)',t:'number',g:'Money'},{k:'vatRate',l:'VAT rate (%)',t:'select',o:['20','5','0'],g:'Money'},{k:'deposit',l:'Deposit asked for (£)',t:'number',g:'Money'},{k:'depDue',l:'Deposit due by',t:'date',g:'Money'},{k:'balDue',l:'Balance due by',t:'date',g:'Money'},{k:'paid',l:'Paid so far (£)',t:'number',g:'Money'},...(ISADM()?[{k:'cost',l:'Job cost (£)',t:'number',g:'Money'}]:[]),{k:'payMethod',l:'Main payment method',t:'select',o:['','Cash','Bank transfer','Card','Finance','Cheque'],g:'Money'},
+  {k:'finCo',l:'Finance company',g:'Finance Plan'},{k:'finRef',l:'Finance reference',g:'Finance Plan'},{k:'finStatus',l:'Finance status',t:'select',o:['','Applied','Approved','Declined','Paid out'],g:'Finance Plan'},{k:'invoiced',l:'Invoiced',t:'select',o:YN,g:'Invoice'},{k:'invoiceNo',l:'Invoice number',g:'Invoice'},{k:'invoiceDate',l:'Invoice date',t:'date',g:'Invoice'}];
 const CFITF=()=>[{k:'survey',l:'Survey date',t:'date',g:'Dates'},{k:'order',l:'Order date',t:'date',g:'Dates'},{k:'delDate',l:'Delivery date',t:'date',g:'Dates'},{k:'fit',l:'Fit date',t:'date',g:'Dates'},
-  {k:'fitter',l:'Fitter / team',t:'select',o:FITL(),g:'Team'},{k:'installMgr',l:'Installation manager',t:'select',o:staffNames(),g:'Team'},{k:'surveyor',l:'Assigned surveyor',t:'select',o:staffNames(),g:'Team'},{k:'fitNotes',l:'Fitting notes',t:'area',max:600,g:'Team'},
+  ...[1,2,3,4,5,6].map(i=>({k:'fitter'+i,l:i==1?'Fitter 1 (lead fitter)':'Fitter '+i,t:'select',o:['',...FITL()],g:'Team'})),{k:'installMgr',l:'Installation manager',t:'select',o:staffNames(),g:'Team'},{k:'surveyor',l:'Assigned surveyor',t:'select',o:staffNames(),g:'Team'},{k:'fitNotes',l:'Fitting notes',t:'area',max:600,g:'Team'},
   {k:'winCount',l:'Window count',t:'number',dp:0,g:'Info For FENSA'},{k:'doorCount',l:'Door count',t:'number',dp:0,g:'Info For FENSA'},{k:'conservatory',l:'Conservatory',t:'select',o:YN,g:'Info For FENSA'},{k:'roofline',l:'Roofline',t:'select',o:YN,g:'Info For FENSA'},{k:'fensaExported',l:'Exported to FENSA',t:'select',o:YN,g:'Info For FENSA'},{k:'fensaNA',l:'FENSA not required',t:'select',o:YN,g:'Info For FENSA'}];
 REC.contract={label:'Contract',
   get:id=>S.contracts.find(c=>c.id==id),order:()=>ctrList().map(c=>c.id),
-  blank:()=>({id:nid('C',S.contracts),cdate:today(),stage:'Deposit due',fitter:FIT[0],contractType:CTYPES[0],soldBy:USER,createdBy:USER,invSame:'Same as home',siteSame:'Same as home',addrType:'Home',pay:[],chk:{},lines:[],log:[]}),
+  blank:()=>({id:nid('C',S.contracts),cdate:today(),stage:'Deposit due',fitter:'',vatRate:String(CO.vat??'20'),contractType:CTYPES[0],soldBy:USER,createdBy:USER,invSame:'Same as home',siteSame:'Same as home',addrType:'Home',pay:[],chk:{},lines:[],log:[]}),
   heading:W=>`${W.v.id}  ${[W.v.title,W.v.name].filter(Boolean).join(' ')||'New contract'}${W.v.company?' · '+W.v.company:''}`,
   headStats:W=>`${stTag(W.v.stage||'Deposit due')}${W.v.flash?`<span class="flash">${esc(W.v.flash)}</span>`:''}<span><small>Value</small><b>${m0(W.v.value)}</b></span><span><small>Balance</small><b>${m0((+W.v.value||0)-(+W.v.paid||0))}</b></span><span><small>Fit</small><b>${W.v.fit?fd(W.v.fit):'-'}</b></span>`,
   actions:W=>`<button class="rb1" ${A('reportContract',W.id)}>${svg(IC.reports)}Reports</button><button class="rb1" ${A('recCall')}>${svg(IC.service)}Service call</button>${ISOWN()?`<button class="rb1 dl" ${A('del','contracts',W.id)}>${svg('M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3')}Delete</button>`:''}`,
@@ -307,7 +309,7 @@ REC.contract={label:'Contract',
     {k:'survey',t:'Survey',n:(W.v.openings||[]).length,h:opsTab},
     {k:'products',t:'Products',n:(W.v.lines||[]).length,h:linesTab},
     {k:'check',t:'Job Progress',h:W=>ckTab(W,CK)},
-    {k:'finance',t:'Finance',h:W=>{const P=W.v.pay||[];return `<div class="rcols">${byGroup(CFINF(),W.v)}<section class="rg"><h4>Payments Received</h4>${ISADM()?`<div class="radd"><input id="ra_amt" type="number" step="any" min="0" placeholder="Amount £"><input id="ra_date" type="date" value="${today()}"><select id="ra_method">${['Bank transfer','Card','Cheque','Cash','Finance','Deposit'].map(x=>`<option>${x}</option>`).join('')}</select><button class="mini pri" onclick="recPay()">Add</button></div>`:''}${P.map((p,i)=>`<div class="row"><span>${fd(p.date)} <span class="muted">${esc(p.method)} ${esc(p.note||'')}</span></span><b>${money(p.amt)}</b></div>`).join('')||'<p class="empty">No payments logged.</p>'}<div class="row"><span><b>Balance</b></span><b>${money((+W.v.value||0)-(+W.v.paid||0))}</b></div></section></div>`}},
+    {k:'finance',t:'Finance',h:finTab},
     {k:'deliveries',t:'Deliveries',n:dels.length,h:W=>`<div class="rg wide"><h4><span>Deliveries For This Job</span><button class="mini pri" ${A('recDelivery')}>New delivery</button></h4>${dels.map(d=>`<div class="row"><span><b>${esc(d.supplier)}</b> ${esc(d.items)}<br><span class="muted">Due ${fd(d.due)}${d.stage?', '+esc(d.stage):''}</span></span>${dTag(d)}</div>`).join('')||'<p class="empty">No deliveries linked to this contract number.</p>'}</div>`},
     {k:'fitting',t:'Fitting',h:W=>`<div class="rcols">${byGroup(CFITF(),W.v)}</div>`},
     {k:'notes',t:'Notes & Activity',n:W.v.log.length,h:W=>logTab(W,'notes')},
@@ -316,11 +318,52 @@ REC.contract={label:'Contract',
     {k:'gdpr',t:'GDPR',h:W=>`<div class="rcols">${grpH('Marketing Consent',GDPRF,W.v)}</div>`}]},
   check:(W,o)=>{if(!o.name)return 'Customer name is needed (Customer step)';if(!PHONES.some(k=>o[k]))return 'Add at least one phone number (Customer step)';if(o.paid>o.value&&o.value>0&&!confirm('Paid is more than the contract value. Save anyway?'))return 'Not saved'},
   save:(W,o)=>{const isNew=W.isNew,c=isNew?{id:W.v.id}:S.contracts.find(x=>x.id==W.id);if(!c)return;delete o.id;delete o.lead;delete o.createdBy;
-    const np=(W.v.pay||[]).length-((c.pay||[]).length);if(np>0)audit('Payment recorded',c.id||W.v.id,np+' payment'+(np>1?'s':'')+', '+money(sum((W.v.pay||[]).slice(-np),x=>x.amt)));if(!ISADM())delete o.cost;Object.assign(c,o,{pay:W.v.pay||[],log:W.v.log||[],createdBy:c.createdBy||W.v.createdBy||USER});if(isNew){if(S.contracts.some(x=>x.id==c.id))c.id=nid('C',S.contracts);S.contracts.unshift(c)}
+    const np=(W.v.pay||[]).length-((c.pay||[]).length);if(np>0)audit('Payment recorded',c.id||W.v.id,np+' payment'+(np>1?'s':'')+', '+money(sum((W.v.pay||[]).slice(-np),x=>x.amt)));if(!ISADM())delete o.cost;Object.assign(c,o,{pay:W.v.pay||[],log:W.v.log||[],createdBy:c.createdBy||W.v.createdBy||USER});c.fitter=[1,2,3,4,5,6].map(i=>c['fitter'+i]).filter(Boolean).join(', ');if(isNew){if(S.contracts.some(x=>x.id==c.id))c.id=nid('C',S.contracts);S.contracts.unshift(c)}
     custCompat(c);audit(isNew?'Contract added':'Contract edited',c.id,c.name);return c.id}};
-function recPay(){if(!need(ISADM,'Recording payments'))return;const amt=SAFE.num($('#ra_amt').value,{max:1e7});if(!(amt>0)){toast('Enter an amount');return}
-  const cur=readFields(CFINF());if(!cur)return;RW.v.value=cur.value;RW.v.pay=RW.v.pay||[];RW.v.pay.push({amt,date:SAFE.date($('#ra_date').value)||today(),method:SAFE.text($('#ra_method').value,40)});RW.v.paid=Math.round(((+cur.paid||0)+amt)*100)/100;
-  if(RW.v.cost!=null&&cur.cost!=null)RW.v.cost=cur.cost;RW.dirty=1;recRedraw('finance');toast('Payment added. Save to keep it.')}
+/* ---- finance step: balance at a glance, then Make A Payment ---- */
+const PAYM=['Bank transfer','Card','Cheque','Cash','Finance'],PAYK=['Deposit','Stage payment','Final balance','Other'];
+function fitSync(c){if(c&&c.fitter&&![1,2,3,4,5,6].some(i=>c['fitter'+i]))String(c.fitter).split(/,\s*/).slice(0,6).forEach((x,i)=>c['fitter'+(i+1)]=x)}
+/* fitters 2 to 6 only appear once the one before is filled in */
+function fitReveal(){if(!RW||RW.kind!='contract')return;for(let i=2;i<=6;i++){const e=$('#f_fitter'+i),pv=$('#f_fitter'+(i-1));if(!e)continue;const w=e.closest('.rf')||e,pw=pv&&(pv.closest('.rf')||pv);
+  const show=!!e.value||!!(pv&&pv.value&&!(pw&&pw.hidden));if(w.hidden==show){w.hidden=!show;if(show){w.classList.remove('fin-in');void w.offsetWidth;w.classList.add('fin-in')}}}}
+function finNums(){const g=k=>{const e=$('#f_'+k);return e?e.value:RW.v[k]},val=+g('value')||0,paid=+g('paid')||0,rate=+(g('vatRate')??CO.vat??20)||0,dep=+g('deposit')||0;
+  const vat=Math.round((val-val/(1+rate/100))*100)/100;return{val,paid,rate,vat,net:val-vat,bal:Math.round((val-paid)*100)/100,dep,depDue:g('depDue'),balDue:g('balDue')}}
+function finTab(W){const P=W.v.pay||[],adm=ISADM();
+  return `<div class="fin"><div class="fin-sum" id="finSum"></div>
+   <div class="fin-pay" id="finPay" hidden></div>
+   <section class="rg fin-list"><h4><span>Payments Received</span><small class="muted">${P.length} payment${P.length==1?'':'s'}</small></h4>
+    ${P.map((p,i)=>`<div class="row fin-row"><span><b>${money(p.amt)}</b> <span class="tag">${esc(p.kind||p.method)}</span><br><small class="muted">${fd(p.date)} · ${esc(p.method)}${p.ref?' · '+esc(p.ref):''}${p.by?' · '+esc(p.by):''}</small></span>${adm?`<button type="button" class="mini del" ${A('recPayDel',i)} aria-label="Remove this payment">Remove</button>`:''}</div>`).join('')||'<p class="empty">No payments yet. Press Make A Payment when money comes in.</p>'}
+   </section>
+   <div class="rcols">${byGroup(CFINF(),W.v)}</div></div>`}
+function finSum(){const el=$('#finSum');if(!el||!RW)return;const n=finNums(),pc=n.val?Math.min(100,Math.round(100*n.paid/n.val)):0,adm=ISADM(),td=today();
+  const depLeft=Math.max(0,n.dep-n.paid),late=d=>d&&d<td;
+  const st=!n.val?['No contract value yet','']:n.bal<=0?['Paid in full','g']:late(n.balDue)?['Balance overdue','r']:depLeft>0&&late(n.depDue)?['Deposit overdue','r']:depLeft>0?['Deposit to collect','y']:['Balance to collect','y'];
+  const h=`<div class="fin-top"><div class="fin-big"><small>Outstanding Balance</small><b>${money(Math.max(0,n.bal))}</b><span class="tag ${st[1]}">${esc(st[0])}</span></div>
+   <div class="fin-act"><button type="button" class="btn green fin-pb" ${adm?'onclick="payOpen()"':'disabled title="Only administrators can take payments"'}>${svg(adm?IC.plus:IC.lock)}Make A Payment</button>${RW.isNew?'':`<button type="button" class="btn ghost" ${A('reportContract',RW.id)}>${svg(IC.reports)}Invoice Or Receipt</button>`}</div></div>
+   <div class="fin-bar" role="progressbar" aria-valuenow="${pc}" aria-valuemin="0" aria-valuemax="100"><i style="width:${pc}%"></i></div><small class="muted">${money(n.paid)} paid of ${money(n.val)} (${pc}%)</small>
+   <dl class="fin-g"><div><dt>Contract Value</dt><dd>${money(n.val)}</dd></div><div><dt>VAT At ${n.rate}%</dt><dd>${money(n.vat)}</dd></div><div><dt>Before VAT</dt><dd>${money(n.net)}</dd></div>
+    <div><dt>Deposit</dt><dd>${n.dep?money(n.dep)+(depLeft>0?'':' ✓'):'-'}${n.depDue?`<small>by ${fd(n.depDue)}</small>`:''}</dd></div><div><dt>Balance Due</dt><dd>${n.balDue?fd(n.balDue):'-'}</dd></div></dl>`;
+  if(el.dataset.h!==h){el.dataset.h=h;el.innerHTML=h}}
+function payOpen(){if(!need(ISADM,'Taking payments'))return;const el=$('#finPay');if(!el)return;if(!el.hidden){el.hidden=true;return}const n=finNums(),depLeft=Math.max(0,n.dep-n.paid);
+  const q=(l,v)=>v>0?`<button type="button" class="td-i" ${A('payFill',v)}>${esc(l)} ${money(v)}</button>`:'';
+  el.innerHTML=`<h4>Make A Payment</h4><div class="fin-q">${q('Whole balance',n.bal)}${q('Deposit',depLeft)}${CO.deposit&&!n.dep?q(CO.deposit+'% deposit',Math.round(n.val*CO.deposit)/100):''}</div>
+   <div class="fin-f"><label class="rf"><span>Amount (£) *</span><input id="ra_amt" type="number" step="any" min="0" inputmode="decimal" placeholder="0.00"></label>
+    <label class="rf"><span>Date</span><input id="ra_date" type="date" value="${today()}"></label>
+    <label class="rf"><span>Paid by</span><select id="ra_method">${PAYM.map(x=>`<option>${x}</option>`).join('')}</select></label>
+    <label class="rf"><span>What for</span><select id="ra_kind">${PAYK.map(x=>`<option${x==(n.paid?'Stage payment':'Deposit')?' selected':''}>${x}</option>`).join('')}</select></label>
+    <label class="rf full"><span>Reference (optional)</span><input id="ra_ref" maxlength="60" placeholder="Card receipt, cheque number..."></label></div>
+   <div class="fin-b"><button type="button" class="btn ghost" onclick="payOpen()">Cancel</button><button type="button" class="btn green" onclick="recPay()">${svg('M5 12l5 5L20 7')}Record Payment</button></div>`;
+  el.hidden=false;el.classList.remove('fin-in');void el.offsetWidth;el.classList.add('fin-in');setTimeout(()=>{const a=$('#ra_amt');if(!a)return;a.focus();el.scrollIntoView({block:'nearest',behavior:'smooth'})},40)}
+function finRe(){const P=$('#mbox .rw-p.on');if(P){delete P.dataset.ginit;grpInit(P)}finSum()}
+function payFill(v){const e=$('#ra_amt');if(e){e.value=v;e.classList.remove('flash');void e.offsetWidth;e.classList.add('flash')}}
+function finKeep(){const cur=readFields(CFINF());if(!cur)return false;Object.assign(RW.v,cur);return true}
+function recPay(){if(!need(ISADM,'Recording payments'))return;const e=$('#ra_amt'),amt=SAFE.num(e.value,{max:1e7});if(!(amt>0)){fieldErr(e,'Type the amount paid');return}
+  if(!finKeep())return;const n=finNums();if(amt>n.bal+0.005&&n.val>0&&!confirm('That is more than the balance of '+money(n.bal)+'. Record it anyway?'))return;
+  RW.v.pay=RW.v.pay||[];RW.v.pay.push({amt,date:SAFE.date($('#ra_date').value)||today(),method:PAYM.includes($('#ra_method').value)?$('#ra_method').value:'Other',kind:PAYK.includes($('#ra_kind').value)?$('#ra_kind').value:'Other',ref:SAFE.text($('#ra_ref').value,60),by:USER});
+  RW.v.paid=Math.round(((+RW.v.paid||0)+amt)*100)/100;RW.dirty=1;recRedraw('finance');finRe();
+  const b=$('#finSum .fin-big');if(b)b.classList.add('pop');toast(money(amt)+' payment added. Press Save to keep it.')}
+function recPayDel(i){if(!need(ISADM,'Removing payments'))return;const p=(RW.v.pay||[])[i];if(!p||!confirm('Remove the '+money(p.amt)+' payment from '+fd(p.date)+'?'))return;if(!finKeep())return;
+  RW.v.pay.splice(i,1);RW.v.paid=Math.max(0,Math.round(((+RW.v.paid||0)-p.amt)*100)/100);RW.dirty=1;recRedraw('finance');finRe();toast('Payment removed. Press Save to keep the change.')}
 function recCall(){if(!recSave(false))return;const id=RW.id;closeModal();editCall(null,id)}
 function recDelivery(){if(!recSave(false))return;const id=RW.id;closeModal();editDel();setTimeout(()=>{const e=$('#f_contract');if(e)e.value=id},30)}
 
