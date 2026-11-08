@@ -50,7 +50,8 @@ function backupDl(){if(!need(ISOWN,'Backups'))return;audit('Backup downloaded','
 function backupLoad(inp){if(!need(ISOWN,'Restoring backups'))return;const f=inp.files[0];inp.value='';if(!f)return;if(f.size>20e6){toast('That file is too large');return}
   f.text().then(t=>{let n;try{n=JSON.parse(t)}catch(e){toast('That is not a valid backup file');return}
     const ok=n&&typeof n=='object'&&['items','leads','contracts','calls','staff'].every(k=>Array.isArray(n[k]));if(!ok){toast('That file is not a Broadland CRM backup');return}
-    if(!confirm('Replace ALL current data with this backup? Your current data is kept as a safety copy in this browser.'))return;
+    askIn('Replace all data with this backup?','Your current data is kept as a safety copy in this browser.','Replace',()=>backupApply(n),true)})}
+function backupApply(n){if(!need(ISOWN,'Restoring backups'))return;{
     try{localStorage.setItem(KEY+'_before_restore',JSON.stringify(S))}catch(e){}
     n.sec=S.sec;delete n.__proto__;delete n.constructor;/* a backup never brings its own PINs */
-    try{const j=JSON.stringify(n);sdb().then(d=>{const t=d.transaction('s','readwrite');t.objectStore('s').put(j,KEY);t.oncomplete=()=>{try{localStorage.removeItem(KEY)}catch(e){}location.reload()}}).catch(()=>toast('Could not restore here'))}catch(e){toast('Could not restore here')}})}
+    try{const j=JSON.stringify(n);sdb().then(d=>{const t=d.transaction('s','readwrite');t.objectStore('s').put(j,KEY);t.oncomplete=()=>{try{localStorage.removeItem(KEY)}catch(e){}location.reload()}}).catch(()=>toast('Could not restore here'))}catch(e){toast('Could not restore here')}}}

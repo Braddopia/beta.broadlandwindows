@@ -70,7 +70,8 @@ function cmdSmart(query){const out=[],m=(re)=>query.match(re);let x;
   if((x=m(/^note\s+(\S+)\s+(.{2,})$/)))recFind(x[1],'cl').filter(f=>f.x).forEach(f=>out.push(['Add Note To '+f.id,'“'+x[2].slice(0,60)+'”',()=>noteQuick(f.k,f.id,x[2]),IC.edit]));
   return out}
 function quickPay(id,amt){if(!need(ISADM,'Taking payments'))return;const c=S.contracts.find(x=>x.id==id);if(!c||!(amt>0))return;
-  if(!confirm('Record a '+money(amt)+' payment on contract '+id+' ('+(c.name||'')+')?'))return;c.pay=c.pay||[];c.pay.push({amt,date:today(),method:'Bank transfer',kind:(+c.paid||0)?'Stage payment':'Deposit',ref:'From search',by:USER});
+  askIn('Record a '+money(amt)+' payment?','On contract '+id+(c.name?' ('+c.name+')':'')+'.','Record Payment',()=>quickPayGo(id,amt))}
+function quickPayGo(id,amt){const c=S.contracts.find(x=>x.id==id);if(!c||!need(ISADM,'Taking payments'))return;c.pay=c.pay||[];c.pay.push({amt,date:today(),method:'Bank transfer',kind:(+c.paid||0)?'Stage payment':'Deposit',ref:'From search',by:USER});
   c.paid=Math.round(((+c.paid||0)+amt)*100)/100;audit('Payment recorded',id,money(amt));store();render(true);toast(money(amt)+' recorded on '+id+'. Balance now '+money((+c.value||0)-c.paid)+'.')}
 function leadQuick(id,st){const l=S.leads.find(x=>x.id==id);if(!l)return;const a=l.stage;if(a==st){toast(id+' is already '+st);return}l.stage=st;l.prob=st=='Won'?100:0;l.log=l.log||[];l.log.unshift({d:today(),t:'Stage: '+(a||'New')+' to '+st,by:USER});
   audit('Lead edited',id,'Stage '+st);store();render(true);toast(id+' marked as '+st)}

@@ -4,6 +4,7 @@
    ========================================================================== */
 /* All page-level UI state lives here (instead of a dozen loose globals) */
 const UI={
+  svc:{f:'open'},
   inv:{v:'products',f:'all',sup:'all',loc:'all',unit:'all',sort:'item',dir:1,page:1,per:50},
   mov:{f:'all',sort:'',dir:1,page:1,per:50},
   cal:{m:'month',o:0,sd:null,ly:{fit:1,svc:1,del:1,hol:1}},
@@ -96,6 +97,13 @@ document.addEventListener('input',e=>{const el=e.target;if(!el.id||!el.id.starts
 /* styled confirmation instead of the browser's own box */
 let ASK=null,ASK_NO=null;
 function askYes(title,msg,okLabel,cb,danger,noCb){ASK=cb;ASK_NO=noCb||null;openModal(`<div class="ask"><div class="ask-ic ${danger?'r':''}">${danger?'!':'?'}</div><h2>${esc(title)}</h2><p class="muted">${esc(msg)}</p></div><div class="mact"><button class="btn ghost" onclick="askNo()">${noCb?'No, go back':'Cancel'}</button><button class="btn ${danger?'red':''}" onclick="askGo()">${esc(okLabel||'Yes')}</button></div>`,'sm')}
+/* askIn: our own confirm box, layered above any open window. Esc or Cancel closes it. */
+let ASKI=null;
+function askIn(title,msg,okLabel,cb,danger){if(ASKI)ASKI.remove();const o=document.createElement('div');o.className='aski';o.setAttribute('role','alertdialog');o.setAttribute('aria-modal','true');o.setAttribute('aria-label',title);
+  o.innerHTML=`<div class="aski-b"><div class="ask-ic ${danger?'r':''}">${danger?'!':'?'}</div><h3>${esc(title)}</h3>${msg?`<p>${esc(msg)}</p>`:''}<div class="aski-a"><button type="button" class="btn ghost" data-a="0">Cancel</button><button type="button" class="btn ${danger?'red':'green'}" data-a="1">${esc(okLabel||'Yes')}</button></div></div>`;
+  const key=e=>{if(e.key=='Escape'){e.stopPropagation();e.preventDefault();done(false)}},done=ok=>{o.remove();document.removeEventListener('keydown',key,true);if(ASKI===o)ASKI=null;if(ok&&cb)cb()};
+  o.addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(b)done(b.dataset.a=='1');else if(e.target==o)done(false)});
+  document.addEventListener('keydown',key,true);ASKI=o;document.body.appendChild(o);o.querySelector('[data-a="1"]').focus()}
 function askNo(){const f=ASK_NO;ASK=ASK_NO=null;closeModal();if(f)f()}
 function askGo(){const f=ASK;ASK=null;closeModal();if(f)f()}
 function closeModal(){$('#modal').classList.remove('open');const a=document.activeElement;if(a&&a!==document.body&&!a.closest('#modal'))a.blur()}
@@ -119,7 +127,7 @@ function form(title,fields,v,cb,photos,size){
   const sel=f=>{const cur=v[f.k]??'',has=f.o.some(o=>String(Array.isArray(o)?o[0]:o)==String(cur));return `<select id="f_${f.k}" ${f.ro?'disabled':''}>${(cur!==''&&!has?[cur,...f.o]:f.o).map(o=>{const[val,lab]=Array.isArray(o)?o:[o,o||'-'];return `<option value="${esc(val)}"${String(val)==String(v[f.k]??'')?' selected':''}>${esc(lab)}</option>`}).join('')}</select>`};
   const inp=f=>f.t=='colour'?colourField(f,v):f.t=='select'?sel(f):f.t=='area'?`<textarea id="f_${f.k}" rows="3" maxlength="${f.max||2000}">${esc(v[f.k]||'')}</textarea>`
     :`<input id="f_${f.k}" type="${f.t||'text'}"${f.t=='number'?` step="any" min="${f.min??0}"${f.max?` max="${f.max}"`:''} inputmode="decimal"`:` maxlength="${f.max||120}"`} value="${esc(v[f.k]??'')}"${f.ro?' readonly':''}${f.list?` list="${f.list}"`:''} autocomplete="off">`;
-  openModal(`<h2>${esc(title)}</h2><div class="grid">${fields.map(f=>`<div class="ff ${f.w||''}"><label for="f_${f.k}">${esc(f.l)}${MARK(f.req,f.adm)}</label>${f.scan?`<div class="inl">${inp(f)}<button type="button" class="btn scan sm" ${A('scanInto','f_'+f.k)}>Scan</button></div>`:inp(f)}${f.hint?`<span class="hint">${esc(f.hint)}</span>`:''}</div>`).join('')}
+  openModal(`<h2>${esc(title)}</h2><div class="grid">${fields.map(f=>f.t=='h'?`<h3 class="fsec full">${esc(f.l)}</h3>`:`<div class="ff ${f.w||''}"><label for="f_${f.k}">${esc(f.l)}${MARK(f.req,f.adm)}</label>${f.scan?`<div class="inl">${inp(f)}<button type="button" class="btn scan sm" ${A('scanInto','f_'+f.k)}>Scan</button></div>`:inp(f)}${f.hint?`<span class="hint">${esc(f.hint)}</span>`:''}</div>`).join('')}
    ${photos?`<div class="ff full"><label>Photos <span class="muted">(up to ${MAX_PHOTOS})</span></label><div class="thumbs" id="thumbs"></div><div class="prow"><label class="btn ghost sm">Take photo<input type="file" accept="image/*" capture="environment" hidden onchange="addPh(this)"></label><label class="btn ghost sm">Choose from gallery<input type="file" accept="image/*" multiple hidden onchange="addPh(this)"></label></div></div>`:''}</div>
    <div class="mact"><button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn" id="saveBtn">Save changes</button></div>`,size||'md'); /* every plain form is the same width */
   if(photos)drawThumbs();
@@ -130,7 +138,7 @@ function fieldErr(e,msg){toast(msg);const w=e.closest('.rf,.ff');if(w){w.classLi
     const d=w.closest('details');if(d)d.open=true;const sg=w.closest('.rg.shut');if(sg)sg.classList.remove('shut');const clr=()=>{w.classList.remove('err');m.remove();e.removeEventListener('input',clr);e.removeEventListener('change',clr)};e.addEventListener('input',clr);e.addEventListener('change',clr)}
   const p=e.closest('.rw-p');if(p&&!p.classList.contains('on')&&typeof recTab=='function')recTab(p.dataset.t);e.focus();if(e.scrollIntoView)e.scrollIntoView({block:'center'})}
 function readFields(fields){const o={};
-  for(const f of fields){const e=$('#f_'+f.k);if(!e)continue;if(f.adm&&!ISADM())continue;const raw=(e.value||'').trim(),lab=f.l.replace(/ \(.*\)/,'');
+  for(const f of fields){if(f.t=='h')continue;const e=$('#f_'+f.k);if(!e)continue;if(f.adm&&!ISADM())continue;const raw=(e.value||'').trim(),lab=f.l.replace(/ \(.*\)/,'');
     if(f.req&&!raw){fieldErr(e,lab+' must be filled in');return null}
     if(f.t=='number'){if(raw===''){o[f.k]=0;continue}const n=SAFE.num(raw,{min:f.min??0,max:f.max??1e9,dp:f.dp??2});if(n==null||(f.pos&&!(n>0))){fieldErr(e,lab+' must be a '+(f.pos?'positive ':'')+'number');return null}if(parseFloat(raw)!=n&&(parseFloat(raw)<(f.min??0)||parseFloat(raw)>(f.max??1e9))){fieldErr(e,lab+' must be between '+(f.min??0)+' and '+(f.max??1e9));return null}o[f.k]=n}
     else if(f.t=='date'){if(raw&&!SAFE.date(raw)){fieldErr(e,lab+' is not a valid date');return null}o[f.k]=raw}

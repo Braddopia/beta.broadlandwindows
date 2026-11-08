@@ -174,7 +174,7 @@ function ieSave(){const mode=ieMode,o=readFields(ieFields());if(!o)return;
   const kind=mode,ex=S.items.find(x=>ikey(x)==ikey(o)),pid=ex?ex.pid:stkId(),cur=ex?ex.stock:0;
   if(kind=='remove'&&!ex){toast('That item (with this length and colours) is not in stock yet');return}
   if(kind=='add'&&!ex&&!o.supplier){toast('Pick a supplier for a new product');return}
-  if(kind=='remove'&&o.qty>cur&&!confirm('Only '+cur+' in stock. Remove all '+cur+'?'))return;
+  if(kind=='remove'&&o.qty>cur){askIn('Only '+cur+' in stock','Remove all '+cur+' instead?','Remove '+cur,()=>{const q=$('#f_qty');if(q){q.value=cur;ieSave()}});return}
   const st=kind=='add'?cur+o.qty:kind=='remove'?Math.max(0,cur-o.qty):cur;
   const base={pid,item:o.item,unit:o.unit,length:o.length||'-',cInName:o.cInName||'-',cIn:o.cInNameHex,cOutName:o.cOutName||'-',cOut:o.cOutNameHex,cost:o.cost||(ex?ex.cost:0),location:o.location||(ex?ex.location:'-'),barcode:bc||(ex?ex.barcode:''),supplier:o.supplier||(ex?ex.supplier:''),reorder:o.reorder!=null&&kind!='remove'?o.reorder:(ex?ex.reorder:0),lead:o.lead||(ex?ex.lead:undefined),reorderQty:o.reorderQty||(ex&&ex.reorderQty),notes:o.notes||(ex&&ex.notes)};
   if(kind!='request')prodRows(pid).forEach(x=>{x.stock=st;['supplier','location','unit','lead','reorderQty','notes'].forEach(f=>{if(o[f])x[f]=o[f]});if(kind=='add'){x.reorder=base.reorder;if(o.cost)x.cost=o.cost}if(bc)x.barcode=bc});

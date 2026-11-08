@@ -1752,6 +1752,54 @@ body[data-theme=dark] .rw-act{background:rgba(255,255,255,.02)}
 .path button{background:rgba(1,43,89,.07)}body[data-theme=dark] .path button{background:rgba(255,255,255,.07)}
 @media(max-width:900px){.rw-rail{display:flex;flex-wrap:nowrap;gap:.3rem;overflow-x:auto}.rw-rail .rw-steps{flex-wrap:nowrap;flex:0 0 auto}}
 
+/* ==== round 12 ==== */
+/* in-app confirm box (layered over any window) */
+.aski{position:fixed;inset:0;z-index:900;display:grid;place-items:center;padding:16px;background:rgba(1,20,45,.42);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);animation:fade .15s}
+.aski-b{width:min(26rem,100%);padding:1.5rem 1.5rem 1.3rem;border-radius:20px;background:var(--pop,var(--card));border:1px solid var(--line);box-shadow:0 30px 70px -20px rgba(0,0,0,.55);text-align:center;animation:pop .2s cubic-bezier(.2,.9,.3,1.2)}
+.aski-b .ask-ic{margin:0 auto .7rem}
+.aski-b h3{margin:0 0 .35rem;font:600 1.25rem/1.25 var(--head);color:var(--navy);text-wrap:balance}
+.aski-b p{margin:0 0 1.2rem;color:var(--muted);font-size:.98rem;line-height:1.45}
+.aski-a{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}
+.aski-a .btn{min-height:2.9rem;font-size:1rem;border-radius:12px;justify-content:center}
+.btn.red{background:var(--red)}.btn.red:hover{filter:brightness(.92)}
+body[data-theme=dark] .btn.red{background:#c24444}
+/* contract header: outstanding stands out */
+.rw-hk .hk-due b{color:var(--red)}.rw-hk .hk-ok b{color:var(--green)}
+/* list pages: stage as a small bar with its name, all lined up */
+.ptb td.ac .acts.stc{justify-content:flex-start;flex-wrap:nowrap}
+.ptb th.ac{text-align:left}
+.sprog{display:inline-flex;align-items:center;gap:.55rem;min-width:9.5rem;white-space:nowrap}
+.sbar{display:inline-grid;grid-auto-flow:column;grid-auto-columns:9px;gap:3px}
+.sbar i{height:6px;border-radius:3px;background:var(--line)}
+.sbar i.d{background:#33a06f}.sbar i.o{background:#034ea2}
+.sprog b{font-size:.82rem;font-weight:600;color:var(--navy)}
+.sprog.end b{color:var(--green)}.sprog.end .sbar i{background:#33a06f}
+.sprog.lost b{color:var(--red)}.sprog.lost .sbar i{background:var(--red-bg)}
+body[data-theme=dark] .sprog b{color:#d3e3fb}
+/* lead/contract window: glassier, still fully readable (the glass sits on our own tint, not the page) */
+.mb.full:has(.rw){background:linear-gradient(160deg,#f7faff 0%,#eef4fc 45%,#f6f2e6 100%);overflow:hidden}
+.mb.full:has(.rw)::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(40rem 22rem at 8% 0%,rgba(90,160,255,.22),transparent 70%),radial-gradient(34rem 20rem at 100% 100%,rgba(255,208,2,.16),transparent 70%)}
+.mb.full:has(.rw)>*{position:relative}
+.mb.full .rw-h{background:linear-gradient(180deg,rgba(255,255,255,.75),rgba(255,255,255,.35));border-bottom:1px solid rgba(255,255,255,.7)}
+.mb.full .rw-path{background:rgba(255,255,255,.35)}
+.mb.full .rw-rail{background:rgba(255,255,255,.45);-webkit-backdrop-filter:blur(14px) saturate(150%);backdrop-filter:blur(14px) saturate(150%);border-right:1px solid rgba(255,255,255,.75)}
+.mb.full .rw-steps button.on{background:rgba(255,255,255,.85);box-shadow:inset 0 1px 0 #fff,0 6px 16px -10px rgba(1,43,89,.4)}
+.mb.full .rw-next{background:rgba(255,255,255,.75);border-color:rgba(255,255,255,.9)}
+.mb.full .rg.fg.gc,.mb.full .fin-sum,.mb.full .rw2 .rg{background:rgba(255,255,255,.78);border-color:rgba(255,255,255,.95);box-shadow:inset 0 1px 0 #fff,0 10px 26px -18px rgba(1,43,89,.45);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+.mb.full .rw-foot{background:rgba(255,255,255,.6);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border-top:1px solid rgba(255,255,255,.8)}
+body[data-theme=dark] .mb.full:has(.rw){background:linear-gradient(160deg,#141a24 0%,#111823 50%,#18160f 100%)}
+body[data-theme=dark] .mb.full:has(.rw)::before{background:radial-gradient(40rem 22rem at 8% 0%,rgba(90,155,245,.16),transparent 70%),radial-gradient(34rem 20rem at 100% 100%,rgba(255,208,2,.08),transparent 70%)}
+body[data-theme=dark] .mb.full .rw-h{background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.02));border-bottom-color:rgba(255,255,255,.07)}
+body[data-theme=dark] .mb.full .rw-path{background:transparent}
+body[data-theme=dark] .mb.full .rw-rail,body[data-theme=dark] .mb.full .rw-foot{background:rgba(255,255,255,.035);border-color:rgba(255,255,255,.07)}
+body[data-theme=dark] .mb.full .rw-steps button.on,body[data-theme=dark] .mb.full .rw-next{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.1);box-shadow:none}
+body[data-theme=dark] .mb.full .rg.fg.gc,body[data-theme=dark] .mb.full .fin-sum{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.09);box-shadow:none}
+
+/* section headings inside plain forms */
+.grid .fsec{grid-column:1/-1;margin:.9rem 0 .1rem;padding-top:.8rem;border-top:1px solid var(--line);font:600 1.02rem var(--head);color:var(--navy)}
+.grid .fsec:first-child{margin-top:0;padding-top:0;border-top:0}
+td b.od{color:var(--red)}
+
 /* ==========================================================================
    06 · Adaptive layout
    Breakpoints: 1400 (laptop) · 1100 (small laptop / tablet landscape)
@@ -2228,7 +2276,7 @@ window.addEventListener('storage',e=>{if(!BC&&e.key==KEY&&e.newValue){try{const 
 const FOCUS=['home','messages','live','deliveries','stock','suppliers','downloads','settings'];
 const ROLES={
   admin:  {n:'Administrator',     d:'Everything a standard user has, plus staff and holidays',v:[...FOCUS,'leads','contracts','staff','holidays']},
-  staff:  {n:'Standard user',     d:'Overview, leads, contracts, calendar, contacts, live analytics, inventory and files',v:[...FOCUS,'leads','contracts','fitting','contacts']},
+  staff:  {n:'Standard user',     d:'Overview, leads, contracts, calendar, service calls, contacts, live analytics, inventory and files',v:[...FOCUS,'leads','contracts','fitting','service','contacts']},
   beta:   {n:'Beta (all features)',d:'Leads, contracts, finance, staff and everything else',v:'*'}};
 const RL={admin:'Administrator',staff:'Team Member',beta:'Beta Access'};
 const IDLE_MIN=30, PIN_TRIES=5, PIN_LOCK_S=60;
@@ -2319,6 +2367,7 @@ function saveProfile(){
    ========================================================================== */
 /* All page-level UI state lives here (instead of a dozen loose globals) */
 const UI={
+  svc:{f:'open'},
   inv:{v:'products',f:'all',sup:'all',loc:'all',unit:'all',sort:'item',dir:1,page:1,per:50},
   mov:{f:'all',sort:'',dir:1,page:1,per:50},
   cal:{m:'month',o:0,sd:null,ly:{fit:1,svc:1,del:1,hol:1}},
@@ -2411,6 +2460,13 @@ document.addEventListener('input',e=>{const el=e.target;if(!el.id||!el.id.starts
 /* styled confirmation instead of the browser's own box */
 let ASK=null,ASK_NO=null;
 function askYes(title,msg,okLabel,cb,danger,noCb){ASK=cb;ASK_NO=noCb||null;openModal(`<div class="ask"><div class="ask-ic ${danger?'r':''}">${danger?'!':'?'}</div><h2>${esc(title)}</h2><p class="muted">${esc(msg)}</p></div><div class="mact"><button class="btn ghost" onclick="askNo()">${noCb?'No, go back':'Cancel'}</button><button class="btn ${danger?'red':''}" onclick="askGo()">${esc(okLabel||'Yes')}</button></div>`,'sm')}
+/* askIn: our own confirm box, layered above any open window. Esc or Cancel closes it. */
+let ASKI=null;
+function askIn(title,msg,okLabel,cb,danger){if(ASKI)ASKI.remove();const o=document.createElement('div');o.className='aski';o.setAttribute('role','alertdialog');o.setAttribute('aria-modal','true');o.setAttribute('aria-label',title);
+  o.innerHTML=`<div class="aski-b"><div class="ask-ic ${danger?'r':''}">${danger?'!':'?'}</div><h3>${esc(title)}</h3>${msg?`<p>${esc(msg)}</p>`:''}<div class="aski-a"><button type="button" class="btn ghost" data-a="0">Cancel</button><button type="button" class="btn ${danger?'red':'green'}" data-a="1">${esc(okLabel||'Yes')}</button></div></div>`;
+  const key=e=>{if(e.key=='Escape'){e.stopPropagation();e.preventDefault();done(false)}},done=ok=>{o.remove();document.removeEventListener('keydown',key,true);if(ASKI===o)ASKI=null;if(ok&&cb)cb()};
+  o.addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(b)done(b.dataset.a=='1');else if(e.target==o)done(false)});
+  document.addEventListener('keydown',key,true);ASKI=o;document.body.appendChild(o);o.querySelector('[data-a="1"]').focus()}
 function askNo(){const f=ASK_NO;ASK=ASK_NO=null;closeModal();if(f)f()}
 function askGo(){const f=ASK;ASK=null;closeModal();if(f)f()}
 function closeModal(){$('#modal').classList.remove('open');const a=document.activeElement;if(a&&a!==document.body&&!a.closest('#modal'))a.blur()}
@@ -2434,7 +2490,7 @@ function form(title,fields,v,cb,photos,size){
   const sel=f=>{const cur=v[f.k]??'',has=f.o.some(o=>String(Array.isArray(o)?o[0]:o)==String(cur));return `<select id="f_${f.k}" ${f.ro?'disabled':''}>${(cur!==''&&!has?[cur,...f.o]:f.o).map(o=>{const[val,lab]=Array.isArray(o)?o:[o,o||'-'];return `<option value="${esc(val)}"${String(val)==String(v[f.k]??'')?' selected':''}>${esc(lab)}</option>`}).join('')}</select>`};
   const inp=f=>f.t=='colour'?colourField(f,v):f.t=='select'?sel(f):f.t=='area'?`<textarea id="f_${f.k}" rows="3" maxlength="${f.max||2000}">${esc(v[f.k]||'')}</textarea>`
     :`<input id="f_${f.k}" type="${f.t||'text'}"${f.t=='number'?` step="any" min="${f.min??0}"${f.max?` max="${f.max}"`:''} inputmode="decimal"`:` maxlength="${f.max||120}"`} value="${esc(v[f.k]??'')}"${f.ro?' readonly':''}${f.list?` list="${f.list}"`:''} autocomplete="off">`;
-  openModal(`<h2>${esc(title)}</h2><div class="grid">${fields.map(f=>`<div class="ff ${f.w||''}"><label for="f_${f.k}">${esc(f.l)}${MARK(f.req,f.adm)}</label>${f.scan?`<div class="inl">${inp(f)}<button type="button" class="btn scan sm" ${A('scanInto','f_'+f.k)}>Scan</button></div>`:inp(f)}${f.hint?`<span class="hint">${esc(f.hint)}</span>`:''}</div>`).join('')}
+  openModal(`<h2>${esc(title)}</h2><div class="grid">${fields.map(f=>f.t=='h'?`<h3 class="fsec full">${esc(f.l)}</h3>`:`<div class="ff ${f.w||''}"><label for="f_${f.k}">${esc(f.l)}${MARK(f.req,f.adm)}</label>${f.scan?`<div class="inl">${inp(f)}<button type="button" class="btn scan sm" ${A('scanInto','f_'+f.k)}>Scan</button></div>`:inp(f)}${f.hint?`<span class="hint">${esc(f.hint)}</span>`:''}</div>`).join('')}
    ${photos?`<div class="ff full"><label>Photos <span class="muted">(up to ${MAX_PHOTOS})</span></label><div class="thumbs" id="thumbs"></div><div class="prow"><label class="btn ghost sm">Take photo<input type="file" accept="image/*" capture="environment" hidden onchange="addPh(this)"></label><label class="btn ghost sm">Choose from gallery<input type="file" accept="image/*" multiple hidden onchange="addPh(this)"></label></div></div>`:''}</div>
    <div class="mact"><button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn" id="saveBtn">Save changes</button></div>`,size||'md'); /* every plain form is the same width */
   if(photos)drawThumbs();
@@ -2445,7 +2501,7 @@ function fieldErr(e,msg){toast(msg);const w=e.closest('.rf,.ff');if(w){w.classLi
     const d=w.closest('details');if(d)d.open=true;const sg=w.closest('.rg.shut');if(sg)sg.classList.remove('shut');const clr=()=>{w.classList.remove('err');m.remove();e.removeEventListener('input',clr);e.removeEventListener('change',clr)};e.addEventListener('input',clr);e.addEventListener('change',clr)}
   const p=e.closest('.rw-p');if(p&&!p.classList.contains('on')&&typeof recTab=='function')recTab(p.dataset.t);e.focus();if(e.scrollIntoView)e.scrollIntoView({block:'center'})}
 function readFields(fields){const o={};
-  for(const f of fields){const e=$('#f_'+f.k);if(!e)continue;if(f.adm&&!ISADM())continue;const raw=(e.value||'').trim(),lab=f.l.replace(/ \(.*\)/,'');
+  for(const f of fields){if(f.t=='h')continue;const e=$('#f_'+f.k);if(!e)continue;if(f.adm&&!ISADM())continue;const raw=(e.value||'').trim(),lab=f.l.replace(/ \(.*\)/,'');
     if(f.req&&!raw){fieldErr(e,lab+' must be filled in');return null}
     if(f.t=='number'){if(raw===''){o[f.k]=0;continue}const n=SAFE.num(raw,{min:f.min??0,max:f.max??1e9,dp:f.dp??2});if(n==null||(f.pos&&!(n>0))){fieldErr(e,lab+' must be a '+(f.pos?'positive ':'')+'number');return null}if(parseFloat(raw)!=n&&(parseFloat(raw)<(f.min??0)||parseFloat(raw)>(f.max??1e9))){fieldErr(e,lab+' must be between '+(f.min??0)+' and '+(f.max??1e9));return null}o[f.k]=n}
     else if(f.t=='date'){if(raw&&!SAFE.date(raw)){fieldErr(e,lab+' is not a valid date');return null}o[f.k]=raw}
@@ -2852,7 +2908,8 @@ function supOpen(n){const x=S.suppliers.find(s=>s.name==n);if(!x)return;const i=
 function supInv(n){event&&event.preventDefault();Object.assign(UI.inv,{v:'products',sup:n,f:'all',page:1});go('stock')}
 function supReorder(i){const x=S.suppliers[i];if(!x)return;const s=supStats(x),need=[...s.out,...s.low].filter(r=>!s.req.some(q=>q.pid==r.pid));
   if(!need.length){toast('Everything low already has a request');return}
-  if(!confirm('Create '+need.length+' stock request'+(need.length>1?'s':'')+' for '+x.name+'?'))return;
+  askIn('Create '+need.length+' stock request'+(need.length>1?'s':'')+'?','For '+x.name+'. They go to an administrator for approval.','Create',()=>supReorderGo(x,need))}
+function supReorderGo(x,need){
   need.forEach(r=>{const q=r.reorderQty||Math.max(ro(r)*2-r.stock,1);S.items.unshift(moveRow(r,'request',q,r.stock,{reqStatus:'Pending',ord:nextOrd('P'),note:'Reorder from '+x.name}))});
   audit('Reorder requested',x.name,need.length+' lines');store();render();toast(need.length+' requests sent for approval')}
 function supDetail(i){const x=S.suppliers[i];if(!x)return;const s=supStats(x),so=supOrders(x);
@@ -3020,17 +3077,41 @@ function ctrSteps(c){const i=CSTAGES.indexOf(c.stage);return[['Contract signed',
 function markFit(id){const c=S.contracts.find(x=>x.id==id);c.stage='Fitted';audit('Marked fitted',id,'');store();render();toast('Contract '+id+' marked as fitted')}
 
 /* ---------------- service calls ---------------- */
-function vService(){const L=S.calls.filter(hit).sort((a,b)=>(a.status=='Complete')-(b.status=='Complete')||['Urgent','Normal','Low'].indexOf(a.priority)-['Urgent','Normal','Low'].indexOf(b.priority));
-  return `<div class="head"><h1>Service Calls</h1><div class="tools"><button class="btn" onclick="editCall()">New service call</button></div></div>
-  <div class="tw"><table><thead><tr><th>Ref</th><th>Customer</th><th>Issue</th><th>Priority</th><th>Status</th><th class="c-sm">Visit</th><th class="c-md">Fitter</th><th class="ac"></th></tr></thead><tbody>
-  ${L.map(c=>`<tr class="clk-r" ${RC('editCall',c.id)}><td><b>${esc(c.id)}</b><br><span class="muted">${esc(c.contract)}</span></td><td>${esc(c.name)}<br><span class="muted">${esc(c.town)}</span></td><td>${esc(c.issue)} ${phCount(c.photos)}</td><td>${prTag(c.priority)}</td><td><span class="tag ${c.status=='Complete'?'g':c.status=='Booked'?'':'y'}">${esc(c.status)}</span></td><td class="c-sm">${fd(c.visit)}</td><td class="c-md">${esc(c.fitter)}</td><td class="ac"><div class="acts r"><button class="mini" ${A('editCall',c.id)}>Edit</button><button class="mini" ${A('reportCall',c.id)}>Report</button><button class="mini del" ${A('del','calls',c.id)}>Delete</button></div></td></tr>`).join('')||'<tr><td colspan="8" class="empty">No service calls match.</td></tr>'}
+const SVC_ST=['Open','Booked','Awaiting parts','Complete'],SVC_CAT=['Misted or broken glass','Lock, handle or hinge','Leak or water coming in','Draught','Door or window sticking','Damage','Keys','Roof or conservatory','Other'],SVC_PR=['Urgent','Normal','Low'];
+const svcOpen=c=>c.status!='Complete',svcMine=c=>{const m=me();return !!m&&forPerson(m,c.fitter)};
+const SVCV=()=>[['open','Open',svcOpen],['today','Visits Today',c=>svcOpen(c)&&c.visit==today()],['urgent','Urgent',c=>svcOpen(c)&&c.priority=='Urgent'],['parts','Awaiting Parts',c=>c.status=='Awaiting parts'],['nobook','Not Booked',c=>svcOpen(c)&&!c.visit],['mine','My Calls',c=>svcOpen(c)&&svcMine(c)],['done','Complete',c=>!svcOpen(c)],['all','All',()=>true]];
+const svcTag=s=>`<span class="tag ${s=='Complete'?'g':s=='Booked'?'':s=='Awaiting parts'?'n':'y'}">${esc(s||'Open')}</span>`;
+function vService(){const U=UI.svc,V=SVCV(),f=(V.find(x=>x[0]==U.f)||V[0])[2],td=today(),O=S.calls.filter(svcOpen);
+  const L=S.calls.filter(c=>f(c)&&hit(c)).sort((a,b)=>svcOpen(b)-svcOpen(a)||SVC_PR.indexOf(a.priority)-SVC_PR.indexOf(b.priority)||String(a.visit||'9').localeCompare(String(b.visit||'9')));
+  const k=(t,n,key,cls)=>`<button class="kpi ${cls||''}" ${A('setUI','svc.f',key)}><small>${t}</small><b>${n}</b></button>`;
+  return `<div class="head"><div><h1>Service Calls</h1><span class="muted">${esc((V.find(x=>x[0]==U.f)||V[0])[1])}: ${L.length}</span></div><div class="tools"><button class="mini" ${A('svcDaySheet',td)}>Today's Day Sheet</button><button class="mini" onclick="svcReport()">Service Report</button><button class="btn" onclick="editCall()">New Service Call</button></div></div>
+  <div class="subbar"><span class="sb-l">Show</span><div class="views">${V.map(([key,n,fn])=>`<button class="chip ${U.f==key?'on':''}" ${A('setUI','svc.f',key)}>${esc(n)} <i>${S.calls.filter(fn).length}</i></button>`).join('')}</div></div>
+  <div class="kpis">${k('Open Calls',O.length,'open')}${k('Urgent',O.filter(c=>c.priority=='Urgent').length,'urgent',O.some(c=>c.priority=='Urgent')?'bad':'')}${k('Visits Today',O.filter(c=>c.visit==td).length,'today')}${k('Awaiting Parts',O.filter(c=>c.status=='Awaiting parts').length,'parts')}${k('Not Booked Yet',O.filter(c=>!c.visit).length,'nobook',O.some(c=>!c.visit)?'warn':'')}${k('Overdue Visits',O.filter(c=>c.visit&&c.visit<td).length,'open',O.some(c=>c.visit&&c.visit<td)?'bad':'')}</div>
+  <div class="tw"><table class="ptb abt"><thead><tr><th>Ref</th><th>Customer</th><th>Problem</th><th>Priority</th><th>Status</th><th class="c-sm">Visit</th><th class="c-md">Engineer</th><th class="ac"></th></tr></thead><tbody>
+  ${L.map(c=>`<tr class="clk-r" ${RC('editCall',c.id)}><td><b class="lref">${esc(c.id)}</b>${c.contract?`<small class="sub">${esc(c.contract)}</small>`:''}</td><td><b>${esc(c.name)}</b><small class="sub">${esc([c.town,c.phone].filter(Boolean).join(' · '))}</small></td><td><span class="cl2">${esc(c.issue)}</span><small class="sub">${esc(c.cat||'')}${c.cat&&c.photos&&c.photos.length?' · ':''}${phCount(c.photos)}</small></td><td>${prTag(c.priority)}</td><td>${svcTag(c.status)}</td><td class="c-sm">${c.visit?`<b class="${svcOpen(c)&&c.visit<td?'od':''}">${fd(c.visit)}</b>${c.visitTime?`<small class="sub">${esc(c.visitTime)}</small>`:''}`:'<span class="muted">Not booked</span>'}</td><td class="c-md">${esc(c.fitter||'-')}</td><td class="ac"><div class="acts r"><button class="mini" ${A('reportCall',c.id)}>Report</button>${ISOWN()?`<button class="mini del" ${A('del','calls',c.id)}>Delete</button>`:''}</div></td></tr>`).join('')||'<tr><td colspan="8" class="empty">No service calls here.</td></tr>'}
   </tbody></table></div>`}
-function editCall(id,cid){const c=S.calls.find(x=>x.id==id),k=S.contracts.find(x=>x.id==cid)||{};if(cid)go('service');
-  form(c?'Edit '+c.id:'New Service Call',[{k:'name',l:'Customer',req:1},{k:'town',l:'Town'},{k:'contract',l:'Contract ref',max:30},{k:'fitter',l:'Fitter',t:'select',o:FITL()},{k:'issue',l:'Issue',t:'area',w:'full',req:1},{k:'priority',l:'Priority',t:'select',o:['Urgent','Normal','Low']},{k:'status',l:'Status',t:'select',o:['Open','Booked','Complete']},{k:'visit',l:'Visit date',t:'date'},{k:'notes',l:'Work done / notes',t:'area',w:'full'}],c||{name:k.name||'',town:k.town||'',contract:k.id||'',priority:'Normal',status:'Open',fitter:FIT[2]},o=>{if(c)Object.assign(c,o);else S.calls.unshift({id:nid('S',S.calls),...o});audit(c?'Service call edited':'Service call added',c?c.id:o.name,'')},true)}
-function reportCall(id,mode){const c=S.calls.find(x=>x.id==id);if(!c)return;
-  if(!mode){docChoice('Service Call '+c.id,'reportCall('+JSON.stringify(id)+',"c")','reportCall('+JSON.stringify(id)+',"i")');return}
-  if(mode=='c'){printDoc('Service Visit Report',c.status=='Complete'?'Work completed':'Visit '+(c.visit?fdl(c.visit):'to be arranged'),[['Your contract',c.contract],['Issue reported',c.issue],['Visit date',c.visit?fdl(c.visit):'To be arranged'],['Engineer',c.fitter||'To be confirmed'],['Work carried out',c.notes||'To be completed on the visit'],['Status',c.status]],c.photos,{customer:{name:c.name,address:c.town},kind:'Service visit',ref:c.id,sign:true,thanks:'If the problem comes back or anything else needs attention, call us and quote reference '+c.id+'.'});return}
-  printDoc('Service call '+c.id,c.name+(c.town?' · '+c.town:''),[['Contract',c.contract],['Issue',c.issue],['Visit',c.visit?fdl(c.visit):''],['Engineer',c.fitter],['Work done',c.notes]],c.photos,{kind:'Service sheet',ref:c.id,kpis:[['Priority',c.priority],['Status',c.status]],sign:true,barcode:c.id})}
+/* the call sheet: who rang, what is wrong, who is going, what was done */
+const SVCF=()=>[{t:'h',l:'The Call'},{k:'takenBy',l:'Call taken by',t:'select',o:['',...staffNames().filter(Boolean)],req:1},{k:'takenAt',l:'Date taken',t:'date',req:1},{k:'takenTime',l:'Time taken',t:'time'},
+  {k:'name',l:'Customer',req:1},{k:'phone',l:'Phone',t:'tel',max:30},{k:'email',l:'Email',t:'email'},{k:'address',l:'Address',w:'full',max:200},{k:'town',l:'Town'},{k:'contract',l:'Contract number',max:30,hint:'Fills in the customer when it matches a contract'},
+  {t:'h',l:'The Problem'},{k:'cat',l:'Type of problem',t:'select',o:['',...SVC_CAT],req:1},{k:'priority',l:'Priority',t:'select',o:SVC_PR},{k:'issue',l:'What is wrong (in their words)',t:'area',w:'full',req:1},{k:'guarantee',l:'Under guarantee?',t:'select',o:['','Yes','No','Not sure']},
+  {t:'h',l:'The Visit'},{k:'fitter',l:'Service engineer attending',t:'select',o:['',...FITL()]},{k:'status',l:'Status',t:'select',o:SVC_ST},{k:'visit',l:'Visit date',t:'date'},{k:'visitTime',l:'Visit time',t:'time'},{k:'arrived',l:'Arrived on site',t:'time'},{k:'left',l:'Left site',t:'time'},
+  {t:'h',l:'Work Done'},{k:'notes',l:'Work carried out',t:'area',w:'full'},{k:'parts',l:'Parts used or ordered',t:'area',w:'full',max:400},{k:'followUp',l:'Another visit needed?',t:'select',o:['','No','Yes']},{k:'followNote',l:'What the next visit is for',max:200},
+  {k:'charge',l:'Charge to customer (£)',t:'number',hint:'Leave at 0 if covered by the guarantee'},{k:'signed',l:'Customer signed off?',t:'select',o:['','Yes','No']},{k:'doneAt',l:'Date completed',t:'date'}];
+function editCall(id,cid){const c=S.calls.find(x=>x.id==id),k=S.contracts.find(x=>x.id==cid)||{};if(cid)go('service');if(id&&!c)return;
+  const v=c||{name:k.name||'',phone:telOf(k)||'',email:mailOf(k)||'',address:addrOf(k)||'',town:k.town||'',contract:k.id||'',priority:'Normal',status:'Open',takenBy:USER,takenAt:today(),takenTime:new Date().toTimeString().slice(0,5),guarantee:k.id?'Yes':''};
+  form(c?'Service Call '+c.id:'New Service Call',SVCF(),v,o=>{if(o.status=='Complete'&&!o.doneAt)o.doneAt=today();if(o.visit&&o.status=='Open')o.status='Booked';
+    if(c){Object.assign(c,o);audit('Service call edited',c.id,o.status)}else{const n={id:nid('S',S.calls),...o};S.calls.unshift(n);audit('Service call added',n.id,o.name)}},true,'lg');
+  setTimeout(()=>{const ct=$('#f_contract');if(ct)ct.addEventListener('change',()=>{const x=S.contracts.find(z=>z.id==ct.value.trim());if(!x)return;[['name',x.name],['phone',telOf(x)],['email',mailOf(x)],['address',addrOf(x)],['town',x.town]].forEach(([f,val])=>{const e=$('#f_'+f);if(e&&!e.value&&val)e.value=val});const g=$('#f_guarantee');if(g&&!g.value)g.value='Yes';toast('Filled in from contract '+x.id)})},30)}
+function reportCall(id,mode){const c=S.calls.find(x=>x.id==id);if(!c)return;const j=JSON.stringify(id);
+  if(!mode){docChoice('Service Call '+c.id,'reportCall('+j+',"c")','reportCall('+j+',"i")');return}
+  const when=c.visit?fdl(c.visit)+(c.visitTime?' at '+c.visitTime:''):'To be arranged',onsite=c.arrived?c.arrived+(c.left?' to '+c.left:''):'';
+  if(mode=='c'){printDoc('Service Visit Report',c.status=='Complete'?'Work completed':'Visit '+when,[['Your contract',c.contract],['Problem reported',c.issue],['Type of problem',c.cat],['Visit',when],['Engineer',c.fitter||'To be confirmed'],['Work carried out',c.notes||'To be completed on the visit'],['Parts',c.parts],['Another visit',c.followUp=='Yes'?(c.followNote||'Yes, we will be in touch to book it'):''],['Charge',+c.charge>0?money(c.charge):c.guarantee=='Yes'?'Covered by your guarantee':''],['Status',c.status]],c.photos,{customer:{name:c.name,address:[c.address,c.town].filter(Boolean).join(', ')},kind:'Service visit',ref:c.id,sign:true,thanks:'If the problem comes back or anything else needs attention, call us and quote reference '+c.id+'.'});return}
+  printDoc('Service Call '+c.id,c.name+(c.town?' · '+c.town:''),[['Phone',c.phone],['Address',[c.address,c.town].filter(Boolean).join(', ')],['Contract',c.contract],['Call taken',[c.takenAt?fd(c.takenAt):'',c.takenTime,c.takenBy?'by '+c.takenBy:''].filter(Boolean).join(' ')],['Type of problem',c.cat],['Problem',c.issue],['Under guarantee',c.guarantee],['Visit',when],['Engineer',c.fitter],['On site',onsite],['Work done',c.notes],['Parts',c.parts],['Another visit',c.followUp=='Yes'?c.followNote||'Yes':c.followUp],['Charge',+c.charge>0?money(c.charge):''],['Customer signed off',c.signed],['Completed',c.doneAt?fd(c.doneAt):'']],c.photos,{kind:'Service sheet',ref:c.id,kpis:[['Priority',c.priority],['Status',c.status],['Engineer',c.fitter||'-']],sign:true,barcode:c.id})}
+/* printable list of every visit on a day, one table per engineer */
+function svcDaySheet(d){d=SAFE.date(d)||today();const V=S.calls.filter(c=>c.visit==d&&svcOpen(c)).sort((a,b)=>String(a.visitTime||'99').localeCompare(String(b.visitTime||'99')));
+  if(!V.length){toast('No service visits booked for '+fd(d));return}const G={};V.forEach(c=>{(G[c.fitter||'No engineer yet']=G[c.fitter||'No engineer yet']||[]).push(c)});
+  printDoc('Engineer Day Sheet',fdl(d),[],[],{kind:'Day sheet',sections:Object.entries(G).map(([e,L])=>({t:e+' ('+L.length+' visit'+(L.length>1?'s':'')+')',kpis:[],bars:[],tables:[{t:'Visits',h:['Time','Ref','Customer','Address','Phone','Problem','Priority','Parts'],r:L.map(c=>[c.visitTime||'-',c.id,c.name,[c.address,c.town].filter(Boolean).join(', '),c.phone||'',c.issue,c.priority,c.parts||''])}]}))});audit('Day sheet printed','Service',fd(d))}
+function svcReport(){const d=R.service();printDoc('Service Report',new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'}),[],[],{kind:'Report',sections:[d]})}
 
 /* ---------------- contact book ---------------- */
 function vContacts(){const F=UI.con.f,L=S.contacts.filter(c=>(F=='all'||c.type==F)&&hit(c)).sort((a,b)=>(a.co||a.name||'').localeCompare(b.co||b.name||'')),letter=c=>{const x=((c.co||c.name||'#').trim()[0]||'#').toUpperCase();return /[A-Z]/.test(x)?x:'#'};
@@ -3410,7 +3491,7 @@ function ieSave(){const mode=ieMode,o=readFields(ieFields());if(!o)return;
   const kind=mode,ex=S.items.find(x=>ikey(x)==ikey(o)),pid=ex?ex.pid:stkId(),cur=ex?ex.stock:0;
   if(kind=='remove'&&!ex){toast('That item (with this length and colours) is not in stock yet');return}
   if(kind=='add'&&!ex&&!o.supplier){toast('Pick a supplier for a new product');return}
-  if(kind=='remove'&&o.qty>cur&&!confirm('Only '+cur+' in stock. Remove all '+cur+'?'))return;
+  if(kind=='remove'&&o.qty>cur){askIn('Only '+cur+' in stock','Remove all '+cur+' instead?','Remove '+cur,()=>{const q=$('#f_qty');if(q){q.value=cur;ieSave()}});return}
   const st=kind=='add'?cur+o.qty:kind=='remove'?Math.max(0,cur-o.qty):cur;
   const base={pid,item:o.item,unit:o.unit,length:o.length||'-',cInName:o.cInName||'-',cIn:o.cInNameHex,cOutName:o.cOutName||'-',cOut:o.cOutNameHex,cost:o.cost||(ex?ex.cost:0),location:o.location||(ex?ex.location:'-'),barcode:bc||(ex?ex.barcode:''),supplier:o.supplier||(ex?ex.supplier:''),reorder:o.reorder!=null&&kind!='remove'?o.reorder:(ex?ex.reorder:0),lead:o.lead||(ex?ex.lead:undefined),reorderQty:o.reorderQty||(ex&&ex.reorderQty),notes:o.notes||(ex&&ex.notes)};
   if(kind!='request')prodRows(pid).forEach(x=>{x.stock=st;['supplier','location','unit','lead','reorderQty','notes'].forEach(f=>{if(o[f])x[f]=o[f]});if(kind=='add'){x.reorder=base.reorder;if(o.cost)x.cost=o.cost}if(bc)x.barcode=bc});
@@ -3675,10 +3756,15 @@ const R={
     const k=[['Contracts',C.length],['Live',C.filter(c=>c.stage!='Complete').length],['Total value',m0(v)],['Average value',m0(C.length?v/C.length:0)]];if(Ad)k.push(['Collected',m0(p),pc(p,v)],['Outstanding',m0(v-p)],['Average margin',wc.length?Math.round(mg*100)+'%':'n/a']);
     return{t:'Contracts',kpis:k,bars:[bar('Value by stage',CSTAGES.map(s=>[s,sum(C.filter(c=>c.stage==s),c=>c.value),m0])),bar('Value by fitter',grp(C,c=>c.fitter).map(([f,x])=>[f,sum(x,c=>c.value),m0])),...(Ad?[bar('Outstanding balance by customer',[...C].filter(c=>c.value>c.paid).sort((a,b)=>(b.value-b.paid)-(a.value-a.paid)).slice(0,8).map(c=>[c.name,c.value-c.paid,m0]))]:[])],
       tables:[{t:'Contract book',h:['Ref','Customer','Town','Product','Stage','Fitter','Fit date','Value',...(Ad?['Paid','Balance','Paid %','Margin']:[])],r:C.map(c=>[c.id,c.name,c.town,c.product,c.stage,c.fitter||'',c.fit?fd(c.fit):'Not set',m0(c.value),...(Ad?[m0(c.paid),m0(c.value-c.paid),pc(c.paid,c.value),c.cost&&c.value?Math.round(100*(c.value-c.cost)/c.value)+'%':'n/a']:[])])},{t:'By town',h:['Town','Contracts','Value'],r:grp(C,c=>c.town).map(([t,x])=>[t,x.length,m0(sum(x,c=>c.value))])}]}},
-  service(){const C=S.calls,td=today(),o=C.filter(c=>c.status!='Complete'),rep=grp(C,c=>c.name).filter(([,x])=>x.length>1);
-    return{t:'Service calls',kpis:[['Total calls',C.length],['Open',o.length],['Urgent open',o.filter(c=>c.priority=='Urgent').length],['Visits booked',o.filter(c=>c.visit&&c.visit>=td).length],['Overdue visits',o.filter(c=>c.visit&&c.visit<td).length],['Repeat customers',rep.length]],
-      bars:[bar('Calls by priority',['Urgent','Normal','Low'].map(p=>[p,C.filter(c=>c.priority==p).length,String])),bar('Calls by status',grp(C,c=>c.status).map(([s,x])=>[s,x.length,String])),bar('Open calls by fitter',grp(o,c=>c.fitter).map(([f,x])=>[f,x.length,String]))],
-      tables:[{t:'Service log',h:['Ref','Customer','Town','Issue','Priority','Status','Visit','Fitter','Contract'],r:C.map(c=>[c.id,c.name,c.town,c.issue,c.priority,c.status,c.visit?fd(c.visit):'Not booked',c.fitter||'',c.contract||''])},{t:'Calls by town',h:['Town','Calls','Open'],r:grp(C,c=>c.town).map(([t,x])=>[t,x.length,x.filter(c=>c.status!='Complete').length])}]}},
+  service(){const C=S.calls,td=today(),o=C.filter(c=>c.status!='Complete'),done=C.filter(c=>c.status=='Complete'),rep=grp(C,c=>c.name).filter(([,x])=>x.length>1);
+    const days=done.filter(c=>c.takenAt&&c.doneAt).map(c=>(new Date(c.doneAt)-new Date(c.takenAt))/864e5),avg=days.length?Math.round(sum(days,x=>x)/days.length*10)/10:null;
+    return{t:'Service calls',kpis:[['Total calls',C.length],['Open',o.length],['Urgent open',o.filter(c=>c.priority=='Urgent').length],['Visits booked',o.filter(c=>c.visit&&c.visit>=td).length],['Overdue visits',o.filter(c=>c.visit&&c.visit<td).length],['Not booked yet',o.filter(c=>!c.visit).length],['Awaiting parts',o.filter(c=>c.status=='Awaiting parts').length],['Average days to fix',avg==null?'-':String(avg)],['Charged to customers',m0(sum(C,c=>+c.charge||0))],['Repeat customers',rep.length]],
+      bars:[bar('Calls by type of problem',grp(C,c=>c.cat||'Not set').map(([s,x])=>[s,x.length,String])),bar('Open calls by engineer',grp(o,c=>c.fitter||'Not assigned').map(([f,x])=>[f,x.length,String])),bar('Calls by priority',['Urgent','Normal','Low'].map(p=>[p,C.filter(c=>c.priority==p).length,String])),bar('Calls by status',grp(C,c=>c.status).map(([s,x])=>[s,x.length,String])),bar('Calls taken by',grp(C,c=>c.takenBy||'Not recorded').map(([s,x])=>[s,x.length,String]))],
+      tables:[{t:'Open calls',h:['Ref','Customer','Town','Problem','Priority','Status','Visit','Engineer'],r:o.map(c=>[c.id,c.name,c.town,c.issue,c.priority,c.status,c.visit?fd(c.visit):'Not booked',c.fitter||''])},
+        {t:'Awaiting parts',h:['Ref','Customer','Parts','Engineer'],r:o.filter(c=>c.status=='Awaiting parts').map(c=>[c.id,c.name,c.parts||'',c.fitter||''])},
+        {t:'Needs another visit',h:['Ref','Customer','What for','Engineer'],r:C.filter(c=>c.followUp=='Yes').map(c=>[c.id,c.name,c.followNote||'',c.fitter||''])},
+        {t:'Service log',h:['Ref','Customer','Town','Problem','Taken by','Priority','Status','Visit','Engineer','Contract'],r:C.map(c=>[c.id,c.name,c.town,c.issue,c.takenBy||'',c.priority,c.status,c.visit?fd(c.visit):'Not booked',c.fitter||'',c.contract||''])},
+        {t:'Calls by town',h:['Town','Calls','Open'],r:grp(C,c=>c.town).map(([t,x])=>[t,x.length,x.filter(c=>c.status!='Complete').length])}]}},
   stock(){const P=products(),mv=S.items,Ad=ISADM();
     return{t:'Stock',kpis:[['Stock lines',P.length],['Units in stock',sum(P,r=>r.stock)],...(Ad?[['Stock value',m0(sum(P,r=>r.stock*r.cost))]]:[]),['Low stock lines',P.filter(isLow).length],['Movements logged',mv.length],['Pending requests',mv.filter(r=>r.type=='request'&&r.reqStatus=='Pending').length]],
       bars:[...(Ad?[bar('Value by item',grp(P,r=>r.item).map(([i,x])=>[i,sum(x,r=>r.stock*r.cost),m0]).sort((a,b)=>b[1]-a[1]).slice(0,8))]:[]),bar('Movements by person',grp(mv,r=>r.user).map(([u,x])=>[u,x.length,String]).sort((a,b)=>b[1]-a[1]))],
@@ -3889,10 +3975,11 @@ function backupDl(){if(!need(ISOWN,'Backups'))return;audit('Backup downloaded','
 function backupLoad(inp){if(!need(ISOWN,'Restoring backups'))return;const f=inp.files[0];inp.value='';if(!f)return;if(f.size>20e6){toast('That file is too large');return}
   f.text().then(t=>{let n;try{n=JSON.parse(t)}catch(e){toast('That is not a valid backup file');return}
     const ok=n&&typeof n=='object'&&['items','leads','contracts','calls','staff'].every(k=>Array.isArray(n[k]));if(!ok){toast('That file is not a Broadland CRM backup');return}
-    if(!confirm('Replace ALL current data with this backup? Your current data is kept as a safety copy in this browser.'))return;
+    askIn('Replace all data with this backup?','Your current data is kept as a safety copy in this browser.','Replace',()=>backupApply(n),true)})}
+function backupApply(n){if(!need(ISOWN,'Restoring backups'))return;{
     try{localStorage.setItem(KEY+'_before_restore',JSON.stringify(S))}catch(e){}
     n.sec=S.sec;delete n.__proto__;delete n.constructor;/* a backup never brings its own PINs */
-    try{const j=JSON.stringify(n);sdb().then(d=>{const t=d.transaction('s','readwrite');t.objectStore('s').put(j,KEY);t.oncomplete=()=>{try{localStorage.removeItem(KEY)}catch(e){}location.reload()}}).catch(()=>toast('Could not restore here'))}catch(e){toast('Could not restore here')}})}
+    try{const j=JSON.stringify(n);sdb().then(d=>{const t=d.transaction('s','readwrite');t.objectStore('s').put(j,KEY);t.oncomplete=()=>{try{localStorage.removeItem(KEY)}catch(e){}location.reload()}}).catch(()=>toast('Could not restore here'))}catch(e){toast('Could not restore here')}}}
 
 /* ==========================================================================
    14 · Notification centre: stock requests, alerts, stock in/out, mentions
@@ -4070,15 +4157,13 @@ function recOpen(kind,id){const D=REC[kind],r=id?D.get(id):null;if(id&&!r)return
   openModal(`<div class="rw">
    <div class="rw-bar"><button class="rb1 sv" onclick="recSave(false)">${svg('M5 12l5 5L20 7')}Save</button>${W.isNew?'':D.actions(W)}<span class="rw-sp"></span>
     ${W.isNew||W.list.length<2?'':`<button class="rb1" title="Save this one and open the previous ${esc(D.label.toLowerCase())}" ${A('recNav',-1)} ${pos<=0?'disabled':''}>&lsaquo; Previous</button><span class="rw-pos">${esc(D.label)} ${pos+1} of ${W.list.length}</span><button class="rb1" title="Save this one and open the next ${esc(D.label.toLowerCase())}" ${A('recNav',1)} ${pos>=W.list.length-1?'disabled':''}>Next &rsaquo;</button>`}
-    <button class="rb1 actb ${actOpen()?'on':''}" onclick="actToggle()" aria-pressed="${actOpen()}">${svg('M12 8v4l3 2M12 3a9 9 0 100 18 9 9 0 000-18')}Activity</button>
     <button class="rb1 cl" onclick="recClose()">${svg('M6 6l12 12M18 6L6 18')}Close</button></div>
    <div class="rw-h"><div><small>${esc(D.label)}${W.isNew?' · New':''}</small><h2>${esc(D.heading(W))}</h2>${W.isNew?'':`<div class="rw-hc">${telOf(W.v)?`<a class="nocap" href="tel:${esc(telOf(W.v).replace(/[^\d+]/g,''))}">${svg('M5 4h4l2 5-2.5 1.5a11 11 0 005 5L15 13l5 2v4a2 2 0 01-2 2A16 16 0 013 6a2 2 0 012-2')}${esc(telOf(W.v))}</a>`:''}${mailOf(W.v)?`<a class="nocap" href="mailto:${esc(mailOf(W.v))}">${svg('M4 6h16v12H4zM4 7l8 6 8-6')}${esc(mailOf(W.v))}</a>`:''}${W.v.town?`<span>${svg('M12 21s-7-6-7-11a7 7 0 0114 0c0 5-7 11-7 11zM12 12a2 2 0 100-4 2 2 0 000 4z')}${esc(W.v.town)}</span>`:''}</div>`}</div><div class="rw-hk">${D.headStats(W)}</div></div>
    <div class="rw-path" id="rwStg"></div>
-   <div class="rw-x ${actOpen()?'act-on':''}"><aside class="rw-rail"><div class="rw-prog"><span id="rwPct"></span><i><b id="rwBar"></b></i></div>
+   <div class="rw-x"><aside class="rw-rail"><div class="rw-prog"><span id="rwPct"></span><i><b id="rwBar"></b></i></div>
      <div class="rw-next" id="rwNextUp"></div><p class="rw-grp">Steps</p><ol class="rw-steps">${tabs.map((t,i)=>`${i&&opt(t.k)&&!opt(tabs[i-1].k)?'</ol><p class="rw-grp">Extras <span>if needed</span></p><ol class="rw-steps">':''}<li><button type="button" data-t="${t.k}" class="${t.k==tab?'on':''}" ${A('recTab',t.k)}><i>${i+1}</i><span><b>${esc(nm(t.k))}</b><small data-st="${t.k}"></small></span></button></li>`).join('')}</ol></aside>
     <div class="rw-main"><div class="rw-b">${tabs.map((t,i)=>`<div class="rw-p ${t.k==tab?'on':''}" data-t="${t.k}" role="tabpanel"><div class="rw-sh"><small>Step ${i+1} of ${tabs.length}</small><h3>${esc(nm(t.k))}</h3><p>${esc(hint(t.k))}</p>${t.k=='customer'||t.k=='details'?`<p class="rw-req">Boxes marked <span class="rq">*</span> must be filled in. Boxes with ${MARK(0,1)} can only be changed by an administrator.</p>`:''}<div class="rw-todo" data-td="${t.k}" aria-live="polite"></div></div>${t.h(W)}</div>`).join('')}</div>
-     <div class="rw-foot"><button type="button" class="btn ghost" id="rwPrev" onclick="recStep(-1)"></button><span class="rw-sp"></span><button type="button" class="btn ghost" onclick="recSave(false)">Save</button><button type="button" class="btn" id="rwNext" onclick="recStep(1)"></button></div></div>
-    <aside class="rw-act" id="rwAct" aria-label="Activity"></aside></div></div>`,'full');
+     <div class="rw-foot"><button type="button" class="btn ghost" id="rwPrev" onclick="recStep(-1)"></button><span class="rw-sp"></span><button type="button" class="btn ghost" onclick="recSave(false)">Save</button><button type="button" class="btn" id="rwNext" onclick="recStep(1)"></button></div></div></div></div>`,'full');
   W.nm=nm;recThumbs();recDocs();recFoot();recRail();stgDraw();actDraw();
   if(!W.isNew){const todo=W.steps.find(k=>{const b=$(`#mbox .rw-steps button[data-t="${k}"]`);return b&&!b.classList.contains('ok')&&!REC_OPTIONAL.includes(k)});recTab(todo||W.steps[0])}grpInit($('#mbox .rw-p.on'));
   $('#mbox .rw-x').addEventListener('change',e=>{const g=e.target.closest&&e.target.closest('.rg.gc');if(g)grpRefresh(g)});$('#mbox .rw-x').addEventListener('input',()=>{RW.dirty=1;clearTimeout(recRail.t);recRail.t=setTimeout(recRail,250)});$('#mbox .rw-x').addEventListener('change',e=>{RW.dirty=1;const c=e.target;if(c.classList&&c.classList.contains('rck')){const w=c.parentElement.querySelector('.ck-w');if(w)w.textContent=c.checked?'Done today by '+USER:''}recRail()});
@@ -4139,7 +4224,9 @@ function stgDraw(){if(!RW)return;const L=STG[RW.kind],cur=stgCur(),i=L.findIndex
   if(nu&&nu.dataset.h!==g){nu.dataset.h=g;nu.innerHTML=g}}
 function stgSet(st){if(!RW)return;const e=$('#f_stage'),cur=stgCur();if(!e||st==cur)return;
   if(![...e.options].some(o=>o.value==st)){toast('That stage is not available');return}
-  const nm=stgOf(st).n;if(!confirm('Move this '+REC[RW.kind].label.toLowerCase()+' to '+nm+'? It will be saved.'))return;
+  const nm=stgOf(st).n,lab=REC[RW.kind].label.toLowerCase(),bad=st=='Lost';
+  askIn(st=='Won'?'Mark this lead as won?':bad?'Mark this lead as lost?':'Move this '+lab+' to '+nm+'?',st=='Won'?'Next you can turn it into a contract. It is saved straight away.':bad?'You can reopen it later if they come back. It is saved straight away.':'It is saved straight away.',st=='Won'?'Yes, Won':bad?'Yes, Lost':'Move To '+nm,()=>stgGo(st,cur,nm),bad)}
+function stgGo(st,cur,nm){const e=$('#f_stage');if(!RW||!e)return;
   e.value=st;e.dispatchEvent(new Event('change',{bubbles:true}));
   if(RW.kind=='contract')RW.v.log.unshift({t:'Stage',n:(cur||'-')+' to '+st,by:USER,at:today()});
   if(st=='Won'||st=='Lost'){const p=$('#f_prob');if(p)p.value=st=='Won'?100:0}
@@ -4163,7 +4250,7 @@ function recRedraw(t){const D=REC[RW.kind],x=D.tabs(RW).find(z=>z.k==t),p=$(`#mb
 function recRead(){const D=REC[RW.kind],o=readFields(D.fields(RW));if(!o)return null;
   const at={...(RW.v.chkAt||{})};$$('#mbox .rck').forEach(c=>{const k=c.dataset.k;(o.chk=o.chk||{})[k]=c.checked;if(c.checked&&!at[k])at[k]={d:today(),by:USER};if(!c.checked)delete at[k]});o.chkAt=at;
   o.phTags=(RW.v.phTags||[]).slice(0,MAX_PHOTOS);if($('#mbox .pl'))o.lines=readLines();if($('#mbox .op')||RW.v.openings)o.openings=$('#mbox .op')?readOps():RW.v.openings;o.photos=tmp.slice(0,MAX_PHOTOS);return o}
-function recSave(close){busyBtn($('#mbox .rw-bar .sv'));const D=REC[RW.kind],o=recRead();if(!o){const a=document.activeElement,p=a&&a.closest&&a.closest('.rw-p');if(p&&!p.classList.contains('on')){recTab(p.dataset.t);setTimeout(()=>a.focus(),30)}return false}const e=D.check&&D.check(RW,o);if(e){toast(e.replace(/ \(.*step\)$/,''));if(/Customer step/.test(e)){recTab('customer');if(/phone/i.test(e)){const f=$('#f_mob1')||$('#f_home1');if(f)fieldErr(f,'Fill in at least one phone number')}else if(/name/i.test(e)){const f=$('#f_name');if(f)fieldErr(f,'Type the customer name')}}return false}
+function recSave(close){busyBtn($('#mbox .rw-bar .sv'));RW.closeAfter=close;const D=REC[RW.kind],o=recRead();if(!o){const a=document.activeElement,p=a&&a.closest&&a.closest('.rw-p');if(p&&!p.classList.contains('on')){recTab(p.dataset.t);setTimeout(()=>a.focus(),30)}return false}const e=D.check&&D.check(RW,o);if(e=='ASK')return false;if(e){toast(e.replace(/ \(.*step\)$/,''));if(/Customer step/.test(e)){recTab('customer');if(/phone/i.test(e)){const f=$('#f_mob1')||$('#f_home1');if(f)fieldErr(f,'Fill in at least one phone number')}else if(/name/i.test(e)){const f=$('#f_name');if(f)fieldErr(f,'Type the customer name')}}return false}
   const id=D.save(RW,o);store();if(close){closeModal();render()}else{render();recOpen(RW.kind,id)}toast('Saved');return true}
 function recNav(d){const L=RW.list,i=L.indexOf(RW.id),n=d=='first'?0:d=='last'?L.length-1:i+d;if(n<0||n>=L.length)return;const kind=RW.kind;if(RW.dirty&&!recSave(false))return;recOpen(kind,L[n])}
 /* small inline lists inside a record */
@@ -4203,7 +4290,8 @@ async function recDocUp(inp){if(RW.isNew){toast('Save the record first, then add
 async function recDocType(id,v){const f=(RW.docs||[]).find(x=>x.id==id);if(!f)return;f.cat=DOCTYPES.includes(v)?v:'Other';await fx('readwrite',s=>s.put(f));recDocs()}
 function recDocOpen(id){const f=(RW.docs||[]).find(x=>x.id==id);if(!f)return;if(/^(application\/pdf|image\/(png|jpe?g|gif|webp)|text\/plain)/.test(f.blob.type))window.open(URL.createObjectURL(f.blob),'_blank','noopener');else download(f.name,f.blob)}
 function recDocDl(id){const f=(RW.docs||[]).find(x=>x.id==id);if(f)download(f.name,f.blob)}
-function recDocDel(id){const f=(RW.docs||[]).find(x=>x.id==id);if(!f)return;const w=RW;if(!confirm('Remove '+f.name+'? It is deleted from this device.'))return;fx('readwrite',s=>s.delete(id)).then(()=>{audit('Document removed',recRef(),f.name);store();recDocs()})}
+function recDocDel(id){const f=(RW.docs||[]).find(x=>x.id==id);if(!f)return;askIn('Remove '+f.name+'?','It is deleted from this device.','Remove',()=>recDocGo(f),true)}
+function recDocGo(f){fx('readwrite',s=>s.delete(f.id)).then(()=>{audit('Document removed',recRef(),f.name);store();recDocs()})}
 /* when a lead becomes a contract, its documents move with it */
 async function docsMove(from,to){try{const L=((await fx('readonly',s=>s.getAll()))||[]).filter(f=>f.ref==from);for(const f of L){f.ref=to;await fx('readwrite',s=>s.put(f))}}catch(e){}}
 const logTab=(W,tab)=>`<div class="rcols"><section class="rg"><h4>Notes</h4>${rfH({k:'notes',l:'General notes',t:'area',rows:8},W.v)}</section>
@@ -4275,7 +4363,7 @@ REC.lead={label:'Lead',
   get:id=>S.leads.find(l=>l.id==id),order:()=>leadList().map(l=>l.id),
   blank:()=>({id:nextLeadId(),created:today(),stage:'New',source:'Website',owner:USER,takenBy:USER,invSame:'Same as home',siteSame:'Same as home',addrType:'Home',log:[],appts:[],chk:{}}),
   heading:W=>`${W.v.id}  ${[W.v.title,W.v.name].filter(Boolean).join(' ')||'New lead'}${W.v.company?' · '+W.v.company:''}`,
-  headStats:W=>`${leadTag(W.v.stage||'New')}<span><small>Net Value</small><b>${m0(W.v.value)}</b></span><span><small>Next Action</small><b>${W.v.followup?fd(W.v.followup):'-'}</b></span>`,
+  headStats:W=>`<span><small>Net Value</small><b>${m0(W.v.value)}</b></span><span><small>Next Action</small><b>${W.v.followup?fd(W.v.followup):'-'}</b></span>`,
   actions:W=>`<button class="rb1" ${A('reportCust','lead',W.id)}>${svg(IC.reports)}Customer sheet</button>${canSee('contracts')&&W.v.stage!='Lost'?`<button class="rb1 go" ${A('recConvert')}>${svg('M5 12h14M13 6l6 6-6 6')}Convert to contract</button>`:''}${ISOWN()?`<button class="rb1 dl" ${A('delLead',W.id)}>${svg('M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3')}Delete</button>`:''}`,
   fields:W=>[...LEADF(W),...CUSTF,...GDPRF,...APPTF,{k:'notes',l:'Notes',t:'area'}],
   tabs:W=>[{k:'details',t:'Details',h:W=>`<div class="rcols">${byGroup(LEADF(W),W.v)}</div>`},
@@ -4310,7 +4398,7 @@ REC.contract={label:'Contract',
   get:id=>S.contracts.find(c=>c.id==id),order:()=>ctrList().map(c=>c.id),
   blank:()=>({id:nid('C',S.contracts),cdate:today(),stage:'Deposit due',fitter:'',vatRate:String(CO.vat??'20'),contractType:CTYPES[0],soldBy:USER,createdBy:USER,invSame:'Same as home',siteSame:'Same as home',addrType:'Home',pay:[],chk:{},lines:[],log:[]}),
   heading:W=>`${W.v.id}  ${[W.v.title,W.v.name].filter(Boolean).join(' ')||'New contract'}${W.v.company?' · '+W.v.company:''}`,
-  headStats:W=>`${stTag(W.v.stage||'Deposit due')}${W.v.flash?`<span class="flash">${esc(W.v.flash)}</span>`:''}<span><small>Value</small><b>${m0(W.v.value)}</b></span><span><small>Balance</small><b>${m0((+W.v.value||0)-(+W.v.paid||0))}</b></span><span><small>Fit</small><b>${W.v.fit?fd(W.v.fit):'-'}</b></span>`,
+  headStats:W=>`${W.v.flash?`<span class="flash">${esc(W.v.flash)}</span>`:''}<span><small>Value</small><b>${m0(W.v.value)}</b></span><span><small>Paid</small><b>${m0(W.v.paid)}</b></span><span class="${(+W.v.value||0)-(+W.v.paid||0)>0?'hk-due':'hk-ok'}"><small>Outstanding</small><b>${(+W.v.value||0)-(+W.v.paid||0)>0?m0((+W.v.value||0)-(+W.v.paid||0)):'Paid'}</b></span><span><small>Fit</small><b>${W.v.fit?fd(W.v.fit):'-'}</b></span>`,
   actions:W=>`<button class="rb1" ${A('reportContract',W.id)}>${svg(IC.reports)}Reports</button><button class="rb1" ${A('recCall')}>${svg(IC.service)}Service call</button>${ISOWN()?`<button class="rb1 dl" ${A('del','contracts',W.id)}>${svg('M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3')}Delete</button>`:''}`,
   fields:W=>[...CDETF(W),...CUSTF,...GDPRF,...CFINF(),...CFITF(),{k:'notes',l:'Notes',t:'area'}],
   tabs:W=>{const calls=S.calls.filter(c=>c.contract==W.v.id),dels=S.deliveries.filter(d=>d.contract==W.v.id);return[
@@ -4326,7 +4414,7 @@ REC.contract={label:'Contract',
     {k:'docs',t:'Photos & Docs',n:(W.v.photos||[]).length,h:photoTab},
     {k:'calls',t:'Service Calls',n:calls.length,h:W=>`<div class="rg wide"><h4><span>Service Calls</span><button class="mini pri" ${A('recCall')}>New service call</button></h4>${calls.map(c=>`<div class="row"><span><b>${esc(c.id)}</b> ${esc(c.issue)}<br><span class="muted">${esc(c.status)}, ${c.visit?'visit '+fd(c.visit):'no visit booked'}, ${esc(c.fitter||'')}</span></span>${prTag(c.priority)}</div>`).join('')||'<p class="empty">No service calls for this contract.</p>'}</div>`},
     {k:'gdpr',t:'GDPR',h:W=>`<div class="rcols">${grpH('Marketing Consent',GDPRF,W.v)}</div>`}]},
-  check:(W,o)=>{if(!o.name)return 'Customer name is needed (Customer step)';if(!PHONES.some(k=>o[k]))return 'Add at least one phone number (Customer step)';if(o.paid>o.value&&o.value>0&&!confirm('Paid is more than the contract value. Save anyway?'))return 'Not saved'},
+  check:(W,o)=>{if(!o.name)return 'Customer name is needed (Customer step)';if(!PHONES.some(k=>o[k]))return 'Add at least one phone number (Customer step)';if(o.paid>o.value&&o.value>0&&!W.okOver){askIn('Paid is more than the contract value','Save it anyway?','Save Anyway',()=>{W.okOver=1;recSave(W.closeAfter)});return 'ASK'}},
   save:(W,o)=>{const isNew=W.isNew,c=isNew?{id:W.v.id}:S.contracts.find(x=>x.id==W.id);if(!c)return;delete o.id;delete o.lead;delete o.createdBy;
     const np=(W.v.pay||[]).length-((c.pay||[]).length);if(np>0)audit('Payment recorded',c.id||W.v.id,np+' payment'+(np>1?'s':'')+', '+money(sum((W.v.pay||[]).slice(-np),x=>x.amt)));if(!ISADM())delete o.cost;Object.assign(c,o,{pay:W.v.pay||[],log:W.v.log||[],createdBy:c.createdBy||W.v.createdBy||USER});c.fitter=[1,2,3,4,5,6].map(i=>c['fitter'+i]).filter(Boolean).join(', ');if(isNew){if(S.contracts.some(x=>x.id==c.id))c.id=nid('C',S.contracts);S.contracts.unshift(c)}
     custCompat(c);audit(isNew?'Contract added':'Contract edited',c.id,c.name);return c.id}};
@@ -4368,11 +4456,12 @@ function finRe(){const P=$('#mbox .rw-p.on');if(P){delete P.dataset.ginit;grpIni
 function payFill(v){const e=$('#ra_amt');if(e){e.value=v;e.classList.remove('flash');void e.offsetWidth;e.classList.add('flash')}}
 function finKeep(){const cur=readFields(CFINF());if(!cur)return false;Object.assign(RW.v,cur);return true}
 function recPay(){if(!need(ISADM,'Recording payments'))return;const e=$('#ra_amt'),amt=SAFE.num(e.value,{max:1e7});if(!(amt>0)){fieldErr(e,'Type the amount paid');return}
-  if(!finKeep())return;const n=finNums();if(amt>n.bal+0.005&&n.val>0&&!confirm('That is more than the balance of '+money(n.bal)+'. Record it anyway?'))return;
+  if(!finKeep())return;const n=finNums();if(amt>n.bal+0.005&&n.val>0&&!recPay.ok){askIn('That is more than the balance','The balance is '+money(n.bal)+'. Record '+money(amt)+' anyway?','Record It',()=>{recPay.ok=1;recPay()});return}recPay.ok=0;
   RW.v.pay=RW.v.pay||[];RW.v.pay.push({amt,date:SAFE.date($('#ra_date').value)||today(),method:PAYM.includes($('#ra_method').value)?$('#ra_method').value:'Other',kind:PAYK.includes($('#ra_kind').value)?$('#ra_kind').value:'Other',ref:SAFE.text($('#ra_ref').value,60),by:USER});
   RW.v.paid=Math.round(((+RW.v.paid||0)+amt)*100)/100;RW.dirty=1;recRedraw('finance');finRe();actDraw();
   const b=$('#finSum .fin-big');if(b)b.classList.add('pop');toast(money(amt)+' payment added. Press Save to keep it.')}
-function recPayDel(i){if(!need(ISADM,'Removing payments'))return;const p=(RW.v.pay||[])[i];if(!p||!confirm('Remove the '+money(p.amt)+' payment from '+fd(p.date)+'?'))return;if(!finKeep())return;
+function recPayDel(i){if(!need(ISADM,'Removing payments'))return;const p=(RW.v.pay||[])[i];if(!p)return;askIn('Remove this payment?',money(p.amt)+' from '+fd(p.date)+'.','Remove',()=>recPayGo(i),true)}
+function recPayGo(i){const p=(RW.v.pay||[])[i];if(!p||!finKeep())return;
   RW.v.pay.splice(i,1);RW.v.paid=Math.max(0,Math.round(((+RW.v.paid||0)-p.amt)*100)/100);RW.dirty=1;recRedraw('finance');finRe();toast('Payment removed. Press Save to keep the change.')}
 function recCall(){if(!recSave(false))return;const id=RW.id;closeModal();editCall(null,id)}
 function recDelivery(){if(!recSave(false))return;const id=RW.id;closeModal();editDel();setTimeout(()=>{const e=$('#f_contract');if(e)e.value=id},30)}
@@ -4404,14 +4493,14 @@ function pipeSet(key,s){const U=UI[key];U.st=U.st==s?'':s;if(U.st)U.f='all';U.pa
 function stgPipe(kind){const key=kind=='lead'?'lead':'ctr',U=UI[key],L=kind=='lead'?[...STG.lead,STG_LOST]:STG.contract,R2=kind=='lead'?S.leads:S.contracts.filter(c=>c.cancelled!='Yes'),f0=L[0].s;
   return `<div class="pipe" role="group" aria-label="Stages">${L.map((x,i)=>{const B=R2.filter(r=>(r.stage||f0)==x.s),on=U.st==x.s;return `<button type="button" class="pp ${on?'on':''} ${x.s=='Lost'?'pl':''} ${x.s=='Won'||x.s=='Complete'?'pw':''}" aria-pressed="${on}" ${A('pipeSet',key,x.s)}><i>${x.s=='Lost'?'×':i+1}</i><span><b>${esc(x.n)}</b><small>${B.length} · ${m0(sum(B,r=>+r.value||0))}</small></span></button>`}).join('')}</div>
    ${U.st?`<p class="pipe-f">Showing only <b>${esc((L.find(x=>x.s==U.st)||{}).n||U.st)}</b> <button type="button" class="mini" ${A('pipeSet',key,U.st)}>Show all stages</button></p>`:''}`}
-function stDots(kind,s){const L=STG[kind],i=L.findIndex(x=>x.s==s);return `<span class="sdots ${s=='Lost'?'lost':''}" title="${esc(s||'')}" aria-hidden="true">${L.map((x,j)=>`<i class="${j<i?'d':j==i?'o':''}"></i>`).join('')}</span>`}
+function stDots(kind,s){const L=STG[kind],i=L.findIndex(x=>x.s==s),x=s=='Lost'?STG_LOST:L[i]||L[0],end=s=='Won'||s=='Complete';return `<span class="sprog ${s=='Lost'?'lost':end?'end':''}" title="${esc(s=='Lost'?'Lost':'Stage '+(Math.max(i,0)+1)+' of '+L.length)}"><span class="sbar" aria-hidden="true">${L.map((y,j)=>`<i class="${s=='Lost'?'':j<i?'d':j==i?'o':''}"></i>`).join('')}</span><b>${esc(x.n)}</b></span>`}
 const LVIEWS=[['live','Active Leads'],['due','Next Action Due'],['won','Won, To Convert'],['lost','Lost'],['all','All Leads']];
 function vLeads(){const U=UI.lead,td=today(),open=S.leads.filter(l=>!['Won','Lost'].includes(l.stage)),pipe=sum(open,l=>l.value),wt=sum(open,l=>l.value*leadProb(l)/100),due=open.filter(l=>l.followup&&l.followup<=td),A2=allLeads(),won=A2.filter(l=>l.stage=='Won').length,lost=A2.filter(l=>l.stage=='Lost').length,ready=S.leads.filter(l=>l.stage=='Won');
   const L=leadList(),pg=paginate(U,L),cnt=k=>{const f=U.f;U.f=k;const n=leadList().length;U.f=f;return n};
   const sel=(k,arr,all)=>`<select class="fsel" ${AC('onchange','setUI','lead.'+k,'this.value')}><option value="all">${all}</option>${arr.map(x=>`<option ${U[k]==x?'selected':''}>${esc(x)}</option>`).join('')}</select>`;
   const tog=`<div class="seg2"><button class="${U.v=='list'?'on':''}" ${A('setUI','lead.v','list')}>List</button><button class="${U.v=='board'?'on':''}" ${A('setUI','lead.v','board')}>Board</button></div>`;
   const list=`<div class="tw"><table class="ptb abt"><thead><tr>${thS('lead','id','Lead No')}${thS('lead','name','Customer')}${thS('lead','town','Address','c-md')}${thS('lead','tel','Contact','c-sm')}${thS('lead','owner','Salesperson','c-md')}${thS('lead','source','Source','c-xl')}${thS('lead','appt','Next Visit','c-sm')}${thS('lead','value','Value','n')}<th class="ac"><span class="srt" ${A('sortBy','lead','stage')} style="cursor:pointer">Stage${U.sort=='stage'?`<span class="ar">${U.dir>0?'▲':'▼'}</span>`:''}</span></th></tr></thead><tbody>
-   ${pg.rows.map(l=>`<tr ${A('openLead',l.id)} class="clk-r"><td><b class="lref">${esc(l.id)}</b>${l.created?`<small class="sub">${fd(l.created)}</small>`:''}</td><td><b>${esc(([l.title,l.name].filter(Boolean).join(' ')))}</b>${l.company?`<small class="sub">${esc(l.company)}</small>`:''}</td><td class="c-md"><span class="cl2">${esc(addrOf(l)||'-')}</span>${l.homePc?`<small class="sub">${esc(l.homePc)}</small>`:''}</td><td class="c-sm">${esc(telOf(l)||'-')}${mailOf(l)?`<small class="sub nocap">${esc(mailOf(l))}</small>`:''}</td><td class="c-md">${esc(l.owner||'Unassigned')}</td><td class="c-xl">${esc(l.source||'-')}</td><td class="c-sm">${nextAppt(l)?fd(nextAppt(l)):'-'}</td><td class="n">${m0(l.value)}</td><td class="ac" onclick="event.stopPropagation()"><div class="acts r">${stDots('lead',l.stage)}${leadTag(l.stage)}${l.stage!='Lost'&&canSee('contracts')?`<button class="mini ${l.stage=='Won'?'pri':''}" ${A('convertLead',l.id)}>Convert</button>`:''}</div></td></tr>`).join('')||'<tr><td colspan="9" class="empty">'+emptyArt('survey','No leads in this view.')+'</td></tr>'}</tbody></table></div>${pagerH('lead',pg,'leads')}`;
+   ${pg.rows.map(l=>`<tr ${A('openLead',l.id)} class="clk-r"><td><b class="lref">${esc(l.id)}</b>${l.created?`<small class="sub">${fd(l.created)}</small>`:''}</td><td><b>${esc(([l.title,l.name].filter(Boolean).join(' ')))}</b>${l.company?`<small class="sub">${esc(l.company)}</small>`:''}</td><td class="c-md"><span class="cl2">${esc(addrOf(l)||'-')}</span>${l.homePc?`<small class="sub">${esc(l.homePc)}</small>`:''}</td><td class="c-sm">${esc(telOf(l)||'-')}${mailOf(l)?`<small class="sub nocap">${esc(mailOf(l))}</small>`:''}</td><td class="c-md">${esc(l.owner||'Unassigned')}</td><td class="c-xl">${esc(l.source||'-')}</td><td class="c-sm">${nextAppt(l)?fd(nextAppt(l)):'-'}</td><td class="n">${m0(l.value)}</td><td class="ac" onclick="event.stopPropagation()"><div class="acts r stc">${stDots('lead',l.stage)}${l.stage!='Lost'&&canSee('contracts')?`<button class="mini ${l.stage=='Won'?'pri':''}" ${A('convertLead',l.id)}>Convert</button>`:''}</div></td></tr>`).join('')||'<tr><td colspan="9" class="empty">'+emptyArt('survey','No leads in this view.')+'</td></tr>'}</tbody></table></div>${pagerH('lead',pg,'leads')}`;
   const board=`<div class="kan">${STAGES.map(s=>{const B=L.filter(l=>l.stage==s);return `<div class="col"><div class="colh"><b>${esc(s)}</b><span>${B.length} leads, ${m0(sum(B,l=>l.value))}</span></div>${B.map(l=>`<div class="lc"><div class="lt"><b ${A('openLead',l.id)} title="Open lead">${esc(l.name)} <small class="muted">${esc(l.id)}</small></b><span>${m0(l.value)}</span></div><p>${esc(l.product)}</p><p class="muted">${esc(l.town||'')}, via ${esc(l.source)}</p><p class="muted">${esc(l.next||'No next action set')}</p><div class="lb"><button class="mini" aria-label="Move back" ${A('mvLead',l.id,-1)}>&lsaquo;</button><button class="mini" aria-label="Move forward" ${A('mvLead',l.id,1)}>&rsaquo;</button><button class="mini" ${A('openLead',l.id)}>Open</button>${s=='Won'&&canSee('contracts')?`<button class="mini pri" ${A('convertLead',l.id)}>Convert</button>`:''}</div></div>`).join('')||'<p class="empty">Nothing here.</p>'}</div>`}).join('')}</div>`;
   return `<div class="head"><div><h1>Leads</h1><span class="muted">${esc((LVIEWS.find(x=>x[0]==U.f)||['','All'])[1])}: ${L.length} records</span></div><div class="tools"><button class="mini" onclick="contactList('lead')">Contact list</button><button class="mini" onclick="leadCsv()">Export CSV</button><button class="btn" onclick="editLead()">New lead</button></div></div>
   <div class="subbar"><span class="sb-l">Show</span><div class="views">${LVIEWS.map(([k,t])=>`<button class="chip ${U.f==k?'on':''}" ${A('setUI','lead.f',k)}>${esc(t)} <i>${cnt(k)}</i></button>`).join('')}<span class="vs"></span><label class="fl-own">Salesperson ${sel('own',OWNERS(),'Everyone')}</label></div><span class="sb-sp"></span>${tog}</div>
@@ -4429,7 +4518,7 @@ function vContracts(){const U=UI.ctr,L=ctrList(),pg=paginate(U,L),tv=sum(L,c=>c.
   const tog=`<div class="seg2"><button class="${U.v=='list'?'on':''}" ${A('setUI','ctr.v','list')}>List</button><button class="${U.v=='board'?'on':''}" ${A('setUI','ctr.v','board')}>Board</button></div>`;
   const board=`<div class="kan" style="grid-template-columns:repeat(${CSTAGES.length},minmax(11rem,1fr))">${CSTAGES.map(s=>{const B=L.filter(c=>c.stage==s);return `<div class="col"><div class="colh"><b>${esc(s)}</b><span>${B.length}, ${m0(sum(B,c=>c.value))}</span></div>${B.map(c=>`<div class="lc"><div class="lt"><b ${A('openContract',c.id)}>${esc(c.name)} <small class="muted">${esc(c.id)}</small></b><span>${m0(c.value)}</span></div><p>${esc(c.product)}</p><p class="muted">${esc(c.town||'')}${c.fit?', fit '+fd(c.fit):''}</p>${c.value-c.paid>0?`<p class="muted">Balance ${m0(c.value-c.paid)}</p>`:'<p><span class="tag g">Paid</span></p>'}</div>`).join('')||'<p class="empty">Nothing here.</p>'}</div>`}).join('')}</div>`;
   const list=`<div class="tw"><table class="ptb abt"><thead><tr>${thS('ctr','id','Contract No')}${thS('ctr','name','Cust Name')}${thS('ctr','addr','Address','c-md')}${thS('ctr','sold','Sold By','c-sm')}${thS('ctr','office','Office Ref','c-xl')}${thS('ctr','site','Site Address','c-xl')}${thS('ctr','fit','Fit Date','c-sm')}${thS('ctr','value','Value','n')}${thS('ctr','bal','Balance','n c-sm')}<th class="ac"><span class="srt" ${A('sortBy','ctr','stage')} style="cursor:pointer">Stage${U.sort=='stage'?`<span class="ar">${U.dir>0?'▲':'▼'}</span>`:''}</span></th></tr></thead><tbody>
-   ${pg.rows.map(c=>`<tr ${A('openContract',c.id)} class="clk-r"><td><b class="lref">${esc(c.id)}</b>${c.lead?`<br><span class="muted" style="font-size:.7rem">From ${esc(c.lead)}</span>`:''}</td><td><b>${esc(c.name)}</b>${c.flash?`<br><span class="flash">${esc(c.flash)}</span>`:''}</td><td class="c-md wrapc">${esc(addrOf(c)||'-')}</td><td class="c-sm">${esc(c.soldBy||'-')}</td><td class="c-xl">${esc(c.officeRef||'')}</td><td class="c-xl wrapc">${esc(siteOf(c)||'-')}</td><td class="c-sm">${fd(c.fit)}</td><td class="n">${m0(c.value)}</td><td class="n c-sm">${m0(c.value-c.paid)}</td><td class="ac"><div class="acts r">${stDots('contract',c.stage)}${stTag(c.stage)}</div></td></tr>`).join('')||'<tr><td colspan="10" class="empty">'+emptyArt('files','No contracts in this view.')+'</td></tr>'}</tbody></table></div>${pagerH('ctr',pg,'contracts')}`;
+   ${pg.rows.map(c=>`<tr ${A('openContract',c.id)} class="clk-r"><td><b class="lref">${esc(c.id)}</b>${c.lead?`<br><span class="muted" style="font-size:.7rem">From ${esc(c.lead)}</span>`:''}</td><td><b>${esc(c.name)}</b>${c.flash?`<br><span class="flash">${esc(c.flash)}</span>`:''}</td><td class="c-md wrapc">${esc(addrOf(c)||'-')}</td><td class="c-sm">${esc(c.soldBy||'-')}</td><td class="c-xl">${esc(c.officeRef||'')}</td><td class="c-xl wrapc">${esc(siteOf(c)||'-')}</td><td class="c-sm">${fd(c.fit)}</td><td class="n">${m0(c.value)}</td><td class="n c-sm">${m0(c.value-c.paid)}</td><td class="ac"><div class="acts r stc">${stDots('contract',c.stage)}</div></td></tr>`).join('')||'<tr><td colspan="10" class="empty">'+emptyArt('files','No contracts in this view.')+'</td></tr>'}</tbody></table></div>${pagerH('ctr',pg,'contracts')}`;
   return `<div class="head"><div><h1>Contracts</h1><span class="muted">${esc((CVIEWS.find(x=>x[0]==U.f)||['','All'])[1])}: ${L.length} records, ${m0(tv)} total, ${m0(bal)} to collect</span></div><div class="tools"><button class="mini" onclick="contactList('contract')">Contact list</button><button class="btn" onclick="editContract()">New contract</button></div></div>
   <div class="subbar"><span class="sb-l">Show</span><div class="views">${CVIEWS.map(([k,t])=>`<button class="chip ${U.f==k?'on':''}" ${A('setUI','ctr.f',k)}>${esc(t)} <i>${cnt(k)}</i></button>`).join('')}</div><span class="sb-sp"></span>${tog}</div>
   ${stgPipe('contract')}${ckpi(L)}${U.v=='board'?board:list}`}
@@ -4671,7 +4760,8 @@ function cmdSmart(query){const out=[],m=(re)=>query.match(re);let x;
   if((x=m(/^note\s+(\S+)\s+(.{2,})$/)))recFind(x[1],'cl').filter(f=>f.x).forEach(f=>out.push(['Add Note To '+f.id,'“'+x[2].slice(0,60)+'”',()=>noteQuick(f.k,f.id,x[2]),IC.edit]));
   return out}
 function quickPay(id,amt){if(!need(ISADM,'Taking payments'))return;const c=S.contracts.find(x=>x.id==id);if(!c||!(amt>0))return;
-  if(!confirm('Record a '+money(amt)+' payment on contract '+id+' ('+(c.name||'')+')?'))return;c.pay=c.pay||[];c.pay.push({amt,date:today(),method:'Bank transfer',kind:(+c.paid||0)?'Stage payment':'Deposit',ref:'From search',by:USER});
+  askIn('Record a '+money(amt)+' payment?','On contract '+id+(c.name?' ('+c.name+')':'')+'.','Record Payment',()=>quickPayGo(id,amt))}
+function quickPayGo(id,amt){const c=S.contracts.find(x=>x.id==id);if(!c||!need(ISADM,'Taking payments'))return;c.pay=c.pay||[];c.pay.push({amt,date:today(),method:'Bank transfer',kind:(+c.paid||0)?'Stage payment':'Deposit',ref:'From search',by:USER});
   c.paid=Math.round(((+c.paid||0)+amt)*100)/100;audit('Payment recorded',id,money(amt));store();render(true);toast(money(amt)+' recorded on '+id+'. Balance now '+money((+c.value||0)-c.paid)+'.')}
 function leadQuick(id,st){const l=S.leads.find(x=>x.id==id);if(!l)return;const a=l.stage;if(a==st){toast(id+' is already '+st);return}l.stage=st;l.prob=st=='Won'?100:0;l.log=l.log||[];l.log.unshift({d:today(),t:'Stage: '+(a||'New')+' to '+st,by:USER});
   audit('Lead edited',id,'Stage '+st);store();render(true);toast(id+' marked as '+st)}

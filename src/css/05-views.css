@@ -1357,3 +1357,51 @@ body[data-theme=dark] .rw-act{background:rgba(255,255,255,.02)}
 @media(max-width:900px){.rw-x.act-on{grid-template-columns:1fr}.rw-next{display:none}.rw-grp{display:none}.rw-path{padding:0 .8rem .6rem;overflow-x:auto;flex-wrap:nowrap}.path{min-width:34rem}}
 .path button{background:rgba(1,43,89,.07)}body[data-theme=dark] .path button{background:rgba(255,255,255,.07)}
 @media(max-width:900px){.rw-rail{display:flex;flex-wrap:nowrap;gap:.3rem;overflow-x:auto}.rw-rail .rw-steps{flex-wrap:nowrap;flex:0 0 auto}}
+
+/* ==== round 12 ==== */
+/* in-app confirm box (layered over any window) */
+.aski{position:fixed;inset:0;z-index:900;display:grid;place-items:center;padding:16px;background:rgba(1,20,45,.42);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);animation:fade .15s}
+.aski-b{width:min(26rem,100%);padding:1.5rem 1.5rem 1.3rem;border-radius:20px;background:var(--pop,var(--card));border:1px solid var(--line);box-shadow:0 30px 70px -20px rgba(0,0,0,.55);text-align:center;animation:pop .2s cubic-bezier(.2,.9,.3,1.2)}
+.aski-b .ask-ic{margin:0 auto .7rem}
+.aski-b h3{margin:0 0 .35rem;font:600 1.25rem/1.25 var(--head);color:var(--navy);text-wrap:balance}
+.aski-b p{margin:0 0 1.2rem;color:var(--muted);font-size:.98rem;line-height:1.45}
+.aski-a{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}
+.aski-a .btn{min-height:2.9rem;font-size:1rem;border-radius:12px;justify-content:center}
+.btn.red{background:var(--red)}.btn.red:hover{filter:brightness(.92)}
+body[data-theme=dark] .btn.red{background:#c24444}
+/* contract header: outstanding stands out */
+.rw-hk .hk-due b{color:var(--red)}.rw-hk .hk-ok b{color:var(--green)}
+/* list pages: stage as a small bar with its name, all lined up */
+.ptb td.ac .acts.stc{justify-content:flex-start;flex-wrap:nowrap}
+.ptb th.ac{text-align:left}
+.sprog{display:inline-flex;align-items:center;gap:.55rem;min-width:9.5rem;white-space:nowrap}
+.sbar{display:inline-grid;grid-auto-flow:column;grid-auto-columns:9px;gap:3px}
+.sbar i{height:6px;border-radius:3px;background:var(--line)}
+.sbar i.d{background:#33a06f}.sbar i.o{background:#034ea2}
+.sprog b{font-size:.82rem;font-weight:600;color:var(--navy)}
+.sprog.end b{color:var(--green)}.sprog.end .sbar i{background:#33a06f}
+.sprog.lost b{color:var(--red)}.sprog.lost .sbar i{background:var(--red-bg)}
+body[data-theme=dark] .sprog b{color:#d3e3fb}
+/* lead/contract window: glassier, still fully readable (the glass sits on our own tint, not the page) */
+.mb.full:has(.rw){background:linear-gradient(160deg,#f7faff 0%,#eef4fc 45%,#f6f2e6 100%);overflow:hidden}
+.mb.full:has(.rw)::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(40rem 22rem at 8% 0%,rgba(90,160,255,.22),transparent 70%),radial-gradient(34rem 20rem at 100% 100%,rgba(255,208,2,.16),transparent 70%)}
+.mb.full:has(.rw)>*{position:relative}
+.mb.full .rw-h{background:linear-gradient(180deg,rgba(255,255,255,.75),rgba(255,255,255,.35));border-bottom:1px solid rgba(255,255,255,.7)}
+.mb.full .rw-path{background:rgba(255,255,255,.35)}
+.mb.full .rw-rail{background:rgba(255,255,255,.45);-webkit-backdrop-filter:blur(14px) saturate(150%);backdrop-filter:blur(14px) saturate(150%);border-right:1px solid rgba(255,255,255,.75)}
+.mb.full .rw-steps button.on{background:rgba(255,255,255,.85);box-shadow:inset 0 1px 0 #fff,0 6px 16px -10px rgba(1,43,89,.4)}
+.mb.full .rw-next{background:rgba(255,255,255,.75);border-color:rgba(255,255,255,.9)}
+.mb.full .rg.fg.gc,.mb.full .fin-sum,.mb.full .rw2 .rg{background:rgba(255,255,255,.78);border-color:rgba(255,255,255,.95);box-shadow:inset 0 1px 0 #fff,0 10px 26px -18px rgba(1,43,89,.45);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+.mb.full .rw-foot{background:rgba(255,255,255,.6);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border-top:1px solid rgba(255,255,255,.8)}
+body[data-theme=dark] .mb.full:has(.rw){background:linear-gradient(160deg,#141a24 0%,#111823 50%,#18160f 100%)}
+body[data-theme=dark] .mb.full:has(.rw)::before{background:radial-gradient(40rem 22rem at 8% 0%,rgba(90,155,245,.16),transparent 70%),radial-gradient(34rem 20rem at 100% 100%,rgba(255,208,2,.08),transparent 70%)}
+body[data-theme=dark] .mb.full .rw-h{background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.02));border-bottom-color:rgba(255,255,255,.07)}
+body[data-theme=dark] .mb.full .rw-path{background:transparent}
+body[data-theme=dark] .mb.full .rw-rail,body[data-theme=dark] .mb.full .rw-foot{background:rgba(255,255,255,.035);border-color:rgba(255,255,255,.07)}
+body[data-theme=dark] .mb.full .rw-steps button.on,body[data-theme=dark] .mb.full .rw-next{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.1);box-shadow:none}
+body[data-theme=dark] .mb.full .rg.fg.gc,body[data-theme=dark] .mb.full .fin-sum{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.09);box-shadow:none}
+
+/* section headings inside plain forms */
+.grid .fsec{grid-column:1/-1;margin:.9rem 0 .1rem;padding-top:.8rem;border-top:1px solid var(--line);font:600 1.02rem var(--head);color:var(--navy)}
+.grid .fsec:first-child{margin-top:0;padding-top:0;border-top:0}
+td b.od{color:var(--red)}

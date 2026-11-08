@@ -6,7 +6,7 @@
 const FOCUS=['home','messages','live','deliveries','stock','suppliers','downloads','settings'];
 const ROLES={
   admin:  {n:'Administrator',     d:'Everything a standard user has, plus staff and holidays',v:[...FOCUS,'leads','contracts','staff','holidays']},
-  staff:  {n:'Standard user',     d:'Overview, leads, contracts, calendar, contacts, live analytics, inventory and files',v:[...FOCUS,'leads','contracts','fitting','contacts']},
+  staff:  {n:'Standard user',     d:'Overview, leads, contracts, calendar, service calls, contacts, live analytics, inventory and files',v:[...FOCUS,'leads','contracts','fitting','service','contacts']},
   beta:   {n:'Beta (all features)',d:'Leads, contracts, finance, staff and everything else',v:'*'}};
 const RL={admin:'Administrator',staff:'Team Member',beta:'Beta Access'};
 const IDLE_MIN=30, PIN_TRIES=5, PIN_LOCK_S=60;

@@ -189,7 +189,8 @@ function supOpen(n){const x=S.suppliers.find(s=>s.name==n);if(!x)return;const i=
 function supInv(n){event&&event.preventDefault();Object.assign(UI.inv,{v:'products',sup:n,f:'all',page:1});go('stock')}
 function supReorder(i){const x=S.suppliers[i];if(!x)return;const s=supStats(x),need=[...s.out,...s.low].filter(r=>!s.req.some(q=>q.pid==r.pid));
   if(!need.length){toast('Everything low already has a request');return}
-  if(!confirm('Create '+need.length+' stock request'+(need.length>1?'s':'')+' for '+x.name+'?'))return;
+  askIn('Create '+need.length+' stock request'+(need.length>1?'s':'')+'?','For '+x.name+'. They go to an administrator for approval.','Create',()=>supReorderGo(x,need))}
+function supReorderGo(x,need){
   need.forEach(r=>{const q=r.reorderQty||Math.max(ro(r)*2-r.stock,1);S.items.unshift(moveRow(r,'request',q,r.stock,{reqStatus:'Pending',ord:nextOrd('P'),note:'Reorder from '+x.name}))});
   audit('Reorder requested',x.name,need.length+' lines');store();render();toast(need.length+' requests sent for approval')}
 function supDetail(i){const x=S.suppliers[i];if(!x)return;const s=supStats(x),so=supOrders(x);
