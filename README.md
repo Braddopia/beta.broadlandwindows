@@ -4,7 +4,7 @@
 It reads the same browser storage as v18, so existing data carries over.
 
 ## Editing
-Change files in `src/`, then run `python3 build.py` to rebuild `dist/Broadland-Windows-CRM-v19.2.html`.
+Change files in `src/`, then run `npm install` once and `npm run build` to rebuild `dist/Broadland-Windows-CRM-v19.2.html`.
 The build stops with a message if a placeholder is missing, an image asset is not a data URI, or
 (when Node is installed) any JavaScript has a syntax error.
 

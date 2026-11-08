@@ -4,13 +4,19 @@
   "private": true,
   "description": "Broadland Windows CRM: single-file web app built from src/",
   "scripts": {
-    "build": "python3 build.py",
+    "build": "node scripts/build.mjs",
+    "lint": "eslint .",
     "test": "playwright test",
     "test:e2e": "playwright test --project=e2e",
     "test:visual": "playwright test --project=visual",
-    "test:visual:update": "playwright test --project=visual --update-snapshots"
+    "test:visual:update": "playwright test --project=visual --update-snapshots",
+    "check": "npm run lint && npm run build && npm run test:e2e"
   },
   "devDependencies": {
-    "@playwright/test": "1.63.0"
+    "@eslint/js": "9.39.1",
+    "@playwright/test": "1.63.0",
+    "esbuild": "0.28.2",
+    "eslint": "9.39.1",
+    "globals": "16.5.0"
   }
 }

@@ -1,6 +1,6 @@
 # Broadland Windows CRM
 
-Single-file HTML CRM. Edit `src/` (css, js, assets), then run `python3 build.py` to write `dist/Broadland-Windows-CRM-<version>.html` and the root `index.html`. Never hand-edit `index.html` or `dist/`.
+Single-file HTML CRM. Edit `src/` (css, js, assets), then run `npm run build` to write `dist/Broadland-Windows-CRM-<version>.html` and the root `index.html`. Never hand-edit `index.html` or `dist/`. Run `npm run check` (lint, build, behaviour tests) before pushing; `npm run test:visual` compares screenshots with local baselines (`npm run test:visual:update` to create them).
 
 Rules for code in `src/js`:
 - Every value put into HTML goes through `esc()`, or is passed to a handler with `A()` / `AC()`.
