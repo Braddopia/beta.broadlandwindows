@@ -44,13 +44,14 @@ test('another open tab picks up a save, but waits while a popup is open', async 
 
 test('restoring a backup replaces the data but keeps this device PINs', async ({ app }) => {
   const before = await app.run(() => ({ salt: state.sec.salt, leads: state.leads.length }));
+  const reloaded = app.page.waitForEvent('load');
   await app.run(() => {
     const copy = JSON.parse(JSON.stringify(state));
     copy.leads = copy.leads.slice(0, 1);
     copy.sec = { salt: 'from-backup', pins: {} };
     backupApply(copy);
   });
-  await app.page.waitForLoadState('load');
+  await reloaded;
   await app.page.waitForFunction(() => window.CRM && document.querySelector('#main').children.length > 0);
   const after = await app.run(() => ({ salt: state.sec.salt, leads: state.leads.length }));
   expect(before.leads).toBeGreaterThan(1);
