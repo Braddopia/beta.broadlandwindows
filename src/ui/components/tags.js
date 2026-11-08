@@ -27,9 +27,6 @@ export const dTag = (x) => {
   return tag('tag fw ' + (DELIVERY_COLOUR[s] || ''), s + (x.damaged == 'Yes' ? ' · Damaged' : ''));
 };
 
-export const leadTag = (s) =>
-  tag('tag fw ' + (s == 'Won' ? 'g' : s == 'Lost' ? 'r' : s == 'Quoted' ? 'y' : s == 'New' ? 'n' : ''), s);
-
 export const stTag = (s) => tag('tag ' + (s == 'Complete' || s == 'Fitted' ? 'g' : s == 'Deposit due' ? 'y' : ''), s);
 
 export const svcTag = (s) =>

@@ -4,7 +4,7 @@ const js = require('@eslint/js');
 const globals = require('globals');
 
 module.exports = [
-  { ignores: ['dist/**', 'index.html', 'node_modules/**', 'test-results/**', 'prototype-lead-forms.html'] },
+  { ignores: ['dist/**', 'index.html', 'node_modules/**', 'test-results/**'] },
   {
     files: ['src/**/*.js'],
     ignores: ['src/boot-loader.js'],

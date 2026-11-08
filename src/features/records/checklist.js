@@ -16,5 +16,3 @@ export const ckTab = (W, items) => {
     }
   ).join('')}</div></div>`;
 };
-export const ckTabOld = (W, items) =>
-  `<div class="rg wide"><h4>Checklist, ${items.filter((k) => (W.v.chk || {})[k]).length} of ${items.length} done</h4><div class="rck-g">${items.map((k) => `<label class="rckl"><input type="checkbox" class="rck" data-k="${esc(k)}" ${(W.v.chk || {})[k] ? 'checked' : ''}><span>${esc(k)}</span></label>`).join('')}</div></div>`;

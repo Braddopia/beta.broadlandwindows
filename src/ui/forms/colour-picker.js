@@ -15,10 +15,6 @@ export function pickC(k, n, h) {
   const b = $('#cb_' + k);
   if (b) b.style.background = h;
 }
-export function pickHex(k) {
-  const e = $('#f_' + k);
-  if (!e.value) e.value = 'Custom';
-}
 /* ---- colour picker: window and door finishes first, then any colour ---- */
 /* RAL Classic: [number, name, screen colour] (screen colours are close, not exact: always check a real swatch) */
 export const RAL =

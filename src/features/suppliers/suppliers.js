@@ -149,11 +149,6 @@ export function supOpen(n) {
     'full'
   );
 }
-export function supInv(n) {
-  event && event.preventDefault();
-  Object.assign(uiState.inv, { v: 'products', sup: n, f: 'all', page: 1 });
-  go('stock');
-}
 export function supReorder(i) {
   const x = state.suppliers[i];
   if (!x) return;

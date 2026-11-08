@@ -1,47 +1,56 @@
 # Broadland Windows CRM v19.2
 
-**To use:** open `dist/Broadland-Windows-CRM-v19.2.html` (a single self-contained file, just like v18).
-It reads the same browser storage as v18, so existing data carries over.
+**To use:** open `dist/Broadland-Windows-CRM-v19.2.html` (a single self-contained file).
+It reads the same browser storage as earlier versions, so existing data carries over.
 
 ## Editing
-Change files in `src/`, then run `npm install` once and `npm run build` to rebuild `dist/Broadland-Windows-CRM-v19.2.html`.
-The build stops with a message if a placeholder is missing, an image asset is not a data URI, or
-(when Node is installed) any JavaScript has a syntax error.
+
+Run `npm install` once. Change files in `src/`, then:
+
+| Command | What it does |
+|---|---|
+| `npm run build` | writes `dist/Broadland-Windows-CRM-v19.2.html` and the root `index.html` |
+| `npm run check` | lint, unit tests, build and the browser tests: run before pushing |
+| `npm run test:unit` | business-rule tests (no browser) |
+| `npm run test:e2e` | browser tests: every page, every account type, phone/tablet/desktop, security |
+| `npm run test:visual` | compares screenshots with your local baselines (`npm run test:visual:update` makes them) |
+| `npm run format` | tidies code layout |
+
+The build stops with a message if a placeholder is missing, an asset is not a data URI, or any
+JavaScript has a syntax error. It also writes the security policy hashes for the app's scripts.
+
+## How the code is organised
+
+See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the full picture and how to add a page.
 
 ```
-src/index.html        page skeleton (sidebar, top bar, dialogs)
-src/assets/           logos (base64)
-src/css/01-06         tokens, base, shell, components, pages, responsive breakpoints
-src/css/07-looks      Look picker: page background and greeting-box pattern
-src/js/01-core        helpers, escaping/validation, icons, SHA-256
-src/js/02-state       seed data, load + migrate, save, audit trail
-src/js/03-auth        accounts, PINs, idle sign-out, My Details
-src/js/04-shell       render loop, navigation, forms, pagination, theme
-src/js/05-home        Overview
-src/js/06-operations  Factory floor, deliveries, suppliers, Hallmark, Smart Orders
-src/js/07-sales       Lead and contract helpers, convert, service calls, contacts
-src/js/08-people      Calendar, holiday planner, staff
-src/js/09-inventory   Inventory (products, movements, requests, item editor)
-src/js/10-scanner     Barcode scanner
-src/js/11-print-reports  Report template, stock reports, customer documents, Reports page
-src/js/12-files       Files page
-src/js/13-finance-admin  Finance, Admin console (PINs, audit log, backups)
-src/js/14-notify      Notification centre
-src/js/15-records     Full-screen lead and contract records, lead wizard, list views
-src/js/16-art         Pattern tiles for empty lists, welcome tour
-src/js/17-signin      Optional Google / Microsoft staff sign-in (Admin Console)
-src/js/18-looks       Look picker in the top bar (saved per device)
-src/js/19-search      Top-bar search across leads, contracts, calls, contacts, suppliers, stock, staff
-src/boot-loader.js    Loads saved data from the browser database before the app starts;
-                      if the database is slow it starts anyway but never saves over newer data
-src/js/99-boot        Start-up
+src/index.html      page skeleton (placeholders filled by the build)
+src/boot-loader.js  reads saved data before the app starts
+src/main.js         entry point: registers button actions, runs start-up steps in order
+src/core/           generic helpers: DOM, escaping, html`` templates, dates, formatting, events
+src/config/         fixed lists, colours, company defaults, roles and permissions
+src/data/           the app data in memory, saving, sync between tabs, photos, audit,
+                    repository (add/change/remove records), sources/ (where data is stored)
+src/domain/         business rules with no screen code (unit-tested)
+src/ui/             shared building blocks: shell and router, popups, forms, tables, tags
+src/integrations/   Hallmark and Smart Orders
+src/print/          printed documents
+src/features/       one folder per part of the app (leads, contracts, service, stock...)
+src/start/          start-up data updates and the first draw
+src/css/            tokens, base, shell, components, page styles, responsive, looks
+tests/unit/         node:test business-rule tests
+tests/e2e/          Playwright browser tests
+tests/visual/       Playwright screenshot tests (baselines stay on your machine)
 ```
 
 ## Security note
-Everything runs in the browser. PINs are hashed, actions are re-checked, all data is
-escaped and every change is logged, but anyone with access to the browser can still read
-or edit its storage. Proper protection of customer/staff data needs a server with real logins.
+
+Everything runs in the browser. PINs are hashed, actions are re-checked with `can()`, all data
+is escaped, scripts are locked down by a strict content security policy and every change is
+logged, but anyone with access to the browser can still read or edit its storage. Proper
+protection of customer and staff data needs the planned Microsoft 365 backend with real sign-in.
 
 ## Hosting
+
 `index.html` at the repo root is the built app, ready to serve as a static page
 (for example with GitHub Pages). Serving it over https also enables the camera barcode scanner.

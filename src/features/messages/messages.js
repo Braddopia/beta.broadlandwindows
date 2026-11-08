@@ -98,34 +98,6 @@ export function msgSend() {
   store();
   render();
 }
-export function msgMark(id) {
-  const n = (state.notes || []).find((x) => x.id == id);
-  if (!n) return;
-  if (n.to == 'Everyone') {
-    n.readBy = n.readBy || [];
-    if (!n.readBy.includes(USER)) n.readBy.push(USER);
-  } else n.read = true;
-  store();
-  render();
-}
-export function msgReadAll() {
-  (state.notes || []).filter(msgMine).forEach((n) => {
-    if (n.to == 'Everyone') {
-      n.readBy = n.readBy || [];
-      if (!n.readBy.includes(USER)) n.readBy.push(USER);
-    } else n.read = true;
-  });
-  store();
-  render();
-}
-export function msgReply(to) {
-  uiState.msg.to = state.staff.some((s) => s.name == to) ? to : 'Everyone';
-  render();
-  setTimeout(() => {
-    const e = $('#m_t');
-    if (e) e.focus();
-  }, 50);
-}
 export function msgDel(id) {
   const n = (state.notes || []).find((x) => x.id == id);
   if (!n || !(n.by == USER || n.to == USER)) return;

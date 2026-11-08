@@ -284,6 +284,3 @@ export function docChoice(title, cus, int, more) {
     'sm'
   );
 }
-export function printTable(t, h, rows) {
-  printDoc(t, '', [], [], { tables: [{ t, h, r: rows }] });
-}

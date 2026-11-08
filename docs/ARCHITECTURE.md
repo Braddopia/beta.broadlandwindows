@@ -1,0 +1,86 @@
+# Architecture
+
+The CRM is one HTML file. esbuild bundles the ES modules in `src/` into one inline script, the CSS
+files are joined into one `<style>`, and the build adds a content security policy with a hash
+for each script. Nothing else is loaded except the optional sign-in and scanner libraries.
+
+## Layers
+
+Imports only point down. ESLint enforces this for the bottom four layers.
+
+```
+start/          start-up data updates (migrations) and the first draw        may import anything
+features/       one folder per part of the app: pages, forms, actions
+ui/  print/  integrations/   shared screen pieces, printed documents, outside services
+domain/         business rules: plain functions, no screen, no storage
+data/           state, load, save, sync, photos, audit, repository, sources/
+core/  config/  generic helpers and fixed settings
+```
+
+- **`ui/shell/`** (router and shell) is the app shell: it lists the pages, so it is the one part of
+  `ui/` that imports from `features/`. A few `ui/` helpers still call into the record window
+  (`ui/modal.js`, `ui/forms/form.js`); move them up into `features/records/` when next touched.
+- **Lower layers never call the screen.** They `emit()` an event from `core/events.js`
+  (`notice`, `data-replaced`, `photos-loaded`) and `ui/shell/data-events.js` decides what to show.
+- **Nothing runs when a module is imported.** Start-up work is an exported function that `main.js`
+  calls, in a fixed order.
+
+## How a click becomes a change
+
+1. Markup is built with `html``...`` (escapes every value) or `esc()`. Buttons carry
+   `onClick('saveThing', id)`, which writes `data-act` / `data-args` attributes; there are no inline
+   handlers.
+2. `core/actions.js` has one click/change/input listener for the whole page. It looks the name up
+   in the action registry. `main.js` registers every exported function.
+3. The action checks permission with `can('money')` / `can('manage')` (or `need()`, which also
+   explains a refusal), validates input with `SAFE.*`, and changes records through
+   `data/repository.js`, which stamps `_meta` (created, updated, by whom, version).
+4. It saves with `store()` and records the change with `audit()`. `store()` moves new photos to the
+   photo store, then hands the whole copy to the data source.
+5. The data source tells other open tabs; `data/sync.js` reloads their copy unless a popup is open,
+   then catches up when it closes.
+
+## Data and the future backend
+
+`data/sources/data-source.js` defines the interface every storage place must offer (`readAll`,
+`saveAll`, `subscribe`, photo reads and writes, `replaceAll` for restores).
+
+- **Today:** `indexeddb-source.js` keeps the whole app data as one saved copy in this browser,
+  using the same database names as earlier versions. The boot loader reads the same database.
+- **Later:** `api-source.js` is a documented stub for the Microsoft 365 backend (Entra ID sign-in,
+  the same permission names, per-record saves with version checks, paged lists, files behind
+  short-lived links). Switching is `setSource(apiSource(...))`; pages do not change.
+- Records already carry `_meta.version`, so a server can refuse a save made on an out-of-date copy.
+
+## Adding a page
+
+1. Make `src/features/<area>/<area>.js` with a `v<Area>()` function that returns the page HTML.
+2. Add it to `VIEWS` and the menu groups (`NG`) in `ui/shell/router.js`, and to `ROLES` in
+   `config/roles.js` for each account type that may open it.
+3. Import the module in `main.js` and add it to the `modules` list, so its actions register.
+4. Put business rules in `src/domain/` with a unit test in `tests/unit/`, and add the page to the
+   smoke and screenshot tests.
+
+## Styles
+
+`src/css/` files are joined in name order, and later rules win, so order matters:
+tokens, base, shell, components, page styles (`05a`), record windows, popups and glass (`05b`),
+later refinements (`05c`), responsive, looks.
+
+- Text is Title Case only for headings, labels, buttons, tabs and tags; everything else shows as typed.
+- `@layer` is not used yet. The CSS still has about 70 `!important` rules, and inside layers
+  `!important` reverses the order, so these must be removed first, one screenshot-checked step
+  at a time.
+
+## Tests
+
+- `tests/unit`: business rules and the repository, with no browser.
+- `tests/e2e`: every page × 3 account types × 3 screen sizes with no errors, security (permissions,
+  PIN lockout, script injection, CSP), records, operations, search, settings, and saving, sync
+  and restore.
+- `tests/visual`: 40 screenshots. Baselines are made on your machine
+  (`npm run test:visual:update`) and must match exactly after any change that should look the same.
+
+## Decisions
+
+See [docs/adr](adr/).

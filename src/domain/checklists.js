@@ -1,20 +1,5 @@
 /* domain/checklists: Sales steps (leads) and job progress (contracts) checklists. */
 
-/* ---------------- contracts ---------------- */
-export const CK_V2 = [
-  'Contract signed by customer',
-  'Deposit received',
-  'Check survey booked',
-  'Check survey done, sizes confirmed',
-  'Frames and glass ordered',
-  'Frames delivered and checked',
-  'Fitting date confirmed with customer',
-  'Installation complete',
-  'Snagging list cleared',
-  'Final balance paid',
-  'Handover form signed',
-  'Guarantee issued',
-];
 /* checklist in stages: [stage, what it means, items] */
 export const CKG = [
   ['Sale Agreed', 'Paperwork signed and money in.', ['Contract signed by customer', 'Deposit taken']],

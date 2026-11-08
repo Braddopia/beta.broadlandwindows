@@ -2,7 +2,6 @@
 import { onClick } from '../../core/actions.js';
 import { addDays, fd, today } from '../../core/dates.js';
 import { $, esc } from '../../core/dom.js';
-import { shortId } from '../../core/ids.js';
 import { store } from '../../data/persistence.js';
 import { state } from '../../data/state.js';
 import { byUid, colTxt, hasLoc, isLow, products, unitOf } from '../../domain/stock.js';
@@ -11,7 +10,6 @@ import { fensaDue } from '../contracts/contracts.js';
 import { moveClear, reqApprove, reqReceive, reqReject } from '../stock/stock.js';
 import { emptyArt } from '../../ui/components/art.js';
 import { ordTag } from '../../ui/components/tags.js';
-import { form } from '../../ui/forms/form.js';
 import { go, render } from '../../ui/shell/router.js';
 import { uiState } from '../../ui/ui-state.js';
 
@@ -20,7 +18,6 @@ import { uiState } from '../../ui/ui-state.js';
    ========================================================================== */
 export const NCTABS_ALL = ['All', 'Requests', 'Stock In/Out', 'Alerts'],
   NCTABS_STD = ['All', 'My Requests', 'Alerts'];
-export const NCTABS = NCTABS_ALL;
 export const ncTabs = () => (can('money') ? NCTABS_ALL : NCTABS_STD);
 export let ncAlerts = [];
 export function ncData() {
@@ -202,21 +199,6 @@ export function ncAct(a, x) {
   });
   store();
   render();
-}
-export function ncNote() {
-  const nm = [...new Set([USER, ...state.staff.map((x) => x.name).filter(Boolean)])];
-  form(
-    'New Message',
-    [
-      { k: 'to', l: 'Mention (To)', t: 'select', o: nm, w: 'full' },
-      { k: 't', l: 'Message', t: 'area', w: 'full', req: 1, max: 500 },
-    ],
-    { to: nm[1] },
-    (o) => {
-      state.notes.push({ id: shortId('N'), to: o.to, by: USER, t: o.t, at: Date.now(), read: false });
-      if (state.notes.length > 500) state.notes.splice(0, state.notes.length - 500);
-    }
-  );
 }
 export function ncGoMessages() {
   ncToggle(false);

@@ -42,7 +42,6 @@ export const guessCat = (r) =>
         : 'Office';
 export const UNITS = ['Each', 'Units', 'Pair', 'Single', 'PCS', 'Meters (M)'];
 export const CT = ['Supplier', 'Customer', 'Sub-contractor', 'Trade', 'Other'];
-export const DS = ['Due', 'In transit', 'Received'];
 export const SUPCAT = [
   'Sealed units and glass',
   'uPVC profiles',

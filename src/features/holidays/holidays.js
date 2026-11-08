@@ -59,27 +59,6 @@ export function hcSet(sid, k, raw) {
   store();
   return true;
 }
-export function hcPaint(sid, k) {
-  if (!need('manage', 'Editing the holiday chart')) return;
-  const b = uiState.hol.brush,
-    s = state.staff.find((x) => x.id == sid);
-  if (!s) return;
-  if (!b) {
-    toast('Pick a code first, at the top of the chart');
-    return;
-  }
-  const m = (state.abs[sid] = state.abs[sid] || {});
-  if (b == 'X') {
-    delete m[k];
-    if (absCode(s, k)) m[k] = '';
-  } else if (absCode(s, k) == b) {
-    delete m[k];
-    if (absCode(s, k) == b) m[k] = '';
-  } else m[k] = b;
-  audit('Holiday chart', s.name, k + ': ' + (m[k] === undefined ? 'reset' : m[k] || 'cleared'));
-  store();
-  render();
-}
 export function shutEdit() {
   if (!need('manage', 'Changing the Christmas shutdown')) return;
   const y = uiState.hol.y,

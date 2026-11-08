@@ -293,3 +293,19 @@ This is a large change, roughly the size of everything built so far. It will run
 - a short note of what moved and the test results.
 
 No new features are mixed in during the refactor, so any visible change is a bug to report.
+
+---
+
+## 11. Status: what was done (November 2026)
+
+All phases 0–7 are done. The site behaves the same. The only intended change you can see is that Title Case now applies to headings, labels, buttons, tabs and tags only.
+
+Where the work differs from the plan, and why:
+
+- **html`` templates:** shared pieces use it now (form fields, tags, star ratings). Other templates move over when next touched, so there was no single risky rewrite. See ADR 3.
+- **Entity schemas:** the field lists stay in `features/records/fields.js`. One renderer (`fieldControl`) draws every box.
+- **Per-collection browser storage:** deferred until the backend work. The data source and repositories are in place, and records carry versions. See ADR 4.
+- **Repositories:** they cover adding, changing and removing records. Pages still read from `state` directly. That is fine while all data is in memory; reads move to `repo.page()` with the backend.
+- **CSS:** 209 unused rules were deleted, and the page styles were split and named. `@layer` and removing `!important` are left as a careful follow-up, because layers reverse the order of `!important` rules.
+- **View registry:** `ui/shell` is the app shell and imports pages directly. A few `ui/` helpers still call the record window.
+- **Lint:** the layer rule is enforced for core, config, data and domain.
