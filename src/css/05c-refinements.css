@@ -416,9 +416,10 @@ body.tv #rpb,body.signin #rpb{display:none}
 .seg,.seg2{border-radius:7px!important}.seg button,.seg2 button{border-radius:5px!important}
 .chip{border-radius:6px!important}.chip i{border-radius:4px!important}
 .tag,.ord,.xtag,.nav i{border-radius:4px!important}
-.sb,.top .sb{border-radius:8px!important}.ck-b,.ck-in{border-radius:10px!important}
-.top .sb::before,.top .sb::after,.ck-b::before,.ck-b::after,.ck-in::after{display:none!important;animation:none!important}
-.top .sb:focus-within{border-color:var(--blue)!important;box-shadow:0 0 0 3px var(--blue-bg)!important}
+.sb,.top .sb{border-radius:8px!important}.ck-b{border-radius:10px!important}
+.ck-in{border-radius:10px 10px 0 0!important}.ck-f{border-radius:0 0 10px 10px!important}
+/* the moving RGB glow round the search bar and the Ctrl+K box stays: its edge follows the squarer corners */
+.top .sb::before{border-radius:10px!important}.ck-b::before{border-radius:12px!important}
 .btn{font-weight:600;letter-spacing:.005em;box-shadow:none}
 .btn:active{transform:none}
 /* step-by-step forms: the facts box on a Check step */
