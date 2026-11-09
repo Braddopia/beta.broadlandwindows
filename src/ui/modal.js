@@ -20,6 +20,7 @@ export function openModal(h, size) {
   }
   b.className = 'mb ' + (size || 'md');
   /* one standard width unless a window needs another */ b.innerHTML = h;
+  addReportButton(b);
   $('#modal').classList.add('open');
   b.scrollTop = 0;
   if (size != 'full')
@@ -27,6 +28,19 @@ export function openModal(h, size) {
       const f = b.querySelector('input:not([readonly]):not([type=hidden]):not([type=checkbox]),select,textarea');
       if (f && matchMedia('(pointer:fine)').matches) f.focus({ preventScroll: true });
     }, 60);
+}
+/* every popup gets a small Report A Problem button: in the toolbar of a lead/contract window, otherwise at
+   the left of the button row (the corner button is hidden while a popup is open, so it never covers one) */
+const FLAG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 21V4M5 4h11l-2 4 2 4H5"/></svg>';
+function addReportButton(b) {
+  if (b.querySelector('.ask') || /report a problem/i.test((b.querySelector('h2') || {}).textContent || '')) return;
+  const btn = (cls) =>
+    `<button type="button" class="${cls} mrp" data-act="bugHere" title="Report a problem with this window">${FLAG}<span>Report a problem</span></button>`;
+  const close = b.querySelector(':scope>.rw .rw-bar .cl');
+  if (close) return close.insertAdjacentHTML('beforebegin', btn('rb1'));
+  const m = b.querySelector(':scope>.mact, :scope .mact');
+  if (m) m.insertAdjacentHTML('afterbegin', btn('btn ghost sm'));
+  else b.insertAdjacentHTML('beforeend', `<div class="mact">${btn('btn ghost sm')}</div>`);
 }
 /* styled confirmation instead of the browser's own box */
 export let ASK = null,

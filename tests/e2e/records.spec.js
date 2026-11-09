@@ -87,10 +87,13 @@ test('a popup opened from a contract returns to it with unsaved typing kept', as
     e.dispatchEvent(new Event('input', { bubbles: true }));
   });
   await app.call('recCall');
-  expect(await app.run(() => [!!document.querySelector('#mbox .rw'), !!document.querySelector('#f_issue')])).toEqual([
-    false,
-    true,
-  ]);
+  expect(
+    await app.run(() => [
+      !!document.querySelector('#mbox .rw'),
+      !!document.querySelector('#mbox .stp.wz'),
+      document.querySelector('#f_contract').value,
+    ])
+  ).toEqual([false, true, '2402318']);
   await app.page.keyboard.press('Escape');
   expect(await app.run(() => document.querySelector('#f_name').value)).toBe('Typed But Not Saved');
 });

@@ -18,6 +18,7 @@ import { pagerH, paginate } from '../../ui/components/table.js';
 import { prTag, svcTag } from '../../ui/components/tags.js';
 import { fieldErr, form } from '../../ui/forms/form.js';
 import { phCount } from '../../ui/forms/photos.js';
+import { wizard } from '../../ui/forms/wizard.js';
 import { hit } from '../../ui/shell/router.js';
 import { toast } from '../../ui/toast.js';
 import { uiState } from '../../ui/ui-state.js';
@@ -109,7 +110,119 @@ export const SVCF = () => [
     hint: 'Needed to close the call. It then moves to Past Tickets and stays on the contract history',
   },
 ];
+/* ---- new service call: step by step, like a new lead ---- */
+const pick = (L, keys) => L.filter((f) => keys.includes(f.k));
+/* contract number box: list of contracts, and picking one fills the customer in */
+function contractHelp(v) {
+  const g = $('#mbox .wz-b .grid');
+  if (g && !$('#dlCon'))
+    g.insertAdjacentHTML(
+      'beforeend',
+      `<datalist id="dlCon">${state.contracts.map((x) => `<option value="${esc(x.id)}">${esc([x.name, x.town].filter(Boolean).join(', '))}</option>`).join('')}</datalist>`
+    );
+  const ex = $('#f_existing'),
+    ct = $('#f_contract'),
+    cw = ct && ct.closest('.ff'),
+    sync = () => {
+      if (cw) cw.hidden = !/^Yes/.test(ex.value);
+    };
+  if (ex) {
+    ex.addEventListener('change', sync);
+    sync();
+  }
+  if (ct)
+    ct.addEventListener('change', () => {
+      const x = state.contracts.find((z) => z.id == ct.value.trim());
+      if (!x) return;
+      [
+        ['name', x.name],
+        ['phone', telOf(x)],
+        ['email', mailOf(x)],
+        ['address', addrOf(x)],
+        ['town', x.town],
+      ].forEach(([f, val]) => {
+        const e = $('#f_' + f);
+        if (e && !e.value && val) e.value = val;
+      });
+      v.guarantee = v.guarantee || 'Yes';
+      toast('Filled in from contract ' + x.id);
+    });
+}
+/* the Check step: what we already know about this customer */
+function callCheck(v) {
+  const k = /^Yes/.test(v.existing || '') && state.contracts.find((x) => x.id == v.contract),
+    past = state.calls.filter((c) => (k ? c.contract == k.id : c.name && c.name == v.name)).slice(0, 5),
+    bal = k ? (+k.value || 0) - (+k.paid || 0) : 0,
+    yrs = k && k.fit ? Math.floor((Date.now() - new Date(k.fit + 'T00:00')) / (365.25 * 864e5)) : null;
+  return `<div class="wz-info">${
+    k
+      ? `<div><small>Contract</small><b>${esc(k.id)}</b><span>${esc([k.contractType, k.fit ? 'fitted ' + fd(k.fit) : ''].filter(Boolean).join(', '))}</span></div><div><small>Guarantee</small><b>${yrs == null ? 'Not fitted yet' : yrs < 10 ? 'Likely covered' : 'Check'}</b><span>${yrs == null ? '' : yrs + ' year' + (yrs == 1 ? '' : 's') + ' since fitting'}</span></div><div><small>Balance</small><b class="${bal > 0 ? 'od' : ''}">${bal > 0 ? m0(bal) + ' owed' : 'Paid up'}</b><span>${bal > 0 ? 'Mention before booking' : ''}</span></div>`
+      : '<div><small>Customer</small><b>New customer</b><span>Not one of our fitted jobs</span></div>'
+  }</div><h3 class="fsec">Past Tickets (${past.length})</h3>${past.map((c) => `<div class="row"><span><b>${esc(c.id)}</b> ${esc(c.issue || '')}</span><span>${svcTag(c.status)}</span></div>`).join('') || '<p class="muted">No earlier service calls.</p>'}`;
+}
+export function callWizard(cid) {
+  const k = state.contracts.find((x) => x.id == cid) || {},
+    F = SVCF();
+  wizard({
+    title: 'New Service Call ' + nid('S', state.calls),
+    saveLabel: 'Create service call',
+    done: 'Service call created. Open it any time to add photos and notes.',
+    v: {
+      name: k.name || '',
+      phone: telOf(k) || '',
+      email: mailOf(k) || '',
+      address: addrOf(k) || '',
+      town: k.town || '',
+      contract: k.id || '',
+      priority: 'Normal',
+      status: 'Open',
+      takenBy: USER,
+      takenAt: today(),
+      takenTime: new Date().toTimeString().slice(0, 5),
+      guarantee: k.id ? 'Yes' : '',
+      existing: k.id ? 'Yes, we fitted it' : 'No, new customer',
+    },
+    steps: [
+      {
+        t: 'Customer',
+        d: 'Who is calling? Pick the contract for a job we fitted.',
+        f: pick(F, ['existing', 'contract', 'name', 'phone', 'email', 'address', 'town']),
+        after: contractHelp,
+      },
+      { t: 'Problem', d: 'What is wrong, in their words?', f: pick(F, ['cat', 'priority', 'issue']) },
+      {
+        t: 'Check',
+        d: 'What we already know: guarantee, money owed and past visits.',
+        html: callCheck,
+        f: pick(F, ['guarantee', 'takenBy', 'takenAt', 'takenTime']),
+      },
+      { t: 'Visit', d: 'Book the visit now, or leave it for later.', f: pick(F, ['fitter', 'visit', 'visitTime']) },
+      { t: 'Review', d: 'Check and create', review: 1 },
+    ],
+    check: (st, v) => {
+      if (st == 0) {
+        if (/^Yes/.test(v.existing)) {
+          const x = state.contracts.find((z) => z.id == String(v.contract || '').trim());
+          if (!x) return 'Pick the contract for this customer';
+          v.contract = x.id;
+        } else {
+          v.contract = '';
+          if (!v.phone) return 'Add a phone number for a new customer';
+          if (!v.address) return 'Add the address for a new customer';
+          if (!v.town) return 'Add the town for a new customer';
+        }
+      }
+      return '';
+    },
+    save: (v) => {
+      const n = { id: nid('S', state.calls), ...v, status: v.visit ? 'Booked' : 'Open', photos: [] };
+      repos.calls.add(n, { first: true });
+      audit('Service call added', n.id, n.name);
+    },
+  });
+}
 export function editCall(id, cid) {
+  if (!id) return callWizard(cid);
   const c = state.calls.find((x) => x.id == id),
     k = state.contracts.find((x) => x.id == cid) || {};
   if (id && !c) return;

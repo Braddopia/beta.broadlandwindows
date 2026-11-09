@@ -52,6 +52,17 @@ core/  config/  generic helpers and fixed settings
   short-lived links). Switching is `setSource(apiSource(...))`; pages do not change.
 - Records already carry `_meta.version`, so a server can refuse a save made on an out-of-date copy.
 
+## Inventory and the stock take
+
+- A product line is **code + description + area + length + colours**. One code can live in several areas
+  (Stores and Fitters Vans) or name several products (a cylinder size sold single or keyed alike).
+- Products are the newest row of each Stock ID in `state.items`, which is also the movement log
+  (`add`, `remove`, `request`, and `import` for a line's starting row). `isMove()` means a real in/out.
+- The stock take (`features/stock/stock-take.js`, rules in `domain/stock-take.js`) reads and writes the
+  office workbook layout through `core/xlsx.js`: one sheet per area with
+  Stock Code | Description | Quantity In Stock | Location | Notes (Value and Cost on the valuation file).
+  Stock takes are kept in `state.stakes`; area order in `state.stockAreas`.
+
 ## Adding a page
 
 1. Make `src/features/<area>/<area>.js` with a `v<Area>()` function that returns the page HTML.

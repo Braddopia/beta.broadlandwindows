@@ -1,4 +1,5 @@
 /* features/reports/reports: The Reports page. */
+import { MORE } from './more.js';
 import { CSTAGES, SOURCES, STAGES } from '../../config/constants.js';
 import { onClick } from '../../core/actions.js';
 import { addDays, fd, today } from '../../core/dates.js';
@@ -594,6 +595,12 @@ export const R = {
     };
   },
 };
+/** a tab's numbers, charts and tables, with the extra ones from more.js */
+export function reportData(T) {
+  const d = R[T]();
+  if (MORE[T]) MORE[T](d);
+  return d;
+}
 export const TABS = () => [
   ['summary', 'Summary'],
   ['sales', 'Sales'],
@@ -630,7 +637,7 @@ export function vReports() {
       )
       .join('')}</tbody></table></div></div>`;
   else {
-    const d = R[T]();
+    const d = reportData(T);
     body =
       `<div class="kpis">${d.kpis.map((k) => `<div class="kpi"><small>${esc(k[0])}</small><b>${esc(k[1])}</b>${k[2] ? `<span class="ksub">${esc(k[2])}</span>` : ''}</div>`).join('')}</div>` +
       (d.bars.length
@@ -658,7 +665,7 @@ export function repPrint(all) {
           .map((t) => t[0])
           .filter((k) => k != 'docs')
       : [uiState.rep.t == 'docs' ? 'summary' : uiState.rep.t],
-    ds = ks.map((k) => R[k]());
+    ds = ks.map((k) => reportData(k));
   printDoc(
     all ? 'Management Report' : ds[0].t + ' Report',
     all ? 'Sales, contracts, service, stock' + (can('money') ? ' and finance' : '') : '',
@@ -668,7 +675,7 @@ export function repPrint(all) {
   );
 }
 export function repCsv() {
-  const d = R[uiState.rep.t == 'docs' ? 'summary' : uiState.rep.t](),
+  const d = reportData(uiState.rep.t == 'docs' ? 'summary' : uiState.rep.t),
     rows = [];
   d.kpis.forEach((k) => rows.push([k[0], k[1]]));
   d.tables.forEach((t) => {

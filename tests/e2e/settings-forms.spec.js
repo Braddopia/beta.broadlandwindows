@@ -105,7 +105,7 @@ test('Files page: Broadland Brochures with Category column', async ({ app }) => 
 test('report a problem from inside a form, then the form comes back as it was', async ({ app }) => {
   await app.call('editContact');
   await app.page.fill('#c_name', 'Half typed');
-  await app.page.click('#rpb');
+  await app.page.click('#mbox .mrp');
   await expect(app.page.locator('#mbox h2')).toHaveText('Report A Problem');
   expect(await app.page.inputValue('#f_where')).toContain('Contact');
   await app.page.fill('#f_what', 'Save did nothing');

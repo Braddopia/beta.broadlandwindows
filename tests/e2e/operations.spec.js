@@ -1,24 +1,45 @@
 // Service calls, deliveries, stock and holidays.
 const { test, expect } = require('../helpers');
 
-test('standard user: service call from an existing contract fills in and saves', async ({ app }) => {
+test('standard user: new service call step by step, from an existing contract', async ({ app }) => {
   await app.role('staff');
   expect(await app.run(() => canSee('service'))).toBe(true);
   await app.go('service');
   expect(await app.run(() => document.querySelectorAll('#main .mini.del').length)).toBe(0);
   await app.call('editCall');
+  await expect(app.page.locator('#mbox .stp.wz')).toContainText('Customer');
   await app.page.selectOption('#f_existing', { index: 0 });
   await app.page.fill('#f_contract', '2402318');
   await app.page.dispatchEvent('#f_contract', 'change');
   expect(
     await app.run(() => [document.querySelector('#f_name').value, document.querySelector('#f_town').value])
   ).toEqual(['Sample Customer E', 'Aylsham']);
+  await app.call('wzStep', 1);
   await app.page.selectOption('#f_cat', { index: 1 });
   await app.page.fill('#f_issue', 'Handle stiff on back door');
+  await app.call('wzStep', 1);
+  await expect(app.page.locator('#mbox .wz-info')).toContainText('2402318');
+  await app.call('wzStep', 1);
   await app.page.fill('#f_visit', '2026-11-08');
-  await app.page.click('#saveBtn');
+  await app.call('wzStep', 1);
+  await app.call('wzSave');
   const c = await app.run(() => state.calls[0]);
-  expect([c.status, c.contract, c.takenBy]).toEqual(['Booked', '2402318', 'Demo User']);
+  expect([c.status, c.contract, c.takenBy, c.issue]).toEqual([
+    'Booked',
+    '2402318',
+    'Demo User',
+    'Handle stiff on back door',
+  ]);
+});
+
+test('new service call for a new customer needs phone, address and town', async ({ app }) => {
+  await app.role('staff');
+  await app.call('editCall');
+  await app.page.selectOption('#f_existing', 'No, new customer');
+  await app.page.fill('#f_name', 'Sample Caller');
+  await app.call('wzStep', 1);
+  await expect(app.page.locator('.toast')).toContainText('phone');
+  expect(await app.run(() => WZ.st)).toBe(0);
 });
 
 test('service call cannot close without a completion date', async ({ app }) => {
@@ -105,4 +126,22 @@ test('holiday days skip bank holidays and the Christmas shutdown; impossible dat
     '2026-02-28',
     '2024-02-29',
   ]);
+});
+
+test('every reports tab draws, with the added trend and performance tables', async ({ app }) => {
+  await app.role('beta');
+  await app.go('reports');
+  const want = {
+    sales: 'Salesperson performance',
+    contracts: 'Sales by salesperson',
+    service: 'Engineer performance',
+    deliveries: 'Supplier delivery record',
+    people: 'Holiday by person',
+    stock: 'Stock value by area',
+  };
+  for (const [t, title] of Object.entries(want)) {
+    await app.run((t) => setUI('rep.t', t), t);
+    await expect(app.page.locator('#main')).toContainText(title);
+  }
+  expect(app.errors).toEqual([]);
 });

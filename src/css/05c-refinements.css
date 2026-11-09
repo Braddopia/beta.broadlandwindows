@@ -421,3 +421,15 @@ body.tv #rpb,body.signin #rpb{display:none}
 .top .sb:focus-within{border-color:var(--blue)!important;box-shadow:0 0 0 3px var(--blue-bg)!important}
 .btn{font-weight:600;letter-spacing:.005em;box-shadow:none}
 .btn:active{transform:none}
+/* step-by-step forms: the facts box on a Check step */
+.wz-info{display:grid;grid-template-columns:repeat(auto-fit,minmax(10rem,1fr));gap:.6rem;margin:0 0 .8rem}
+.wz-info>div{padding:.6rem .75rem;border:1px solid var(--line);border-radius:8px;background:var(--card2)}
+.wz-info small{display:block;font-size:.72rem;color:var(--muted);font-weight:600}
+.wz-info b{display:block;font:600 1.05rem var(--head);color:var(--navy)}
+.wz-info b.od{color:var(--red)}
+.wz-info span{display:block;font-size:.76rem;color:var(--muted)}
+body:has(#modal.open) #rpb{display:none}
+.mact .mrp{margin-right:auto;color:var(--muted);font-weight:500}
+.mrp svg{width:.95rem;height:.95rem;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.mrp:hover{color:var(--red)}
+@media(max-width:700px){.mrp span{display:none}}
