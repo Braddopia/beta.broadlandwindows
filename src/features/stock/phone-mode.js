@@ -3,7 +3,7 @@ import { onClick, rowClick } from '../../core/actions.js';
 import { esc } from '../../core/dom.js';
 import { ICONS, svg } from '../../core/icons.js';
 import { state } from '../../data/state.js';
-import { hasLoc, isLow, isMove, key, products } from '../../domain/stock.js';
+import { canUndo, hasLoc, isLow, isMove, key, products } from '../../domain/stock.js';
 import { scan } from '../scanner/scanner.js';
 import { found } from './item-window.js';
 import { render, view } from '../../ui/shell/router.js';
@@ -14,7 +14,7 @@ export function vPDA() {
   const P = products(),
     low = P.filter((r) => isLow(r) && r.stock > 0),
     out = P.filter((r) => r.stock <= 0),
-    mine = state.items.filter((r) => r.user == USER && isMove(r)).slice(0, 5);
+    mine = state.items.filter((r) => r.user == USER && isMove(r) && !r.undoOf).slice(0, 5);
   const b = (ic, t, s, act, cls) =>
     `<button type="button" class="pda-b ${cls || ''}" ${act}><span class="pda-i">${svg(ic)}</span><b>${t}</b><small>${s}</small></button>`;
   return `<div class="head"><div><h1>Stock</h1><span class="muted">${P.length} products · ${low.length} low · ${out.length} out</span></div></div>
@@ -30,7 +30,7 @@ export function vPDA() {
           .join('')}</div>`
       : ''
   }
-  ${mine.length ? `<div class="panel" style="margin-top:1rem"><h2>My Last Moves</h2>${mine.map((r) => `<div class="row"><span><b>${esc(r.item)}</b><br><span class="muted">${esc(r.time || '')}</span></span><span class="tag ${r.type == 'add' ? 'g' : 'r'}">${r.type == 'add' ? '+' : '-'}${r.qty}</span></div>`).join('')}</div>` : ''}
+  ${mine.length ? `<div class="panel" style="margin-top:1rem"><h2>My Last Moves</h2>${mine.map((r) => `<div class="row"><span><b>${esc(r.item)}</b><br><span class="muted">${esc(r.time || '')}</span></span><span class="acts"><span class="tag ${r.type == 'add' ? 'g' : 'r'}">${r.type == 'add' ? '+' : '-'}${r.qty}</span>${canUndo(r) ? `<button class="mini" ${onClick('moveUndo', r.uid)}>Undo</button>` : ''}</span></div>`).join('')}</div>` : ''}
   <p style="text-align:center;margin-top:1.2rem"><button class="btn ghost sm" ${onClick('setUI', 'inv.full', 1)}>Show the full inventory</button></p>`;
 }
 export let pdaWas = null;

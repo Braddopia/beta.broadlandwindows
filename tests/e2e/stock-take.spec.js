@@ -71,17 +71,28 @@ test('count by area, print count sheets, export to Excel, then apply', async ({ 
   const [sheet] = await Promise.all([app.nextPopup(), app.page.click('#mbox >> text=/^Print$/')]);
   await sheet.waitForLoadState();
   await expect(sheet.locator('h1')).toHaveText('Stores');
-  await expect(sheet.locator('thead th')).toHaveText(['Stock Code', 'Description', 'Quantity In Stock', 'Location', 'Notes']);
+  await expect(sheet.locator('thead th')).toHaveText([
+    'Stock Code',
+    'Description',
+    'Quantity In Stock',
+    'Location',
+    'Notes',
+  ]);
   await sheet.close();
 
   await app.page.click('#main >> text=Export To Excel >> nth=0');
   const [dl] = await Promise.all([app.page.waitForEvent('download'), app.page.click('text=With Counts So Far')]);
   expect(dl.suggestedFilename()).toMatch(/\.xlsx$/);
-  const back = await app.page.evaluate(async (b64) => {
-    const bin = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
-    const s = await window.CRM.readXlsx(new Blob([bin]));
-    return s.find((x) => x.name == 'Stores').rows.slice(0, 3);
-  }, require('fs').readFileSync(await dl.path()).toString('base64'));
+  const back = await app.page.evaluate(
+    async (b64) => {
+      const bin = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
+      const s = await window.CRM.readXlsx(new Blob([bin]));
+      return s.find((x) => x.name == 'Stores').rows.slice(0, 3);
+    },
+    require('fs')
+      .readFileSync(await dl.path())
+      .toString('base64')
+  );
   expect(back[0]).toEqual(['Stock Code', 'Description', 'Quantity In Stock', 'Location', 'Notes']);
   expect(back[1][2]).toBe(12);
 
@@ -108,4 +119,57 @@ test('standard users count blind and cannot apply', async ({ app }) => {
   await expect(app.page.locator('#main')).not.toContainText('Finish And Apply Counts');
   await expect(app.page.locator('#main thead')).not.toContainText('System');
   expect(await app.run(() => (takeApply(), state.stakes[0].status))).toBe('open');
+});
+
+test('every inventory report opens', async ({ app }) => {
+  await importSample(app);
+  const codes = [
+    'all',
+    'area',
+    'sup',
+    'loc',
+    'val',
+    'supcost',
+    'dead',
+    'low',
+    'out',
+    'qc',
+    'expiry',
+    'uncounted',
+    'moves',
+    'req',
+  ];
+  for (const c of codes) {
+    await app.call('invRep');
+    const [w] = await Promise.all([app.nextPopup(), app.call('invRun', c)]);
+    await w.waitForLoadState();
+    await expect(w.locator('h1').first(), c).not.toBeEmpty();
+    await w.close();
+  }
+  expect(app.errors).toEqual([]);
+});
+
+test('a standard user can undo a stock movement for 15 minutes, and the audit log says who', async ({ app }) => {
+  await app.role('staff');
+  await app.go('stock');
+  const pid = await app.run(() => products()[0].pid);
+  const before = await app.run((k) => prod(k).stock, pid);
+  await app.call('stockForm', 'add', pid);
+  await app.page.fill('#f_qty', '3');
+  await app.page.click('#mbox .mact >> text=Add stock');
+  expect(await app.run((k) => prod(k).stock, pid)).toBe(before + 3);
+  await app.run(() => setUI('inv.v', 'moves'));
+  await app.page.locator('#main tbody tr').first().locator('text=Undo').click();
+  await app.page.click('#modal >> text=/^Undo$/');
+  const r = await app.run((k) => ({ stock: prod(k).stock, audit: state.audit[0].a, by: state.audit[0].role }), pid);
+  expect(r).toEqual({ stock: before, audit: 'Stock movement undone', by: 'staff' });
+  await expect(app.page.locator('#main')).toContainText('Undone by');
+  // after 15 minutes the button is gone
+  await app.call('stockForm', 'remove', pid);
+  await app.page.fill('#f_qty', '1');
+  await app.page.click('#mbox .mact >> text=Remove stock');
+  await expect(app.page.locator('#main tbody tr').first()).toContainText('Undo');
+  await app.page.clock.setFixedTime(new Date('2026-11-08T10:16:00'));
+  await app.run(() => render());
+  await expect(app.page.locator('#main tbody tr').first()).not.toContainText('Undo');
 });

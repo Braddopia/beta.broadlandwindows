@@ -308,7 +308,9 @@ export function srchBuild(raw, big) {
       `<div class="srg xm">Exact Stock Match</div>` +
         row(
           X.item + (X.desc ? ' · ' + X.desc : ''),
-          ['Stock ID ' + X.pid, X.stock + ' ' + unitOf(X) + ' in stock', X.location, X.area].filter((v) => v && v != '-').join(' · '),
+          ['Stock ID ' + X.pid, X.stock + ' ' + unitOf(X) + ' in stock', X.location, X.area]
+            .filter((v) => v && v != '-')
+            .join(' · '),
           () => viewItem(X.pid),
           'M4 7l8-4 8 4v10l-8 4-8-4zM4 7l8 4 8-4M12 11v10'
         ).replace('class="sri"', 'class="sri sri-x"')

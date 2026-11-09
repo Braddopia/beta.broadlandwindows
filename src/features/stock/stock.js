@@ -13,7 +13,9 @@ import { store } from '../../data/persistence.js';
 import { state } from '../../data/state.js';
 import {
   areaOf,
+  UNDO_MIN,
   byUid,
+  canUndo,
   colTxt,
   exactProduct,
   hasLoc,
@@ -454,7 +456,7 @@ export function vMoves(tog) {
       .map((r) => {
         const req = r.type == 'request',
           pend = req && r.reqStatus == 'Pending';
-        return `<tr class="clk-r" ${rowClick('viewItem', r.pid)} style="${req && ['Cleared', 'Rejected'].includes(r.reqStatus) ? 'opacity:.6' : ''}"><td>${ordTag(r) || '<span class="muted">-</span>'}</td><td>${esc(r.time)}</td><td><span class="tag ${r.type == 'add' ? 'g' : r.type == 'remove' ? 'r' : 'y'}">${esc(r.type)}</span>${req ? ' ' + reqTag(r) : ''}${r.flag && !r.cleared ? ' <span class="tag r">Alert</span>' : ''}</td><td class="c-sm">${esc(r.user)}</td><td class="n">${r.qty} ${esc(unitOf(r))}</td><td><b>${esc(r.item)}</b></td><td class="c-sm">${esc(r.length)}</td><td class="c-md">${esc(colTxt(r))}</td><td class="n c-md">${req ? '<span class="muted">-</span>' : r.stock}</td><td class="ac"><div class="acts r">${pend && Ad ? `<button class="mini pri" ${onClick('reqApprove', r.uid)}>Approve</button><button class="mini del" ${onClick('reqReject', r.uid)}>Reject</button>` : ''}${req && r.reqStatus == 'Approved' ? `<button class="mini ok" ${onClick('reqReceive', r.uid)}>Receive</button>` : ''}${(req && !['Cleared', 'Rejected'].includes(r.reqStatus) && !pend) || (r.flag && !r.cleared) ? `<button class="mini" ${onClick('moveClear', r.uid)}>Clear</button>` : ''}<button class="mini" ${onClick('viewItem', r.pid)}>View</button>${can('manage') ? `<button class="mini del" ${onClick('moveDel', r.uid)} aria-label="Delete entry">&times;</button>` : ''}</div></td></tr>`;
+        return `<tr class="clk-r" ${rowClick('viewItem', r.pid)} style="${(req && ['Cleared', 'Rejected', 'Cancelled'].includes(r.reqStatus)) || r.undone ? 'opacity:.6' : ''}" ${r.undone ? 'data-undone="1"' : ''}><td>${ordTag(r) || '<span class="muted">-</span>'}</td><td>${esc(r.time)}</td><td><span class="tag ${r.type == 'add' ? 'g' : r.type == 'remove' ? 'r' : 'y'}">${esc(r.type)}</span>${req && !r.undone ? ' ' + reqTag(r) : ''}${r.undone ? ` <span class="tag n" title="${esc(new Date(r.undone.at).toLocaleString('en-GB'))}">Undone by ${esc(r.undone.by)}</span>` : ''}${r.undoOf ? ' <span class="tag n">Undo</span>' : ''}${r.flag && !r.cleared ? ' <span class="tag r">Alert</span>' : ''}</td><td class="c-sm">${esc(r.user)}</td><td class="n">${r.qty} ${esc(unitOf(r))}</td><td><b>${esc(r.item)}</b></td><td class="c-sm">${esc(r.length)}</td><td class="c-md">${esc(colTxt(r))}</td><td class="n c-md">${req ? '<span class="muted">-</span>' : r.stock}</td><td class="ac"><div class="acts r">${pend && Ad ? `<button class="mini pri" ${onClick('reqApprove', r.uid)}>Approve</button><button class="mini del" ${onClick('reqReject', r.uid)}>Reject</button>` : ''}${req && r.reqStatus == 'Approved' ? `<button class="mini ok" ${onClick('reqReceive', r.uid)}>Receive</button>` : ''}${(req && !['Cleared', 'Rejected'].includes(r.reqStatus) && !pend) || (r.flag && !r.cleared) ? `<button class="mini" ${onClick('moveClear', r.uid)}>Clear</button>` : ''}${canUndo(r) ? `<button class="mini" ${onClick('moveUndo', r.uid)} title="Undo for ${UNDO_MIN} minutes after">Undo</button>` : ''}<button class="mini" ${onClick('viewItem', r.pid)}>View</button>${can('manage') ? `<button class="mini del" ${onClick('moveDel', r.uid)} aria-label="Delete entry">&times;</button>` : ''}</div></td></tr>`;
       })
       .join('') || '<tr><td colspan="10" class="empty">No entries match.</td></tr>'
   }
@@ -515,6 +517,50 @@ export function moveDel(u) {
       render();
     },
     true
+  );
+}
+/** undo a recent movement: in/out gets a matching movement the other way, a pending request is cancelled */
+export function moveUndo(u) {
+  const r = byUid(u);
+  if (!canUndo(r)) return toast('This can only be undone for ' + UNDO_MIN + ' minutes');
+  askYes(
+    'Undo this ' + (r.type == 'request' ? 'request' : r.type == 'add' ? 'stock in' : 'stock out') + '?',
+    r.qty +
+      ' ' +
+      unitOf(r) +
+      ' of ' +
+      r.item +
+      ', by ' +
+      r.user +
+      ' at ' +
+      r.time +
+      '. Your name goes in the audit log.',
+    'Undo',
+    () => {
+      r.undone = { by: USER, at: Date.now() };
+      r.flag = false;
+      if (r.type == 'request') r.reqStatus = 'Cancelled';
+      else {
+        const p = prod(r.pid),
+          cur = p ? +p.stock || 0 : 0,
+          back = r.type == 'add' ? 'remove' : 'add',
+          st = back == 'add' ? cur + r.qty : Math.max(0, cur - r.qty);
+        state.items.unshift(
+          moveRow(p || r, back, r.qty, st, {
+            note: 'Undo of ' + r.type + ' by ' + r.user + ' at ' + r.time,
+            undoOf: r.uid,
+          })
+        );
+      }
+      audit(
+        'Stock movement undone',
+        r.item,
+        r.type + ' ' + r.qty + ' by ' + r.user + ' at ' + r.time + (r.ord ? ' ' + r.ord : '')
+      );
+      store();
+      render();
+      toast('Undone');
+    }
   );
 }
 export function invSelClear() {

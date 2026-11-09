@@ -70,7 +70,17 @@ export function moveRow(b, kind, qty, stock, extra) {
   };
 }
 /* a real stock movement (in or out), not a request or an imported starting line */
-export const isMove = (r) => r.type == 'add' || r.type == 'remove';
+export const isMove = (r) => (r.type == 'add' || r.type == 'remove') && !r.undone;
+/* anyone may undo a stock movement or request for this many minutes after it was made */
+export const UNDO_MIN = 15;
+/** can this movement still be undone? (not already undone, not an undo itself, request still pending) */
+export const canUndo = (r, now = Date.now()) =>
+  !!r &&
+  !r.undone &&
+  !r.undoOf &&
+  !r.stake &&
+  now - (r.at || 0) < UNDO_MIN * 6e4 &&
+  (r.type == 'add' || r.type == 'remove' || (r.type == 'request' && r.reqStatus == 'Pending'));
 export const byUid = (u) => state.items.find((x) => x.uid == u);
 /* request numbers: P0001 while pending, then the next order number (0001, 0002...) once approved */
 /* next order / pending number: one above the highest already used, so numbers never repeat.

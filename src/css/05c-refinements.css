@@ -384,3 +384,5 @@ body[data-theme=dark] .sri.sri-x{background:rgba(255,208,2,.16)}
 .tk-foot{margin-top:1rem;justify-content:flex-end;flex-wrap:wrap}
 .take-intro .steps-l{margin:.4rem 0 1rem;padding-left:1.2rem;line-height:1.7}
 .take-intro .acts{flex-wrap:wrap}
+.rl.rl2{display:grid;grid-template-columns:repeat(auto-fill,minmax(15rem,1fr));gap:.5rem}
+.rl.rl2 .rb span{display:block;font-size:.74rem;color:var(--muted);font-weight:400;margin-top:.15rem}

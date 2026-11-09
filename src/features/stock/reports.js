@@ -5,7 +5,21 @@ import { $, esc } from '../../core/dom.js';
 import { grp, money, sum } from '../../core/format.js';
 import { state } from '../../data/state.js';
 import { pphotos } from './stock.js';
-import { colTxt, hasLoc, isLow, isMove, key, prodRows, products, ro, stt, unitOf } from '../../domain/stock.js';
+import {
+  areaOf,
+  colTxt,
+  hasLoc,
+  isLow,
+  isMove,
+  key,
+  prodRows,
+  products,
+  qcIssue,
+  ro,
+  stt,
+  unitOf,
+} from '../../domain/stock.js';
+import { areaList } from '../../domain/stock-take.js';
 import { can } from '../../domain/permissions.js';
 import { SEL } from './stock.js';
 import { c39, printDoc } from '../../print/print.js';
@@ -101,21 +115,57 @@ export function invRep(k) {
     reportProd(k);
     return;
   }
-  const n = SEL.size;
+  const n = SEL.size,
+    Ad = can('money'),
+    last = (state.stakes || []).filter((t) => t.status == 'done').slice(-1)[0],
+    G = [
+      [
+        'Stock Lists',
+        [
+          ['sel', 'Selected Items (' + n + ')', n],
+          ['all', 'Full Stock List', 1],
+          ['area', 'By Stock-Take Area', 1],
+          ['sup', 'By Supplier', 1],
+          ['loc', 'By Location', 1],
+        ],
+      ],
+      [
+        'Money',
+        [
+          ['val', 'Valuation By Area', Ad, 'Value of every area and the company total'],
+          ['supcost', 'Cost By Supplier', Ad, 'What is held from each supplier, biggest first'],
+          ['dead', 'Not Moved In 6 Months', Ad, 'Money tied up in stock nobody is using'],
+        ],
+      ],
+      [
+        'Checks',
+        [
+          ['low', 'Low Stock And Reorder', 1],
+          ['out', 'Out Of Stock', 1],
+          ['qc', 'Quality Check Issues', 1, 'Failed, quarantined, damaged or out of date'],
+          ['expiry', 'Expiring In 90 Days', 1],
+          ['uncounted', 'Not Counted In A Year', 1],
+        ],
+      ],
+      [
+        'Activity',
+        [
+          ['moves', 'Movements: Last 30 Days', 1, 'In and out per product'],
+          ['req', 'Stock Requests', 1],
+          ...(last ? [['take', 'Last Stock Take Differences', 1, last.name]] : []),
+        ],
+      ],
+    ];
   openModal(
-    `<h2>Inventory Reports</h2><div class="rl">${[
-      ['sel', 'Selected Items (' + n + ')', n],
-      ['all', 'Full Stock List', 1],
-      ['low', 'Low Stock And Reorder', 1],
-      ['out', 'Out Of Stock', 1],
-      ['sup', 'By Supplier', 1],
-      ['loc', 'By Location', 1],
-      ['req', 'Stock Requests', 1],
-    ]
-      .map(([c, t, e]) => `<button class="rb" ${e ? '' : 'disabled'} ${onClick('invRun', c)}><b>${t}</b></button>`)
-      .join(
-        ''
-      )}</div><div class="ff" style="margin-top:.8rem"><label class="cbl"><input type="checkbox" id="rhist" checked> Include movement history</label><label class="cbl"><input type="checkbox" id="rphoto"> Include photos</label></div><div class="mact"><button class="btn ghost" data-act="closeModal">Close</button></div>`
+    `<h2>Inventory Reports</h2>${G.map(
+      ([g, L]) =>
+        `<h3 class="fsec">${g}</h3><div class="rl rl2">${L.map(
+          ([c, t, e, d]) =>
+            `<button class="rb" ${e ? '' : 'disabled'} ${c == 'take' ? onClick('takeReport', last.id) : onClick('invRun', c)}><b>${t}</b>${d ? `<span>${esc(d)}</span>` : ''}</button>`
+        ).join('')}</div>`
+    ).join(
+      ''
+    )}<div class="ff" style="margin-top:.8rem"><label class="cbl"><input type="checkbox" id="rhist" checked> Include movement history</label><label class="cbl"><input type="checkbox" id="rphoto"> Include photos</label></div><div class="mact"><button class="btn ghost" data-act="closeModal">Close</button></div>`
   );
 }
 export function invRun(sc) {
@@ -147,6 +197,11 @@ export function invRun(sc) {
     sub = 'Grouped by location';
   }
   closeModal();
+  if (EXTRA[sc]) return EXTRA[sc](P, ref);
+  if (sc == 'area') {
+    title = 'Stock By Area';
+    sub = 'Grouped by stock-take area';
+  }
   if (sc == 'req') {
     const R = state.items.filter((r) => r.type == 'request');
     printDoc('Stock Requests', 'Pending and approved requests', [], [], {
@@ -222,7 +277,9 @@ export function invRun(sc) {
         ? grpT((r) => r.supplier)
         : sc == 'loc'
           ? grpT((r) => (hasLoc(r) ? r.location : ''))
-          : [{ t: 'Items', h: hd, r: L.map(row) }],
+          : sc == 'area'
+            ? areaList(L, state.stockAreas).map((a) => grpT(areaOf).find((t) => t.t.startsWith(a + ' (')))
+            : [{ t: 'Items', h: hd, r: L.map(row) }],
     keys = new Set(L.map(key));
   if (hist)
     tables.push({
@@ -252,6 +309,288 @@ export function invRun(sc) {
     tables,
   });
 }
+/* ---- the newer reports ---- */
+const r2 = (n) => Math.round(n * 100) / 100;
+const val = (r) => (+r.stock || 0) * (+r.cost || 0);
+const name = (r) => [r.nocode ? '' : r.item, r.desc].filter(Boolean).join(' · ') || r.item;
+/** when each product last went in or out */
+function lastMoves() {
+  const m = {};
+  state.items.forEach((x) => {
+    if (isMove(x) && !(x.pid in m)) m[x.pid] = x.at || 0;
+  });
+  return m;
+}
+const EXTRA = {
+  val(P, ref) {
+    if (!can('money')) return;
+    const A = areaList(P, state.stockAreas),
+      total = sum(P, val),
+      rows = A.map((a) => {
+        const L = P.filter((r) => areaOf(r) == a);
+        return [
+          a,
+          L.length,
+          sum(L, (r) => +r.stock || 0),
+          money(sum(L, val)),
+          total ? Math.round((sum(L, val) / total) * 100) + '%' : '-',
+        ];
+      });
+    printDoc('Stock Valuation By Area', 'Quantity in stock × cost each', [], [], {
+      kind: 'Stock Report',
+      ref,
+      sign: true,
+      kpis: [
+        ['Company Value', money(total)],
+        ['Areas', A.length],
+        ['Lines', P.length],
+        ['No Cost Set', P.filter((r) => r.stock > 0 && !(+r.cost > 0)).length],
+      ],
+      tables: [
+        {
+          t: 'Value By Area',
+          h: ['Area', 'Lines', 'Units', 'Value', 'Share'],
+          r: [...rows, ['Total', P.length, sum(P, (r) => +r.stock || 0), money(total), '100%']],
+        },
+        {
+          t: 'Most Valuable Lines',
+          h: ['Item', 'Area', 'Qty', 'Cost', 'Value'],
+          r: P.slice()
+            .sort((a, b) => val(b) - val(a))
+            .slice(0, 25)
+            .map((r) => [name(r), areaOf(r), r.stock + ' ' + unitOf(r), money(r.cost), money(val(r))]),
+        },
+        {
+          t: 'In Stock With No Cost (value counted as £0)',
+          h: ['Item', 'Area', 'Qty'],
+          r: P.filter((r) => r.stock > 0 && !(+r.cost > 0)).map((r) => [name(r), areaOf(r), r.stock + ' ' + unitOf(r)]),
+        },
+      ],
+    });
+  },
+  supcost(P, ref) {
+    if (!can('money')) return;
+    const total = sum(P, val),
+      G = grp(P, (r) => r.supplier || 'No Supplier').sort((a, b) => sum(b[1], val) - sum(a[1], val));
+    printDoc('Cost By Supplier', 'Stock held from each supplier, at cost', [], [], {
+      kind: 'Stock Report',
+      ref,
+      sign: true,
+      kpis: [
+        ['Company Value', money(total)],
+        ['Suppliers', G.length],
+        ['Biggest', G[0] ? G[0][0] : '-'],
+      ],
+      tables: [
+        {
+          t: 'Summary',
+          h: ['Supplier', 'Lines', 'Units', 'Value', 'Share'],
+          r: G.map(([k, L]) => [
+            k,
+            L.length,
+            r2(sum(L, (r) => +r.stock || 0)),
+            money(sum(L, val)),
+            total ? Math.round((sum(L, val) / total) * 100) + '%' : '-',
+          ]),
+        },
+        ...G.map(([k, L]) => ({
+          t: k + ' · ' + money(sum(L, val)),
+          h: ['Item', 'Area', 'Location', 'Qty', 'Cost', 'Value'],
+          r: L.slice()
+            .sort((a, b) => val(b) - val(a))
+            .map((r) => [
+              name(r),
+              areaOf(r),
+              hasLoc(r) ? r.location : '-',
+              r.stock + ' ' + unitOf(r),
+              money(r.cost),
+              money(val(r)),
+            ]),
+        })),
+      ],
+    });
+  },
+  dead(P, ref) {
+    if (!can('money')) return;
+    const lm = lastMoves(),
+      cut = Date.now() - 182 * 864e5,
+      L = P.filter((r) => r.stock > 0 && (lm[r.pid] || 0) < cut).sort((a, b) => val(b) - val(a));
+    printDoc('Not Moved In 6 Months', 'In stock, with nothing in or out for 6 months', [], [], {
+      kind: 'Stock Report',
+      ref,
+      sign: true,
+      kpis: [
+        ['Lines', L.length],
+        ['Value Tied Up', money(sum(L, val))],
+        ['Share Of Stock', sum(P, val) ? Math.round((sum(L, val) / sum(P, val)) * 100) + '%' : '-'],
+      ],
+      tables: [
+        {
+          t: 'Lines',
+          h: ['Item', 'Area', 'Qty', 'Value', 'Last Moved', 'Supplier'],
+          r: L.map((r) => [
+            name(r),
+            areaOf(r),
+            r.stock + ' ' + unitOf(r),
+            money(val(r)),
+            lm[r.pid] ? new Date(lm[r.pid]).toLocaleDateString('en-GB') : 'Never',
+            r.supplier || '-',
+          ]),
+        },
+      ],
+    });
+  },
+  qc(P, ref) {
+    const td = today(),
+      L = P.filter((r) => qcIssue(r, td));
+    printDoc('Quality Check Issues', 'Failed, quarantined, damaged, faulty or past its date', [], [], {
+      kind: 'Stock Report',
+      ref,
+      sign: true,
+      kpis: [
+        ['Lines', L.length],
+        ['Damaged Units', sum(L, (r) => +r.damaged || 0)],
+        ['Out Of Date', L.filter((r) => r.expiry && r.expiry < td).length],
+        ['COSHH Items', P.filter((r) => r.coshh == 'Yes').length],
+      ],
+      tables: [
+        {
+          t: 'Lines',
+          h: ['Item', 'Area', 'QC', 'Condition', 'Damaged', 'Batch', 'Expiry', 'Checked', 'Notes'],
+          r: L.map((r) => [
+            name(r),
+            areaOf(r),
+            r.qc || '-',
+            r.cond || '-',
+            r.damaged || 0,
+            r.batch || '-',
+            r.expiry || '-',
+            [r.qcBy, r.qcAt].filter(Boolean).join(', ') || '-',
+            r.qcNote || '',
+          ]),
+        },
+        {
+          t: 'Hazardous (COSHH) Items',
+          h: ['Item', 'Area', 'Location', 'Qty'],
+          r: P.filter((r) => r.coshh == 'Yes').map((r) => [
+            name(r),
+            areaOf(r),
+            hasLoc(r) ? r.location : '-',
+            r.stock + ' ' + unitOf(r),
+          ]),
+        },
+      ],
+    });
+  },
+  expiry(P, ref) {
+    const td = today(),
+      lim = new Date(Date.now() + 90 * 864e5).toISOString().slice(0, 10),
+      L = P.filter((r) => r.expiry && r.expiry <= lim).sort((a, b) => a.expiry.localeCompare(b.expiry));
+    printDoc('Expiring In 90 Days', 'Sealants, foams, paints and anything with a use-by date', [], [], {
+      kind: 'Stock Report',
+      ref,
+      sign: true,
+      kpis: [
+        ['Lines', L.length],
+        ['Already Out Of Date', L.filter((r) => r.expiry < td).length],
+      ],
+      tables: [
+        {
+          t: 'Lines',
+          h: ['Item', 'Area', 'Qty', 'Batch', 'Expiry'],
+          r: L.map((r) => [name(r), areaOf(r), r.stock + ' ' + unitOf(r), r.batch || '-', r.expiry]),
+        },
+      ],
+    });
+  },
+  uncounted(P, ref) {
+    const cut = new Date(Date.now() - 365 * 864e5).toISOString().slice(0, 10),
+      L = P.filter((r) => !r.countedAt || r.countedAt < cut);
+    printDoc('Not Counted In A Year', 'Lines with no stock-take count in the last 12 months', [], [], {
+      kind: 'Stock Report',
+      ref,
+      sign: true,
+      kpis: [
+        ['Lines', L.length],
+        ['Never Counted', L.filter((r) => !r.countedAt).length],
+      ],
+      tables: areaList(L, state.stockAreas).map((a) => ({
+        t: a,
+        h: ['Item', 'Location', 'Qty', 'Last Counted'],
+        r: L.filter((r) => areaOf(r) == a).map((r) => [
+          name(r),
+          hasLoc(r) ? r.location : '-',
+          r.stock + ' ' + unitOf(r),
+          r.countedAt || 'Never',
+        ]),
+      })),
+    });
+  },
+  moves(P, ref) {
+    const Ad = can('money'),
+      cut = Date.now() - 30 * 864e5,
+      M = state.items.filter((x) => isMove(x) && (x.at || 0) >= cut),
+      G = grp(M, (x) => x.pid)
+        .map(([k, L]) => {
+          const inQ = sum(
+              L.filter((x) => x.type == 'add'),
+              (x) => +x.qty || 0
+            ),
+            outQ = sum(
+              L.filter((x) => x.type == 'remove'),
+              (x) => +x.qty || 0
+            );
+          return { r: L[0], inQ, outQ, n: L.length };
+        })
+        .sort((a, b) => b.outQ - a.outQ);
+    printDoc('Movements: Last 30 Days', 'Stock in and out per product', [], [], {
+      kind: 'Stock Report',
+      ref,
+      sign: true,
+      kpis: [
+        ['Movements', M.length],
+        ['Products', G.length],
+        ['Units In', r2(sum(G, (g) => g.inQ))],
+        ['Units Out', r2(sum(G, (g) => g.outQ))],
+        ...(Ad ? [['Value Out', money(sum(G, (g) => g.outQ * (+g.r.cost || 0)))]] : []),
+      ],
+      tables: [
+        {
+          t: 'Per Product (most used first)',
+          h: ['Item', 'Area', 'In', 'Out', 'Moves', ...(Ad ? ['Value Out'] : [])],
+          r: G.map((g) => [
+            name(g.r),
+            areaOf(g.r),
+            r2(g.inQ),
+            r2(g.outQ),
+            g.n,
+            ...(Ad ? [money(g.outQ * (+g.r.cost || 0))] : []),
+          ]),
+        },
+        {
+          t: 'By Person',
+          h: ['Person', 'Moves', 'Units In', 'Units Out'],
+          r: grp(M, (x) => x.user || '-').map(([k, L]) => [
+            k,
+            L.length,
+            r2(
+              sum(
+                L.filter((x) => x.type == 'add'),
+                (x) => +x.qty || 0
+              )
+            ),
+            r2(
+              sum(
+                L.filter((x) => x.type == 'remove'),
+                (x) => +x.qty || 0
+              )
+            ),
+          ]),
+        },
+      ],
+    });
+  },
+};
 export function invLabels() {
   const L = products().filter((r) => SEL.has(key(r)));
   if (!L.length) return;

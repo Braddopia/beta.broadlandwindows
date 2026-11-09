@@ -8,7 +8,19 @@ import { render } from './shell/router.js';
 /* All page-level UI state lives here (instead of a dozen loose globals) */
 export const uiState = {
   svc: { f: 'open', page: 1, per: 50 },
-  inv: { v: 'products', f: 'all', q: '', sup: 'all', loc: 'all', area: 'all', unit: 'all', sort: 'item', dir: 1, page: 1, per: 50 },
+  inv: {
+    v: 'products',
+    f: 'all',
+    q: '',
+    sup: 'all',
+    loc: 'all',
+    area: 'all',
+    unit: 'all',
+    sort: 'item',
+    dir: 1,
+    page: 1,
+    per: 50,
+  },
   take: { area: '', f: 'all', q: '', show: false, page: 1, per: 100 },
   mov: { f: 'all', sort: '', dir: 1, page: 1, per: 50 },
   cal: { m: 'month', o: 0, sd: null, ly: { fit: 1, svc: 1, del: 1, hol: 1 } },

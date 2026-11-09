@@ -202,7 +202,16 @@ function fillList(id, values) {
 }
 function fillLists() {
   const P = products();
-  fillList('itemCodes', P.map((x) => x.item));
-  fillList('locs', P.map((x) => x.location));
-  fillList('areas', P.map((x) => x.area));
+  fillList(
+    'itemCodes',
+    P.map((x) => x.item)
+  );
+  fillList(
+    'locs',
+    P.map((x) => x.location)
+  );
+  fillList(
+    'areas',
+    P.map((x) => x.area)
+  );
 }
