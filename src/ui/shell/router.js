@@ -63,13 +63,18 @@ export const VIEWS = {
   settings: { t: 'Settings', fn: vSettings },
 };
 export const NG = [
-  ['Workspace', ['home', 'messages']],
+  ['Workspace', ['home', 'messages', 'fitting', 'contacts']],
   ['Sales', ['leads', 'contracts']],
-  ['Operations', ['live', 'deliveries', 'fitting', 'service']],
-  ['Stock & People', ['stock', 'suppliers', 'contacts', 'staff', 'holidays']],
+  ['Operations', ['live', 'deliveries', 'service']],
+  ['Stock', ['stock', 'suppliers']],
+  ['People', ['staff', 'holidays']],
   ['Insights', ['reports', 'downloads']],
   ['Admin', ['finance', 'admin', 'settings']],
 ];
+/* the logo in the side menu goes back to the first page */
+export function goHome() {
+  go(HOME());
+}
 export let view = '',
   q = '',
   lastView = '';
@@ -92,12 +97,7 @@ export function navHtml(b) {
   let n = 0;
   return NG.map(([g, keys]) => {
     const ks = keys.filter((k) => canSee(k) && (k != 'admin' || can('manage')));
-    const gl =
-      g == 'Admin' && ks.every((k) => k == 'settings')
-        ? 'You'
-        : g == 'Stock & People' && !ks.some((k) => ['staff', 'holidays', 'contacts'].includes(k))
-          ? 'Stock'
-          : g;
+    const gl = g == 'Admin' && ks.every((k) => k == 'settings') ? 'You' : g;
     return ks.length
       ? `<div class="nl">${esc(gl)}</div>` +
           ks

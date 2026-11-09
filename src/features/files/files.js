@@ -9,7 +9,7 @@ import { SAFE } from '../../data/sanitize.js';
 import { audit } from '../../data/audit.js';
 import { store } from '../../data/persistence.js';
 import { state } from '../../data/state.js';
-import { can } from '../../domain/permissions.js';
+import { can, canSee } from '../../domain/permissions.js';
 import { need } from '../auth/session.js';
 import { emptyArt } from '../../ui/components/art.js';
 import { pagerH, paginate } from '../../ui/components/table.js';
@@ -181,6 +181,7 @@ export function vFiles() {
   <div class="chips">${cats.map((c) => `<button class="chip ${F.cat == c ? 'on' : ''}" ${onClick('setUI', 'files.cat', c)}>${c == 'all' ? 'All brochures' : esc(c)}</button>`).join('')}<span class="vs"></span><button class="chip ${F.az ? 'on' : ''}" ${onClick('togUI', 'files.az')}>Sort A to Z</button><button class="chip ${F.list ? 'on' : ''}" ${onClick('togUI', 'files.list')}>List view</button></div>
   ${rc.length ? `<div class="panel" style="margin-bottom:1rem"><h2>Recently Opened</h2>${rc.map((x) => `<div class="row"><span>${esc(x.t)}</span><a class="mini pri" href="${esc(SAFE.url(x.u))}" target="_blank" rel="noopener noreferrer">Open</a></div>`).join('')}</div>` : ''}
   <div class="book ${F.list ? 'lst' : ''}">${L.map((d) => `<div class="bc" style="position:relative"><div class="cvw">${cover(d)}<img src="${esc(coverUrl(d))}" alt="${esc(d.title)} cover" loading="lazy" referrerpolicy="no-referrer" data-alt="${esc(coverAlt(d))}" data-onerror="coverNext" data-args-error="[{&quot;$&quot;:&quot;this&quot;}]"></div><button class="mini covb" ${onClick('setCover', d.url)}>Set cover</button><div class="bb"><b>${esc(d.title)}</b><span class="tag n" style="align-self:flex-start">${esc(d.cat)}</span><div class="acts"><a class="mini pri" href="${esc(d.url)}" target="_blank" rel="noopener noreferrer" ${onClick('recent', d.url, d.title)}>Open</a><button class="mini" ${onClick('dlf', d.url)}>Download</button><a class="mini" href="mailto:?subject=${encodeURIComponent('Broadland brochure: ' + d.title)}&amp;body=${encodeURIComponent(d.url)}">Email</a>${can('manage') ? `<button class="mini del" ${onClick('fileHide', d.url, d.title)}>Remove</button>` : ''}</div></div></div>`).join('') || emptyArt('files', 'No brochures match.')}</div>
+  <div class="panel" style="margin-top:1.2rem"><h2><span>Broadland Forms <span class="muted">(order forms, survey sheets, job sheets and checklists to print)</span></span></h2><div class="upl"><label class="btn sm" style="cursor:pointer">Upload forms<input type="file" multiple hidden ${onEvent('onchange', 'manUp', 'this', 'Broadland Form')}></label>${canSee('stock') ? '<button class="btn ghost sm" data-act="takePrint">Print stock count sheets</button>' : ''}<span class="muted">Stored on this device only</span></div>${fhead('Form', 'Category', 'Size')}<div id="forms" class="flist">Loading</div></div>
   <div class="panel" style="margin-top:1.2rem"><h2><span>Smart Systems Manuals <span class="muted">(${SSM.filter((m) => !HID[m.u]).length} technical fabrication manuals)</span></span>${can('manage') && Object.keys(HID).length ? `<button class="btn ghost sm" data-act="fileHidden">Removed (${Object.keys(HID).length})</button>` : ''}<a class="btn ghost sm" href="https://previous.smartsystems.co.uk/documentlibrary/?c=35" target="_blank" rel="noopener noreferrer">Open Smart Systems library</a></h2>
    <div class="upl"><input placeholder="Search" value="${esc(F.ssq)}" maxlength="60" ${onEvent('oninput', 'ssqSet', 'this.value')} id="ssqI" style="min-width:min(16rem,100%)"></div>
    ${fhead('Manual', 'Category', 'Size')}<div class="flist">${pg.rows.map((m) => `<div class="frow"><b>${esc(m.t)}</b><span class="tag">${esc(m.f)}</span><span class="sz">${esc(m.s)}</span><span class="acts"><a class="mini pri" href="${esc(m.u)}" target="_blank" rel="noopener noreferrer">Open</a><button class="mini" ${onClick('dlf', m.u)}>Download</button><button class="mini" ${onClick('copyText', m.u)}>Copy link</button>${can('manage') ? `<button class="mini del" ${onClick('fileHide', m.u, m.t)}>Remove</button>` : ''}</span></div>`).join('') || '<p class="empty">No manuals match.</p>'}</div>${pagerH('files', pg, 'manuals')}</div>
@@ -319,8 +320,9 @@ export async function manRen(id) {
 }
 export async function loadMan() {
   const m = $('#mans'),
-    a = $('#assets');
-  if (!m && !a) return;
+    a = $('#assets'),
+    fm = $('#forms');
+  if (!m && !a && !fm) return;
   try {
     MF = ((await fx('readonly', (s) => s.getAll())) || []).filter((f) => !f.ref).sort((x, y) => y.time - x.time);
     const row = (f) =>
@@ -328,13 +330,19 @@ export async function loadMan() {
     const fl = (f) => !q || (f.name + ' ' + f.cat).toLowerCase().includes(q);
     if (m)
       m.innerHTML =
-        MF.filter((f) => !/^brand asset$/i.test(f.cat) && fl(f))
+        MF.filter((f) => !/^(brand asset|broadland form)$/i.test(f.cat) && fl(f))
           .map(row)
           .join('') ||
         emptyArt(
           'files',
           'No files yet. Upload manuals, fitting guides, spec sheets and anything else the team needs.'
         );
+    if (fm)
+      fm.innerHTML =
+        MF.filter((f) => /^broadland form$/i.test(f.cat) && fl(f))
+          .map(row)
+          .join('') ||
+        '<p class="empty" style="margin-top:.6rem">No forms yet. Upload the forms the team prints and fills in.</p>';
     if (a)
       a.innerHTML =
         BUILTIN()
@@ -350,7 +358,7 @@ export async function loadMan() {
           .join('') ||
           '<p class="empty" style="margin-top:.6rem">No uploaded brand or print assets yet. Upload cards and artwork above.</p>');
   } catch (e) {
-    [m, a].forEach(
+    [m, a, fm].forEach(
       (el) => el && (el.innerHTML = '<p class="empty">File storage is not available in this browser.</p>')
     );
   }

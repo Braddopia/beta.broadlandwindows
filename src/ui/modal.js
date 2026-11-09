@@ -1,6 +1,7 @@
 /* ui/modal: Popups: opening and closing, our own confirm box, the "saved" tick, and returning to an open record. */
 import { $, esc } from '../core/dom.js';
 import { syncIfPending } from '../data/sync.js';
+import { setPhotoList, tmp, tmpDraw } from './forms/photos.js';
 import { recReturn, recordWin, setRecordWin } from '../features/records/record-window.js';
 
 /* ---- modal ---- */
@@ -94,7 +95,27 @@ export function askGo() {
   closeModal();
   if (f) f();
 }
+/* a popup set aside (with whatever was typed in it) while another opens on top, e.g. Report A Problem */
+let PARKED = null;
+/** set the open popup aside; the next closeModal() puts it back exactly as it was */
+export function parkModal() {
+  const b = $('#mbox');
+  if (!$('#modal').classList.contains('open') || PARKED || b.querySelector(':scope>.rw')) return false;
+  PARKED = { nodes: [...b.childNodes], cls: b.className, photos: tmp, draw: tmpDraw };
+  b.replaceChildren();
+  return true;
+}
 export function closeModal() {
+  if (PARKED && !REC_STASH) {
+    const p = PARKED,
+      b = $('#mbox');
+    PARKED = null;
+    b.className = p.cls;
+    b.replaceChildren(...p.nodes);
+    setPhotoList(p.photos, p.draw);
+    $('#modal').classList.add('open');
+    return;
+  }
   if (REC_STASH) {
     const s = REC_STASH,
       b = $('#mbox');

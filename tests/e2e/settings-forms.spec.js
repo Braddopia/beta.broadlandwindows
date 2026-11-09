@@ -101,3 +101,15 @@ test('Files page: Broadland Brochures with Category column', async ({ app }) => 
     'Category'
   );
 });
+
+test('report a problem from inside a form, then the form comes back as it was', async ({ app }) => {
+  await app.call('editContact');
+  await app.page.fill('#c_name', 'Half typed');
+  await app.page.click('#rpb');
+  await expect(app.page.locator('#mbox h2')).toHaveText('Report A Problem');
+  expect(await app.page.inputValue('#f_where')).toContain('Contact');
+  await app.page.fill('#f_what', 'Save did nothing');
+  await app.page.click('#saveBtn');
+  await expect(app.page.locator('#c_name')).toHaveValue('Half typed', { timeout: 4000 });
+  expect(await app.run(() => state.bugs[0].what)).toBe('Save did nothing');
+});

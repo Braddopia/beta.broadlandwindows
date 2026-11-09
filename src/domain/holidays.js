@@ -23,7 +23,9 @@ export const holLeft = (s, y) =>
   allowTot(s) -
   hu(s, y) -
   sum(
-    state.hols.filter((h) => h.sid == s.id && h.status == 'Pending' && String(h.from).startsWith(String(y))),
+    state.hols.filter(
+      (h) => h.sid == s.id && h.status == 'Pending' && h.paid !== false && String(h.from).startsWith(String(y))
+    ),
     (h) => +h.days || 0
   );
 /* ---------------- holiday chart (same codes and rules as the office spreadsheet) ---------------- */
@@ -54,7 +56,8 @@ export function absCode(s, k) {
   if (!isWk(k)) return '';
   if (BH[k]) return 'B';
   const h = state.hols.find((h) => h.sid == s.id && h.status != 'Rejected' && h.from <= k && h.to >= k);
-  if (h) return h.status == 'Approved' ? 'H' : 'P';
+  /* unpaid leave does not use the allowance: it shows as U (voluntary unpaid) */
+  if (h) return h.status == 'Approved' ? (h.paid === false ? 'U' : 'H') : 'P';
   return shutDays(+k.slice(0, 4)).includes(k) ? 'H' : '';
 }
 export function yearCounts(s, y) {

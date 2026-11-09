@@ -7,7 +7,8 @@ import { ART_IC } from '../../ui/components/art.js';
 import { go, render, view } from '../../ui/shell/router.js';
 import { toast } from '../../ui/toast.js';
 
-/* ---------------- welcome tour ---------------- */
+/* ---------------- welcome tour ----------------
+   Steps go in screen order: the side menu top to bottom, then the top bar left to right, then the page. */
 export const TOUR = [
   {
     art: 'team',
@@ -19,39 +20,39 @@ export const TOUR = [
     t: 'Your menu',
     d: 'Every page you can use is here, grouped by job: sales, operations, stock and insights. What you see depends on your account.',
   },
-  {
-    sel: '#sb',
-    t: 'Search',
-    d: 'Type a name, postcode, item code or contract number to filter the page you are on. Press / on the keyboard to jump here.',
-  },
-  {
-    sel: '#nwb',
-    t: 'Add something new',
-    d: 'Start a new lead, service call, contact or stock movement from any page.',
-  },
-  { sel: '#scanBtn', t: 'Scan a barcode', d: 'Use the camera to find a product or book stock in and out.' },
-  {
-    sel: '#bell',
-    t: 'Notifications',
-    d: 'Stock requests, low stock, deliveries due and FENSA reminders all land here.',
-  },
-  { sel: '#thb', t: 'Light or dark', d: 'Switch the look to suit the room. The factory screen works well in dark.' },
-  {
-    sel: '#lookBtn',
-    t: 'Change the look',
-    d: 'Pick the page background, and a pattern for the blue greeting box on the overview.',
-  },
-  {
-    sel: '.hero-cz',
-    page: 'home',
-    t: 'Make the overview yours',
-    d: 'Choose which numbers and panels show on your dashboard, and in what order.',
-  },
   { sel: '#meBtn', t: 'Your details', d: 'Update your phone and email, and check your holiday allowance.' },
   {
     sel: '#acct',
     t: 'Switch account',
     d: 'Sign in as an administrator with your PIN when you need more access. It signs you out again after 30 minutes idle.',
+  },
+  {
+    sel: '#sb',
+    t: 'Search',
+    d: 'Type a name, postcode, item code or contract number to filter the page you are on. Press / on the keyboard to jump here.',
+  },
+  { sel: '#scanBtn', t: 'Scan a barcode', d: 'Use the camera to find a product or book stock in and out.' },
+  {
+    sel: '#nwb',
+    t: 'Add something new',
+    d: 'Start a new lead, service call, contact or stock movement from any page.',
+  },
+  {
+    sel: '#bell',
+    t: 'Notifications',
+    d: 'Stock requests, low stock, deliveries due and FENSA reminders all land here.',
+  },
+  {
+    sel: '#lookBtn',
+    t: 'Change the look',
+    d: 'Pick the page background, and a pattern for the blue greeting box on the overview.',
+  },
+  { sel: '#thb', t: 'Light or dark', d: 'Switch the look to suit the room. The factory screen works well in dark.' },
+  {
+    sel: '.hero-cz',
+    page: 'home',
+    t: 'Make the overview yours',
+    d: 'Choose which numbers and panels show on your dashboard, and in what order.',
   },
   { art: 'done', t: "You're all set", d: 'Press the ? button at the top any time to see this tour again.' },
 ];

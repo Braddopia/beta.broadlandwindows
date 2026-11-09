@@ -350,9 +350,14 @@ export function holBook(sid, day) {
     if (m) sid = m.id;
   }
   openModal(
-    `<h2>Book Holiday</h2><div class="dfm"><label>Staff member<select id="hs" data-onchange="holChk">${state.staff.map((s) => `<option value="${esc(s.id)}" ${s.id == sid ? 'selected' : ''}>${esc(s.name)}</option>`).join('')}</select></label><label>From<input type="date" id="hf" value="${esc(d)}" data-onchange="holChk"></label><label>To<input type="date" id="ht" value="${esc(d)}" data-onchange="holChk"></label><label>Note (optional)<input id="hn" maxlength="120"></label><div id="hi" style="margin-top:.7rem;font-size:.88rem"></div></div><div class="mact"><button class="btn ghost" data-act="closeModal">Cancel</button><button class="btn" data-act="holSave">${can('manage') ? 'Book holiday' : 'Send request'}</button></div>`
+    `<h2>Book Holiday</h2><div class="dfm"><label>Staff member<select id="hs" data-onchange="holChk">${state.staff.map((s) => `<option value="${esc(s.id)}" ${s.id == sid ? 'selected' : ''}>${esc(s.name)}</option>`).join('')}</select></label><label>From<input type="date" id="hf" value="${esc(d)}" data-onchange="holChk"></label><label>To<input type="date" id="ht" value="${esc(d)}" data-onchange="holChk"></label><fieldset class="paidq"><legend>Paid or unpaid<span class="req" aria-hidden="true">*</span></legend><label class="cbl"><input type="radio" name="hpaid" value="paid" data-onchange="holChk"> Paid holiday (uses allowance)</label><label class="cbl"><input type="radio" name="hpaid" value="unpaid" data-onchange="holChk"> Unpaid leave</label></fieldset><label>Note (optional)<input id="hn" maxlength="120"></label><div id="hi" style="margin-top:.7rem;font-size:.88rem"></div></div><div class="mact"><button class="btn ghost" data-act="closeModal">Cancel</button><button class="btn" data-act="holSave">${can('manage') ? 'Book holiday' : 'Send request'}</button></div>`
   );
   holChk();
+}
+/** the paid / unpaid choice in the booking form: true, false, or null if not chosen */
+function paidChoice() {
+  const c = document.querySelector('input[name=hpaid]:checked');
+  return c ? c.value == 'paid' : null;
 }
 export function holChk() {
   const s = state.staff.find((x) => x.id == $('#hs').value),
@@ -364,8 +369,9 @@ export function holChk() {
   }
   const n = holDays(f, t),
     left = holLeft(s, +f.slice(0, 4)),
+    unpaid = paidChoice() === false,
     w = [];
-  if (n > left) w.push('Only ' + left + ' days left');
+  if (n > left && !unpaid) w.push('Only ' + left + ' days left');
   state.contracts
     .filter((c) => c.fit && c.stage != 'Complete' && c.fit >= f && c.fit <= t && forPerson(s, c.fitter))
     .forEach((c) => w.push('Fitting #' + c.id + ' is booked on ' + fd(c.fit)));
@@ -387,12 +393,19 @@ export function holSave() {
     return;
   }
   const n = holDays(f, t),
-    left = holLeft(s, +f.slice(0, 4));
+    left = holLeft(s, +f.slice(0, 4)),
+    paid = paidChoice();
+  if (paid == null) {
+    toast('Choose paid holiday or unpaid leave');
+    const q = $('.paidq');
+    if (q) q.classList.add('bad');
+    return;
+  }
   if (!n) {
     toast('Those days are weekends, bank holidays or the Christmas shutdown');
     return;
   }
-  if (n > left) {
+  if (paid && n > left) {
     toast('Only ' + left + ' days left');
     return;
   }
@@ -407,6 +420,7 @@ export function holSave() {
     to: t,
     days: n,
     status: can('manage') ? 'Approved' : 'Pending',
+    paid,
     note: SAFE.text($('#hn').value, 120),
   });
   audit(can('manage') ? 'Holiday booked' : 'Holiday requested', s.name, f + ' to ' + t);
@@ -421,7 +435,7 @@ export function holEdit(id) {
   const Ad = can('manage'),
     mine = me() && me().id == h.sid;
   openModal(
-    `<h2>${esc(staffName(h.sid))}</h2><p>${fd(h.from)} to ${fd(h.to)}, ${h.days} working day${h.days == 1 ? '' : 's'}<br>${holTag(h)}</p>${h.note ? `<p class="muted">${esc(h.note)}</p>` : ''}<div class="mact"><button class="btn ghost" data-act="closeModal">Close</button>${Ad && h.status != 'Approved' ? `<button class="btn green" ${onClick('holSetClose', id, 'Approved')}>Approve</button>` : ''}${Ad && h.status == 'Pending' ? `<button class="btn red" ${onClick('holSetClose', id, 'Rejected')}>Reject</button>` : ''}${Ad || (mine && h.status == 'Pending') ? `<button class="btn ghost" ${onClick('holDel', id)}>${h.status == 'Pending' && !Ad ? 'Cancel request' : 'Delete'}</button>` : ''}</div>`
+    `<h2>${esc(staffName(h.sid))}</h2><p>${fd(h.from)} to ${fd(h.to)}, ${h.days} working day${h.days == 1 ? '' : 's'}<br>${holTag(h)} ${paidTag(h)}</p>${h.note ? `<p class="muted">${esc(h.note)}</p>` : ''}<div class="mact"><button class="btn ghost" data-act="closeModal">Close</button>${Ad && h.status != 'Approved' ? `<button class="btn green" ${onClick('holSetClose', id, 'Approved')}>Approve</button>` : ''}${Ad && h.status == 'Pending' ? `<button class="btn red" ${onClick('holSetClose', id, 'Rejected')}>Reject</button>` : ''}${Ad || (mine && h.status == 'Pending') ? `<button class="btn ghost" ${onClick('holDel', id)}>${h.status == 'Pending' && !Ad ? 'Cancel request' : 'Delete'}</button>` : ''}</div>`
   );
 }
 export function holDel(id) {
@@ -507,4 +521,33 @@ export function listenForHolidayChart() {
     const el = e.target;
     if (el.classList && el.classList.contains('hci')) el.select();
   });
+}
+
+/** Paid / Unpaid tag (older bookings have no choice saved and count as paid) */
+export const paidTag = (h) =>
+  h.paid === false ? '<span class="tag n">Unpaid</span>' : '<span class="tag">Paid</span>';
+/** every holiday of one person, newest first, by year */
+export function myHolidays(sid) {
+  const s = state.staff.find((x) => x.id == sid);
+  if (!s) return;
+  const L = state.hols.filter((h) => h.sid == sid).sort((a, b) => b.from.localeCompare(a.from)),
+    years = [...new Set(L.map((h) => h.from.slice(0, 4)))];
+  openModal(
+    `<h2>${esc(s.name)}: All Holidays</h2>${
+      years
+        .map(
+          (y) =>
+            `<h3 class="fsec">${y}<span class="muted"> · ${sum(
+              L.filter((h) => h.from.startsWith(y) && h.status == 'Approved' && h.paid !== false),
+              (h) => h.days
+            )} paid days taken</span></h3>${L.filter((h) => h.from.startsWith(y))
+              .map(
+                (h) =>
+                  `<div class="row"><span>${fd(h.from)} to ${fd(h.to)} · ${h.days} day${h.days == 1 ? '' : 's'}${h.note ? `<br><span class="muted">${esc(h.note)}</span>` : ''}</span><span class="acts">${paidTag(h)}${holTag(h)}</span></div>`
+              )
+              .join('')}`
+        )
+        .join('') || '<p class="empty">No holidays booked yet.</p>'
+    }<div class="mact"><button class="btn ghost" data-act="closeModal">Close</button></div>`
+  );
 }

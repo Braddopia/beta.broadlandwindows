@@ -16,7 +16,7 @@ import { hasLoc, isLow, products } from '../../domain/stock.js';
 import { ROLE } from '../../data/session.js';
 import { can, canSee } from '../../domain/permissions.js';
 import { need } from '../auth/session.js';
-import { holBook } from '../holidays/holidays.js';
+import { holBook, paidTag } from '../holidays/holidays.js';
 import { ratingsH } from './reviews.js';
 import { dTag, prTag } from '../../ui/components/tags.js';
 import { closeModal, openModal } from '../../ui/modal.js';
@@ -197,7 +197,7 @@ export function vHome() {
           .filter((h) => h.sid == m.id && h.status != 'Rejected' && h.to >= td)
           .sort((a, b) => a.from.localeCompare(b.from))[0]
       : null;
-  const holP = `<div class="panel"><h2><span>My Holiday</span><span class="acts"><button class="btn sm" data-act="bookMine">Book Holiday</button>${canSee('holidays') ? `<button class="mini" ${onClick('go', 'holidays')}>Holiday Planner</button>` : canSee('fitting') ? `<button class="mini" ${onClick('go', 'fitting')}>My Calendar</button>` : ''}</span></h2>${m ? `<div class="hl"><div class="big"><b>${allow - used}</b><small>Days Left</small></div><div><b>${used}</b><small>Booked</small></div><div><b>${pend}</b><small>Pending</small></div><div><b>${allow}</b><small>Allowance</small></div></div><div class="hbar2"><div class="bar2"><i style="width:${allow ? Math.min(100, Math.round((100 * (used + pend)) / allow)) : 0}%"></i></div><small>${used + pend} of ${allow} days used</small></div><p class="muted" style="margin:.5rem 0 0">${nxt ? `Next: ${fd(nxt.from)} to ${fd(nxt.to)}, ${nxt.days} days, ${esc(nxt.status)}` : 'No holiday booked yet.'}</p>${svcBox(m, true)}` : '<p class="empty">Your name is not in the staff list yet, so there is no allowance to show.</p>'}</div>`;
+  const holP = `<div class="panel"><h2><span>My Holiday</span><span class="acts"><button class="btn sm" data-act="bookMine">Book Holiday</button>${canSee('holidays') ? `<button class="mini" ${onClick('go', 'holidays')}>Holiday Planner</button>` : canSee('fitting') ? `<button class="mini" ${onClick('go', 'fitting')}>My Calendar</button>` : ''}</span></h2>${m ? `<div class="hl"><div class="big"><b>${allow - used}</b><small>Days Left</small></div><div><b>${used}</b><small>Booked</small></div><div><b>${pend}</b><small>Pending</small></div><div><b>${allow}</b><small>Allowance</small></div></div><div class="hbar2"><div class="bar2"><i style="width:${allow ? Math.min(100, Math.round((100 * (used + pend)) / allow)) : 0}%"></i></div><small>${used + pend} of ${allow} days used</small></div><p class="muted" style="margin:.5rem 0 0">${nxt ? `Next: ${fd(nxt.from)} to ${fd(nxt.to)}, ${nxt.days} days, ${esc(nxt.status)}${nxt.paid === false ? ', unpaid' : ''}` : 'No holiday booked yet.'}</p>${prevHols(m, td)}${svcBox(m, true)}` : '<p class="empty">Your name is not in the staff list yet, so there is no allowance to show.</p>'}</div>`;
   /* widgets: every tile and panel the person may see; they choose which show and in what order */
   const KP = {
     leads: ['Open Leads', open.length, '', 'leads'],
@@ -405,6 +405,20 @@ export function dashReset() {
   closeModal();
   render();
   toast('Back to the default layout');
+}
+/* the last few holidays already taken, with a link to all of them */
+function prevHols(m, td) {
+  const L = state.hols
+    .filter((h) => h.sid == m.id && h.to < td && h.status != 'Rejected')
+    .sort((a, b) => b.from.localeCompare(a.from));
+  return `<div class="hprev"><div class="hprev-h"><b>Previous Holidays</b><button class="mini" ${onClick('myHolidays', m.id)}>All My Holidays</button></div>${
+    L.slice(0, 3)
+      .map(
+        (h) =>
+          `<div class="row"><span>${fd(h.from)} to ${fd(h.to)} · ${h.days} day${h.days == 1 ? '' : 's'}</span>${paidTag(h)}</div>`
+      )
+      .join('') || '<p class="muted" style="margin:.2rem 0">None yet.</p>'
+  }</div>`;
 }
 export function bookMine() {
   const m = me();

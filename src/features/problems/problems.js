@@ -8,11 +8,19 @@ import { state } from '../../data/state.js';
 import { ROLE } from '../../data/session.js';
 import { need } from '../auth/session.js';
 import { form } from '../../ui/forms/form.js';
-import { askIn, closeModal } from '../../ui/modal.js';
+import { askIn, closeModal, parkModal } from '../../ui/modal.js';
 import { VIEWS, render, view } from '../../ui/shell/router.js';
 import * as repos from '../../data/repository.js';
 
-export function bugReport() {
+/** the Report A Problem button on every page and popup: notes where the person was */
+export function bugHere() {
+  const t = $('#modal').classList.contains('open') ? ($('#mbox h2') || {}).textContent || '' : '',
+    page = (VIEWS[view] || {}).t || '';
+  if (/report a problem/i.test(t)) return;
+  parkModal();
+  bugReport(t ? page + ': ' + t.trim().slice(0, 60) + ' window' : page);
+}
+export function bugReport(where) {
   const views = Object.values(VIEWS).map((v) => v.t);
   form(
     'Report A Problem',
@@ -36,7 +44,7 @@ export function bugReport() {
       },
       { k: 'steps', l: 'What were you doing just before?', t: 'area', w: 'full', max: 600 },
     ],
-    { where: (VIEWS[view] || {}).t || '', sev: BUG_SEV[1] },
+    { where: typeof where == 'string' && where ? where : (VIEWS[view] || {}).t || '', sev: BUG_SEV[1] },
     (o) => {
       const n = state.bugs.reduce((m, b) => Math.max(m, parseInt(String(b.id).slice(2)) || 0), 0) + 1,
         b = { id: 'P-' + String(n).padStart(3, '0'), at: Date.now(), by: USER, role: ROLE, status: 'Open', ...o };

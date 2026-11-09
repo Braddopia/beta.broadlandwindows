@@ -19,7 +19,7 @@
 <div class="app">
   <!-- ===== Sidebar ===== -->
   <aside class="side" aria-label="Main menu">
-    <div class="brand"><img class="lg lg-auto" alt="Broadland Windows, Doors &amp; Garden Rooms"></div>
+    <button type="button" class="brand" data-act="goHome" title="Back to the overview" aria-label="Broadland Windows: back to the overview"><img class="lg lg-auto" alt="Broadland Windows, Doors &amp; Garden Rooms"></button>
     <nav id="nav"></nav>
     <div class="who">
       <button class="me" id="meBtn" type="button" title="Edit my details" aria-label="Edit my details">
@@ -71,7 +71,7 @@
 <aside id="nc" class="nc" aria-label="Notification Centre"></aside>
 <div class="fpop" id="fpop" role="dialog" aria-label="Sort and filter"></div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
-<datalist id="locs"></datalist><datalist id="areas"></datalist><datalist id="itemCodes"></datalist>
+<button type="button" id="rpb" data-act="bugHere" title="Report a problem with this page or window" aria-label="Report a problem"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 21V4M5 4h11l-2 4 2 4H5"/></svg><span>Report a problem</span></button><datalist id="locs"></datalist><datalist id="areas"></datalist><datalist id="itemCodes"></datalist>
 
 <!-- @@JS@@ -->
 </body>
