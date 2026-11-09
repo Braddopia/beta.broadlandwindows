@@ -1735,15 +1735,15 @@ body[data-view=home] .top .sb:focus-within::before{opacity:.75}body[data-view=ho
 .invq svg{width:1.05rem;height:1.05rem;color:var(--muted);flex-shrink:0}
 .invq input{flex:1;min-width:0;height:100%;border:0;background:transparent;outline:none;font-size:.92rem;padding:0}
 .invq:focus-within{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-bg)}
-tr.xhit td{background:#fff6c7!important}
-body[data-theme=dark] tr.xhit td{background:rgba(255,208,2,.16)!important}
-tr.xhit td:first-child{box-shadow:inset 4px 0 0 var(--yellow)}
-.xtag{display:block;margin-top:.2rem;font-size:.66rem;font-weight:700;color:#8a6a00;letter-spacing:.04em}
-body[data-theme=dark] .xtag{color:#ffd84d}
+tr.xhit td{background:#e4f2ff!important}
+body[data-theme=dark] tr.xhit td{background:rgba(90,170,255,.18)!important}
+tr.xhit td:first-child{box-shadow:inset 4px 0 0 #2b8fe0}
+.xtag{display:block;margin-top:.2rem;font-size:.66rem;font-weight:700;color:#1667a8;letter-spacing:.04em}
+body[data-theme=dark] .xtag{color:#8cc8ff}
 .idesc{display:block;font-size:.74rem;color:var(--muted);font-weight:400;max-width:22rem;white-space:normal}
-.sri.sri-x{background:#fff6c7;border-radius:10px}
-body[data-theme=dark] .sri.sri-x{background:rgba(255,208,2,.16)}
-.srg.xm{color:#8a6a00}
+.sri.sri-x{background:#e4f2ff;border-radius:8px;box-shadow:inset 3px 0 0 #2b8fe0}
+body[data-theme=dark] .sri.sri-x{background:rgba(90,170,255,.18)}
+.srg.xm{color:#1667a8}
 /* ==== stock take ==== */
 .tk-prog{position:relative;height:1.5rem;margin:0 0 .8rem;border-radius:8px;background:var(--card2);border:1px solid var(--line);overflow:hidden}
 .tk-prog i{position:absolute;inset:0 auto 0 0;background:linear-gradient(90deg,#1f9d55,#4cc47f);transition:width .4s}
@@ -1806,6 +1806,13 @@ body:has(#modal.open) #rpb{display:none}
 .mrp svg{width:.95rem;height:.95rem;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .mrp:hover{color:var(--red)}
 @media(max-width:700px){.mrp span{display:none}}
+/* RGB glow: one long rainbow slid along the edge, zoomed in (3x the width) so colours blend with no hard
+   breaks; the round (conic) version squashed the colours at the ends of the long bar */
+@keyframes rgbflow{to{background-position:300% 0}}
+.top .sb::before,.top .sb::after,.ck-b::before,.ck-in::after{background:linear-gradient(90deg,#ff6ec4,#ff9a8a,#ffc46b,#e9ef72,#9cf59a,#6be6d8,#5ab8ff,#7c87ff,#b67cf0,#ff6ec4)!important;background-size:300% 100%!important;animation:rgbflow 10s linear infinite!important}
+.top .sb:focus-within::before,.top .sb:focus-within::after{animation-duration:5s!important}
+body[data-view=home] .top .sb::before,body[data-view=home] .top .sb::after{background:linear-gradient(90deg,#034ea2,#3d8be0,#5ac8ff,#ffd002,#5ac8ff,#3d8be0,#034ea2)!important;background-size:300% 100%!important}
+@media(prefers-reduced-motion:reduce){.top .sb::before,.top .sb::after,.ck-b::before,.ck-in::after{animation:none!important}}
 
 /* ==========================================================================
    06 · Adaptive layout
