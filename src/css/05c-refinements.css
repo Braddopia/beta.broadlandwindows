@@ -355,7 +355,9 @@ body[data-view=home] .top .sb:focus-within::before{opacity:.75}body[data-view=ho
 
 /* floor boards: empty-state art sits in the middle of its panel */
 .lvg>.panel>.emp{flex:1;justify-content:center;min-height:6rem}
-.thumbs.phg{grid-template-columns:repeat(4,minmax(0,8.5rem))}
+.thumbs.phg{grid-template-columns:repeat(8,minmax(0,1fr));gap:.5rem;width:100%}
+@media(max-width:700px){.thumbs.phg{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.phb{border-radius:10px}
 @media(max-width:640px){.rw-foot{flex-wrap:wrap;gap:.5rem}.rw-foot .btn{flex:1 1 auto;min-width:0;white-space:normal;justify-content:center;text-align:center}.rw-foot .rw-sp{display:none}}
 /* ==== inventory: own search, exact match, description and area lines ==== */
 .invbar{display:flex;gap:.6rem;align-items:center;margin:0 0 .8rem}
@@ -429,11 +431,7 @@ body.tv #rpb,body.signin #rpb{display:none}
 .wz-info b{display:block;font:600 1.05rem var(--head);color:var(--navy)}
 .wz-info b.od{color:var(--red)}
 .wz-info span{display:block;font-size:.76rem;color:var(--muted)}
-body:has(#modal.open) #rpb{display:none}
-.mact .mrp{margin-right:auto;color:var(--muted);font-weight:500}
-.mrp svg{width:.95rem;height:.95rem;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.mrp:hover{color:var(--red)}
-@media(max-width:700px){.mrp span{display:none}}
+
 /* RGB glow: one long rainbow slid along the edge, zoomed in (3x the width) so colours blend with no hard
    breaks; the round (conic) version squashed the colours at the ends of the long bar */
 @keyframes rgbflow{to{background-position:300% 0}}
@@ -441,3 +439,50 @@ body:has(#modal.open) #rpb{display:none}
 .top .sb:focus-within::before,.top .sb:focus-within::after{animation-duration:5s!important}
 body[data-view=home] .top .sb::before,body[data-view=home] .top .sb::after{background:linear-gradient(90deg,#034ea2,#3d8be0,#5ac8ff,#ffd002,#5ac8ff,#3d8be0,#034ea2)!important;background-size:300% 100%!important}
 @media(prefers-reduced-motion:reduce){.top .sb::before,.top .sb::after,.ck-b::before,.ck-in::after{animation:none!important}}
+/* My Holiday: Days Left a little smaller, the other numbers centred on it */
+.hl{align-items:center}
+.hl .big b{font-size:2.35rem}
+.hl>div:not(.big){display:flex;flex-direction:column;justify-content:center;align-items:center}
+@media(max-width:700px){.hl .big b{font-size:2.2rem}}
+/* Messages: the typing box is focused for you, so no yellow focus ring; a soft blue edge instead */
+.msn-in textarea:focus,.msn-in textarea:focus-visible{outline:none;box-shadow:0 0 0 2px rgba(43,143,224,.45)}
+.msn-send:focus-visible{outline:2px solid #5ab8ff;outline-offset:2px}
+/* the one Report A Problem button stays bottom right, over popups too, and clear of the message send button */
+#rpb{z-index:1000}
+body[data-view=messages] #rpb{bottom:calc(5.2rem + var(--safe-b,0px))}
+/* Inventory Reports: every button the same height, one line, an arrow at the end (details on hover) */
+.rl2 .rb{display:flex;flex-direction:row;align-items:center;justify-content:space-between;gap:.6rem;min-height:2.75rem;padding:.55rem .8rem}
+.rl2 .rb b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rl2 .rb::after{content:"\203A";font-size:1.15rem;line-height:1;color:var(--muted);flex:0 0 auto}
+.rl2 .rb:not(:disabled):hover::after{color:var(--blue)}
+.rb span{text-transform:none}
+.rep-opt{display:flex;flex-wrap:wrap;gap:.4rem 1.6rem;margin-top:.9rem}.rep-opt .cbl{margin:0}
+/* step-by-step forms: room between the step numbers and the step title */
+.stp.wz{margin-bottom:1.1rem}.stp.wz i{margin-bottom:.35rem}
+.wz-d{margin:.2rem 0 1rem!important;padding-top:.9rem;border-top:1px solid var(--line)}
+/* the Review step: one card per step, label above value in two columns */
+.wz-rev{display:grid;gap:.75rem}
+.wz-rev .wz-r{padding:.8rem 1rem .9rem;border:1px solid var(--line);border-radius:12px;background:var(--bg2,rgba(127,140,160,.06));display:grid;grid-template-columns:1fr 1fr;gap:.55rem 1.2rem}
+.wz-rev .wz-r h3{grid-column:1/-1;margin:0 0 .2rem;font-size:.95rem}
+.wz-rev .wz-r h3>span{display:flex;align-items:center;gap:.5rem}
+.wz-rev .wz-r h3 i{display:grid;place-items:center;width:1.45rem;height:1.45rem;border-radius:50%;background:var(--blue);color:#fff;font:600 .72rem var(--body);font-style:normal}
+.wz-rev .si{display:flex;flex-direction:column;gap:.1rem;padding:0;border:0;min-width:0}
+.wz-rev .si span{font-size:.72rem;color:var(--muted)}
+.wz-rev .si b{font-weight:600;font-size:.9rem;overflow-wrap:anywhere}
+.wz-rev .si b .muted{font-weight:400}
+.wz-ph{grid-column:1/-1;display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:.4rem}.wz-ph img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px}
+@media(max-width:560px){.wz-rev .wz-r{grid-template-columns:1fr}.wz-ph{grid-template-columns:repeat(4,minmax(0,1fr))}}
+/* Leads and Contracts lists: stage straight after the customer, its name over a thin progress bar */
+.ptb th.stcol,.ptb td.stcol{width:9.5rem;min-width:8rem}
+.sprog2{display:flex;flex-direction:column;gap:.3rem;min-width:7rem;max-width:9rem}
+.sprog2 b{font-weight:600;font-size:.82rem;white-space:nowrap}
+.sbar2{display:block;height:4px;border-radius:4px;background:var(--line);overflow:hidden}
+.sbar2 i{display:block;height:100%;border-radius:4px;background:linear-gradient(90deg,#2b8fe0,#5ab8ff)}
+.sprog2.end .sbar2 i{background:linear-gradient(90deg,#12794c,#2fbf71)}
+.sprog2.lost b{color:var(--red)}.sprog2.lost .sbar2 i{background:var(--red);opacity:.55}
+.ptb td.ac{width:1%;white-space:nowrap}
+.ie-pick{display:flex;flex-wrap:wrap;gap:.35rem;align-items:center;margin-top:.45rem;max-width:52rem}.ie-pick>b{font-size:.8rem;margin-right:.2rem}
+.wz-rev .si b,.wz-rev .si span{text-align:left!important;align-self:stretch}
+/* while a popup is open: the report button is just the flag, lifted above the popup's button row */
+body:has(#modal.open) #rpb{width:2.4rem;padding:0;justify-content:center;bottom:calc(5.4rem + var(--safe-b,0px))}
+body:has(#modal.open) #rpb span{display:none}

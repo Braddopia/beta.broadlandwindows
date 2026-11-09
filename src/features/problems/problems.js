@@ -12,15 +12,47 @@ import { askIn, closeModal, parkModal } from '../../ui/modal.js';
 import { VIEWS, render, view } from '../../ui/shell/router.js';
 import * as repos from '../../data/repository.js';
 
-/** the Report A Problem button on every page and popup: notes where the person was */
-export function bugHere() {
+/** the Report A Problem button (bottom right of every screen): notes where the person was and,
+    where the browser allows, takes a picture of the screen they are looking at to attach */
+export async function bugHere() {
   const t = $('#modal').classList.contains('open') ? ($('#mbox h2') || {}).textContent || '' : '',
     page = (VIEWS[view] || {}).t || '';
   if (/report a problem/i.test(t)) return;
+  const shot = await grabScreen();
   parkModal();
-  bugReport(t ? page + ': ' + t.trim().slice(0, 60) + ' window' : page);
+  bugReport(t ? page + ': ' + t.trim().slice(0, 60) + ' window' : page, shot);
 }
-export function bugReport(where) {
+/* a picture of this tab. The browser asks first ("share this tab"); saying no just skips the picture.
+   Nothing leaves the computer: the picture is saved with the report like any other photo. */
+async function grabScreen() {
+  const md = navigator.mediaDevices;
+  if (!md || !md.getDisplayMedia || !matchMedia('(pointer:fine)').matches) return null;
+  let stream;
+  try {
+    stream = await md.getDisplayMedia({
+      video: { displaySurface: 'browser' },
+      audio: false,
+      preferCurrentTab: true,
+      selfBrowserSurface: 'include',
+    });
+    const v = document.createElement('video');
+    v.muted = true;
+    v.srcObject = stream;
+    await v.play();
+    await new Promise((r) => setTimeout(r, 350));
+    const k = Math.min(1, 1600 / (v.videoWidth || 1600)),
+      c = document.createElement('canvas');
+    c.width = Math.round((v.videoWidth || 1) * k);
+    c.height = Math.round((v.videoHeight || 1) * k);
+    c.getContext('2d').drawImage(v, 0, 0, c.width, c.height);
+    return c.width > 1 ? c.toDataURL('image/jpeg', 0.82) : null;
+  } catch (e) {
+    return null;
+  } finally {
+    if (stream) stream.getTracks().forEach((x) => x.stop());
+  }
+}
+export function bugReport(where, shot) {
   const views = Object.values(VIEWS).map((v) => v.t);
   form(
     'Report A Problem',
@@ -44,14 +76,20 @@ export function bugReport(where) {
       },
       { k: 'steps', l: 'What were you doing just before?', t: 'area', w: 'full', max: 600 },
     ],
-    { where: typeof where == 'string' && where ? where : (VIEWS[view] || {}).t || '', sev: BUG_SEV[1] },
+    {
+      where: typeof where == 'string' && where ? where : (VIEWS[view] || {}).t || '',
+      sev: BUG_SEV[1],
+      photos: typeof shot == 'string' ? [shot] : [],
+    },
     (o) => {
       const n = state.bugs.reduce((m, b) => Math.max(m, parseInt(String(b.id).slice(2)) || 0), 0) + 1,
         b = { id: 'P-' + String(n).padStart(3, '0'), at: Date.now(), by: USER, role: ROLE, status: 'Open', ...o };
       repos.problems.add(b, { first: true });
       audit('Problem reported', b.id, o.what.slice(0, 60));
     },
-    'A screenshot or photo of the screen helps us fix it faster.'
+    typeof shot == 'string'
+      ? 'A picture of your screen is attached. Remove it if it shows anything private.'
+      : 'A screenshot or photo of the screen helps us fix it faster.'
   );
 }
 export function bugView(id) {

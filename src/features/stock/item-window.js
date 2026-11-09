@@ -18,6 +18,7 @@ import {
   ikey,
   moveRow,
   nextOrd,
+  normCode,
   prod,
   prodRows,
   products,
@@ -30,6 +31,7 @@ import { can } from '../../domain/permissions.js';
 import { need } from '../auth/session.js';
 import { SEL, pphotos } from './stock.js';
 import { SUPN } from '../suppliers/suppliers.js';
+import { pickC } from '../../ui/forms/colour-picker.js';
 import { fieldH, readFields } from '../../ui/forms/form.js';
 import { gallery, setPhotoList, tmp } from '../../ui/forms/photos.js';
 import { askIn, askYes, closeModal, openModal } from '../../ui/modal.js';
@@ -58,9 +60,10 @@ export function ieFields() {
       k: 'pid',
       l: ed && Own && !ieView ? 'Stock ID (admin override, must be unique)' : 'Stock ID',
       ro: !(ed && Own),
-      req: 1,
+      req: ieMode != 'remove',
       max: 24,
       sec: 'p',
+      ...(ieMode == 'remove' ? { ph: 'Pick a product below' } : {}),
     },
     {
       k: 'item',
@@ -72,8 +75,8 @@ export function ieFields() {
       sec: 'p',
       hint: ed && !Ad ? 'Only an admin can rename' : '',
     },
-    { k: 'desc', l: 'Description', max: 160, w: 'full', sec: 'p', ph: 'What it is, as on the count sheet' },
-    { k: 'unit', l: 'Unit', t: 'select', o: UNITS, sec: 'p' },
+    { k: 'desc', l: 'Description', max: 160, w: 'full', sec: 'p', ph: 'What it is, as on the count sheet', ro: ieMode == 'remove' },
+    { k: 'unit', l: 'Unit', t: 'select', o: UNITS, sec: 'p', ro: ieMode == 'remove' },
     ed
       ? { k: 'stock', l: 'Current stock', t: 'number', max: 1e7, sec: 'p', hint: 'Changing this logs an adjustment' }
       : { k: 'qty', l: 'Quantity', t: 'number', req: 1, pos: 1, max: 1e6, sec: 'p' },
@@ -108,9 +111,11 @@ export function ieFields() {
           },
         ]
       : []),
-    { k: 'location', l: 'Location (Bay, Bin, Shelf, Rack)', list: 'locs', max: 60, sec: 'l' },
+    { k: 'location', l: 'Location (Bay, Bin, Shelf, Rack)', list: 'locs', max: 60, sec: 'l', ro: ieMode == 'remove' },
     { k: 'area', l: 'Stock-take area', list: 'areas', max: 40, sec: 'l', hint: 'The count sheet it is on' },
-    { k: 'supplier', l: 'Supplier', t: 'select', o: SUPN(r.supplier), req: ieMode == 'add' && !r.pid, sec: 'l' },
+    ...(ieMode == 'remove'
+      ? [{ k: 'supplier', l: 'Supplier', ro: 1, sec: 'l' }]
+      : [{ k: 'supplier', l: 'Supplier', t: 'select', o: SUPN(r.supplier), req: ieMode == 'add' && !r.pid, sec: 'l' }]),
     ...(ieMode == 'edit' || ieMode == 'add'
       ? [
           { k: 'qc', l: 'QC status', t: 'select', o: QC_STATUS, sec: 'q' },
@@ -155,7 +160,7 @@ export function itemWindow(mode, k, pre) {
         notes: r.notes || '',
       }
     : {
-        pid: stkId(),
+        pid: mode == 'remove' ? '' : stkId(),
         item: '',
         unit: 'Each',
         qty: 1,
@@ -186,7 +191,7 @@ export function itemWindow(mode, k, pre) {
     B = { edit: 'Save changes', add: 'Add stock', remove: 'Remove stock', request: 'Send request' }[mode];
   const s = r ? stt(r) : null;
   openModal(
-    `<div class="ie-h"><div><h2>${esc(T)}</h2><span class="muted" id="ieSub">${r ? `Stock ID ${esc(r.pid)} · ${prodRows(r.pid).filter((x) => x.type != 'import').length} movements · <span class="tag ${s[1]}">${s[0]}</span>` : 'New product: a Stock ID is given automatically'}</span></div><button class="mx" data-act="closeModal" aria-label="Close">&times;</button></div>
+    `<div class="ie-h"><div><h2>${esc(T)}</h2><span class="muted" id="ieSub">${r ? `Stock ID ${esc(r.pid)} · ${prodRows(r.pid).filter((x) => x.type != 'import').length} movements · <span class="tag ${s[1]}">${s[0]}</span>` : mode == 'remove' ? 'Type or scan the item code, then pick the product' : 'New product: a Stock ID is given automatically'}</span>${!r && mode == 'remove' ? '<div class="ie-pick" id="iePick"></div>' : ''}</div><button class="mx" data-act="closeModal" aria-label="Close">&times;</button></div>
   <div class="ie"><div class="ie-ph"><div class="ie-main" id="ieMain"></div><div class="ie-strip" id="ieStrip"></div>
      <div class="prow"><label class="btn ghost sm">${svg(ICONS.photo)}Take photo<input type="file" accept="image/*" capture="environment" hidden data-onchange="addPh" data-args-change="[{&quot;$&quot;:&quot;this&quot;}]"></label><label class="btn ghost sm">Upload photos<input type="file" accept="image/*" multiple hidden data-onchange="addPh" data-args-change="[{&quot;$&quot;:&quot;this&quot;}]"></label><span class="muted" style="align-self:center;font-size:.75rem">Up to ${MAX_PHOTOS}, resized automatically</span></div>
      <div class="ie-stats" id="ieStats"></div></div>
@@ -225,7 +230,8 @@ export function itemWindow(mode, k, pre) {
               area: g('area'),
             })
         );
-      $('#f_pid').value = ex ? ex.pid : stkId();
+      $('#f_pid').value = ex ? ex.pid : ieMode == 'remove' ? '' : stkId();
+      if (ieMode == 'remove') removePick(ex, g('item'));
       if (ex && ex.pid != ieKey) {
         ieKey = ex.pid;
         $('#f_unit').value = unitOf(ex);
@@ -249,7 +255,9 @@ export function ieStats() {
   const r = ieKey && prod(ieKey);
   el.innerHTML = r
     ? `<div><small>In Stock</small><b>${r.stock} ${esc(unitOf(r))}</b></div><div><small>Reorder At</small><b>${ro(r)}</b></div><div><small>${can('money') ? 'Stock Value' : 'Cost Each'}</small><b>${can('money') ? m0(r.stock * r.cost) : money(r.cost)}</b></div>`
-    : `<div style="grid-column:1/-1"><small>New Product</small><b>Not in stock yet</b></div>`;
+    : ieMode == 'remove'
+      ? `<div style="grid-column:1/-1"><small>Remove Stock</small><b>Pick a product first</b></div>`
+      : `<div style="grid-column:1/-1"><small>New Product</small><b>Not in stock yet</b></div>`;
 }
 export function ieDraw() {
   const m = $('#ieMain'),
@@ -363,7 +371,7 @@ export function ieSave() {
     pid = ex ? ex.pid : stkId(),
     cur = ex ? ex.stock : 0;
   if (kind == 'remove' && !ex) {
-    toast('That item (with this length and colours) is not in stock yet');
+    toast('Pick the product to take stock from: nothing matches this code, length, colours and area');
     return;
   }
   if (kind == 'add' && !ex && !o.supplier) {
@@ -400,7 +408,7 @@ export function ieSave() {
     notes: o.notes || (ex && ex.notes),
     ...mergeQc(o, ex),
   };
-  if (kind != 'request')
+  if (kind == 'add')
     prodRows(pid).forEach((x) => {
       if (kind == 'add') Object.assign(x, mergeQc(o, x));
       ['supplier', 'location', 'unit', 'lead', 'reorderQty', 'notes'].forEach((f) => {
@@ -557,4 +565,58 @@ export function newFromCode(c) {
     e.value = SAFE.code(c);
     e.dispatchEvent(new Event('input'));
   }
+}
+
+/* Remove Stock started without a product: the products with this code are offered to pick from,
+   and picking one fills in its length, colours and area. Removing never makes a new product. */
+function removePick(ex, code) {
+  const el = $('#iePick');
+  if (!el) return;
+  const c = normCode(code),
+    L = c ? products().filter((p) => normCode(p.item) == c || normCode(p.pid) == c) : [];
+  if (!ex && L.length == 1 && !el.dataset.auto) {
+    el.dataset.auto = '1';
+    return iePickProd(L[0].pid);
+  }
+  if (ex) {
+    ['desc', 'location', 'barcode'].forEach((k) => {
+      const e = $('#f_' + k);
+      if (e) e.value = k == 'location' ? (hasLoc(ex) ? ex.location : '') : ex[k] || '';
+    });
+    const sp = $('#f_supplier');
+    if (sp) sp.value = ex.supplier || '';
+  }
+  const h = ex
+    ? `<span class="tag g">${esc(ex.item)} picked: ${esc(String(ex.stock))} ${esc(unitOf(ex))} in stock</span>`
+    : L.length
+      ? `<b>Pick the product</b>${L.slice(0, 12)
+          .map(
+            (p) =>
+              `<button type="button" class="mini" ${onClick('iePickProd', p.pid)}>${esc(p.item)}${p.desc ? ' · ' + esc(p.desc) : ''}${p.length && p.length != '-' ? ' · ' + esc(p.length) : ''}${colTxt(p) != '-' ? ' · ' + esc(colTxt(p)) : ''}${p.area ? ' · ' + esc(p.area) : ''} (${esc(String(p.stock))})</button>`
+          )
+          .join('')}`
+      : c
+        ? '<span class="muted">No product has this code</span>'
+        : '';
+  /* leaving the code box redraws this; keep the same buttons so a click on one is not lost */
+  if (el.dataset.h != h) {
+    el.dataset.h = h;
+    el.innerHTML = h;
+  }
+}
+export function iePickProd(pid) {
+  const r = prod(pid);
+  if (!r || ieMode != 'remove') return;
+  const clean = (x) => (x && x != '-' ? x : '');
+  [
+    ['item', r.item],
+    ['length', clean(r.length)],
+    ['area', r.area || ''],
+  ].forEach(([k, v]) => {
+    const e = $('#f_' + k);
+    if (e) e.value = v;
+  });
+  pickC('cInName', clean(r.cInName), r.cIn || '#8a8a8a');
+  pickC('cOutName', clean(r.cOutName), r.cOut || '#8a8a8a');
+  $('#f_item').dispatchEvent(new Event('input'));
 }

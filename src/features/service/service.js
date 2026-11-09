@@ -1,5 +1,5 @@
 /* features/service/service: Service calls: the page, the call sheet and service reports. */
-import { SVC_CAT, SVC_PR, SVC_ST } from '../../config/constants.js';
+import { MAX_PHOTOS, SVC_CAT, SVC_PR, SVC_ST } from '../../config/constants.js';
 import { onClick, rowClick } from '../../core/actions.js';
 import { fd, fdl, today } from '../../core/dates.js';
 import { $, esc } from '../../core/dom.js';
@@ -16,8 +16,7 @@ import { R } from '../reports/reports.js';
 import { docChoice, printDoc } from '../../print/print.js';
 import { pagerH, paginate } from '../../ui/components/table.js';
 import { prTag, svcTag } from '../../ui/components/tags.js';
-import { fieldErr, form } from '../../ui/forms/form.js';
-import { phCount } from '../../ui/forms/photos.js';
+import { drawThumbs, phCount, setPhotoList, tmp } from '../../ui/forms/photos.js';
 import { wizard } from '../../ui/forms/wizard.js';
 import { hit } from '../../ui/shell/router.js';
 import { toast } from '../../ui/toast.js';
@@ -124,7 +123,10 @@ function contractHelp(v) {
     ct = $('#f_contract'),
     cw = ct && ct.closest('.ff'),
     sync = () => {
-      if (cw) cw.hidden = !/^Yes/.test(ex.value);
+      const yes = /^Yes/.test(ex.value);
+      if (cw) cw.hidden = !yes;
+      star('contract', yes);
+      ['phone', 'address', 'town'].forEach((f) => star(f, !yes));
     };
   if (ex) {
     ex.addEventListener('change', sync);
@@ -148,6 +150,14 @@ function contractHelp(v) {
       toast('Filled in from contract ' + x.id);
     });
 }
+/* a * on a box that is needed only sometimes (contract for a customer we fitted; phone, address, town for a new one) */
+function star(k, on) {
+  const l = $('label[for=f_' + k + ']');
+  if (!l) return;
+  const m = l.querySelector('.rq.dyn');
+  if (on && !m) l.insertAdjacentHTML('beforeend', '<span class="rq dyn" aria-hidden="true">*</span>');
+  if (!on && m) m.remove();
+}
 /* the Check step: what we already know about this customer */
 function callCheck(v) {
   const k = /^Yes/.test(v.existing || '') && state.contracts.find((x) => x.id == v.contract),
@@ -160,45 +170,79 @@ function callCheck(v) {
       : '<div><small>Customer</small><b>New customer</b><span>Not one of our fitted jobs</span></div>'
   }</div><h3 class="fsec">Past Tickets (${past.length})</h3>${past.map((c) => `<div class="row"><span><b>${esc(c.id)}</b> ${esc(c.issue || '')}</span><span>${svcTag(c.status)}</span></div>`).join('') || '<p class="muted">No earlier service calls.</p>'}`;
 }
-export function callWizard(cid) {
+export function callWizard(cid, id) {
+  const c = id ? state.calls.find((x) => x.id == id) : null;
+  if (id && !c) return;
   const k = state.contracts.find((x) => x.id == cid) || {},
     F = SVCF();
-  wizard({
-    title: 'New Service Call ' + nid('S', state.calls),
-    saveLabel: 'Create service call',
-    done: 'Service call created. Open it any time to add photos and notes.',
-    v: {
-      name: k.name || '',
-      phone: telOf(k) || '',
-      email: mailOf(k) || '',
-      address: addrOf(k) || '',
-      town: k.town || '',
-      contract: k.id || '',
-      priority: 'Normal',
-      status: 'Open',
-      takenBy: USER,
-      takenAt: today(),
-      takenTime: new Date().toTimeString().slice(0, 5),
-      guarantee: k.id ? 'Yes' : '',
-      existing: k.id ? 'Yes, we fitted it' : 'No, new customer',
+  setPhotoList(c ? (c.photos || []).filter(SAFE.img).slice() : [], drawThumbs);
+  const steps = [
+    {
+      t: 'Customer',
+      d: 'Who is calling? Pick the contract for a job we fitted.',
+      f: pick(F, ['existing', 'contract', 'name', 'phone', 'email', 'address', 'town']),
+      after: contractHelp,
     },
-    steps: [
-      {
-        t: 'Customer',
-        d: 'Who is calling? Pick the contract for a job we fitted.',
-        f: pick(F, ['existing', 'contract', 'name', 'phone', 'email', 'address', 'town']),
-        after: contractHelp,
-      },
-      { t: 'Problem', d: 'What is wrong, in their words?', f: pick(F, ['cat', 'priority', 'issue']) },
-      {
-        t: 'Check',
-        d: 'What we already know: guarantee, money owed and past visits.',
-        html: callCheck,
-        f: pick(F, ['guarantee', 'takenBy', 'takenAt', 'takenTime']),
-      },
-      { t: 'Visit', d: 'Book the visit now, or leave it for later.', f: pick(F, ['fitter', 'visit', 'visitTime']) },
-      { t: 'Review', d: 'Check and create', review: 1 },
-    ],
+    { t: 'Problem', d: 'What is wrong, in their words?', f: pick(F, ['cat', 'priority', 'issue']) },
+    {
+      t: 'Check',
+      d: 'What we already know: guarantee, money owed and past visits.',
+      html: callCheck,
+      f: pick(F, ['guarantee', 'takenBy', 'takenAt', 'takenTime']),
+    },
+    {
+      t: 'Visit',
+      d: c ? 'Who is going, when, and the status of the call.' : 'Book the visit now, or leave it for later.',
+      f: pick(F, c ? ['fitter', 'status', 'visit', 'visitTime', 'arrived', 'left'] : ['fitter', 'visit', 'visitTime']),
+    },
+    ...(c
+      ? [
+          {
+            t: 'Work Done',
+            d: 'What was done, parts, and whether it is finished.',
+            f: pick(F, ['notes', 'parts', 'followUp', 'followNote', 'charge', 'signed', 'doneAt']),
+          },
+        ]
+      : []),
+    {
+      t: 'Photos',
+      d: 'Up to ' + MAX_PHOTOS + ' photos. They print with the service report and stay on the call.',
+      f: [],
+      html: () =>
+        `<div class="ff full"><div class="thumbs phg" id="thumbs"></div><div class="prow"><label class="btn ghost sm">Take photo<input type="file" accept="image/*" capture="environment" hidden data-onchange="addPh" data-args-change="[{&quot;$&quot;:&quot;this&quot;}]"></label><label class="btn ghost sm">Choose from gallery<input type="file" accept="image/*" multiple hidden data-onchange="addPh" data-args-change="[{&quot;$&quot;:&quot;this&quot;}]"></label></div></div>`,
+      after: drawThumbs,
+      photos: 1,
+    },
+    { t: 'Review', d: c ? 'Check and save' : 'Check and create', review: 1 },
+  ];
+  const at = (t) => steps.findIndex((x) => x.t == t);
+  wizard({
+    title: c ? 'Service Call ' + c.id : 'New Service Call ' + nid('S', state.calls),
+    saveLabel: c ? 'Save changes' : 'Create service call',
+    done: c ? 'Service call saved.' : 'Service call created.',
+    edit: !!c,
+    v: c
+      ? {
+          ...c,
+          existing:
+            c.existing || (state.contracts.some((x) => x.id == c.contract) ? 'Yes, we fitted it' : 'No, new customer'),
+        }
+      : {
+          name: k.name || '',
+          phone: telOf(k) || '',
+          email: mailOf(k) || '',
+          address: addrOf(k) || '',
+          town: k.town || '',
+          contract: k.id || '',
+          priority: 'Normal',
+          status: 'Open',
+          takenBy: USER,
+          takenAt: today(),
+          takenTime: new Date().toTimeString().slice(0, 5),
+          guarantee: k.id ? 'Yes' : '',
+          existing: k.id ? 'Yes, we fitted it' : 'No, new customer',
+        },
+    steps,
     check: (st, v) => {
       if (st == 0) {
         if (/^Yes/.test(v.existing)) {
@@ -212,113 +256,28 @@ export function callWizard(cid) {
           if (!v.town) return 'Add the town for a new customer';
         }
       }
+      if (c && st == at('Work Done') && v.status == 'Complete' && !v.doneAt)
+        return 'Enter the date the work was completed';
       return '';
     },
     save: (v) => {
-      const n = { id: nid('S', state.calls), ...v, status: v.visit ? 'Booked' : 'Open', photos: [] };
+      const photos = tmp.slice();
+      if (c) {
+        if (v.status != 'Complete') v.doneAt = '';
+        if (v.visit && v.status == 'Open') v.status = 'Booked';
+        repos.calls.changed(Object.assign(c, v, { photos }));
+        audit('Service call edited', c.id, v.status);
+        return;
+      }
+      const n = { id: nid('S', state.calls), ...v, status: v.visit ? 'Booked' : 'Open', photos };
       repos.calls.add(n, { first: true });
       audit('Service call added', n.id, n.name);
     },
   });
 }
+/** a new call, or change one: the same steps either way (with Work Done when changing one) */
 export function editCall(id, cid) {
-  if (!id) return callWizard(cid);
-  const c = state.calls.find((x) => x.id == id),
-    k = state.contracts.find((x) => x.id == cid) || {};
-  if (id && !c) return;
-  const v = c
-    ? {
-        ...c,
-        existing:
-          c.existing || (state.contracts.some((x) => x.id == c.contract) ? 'Yes, we fitted it' : 'No, new customer'),
-      }
-    : {
-        name: k.name || '',
-        phone: telOf(k) || '',
-        email: mailOf(k) || '',
-        address: addrOf(k) || '',
-        town: k.town || '',
-        contract: k.id || '',
-        priority: 'Normal',
-        status: 'Open',
-        takenBy: USER,
-        takenAt: today(),
-        takenTime: new Date().toTimeString().slice(0, 5),
-        guarantee: k.id ? 'Yes' : '',
-        existing: k.id ? 'Yes, we fitted it' : 'No, new customer',
-      };
-  form(
-    c ? 'Service Call ' + c.id : 'New Service Call',
-    SVCF(),
-    v,
-    (o) => {
-      const bad = (k, m) => {
-        const e = $('#f_' + k);
-        if (e) fieldErr(e, m);
-        return false;
-      };
-      if (/^Yes/.test(o.existing)) {
-        const x = state.contracts.find((z) => z.id == o.contract.trim());
-        if (!x) return bad('contract', 'Pick the contract for this customer');
-        o.contract = x.id;
-      } else {
-        if (!o.phone) return bad('phone', 'Add a phone number for a new customer');
-        if (!o.address) return bad('address', 'Add the address for a new customer');
-        if (!o.town) return bad('town', 'Add the town for a new customer');
-      }
-      if (o.status == 'Complete' && !o.doneAt) return bad('doneAt', 'Enter the date the work was completed');
-      if (o.status != 'Complete') o.doneAt = '';
-      if (o.visit && o.status == 'Open') o.status = 'Booked';
-      if (c) {
-        repos.calls.changed(Object.assign(c, o));
-        audit('Service call edited', c.id, o.status);
-      } else {
-        const n = { id: nid('S', state.calls), ...o };
-        repos.calls.add(n, { first: true });
-        audit('Service call added', n.id, o.name);
-      }
-    },
-    'Up to 8 photos. They print with the service report and stay on the call.',
-    'lg'
-  );
-  setTimeout(() => {
-    const g = $('#mbox .grid');
-    if (g && !$('#dlCon'))
-      g.insertAdjacentHTML(
-        'beforeend',
-        `<datalist id="dlCon">${state.contracts.map((x) => `<option value="${esc(x.id)}">${esc([x.name, x.town].filter(Boolean).join(', '))}</option>`).join('')}</datalist>`
-      );
-    const ex = $('#f_existing'),
-      cw = $('#f_contract') && $('#f_contract').closest('.ff'),
-      sync = () => {
-        if (cw) cw.hidden = !/^Yes/.test(ex.value);
-      };
-    if (ex) {
-      ex.addEventListener('change', sync);
-      sync();
-    }
-  }, 20);
-  setTimeout(() => {
-    const ct = $('#f_contract');
-    if (ct)
-      ct.addEventListener('change', () => {
-        const x = state.contracts.find((z) => z.id == ct.value.trim());
-        if (!x) return;
-        [
-          ['name', x.name],
-          ['phone', telOf(x)],
-          ['email', mailOf(x)],
-          ['address', addrOf(x)],
-          ['town', x.town],
-        ].forEach(([f, val]) => {
-          const e = $('#f_' + f);
-          if (e && !e.value && val) e.value = val;
-        });
-        const g = $('#f_guarantee');
-        if (g && !g.value) g.value = 'Yes';
-        toast('Filled in from contract ' + x.id);
-      });
-  }, 30);
+  return callWizard(cid, id);
 }
 export function reportCall(id, mode) {
   const c = state.calls.find((x) => x.id == id);

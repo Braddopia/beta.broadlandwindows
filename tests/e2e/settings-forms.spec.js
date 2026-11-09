@@ -103,13 +103,33 @@ test('Files page: Broadland Brochures with Category column', async ({ app }) => 
 });
 
 test('report a problem from inside a form, then the form comes back as it was', async ({ app }) => {
+  // the browser's "share this tab" is stood in for by a small drawn picture
+  await app.page.evaluate(() => {
+    navigator.mediaDevices.getDisplayMedia = async () => {
+      const c = document.createElement('canvas');
+      c.width = 64;
+      c.height = 40;
+      const g = c.getContext('2d');
+      g.fillStyle = '#034ea2';
+      g.fillRect(0, 0, 64, 40);
+      const s = c.captureStream(5);
+      setInterval(() => g.fillRect(0, 0, 64, 40), 50);
+      return s;
+    };
+  });
   await app.call('editContact');
   await app.page.fill('#c_name', 'Half typed');
-  await app.page.click('#mbox .mrp');
+  // one report button, bottom right, over popups too
+  await expect(app.page.locator('#mbox .mrp')).toHaveCount(0);
+  await app.page.click('#rpb');
   await expect(app.page.locator('#mbox h2')).toHaveText('Report A Problem');
   expect(await app.page.inputValue('#f_where')).toContain('Contact');
+  await expect(app.page.locator('#thumbs .phb.on')).toHaveCount(1);
   await app.page.fill('#f_what', 'Save did nothing');
   await app.page.click('#saveBtn');
   await expect(app.page.locator('#c_name')).toHaveValue('Half typed', { timeout: 4000 });
-  expect(await app.run(() => state.bugs[0].what)).toBe('Save did nothing');
+  expect(await app.run(() => [state.bugs[0].what, (state.bugs[0].photos || []).length])).toEqual([
+    'Save did nothing',
+    1,
+  ]);
 });

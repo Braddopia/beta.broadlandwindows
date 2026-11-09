@@ -45,10 +45,22 @@ test('new service call for a new customer needs phone, address and town', async 
 test('service call cannot close without a completion date', async ({ app }) => {
   await app.role('beta');
   await app.call('editCall', 'S-0871');
+  // changing a call uses the same steps as a new one, plus Work Done
+  await expect(app.page.locator('.stp.wz span')).toHaveText([
+    /Customer/,
+    /Problem/,
+    /Check/,
+    /Visit/,
+    /Work Done/,
+    /Photos/,
+    /Review/,
+  ]);
+  await app.call('wzGo', 3);
   await app.page.selectOption('#f_status', 'Complete');
-  await app.page.click('#saveBtn');
+  await app.call('wzSave');
   expect(await app.run(() => state.calls.find((c) => c.id === 'S-0871').status)).not.toBe('Complete');
-  expect(await app.run(() => !!document.querySelector('#modal.open'))).toBe(true);
+  expect(await app.run(() => WZ.steps[WZ.st].t)).toBe('Work Done');
+  await expect(app.page.locator('.toast')).toContainText('date the work was completed');
 });
 
 test('service visits show on the calendar for every role that can see them', async ({ app }) => {

@@ -3,10 +3,10 @@ import { onClick } from '../../core/actions.js';
 import { BH, fd, isWk, iso, today } from '../../core/dates.js';
 import { esc } from '../../core/dom.js';
 import { state } from '../../data/state.js';
-import { allowTot, hu } from '../../domain/holidays.js';
 import { forPerson, me, staffName } from '../../domain/people.js';
 import { can, canSee } from '../../domain/permissions.js';
-import { svcBox } from '../home/home.js';
+import { holBody } from '../home/home.js';
+import { paidTag } from '../holidays/holidays.js';
 import { emptyArt } from '../../ui/components/art.js';
 import { holTag } from '../../ui/components/tags.js';
 import { setUI, uiState } from '../../ui/ui-state.js';
@@ -93,7 +93,7 @@ export function calMine() {
     J = state.contracts
       .filter((c) => c.fit && c.fit >= td && c.stage != 'Complete' && forPerson(m, c.fitter))
       .sort((a, b) => a.fit.localeCompare(b.fit));
-  return `<div class="two" style="margin-top:1rem"><div class="panel"><h2><span>My Holidays</span><button class="btn sm" data-act="bookMine">Book holiday</button></h2>${H.map((h) => `<div class="row"><span><b>${fd(h.from)} to ${fd(h.to)}</b><br><span class="muted">${h.days} working day${h.days == 1 ? '' : 's'}${h.note ? ', ' + esc(h.note) : ''}</span></span>${holTag(h)}</div>`).join('') || emptyArt('holiday', 'No holiday booked yet.')}<p class="muted" style="margin:.6rem 0 0">${allowTot(m) - hu(m)} of ${allowTot(m)} days left this year.</p>${svcBox(m, false)}</div>
+  return `<div class="two" style="margin-top:1rem"><div class="panel"><h2><span>My Holiday</span><span class="acts"><button class="btn sm" data-act="bookMine">Book Holiday</button></span></h2>${holBody(m, false)}${H.length ? `<div class="hprev"><div class="hprev-h"><b>Coming Up</b></div>${H.map((h) => `<div class="row"><span>${fd(h.from)} to ${fd(h.to)} · ${h.days} day${h.days == 1 ? '' : 's'}${h.note ? `<br><span class="muted">${esc(h.note)}</span>` : ''}</span><span class="acts">${paidTag(h)}${holTag(h)}</span></div>`).join('')}</div>` : ''}</div>
   <div class="panel"><h2>My Jobs</h2>${J.map((c) => `<div class="row"><span><b>${fd(c.fit)}</b> ${esc(c.name)}<br><span class="muted">${esc(c.product)}, ${esc(c.town || '')}</span></span></div>`).join('') || emptyArt('done', 'No fittings booked for you.')}</div></div>`;
 }
 export function vCalendar() {

@@ -184,35 +184,22 @@ export function vHome() {
   };
   cfg.beta = cfg.admin;
   const C = cfg[R] || cfg.staff;
-  const allow = m ? allowTot(m) : 0,
-    used = m ? hu(m) : 0,
-    pend = m
-      ? sum(
-          state.hols.filter((h) => h.sid == m.id && h.status == 'Pending'),
-          (h) => h.days
-        )
-      : 0,
-    nxt = m
-      ? state.hols
-          .filter((h) => h.sid == m.id && h.status != 'Rejected' && h.to >= td)
-          .sort((a, b) => a.from.localeCompare(b.from))[0]
-      : null;
-  const holP = `<div class="panel"><h2><span>My Holiday</span><span class="acts"><button class="btn sm" data-act="bookMine">Book Holiday</button>${canSee('holidays') ? `<button class="mini" ${onClick('go', 'holidays')}>Holiday Planner</button>` : canSee('fitting') ? `<button class="mini" ${onClick('go', 'fitting')}>My Calendar</button>` : ''}</span></h2>${m ? `<div class="hl"><div class="big"><b>${allow - used}</b><small>Days Left</small></div><div><b>${used}</b><small>Booked</small></div><div><b>${pend}</b><small>Pending</small></div><div><b>${allow}</b><small>Allowance</small></div></div><div class="hbar2"><div class="bar2"><i style="width:${allow ? Math.min(100, Math.round((100 * (used + pend)) / allow)) : 0}%"></i></div><small>${used + pend} of ${allow} days used</small></div><p class="muted" style="margin:.5rem 0 0">${nxt ? `Next: ${fd(nxt.from)} to ${fd(nxt.to)}, ${nxt.days} days, ${esc(nxt.status)}${nxt.paid === false ? ', unpaid' : ''}` : 'No holiday booked yet.'}</p>${prevHols(m, td)}${svcBox(m, true)}` : '<p class="empty">Your name is not in the staff list yet, so there is no allowance to show.</p>'}</div>`;
+  const holP = `<div class="panel"><h2><span>My Holiday</span><span class="acts"><button class="btn sm" data-act="bookMine">Book Holiday</button>${canSee('holidays') ? `<button class="mini" ${onClick('go', 'holidays')}>Holiday Planner</button>` : canSee('fitting') ? `<button class="mini" ${onClick('go', 'fitting')}>My Calendar</button>` : ''}</span></h2>${holBody(m, true)}</div>`;
   /* widgets: every tile and panel the person may see; they choose which show and in what order */
   const KP = {
-    leads: ['Open Leads', open.length, '', 'leads'],
     pipe: ['Pipeline Value', m0(pipe), '', 'leads'],
     live: ['Live Contracts', m0(sum(live, (c) => c.value)), '', 'contracts'],
     bal: ['Balance To Collect', m0(bal), 'warn', 'contracts'],
     calls: ['Open Service Calls', oc.length, urgent ? 'bad' : '', 'service'],
-    req: ['Stock Requests', reqP, reqP ? 'warn' : '', 'stock'],
+    leads: ['Open Leads', open.length, '', 'leads'],
+    fol: ['Follow-Ups Due', fol.length, fol.length ? 'warn' : '', 'leads'],
     nfit: ['Next Fitting', fits[0] ? fd(fits[0].fit) : 'None', '', 'fitting'],
     fitwk: ['Fittings This Week', fitWk, '', 'fitting'],
     dtoday: ['Deliveries Due Today', dToday, dToday ? 'warn' : '', 'deliveries'],
     dover: ['Overdue Deliveries', dOver, dOver ? 'bad' : '', 'deliveries'],
+    req: ['Stock Requests', reqP, reqP ? 'warn' : '', 'stock'],
     low: ['Low Stock Lines', low.length, low.length ? 'warn' : '', 'stock'],
     out: ['Out Of Stock', out, out ? 'bad' : '', 'stock'],
-    fol: ['Follow-Ups Due', fol.length, fol.length ? 'warn' : '', 'leads'],
     quoted: ['Quotes Out', quoted, '', 'leads'],
     ...(can('money')
       ? {
@@ -224,12 +211,12 @@ export function vHome() {
   const PN = {
     hol: ['My Holiday', holP],
     fits: ['Next Fittings', fitsP],
-    calls: ['Service Calls To Action', callsP],
-    low: ['Reorder List', lowP],
     del: ['Deliveries Due', delP],
-    chase: ['Leads To Chase', chaseP],
-    dep: ['Awaiting Deposit', depP],
     res: ['Lead Results', resP],
+    calls: ['Service Calls To Action', callsP],
+    dep: ['Awaiting Deposit', depP],
+    chase: ['Leads To Chase', chaseP],
+    low: ['Reorder List', lowP],
     ...(can('money') ? { pay: ['Payments Due Before Fit', payP], bills: ['Bills To Pay', billP] } : {}),
   };
   const okK = (k) => KP[k] && canSee(KP[k][3]),
@@ -280,9 +267,9 @@ export function vHome() {
 /* per-person dashboard layout */
 export let DASH_AV = { k: [], p: [] };
 export const DASH_DEF = {
-  admin: { k: ['leads', 'pipe', 'live', 'bal', 'calls', 'req'], p: ['hol', 'fits', 'calls', 'low', 'res'] },
-  beta: { k: ['leads', 'pipe', 'live', 'bal', 'calls', 'req'], p: ['hol', 'fits', 'calls', 'low', 'res'] },
-  staff: { k: ['nfit', 'calls', 'dtoday', 'low'], p: ['hol', 'fits', 'calls', 'del'] },
+  admin: { k: ['pipe', 'live', 'bal', 'calls'], p: ['hol', 'fits', 'del', 'res'] },
+  beta: { k: ['pipe', 'live', 'bal', 'calls'], p: ['hol', 'fits', 'del', 'res'] },
+  staff: { k: ['calls', 'nfit', 'dtoday', 'low'], p: ['hol', 'fits', 'del', 'calls'] },
 };
 export function dashGet() {
   state.dash = state.dash || {};
@@ -450,4 +437,21 @@ export function svcBox(m, link) {
   return link
     ? `<button type="button" class="svc" ${onClick('go', canSee('holidays') ? 'holidays' : 'fitting')} title="Open your holidays">${inner}<span class="svc-go">${canSee('holidays') ? 'Holiday planner' : 'My calendar'} &rarr;</span></button>`
     : `<div class="svc">${inner}</div>`;
+}
+
+/** the My Holiday summary (days left, booked, pending, allowance, next, previous, service years):
+    the same on the overview and on My Calendar */
+export function holBody(m, link) {
+  if (!m) return '<p class="empty">Your name is not in the staff list yet, so there is no allowance to show.</p>';
+  const td = today(),
+    allow = allowTot(m),
+    used = hu(m),
+    pend = sum(
+      state.hols.filter((h) => h.sid == m.id && h.status == 'Pending'),
+      (h) => h.days
+    ),
+    nxt = state.hols
+      .filter((h) => h.sid == m.id && h.status != 'Rejected' && h.to >= td)
+      .sort((a, b) => a.from.localeCompare(b.from))[0];
+  return `<div class="hl"><div class="big"><b>${allow - used}</b><small>Days Left</small></div><div><b>${used}</b><small>Booked</small></div><div><b>${pend}</b><small>Pending</small></div><div><b>${allow}</b><small>Allowance</small></div></div><div class="hbar2"><div class="bar2"><i style="width:${allow ? Math.min(100, Math.round((100 * (used + pend)) / allow)) : 0}%"></i></div><small>${used + pend} of ${allow} days used</small></div><p class="muted" style="margin:.5rem 0 0">${nxt ? `Next: ${fd(nxt.from)} to ${fd(nxt.to)}, ${nxt.days} days, ${esc(nxt.status)}${nxt.paid === false ? ', unpaid' : ''}` : 'No holiday booked yet.'}</p>${prevHols(m, td)}${svcBox(m, link)}`;
 }

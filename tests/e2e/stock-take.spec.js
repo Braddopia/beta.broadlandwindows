@@ -173,3 +173,24 @@ test('a standard user can undo a stock movement for 15 minutes, and the audit lo
   await app.run(() => render());
   await expect(app.page.locator('#main tbody tr').first()).not.toContainText('Undo');
 });
+
+test('Remove Stock never makes a new product: it offers the products with that code', async ({ app }) => {
+  const before = await app.run(() => products().length);
+  await app.call('stockForm', 'remove');
+  await expect(app.page.locator('#f_pid')).toHaveValue('');
+  const code = await app.run(() => products()[0].item);
+  await app.page.fill('#f_item', code);
+  await app.page.locator('#iePick button').first().click();
+  const pid = await app.page.inputValue('#f_pid');
+  expect(pid).not.toBe('');
+  const stock = await app.run((k) => prod(k).stock, pid);
+  await app.page.fill('#f_qty', '1');
+  await app.page.click('#mbox .mact >> text=Remove stock');
+  expect(await app.run((k) => [products().length, prod(k).stock], pid)).toEqual([before, stock - 1]);
+  // an unknown code is refused
+  await app.call('stockForm', 'remove');
+  await app.page.fill('#f_item', 'NOSUCHCODE');
+  await expect(app.page.locator('#iePick')).toContainText('No product has this code');
+  await app.page.click('#mbox .mact >> text=Remove stock');
+  expect(await app.run(() => products().length)).toBe(before);
+});

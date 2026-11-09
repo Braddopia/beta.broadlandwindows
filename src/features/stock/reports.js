@@ -161,11 +161,11 @@ export function invRep(k) {
       ([g, L]) =>
         `<h3 class="fsec">${g}</h3><div class="rl rl2">${L.map(
           ([c, t, e, d]) =>
-            `<button class="rb" ${e ? '' : 'disabled'} ${c == 'take' ? onClick('takeReport', last.id) : onClick('invRun', c)}><b>${t}</b>${d ? `<span>${esc(d)}</span>` : ''}</button>`
+            `<button class="rb" ${d ? `title="${esc(d)}"` : ''} ${e ? '' : 'disabled'} ${c == 'take' ? onClick('takeReport', last.id) : onClick('invRun', c)}><b>${t}</b></button>`
         ).join('')}</div>`
     ).join(
       ''
-    )}<div class="ff" style="margin-top:.8rem"><label class="cbl"><input type="checkbox" id="rhist" checked> Include movement history</label><label class="cbl"><input type="checkbox" id="rphoto"> Include photos</label></div><div class="mact"><button class="btn ghost" data-act="closeModal">Close</button></div>`
+    )}<div class="rep-opt"><label class="cbl"><input type="checkbox" id="rhist" checked> Include movement history</label><label class="cbl"><input type="checkbox" id="rphoto"> Include photos</label></div><div class="mact"><button class="btn ghost" data-act="closeModal">Close</button></div>`
   );
 }
 export function invRun(sc) {

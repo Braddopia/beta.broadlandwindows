@@ -43,10 +43,12 @@ export function stgPipe(kind) {
   }).join('')}</div>
    ${U.st ? `<p class="pipe-f">Showing only <b>${esc((L.find((x) => x.s == U.st) || {}).n || U.st)}</b> <button type="button" class="mini" ${onClick('pipeSet', key, U.st)}>Show all stages</button></p>` : ''}`;
 }
+/** a list row's stage: its name with a thin bar under it showing how far along it is */
 export function stDots(kind, s) {
   const L = STG[kind],
     i = L.findIndex((x) => x.s == s),
     x = s == 'Lost' ? STG_LOST : L[i] || L[0],
-    end = s == 'Won' || s == 'Complete';
-  return `<span class="sprog ${s == 'Lost' ? 'lost' : end ? 'end' : ''}" title="${esc(s == 'Lost' ? 'Lost' : 'Stage ' + (Math.max(i, 0) + 1) + ' of ' + L.length)}"><span class="sbar" aria-hidden="true">${L.map((y, j) => `<i class="${s == 'Lost' ? '' : j < i ? 'd' : j == i ? 'o' : ''}"></i>`).join('')}</span><b>${esc(x.n)}</b></span>`;
+    end = s == 'Won' || s == 'Complete',
+    pct = s == 'Lost' ? 100 : Math.round(((Math.max(i, 0) + 1) / L.length) * 100);
+  return `<span class="sprog2 ${s == 'Lost' ? 'lost' : end ? 'end' : ''}" title="${esc(s == 'Lost' ? 'Lost' : 'Stage ' + (Math.max(i, 0) + 1) + ' of ' + L.length)}"><b>${esc(x.n)}</b><span class="sbar2" aria-hidden="true"><i style="width:${pct}%"></i></span></span>`;
 }

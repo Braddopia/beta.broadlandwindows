@@ -1,9 +1,11 @@
 /* ui/forms/wizard: Step-by-step forms (new lead, new contract, supplier). */
 import { onClick } from '../../core/actions.js';
+import { fd } from '../../core/dates.js';
 import { $, esc } from '../../core/dom.js';
 import { SAFE } from '../../data/sanitize.js';
 import { store } from '../../data/persistence.js';
 import { fieldH, readFields } from './form.js';
+import { tmp } from './photos.js';
 import { doneIn, openModal } from '../modal.js';
 import { render } from '../shell/router.js';
 import { toast } from '../toast.js';
@@ -24,14 +26,14 @@ export function wzDraw() {
     last = W.st == W.steps.length - 1;
   const lab = (f) => {
     const val = W.v[f.k];
-    return f.t == 'number' ? (val ? val : '') : val;
+    return f.t == 'number' ? (val ? val : '') : f.t == 'date' && val ? fd(val) : val;
   };
   const rev = () =>
     W.steps
-      .filter((x) => x.f)
+      .filter((x) => (x.f && x.f.length) || x.photos)
       .map(
         (x) =>
-          `<div class="wz-r"><h3>${esc(x.t)} <button class="mini" ${onClick('wzGo', W.steps.indexOf(x))}>Change</button></h3>${x.f
+          `<div class="wz-r"><h3><span><i>${W.steps.indexOf(x) + 1}</i>${esc(x.t)}</span><button class="mini" ${onClick('wzGo', W.steps.indexOf(x))}>Change</button></h3>${x.photos ? `<div class="wz-ph">${tmp.length ? tmp.map((p) => `<img src="${SAFE.img(p)}" alt="">`).join('') : '<span class="muted">No photos</span>'}</div>` : ''}${x.f
             .filter((f) => !(f.nx && !W.v[f.k]))
             .map(
               (f) =>
@@ -40,11 +42,12 @@ export function wzDraw() {
             .join('')}</div>`
       )
       .join('');
+  const revWrap = () => `<div class="wz-rev">${rev()}</div>`;
   openModal(
     `<button class="mx" data-act="closeModal" aria-label="Close">&times;</button><h2>${esc(W.title)}</h2>
    <div class="stp wz">${W.steps.map((x, i) => `<span class="${i <= W.st ? 'on' : ''} ${i <= W.seen || W.edit ? 'go' : ''}" ${i <= W.seen || W.edit ? onClick('wzGo', i) : ''}><i>${i < W.st ? '&#10003;' : i + 1}</i>${esc(x.t)}</span>`).join('')}</div>
    <p class="muted wz-d">Step ${W.st + 1} of ${W.steps.length}: ${esc(st.d || '')}</p>
-   <div class="wz-b">${st.html ? st.html(W.v) : ''}${st.review ? rev() : `<div class="grid">${st.f.map((f) => fieldH(f, W.v)).join('')}</div>`}</div>
+   <div class="wz-b">${st.html ? st.html(W.v) : ''}${st.review ? revWrap() : `<div class="grid">${st.f.map((f) => fieldH(f, W.v)).join('')}</div>`}</div>
    <div class="mact">${W.del ? `<button class="btn ghost l" style="color:var(--red)" data-act="wzDel">Delete</button>` : ''}${W.st ? '<button class="btn ghost" data-act="wzStep" data-args="[-1]">Back</button>' : '<button class="btn ghost" data-act="closeModal">Cancel</button>'}${W.edit && !last ? '<button class="btn ghost" data-act="wzSave">Save now</button>' : ''}${last ? `<button class="btn green" data-act="wzSave">${esc(W.saveLabel || 'Save')}</button>` : '<button class="btn" data-act="wzStep" data-args="[1]">Next</button>'}</div>`,
     'md'
   );
