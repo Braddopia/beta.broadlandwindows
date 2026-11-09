@@ -12,8 +12,10 @@ import { audit } from '../../data/audit.js';
 import { store } from '../../data/persistence.js';
 import { state } from '../../data/state.js';
 import {
+  areaOf,
   byUid,
   colTxt,
+  exactProduct,
   hasLoc,
   ikey,
   isLow,
@@ -22,6 +24,7 @@ import {
   nextOrd,
   prod,
   products,
+  qcIssue,
   ro,
   stkId,
   stt,
@@ -29,7 +32,9 @@ import {
 } from '../../domain/stock.js';
 import { can } from '../../domain/permissions.js';
 import { need } from '../auth/session.js';
-import { stockForm } from './item-window.js';
+import { stockForm, viewItem } from './item-window.js';
+import { openTake, vTake } from './stock-take.js';
+import { srchMatch, srchText } from '../search/search.js';
 import { isPhone, vPDA } from './phone-mode.js';
 import { SUPN, suppliersPanel } from '../suppliers/suppliers.js';
 import { emptyArt } from '../../ui/components/art.js';
@@ -39,7 +44,7 @@ import { ordTag, reqTag } from '../../ui/components/tags.js';
 import { hex } from '../../config/colours.js';
 import { form } from '../../ui/forms/form.js';
 import { askYes, closeModal, openModal } from '../../ui/modal.js';
-import { hit, render } from '../../ui/shell/router.js';
+import { hit, q, render } from '../../ui/shell/router.js';
 import { toast } from '../../ui/toast.js';
 import { uiState } from '../../ui/ui-state.js';
 
@@ -49,8 +54,9 @@ export const pphotos = (k) => (state.pphotos[k] || []).filter(SAFE.img);
 /* ---------------- page ---------------- */
 export function vStock() {
   const v = uiState.inv.v;
-  const tog = `<div class="seg2"><button class="${v == 'products' ? 'on' : ''}" ${onClick('setUI', 'inv.v', 'products')}>Products</button><button class="${v == 'moves' ? 'on' : ''}" ${onClick('setUI', 'inv.v', 'moves')}>Movements</button></div>`;
-  return v == 'moves' ? vMoves(tog) : vProducts(tog);
+  const T = openTake();
+  const tog = `<div class="seg2"><button class="${v == 'products' ? 'on' : ''}" ${onClick('setUI', 'inv.v', 'products')}>Products</button><button class="${v == 'moves' ? 'on' : ''}" ${onClick('setUI', 'inv.v', 'moves')}>Movements</button><button class="${v == 'take' ? 'on' : ''}" ${onClick('setUI', 'inv.v', 'take')}>Stock Take${T ? ' <i class="dotn"></i>' : ''}</button></div>`;
+  return v == 'moves' ? vMoves(tog) : v == 'take' ? vTake(tog) : vProducts(tog);
 }
 export function invFiltered() {
   const I = uiState.inv,
@@ -60,7 +66,8 @@ export function invFiltered() {
     (I.f == 'low' && isLow(r) && r.stock > 0) ||
     (I.f == 'out' && r.stock <= 0) ||
     (I.f == 'noloc' && !hasLoc(r)) ||
-    (I.f == 'nosup' && !r.supplier);
+    (I.f == 'nosup' && !r.supplier) ||
+    (I.f == 'qc' && qcIssue(r, today()));
   const val =
     {
       pid: (r) => r.pid,
@@ -69,6 +76,8 @@ export function invFiltered() {
       colours: colTxt,
       unit: unitOf,
       location: (r) => (hasLoc(r) ? r.location : '~'),
+      area: (r) => (r.area ? r.area : '~'),
+      desc: (r) => r.desc || '~',
       stock: (r) => +r.stock,
       reorder: ro,
       supplier: (r) => r.supplier || '~',
@@ -76,14 +85,51 @@ export function invFiltered() {
       value: (r) => r.stock * r.cost,
       status: (r) => (r.stock <= 0 ? 0 : isLow(r) ? 1 : 2),
     }[I.sort] || ((r) => r.item);
-  return P.filter(
-    (r) =>
-      hit(r) &&
-      okF(r) &&
-      (I.sup == 'all' || r.supplier == I.sup) &&
-      (I.loc == 'all' || r.location == I.loc) &&
-      (I.unit == 'all' || unitOf(r) == I.unit)
-  ).sort((a, b) => cmp(val(a), val(b)) * I.dir || cmp(a.item, b.item));
+  const own = (I.q || '').trim().toLowerCase(),
+    L = P.filter(
+      (r) =>
+        hit(r) &&
+        (!own || srchMatch(srchText(r), own)) &&
+        okF(r) &&
+        (I.sup == 'all' || r.supplier == I.sup) &&
+        (I.loc == 'all' || r.location == I.loc) &&
+        (I.area == 'all' || areaOf(r) == I.area) &&
+        (I.unit == 'all' || unitOf(r) == I.unit)
+    ).sort((a, b) => cmp(val(a), val(b)) * I.dir || cmp(a.item, b.item));
+  /* typed an exact Stock ID, item code or barcode: that product goes first */
+  const x = invExact();
+  if (x) {
+    const i = L.indexOf(x);
+    if (i > 0) L.unshift(...L.splice(i, 1));
+  }
+  return L;
+}
+/* the product whose Stock ID, code or barcode is exactly what was typed (Inventory box or top search) */
+export const invExact = () => exactProduct(uiState.inv.q) || exactProduct(q);
+let lastExact = null;
+/* Inventory's own search box */
+export function invSearch(v) {
+  uiState.inv.q = SAFE.text(v, 80);
+  uiState.inv.page = 1;
+  render(true);
+}
+/* Enter in the Inventory search box opens the exact match */
+export function invSearchKey(e) {
+  if (e.key != 'Enter') return;
+  const x = invExact();
+  if (x) viewItem(x.pid);
+}
+/* after drawing: bring an exact match into view once */
+export function invShowExact() {
+  const x = invExact(),
+    k = x ? x.pid : null;
+  if (k == lastExact) return;
+  lastExact = k;
+  if (!k) return;
+  requestAnimationFrame(() => {
+    const row = document.querySelector('#main tr.xhit');
+    row && row.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  });
 }
 export function vProducts(tog) {
   if (isPhone() && !uiState.inv.full) return vPDA();
@@ -92,6 +138,8 @@ export function vProducts(tog) {
     P = products(),
     list = invFiltered(),
     pg = paginate(I, list),
+    ex = invExact(),
+    td = today(),
     n = SEL.size,
     cnt = (f) => P.filter(f).length;
   const pend = state.items.filter((r) => r.type == 'request' && r.reqStatus == 'Pending').length,
@@ -115,21 +163,25 @@ export function vProducts(tog) {
       ? `<button class="kpi ${k[2]} ${k[3][0] == 'inv.f' && I.f == k[3][1] && k[3][1] != 'all' ? 'on' : ''}" ${k[3][0] == 'moves' ? onClick('invMoves', k[3][1]) : onClick('setUI', k[3][0], k[3][1])}><small>${k[0]}</small><b>${k[1]}</b></button>`
       : `<div class="kpi"><small>${k[0]}</small><b>${k[1]}</b></div>`;
   const ch = (v, t) => `<button class="chip ${I.f == v ? 'on' : ''}" ${onClick('setUI', 'inv.f', v)}>${t}</button>`;
-  const filtersOn = I.sup != 'all' || I.loc != 'all' || I.unit != 'all';
+  const filtersOn = I.sup != 'all' || I.loc != 'all' || I.area != 'all' || I.unit != 'all';
+  invShowExact();
   const rows = pg.rows
     .map((r) => {
       const k = key(r),
         s = stt(r),
-        on = SEL.has(k);
-      return `<tr class="clk-r ${on ? 'sel' : ''}" ${rowClick('viewItem', k)}><td><input type="checkbox" aria-label="Select ${esc(r.item)}" ${on ? 'checked' : ''} ${onEvent('onchange', 'invSel', k, 'this.checked')}></td><td><code>${esc(r.pid)}</code></td><td><b>${esc(r.item)}</b></td><td class="c-sm">${esc(r.length)}</td><td class="c-md">${esc(colTxt(r))}</td><td>${esc(unitOf(r))}</td><td class="c-md">${hasLoc(r) ? esc(r.location) : '<span class="muted">Not Set</span>'}</td><td class="n">${r.stock}</td><td class="c-sm">${esc(r.supplier || '-')}</td><td class="n c-sm">${money(r.cost)}</td>${Ad ? `<td class="n c-md">${money(r.stock * r.cost)}</td>` : ''}<td class="ac"><div class="acts r"><span class="tag fw ${s[1]}">${s[0] == 'OK' ? 'In Stock' : s[0] == 'Low' ? 'Low' : 'Out'}</span><button class="mini" ${onClick('viewItem', k)}>View</button><button class="mini pri" ${onClick('editItem', k)}>${svg(ICONS.edit)}Edit</button><button class="mini c-sm" ${onClick('reportProd', k)}>Report</button></div></td></tr>`;
+        on = SEL.has(k),
+        xh = ex && ex.pid == k,
+        qi = qcIssue(r, td);
+      return `<tr class="clk-r ${on ? 'sel' : ''} ${xh ? 'xhit' : ''}" ${rowClick('viewItem', k)}><td><input type="checkbox" aria-label="Select ${esc(r.item)}" ${on ? 'checked' : ''} ${onEvent('onchange', 'invSel', k, 'this.checked')}></td><td><code>${esc(r.pid)}</code>${xh ? '<span class="xtag">Exact Match</span>' : ''}</td><td><b>${esc(r.item)}</b>${r.desc ? `<small class="idesc">${esc(r.desc)}</small>` : ''}</td><td class="c-sm">${esc(r.length)}</td><td class="c-md">${esc(colTxt(r))}</td><td>${esc(unitOf(r))}</td><td class="c-md">${hasLoc(r) ? esc(r.location) : '<span class="muted">Not Set</span>'}${r.area ? `<small class="idesc">${esc(r.area)}</small>` : ''}</td><td class="n">${r.stock}</td><td class="c-sm">${esc(r.supplier || '-')}</td><td class="n c-sm">${money(r.cost)}</td>${Ad ? `<td class="n c-md">${money(r.stock * r.cost)}</td>` : ''}<td class="ac"><div class="acts r">${qi ? '<span class="tag r" title="Quality check needs attention">QC</span>' : ''}<span class="tag fw ${s[1]}">${s[0] == 'OK' ? 'In Stock' : s[0] == 'Low' ? 'Low' : 'Out'}</span><button class="mini" ${onClick('viewItem', k)}>View</button><button class="mini pri" ${onClick('editItem', k)}>${svg(ICONS.edit)}Edit</button><button class="mini c-sm" ${onClick('reportProd', k)}>Report</button></div></td></tr>`;
     })
     .join('');
 
   return `<div class="head"><div><h1>Inventory</h1><span class="muted">${P.length} products, ${sum(P, (r) => r.stock)} units${Ad ? ', ' + m0(sum(P, (r) => r.stock * r.cost)) : ''}</span></div><div class="tools">${tog}<span class="vs"></span><div class="seg2"><button class="g" ${onClick('stockForm', 'add')}>+ Add</button><button class="r" ${onClick('stockForm', 'remove')}>- Remove</button><button ${onClick('stockForm', 'request')}>Request</button></div><button class="mini" data-act="invNew">Batch Add</button><button class="mini" data-act="invRep">Reports</button><button class="mini" data-act="invCsv">Export CSV</button></div></div>
   <div class="kpis">${K.map(kpi).join('')}</div>
-  <div class="sg2">${ch('all', 'All (' + P.length + ')')}${ch('low', 'Low (' + cnt((r) => isLow(r) && r.stock > 0) + ')')}${ch('out', 'Out (' + cnt((r) => r.stock <= 0) + ')')}${ch('noloc', 'No Location (' + cnt((r) => !hasLoc(r)) + ')')}${ch('nosup', 'No Supplier (' + cnt((r) => !r.supplier) + ')')}${filtersOn ? `<span class="vs"></span><button class="chip on" data-act="invReset">Filters on &times;</button>` : ''}</div>
+  <div class="invbar"><label class="invq">${svg(ICONS.search)}<input id="invQ" type="search" autocomplete="off" maxlength="80" placeholder="Search stock: Stock ID, code, description, location, supplier" aria-label="Search inventory" value="${esc(I.q || '')}" ${onEvent('oninput', 'invSearch', 'this.value')} ${onEvent('onkeydown', 'invSearchKey', 'event')}></label>${ex ? `<button class="btn sm" ${onClick('viewItem', ex.pid)}>Open ${esc(ex.item)}</button>` : ''}</div>
+  <div class="sg2">${ch('all', 'All (' + P.length + ')')}${ch('low', 'Low (' + cnt((r) => isLow(r) && r.stock > 0) + ')')}${ch('out', 'Out (' + cnt((r) => r.stock <= 0) + ')')}${ch('noloc', 'No Location (' + cnt((r) => !hasLoc(r)) + ')')}${ch('nosup', 'No Supplier (' + cnt((r) => !r.supplier) + ')')}${ch('qc', 'QC Issues (' + cnt((r) => qcIssue(r, td)) + ')')}${filtersOn ? `<span class="vs"></span><button class="chip on" data-act="invReset">Filters on &times;</button>` : ''}</div>
   ${n ? `<div class="selbar"><b>${n} Selected</b><button class="mini pri" ${onClick('invBatch', 'add')}>Add Stock</button><button class="mini" ${onClick('invBatch', 'remove')}>Remove Stock</button><button class="mini" ${onClick('invSetF', 'location')}>Set Location</button><button class="mini" ${onClick('invSetF', 'supplier')}>Set Supplier</button><button class="mini" ${onClick('invSetF', 'unit')}>Set Unit</button><button class="mini" data-act="invRep">Report</button><button class="mini" data-act="invLabels">Labels</button><button class="mini" ${onClick('invCsv', 1)}>Export</button>${can('manage') ? '<button class="mini del" data-act="invDel">Delete</button>' : ''}<button class="mini" data-act="invSelClear">Clear</button></div>` : ''}
-  <div class="tw"><table class="ptb"><thead><tr><th><input type="checkbox" aria-label="Select all on this page" ${pg.rows.length && pg.rows.every((r) => SEL.has(key(r))) ? 'checked' : ''} ${onEvent('onchange', 'invAll', 'this.checked')}></th>${thS('inv', 'pid', 'ID')}${thS('inv', 'item', 'Item')}${thS('inv', 'length', 'Length', 'c-sm')}${thS('inv', 'colours', 'Colours', 'c-md')}${thS('inv', 'unit', 'Unit')}${thS('inv', 'location', 'Location', 'c-md')}${thS('inv', 'stock', 'Stock', 'n')}${thS('inv', 'supplier', 'Supplier', 'c-sm')}${thS('inv', 'cost', 'Cost', 'n c-sm')}${Ad ? thS('inv', 'value', 'Value', 'n c-md') : ''}<th class="ac"><span class="srt" ${onClick('sortBy', 'inv', 'status')} style="cursor:pointer;margin-right:.5rem">Status${uiState.inv.sort == 'status' ? `<span class="ar">${uiState.inv.dir > 0 ? '▲' : '▼'}</span>` : ''}</span><button class="fbtn ${filtersOn ? 'on' : ''}" id="invF" title="Sort and filter" aria-label="Sort and filter" data-act="invFilter" data-args="[{&quot;$&quot;:&quot;this&quot;}]">${svg(ICONS.filter)}</button></th></tr></thead><tbody>${rows || `<tr><td colspan="14" class="empty">${emptyArt('stock', 'No products match.')}</td></tr>`}</tbody></table></div>
+  <div class="tw"><table class="ptb"><thead><tr><th><input type="checkbox" aria-label="Select all on this page" ${pg.rows.length && pg.rows.every((r) => SEL.has(key(r))) ? 'checked' : ''} ${onEvent('onchange', 'invAll', 'this.checked')}></th>${thS('inv', 'pid', 'ID')}${thS('inv', 'item', 'Item')}${thS('inv', 'length', 'Length', 'c-sm')}${thS('inv', 'colours', 'Colours', 'c-md')}${thS('inv', 'unit', 'Unit')}${thS('inv', 'location', 'Location / Area', 'c-md')}${thS('inv', 'stock', 'Stock', 'n')}${thS('inv', 'supplier', 'Supplier', 'c-sm')}${thS('inv', 'cost', 'Cost', 'n c-sm')}${Ad ? thS('inv', 'value', 'Value', 'n c-md') : ''}<th class="ac"><span class="srt" ${onClick('sortBy', 'inv', 'status')} style="cursor:pointer;margin-right:.5rem">Status${uiState.inv.sort == 'status' ? `<span class="ar">${uiState.inv.dir > 0 ? '▲' : '▼'}</span>` : ''}</span><button class="fbtn ${filtersOn ? 'on' : ''}" id="invF" title="Sort and filter" aria-label="Sort and filter" data-act="invFilter" data-args="[{&quot;$&quot;:&quot;this&quot;}]">${svg(ICONS.filter)}</button></th></tr></thead><tbody>${rows || `<tr><td colspan="14" class="empty">${emptyArt('stock', 'No products match.')}</td></tr>`}</tbody></table></div>
   ${pagerH('inv', pg, 'products')}
   <div style="margin-top:1.1rem">${suppliersPanel()}</div>`;
 }
@@ -140,7 +192,7 @@ export function invMoves(f) {
   render();
 }
 export function invReset() {
-  Object.assign(uiState.inv, { sup: 'all', loc: 'all', unit: 'all', f: 'all', page: 1 });
+  Object.assign(uiState.inv, { sup: 'all', loc: 'all', area: 'all', unit: 'all', f: 'all', q: '', page: 1 });
   closeFpop();
   render();
 }
@@ -158,6 +210,8 @@ export function invFilter(btn) {
     ['stock', 'Stock level'],
     ['status', 'Status'],
     ['location', 'Location'],
+    ['area', 'Stock-take area'],
+    ['desc', 'Description'],
     ['supplier', 'Supplier'],
     ['unit', 'Unit'],
     ['reorder', 'Reorder level'],
@@ -173,11 +227,13 @@ export function invFilter(btn) {
      ['out', 'Out of stock'],
      ['noloc', 'No location'],
      ['nosup', 'No supplier'],
+     ['qc', 'QC issues'],
    ]
      .map(([k, t]) => `<option value="${k}" ${I.f == k ? 'selected' : ''}>${t}</option>`)
      .join('')}</select>
    <select aria-label="Supplier" ${onEvent('onchange', 'invPop', 'sup', 'this.value')}>${opts([...new Set(P.map((r) => r.supplier).filter(Boolean))].sort(), I.sup, 'All suppliers')}</select>
    <select aria-label="Location" ${onEvent('onchange', 'invPop', 'loc', 'this.value')}>${opts([...new Set(P.filter(hasLoc).map((r) => r.location))].sort(), I.loc, 'All locations')}</select>
+ <select aria-label="Area" ${onEvent('onchange', 'invPop', 'area', 'this.value')}>${opts([...new Set(P.map(areaOf))].sort(), I.area, 'All areas')}</select>
    <select aria-label="Unit" ${onEvent('onchange', 'invPop', 'unit', 'this.value')}>${opts(UNITS, I.unit, 'All units')}</select>
    <div class="acts"><button class="mini" data-act="invReset">Reset</button><button class="mini pri" data-act="closeFpop">Done</button></div>`
   );
@@ -386,7 +442,7 @@ export function vMoves(tog) {
       : M.f == 'pending'
         ? r.type == 'request' && r.reqStatus == 'Pending'
         : r.type == M.f);
-  const L = state.items.filter((r) => ok(r) && hit(r)),
+  const L = state.items.filter((r) => r.type != 'import' && ok(r) && hit(r)),
     pg = paginate(M, L),
     cnt = (f) => state.items.filter(f).length;
   const ch = (v, t) => `<button class="chip ${M.f == v ? 'on' : ''}" ${onClick('setUI', 'mov.f', v)}>${t}</button>`;

@@ -185,7 +185,8 @@ test('stock: low level, reorder amount, matching key and numbers', () => {
   assert.equal(isLow({ stock: 5, reorder: 5 }), false);
   assert.equal(reorderQty({ stock: 2, reorder: 5 }), 8);
   assert.equal(reorderQty({ stock: 2, reorder: 5, reorderQty: 3 }), 3);
-  assert.equal(ikey({ item: ' Frame ', length: '-', cInName: 'White' }), 'frame||white|');
+  assert.equal(ikey({ item: ' Frame ', length: '-', cInName: 'White' }), 'frame||white||');
+  assert.equal(ikey({ item: 'X1', area: 'Stores' }), 'x1||||stores');
   assert.equal(unitOf({ unit: 'nonsense' }), 'Each');
   const st = blank({ items: [{ pid: '0003' }, { pid: '0007', type: 'request', ord: 'P0002' }], seq: { pend: 1 } });
   replaceState(st);

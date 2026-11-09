@@ -6,6 +6,7 @@ import { initials } from '../../core/format.js';
 import { ICONS, svg } from '../../core/icons.js';
 import { state } from '../../data/state.js';
 import { me } from '../../domain/people.js';
+import { products } from '../../domain/stock.js';
 import { vAdmin } from '../../features/admin/admin.js';
 import { ROLE } from '../../data/session.js';
 import { can, canSee } from '../../domain/permissions.js';
@@ -186,13 +187,22 @@ export function shellSync() {
   bn.textContent = c > 99 ? '99+' : c;
   bn.style.display = c ? '' : 'none';
   if ($('#nc').classList.contains('open')) ncDraw();
-  $('#itemCodes').innerHTML = [...new Set(state.items.map((x) => x.item))]
-    .sort()
-    .map((x) => `<option value="${esc(x)}">`)
-    .join('');
-  const d = $('#locs');
-  d.innerHTML = [...new Set(state.items.map((x) => x.location).filter((x) => x && x != '-'))]
-    .sort()
-    .map((x) => `<option value="${esc(x)}">`)
-    .join('');
+  fillLists();
+}
+/* suggestion lists for item codes, locations and stock-take areas: rebuilt only when they change */
+const listSig = {};
+function fillList(id, values) {
+  const el = $('#' + id);
+  if (!el) return;
+  const v = [...new Set(values.filter((x) => x && x != '-'))].sort(),
+    sig = v.join('|');
+  if (listSig[id] === sig) return;
+  listSig[id] = sig;
+  el.innerHTML = v.map((x) => `<option value="${esc(x)}">`).join('');
+}
+function fillLists() {
+  const P = products();
+  fillList('itemCodes', P.map((x) => x.item));
+  fillList('locs', P.map((x) => x.location));
+  fillList('areas', P.map((x) => x.area));
 }

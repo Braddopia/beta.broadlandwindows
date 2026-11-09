@@ -14,6 +14,7 @@ import * as coreEvents from './core/events.js';
 import * as coreHaptics from './core/haptics.js';
 import * as coreHttps from './core/https.js';
 import * as coreIcons from './core/icons.js';
+import * as coreXlsx from './core/xlsx.js';
 import * as coreIds from './core/ids.js';
 import * as dataSanitize from './data/sanitize.js';
 import * as dataAudit from './data/audit.js';
@@ -39,6 +40,7 @@ import * as domainNumbering from './domain/numbering.js';
 import * as domainPermissions from './domain/permissions.js';
 import * as domainPeople from './domain/people.js';
 import * as domainService from './domain/service.js';
+import * as domainStockTake from './domain/stock-take.js';
 import * as domainStock from './domain/stock.js';
 import * as featuresAdminAdmin from './features/admin/admin.js';
 import * as featuresAuthPins from './features/auth/pins.js';
@@ -87,6 +89,7 @@ import * as featuresStaffStaff from './features/staff/staff.js';
 import * as featuresStockItemWindow from './features/stock/item-window.js';
 import * as featuresStockPhoneMode from './features/stock/phone-mode.js';
 import * as featuresStockReports from './features/stock/reports.js';
+import * as featuresStockStockTake from './features/stock/stock-take.js';
 import * as featuresStockStock from './features/stock/stock.js';
 import * as featuresSuppliersSuppliers from './features/suppliers/suppliers.js';
 import * as featuresTourTour from './features/tour/tour.js';
@@ -131,6 +134,7 @@ const modules = {
   coreHttps,
   coreIcons,
   coreIds,
+  coreXlsx,
   dataSanitize,
   dataAudit,
   featuresAdminBackup,
@@ -155,6 +159,7 @@ const modules = {
   domainPermissions,
   domainService,
   domainStock,
+  domainStockTake,
   featuresAdminAdmin,
   featuresAuthPins,
   featuresAuthSession,
@@ -203,6 +208,7 @@ const modules = {
   featuresStockPhoneMode,
   featuresStockReports,
   featuresStockStock,
+  featuresStockStockTake,
   featuresSuppliersSuppliers,
   featuresTourTour,
   integrationsHallmark,

@@ -1,5 +1,6 @@
 /* features/stock/item-window: The product window: adding, removing, requesting and editing stock. */
 import { MAX_PHOTOS, UNITS } from '../../config/constants.js';
+import { today } from '../../core/dates.js';
 import { onClick } from '../../core/actions.js';
 import { $, $$, esc } from '../../core/dom.js';
 import { m0, money } from '../../core/format.js';
@@ -9,6 +10,8 @@ import { audit } from '../../data/audit.js';
 import { store } from '../../data/persistence.js';
 import { state } from '../../data/state.js';
 import {
+  CONDITIONS,
+  QC_STATUS,
   byUid,
   colTxt,
   hasLoc,
@@ -69,6 +72,7 @@ export function ieFields() {
       sec: 'p',
       hint: ed && !Ad ? 'Only an admin can rename' : '',
     },
+    { k: 'desc', l: 'Description', max: 160, w: 'full', sec: 'p', ph: 'What it is, as on the count sheet' },
     { k: 'unit', l: 'Unit', t: 'select', o: UNITS, sec: 'p' },
     ed
       ? { k: 'stock', l: 'Current stock', t: 'number', max: 1e7, sec: 'p', hint: 'Changing this logs an adjustment' }
@@ -105,7 +109,19 @@ export function ieFields() {
         ]
       : []),
     { k: 'location', l: 'Location (Bay, Bin, Shelf, Rack)', list: 'locs', max: 60, sec: 'l' },
+    { k: 'area', l: 'Stock-take area', list: 'areas', max: 40, sec: 'l', hint: 'The count sheet it is on' },
     { k: 'supplier', l: 'Supplier', t: 'select', o: SUPN(r.supplier), req: ieMode == 'add' && !r.pid, sec: 'l' },
+    ...(ieMode == 'edit' || ieMode == 'add'
+      ? [
+          { k: 'qc', l: 'QC status', t: 'select', o: QC_STATUS, sec: 'q' },
+          { k: 'cond', l: 'Condition', t: 'select', o: CONDITIONS, sec: 'q' },
+          { k: 'damaged', l: 'Damaged / unusable qty', t: 'number', max: 1e6, dp: 0, sec: 'q' },
+          { k: 'batch', l: 'Batch / lot number', max: 40, sec: 'q' },
+          { k: 'expiry', l: 'Use by / expiry', t: 'date', sec: 'q' },
+          { k: 'coshh', l: 'Hazardous (COSHH)', t: 'select', o: ['', 'No', 'Yes'], sec: 'q' },
+          { k: 'qcNote', l: 'QC notes', w: 'full', max: 200, sec: 'q' },
+        ]
+      : []),
     ...(ieMode == 'request'
       ? [{ k: 'note', l: 'Needed for (job, reason)', w: 'full', max: 160, sec: 'n' }]
       : [{ k: 'notes', l: ed ? 'Notes' : 'Product notes', t: 'area', w: 'full', sec: 'n' }]),
@@ -170,11 +186,11 @@ export function itemWindow(mode, k, pre) {
     B = { edit: 'Save changes', add: 'Add stock', remove: 'Remove stock', request: 'Send request' }[mode];
   const s = r ? stt(r) : null;
   openModal(
-    `<div class="ie-h"><div><h2>${esc(T)}</h2><span class="muted" id="ieSub">${r ? `Stock ID ${esc(r.pid)} · ${prodRows(r.pid).length} movements · <span class="tag ${s[1]}">${s[0]}</span>` : 'New product: a Stock ID is given automatically'}</span></div><button class="mx" data-act="closeModal" aria-label="Close">&times;</button></div>
+    `<div class="ie-h"><div><h2>${esc(T)}</h2><span class="muted" id="ieSub">${r ? `Stock ID ${esc(r.pid)} · ${prodRows(r.pid).filter((x) => x.type != 'import').length} movements · <span class="tag ${s[1]}">${s[0]}</span>` : 'New product: a Stock ID is given automatically'}</span></div><button class="mx" data-act="closeModal" aria-label="Close">&times;</button></div>
   <div class="ie"><div class="ie-ph"><div class="ie-main" id="ieMain"></div><div class="ie-strip" id="ieStrip"></div>
      <div class="prow"><label class="btn ghost sm">${svg(ICONS.photo)}Take photo<input type="file" accept="image/*" capture="environment" hidden data-onchange="addPh" data-args-change="[{&quot;$&quot;:&quot;this&quot;}]"></label><label class="btn ghost sm">Upload photos<input type="file" accept="image/*" multiple hidden data-onchange="addPh" data-args-change="[{&quot;$&quot;:&quot;this&quot;}]"></label><span class="muted" style="align-self:center;font-size:.75rem">Up to ${MAX_PHOTOS}, resized automatically</span></div>
      <div class="ie-stats" id="ieStats"></div></div>
-   <div class="ie-f">${sec('Product', 'p', 'ie-prod')}${sec('Colours', 'c')}${sec('Stock And Ordering', 'o')}${sec('Location And Supplier', 'l')}${sec(mode == 'request' ? 'Request' : 'Notes', 'n')}</div></div>
+   <div class="ie-f">${sec('Product', 'p', 'ie-prod')}${sec('Colours', 'c')}${sec('Stock And Ordering', 'o')}${sec('Location And Supplier', 'l')}${sec('Quality Check', 'q')}${sec(mode == 'request' ? 'Request' : 'Notes', 'n')}</div></div>
   ${view ? `<div class="mact"><button class="btn ghost" ${onClick('reportProd', r.pid)}>Report</button><button class="btn ghost" ${onClick('stockForm', 'request', r.pid)}>Request stock</button><button class="btn ghost" data-act="closeModal">Close</button><button class="btn" ${onClick('itemWindow', 'edit', r.pid)}>Edit</button>` : `<div class="mact">${ed && can('manage') ? `<button class="btn ghost l" style="color:var(--red)" ${onClick('delProduct', r.pid)}>Delete product</button>` : ''}${r ? `<button class="btn ghost" ${onClick('reportProd', r.pid)}>Report</button>` : ''}<button class="btn ghost" data-act="closeModal">Cancel</button><button class="btn ${mode == 'remove' ? 'red' : mode == 'add' ? 'green' : ''}" data-act="ieSave">${B}</button>`}</div>`,
     'xl'
   );
@@ -187,7 +203,9 @@ export function itemWindow(mode, k, pre) {
     b.querySelectorAll('.ie-f input,.ie-f select,.ie-f textarea,.ie-f button,.ie-ph .prow input').forEach(
       (e) => (e.disabled = true)
     );
-    const mv = prodRows(r.pid).slice(0, 6);
+    const mv = prodRows(r.pid)
+      .filter((x) => x.type != 'import')
+      .slice(0, 6);
     $('#mbox .ie-f').insertAdjacentHTML(
       'beforeend',
       `<fieldset><legend>Recent Movements</legend>${mv.map((x) => `<div class="row"><span><span class="tag ${x.type == 'add' ? 'g' : x.type == 'remove' ? 'r' : 'y'}">${esc(x.type == 'add' ? 'In' : x.type == 'remove' ? 'Out' : 'Request')}</span> ${x.qty} ${esc(unitOf(x))} by ${esc(x.user)}</span><span class="muted">${esc(x.time)}</span></div>`).join('') || '<p class="empty">No movements yet.</p>'}</fieldset>`
@@ -198,7 +216,14 @@ export function itemWindow(mode, k, pre) {
       const g = (i) => ($('#f_' + i) || {}).value || '',
         ex = state.items.find(
           (x) =>
-            ikey(x) == ikey({ item: g('item'), length: g('length'), cInName: g('cInName'), cOutName: g('cOutName') })
+            ikey(x) ==
+            ikey({
+              item: g('item'),
+              length: g('length'),
+              cInName: g('cInName'),
+              cOutName: g('cOutName'),
+              area: g('area'),
+            })
         );
       $('#f_pid').value = ex ? ex.pid : stkId();
       if (ex && ex.pid != ieKey) {
@@ -211,7 +236,7 @@ export function itemWindow(mode, k, pre) {
       } else if (!ex) ieKey = null;
       ieStats();
     };
-    ['item', 'length', 'cInName', 'cOutName'].forEach((i) => {
+    ['item', 'length', 'cInName', 'cOutName', 'area'].forEach((i) => {
       const e = $('#f_' + i);
       e && ['input', 'change'].forEach((t) => e.addEventListener(t, sync));
     });
@@ -277,7 +302,13 @@ export function ieSave() {
       return;
     }
     const nm = Ad ? o.item : r.item,
-      probe = { item: nm, length: o.length || '-', cInName: o.cInName || '-', cOutName: o.cOutName || '-' };
+      probe = {
+        item: nm,
+        length: o.length || '-',
+        cInName: o.cInName || '-',
+        cOutName: o.cOutName || '-',
+        area: o.area,
+      };
     if (state.items.some((x) => x.pid != k && ikey(x) == ikey(probe))) {
       toast('Another product already has this item code, length and colours');
       return;
@@ -299,6 +330,7 @@ export function ieSave() {
       supplier: o.supplier,
       barcode: bc,
       notes: o.notes,
+      ...qcFields(o, r),
       ...(Ad ? { cost: o.cost } : {}),
     };
     prodRows(k).forEach((x) => Object.assign(x, upd));
@@ -366,9 +398,11 @@ export function ieSave() {
     lead: o.lead || (ex ? ex.lead : undefined),
     reorderQty: o.reorderQty || (ex && ex.reorderQty),
     notes: o.notes || (ex && ex.notes),
+    ...mergeQc(o, ex),
   };
   if (kind != 'request')
     prodRows(pid).forEach((x) => {
+      if (kind == 'add') Object.assign(x, mergeQc(o, x));
       ['supplier', 'location', 'unit', 'lead', 'reorderQty', 'notes'].forEach((f) => {
         if (o[f]) x[f] = o[f];
       });
@@ -412,6 +446,34 @@ export function ieSave() {
   );
 }
 /* barcode follows the item code unless "use a different barcode" is ticked */
+/* description, area and quality-check details from the form; QC stamps who checked and when */
+const QCK = ['desc', 'area', 'qc', 'cond', 'damaged', 'batch', 'expiry', 'coshh', 'qcNote'];
+/* add / remove / request: boxes left empty keep what the product already has */
+function mergeQc(o, was) {
+  const n = qcFields(o, was || {}),
+    out = {};
+  [...QCK, 'qcBy', 'qcAt'].forEach((k) => {
+    const v = n[k] !== '' && n[k] !== 0 && n[k] != null ? n[k] : was ? was[k] : undefined;
+    if (v !== undefined) out[k] = v;
+  });
+  return out;
+}
+function qcFields(o, was) {
+  const n = {
+    desc: SAFE.text(o.desc, 160),
+    area: SAFE.text(o.area, 40),
+    qc: o.qc || '',
+    cond: o.cond || '',
+    damaged: +o.damaged || 0,
+    batch: SAFE.text(o.batch, 40),
+    expiry: SAFE.date(o.expiry),
+    coshh: o.coshh || '',
+    qcNote: SAFE.text(o.qcNote, 200),
+  };
+  const qcChanged = ['qc', 'cond', 'damaged', 'qcNote'].some((k) => String(n[k] || '') != String((was || {})[k] || ''));
+  if (qcChanged && (n.qc || n.cond || n.damaged || n.qcNote)) Object.assign(n, { qcBy: USER, qcAt: today() });
+  return n;
+}
 export function bcDeco(o) {
   const bc = $('#f_barcode');
   if (!bc || $('#bcx')) return;
@@ -471,7 +533,7 @@ export function found(code, pv) {
     vs = products().filter((x) => x.item.toLowerCase() == c || (x.barcode || '').toLowerCase() == c);
   if (vs.length > 1 && !pv) {
     openModal(
-      `<h2>${esc(code)}: Pick A Variant</h2>${vs.map((x) => `<div class="row"><span>${esc(colTxt(x))} &middot; ${esc(x.length)}<br><span class="muted">${x.stock} ${esc(unitOf(x))} in stock &middot; ID ${esc(x.pid)}</span></span><button class="mini pri" ${onClick('found', code, x.pid)}>Open</button></div>`).join('')}<div class="mact"><button class="btn ghost" data-act="closeModal">Cancel</button></div>`
+      `<h2>${esc(code)}: Pick A Variant</h2>${vs.map((x) => `<div class="row"><span><b>${esc(x.desc || x.item)}</b><br>${esc([colTxt(x), x.length, x.area].filter((v) => v && v != '-').join(' · '))}<br><span class="muted">${x.stock} ${esc(unitOf(x))} in stock &middot; ID ${esc(x.pid)}</span></span><button class="mini pri" ${onClick('found', code, x.pid)}>Open</button></div>`).join('')}<div class="mact"><button class="btn ghost" data-act="closeModal">Cancel</button></div>`
     );
     return;
   }

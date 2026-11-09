@@ -7,7 +7,7 @@ import { backupDl } from '../admin/backup.js';
 import { state } from '../../data/state.js';
 import { allLeads } from '../../domain/leads.js';
 import { nlq } from './questions.js';
-import { products } from '../../domain/stock.js';
+import { exactProduct, products, unitOf } from '../../domain/stock.js';
 import { chPin } from '../auth/pins.js';
 import { ROLE } from '../../data/session.js';
 import { can, canSee } from '../../domain/permissions.js';
@@ -110,7 +110,10 @@ export const SRCH = [
     'stock',
     'Inventory',
     () => products(),
-    (r) => [r.item || r.pid, ['Stock ID ' + r.pid, r.supplier, r.location].filter(Boolean).join(' · ')],
+    (r) => [
+      r.item || r.pid,
+      [r.desc, 'Stock ID ' + r.pid, r.supplier, r.location].filter((v) => v && v != '-').join(' · '),
+    ],
     (r) => viewItem(r.pid),
   ],
   [
@@ -298,6 +301,18 @@ export function srchBuild(raw, big) {
     RUN.push(fn);
     return `<button type="button" class="sri" data-i="${i}" role="option">${ic ? `<span class="sri-ic">${svg(ic)}</span>` : ''}<span class="sri-t"><b>${esc(tc(String(t || '')))}</b>${s ? `<small>${esc(s)}</small>` : ''}</span></button>`;
   };
+  /* an exact Stock ID, item code or barcode wins: first result, highlighted, Enter opens it */
+  const X = !cmdOnly && canSee('stock') ? exactProduct(query) : null;
+  if (X)
+    grp.push(
+      `<div class="srg xm">Exact Stock Match</div>` +
+        row(
+          X.item + (X.desc ? ' · ' + X.desc : ''),
+          ['Stock ID ' + X.pid, X.stock + ' ' + unitOf(X) + ' in stock', X.location, X.area].filter((v) => v && v != '-').join(' · '),
+          () => viewItem(X.pid),
+          'M4 7l8-4 8 4v10l-8 4-8-4zM4 7l8 4 8-4M12 11v10'
+        ).replace('class="sri"', 'class="sri sri-x"')
+    );
   const NQ = cmdOnly ? null : nlq(raw);
   if (NQ) {
     NLQ = NQ;

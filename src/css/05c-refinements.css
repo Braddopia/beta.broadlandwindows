@@ -357,3 +357,30 @@ body[data-view=home] .top .sb:focus-within::before{opacity:.75}body[data-view=ho
 .lvg>.panel>.emp{flex:1;justify-content:center;min-height:6rem}
 .thumbs.phg{grid-template-columns:repeat(4,minmax(0,8.5rem))}
 @media(max-width:640px){.rw-foot{flex-wrap:wrap;gap:.5rem}.rw-foot .btn{flex:1 1 auto;min-width:0;white-space:normal;justify-content:center;text-align:center}.rw-foot .rw-sp{display:none}}
+/* ==== inventory: own search, exact match, description and area lines ==== */
+.invbar{display:flex;gap:.6rem;align-items:center;margin:0 0 .8rem}
+.invq{flex:1;display:flex;align-items:center;gap:.5rem;height:2.5rem;padding:0 .85rem;border:1px solid var(--line);border-radius:10px;background:var(--card)}
+.invq svg{width:1.05rem;height:1.05rem;color:var(--muted);flex-shrink:0}
+.invq input{flex:1;min-width:0;height:100%;border:0;background:transparent;outline:none;font-size:.92rem;padding:0}
+.invq:focus-within{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-bg)}
+tr.xhit td{background:#fff6c7!important}
+body[data-theme=dark] tr.xhit td{background:rgba(255,208,2,.16)!important}
+tr.xhit td:first-child{box-shadow:inset 4px 0 0 var(--yellow)}
+.xtag{display:block;margin-top:.2rem;font-size:.66rem;font-weight:700;color:#8a6a00;letter-spacing:.04em}
+body[data-theme=dark] .xtag{color:#ffd84d}
+.idesc{display:block;font-size:.74rem;color:var(--muted);font-weight:400;max-width:22rem;white-space:normal}
+.sri.sri-x{background:#fff6c7;border-radius:10px}
+body[data-theme=dark] .sri.sri-x{background:rgba(255,208,2,.16)}
+.srg.xm{color:#8a6a00}
+/* ==== stock take ==== */
+.tk-prog{position:relative;height:1.5rem;margin:0 0 .8rem;border-radius:8px;background:var(--card2);border:1px solid var(--line);overflow:hidden}
+.tk-prog i{position:absolute;inset:0 auto 0 0;background:linear-gradient(90deg,#1f9d55,#4cc47f);transition:width .4s}
+.tk-prog span{position:relative;display:block;line-height:1.4rem;padding:0 .7rem;font-size:.76rem;font-weight:700;color:var(--ink)}
+.tk-areas .chip small{opacity:.7;font-weight:500;margin-left:.15rem}
+.tk-t td{vertical-align:middle}
+.tk-in input{width:6.5rem;height:2.1rem;text-align:right;font-weight:700;font-size:.95rem}
+.tk-done td{background:rgba(31,157,85,.06)}
+.tk-t td.up{color:var(--green);font-weight:700}.tk-t td.dn{color:var(--red);font-weight:700}
+.tk-foot{margin-top:1rem;justify-content:flex-end;flex-wrap:wrap}
+.take-intro .steps-l{margin:.4rem 0 1rem;padding-left:1.2rem;line-height:1.7}
+.take-intro .acts{flex-wrap:wrap}

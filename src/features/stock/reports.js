@@ -5,7 +5,7 @@ import { $, esc } from '../../core/dom.js';
 import { grp, money, sum } from '../../core/format.js';
 import { state } from '../../data/state.js';
 import { pphotos } from './stock.js';
-import { colTxt, hasLoc, isLow, key, prodRows, products, ro, stt, unitOf } from '../../domain/stock.js';
+import { colTxt, hasLoc, isLow, isMove, key, prodRows, products, ro, stt, unitOf } from '../../domain/stock.js';
 import { can } from '../../domain/permissions.js';
 import { SEL } from './stock.js';
 import { c39, printDoc } from '../../print/print.js';
@@ -229,7 +229,7 @@ export function invRun(sc) {
       t: 'Recent Movements',
       h: ['Time', 'Type', 'Item', 'Qty', 'User', 'Stock After'],
       r: state.items
-        .filter((x) => keys.has(key(x)) && x.type != 'request')
+        .filter((x) => keys.has(key(x)) && isMove(x))
         .slice(0, 30)
         .map((x) => [x.time, x.type, x.item, x.qty + ' ' + unitOf(x), x.user, x.stock]),
     });

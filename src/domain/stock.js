@@ -14,8 +14,10 @@ export function stkId() {
     ) + 1
   ).padStart(4, '0');
 }
+/* what makes a product line unique: code, length, colours and stock-take area
+   (the same code kept in two areas, e.g. Stores and Fitters Vans, is two lines with their own counts) */
 export const ikey = (r) =>
-  [r.item, r.length, r.cInName, r.cOutName]
+  [r.item, r.length, r.cInName, r.cOutName, r.area]
     .map((v) => {
       v = String(v || '')
         .trim()
@@ -24,12 +26,20 @@ export const ikey = (r) =>
     })
     .join('|');
 export const key = (r) => r.pid;
+/* one row per product: the newest row of each Stock ID (rows are kept newest first).
+   Kept until the list changes or the next save, because pages ask for it many times per draw. */
+let pCache = null,
+  pKey = [];
 export const products = () => {
+  const I = state.items,
+    k = [I, I.length, I[0], state._saved];
+  if (pCache && k.every((x, i) => x === pKey[i])) return pCache;
   const m = new Map();
-  state.items.forEach((r) => {
+  I.forEach((r) => {
     if (!m.has(r.pid)) m.set(r.pid, r);
   });
-  return [...m.values()];
+  pKey = k;
+  return (pCache = [...m.values()]);
 };
 export const prodRows = (k) => state.items.filter((x) => x.pid == k);
 export const prod = (k) => state.items.find((x) => x.pid == k);
@@ -59,6 +69,8 @@ export function moveRow(b, kind, qty, stock, extra) {
     ...(extra || {}),
   };
 }
+/* a real stock movement (in or out), not a request or an imported starting line */
+export const isMove = (r) => r.type == 'add' || r.type == 'remove';
 export const byUid = (u) => state.items.find((x) => x.uid == u);
 /* request numbers: P0001 while pending, then the next order number (0001, 0002...) once approved */
 /* next order / pending number: one above the highest already used, so numbers never repeat.
@@ -76,4 +88,35 @@ export function nextOrd(pre) {
     n = Math.max(+state.seq[key] || 0, 0, ...used) + 1;
   state.seq[key] = n;
   return pre + String(n).padStart(4, '0');
+}
+
+/* ---- quality checks ---- */
+export const QC_STATUS = ['', 'Passed', 'Awaiting check', 'Quarantine', 'Failed'];
+export const CONDITIONS = ['', 'New', 'Good', 'Used', 'Damaged', 'Faulty'];
+/* needs attention: failed or quarantined, damaged items, or past its expiry date */
+export const qcIssue = (r, td) =>
+  r.qc == 'Failed' ||
+  r.qc == 'Quarantine' ||
+  r.cond == 'Damaged' ||
+  r.cond == 'Faulty' ||
+  +r.damaged > 0 ||
+  !!(r.expiry && td && r.expiry < td);
+/* the stock-take area a product is counted in (the sheet name on the count sheets) */
+export const areaOf = (r) => (r.area && r.area != '-' ? r.area : 'No Area');
+/* exact match on Stock ID, item code or barcode (case and spaces ignored) */
+export const normCode = (v) =>
+  String(v || '')
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, ' ');
+export function exactProduct(q) {
+  const c = normCode(q);
+  if (!c) return null;
+  const P = products();
+  return (
+    P.find((r) => normCode(r.pid) == c) ||
+    P.find((r) => normCode(r.item) == c) ||
+    P.find((r) => normCode(r.barcode) == c) ||
+    null
+  );
 }

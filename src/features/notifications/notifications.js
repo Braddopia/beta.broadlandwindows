@@ -4,7 +4,7 @@ import { addDays, fd, today } from '../../core/dates.js';
 import { $, esc } from '../../core/dom.js';
 import { store } from '../../data/persistence.js';
 import { state } from '../../data/state.js';
-import { byUid, colTxt, hasLoc, isLow, products, unitOf } from '../../domain/stock.js';
+import { byUid, colTxt, hasLoc, isLow, isMove, products, unitOf } from '../../domain/stock.js';
 import { can } from '../../domain/permissions.js';
 import { fensaDue } from '../contracts/contracts.js';
 import { moveClear, reqApprove, reqReceive, reqReject } from '../stock/stock.js';
@@ -29,7 +29,7 @@ export function ncData() {
   state.items.forEach((r) => {
     if (r.type == 'request') {
       if (['Pending', 'Approved'].includes(r.reqStatus) && !r.cleared && (Ad || r.user == USER)) req.push(r);
-    } else if (Ad) {
+    } else if (Ad && isMove(r)) {
       mov.push({ r, n: !state.seen[r.uid] });
       if (r.flag && !r.cleared)
         alr.push({ k: 'Alert', t: r.item + ': ' + r.type + ' ' + r.qty, s: r.user + ', ' + r.time, uid: r.uid });

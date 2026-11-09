@@ -8,7 +8,7 @@ import { state } from '../../data/state.js';
 import { ORDDONE, dAuto, dDueToday, dLate } from '../../domain/deliveries.js';
 import { HC, absCode } from '../../domain/holidays.js';
 import { allLeads } from '../../domain/leads.js';
-import { hasLoc, isLow, products, unitOf } from '../../domain/stock.js';
+import { hasLoc, isLow, isMove, products, unitOf } from '../../domain/stock.js';
 import { can } from '../../domain/permissions.js';
 import { need } from '../auth/session.js';
 import { LAY, flGet, layEdit } from '../home/home.js';
@@ -76,7 +76,7 @@ export function vLive() {
   const rq = state.items
       .filter((r) => r.type == 'request' && ['Pending', 'Approved'].includes(r.reqStatus))
       .slice(0, 4),
-    mv = state.items.filter((r) => r.type != 'request').slice(0, 4);
+    mv = state.items.filter(isMove).slice(0, 4);
   const O = state.orders
       .filter((o) => !ORDDONE.test(o.status))
       .sort((a, b) => (a.due || '9').localeCompare(b.due || '9')),
