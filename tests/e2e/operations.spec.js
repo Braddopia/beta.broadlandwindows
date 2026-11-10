@@ -9,7 +9,7 @@ test('standard user: new service call step by step, from an existing contract', 
   await app.call('editCall');
   await expect(app.page.locator('#mbox .stp.wz')).toContainText('Customer');
   await app.page.selectOption('#f_existing', { index: 0 });
-  await app.page.fill('#f_contract', '2402318');
+  await app.page.fill('#f_contract', '1023421');
   await app.page.dispatchEvent('#f_contract', 'change');
   expect(
     await app.run(() => [document.querySelector('#f_name').value, document.querySelector('#f_town').value])
@@ -18,7 +18,7 @@ test('standard user: new service call step by step, from an existing contract', 
   await app.page.selectOption('#f_cat', { index: 1 });
   await app.page.fill('#f_issue', 'Handle stiff on back door');
   await app.call('wzStep', 1);
-  await expect(app.page.locator('#mbox .wz-info')).toContainText('2402318');
+  await expect(app.page.locator('#mbox .wz-info')).toContainText('1023421');
   await app.call('wzStep', 1);
   await app.page.fill('#f_visit', '2026-11-08');
   await app.call('wzStep', 1);
@@ -26,7 +26,7 @@ test('standard user: new service call step by step, from an existing contract', 
   const c = await app.run(() => state.calls[0]);
   expect([c.status, c.contract, c.takenBy, c.issue]).toEqual([
     'Booked',
-    '2402318',
+    '1023421',
     'Demo User',
     'Handle stiff on back door',
   ]);
@@ -73,14 +73,14 @@ test('service visits show on the calendar for every role that can see them', asy
           .join('|')
       ),
       role
-    ).toContain('Service: 2402311 - SAMPLE CUSTOMER I');
+    ).toContain('Service: 1023418 - SAMPLE CUSTOMER I');
   }
 });
 
 test('day sheet and service report print', async ({ app }) => {
   await app.role('beta');
   for (const fn of ['svcReport', 'invoicePrint']) {
-    const [w] = await Promise.all([app.nextPopup(), fn === 'svcReport' ? app.call(fn) : app.call(fn, '2402318')]);
+    const [w] = await Promise.all([app.nextPopup(), fn === 'svcReport' ? app.call(fn) : app.call(fn, '1023421')]);
     await w.waitForLoadState();
     await w.close();
   }
@@ -167,7 +167,7 @@ test('calendar: fittings show on every view for every account; the chip hides th
     for (const m of ['month', 'week', 'agenda']) {
       await app.run(`setUI('cal.m', '${m}')`);
       await app.run(`setUI('cal.o', ${m == 'week' ? 1 : 0})`);
-      await expect(app.page.locator('#main .ce.fit', { hasText: '2402318 - SAMPLE CUSTOMER E' }).first()).toBeVisible();
+      await expect(app.page.locator('#main .ce.fit', { hasText: '1023421 - SAMPLE CUSTOMER E' }).first()).toBeVisible();
     }
     await app.run(`setUI('cal.m', 'month')`);
     await app.run(`setUI('cal.o', 0)`);
@@ -177,8 +177,8 @@ test('calendar: fittings show on every view for every account; the chip hides th
   }
   await app.role('staff');
   await app.go('fitting');
-  await app.page.locator('#main .ce.fit', { hasText: '2402318' }).first().click();
+  await app.page.locator('#main .ce.fit', { hasText: '1023421' }).first().click();
   // accounts that can open contracts get the contract; others a pop-up with the job
-  await expect(app.page.locator('#mbox')).toContainText('2402318 - SAMPLE CUSTOMER E');
+  await expect(app.page.locator('#mbox')).toContainText('1023421 - SAMPLE CUSTOMER E');
   expect(app.errors).toEqual([]);
 });

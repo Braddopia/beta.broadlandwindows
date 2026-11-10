@@ -95,20 +95,20 @@ test('Panel Optimiser: job number and name lead everywhere, and the plan can be 
   await app.role('beta');
   await app.go('cutting');
   await expect(app.page.locator('#cutToC')).toBeHidden();
-  await app.page.fill('#cut_job_no', '2402318');
+  await app.page.fill('#cut_job_no', '1023421');
   // a known contract fills the job name in and offers Save To Contract
   await expect(app.page.locator('#cut_job_name')).toHaveValue('Sample Customer E');
-  await expect(app.page.locator('#cutTitle')).toHaveText('2402318 - SAMPLE CUSTOMER E');
+  await expect(app.page.locator('#cutTitle')).toHaveText('1023421 - SAMPLE CUSTOMER E');
   await expect(app.page.locator('#cutToC')).toBeVisible();
   // printed plan: the job first
   const [w] = await Promise.all([app.nextPopup(), app.page.click('#main >> text=Print Plan')]);
   await w.waitForLoadState();
-  await expect(w.locator('h1')).toHaveText('2402318 - SAMPLE CUSTOMER E');
+  await expect(w.locator('h1')).toHaveText('1023421 - SAMPLE CUSTOMER E');
   await expect(w.locator('.pg')).toContainText('Job number');
   await w.close();
   // kept with the contract's documents
   await app.page.click('#cutToC');
-  await expect(app.page.locator('.toast')).toContainText('Saved to contract 2402318');
+  await expect(app.page.locator('.toast')).toContainText('Saved to contract 1023421');
   const docs = await app.page.evaluate(
     () =>
       new Promise((ok) => {
@@ -121,19 +121,19 @@ test('Panel Optimiser: job number and name lead everywhere, and the plan can be 
       })
   );
   expect(
-    docs.some(([ref, name]) => ref == 'contract:2402318' && /^2402318 - SAMPLE CUSTOMER E Cutting Plan/.test(name))
+    docs.some(([ref, name]) => ref == 'contract:1023421' && /^1023421 - SAMPLE CUSTOMER E Cutting Plan/.test(name))
   ).toBe(true);
   expect(app.errors).toEqual([]);
 });
 
 test('contracts are named "number - NAME" in the window, the list, search and the calendar', async ({ app }) => {
   await app.role('beta');
-  await app.openContract('2402318');
-  await expect(app.page.locator('#mbox .rw-h h2')).toContainText('2402318 - SAMPLE CUSTOMER E');
+  await app.openContract('1023421');
+  await expect(app.page.locator('#mbox .rw-h h2')).toContainText('1023421 - SAMPLE CUSTOMER E');
   await app.closeAll();
   await app.go('contracts');
   await expect(app.page.locator('#main tbody')).toContainText('SAMPLE CUSTOMER E');
   await app.page.fill('#sb input', 'Sample Customer E');
-  await expect(app.page.locator('#sres')).toContainText('2402318 - SAMPLE CUSTOMER E');
-  expect(await app.run(() => evs('2026-11-12').map((e) => e.t))).toContain('2402318 - SAMPLE CUSTOMER E');
+  await expect(app.page.locator('#sres')).toContainText('1023421 - SAMPLE CUSTOMER E');
+  expect(await app.run(() => evs('2026-11-12').map((e) => e.t))).toContain('1023421 - SAMPLE CUSTOMER E');
 });

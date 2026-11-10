@@ -34,7 +34,7 @@ test('lead and contract windows open on every step without errors', async ({ app
   await app.role('beta');
   for (const [kind, id] of [
     ['lead', 'L0001'],
-    ['contract', '2402318'],
+    ['contract', '1023421'],
   ]) {
     await app.call('recOpen', kind, id);
     const steps = await app.run(() => recordWin.steps);
@@ -52,7 +52,7 @@ test('phone: record window never scrolls sideways', async ({ app }) => {
   await app.role('beta');
   for (const [kind, id] of [
     ['lead', 'L0001'],
-    ['contract', '2402318'],
+    ['contract', '1023421'],
   ]) {
     await app.call('recOpen', kind, id);
     for (const s of await app.run(() => recordWin.steps)) {

@@ -521,7 +521,7 @@ export function cmdkRun(raw) {
   CXi = 0;
   $('#cres').innerHTML =
     b.html ||
-    '<p class="srn">Type a name, postcode, contract number or item code.<br>Or tell it what to do: <b class="nocap">pay 500 2402318</b>, <b class="nocap">call sample</b>, <b class="nocap">won L0002</b>, <b class="nocap">note 2402318 rang customer</b>.</p>';
+    '<p class="srn">Type a name, postcode, contract number or item code.<br>Or tell it what to do: <b class="nocap">pay 500 1023421</b>, <b class="nocap">call sample</b>, <b class="nocap">won L0002</b>, <b class="nocap">note 1023421 rang customer</b>.</p>';
   srchMark('#cres', 0);
 }
 /* ---- the hint in the box cycles through real examples ---- */

@@ -99,7 +99,7 @@ export const TAB_TOURS = {
     T(
       '#main .cm',
       'The Calendar',
-      'Click an entry to open the job. Fittings are named by job number and customer, like 2402318 - SAMPLE CUSTOMER.'
+      'Click an entry to open the job. Fittings are named by job number and customer, like 1023421 - SAMPLE CUSTOMER.'
     ),
   ],
   contacts: [

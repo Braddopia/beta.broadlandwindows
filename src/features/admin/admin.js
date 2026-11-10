@@ -5,8 +5,10 @@ import { fd, today } from '../../core/dates.js';
 import { esc } from '../../core/dom.js';
 import { csvDownload } from '../../ui/download.js';
 import { kb, m0, money, pc, sum } from '../../core/format.js';
-import { savedSize } from '../../data/persistence.js';
-import { state } from '../../data/state.js';
+import { savedSize, store } from '../../data/persistence.js';
+import { seed } from '../../data/seed.js';
+import { askYes } from '../../ui/modal.js';
+import { replaceState, state } from '../../data/state.js';
 import { allLeads } from '../../domain/leads.js';
 import { staffName } from '../../domain/people.js';
 import { unitOf } from '../../domain/stock.js';
@@ -65,7 +67,7 @@ export function vAdmin() {
    <div class="panel"><h2><span>Reviews</span><button class="mini pri" data-act="editRatings">Update scores</button></h2><div class="row"><span>Trustpilot</span><span>${stars(state.brand.tp.score, '#e0a800', '#d9e1ee')} <b>${(+state.brand.tp.score).toFixed(1)}</b></span></div><div class="row"><span>Google</span><span>${stars(state.brand.g.score, '#e0a800', '#d9e1ee')} <b>${(+state.brand.g.score).toFixed(1)}</b></span></div><div class="row"><span>Trusted Trader</span><span><b>${(+(state.brand.tt || {}).score || 0).toFixed(1)}</b> / 5</span></div><div class="row"><span>ReferenceLine</span><span><b>${(+(state.brand.rl || {}).score || 0).toFixed(1)}</b> / 10</span></div><p class="muted" style="font-size:.8rem;margin:.5rem 0 0">Shown on the overview, the office board and customer documents.</p>
    <h3 class="nch" style="display:flex;justify-content:space-between;align-items:center">Review Quotes <button class="mini" data-act="addQuote">Add Quote</button></h3>${(state.brand.quotes || []).map((x, i) => `<div class="row"><span style="font-size:.84rem">“${esc(x.t.length > 90 ? x.t.slice(0, 90) + '…' : x.t)}” <small class="muted">${esc(x.src)}</small></span><button class="mini red" ${onClick('delQuote', i)} aria-label="Remove quote">Remove</button></div>`).join('') || '<p class="muted">No quotes yet.</p>'}</div>
    ${authPanel()}
-   <div class="panel"><h2>Testing Tools</h2><label class="tsw"><input type="checkbox" ${tourTest() ? 'checked' : ''} ${onEvent('onchange', 'tourToggle', 'this.checked')}><span>Show the welcome tour every time the site opens</span></label><p class="muted" style="font-size:.82rem;margin:.4rem 0 .7rem">For testing. Turn it off before the team starts using the site, so the tour only shows once per browser.</p><button class="btn ghost sm" data-act="startTour">Start the tour now</button></div>
+   <div class="panel"><h2>Testing Tools</h2><label class="tsw"><input type="checkbox" ${tourTest() ? 'checked' : ''} ${onEvent('onchange', 'tourToggle', 'this.checked')}><span>Show the welcome tour every time the site opens</span></label><p class="muted" style="font-size:.82rem;margin:.4rem 0 .7rem">For testing. Turn it off before the team starts using the site, so the tour only shows once per browser.</p><button class="btn ghost sm" data-act="startTour">Start the tour now</button><h3 class="fsec" style="margin-top:1.2rem">Sample Data</h3><p class="muted" style="font-size:.82rem;margin:.2rem 0 .7rem">Wipes everything saved in this browser and loads fresh sample records, with every required box filled in. For testing only.</p><button class="btn red sm" data-act="resetSample">Start Again With Fresh Sample Data</button></div>
    <div class="panel"><h2>Quick Actions</h2><div class="acts" style="gap:.5rem"><button class="btn ghost" ${onClick('go', 'finance')}>Finance</button><button class="btn ghost" ${onClick('go', 'staff')}>Staff</button><button class="btn ghost" ${onClick('go', 'holidays')}>Holidays</button><button class="btn ghost" ${onClick('go', 'reports')}>Reports</button><button class="btn ghost" ${onClick('setRole', 'staff')}>Leave admin mode</button></div></div>
   </div>
   <div class="panel" style="margin-top:1rem;padding:0"><h2 style="padding:1rem 1.1rem 0"><span>Audit Trail <span class="muted" style="font:500 .78rem var(--body)">who changed what, and when</span></span><span class="acts"><button class="mini" data-act="auditCsv">Export CSV</button></span></h2>
@@ -77,4 +79,20 @@ export function auditCsv() {
     ['When', 'Who', 'Account', 'Action', 'Target', 'Detail'],
     ...state.audit.map((e) => [new Date(e.at).toISOString(), e.by, e.role, e.a, e.t, e.d]),
   ]);
+}
+
+/** testing: throw away this browser's data and start again from the sample records */
+export function resetSample() {
+  if (!need('manage', 'Resetting the data')) return;
+  askYes(
+    'Start Again With Fresh Sample Data?',
+    'Everything saved in this browser is replaced with the sample records: leads, contracts, stock, staff, holidays, settings and PINs. This cannot be undone. Download a backup first if you want to keep anything.',
+    'Wipe And Reload',
+    () => {
+      replaceState(seed());
+      store();
+      setTimeout(() => location.reload(), 700);
+    },
+    true
+  );
 }

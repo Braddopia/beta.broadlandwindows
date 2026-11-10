@@ -82,12 +82,12 @@ test.describe('windows and popups', () => {
     await shot(app, 'popup-lead');
   });
   test('contract finance', async ({ app }) => {
-    await app.openContract('2402318');
+    await app.openContract('1023421');
     await app.step('finance');
     await shot(app, 'popup-contract-finance');
   });
   test('contract fitting', async ({ app }) => {
-    await app.openContract('2402318');
+    await app.openContract('1023421');
     await app.step('fitting');
     await shot(app, 'popup-contract-fitting');
   });

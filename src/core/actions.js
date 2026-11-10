@@ -1,7 +1,7 @@
 /* core/actions: Buttons and boxes name the action they run in data attributes; one listener per event type runs it. */
 import { esc } from './dom.js';
 
-/* Safe inline handler: A('openContract',id) -> data-act="openContract" data-args="[&quot;2402318&quot;]".
+/* Safe inline handler: A('openContract',id) -> data-act="openContract" data-args="[&quot;1023421&quot;]".
    Arguments are JSON-encoded then HTML-escaped, so names/ids containing quotes can't break out. */
 /* click anywhere on a row or card to open it (buttons, links and boxes inside keep their own job) */
 /* ---- actions: markup names the function to run in data attributes, and one listener per event type

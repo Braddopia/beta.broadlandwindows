@@ -14,7 +14,7 @@ test('an exact number, name, phone, email or postcode matches', () => {
     assert.equal(isExact(lead, q), true, q);
 });
 test('part of a value, or very short searches, do not count', () => {
-  const c = { id: '2402318', name: 'Sample Customer E', town: 'Aylsham' };
+  const c = { id: '1023421', name: 'Sample Customer E', town: 'Aylsham' };
   for (const q of ['2402', 'Sample', 'Aylsham', 'e', '', null]) assert.equal(isExact(c, q), false, String(q));
 });
 test('exactKeys skips empty and non-text values', () => {
@@ -25,7 +25,7 @@ test('exactKeys skips empty and non-text values', () => {
 import { jobTitle, recTitle } from '../../src/domain/job-title.js';
 test('jobs are named "number - NAME IN CAPS"', () => {
   assert.equal(jobTitle('1023456', 'Smith kitchen'), '1023456 - SMITH KITCHEN');
-  assert.equal(jobTitle(' 2402318 ', '  sample   customer e '), '2402318 - SAMPLE CUSTOMER E');
+  assert.equal(jobTitle(' 1023421 ', '  sample   customer e '), '1023421 - SAMPLE CUSTOMER E');
   assert.equal(jobTitle('', 'Smith'), 'SMITH');
   assert.equal(jobTitle('1023456', ''), '1023456');
   assert.equal(recTitle({ id: 'L0001', name: 'Sample Customer A' }), 'L0001 - SAMPLE CUSTOMER A');

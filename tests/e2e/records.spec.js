@@ -38,7 +38,7 @@ test('stage path: mark a lead as won through the in-app confirm box', async ({ a
 });
 
 test('contract header shows value, paid and outstanding', async ({ app }) => {
-  await app.openContract('2402318');
+  await app.openContract('1023421');
   const t = await app.text('#mbox .rw-hk');
   expect(t).toMatch(/Value/i);
   expect(t).toMatch(/Paid/i);
@@ -46,7 +46,7 @@ test('contract header shows value, paid and outstanding', async ({ app }) => {
 });
 
 test('finance: make a payment, then remove it', async ({ app }) => {
-  await app.openContract('2402318');
+  await app.openContract('1023421');
   await app.step('finance');
   await app.page.click('.fin-pb');
   await app.page.fill('#ra_amt', '1000');
@@ -60,7 +60,7 @@ test('finance: make a payment, then remove it', async ({ app }) => {
 });
 
 test('fitters 2 to 6 appear in turn and save as one fitter list', async ({ app }) => {
-  await app.openContract('2402318');
+  await app.openContract('1023421');
   await app.step('fitting');
   const vis = () =>
     app.run(() =>
@@ -75,11 +75,11 @@ test('fitters 2 to 6 appear in turn and save as one fitter list', async ({ app }
   expect(await vis()).toBe('111000');
   await app.fillRequired();
   expect(await app.call('recSave', true)).toBe(true);
-  expect(await app.run(() => state.contracts.find((c) => c.id === '2402318').fitter)).toBe('Team A, Fitter B');
+  expect(await app.run(() => state.contracts.find((c) => c.id === '1023421').fitter)).toBe('Team A, Fitter B');
 });
 
 test('a popup opened from a contract returns to it with unsaved typing kept', async ({ app }) => {
-  await app.openContract('2402318');
+  await app.openContract('1023421');
   await app.step('customer');
   await app.run(() => {
     const e = document.querySelector('#f_name');
@@ -93,13 +93,13 @@ test('a popup opened from a contract returns to it with unsaved typing kept', as
       !!document.querySelector('#mbox .stp.wz'),
       document.querySelector('#f_contract').value,
     ])
-  ).toEqual([false, true, '2402318']);
+  ).toEqual([false, true, '1023421']);
   await app.page.keyboard.press('Escape');
   expect(await app.run(() => document.querySelector('#f_name').value)).toBe('Typed But Not Saved');
 });
 
 test('Escape on a record with changes asks before closing', async ({ app }) => {
-  await app.openContract('2402318');
+  await app.openContract('1023421');
   await app.run(() => {
     recordWin.dirty = 1;
   });
@@ -128,10 +128,10 @@ test('list pages: stage filter and year filter', async ({ app }) => {
 });
 
 test('the invoice prints with VAT and balance', async ({ app }) => {
-  const [w] = await Promise.all([app.nextPopup(), app.call('invoicePrint', '2402318')]);
+  const [w] = await Promise.all([app.nextPopup(), app.call('invoicePrint', '1023421')]);
   await w.waitForLoadState();
   const t = await w.evaluate(() => document.body.innerText);
-  expect(t).toContain('INV-2402318');
+  expect(t).toContain('INV-1023421');
   expect(t).toMatch(/VAT at 20%/);
   expect(t).toContain('£6,594.00');
 });

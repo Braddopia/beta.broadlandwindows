@@ -31,27 +31,27 @@ test('Ctrl+K opens the big box; typed payment command offers the action', async 
   await app.page.keyboard.press('Control+KeyK');
   await expect(app.page.locator('#cmdk')).toHaveClass(/open/);
   await expect(app.page.locator('#cq')).toBeFocused();
-  await app.page.keyboard.type('pay 100 2402318');
-  await expect(app.page.locator('#cres')).toContainText('Record £100.00 Payment On 2402318');
+  await app.page.keyboard.type('pay 100 1023421');
+  await expect(app.page.locator('#cres')).toContainText('Record £100.00 Payment On 1023421');
 });
 
 test('search finds a contract by number and a lead by name', async ({ app }) => {
   const r = await app.run(() => {
-    const b = srchBuild('2402318', true).html + srchBuild('Sample Customer A', true).html;
-    return [b.includes('2402318'), b.includes('Sample Customer A')];
+    const b = srchBuild('1023421', true).html + srchBuild('Sample Customer A', true).html;
+    return [b.includes('1023421'), b.includes('Sample Customer A')];
   });
   expect(r).toEqual([true, true]);
 });
 
 test('note typed in search keeps its capitals', async ({ app }) => {
-  const html = await app.run(() => srchBuild('note 2402318 Rang Mrs Smith', true).html);
+  const html = await app.run(() => srchBuild('note 1023421 Rang Mrs Smith', true).html);
   expect(html).toContain('Rang Mrs Smith');
 });
 
 test('an exact number, name or phone is highlighted first, for every kind of record', async ({ app }) => {
   await app.role('beta');
   for (const [page, q, label] of [
-    ['contracts', '2402305', 'Sample Customer J'],
+    ['contracts', '1023415', 'Sample Customer J'],
     ['leads', 'L0003', 'Sample Customer C'],
     ['leads', '01632 963 882', 'Sample Customer C'],
     ['service', 'S-0871', 'Sample Customer I'],

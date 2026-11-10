@@ -48,7 +48,7 @@ export const emerList = (p) =>
 export const emerRows = (L) =>
   L.map(
     (e, i) =>
-      `<div class="emr"><b>Person ${i + 1}</b><input id="pe_n${i}" maxlength="60" placeholder="Name" aria-label="Name" value="${esc(e.n || '')}"><input id="pe_r${i}" maxlength="40" placeholder="Relationship, e.g. partner" aria-label="Relationship" value="${esc(e.r || '')}"><input id="pe_t${i}" type="tel" maxlength="30" placeholder="Phone number" aria-label="Phone number" value="${esc(e.t || '')}"></div>`
+      `<div class="emr"><b>Person ${i + 1}</b><input id="pe_n${i}" maxlength="60" placeholder="Name" aria-label="Name" value="${esc(e.n || '')}"><input id="pe_r${i}" maxlength="40" placeholder="Relationship" aria-label="Relationship" value="${esc(e.r || '')}"><input id="pe_t${i}" type="tel" maxlength="30" placeholder="Phone number" aria-label="Phone number" value="${esc(e.t || '')}"></div>`
   ).join('');
 export function emerRead() {
   const n = +(($('#p_en') || {}).value || 0),
