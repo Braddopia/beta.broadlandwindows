@@ -25,6 +25,7 @@ const test = base.extend({
     await page.addInitScript(() => {
       try {
         localStorage.setItem('bb_tour_seen', '1');
+        localStorage.setItem('bb_preview_seen', '1'); // the Work In Progress notice has its own test
       } catch (e) {}
       let seed = 42;
       Math.random = () => (seed = (seed * 16807) % 2147483647) / 2147483647;

@@ -74,6 +74,7 @@ import * as featuresRecordsNotes from './features/records/notes.js';
 import * as featuresRecordsPhotosDocs from './features/records/photos-docs.js';
 import * as featuresRecordsProducts from './features/records/products.js';
 import * as featuresRecordsRecordWindow from './features/records/record-window.js';
+import * as featuresRecordsPreviewNotice from './features/records/preview-notice.js';
 import * as featuresRecordsStages from './features/records/stages.js';
 import * as featuresRecordsSurvey from './features/records/survey.js';
 import * as featuresReportsMore from './features/reports/more.js';
@@ -193,6 +194,7 @@ const modules = {
   featuresRecordsPhotosDocs,
   featuresRecordsProducts,
   featuresRecordsRecordWindow,
+  featuresRecordsPreviewNotice,
   featuresRecordsStages,
   featuresRecordsSurvey,
   featuresReportsMore,

@@ -486,3 +486,17 @@ body[data-view=messages] #rpb{bottom:calc(5.2rem + var(--safe-b,0px))}
 /* while a popup is open: the report button is just the flag, lifted above the popup's button row */
 body:has(#modal.open) #rpb{width:2.4rem;padding:0;justify-content:center;bottom:calc(5.4rem + var(--safe-b,0px))}
 body:has(#modal.open) #rpb span{display:none}
+/* "Work In Progress" notice over the lead and contract windows: solid, centred, must be closed */
+#pvn{position:fixed;inset:0;z-index:1100;display:grid;place-items:center;padding:1rem;background:rgba(1,20,45,.55);opacity:0;transition:opacity .18s}
+#pvn.on{opacity:1}
+.pvn-b{width:min(26rem,100%);padding:1.6rem 1.5rem 1.2rem;border-radius:14px;background:var(--card);color:var(--ink);border:1px solid var(--line);box-shadow:0 24px 60px -20px rgba(0,0,0,.6);text-align:center;transform:translateY(8px) scale(.98);transition:transform .2s}
+#pvn.on .pvn-b{transform:none}
+.pvn-i{width:3.2rem;height:3.2rem;margin:0 auto .7rem;border-radius:50%;display:grid;place-items:center;background:rgba(232,160,0,.16);color:#d18b00}
+.pvn-i svg{width:1.7rem;height:1.7rem;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.pvn-b h2{margin:0 0 .5rem;font-size:1.25rem}
+.pvn-b p{margin:0 0 .8rem;color:var(--muted);line-height:1.45}
+.pvn-b ul{margin:0 0 1rem;padding:.7rem .9rem .7rem 1.9rem;text-align:left;border-radius:10px;background:rgba(127,140,160,.08);font-size:.88rem;line-height:1.5}
+.pvn-b .cbl{justify-content:center;font-size:.85rem;color:var(--muted)}
+.pvn-a{display:flex;justify-content:center;margin-top:1rem}.pvn-a .btn{min-width:9rem;justify-content:center}
+@media(prefers-reduced-motion:reduce){#pvn,.pvn-b{transition:none}}
+#pvnOk:focus-visible{outline:2px solid #5ab8ff;outline-offset:2px}

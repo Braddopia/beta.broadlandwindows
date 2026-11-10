@@ -1,5 +1,6 @@
 /* features/contracts/contracts: The Contracts page, new contract wizard and contract actions. */
 import { company } from '../../data/company.js';
+import { previewNotice } from '../records/preview-notice.js';
 import { CSTAGES, CTYPES, SOURCES } from '../../config/constants.js';
 import { onClick } from '../../core/actions.js';
 import { fd, iso, today, weekRange } from '../../core/dates.js';
@@ -70,6 +71,7 @@ export function contractWizard() {
     toast('Your account cannot create contracts');
     return;
   }
+  setTimeout(() => previewNotice('contract'), 120);
   const nx = nid('C', state.contracts);
   wizard({
     title: 'New Contract ' + nx,
