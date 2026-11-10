@@ -65,11 +65,14 @@ body[data-theme=dark] .adminbar{background:rgba(255,208,2,.16);color:#ffe27a}
 .secbar.on{display:block}
 
 /* ---- splash, scrim, toast ---- */
-/* start-up: the stork glides in, then sweeps past the screen and the app shows behind it */
-#splash{position:fixed;inset:0;z-index:5000;overflow:hidden;pointer-events:none;background:radial-gradient(circle at 50% 46%,#034ea2,#012b59 70%);animation:spOut .45s 1.85s ease-in forwards}
-#splash .sp-glow{position:absolute;left:50%;top:46%;width:min(560px,90vw);aspect-ratio:1;border-radius:50%;transform:translate(-50%,-50%);background:radial-gradient(circle,rgba(127,192,255,.32),rgba(127,192,255,0) 65%);animation:spGlow 1.9s ease-out both}
-#splash .sp-fly{position:absolute;left:50%;top:46%;width:min(420px,72vw);margin-left:calc(min(420px,72vw)/-2);margin-top:calc(min(420px,72vw)*-.3125);transform-origin:55% 72%;animation:spFly 2.15s cubic-bezier(.45,.05,.55,.95) both;will-change:transform}
-#splash .sp-bird{display:block;width:100%;height:auto;overflow:visible;transform-origin:55% 70%;filter:drop-shadow(0 10px 28px rgba(0,0,0,.35));animation:spFlap .42s ease-in-out 3 alternate both}
+/* start-up: the stork draws itself in a thin line of light, fills in, then the logo shows under it */
+#splash{position:fixed;inset:0;z-index:5000;overflow:hidden;pointer-events:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.6rem;background:radial-gradient(circle at 50% 44%,#034ea2,#012b59 70%);animation:spOut .55s 2.75s ease-in forwards}
+#splash .sp-glow{position:absolute;left:50%;top:44%;width:min(620px,95vw);aspect-ratio:1;border-radius:50%;transform:translate(-50%,-50%);background:radial-gradient(circle,rgba(127,192,255,.28),rgba(127,192,255,0) 65%);animation:spGlow 2.4s ease-out both}
+#splash .sp-fly{position:relative;width:min(360px,64vw);animation:spRise 3.3s ease-out both}
+#splash .sp-bird{display:block;width:100%;height:auto;overflow:visible}
+#splash .sp-line{fill:none;stroke:#e6f2ff;stroke-width:3;stroke-linejoin:round;stroke-dasharray:1;stroke-dashoffset:1;filter:drop-shadow(0 0 6px rgba(160,210,255,.9));animation:spDraw 1.5s .15s cubic-bezier(.55,.1,.35,1) forwards,spLineOut .5s 1.55s ease forwards}
+#splash .sp-fill{opacity:0;filter:drop-shadow(0 12px 30px rgba(0,0,0,.35));animation:spFillIn .7s 1.25s ease forwards}
+#splash .sp-logo{position:relative;width:min(300px,62vw);opacity:0;animation:spLogoIn .6s 1.75s ease-out forwards}
 .scrim{display:none;position:fixed;inset:0;z-index:65;background:rgba(0,0,0,.45)}
 .toast{position:fixed;left:50%;bottom:calc(1.2rem + var(--safe-b));transform:translateX(-50%);z-index:300;display:none;max-width:calc(100vw - 2rem);padding:.65rem 1.1rem;border-radius:10px;border-left:4px solid var(--yellow);background:#012b59;color:#fff;animation:tin .3s}
 
