@@ -28,6 +28,7 @@ import { ncCount, ncDraw } from '../../features/notifications/notifications.js';
 import { vReports } from '../../features/reports/reports.js';
 import { sbSync, srchMatch, srchText } from '../../features/search/search.js';
 import { vService } from '../../features/service/service.js';
+import { vCutting } from '../../features/cutting/cutting.js';
 import { vSettings } from '../../features/settings/settings.js';
 import { vStaff } from '../../features/staff/staff.js';
 import { vStock } from '../../features/stock/stock.js';
@@ -54,6 +55,7 @@ export const VIEWS = {
   contracts: { t: 'Contracts', fn: vContracts },
   fitting: { t: 'Calendar', fn: vCalendar },
   service: { t: 'Service Calls', fn: vService },
+  cutting: { t: 'Panel Optimiser', fn: vCutting },
   stock: { t: 'Inventory', fn: vStock },
   contacts: { t: 'Contact Book', fn: vContacts },
   staff: { t: 'Staff', fn: vStaff },
@@ -68,7 +70,7 @@ export const NG = [
   ['Workspace', ['home', 'messages', 'fitting', 'contacts']],
   ['Sales', ['leads', 'contracts']],
   ['Operations', ['live', 'deliveries', 'service']],
-  ['Stock', ['stock', 'suppliers']],
+  ['Stock', ['stock', 'suppliers', 'cutting']],
   ['People', ['staff', 'holidays']],
   ['Insights', ['reports', 'downloads']],
   ['Admin', ['finance', 'admin', 'settings']],

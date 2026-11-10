@@ -497,3 +497,45 @@ body[data-theme=dark] .hring b,body[data-theme=dark] .hring small{color:#7fb6ff}
 .hprevl{display:flex;flex-direction:column;gap:.25rem}
 .hsvc{margin:.5rem 0 0;padding-top:.5rem;border-top:1px solid var(--line);font-size:.78rem;color:var(--muted)}
 @media(max-width:480px){.hol2{grid-template-columns:1fr;justify-items:center}.hlist{width:100%}.hrow{flex-wrap:wrap}}
+/* service-call map: Norfolk outline with a pin per town, and the town's calls beside it */
+.smap{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(16rem,1fr);gap:1rem;align-items:start}
+.smap-m svg{display:block;width:100%;height:auto}
+.smap .land{fill:rgba(3,78,162,.07);stroke:#2b6cb0;stroke-width:2.5;stroke-linejoin:round}
+body[data-theme=dark] .smap .land{fill:rgba(120,170,255,.08);stroke:#6ea3e8}
+.smap .sea{font:italic 600 18px var(--body);fill:var(--muted);opacity:.7}
+.smap .tl{font:600 15px var(--body);fill:var(--ink);text-anchor:middle;paint-order:stroke;stroke:var(--card);stroke-width:4px;pointer-events:none}
+.pin{cursor:pointer}.pin circle{stroke:#fff;stroke-width:3;transition:transform .15s}
+.pin:hover circle,.pin.on circle,.pin:focus-visible circle{transform:scale(1.15);stroke:#ffd002;stroke-width:4}
+.pin:focus{outline:none}
+.pin text{font:700 15px var(--body);fill:#fff;text-anchor:middle;pointer-events:none}
+.pin.u circle,.dot.u,.smap-key .u{fill:#d43c3c;background:#d43c3c}
+.pin.o circle,.dot.o,.smap-key .o{fill:#e08a00;background:#e08a00}
+.pin.b circle,.dot.b,.smap-key .b{fill:#2b8fe0;background:#2b8fe0}
+.pin.d circle,.dot.d,.smap-key .d{fill:#8a97a8;background:#8a97a8}
+.smap-key{display:flex;flex-wrap:wrap;gap:.4rem 1rem;margin-top:.6rem;font-size:.78rem}
+.smap-key span{display:inline-flex;align-items:center;gap:.35rem}.smap-key i,.dot{display:inline-block;width:.7rem;height:.7rem;border-radius:50%}
+.smap-l h2{display:flex;justify-content:space-between;align-items:center}
+.smap-t{width:100%;border:0;background:none;color:inherit;font:inherit;text-align:left;cursor:pointer;border-radius:8px;padding:.5rem .4rem}
+.smap-t:hover{background:var(--blue-bg)}.smap-t .dot{margin-right:.5rem}
+.smap-off{margin-top:.8rem;font-size:.85rem}.smap-off summary{cursor:pointer;color:var(--muted)}
+@media(max-width:900px){.smap{grid-template-columns:1fr}}
+/* Panel Optimiser: lists on the left, the plan on the right; boards drawn to scale */
+.cut{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);gap:1rem;align-items:start}
+.cut-in{display:grid;gap:1rem}.cut-out{display:grid;gap:1rem}
+.cut-t td{padding:.3rem .35rem}.cut-t input,.cut-t select{width:100%;min-width:4.5rem;padding:.4rem .5rem;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);font:inherit}
+.cut-t td:first-child input{min-width:8rem}
+.cut-t+.mini{margin-top:.6rem}
+.cut-o .grid{display:grid;grid-template-columns:1fr 1fr;gap:.8rem}
+.cut-o input{width:100%;padding:.5rem .6rem;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);font:inherit}
+.cut-out .kpis{grid-template-columns:repeat(4,minmax(0,1fr))}
+.cut-bp h2{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:.3rem}
+.cut-b{display:block;width:100%;height:auto;max-height:70vh}
+.cut-b .bd{fill:rgba(127,140,160,.1);stroke:var(--ink);stroke-width:3}
+.cut-b rect{stroke-width:2}
+.cut-b text{text-anchor:middle;dominant-baseline:middle;fill:#13233a;font-family:var(--body);font-weight:700;pointer-events:none}
+.cut-b text.sz{font-weight:500}
+.cut-by{margin:-.4rem 0 0}
+.note.bad{padding:.7rem .9rem;border-radius:10px;background:var(--red-bg);color:var(--red);font-size:.88rem}
+@media(max-width:1100px){.cut{grid-template-columns:1fr}}
+@media(max-width:560px){.cut-out .kpis{grid-template-columns:1fr 1fr}.cut-o .grid{grid-template-columns:1fr}}
+.cut-in .panel h2{display:flex;justify-content:space-between;align-items:baseline}.cut-in .panel h2 small{font-weight:400;font-size:.78rem}

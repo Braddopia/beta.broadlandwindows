@@ -76,6 +76,16 @@ core/  config/  generic helpers and fixed settings
 - On list pages, `features/search/exact-rows.js` moves the exactly matching row to the top, marks it
   and scrolls to it after each draw. Inventory does the same itself.
 
+## Service map and Panel Optimiser
+
+- The Service Calls map (`svcMap` in `features/service/service.js`) draws an approximate Norfolk
+  outline and puts a pin per town from the list in `domain/places.js`. Nothing is looked up online;
+  a town not in the list is shown under the map as "not on the map". Add towns to `TOWNS` (or a
+  spelling to `ALIAS`).
+- The Panel Optimiser (`features/cutting/cutting.js`) plans board cutting with `domain/cutlist.js`
+  (maximal-rectangles placement, saw kerf and edge trim, grain lock per piece). The current list and
+  saved lists are kept in `state.cut`.
+
 ## Adding a page
 
 1. Make `src/features/<area>/<area>.js` with a `v<Area>()` function that returns the page HTML.

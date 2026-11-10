@@ -11,6 +11,8 @@ import { addrOf, mailOf, telOf } from '../../domain/customers.js';
 import { nid } from '../../domain/numbering.js';
 import { FITL, staffNames } from '../../domain/people.js';
 import { SVCV, svcOpen } from '../../domain/service.js';
+import { MAP_H, MAP_W, groupByTown, outlinePath } from '../../domain/places.js';
+import { html, raw } from '../../core/html.js';
 import { can } from '../../domain/permissions.js';
 import { R } from '../reports/reports.js';
 import { docChoice, printDoc } from '../../print/print.js';
@@ -18,7 +20,7 @@ import { pagerH, paginate } from '../../ui/components/table.js';
 import { prTag, svcTag } from '../../ui/components/tags.js';
 import { drawThumbs, phCount, setPhotoList, tmp } from '../../ui/forms/photos.js';
 import { wizard } from '../../ui/forms/wizard.js';
-import { hit } from '../../ui/shell/router.js';
+import { hit, render } from '../../ui/shell/router.js';
 import { toast } from '../../ui/toast.js';
 import { uiState } from '../../ui/ui-state.js';
 import * as repos from '../../data/repository.js';
@@ -51,11 +53,15 @@ export function vService() {
   const k = (t, n, key, cls) =>
     `<button class="kpi ${cls || ''}" ${onClick('setUI', 'svc.f', key)}><small>${t}</small><b>${n}</b></button>`;
   return `<div class="head"><div><h1>Service Calls</h1><span class="muted">${esc((V.find((x) => x[0] == U.f) || V[0])[1])}: ${L.length}</span></div><div class="tools"><button class="mini" ${onClick('svcDaySheet', td)}>Today's Day Sheet</button><button class="mini" data-act="svcReport">Service Report</button><button class="btn" data-act="editCall">New Service Call</button></div></div>
-  <div class="subbar"><span class="sb-l">Show</span><div class="views">${V.map(([key, n, fn]) => `<button class="chip ${U.f == key ? 'on' : ''}" ${onClick('setUI', 'svc.f', key)}>${esc(n)} <i>${state.calls.filter(fn).length}</i></button>`).join('')}</div></div>
+  <div class="subbar"><span class="sb-l">Show</span><div class="views">${V.map(([key, n, fn]) => `<button class="chip ${U.f == key ? 'on' : ''}" ${onClick('setUI', 'svc.f', key)}>${esc(n)} <i>${state.calls.filter(fn).length}</i></button>`).join('')}</div><span class="sb-sp"></span><div class="seg2"><button class="${U.mode != 'map' ? 'on' : ''}" ${onClick('setUI', 'svc.mode', 'list')}>List</button><button class="${U.mode == 'map' ? 'on' : ''}" ${onClick('setUI', 'svc.mode', 'map')}>Map</button></div></div>
   <div class="kpis">${k('Open Calls', O.length, 'open')}${k('Urgent', O.filter((c) => c.priority == 'Urgent').length, 'urgent', O.some((c) => c.priority == 'Urgent') ? 'bad' : '')}${k('Visits Today', O.filter((c) => c.visit == td).length, 'today')}${k('Awaiting Parts', O.filter((c) => c.status == 'Awaiting parts').length, 'parts')}${k('Not Booked Yet', O.filter((c) => !c.visit).length, 'nobook', O.some((c) => !c.visit) ? 'warn' : '')}${k('Overdue Visits', O.filter((c) => c.visit && c.visit < td).length, 'open', O.some((c) => c.visit && c.visit < td) ? 'bad' : '')}</div>
-  <div class="tw"><table class="ptb abt"><thead><tr><th>Ref</th><th>Customer</th><th>Problem</th><th>Priority</th><th>Status</th><th class="c-sm">Visit</th><th class="c-md">Engineer</th><th class="ac"></th></tr></thead><tbody>
+  ${
+    U.mode == 'map'
+      ? svcMap(L0)
+      : `<div class="tw"><table class="ptb abt"><thead><tr><th>Ref</th><th>Customer</th><th>Problem</th><th>Priority</th><th>Status</th><th class="c-sm">Visit</th><th class="c-md">Engineer</th><th class="ac"></th></tr></thead><tbody>
   ${pg.rows.map((c) => `<tr class="clk-r" ${rowClick('editCall', c.id)}><td><b class="lref">${esc(c.id)}</b>${c.contract ? `<small class="sub">${esc(c.contract)}</small>` : ''}</td><td><b>${esc(c.name)}</b><small class="sub">${esc([c.town, c.phone].filter(Boolean).join(' · '))}</small>${svcBal(c)}</td><td><span class="cl2">${esc(c.issue)}</span><small class="sub">${esc(c.cat || '')}${c.cat && c.photos && c.photos.length ? ' · ' : ''}${phCount(c.photos)}</small></td><td>${prTag(c.priority)}</td><td>${svcTag(c.status)}</td><td class="c-sm">${c.visit ? `<b class="${svcOpen(c) && c.visit < td ? 'od' : ''}">${fd(c.visit)}</b>${c.visitTime ? `<small class="sub">${esc(c.visitTime)}</small>` : ''}` : '<span class="muted">Not booked</span>'}</td><td class="c-md">${esc(c.fitter || '-')}</td><td class="ac"><div class="acts r"><button class="mini" ${onClick('reportCall', c.id)}>Report</button>${can('manage') ? `<button class="mini del" ${onClick('del', 'calls', c.id)}>Delete</button>` : ''}</div></td></tr>`).join('') || '<tr><td colspan="8" class="empty">No service calls here.</td></tr>'}
-  </tbody></table></div>${pagerH('svc', pg, 'calls')}`;
+  </tbody></table></div>${pagerH('svc', pg, 'calls')}`
+  }`;
 }
 /* the call sheet: who rang, what is wrong, who is going, what was done */
 export const SVCF = () => [
@@ -403,4 +409,70 @@ export function svcReport() {
     [],
     { kind: 'Report', sections: [d] }
   );
+}
+
+/* ---- the map: an outline of Norfolk with a pin per town (approximate, drawn here: nothing is looked up
+   online). The pin's size is the number of calls; its colour the most pressing one. Click a pin to list
+   that town's calls under the map. ---- */
+const pinCol = (L) =>
+  L.some((c) => svcOpen(c) && c.priority == 'Urgent')
+    ? 'u'
+    : L.some((c) => svcOpen(c) && !c.visit)
+      ? 'o'
+      : L.some(svcOpen)
+        ? 'b'
+        : 'd';
+export function svcMap(L) {
+  const U = uiState.svc,
+    { towns, off } = groupByTown(L, (c) => c.town),
+    sel = towns.find((t) => t.key == U.town),
+    list = sel ? sel.items : [],
+    pins = towns
+      .slice()
+      .reverse()
+      .map((t) => {
+        const n = t.items.length,
+          r = Math.min(30, 9 + Math.sqrt(n) * 5);
+        return html`<g class="pin ${pinCol(t.items)} ${t.key == U.town ? 'on' : ''}" transform="translate(${t.x} ${t.y})" ${raw(onClick('svcTown', t.key))} role="button" tabindex="0" aria-label="${t.name}: ${n} call${n == 1 ? '' : 's'}"><circle r="${r}"/>${n > 1 ? html`<text dy="5">${n}</text>` : ''}<title>${t.name}: ${n} call${n == 1 ? '' : 's'}</title></g>`;
+      }),
+    labels = towns
+      .slice(0, 12)
+      .map(
+        (t) =>
+          html`<text class="tl" x="${t.x}" y="${t.y + Math.min(30, 9 + Math.sqrt(t.items.length) * 5) + 22}">${t.name}</text>`
+      );
+  const row = (c) =>
+    html`<div class="row clk-r" ${raw(rowClick('editCall', c.id))}><span><b>${c.id}</b> ${c.name}<br><span class="muted">${c.issue || ''}</span></span><span class="acts">${raw(prTag(c.priority))}${raw(svcTag(c.status))}${c.visit ? html`<span class="tag">${fd(c.visit)}</span>` : ''}</span></div>`;
+  return String(html`<div class="smap">
+    <div class="panel smap-m">
+      <svg viewBox="-20 -20 ${MAP_W + 40} ${MAP_H + 40}" role="img" aria-label="Map of Norfolk with service calls by town">
+        <path class="land" d="${outlinePath()}"/>
+        <text class="sea" x="${MAP_W - 70}" y="120">North Sea</text><text class="sea" x="40" y="60">The Wash</text>
+        ${labels}${pins}
+      </svg>
+      <div class="smap-key"><span><i class="u"></i>Urgent</span><span><i class="o"></i>Not booked</span><span><i class="b"></i>Booked</span><span><i class="d"></i>Complete</span><span class="muted">Approximate, by town</span></div>
+    </div>
+    <div class="panel smap-l">
+      <h2><span>${sel ? sel.name : 'Towns'}</span>${sel ? html`<button class="mini" ${raw(onClick('svcTown', ''))}>All Towns</button>` : ''}</h2>
+      ${
+        sel
+          ? list.map(row)
+          : towns.length
+            ? towns.map(
+                (t) =>
+                  html`<button type="button" class="row smap-t" ${raw(onClick('svcTown', t.key))}><span><i class="dot ${pinCol(t.items)}"></i>${t.name}</span><b>${t.items.length}</b></button>`
+              )
+            : html`<p class="empty">No calls to show.</p>`
+      }
+      ${
+        off.length
+          ? html`<details class="smap-off"><summary>${off.length} not on the map (town missing or not known)</summary>${off.map(row)}</details>`
+          : ''
+      }
+    </div>
+  </div>`);
+}
+export function svcTown(k) {
+  uiState.svc.town = k || '';
+  render(true);
 }

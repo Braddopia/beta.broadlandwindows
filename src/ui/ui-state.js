@@ -7,7 +7,7 @@ import { render } from './shell/router.js';
    ========================================================================== */
 /* All page-level UI state lives here (instead of a dozen loose globals) */
 export const uiState = {
-  svc: { f: 'open', page: 1, per: 50 },
+  svc: { f: 'open', page: 1, per: 50, mode: 'list', town: '' },
   inv: {
     v: 'products',
     f: 'all',

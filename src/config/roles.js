@@ -5,7 +5,7 @@
    NOTE: this app runs entirely in the browser. These checks stop casual
    access and accidents; real protection of the data needs a server.
    ========================================================================== */
-export const FOCUS = ['home', 'messages', 'live', 'deliveries', 'stock', 'suppliers', 'downloads', 'settings'];
+export const FOCUS = ['home', 'messages', 'live', 'deliveries', 'stock', 'suppliers', 'cutting', 'downloads', 'settings'];
 export const ROLES = {
   admin: {
     n: 'Administrator',
