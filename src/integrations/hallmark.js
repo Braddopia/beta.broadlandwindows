@@ -4,7 +4,6 @@ import { $, esc } from '../core/dom.js';
 import { SAFE } from '../data/sanitize.js';
 import { store } from '../data/persistence.js';
 import { state } from '../data/state.js';
-import { sups } from '../features/suppliers/suppliers.js';
 import { closeModal, openModal } from '../ui/modal.js';
 import { render } from '../ui/shell/router.js';
 import { toast } from '../ui/toast.js';
@@ -14,7 +13,7 @@ import { toast } from '../ui/toast.js';
         Hallmark feed, Smart Orders import
    ========================================================================== */
 export const HM_URL = '';
-export const hmS = () => sups().find((x) => x.hm) || { name: 'Hallmark', url: HM_URL };
+export const hmS = () => state.suppliers.find((x) => x.hm) || { name: 'Hallmark', url: HM_URL };
 /* ---------------- Hallmark feed ---------------- */
 export const HMSNAP = [];
 /* no sample orders in the public build */

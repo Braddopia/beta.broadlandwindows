@@ -47,3 +47,27 @@ test('note typed in search keeps its capitals', async ({ app }) => {
   const html = await app.run(() => srchBuild('note 2402318 Rang Mrs Smith', true).html);
   expect(html).toContain('Rang Mrs Smith');
 });
+
+test('an exact number, name or phone is highlighted first, for every kind of record', async ({ app }) => {
+  await app.role('beta');
+  for (const [page, q, label] of [
+    ['contracts', '2402305', 'Sample Customer J'],
+    ['leads', 'L0003', 'Sample Customer C'],
+    ['leads', '01632 963 882', 'Sample Customer C'],
+    ['service', 'S-0871', 'Sample Customer I'],
+  ]) {
+    await app.go(page);
+    await app.page.fill('#sb input', q);
+    const first = app.page.locator('#sres .sri').first();
+    await expect(first, q).toHaveClass(/sri-x/);
+    await expect(first, q).toContainText(label);
+    const row = app.page.locator('#main .clk-r.xhit');
+    await expect(row, q).toHaveCount(1);
+    await expect(row, q).toContainText('Exact Match');
+    await expect(app.page.locator('#main .clk-r').first(), q).toHaveClass(/xhit/);
+    await app.page.fill('#sb input', '');
+  }
+  // part of a name is not exact
+  await app.page.fill('#sb input', 'Sample');
+  await expect(app.page.locator('#sres .sri-x')).toHaveCount(0);
+});

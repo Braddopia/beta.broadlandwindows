@@ -6,7 +6,6 @@ import { audit } from '../data/audit.js';
 import { store } from '../data/persistence.js';
 import { state } from '../data/state.js';
 import { ORDDONE } from '../domain/deliveries.js';
-import { sups } from '../features/suppliers/suppliers.js';
 import { askYes, closeModal, openModal } from '../ui/modal.js';
 import { render } from '../ui/shell/router.js';
 import { toast } from '../ui/toast.js';
@@ -113,7 +112,7 @@ export function ordNext() {
       ''
     );
   openModal(
-    `<h2>Check The Columns</h2><div class="grid">${OF.map(([k, l]) => `<div class="ff"><label>${l}</label><select id="om_${k}" data-onchange="ordPrev">${opt(pick(k))}</select></div>`).join('')}<div class="ff full"><label>Supplier for all orders (when no supplier column)</label><select id="om_dsup" data-onchange="ordPrev">${sups()
+    `<h2>Check The Columns</h2><div class="grid">${OF.map(([k, l]) => `<div class="ff"><label>${l}</label><select id="om_${k}" data-onchange="ordPrev">${opt(pick(k))}</select></div>`).join('')}<div class="ff full"><label>Supplier for all orders (when no supplier column)</label><select id="om_dsup" data-onchange="ordPrev">${state.suppliers
       .map((x) => `<option${/smart/i.test(x.name) ? ' selected' : ''}>${esc(x.name)}</option>`)
       .join(
         ''

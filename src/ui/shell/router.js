@@ -1,5 +1,6 @@
 /* ui/shell/router: The pages, the side menu and drawing the current page. */
 import { ROLES } from '../../config/roles.js';
+import { markExact } from '../../features/search/exact-rows.js';
 import { previewNotice } from '../../features/records/preview-notice.js';
 import { onClick } from '../../core/actions.js';
 import { $, $$, esc } from '../../core/dom.js';
@@ -167,6 +168,7 @@ export function render(soft) {
   } catch (e) {
     console.error(e);
   }
+  markExact(view, q);
 }
 /* ---- sidebar footer, top bar, bell ---- */
 export function shellSync() {

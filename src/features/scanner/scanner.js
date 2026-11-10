@@ -3,6 +3,7 @@ import { $ } from '../../core/dom.js';
 import { SAFE } from '../../data/sanitize.js';
 import { audit } from '../../data/audit.js';
 import { store } from '../../data/persistence.js';
+import { plugInForms } from '../../ui/forms/form.js';
 
 /* ==========================================================================
    10 · Barcode scanner (camera via BarcodeDetector, ZXing fallback)
@@ -25,6 +26,10 @@ export function loadZX() {
     s.onerror = no;
     document.head.appendChild(s);
   });
+}
+/* start-up step (run once by main.js): the Scan button beside form boxes */
+export function plugScannerIn() {
+  plugInForms({ scan });
 }
 export async function scan(cb) {
   scanCb = cb;

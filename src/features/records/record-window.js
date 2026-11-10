@@ -18,9 +18,9 @@ import { readLines } from './products.js';
 import { stgDraw } from './stages.js';
 import { readOps } from './survey.js';
 import { editCall } from '../service/service.js';
-import { MARK, fieldErr, readFields } from '../../ui/forms/form.js';
+import { MARK, fieldErr, plugInForms, readFields } from '../../ui/forms/form.js';
 import { drawThumbs, setPhotoList, tmp } from '../../ui/forms/photos.js';
-import { closeModal, openModal } from '../../ui/modal.js';
+import { closeModal, openModal, plugInRecordWindow } from '../../ui/modal.js';
 import { render } from '../../ui/shell/router.js';
 import { busyBtn, toast } from '../../ui/toast.js';
 
@@ -473,6 +473,11 @@ export function recCall() {
 export function recDelivery() {
   if (recordWin.isNew && !recSave(false)) return;
   editDel(null, null, recordWin.id);
+}
+/* start-up step (run once by main.js): popups and forms hand back to this window */
+export function plugRecordWindowIn() {
+  plugInRecordWindow({ get: () => recordWin, set: setRecordWin, back: recReturn });
+  plugInForms({ showStep: recTab });
 }
 export function recReturn() {
   if (!recordWin) return;

@@ -20,6 +20,7 @@ import { go, hit, render } from '../../ui/shell/router.js';
 import { toast } from '../../ui/toast.js';
 import { uiState } from '../../ui/ui-state.js';
 import * as repos from '../../data/repository.js';
+import { plugInForms } from '../../ui/forms/form.js';
 
 export const sups = () => state.suppliers;
 export const SUPN = (cur) => ['', ...new Set([...sups().map((x) => x.name), cur || ''].filter(Boolean))];
@@ -251,6 +252,10 @@ export function contactFromSup(oldName, s) {
 }
 /* a new supplier is a contact book company too: with none to pick, the contact form opens first and then carries on here */
 export const NEWCO = '+ Add a new company';
+/* start-up step (run once by main.js): "+ Add a new company" in any supplier list */
+export function plugSuppliersIn() {
+  plugInForms({ newCompany: { value: NEWCO, open: supNewCo } });
+}
 export function supNewCo() {
   editContact(null, { type: 'Supplier', phones: [] }, (co) => editSup(null, co));
 }

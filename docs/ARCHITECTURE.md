@@ -6,7 +6,7 @@ for each script. Nothing else is loaded except the optional sign-in and scanner 
 
 ## Layers
 
-Imports only point down. ESLint enforces this for the bottom four layers.
+Imports only point down. ESLint enforces this for every layer below `features/`.
 
 ```
 start/          start-up data updates (migrations) and the first draw        may import anything
@@ -18,8 +18,11 @@ core/  config/  generic helpers and fixed settings
 ```
 
 - **`ui/shell/`** (router and shell) is the app shell: it lists the pages, so it is the one part of
-  `ui/` that imports from `features/`. A few `ui/` helpers still call into the record window
-  (`ui/modal.js`, `ui/forms/form.js`); move them up into `features/records/` when next touched.
+  `ui/` that imports from `features/`.
+- **Plug-in points instead of upward imports.** When a shared piece needs a page, the page plugs in
+  at start-up: the record window into popups (`plugInRecordWindow`) and forms (`plugInForms`, to open
+  the step a box is on), the scanner and the supplier list into forms. `main.js` calls each
+  `plug…In()` once.
 - **Lower layers never call the screen.** They `emit()` an event from `core/events.js`
   (`notice`, `data-replaced`, `photos-loaded`) and `ui/shell/data-events.js` decides what to show.
 - **Nothing runs when a module is imported.** Start-up work is an exported function that `main.js`
@@ -62,6 +65,16 @@ core/  config/  generic helpers and fixed settings
   office workbook layout through `core/xlsx.js`: one sheet per area with
   Stock Code | Description | Quantity In Stock | Location | Notes (Value and Cost on the valuation file).
   Stock takes are kept in `state.stakes`; area order in `state.stockAreas`.
+
+## Search and exact matches
+
+- `features/search/search.js` builds the top bar list and the Ctrl+K box from `SRCH` (one entry per
+  kind of record) and `CMDS` (actions).
+- An exact match comes first and is highlighted: a Stock ID, item code or barcode
+  (`domain/stock.js` `exactProduct`), or a record's number, name, company, phone, email or postcode
+  (`domain/exact.js` `isExact`, ignoring spaces, brackets, dots and dashes).
+- On list pages, `features/search/exact-rows.js` moves the exactly matching row to the top, marks it
+  and scrolls to it after each draw. Inventory does the same itself.
 
 ## Adding a page
 

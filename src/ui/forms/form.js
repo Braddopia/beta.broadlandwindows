@@ -8,9 +8,6 @@ import { SAFE } from '../../data/sanitize.js';
 import { store } from '../../data/persistence.js';
 import { OWNERS, RANDOM_SP } from '../../domain/people.js';
 import { can } from '../../domain/permissions.js';
-import { recTab } from '../../features/records/record-window.js';
-import { scan } from '../../features/scanner/scanner.js';
-import { NEWCO, supNewCo } from '../../features/suppliers/suppliers.js';
 import { drawThumbs, setPhotoList, tmp } from './photos.js';
 import { doneIn, openModal } from '../modal.js';
 import { render } from '../shell/router.js';
@@ -75,7 +72,7 @@ export function fieldErr(e, msg) {
     e.addEventListener('change', clr);
   }
   const p = e.closest('.rw-p');
-  if (p && !p.classList.contains('on') && typeof recTab == 'function') recTab(p.dataset.t);
+  if (p && !p.classList.contains('on') && HOOKS.showStep) HOOKS.showStep(p.dataset.t);
   e.focus();
   if (e.scrollIntoView) e.scrollIntoView({ block: 'center' });
 }
@@ -125,13 +122,20 @@ export function readFields(fields) {
   return o;
 }
 export function scanInto(id) {
-  scan((c) => {
+  if (!HOOKS.scan) return;
+  HOOKS.scan((c) => {
     const e = $('#' + id);
     if (e) {
       e.value = c;
       e.dispatchEvent(new Event('input'));
     }
   });
+}
+/* Pages plug in here at start-up, so ui/ never imports a page: the record window (open the step a
+   box is on), the barcode scanner, and the supplier list's "add a new company" choice. */
+const HOOKS = { showStep: null, scan: null, newCompany: null };
+export function plugInForms(h) {
+  Object.assign(HOOKS, h);
 }
 export function fieldH(f, v) {
   const val = v[f.k] ?? '';
@@ -142,8 +146,8 @@ export function fieldH(f, v) {
 export function listenForFormChanges() {
   document.addEventListener('change', (e) => {
     const el = e.target;
-    if (el.tagName == 'SELECT' && typeof NEWCO != 'undefined' && el.value === NEWCO) {
-      supNewCo();
+    if (el.tagName == 'SELECT' && HOOKS.newCompany && el.value === HOOKS.newCompany.value) {
+      HOOKS.newCompany.open();
       return;
     }
     if (el.tagName == 'SELECT' && el.value === RANDOM_SP) {

@@ -242,17 +242,7 @@ body[data-theme=dark] .path li.done button{background:#0f3a29;color:#7fe0aa}
 body[data-theme=dark] .btn.red{background:#c24444}
 /* contract header: outstanding stands out */
 .rw-hk .hk-due b{color:var(--red)}.rw-hk .hk-ok b{color:var(--green)}
-/* list pages: stage as a small bar with its name, all lined up */
-.ptb td.ac .acts.stc{justify-content:flex-start;flex-wrap:nowrap}
 .ptb th.ac{text-align:left}
-.sprog{display:inline-flex;align-items:center;gap:.55rem;min-width:9.5rem;white-space:nowrap}
-.sbar{display:inline-grid;grid-auto-flow:column;grid-auto-columns:9px;gap:3px}
-.sbar i{height:6px;border-radius:3px;background:var(--line)}
-.sbar i.d{background:#33a06f}.sbar i.o{background:#034ea2}
-.sprog b{font-size:.82rem;font-weight:600;color:var(--navy)}
-.sprog.end b{color:var(--green)}.sprog.end .sbar i{background:#33a06f}
-.sprog.lost b{color:var(--red)}.sprog.lost .sbar i{background:var(--red-bg)}
-body[data-theme=dark] .sprog b{color:#d3e3fb}
 /* lead/contract window: glassier, still fully readable (the glass sits on our own tint, not the page) */
 .mb.full:has(.rw){background:linear-gradient(160deg,#f7faff 0%,#eef4fc 45%,#f6f2e6 100%);overflow:hidden}
 .mb.full:has(.rw)::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(40rem 22rem at 8% 0%,rgba(90,160,255,.22),transparent 70%),radial-gradient(34rem 20rem at 100% 100%,rgba(255,208,2,.16),transparent 70%)}
@@ -293,9 +283,6 @@ body[data-theme=dark] .path li.on button{background:#2f6fd0;color:#fff}body[data
 /* rail progress: breathing room */
 .rw-rail .rw-prog{margin:.3rem .35rem 1rem;font-size:.74rem}
 .rw-rail .rw-prog i{margin-top:.5rem;height:6px}
-/* list pages: stage on the left of the cell, buttons pushed to the right */
-.ptb td.ac .acts.stc{justify-content:space-between;gap:1rem;min-width:15rem}
-.ptb td.ac .acts.stc .mini{margin-left:auto}
 
 /* ==== saved tick, photo grid, file rows, phone stock mode, search answers ==== */
 /* success inside the same window */
@@ -306,9 +293,10 @@ body[data-theme=dark] .path li.on button{background:#2f6fd0;color:#fff}body[data
 .dn-svg path{fill:none;stroke:#12794c;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:40;stroke-dashoffset:40;animation:dnc .35s .4s ease-out forwards}
 @keyframes dnc{to{stroke-dashoffset:0}}
 body[data-theme=dark] .dn-svg circle,body[data-theme=dark] .dn-svg path{stroke:#7fe0aa}
-/* photo grid: 2 rows of 4 glass boxes */
-.thumbs.phg{display:grid;grid-template-columns:repeat(4,1fr);gap:.6rem;margin:.3rem 0 .6rem}
-.phb{position:relative;aspect-ratio:1;border-radius:16px;border:1.5px dashed rgba(1,43,89,.18);background:linear-gradient(160deg,rgba(255,255,255,.75),rgba(226,237,250,.45));box-shadow:inset 0 1px 0 #fff;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);overflow:hidden}
+/* photo grid: one row of 8 boxes across the full width (4 a row on phones) */
+.thumbs.phg{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:.5rem;width:100%;margin:.3rem 0 .6rem}
+@media(max-width:700px){.thumbs.phg{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.phb{position:relative;aspect-ratio:1;border-radius:10px;border:1.5px dashed rgba(1,43,89,.18);background:linear-gradient(160deg,rgba(255,255,255,.75),rgba(226,237,250,.45));box-shadow:inset 0 1px 0 #fff;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);overflow:hidden}
 .phb.on{border-style:solid;border-color:rgba(255,255,255,.9);box-shadow:0 8px 20px -14px rgba(1,43,89,.5)}
 .phb.on img{width:100%;height:100%;object-fit:cover;display:block;cursor:zoom-in}
 .phb.on button{position:absolute;top:6px;right:6px;width:1.7rem;height:1.7rem;border-radius:50%;border:0;background:rgba(0,0,0,.55);color:#fff;font-size:1.1rem;line-height:1;cursor:pointer}
@@ -318,8 +306,6 @@ body[data-theme=dark] .phb{background:linear-gradient(160deg,rgba(255,255,255,.0
 @media(max-width:480px){.thumbs.phg{gap:.4rem}.phb{border-radius:12px}}
 
 /* contracts list: stage aligned on the right */
-.ctb th.ac{text-align:right}
-.ctb td.ac .acts.stc{justify-content:flex-end;min-width:12rem}
 .svb{display:inline-block;margin-top:.25rem;font-size:.7rem}
 
 /* files: category and size sit right next to the buttons, every row lined up */
@@ -355,9 +341,6 @@ body[data-view=home] .top .sb:focus-within::before{opacity:.75}body[data-view=ho
 
 /* floor boards: empty-state art sits in the middle of its panel */
 .lvg>.panel>.emp{flex:1;justify-content:center;min-height:6rem}
-.thumbs.phg{grid-template-columns:repeat(8,minmax(0,1fr));gap:.5rem;width:100%}
-@media(max-width:700px){.thumbs.phg{grid-template-columns:repeat(4,minmax(0,1fr))}}
-.phb{border-radius:10px}
 @media(max-width:640px){.rw-foot{flex-wrap:wrap;gap:.5rem}.rw-foot .btn{flex:1 1 auto;min-width:0;white-space:normal;justify-content:center;text-align:center}.rw-foot .rw-sp{display:none}}
 /* ==== inventory: own search, exact match, description and area lines ==== */
 .invbar{display:flex;gap:.6rem;align-items:center;margin:0 0 .8rem}
@@ -392,12 +375,13 @@ body[data-theme=dark] .sri.sri-x{background:rgba(90,170,255,.18)}
 button.brand{width:100%;border:0;background:none;cursor:pointer;color:inherit;font:inherit;border-radius:12px}
 button.brand:hover .lg{opacity:.85}
 button.brand:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
-/* My Holiday: days left is the number everyone wants, so it leads */
-.hl{grid-template-columns:1.6fr 1fr 1fr 1fr;align-items:end}
+/* My Holiday: days left is the number everyone wants, so it leads; the others are centred on it */
+.hl{grid-template-columns:1.6fr 1fr 1fr 1fr;align-items:center}
+.hl>div:not(.big){display:flex;flex-direction:column;justify-content:center;align-items:center}
 .hl .big{padding:.4rem .2rem .3rem;border-radius:12px;background:var(--blue-bg)}
-.hl .big b{font-size:3rem;line-height:1;letter-spacing:-.02em}
+.hl .big b{font-size:2.35rem;line-height:1;letter-spacing:-.02em}
 .hl .big small{font-weight:700;color:var(--blue)}
-@media(max-width:700px){.hl .big{grid-column:1/-1}.hl .big b{font-size:2.6rem}}
+@media(max-width:700px){.hl .big{grid-column:1/-1}.hl .big b{font-size:2.2rem}}
 .hprev{margin-top:.7rem;padding-top:.6rem;border-top:1px solid var(--line)}
 .hprev-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:.2rem;font-size:.86rem}
 .hprev .row{padding:.3rem 0;font-size:.84rem}
@@ -439,11 +423,6 @@ body.tv #rpb,body.signin #rpb{display:none}
 .top .sb:focus-within::before,.top .sb:focus-within::after{animation-duration:5s!important}
 body[data-view=home] .top .sb::before,body[data-view=home] .top .sb::after{background:linear-gradient(90deg,#034ea2,#3d8be0,#5ac8ff,#ffd002,#5ac8ff,#3d8be0,#034ea2)!important;background-size:300% 100%!important}
 @media(prefers-reduced-motion:reduce){.top .sb::before,.top .sb::after,.ck-b::before,.ck-in::after{animation:none!important}}
-/* My Holiday: Days Left a little smaller, the other numbers centred on it */
-.hl{align-items:center}
-.hl .big b{font-size:2.35rem}
-.hl>div:not(.big){display:flex;flex-direction:column;justify-content:center;align-items:center}
-@media(max-width:700px){.hl .big b{font-size:2.2rem}}
 /* Messages: the typing box is focused for you, so no yellow focus ring; a soft blue edge instead */
 .msn-in textarea:focus,.msn-in textarea:focus-visible{outline:none;box-shadow:0 0 0 2px rgba(43,143,224,.45)}
 .msn-send:focus-visible{outline:2px solid #5ab8ff;outline-offset:2px}
@@ -500,3 +479,6 @@ body:has(#modal.open) #rpb span{display:none}
 .pvn-a{display:flex;justify-content:center;margin-top:1rem}.pvn-a .btn{min-width:9rem;justify-content:center}
 @media(prefers-reduced-motion:reduce){#pvn,.pvn-b{transition:none}}
 #pvnOk:focus-visible{outline:2px solid #5ab8ff;outline-offset:2px}
+/* exact search match on any list page (rows) or card list (contacts) */
+.clk-r.xhit:not(tr){box-shadow:inset 3px 0 0 #2b8fe0,0 0 0 2px rgba(43,143,224,.35)!important;background:#e4f2ff}
+body[data-theme=dark] .clk-r.xhit:not(tr){background:rgba(90,170,255,.14)}

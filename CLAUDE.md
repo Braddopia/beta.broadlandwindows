@@ -2,7 +2,7 @@
 
 Single-file HTML CRM. Edit `src/` (css, js, assets), then run `npm run build` to write `dist/Broadland-Windows-CRM-<version>.html` and the root `index.html`. Never hand-edit `index.html` or `dist/`. Run `npm run check` (lint, unit tests, build, behaviour tests) before pushing; `npm run test:visual` compares screenshots with local baselines (`npm run test:visual:update` to create them).
 
-Code layout (ES modules, bundled by esbuild into the one HTML file; imports only point down the layers, and `npm run lint` enforces it for core/config/data/domain):
+Code layout (ES modules, bundled by esbuild into the one HTML file; imports only point down the layers, and `npm run lint` enforces it for every layer below features/; ui/shell is the one exception):
 - `src/core/` generic helpers (DOM, escaping, `html```, dates, formatting, actions, `events` on/emit) · `src/config/` fixed lists, colours, roles and permissions
 - `src/data/` the in-memory `state`, loading, saving (`store()`), cross-tab `sync`, photos, `audit`, `repository` (add/change/remove records with `_meta` stamps), `sources/` (where data lives: IndexedDB today, `api-source.js` stub for the Microsoft 365 backend)
 - `src/domain/` business rules with no DOM or storage (unit-tested in `tests/unit`), including `permissions.js` (`can('money')`, `can('manage')`, `canSee(view)`)
@@ -11,6 +11,7 @@ Code layout (ES modules, bundled by esbuild into the one HTML file; imports only
 - `src/main.js` registers every exported function as a button action and runs start-up steps in order. Nothing runs at import time: start-up code goes in an exported function called from `main.js`.
 - Lower layers never call the UI: they `emit('notice', text)`, `emit('data-replaced')` or `emit('photos-loaded')`, and `ui/shell/data-events.js` answers.
 - Buttons use `onClick('fn', ...args)` / `onEvent('onchange', 'fn', ...)` / `rowClick('fn', ...)`; never inline `onclick=` (the security policy blocks it).
+- When a shared ui/ piece needs a page, the page plugs in at start-up (`plugInForms`, `plugInRecordWindow`) instead of ui/ importing it.
 - To change another module's variable, call a setter it exports (e.g. `setView`, `replaceState`, `setRoleValue`); imports are read-only.
 
 Rules for code in `src/`:

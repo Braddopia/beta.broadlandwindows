@@ -6,6 +6,7 @@ import { SAFE } from '../../data/sanitize.js';
 import { backupDl } from '../admin/backup.js';
 import { state } from '../../data/state.js';
 import { allLeads } from '../../domain/leads.js';
+import { isExact } from '../../domain/exact.js';
 import { nlq } from './questions.js';
 import { exactProduct, products, unitOf } from '../../domain/stock.js';
 import { chPin } from '../auth/pins.js';
@@ -301,19 +302,42 @@ export function srchBuild(raw, big) {
     RUN.push(fn);
     return `<button type="button" class="sri" data-i="${i}" role="option">${ic ? `<span class="sri-ic">${svg(ic)}</span>` : ''}<span class="sri-t"><b>${esc(tc(String(t || '')))}</b>${s ? `<small>${esc(s)}</small>` : ''}</span></button>`;
   };
-  /* an exact Stock ID, item code or barcode wins: first result, highlighted, Enter opens it */
-  const X = !cmdOnly && canSee('stock') ? exactProduct(query) : null;
+  /* exact matches win: a Stock ID, item code or barcode, or a record's number, name, phone, email or
+     postcode. They come first, highlighted, and Enter opens the first one */
+  const X = !cmdOnly && canSee('stock') ? exactProduct(query) : null,
+    XR = [];
   if (X)
+    XR.push(
+      row(
+        X.item + (X.desc ? ' · ' + X.desc : ''),
+        ['Stock ID ' + X.pid, X.stock + ' ' + unitOf(X) + ' in stock', X.location, X.area]
+          .filter((v) => v && v != '-')
+          .join(' · '),
+        () => viewItem(X.pid),
+        'M4 7l8-4 8 4v10l-8 4-8-4zM4 7l8 4 8-4M12 11v10'
+      )
+    );
+  const exactIds = new Set();
+  if (!cmdOnly && query.length >= 3)
+    SRCH.forEach(([v, label, list, show, open]) => {
+      if (!canSee(v) || v == 'stock' || v == 'downloads') return;
+      try {
+        list()
+          .filter((o) => isExact(o, query))
+          .slice(0, 3)
+          .forEach((o) => {
+            const [t, s] = show(o);
+            exactIds.add(v + ':' + (o.id ?? o._i));
+            XR.push(row(t, label + ' · ' + s, () => open(o)));
+          });
+      } catch (e) {
+        /* one list failing never stops the search */
+      }
+    });
+  if (XR.length)
     grp.push(
-      `<div class="srg xm">Exact Stock Match</div>` +
-        row(
-          X.item + (X.desc ? ' · ' + X.desc : ''),
-          ['Stock ID ' + X.pid, X.stock + ' ' + unitOf(X) + ' in stock', X.location, X.area]
-            .filter((v) => v && v != '-')
-            .join(' · '),
-          () => viewItem(X.pid),
-          'M4 7l8-4 8 4v10l-8 4-8-4zM4 7l8 4 8-4M12 11v10'
-        ).replace('class="sri"', 'class="sri sri-x"')
+      `<div class="srg xm">Exact Match${XR.length > 1 ? `<span>${XR.length}</span>` : ''}</div>` +
+        XR.map((h) => h.replace('class="sri"', 'class="sri sri-x"')).join('')
     );
   const NQ = cmdOnly ? null : nlq(raw);
   if (NQ) {
@@ -365,7 +389,7 @@ export function srchBuild(raw, big) {
       if (!canSee(v)) return;
       let L;
       try {
-        L = list().filter((o) => srchMatch(srchText(o), query));
+        L = list().filter((o) => !exactIds.has(v + ':' + (o.id ?? o._i)) && srchMatch(srchText(o), query));
       } catch (e) {
         return;
       }

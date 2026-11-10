@@ -2,19 +2,24 @@
 import { $, esc } from '../core/dom.js';
 import { syncIfPending } from '../data/sync.js';
 import { setPhotoList, tmp, tmpDraw } from './forms/photos.js';
-import { recReturn, recordWin, setRecordWin } from '../features/records/record-window.js';
 
+/* The lead/contract window plugs in here at start-up (features/records), so a popup opened from it
+   can park it and hand back to it. ui/ never imports a page. */
+let REC = { get: () => null, set: () => {}, back: () => {} };
+export function plugInRecordWindow(h) {
+  REC = { ...REC, ...h };
+}
 /* ---- modal ---- */
 export let REC_STASH = null;
 export function openModal(h, size) {
   const b = $('#mbox'),
     isRec = /^\s*<div class="rw[ "]/.test(h);
   if (isRec) REC_STASH = null;
-  else if (!REC_STASH && $('#modal').classList.contains('open') && typeof recordWin != 'undefined' && recordWin) {
+  else if (!REC_STASH && $('#modal').classList.contains('open') && REC.get()) {
     const rw = b.querySelector(':scope>.rw');
     if (rw) {
       const rb = rw.querySelector('.rw-b');
-      REC_STASH = { node: rw, cls: b.className, rw: recordWin, sy: rb ? rb.scrollTop : 0 };
+      REC_STASH = { node: rw, cls: b.className, rw: REC.get(), sy: rb ? rb.scrollTop : 0 };
       rw.remove();
     }
   }
@@ -123,11 +128,11 @@ export function closeModal() {
     b.innerHTML = '';
     b.className = s.cls;
     b.appendChild(s.node);
-    setRecordWin(s.rw);
+    REC.set(s.rw);
     $('#modal').classList.add('open');
     const rb = b.querySelector('.rw-b');
     if (rb) rb.scrollTop = s.sy;
-    if (typeof recReturn == 'function') recReturn();
+    REC.back();
     return;
   }
   $('#modal').classList.remove('open');

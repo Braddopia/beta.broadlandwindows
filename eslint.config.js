@@ -52,8 +52,11 @@ module.exports = [
     ],
     [['src/data/**'], ['domain', 'ui', 'integrations', 'print', 'features', 'start']],
     [['src/domain/**'], ['ui', 'integrations', 'print', 'features', 'start']],
-  ].map(([files, above]) => ({
+    /* ui/shell is the app shell (it lists the pages), so it is the one part of ui/ allowed to import them */
+    [['src/ui/**', 'src/print/**', 'src/integrations/**'], ['features', 'start'], ['src/ui/shell/**']],
+  ].map(([files, above, ignores]) => ({
     files,
+    ...(ignores ? { ignores } : {}),
     rules: {
       'no-restricted-imports': [
         'error',
