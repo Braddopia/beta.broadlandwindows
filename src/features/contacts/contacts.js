@@ -36,14 +36,14 @@ export function vContacts() {
   const card = (
     c
   ) => `<div class="cc2 clk-r" ${rowClick('editContact', c.id)}><div class="cc2-h"><span class="cav" style="--h:${[...(c.co || c.name || '?')].reduce((a, x) => a + x.charCodeAt(0), 0) % 360}">${esc(initials(c.co || c.name))}</span><div><b>${esc(c.co || c.name)}</b><small>${esc([c.name && c.name != c.co ? c.name : '', c.role].filter(Boolean).join(' · ') || ' ')}</small></div><span class="tag">${esc(c.type || '')}</span></div>
-    <div class="cc2-b">${conPhones(c)
+    <div class="cc2-b">${conLines(c)
       .map(
         (p) =>
-          `<a class="nocap" href="${esc(telHref(p.n))}">${svg('M5 4h4l2 5-2.5 1.5a11 11 0 005 5L15 13l5 2v4a2 2 0 01-2 2A16 16 0 013 6a2 2 0 012-2')}<span class="cpl">${esc(p.t)}</span>${esc(p.n)}</a>`
+          `<div class="cpr"><span class="cpl">${esc(p.t)}</span><span class="cpv">${p.n ? `<a class="nocap" href="${esc(telHref(p.n))}">${svg('M5 4h4l2 5-2.5 1.5a11 11 0 005 5L15 13l5 2v4a2 2 0 01-2 2A16 16 0 013 6a2 2 0 012-2')}${esc(p.n)}</a>` : ''}${p.e ? `<a class="nocap" href="mailto:${esc(p.e)}">${svg('M4 6h16v12H4zM4 7l8 6 8-6')}${esc(p.e)}</a>` : ''}</span></div>`
       )
       .join(
         ''
-      )}${c.email ? `<a class="nocap" href="mailto:${esc(c.email)}">${svg('M4 6h16v12H4zM4 7l8 6 8-6')}${esc(c.email)}</a>` : ''}${c.email2 ? `<a class="nocap" href="mailto:${esc(c.email2)}">${svg('M4 6h16v12H4zM4 7l8 6 8-6')}<span class="cpl">Accounts</span>${esc(c.email2)}</a>` : ''}${c.addr || c.town || c.pc ? `<span>${svg('M12 21s-7-6-7-11a7 7 0 0114 0c0 5-7 11-7 11zM12 12a2 2 0 100-4 2 2 0 000 4z')}${esc([c.addr, c.town, c.pc].filter(Boolean).join(', '))}</span>` : ''}${!c.phone && !c.email && !c.addr ? '<span class="muted">No details yet</span>' : ''}</div>
+      )}${c.addr || c.town || c.pc ? `<span>${svg('M12 21s-7-6-7-11a7 7 0 0114 0c0 5-7 11-7 11zM12 12a2 2 0 100-4 2 2 0 000 4z')}${esc([c.addr, c.town, c.pc].filter(Boolean).join(', '))}</span>` : ''}${!conLines(c).length && !c.addr ? '<span class="muted">No details yet</span>' : ''}</div>
     <div class="cc2-f"><button class="mini" ${onClick('editContact', c.id)}>Edit</button>${can('manage') ? `<button class="mini del" ${onClick('del', 'contacts', c.id)}>Delete</button>` : ''}</div></div>`;
   return `<div class="head"><div><h1>Contact Book</h1><span class="muted">${L.length} of ${state.contacts.length} contacts</span></div><div class="tools">${can('manage') ? '<button class="btn ghost" data-act="impCust">Import customers</button>' : ''}<button class="btn" data-act="editContact">New contact</button></div></div>
   <div class="subbar"><span class="sb-l">Show</span><div class="views">${['all', ...CT].map((k) => `<button class="chip ${F == k ? 'on' : ''}" ${onClick('setUI', 'con.f', k)}>${k == 'all' ? 'All' : esc(k)} <i>${k == 'all' ? state.contacts.length : state.contacts.filter((c) => c.type == k).length}</i></button>`).join('')}</div></div>
@@ -66,33 +66,46 @@ export const conPhones = (c) =>
     : c && c.phone
       ? [{ t: 'Office', n: c.phone }]
       : [];
+/** every contact line: what it is for (Office, Accounts, Sales...), its phone number and its email.
+    Older contacts kept one main email and an accounts email apart from the numbers: they are paired up here. */
+export function conLines(c) {
+  if (!c) return [];
+  if (Array.isArray(c.lines) && c.lines.length) return c.lines.filter((l) => l && (l.n || l.e));
+  const L = conPhones(c).map((p) => ({ t: p.t, n: p.n, e: '' }));
+  if (c.email) {
+    const f = L.find((l) => l.t != 'Accounts') || L[0];
+    if (f) f.e = c.email;
+    else L.push({ t: 'Office', n: '', e: c.email });
+  }
+  if (c.email2) {
+    const a = L.find((l) => l.t == 'Accounts' && !l.e);
+    if (a) a.e = c.email2;
+    else L.push({ t: 'Accounts', n: '', e: c.email2 });
+  }
+  return L;
+}
 export const telHref = (n) => 'tel:' + String(n).replace(/[^\d+]/g, '');
 export function cphRow(p) {
   const t = (p && p.t) || '';
-  return `<div class="cphr"><select aria-label="Number type">${(t && !CPH.includes(t) ? [t, ...CPH] : CPH).map((x) => `<option${x == t ? ' selected' : ''}>${esc(x)}</option>`).join('')}</select><input type="tel" inputmode="tel" maxlength="30" placeholder="Phone number" aria-label="Phone number" value="${esc((p && p.n) || '')}"><button type="button" class="cphx" title="Remove this number" aria-label="Remove this number">&times;</button></div>`;
+  return `<div class="cphr"><select aria-label="What this line is for">${(t && !CPH_ALL.includes(t) ? [t, ...CPH] : CPH).map((x) => `<option${x == t ? ' selected' : ''}>${esc(x)}</option>`).join('')}</select><input type="tel" inputmode="tel" maxlength="30" placeholder="Phone number" aria-label="Phone number" value="${esc((p && p.n) || '')}"><input type="email" class="nocap" maxlength="120" placeholder="Email" aria-label="Email" value="${esc((p && p.e) || '')}"><button type="button" class="cphx" title="Remove this line" aria-label="Remove this line">&times;</button></div>`;
 }
+const filled = (r) => [...r.querySelectorAll('input')].some((i) => i.value.trim());
 /* always one empty row at the end: the next box only appears once the last one is filled */
 export function cphTidy() {
   const box = $('#cphs');
   if (!box) return;
   const rows = [...box.querySelectorAll('.cphr')];
   rows.forEach((r, i) => {
-    if (
-      i < rows.length - 1 &&
-      !r.querySelector('input').value.trim() &&
-      rows.length > 1 &&
-      document.activeElement != r.querySelector('input')
-    )
-      r.remove();
+    if (i < rows.length - 1 && !filled(r) && rows.length > 1 && !r.contains(document.activeElement)) r.remove();
   });
   const R = [...box.querySelectorAll('.cphr')],
     last = R[R.length - 1];
-  if (!last || last.querySelector('input').value.trim()) {
+  if (!last || filled(last)) {
     const used = R.map((r) => r.querySelector('select').value);
     box.insertAdjacentHTML('beforeend', cphRow({ t: CPH.find((x) => !used.includes(x)) || 'Office' }));
   }
   [...box.querySelectorAll('.cphr')].forEach((r, i, a) => {
-    r.querySelector('.cphx').hidden = a.length < 2 || (i == a.length - 1 && !r.querySelector('input').value.trim());
+    r.querySelector('.cphx').hidden = a.length < 2 || (i == a.length - 1 && !filled(r));
   });
 }
 /* which boxes must be filled in depends on the type: a customer needs email and address, a company needs its name and a job title */
@@ -115,15 +128,15 @@ export function cReqDraw() {
 }
 export function editContact(id, draft, after) {
   const c = state.contacts.find((x) => x.id == id),
-    v = draft || (c ? { ...c, phones: conPhones(c) } : { type: 'Supplier', phones: [] });
+    v = draft || (c ? { ...c, lines: conLines(c) } : { type: 'Supplier', lines: [] });
   const fld = (k, l, o = {}) =>
     `<div class="ff ${o.w || ''}"><label for="c_${k}">${esc(l)}<span data-rq="${k}"></span>${MARK(0, o.adm)}</label>${fieldControl({ k, t: o.sel ? 'select' : o.area ? 'area' : o.t || 'text', o: o.sel, max: o.max || (o.area ? 600 : 120), ph: o.ph }, v[k] || '', { id: 'c_' + k, rows: 2 })}</div>`;
   openModal(
     `<button class="mx" data-act="closeModal" aria-label="Close">&times;</button><h2>${c ? 'Edit Contact' : 'New Contact'}</h2>
    <div class="cform">
     <section><h3>Who</h3><div class="grid">${fld('type', 'Type', { sel: CT })}${fld('co', 'Company', { max: 80 })}${fld('name', 'Contact name', { max: 60 })}${fld('role', 'Job title', { max: 60 })}</div></section>
-    <section><h3>Phone Numbers <small>At least one *</small></h3><div id="cphs" class="cphs">${v.phones.map(cphRow).join('')}</div><p class="hint">Pick what each number is for. Another box appears when you fill one in.</p></section>
-    <section><h3>Email And Web</h3><div class="grid">${fld('email', 'Main email', { t: 'email' })}${fld('email2', 'Accounts email', { t: 'email' })}${fld('web', 'Website', { w: 'full', max: 200, ph: 'https://' })}</div></section>
+    <section><h3>Phone Numbers And Emails <small>At least one number *</small></h3><div class="cphh" aria-hidden="true"><span>For</span><span>Phone</span><span>Email<span data-rq="email"></span></span></div><div id="cphs" class="cphs">${(v.lines || []).map(cphRow).join('')}</div><p class="hint">Pick what each line is for, such as Accounts or Sales, then its number and email. Another line appears when you fill one in.</p></section>
+    <section><h3>Web</h3><div class="grid">${fld('web', 'Website', { w: 'full', max: 200, ph: 'https://' })}</div></section>
     <section><h3>Address</h3><div class="grid">${fld('addr', 'Address', { w: 'full', max: 200 })}${fld('town', 'Town', { max: 60 })}${fld('pc', 'Postcode', { max: 10 })}</div></section>
     <section><h3>Notes</h3>${fld('notes', 'Notes', { area: 1, w: 'full' })}</section>
    </div>
@@ -151,20 +164,26 @@ export function editContact(id, draft, after) {
         type: CT.includes(g('type')) ? g('type') : 'Other',
         name: SAFE.text(g('name'), 60),
         role: SAFE.text(g('role'), 60),
-        email: g('email').toLowerCase(),
-        email2: g('email2').toLowerCase(),
         web: SAFE.url(g('web')) ? SAFE.text(g('web'), 200) : '',
         addr: SAFE.text(g('addr'), 200),
         town: SAFE.text(g('town'), 60),
         pc: SAFE.text(g('pc'), 10).toUpperCase(),
         notes: SAFE.text(g('notes'), 600),
       };
-    o.phones = [...$$('#cphs .cphr')]
-      .map((r) => ({
-        t: CPH_ALL.includes(r.querySelector('select').value) ? r.querySelector('select').value : 'Office',
-        n: SAFE.text(r.querySelector('input').value, 30),
-      }))
-      .filter((p) => p.n);
+    o.lines = [...$$('#cphs .cphr')]
+      .map((r) => {
+        const [n, e] = r.querySelectorAll('input');
+        return {
+          t: CPH_ALL.includes(r.querySelector('select').value) ? r.querySelector('select').value : 'Office',
+          n: SAFE.text(n.value, 30),
+          e: SAFE.text(e.value, 120).toLowerCase(),
+        };
+      })
+      .filter((p) => p.n || p.e);
+    o.phones = o.lines.filter((p) => p.n).map((p) => ({ t: p.t, n: p.n }));
+    /* the first email is the main one; an Accounts line's email is the accounts email */
+    o.email = (o.lines.find((p) => p.e) || {}).e || '';
+    o.email2 = (o.lines.find((p) => p.e && p.t == 'Accounts' && p.e != o.email) || {}).e || '';
     const bad = (m, k) => {
       toast(m);
       const e = k ? $('#c_' + k) : $('#cphs input');
@@ -179,10 +198,10 @@ export function editContact(id, draft, after) {
     if (!o.phones.length) return bad('Add at least one phone number');
     const wrong = o.phones.find((p) => !/^[\d +()-]{6,30}$/.test(p.n) || (p.n.match(/\d/g) || []).length < 6);
     if (wrong) return bad(wrong.n + ' does not look like a phone number');
-    if (o.email && !SAFE.email(o.email)) return bad('Main email does not look like an email address', 'email');
-    if (o.email2 && !SAFE.email(o.email2)) return bad('Accounts email does not look like an email address', 'email2');
+    const badMail = o.lines.find((p) => p.e && !SAFE.email(p.e));
+    if (badMail) return bad(badMail.e + ' does not look like an email address');
     if (o.web && !SAFE.url(o.web)) return bad('The website must start with https://', 'web');
-    if (R.email && !o.email) return bad('Main email is required for a customer', 'email');
+    if (R.email && !o.email) return bad('Add an email for a customer');
     if (R.addr && !o.addr) return bad('Address is required for a customer', 'addr');
     if (R.town && !o.town) return bad('Town is required for a customer', 'town');
     if (R.pc && !o.pc) return bad('Postcode is required for a customer', 'pc');

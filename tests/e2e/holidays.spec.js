@@ -35,7 +35,9 @@ test('paid or unpaid is required, and unpaid leave keeps the allowance', async (
   ).toBe('U');
 });
 
-test('My Holiday shows days left in a ring, the numbers beside it, and previous holidays', async ({ app }) => {
+test('My Holiday shows days left in a ring, the numbers beside it, and Next / Previous / All open as pop-ups', async ({
+  app,
+}) => {
   await app.role('staff');
   await app.go('home');
   const ring = app.page.locator('.hring');
@@ -47,10 +49,15 @@ test('My Holiday shows days left in a ring, the numbers beside it, and previous 
     .evaluate((e) => parseFloat(getComputedStyle(e).fontSize));
   expect(big).toBeGreaterThan(other * 1.6);
   await expect(app.page.locator('.hlist')).toContainText('Allowance');
-  await expect(app.page.locator('.hrows')).toContainText('Previous');
+  await app.page.click('#main .hbtns >> text=Previous');
+  await expect(app.page.locator('#mbox h2')).toContainText('Previous Holidays');
+  // switch between the three lists inside the pop-up
+  await app.page.click('#mbox .hol-seg >> text=Next');
+  await expect(app.page.locator('#mbox h2')).toContainText('Coming Up');
+  await app.call('closeModal');
   // the same panel on My Calendar
   await app.go('fitting');
   await expect(app.page.locator('#main .hring')).toBeVisible();
-  await app.page.click('text=All My Holidays');
+  await app.page.click('#main .hbtns >> text=All Holidays');
   await expect(app.page.locator('#mbox h2')).toContainText('All Holidays');
 });

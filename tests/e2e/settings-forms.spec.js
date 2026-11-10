@@ -168,3 +168,28 @@ test('Esc closes every kind of popup, top-most first', async ({ app }) => {
   await expect(app.page.locator('#scanner')).not.toHaveClass(/open/);
   expect(app.errors).toEqual([]);
 });
+
+test('contact lines pair a label with a phone and an email; old main and accounts emails are paired up', async ({
+  app,
+}) => {
+  await app.role('beta');
+  await app.go('contacts');
+  const id = await app.run(() => state.contacts.find((c) => c.co == 'Example Glass Ltd').id);
+  await app.call('editContact', id);
+  const rows = app.page.locator('#cphs .cphr');
+  await expect(rows.first().locator('input[type=email]')).toHaveValue('sales@glass.example.com');
+  // add an Accounts line with its own number and email
+  const last = rows.nth(1); // typing in a line adds a fresh empty one below it
+  await last.locator('select').selectOption('Accounts');
+  await last.locator('input[type=tel]').fill('01632 960 202');
+  await last.locator('input[type=email]').fill('Accounts@Glass.Example.com');
+  await app.page.click('#saveBtn');
+  const c = await app.run((i) => state.contacts.find((x) => x.id == i), id);
+  expect(c.lines).toContainEqual({ t: 'Accounts', n: '01632 960 202', e: 'accounts@glass.example.com' });
+  expect(c.email).toBe('sales@glass.example.com');
+  expect(c.email2).toBe('accounts@glass.example.com');
+  await expect(app.page.locator('#main .cc2', { hasText: 'Example Glass Ltd' })).toContainText(
+    'accounts@glass.example.com'
+  );
+  expect(app.errors).toEqual([]);
+});

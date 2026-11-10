@@ -613,3 +613,28 @@ body[data-theme=dark] .toast.tpop.ok .tp-i *{stroke:#7fe0aa}
 body[data-theme=dark] .toast.tpop.bad .tp-i *{stroke:#ffc35c}
 @keyframes tpIn{from{opacity:0;transform:translate(-50%,-50%) scale(.85)}to{opacity:1;transform:translate(-50%,-50%) scale(1)}}
 @keyframes tpOut{to{opacity:0;transform:translate(-50%,-50%) scale(.94)}}
+
+/* messages: the report button sits at the bottom of the chat list, centred, instead of over the send box */
+.msn-l .msn-list{flex:1;min-height:0}
+.msn-rp{display:flex;justify-content:center;padding:.7rem .8rem .9rem;border-top:1px solid var(--line)}
+.msn-rp .btn{gap:.4rem;color:var(--muted)}.msn-rp .btn:hover{color:var(--red);border-color:var(--red)}
+.msn-rp svg{width:.95rem;height:.95rem;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+body[data-view=messages]:not(:has(#modal.open)) #rpb{display:none}
+/* empty panels: picture centred in the space, words under it with room below */
+.panel:has(>.emp){display:flex;flex-direction:column}
+.panel>.emp{flex:1;justify-content:center;min-height:9rem;padding:1.2rem .5rem 1.5rem;gap:.7rem}
+/* a fitting opened from the calendar by an account without contracts */
+.cal-job{display:grid;grid-template-columns:7.5rem 1fr;gap:.55rem 1rem;margin:.6rem 0 1rem}.cal-job dt{color:var(--muted);font-size:.82rem}.cal-job dd{margin:0;font-weight:600}
+.ce.fit.oth{opacity:.75}
+/* holiday widget: ring and numbers, then three equal buttons that open pop-ups */
+.hbtns{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin-top:1rem}
+.hbtns .btn{justify-content:center;gap:.35rem}.hbtns .btn small{opacity:.7;font-weight:500}
+.hol-seg{display:inline-flex;margin:.2rem 0 .9rem}.hol-svc{margin:-.3rem 0 .6rem;font-size:.82rem}
+
+/* contact lines: what the line is for, its number and its email, side by side */
+.cphr{grid-template-columns:minmax(7.5rem,9.5rem) minmax(0,1fr) minmax(0,1.3fr) 2.4rem}
+.cphh{display:grid;grid-template-columns:minmax(7.5rem,9.5rem) minmax(0,1fr) minmax(0,1.3fr) 2.4rem;gap:.5rem;margin:0 0 .3rem;font-size:.74rem;font-weight:600;color:var(--muted)}
+@media(max-width:600px){.cphr{grid-template-columns:1fr 1fr 2.4rem}.cphr select{grid-column:1/-1}.cphh{display:none}}
+.cc2-b .cpr{display:grid;grid-template-columns:4.8rem minmax(0,1fr);align-items:start;gap:.6rem}
+.cc2-b .cpr .cpl{justify-content:center;margin-top:.05rem}
+.cc2-b .cpv{display:flex;flex-direction:column;gap:.3rem;min-width:0}

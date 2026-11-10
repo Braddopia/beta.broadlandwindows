@@ -70,7 +70,7 @@ export const SVC_ST = ['Open', 'Booked', 'Awaiting parts', 'Complete'],
   SVC_PR = ['Urgent', 'Normal', 'Low'];
 /* ---- contact window: tidy two-column layout, any number of labelled phone numbers ----
    c.phones=[{t:'Office',n:'01632 ...'}]; c.phone mirrors the first one (used by lists, suppliers, search) */
-export const CPH = ['Office', 'Mobile', 'Direct DDI', 'Accounts', 'Sales rep', 'Orders', 'Out of hours'],
+export const CPH = ['Office', 'Mobile', 'Direct DDI', 'Accounts', 'Sales', 'Sales rep', 'Orders', 'Out of hours'],
   CPH_ALL = [...CPH, 'Fax', 'Home'];
 export const YN = ['', 'Yes', 'No'];
 export const BRANCHES = ['Norwich', 'Cambridge', 'Great Yarmouth', 'North Norfolk', 'Suffolk'];

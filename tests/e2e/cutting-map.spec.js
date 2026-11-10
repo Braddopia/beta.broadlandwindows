@@ -89,7 +89,9 @@ test('Remove Stock has a scan icon inside the Stock ID and item code boxes', asy
   await expect(app.page.locator('#scanner')).toHaveClass(/open/);
 });
 
-test('Panel Optimiser: job number and name lead everywhere, and the plan can be kept on the contract', async ({ app }) => {
+test('Panel Optimiser: job number and name lead everywhere, and the plan can be kept on the contract', async ({
+  app,
+}) => {
   await app.role('beta');
   await app.go('cutting');
   await expect(app.page.locator('#cutToC')).toBeHidden();
@@ -118,9 +120,9 @@ test('Panel Optimiser: job number and name lead everywhere, and the plan can be 
         r.onerror = () => ok([]);
       })
   );
-  expect(docs.some(([ref, name]) => ref == 'contract:2402318' && /^2402318 - SAMPLE CUSTOMER E Cutting Plan/.test(name))).toBe(
-    true
-  );
+  expect(
+    docs.some(([ref, name]) => ref == 'contract:2402318' && /^2402318 - SAMPLE CUSTOMER E Cutting Plan/.test(name))
+  ).toBe(true);
   expect(app.errors).toEqual([]);
 });
 

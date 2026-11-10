@@ -157,3 +157,28 @@ test('every reports tab draws, with the added trend and performance tables', asy
   }
   expect(app.errors).toEqual([]);
 });
+
+test('calendar: fittings show on every view for every account; the chip hides them; clicking one opens the job', async ({
+  app,
+}) => {
+  for (const role of ['staff', 'beta']) {
+    await app.role(role);
+    await app.go('fitting');
+    for (const m of ['month', 'week', 'agenda']) {
+      await app.run(`setUI('cal.m', '${m}')`);
+      await app.run(`setUI('cal.o', ${m == 'week' ? 1 : 0})`);
+      await expect(app.page.locator('#main .ce.fit', { hasText: '2402318 - SAMPLE CUSTOMER E' }).first()).toBeVisible();
+    }
+    await app.run(`setUI('cal.m', 'month')`);
+    await app.run(`setUI('cal.o', 0)`);
+    await app.page.click('#main .chip:has-text("Fittings")');
+    await expect(app.page.locator('#main .ce.fit')).toHaveCount(0);
+    await app.page.click('#main .chip:has-text("Fittings")');
+  }
+  await app.role('staff');
+  await app.go('fitting');
+  await app.page.locator('#main .ce.fit', { hasText: '2402318' }).first().click();
+  // accounts that can open contracts get the contract; others a pop-up with the job
+  await expect(app.page.locator('#mbox')).toContainText('2402318 - SAMPLE CUSTOMER E');
+  expect(app.errors).toEqual([]);
+});

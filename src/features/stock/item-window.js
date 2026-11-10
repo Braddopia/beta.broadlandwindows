@@ -76,7 +76,15 @@ export function ieFields() {
       sec: 'p',
       hint: ed && !Ad ? 'Only an admin can rename' : '',
     },
-    { k: 'desc', l: 'Description', max: 160, w: 'full', sec: 'p', ph: 'What it is, as on the count sheet', ro: ieMode == 'remove' },
+    {
+      k: 'desc',
+      l: 'Description',
+      max: 160,
+      w: 'full',
+      sec: 'p',
+      ph: 'What it is, as on the count sheet',
+      ro: ieMode == 'remove',
+    },
     { k: 'unit', l: 'Unit', t: 'select', o: UNITS, sec: 'p', ro: ieMode == 'remove' },
     ed
       ? { k: 'stock', l: 'Current stock', t: 'number', max: 1e7, sec: 'p', hint: 'Changing this logs an adjustment' }
@@ -659,7 +667,13 @@ export function lenBox(unit) {
   if (unit == 'PCS')
     return { l: 'Pieces per pack', ph: '', mode: 'numeric', re: /^\d+$/, err: 'Pieces per pack, as a whole number' };
   /* Each, Units, Pair, Single: how many come in one */
-  return { l: 'Qty (how many in one)', ph: '', mode: 'numeric', re: /^\d+$/, err: 'How many in one, as a whole number' };
+  return {
+    l: 'Qty (how many in one)',
+    ph: '',
+    mode: 'numeric',
+    re: /^\d+$/,
+    err: 'How many in one, as a whole number',
+  };
 }
 export function lenSync() {
   const u = $('#f_unit'),

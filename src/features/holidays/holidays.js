@@ -527,27 +527,57 @@ export function listenForHolidayChart() {
 export const paidTag = (h) =>
   h.paid === false ? '<span class="tag n">Unpaid</span>' : '<span class="tag">Paid</span>';
 /** every holiday of one person, newest first, by year */
-export function myHolidays(sid) {
+/* how long someone has worked here, and when their next extra holiday day comes */
+function svcLine(m) {
+  if (!m.start) return 'Start date not set, so no service days yet';
+  const y = svcYears(m),
+    when = new Date(m.start + 'T00:00').toLocaleDateString('en-GB', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    }),
+    to = 5 - (y % 5);
+  return `${y} year${y == 1 ? '' : 's'} service · started ${when} · ${y >= 15 ? 'maximum service days reached' : to + ' year' + (to == 1 ? '' : 's') + ' to the next extra day'}`;
+}
+/** a person's holidays in a pop-up: what is coming up ('next'), what has been taken ('prev'), or everything */
+export function myHolidays(sid, which = 'all') {
   const s = state.staff.find((x) => x.id == sid);
   if (!s) return;
-  const L = state.hols.filter((h) => h.sid == sid).sort((a, b) => b.from.localeCompare(a.from)),
-    years = [...new Set(L.map((h) => h.from.slice(0, 4)))];
+  const td = today(),
+    all = state.hols.filter((h) => h.sid == sid),
+    L =
+      which == 'next'
+        ? all.filter((h) => h.to >= td && h.status != 'Rejected').sort((a, b) => a.from.localeCompare(b.from))
+        : which == 'prev'
+          ? all.filter((h) => h.to < td && h.status != 'Rejected').sort((a, b) => b.from.localeCompare(a.from))
+          : all.sort((a, b) => b.from.localeCompare(a.from)),
+    years = [...new Set(L.map((h) => h.from.slice(0, 4)))],
+    title = which == 'next' ? 'Coming Up' : which == 'prev' ? 'Previous Holidays' : 'All Holidays',
+    none =
+      which == 'next' ? 'Nothing booked yet.' : which == 'prev' ? 'No holidays taken yet.' : 'No holidays booked yet.',
+    row = (h) =>
+      `<div class="row"><span>${fd(h.from)} to ${fd(h.to)} · ${h.days} day${h.days == 1 ? '' : 's'}${h.note ? `<br><span class="muted">${esc(h.note)}</span>` : ''}</span><span class="acts">${paidTag(h)}${holTag(h)}</span></div>`;
+  const tabs = ['next', 'prev', 'all']
+    .map(
+      (k) =>
+        `<button class="${k == which ? 'on' : ''}" ${onClick('myHolidays', sid, k)}>${k == 'next' ? 'Next' : k == 'prev' ? 'Previous' : 'All'}</button>`
+    )
+    .join('');
   openModal(
-    `<h2>${esc(s.name)}: All Holidays</h2>${
-      years
-        .map(
-          (y) =>
-            `<h3 class="fsec">${y}<span class="muted"> · ${sum(
-              L.filter((h) => h.from.startsWith(y) && h.status == 'Approved' && h.paid !== false),
-              (h) => h.days
-            )} paid days taken</span></h3>${L.filter((h) => h.from.startsWith(y))
-              .map(
-                (h) =>
-                  `<div class="row"><span>${fd(h.from)} to ${fd(h.to)} · ${h.days} day${h.days == 1 ? '' : 's'}${h.note ? `<br><span class="muted">${esc(h.note)}</span>` : ''}</span><span class="acts">${paidTag(h)}${holTag(h)}</span></div>`
-              )
-              .join('')}`
-        )
-        .join('') || '<p class="empty">No holidays booked yet.</p>'
-    }<div class="mact"><button class="btn ghost" data-act="closeModal">Close</button></div>`
+    `<h2>${esc(s.name)}: ${title}</h2><div class="seg hol-seg">${tabs}</div>${which == 'all' ? `<p class="muted hol-svc">${esc(svcLine(s))}</p>` : ''}${
+      which == 'next'
+        ? L.map(row).join('')
+        : years
+            .map(
+              (y) =>
+                `<h3 class="fsec">${y}<span class="muted"> · ${sum(
+                  L.filter((h) => h.from.startsWith(y) && h.status == 'Approved' && h.paid !== false),
+                  (h) => h.days
+                )} paid days taken</span></h3>${L.filter((h) => h.from.startsWith(y))
+                  .map(row)
+                  .join('')}`
+            )
+            .join('')
+    }${L.length ? '' : `<p class="empty">${none}</p>`}<div class="mact"><button class="btn ghost" data-act="closeModal">Close</button></div>`
   );
 }

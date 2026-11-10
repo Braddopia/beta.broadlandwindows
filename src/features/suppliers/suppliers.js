@@ -257,7 +257,7 @@ export function plugSuppliersIn() {
   plugInForms({ newCompany: { value: NEWCO, open: supNewCo } });
 }
 export function supNewCo() {
-  editContact(null, { type: 'Supplier', phones: [] }, (co) => editSup(null, co));
+  editContact(null, { type: 'Supplier', lines: [] }, (co) => editSup(null, co));
 }
 export function editSup(i, pre) {
   if (i == null && !pre) {

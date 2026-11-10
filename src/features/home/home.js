@@ -1,24 +1,22 @@
 /* features/home/home: The Overview page and its widgets. */
-import { RL } from '../../config/roles.js';
 import { onClick } from '../../core/actions.js';
 import { addDays, fd, greet, inWeek, today } from '../../core/dates.js';
 import { $, esc } from '../../core/dom.js';
-import { m0, pc, sum, tc } from '../../core/format.js';
+import { m0, pc, sum } from '../../core/format.js';
 import { ICONS, svg } from '../../core/icons.js';
 import { audit } from '../../data/audit.js';
 import { store } from '../../data/persistence.js';
 import { state } from '../../data/state.js';
 import { dDueToday, dLate } from '../../domain/deliveries.js';
-import { allowTot, hu, svcExtra, svcYears } from '../../domain/holidays.js';
+import { allowTot, hu, svcExtra } from '../../domain/holidays.js';
 import { allLeads } from '../../domain/leads.js';
 import { me } from '../../domain/people.js';
 import { hasLoc, isLow, products } from '../../domain/stock.js';
 import { ROLE } from '../../data/session.js';
 import { can, canSee } from '../../domain/permissions.js';
 import { need } from '../auth/session.js';
-import { holBook, paidTag } from '../holidays/holidays.js';
+import { holBook } from '../holidays/holidays.js';
 import { html, raw } from '../../core/html.js';
-import { holTag } from '../../ui/components/tags.js';
 import { ratingsH } from './reviews.js';
 import { dTag, prTag } from '../../ui/components/tags.js';
 import { closeModal, openModal } from '../../ui/modal.js';
@@ -247,7 +245,7 @@ export function vHome() {
       .map((k) => [k, PN[k][0]]),
   };
   const DL = dashGet();
-  return `<div class="hero lkp"><span class="rt">${esc(m && m.role ? tc(m.role) : RL[R] || 'Team Member')}</span><button class="hero-cz" data-act="dashEdit">${svg(ICONS.layout)} Customise Widgets</button><h1>Welcome back, ${esc(first)} <span class="wave">👋</span></h1><p>${greet()}. It's ${new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}. ${C.s}</p>${ratingsH()}</div>
+  return `<div class="hero lkp"><button class="hero-cz" data-act="dashEdit">${svg(ICONS.layout)} Customise Widgets</button><h1>Welcome back, ${esc(first)} <span class="wave">👋</span></h1><p>${greet()}. It's ${new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}. ${C.s}</p>${ratingsH()}</div>
   ${
     DL.k.filter(okK).length
       ? `<div class="kpis big">${DL.k
@@ -427,23 +425,11 @@ export function holBody(m) {
     mine = state.hols.filter((h) => h.sid == m.id && h.status != 'Rejected'),
     nxt = mine.filter((h) => h.to >= td).sort((x, y) => x.from.localeCompare(y.from))[0],
     prev = mine.filter((h) => h.to < td).sort((x, y) => y.from.localeCompare(x.from)),
-    y = svcYears(m),
     xd = svcExtra(m),
     /* ring: what is left (blue) and what is waiting for approval (amber) */
     R = 52,
     C = 2 * Math.PI * R,
-    part = (n) => (allow ? Math.max(0, Math.min(1, n / allow)) : 0) * C,
-    days = (h) => `${fd(h.from)} to ${fd(h.to)} · ${h.days} day${h.days == 1 ? '' : 's'}`,
-    when = m.start
-      ? new Date(m.start + 'T00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
-      : '';
-  const svc = m.start
-    ? `${y} year${y == 1 ? '' : 's'} service · started ${when} · ${
-        y >= 15
-          ? 'maximum service days reached'
-          : 5 - (y % 5) + ' year' + (5 - (y % 5) == 1 ? '' : 's') + ' to the next extra day'
-      }`
-    : 'Start date not set, so no service days yet';
+    part = (n) => (allow ? Math.max(0, Math.min(1, n / allow)) : 0) * C;
   return String(html`<div class="hol2">
     <div class="hring" role="img" aria-label="${left} of ${allow} days left">
       <svg viewBox="0 0 120 120" aria-hidden="true"><circle class="t" cx="60" cy="60" r="${R}"/><circle class="p" cx="60" cy="60" r="${R}" stroke-dasharray="${part(left).toFixed(1)} ${C.toFixed(1)}"/>${pend > 0 && left > 0 ? raw(`<circle class="w" cx="60" cy="60" r="${R}" stroke-dasharray="${part(Math.min(pend, left)).toFixed(1)} ${C.toFixed(1)}" stroke-dashoffset="${(-part(left - Math.min(pend, left))).toFixed(1)}"/>`) : ''}</svg>
@@ -456,18 +442,9 @@ export function holBody(m) {
       <div><dt>Service days</dt><dd>${xd ? '+' + xd : '0'}</dd></div>
     </dl>
   </div>
-  <div class="hrows">
-    <div class="hrow"><span class="hk">Next</span><span>${nxt ? raw(esc(days(nxt)) + ' ' + holTag(nxt) + (nxt.paid === false ? ' ' + paidTag(nxt) : '')) : html`<span class="muted">None booked</span>`}</span></div>
-    <div class="hrow"><span class="hk">Previous</span><span class="hprevl">${
-      prev.length
-        ? raw(
-            prev
-              .slice(0, 3)
-              .map((h) => `<span>${esc(days(h))} ${paidTag(h)}</span>`)
-              .join('')
-          )
-        : html`<span class="muted">None yet</span>`
-    }</span><button class="mini" ${raw(onClick('myHolidays', m.id))}>All My Holidays</button></div>
-  </div>
-  <p class="hsvc">${svc}</p>`);
+  <div class="hbtns">
+    <button class="btn ghost sm" ${raw(onClick('myHolidays', m.id, 'next'))}>Next${nxt ? html` <small>${fd(nxt.from)}</small>` : ''}</button>
+    <button class="btn ghost sm" ${raw(onClick('myHolidays', m.id, 'prev'))}>Previous${prev.length ? html` <small>${prev.length}</small>` : ''}</button>
+    <button class="btn ghost sm" ${raw(onClick('myHolidays', m.id, 'all'))}>All Holidays</button>
+  </div>`);
 }

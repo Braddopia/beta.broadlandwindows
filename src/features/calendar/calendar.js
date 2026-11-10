@@ -1,15 +1,17 @@
 /* features/calendar/calendar: The Calendar: fittings, service visits, deliveries and holidays. */
 import { onClick } from '../../core/actions.js';
 import { jobTitle } from '../../domain/job-title.js';
+import { html } from '../../core/html.js';
+import { siteOf } from '../../domain/customers.js';
+import { openModal } from '../../ui/modal.js';
+import { openContract } from '../contracts/contracts.js';
 import { BH, fd, isWk, iso, today } from '../../core/dates.js';
 import { esc } from '../../core/dom.js';
 import { state } from '../../data/state.js';
 import { forPerson, me, staffName } from '../../domain/people.js';
 import { can, canSee } from '../../domain/permissions.js';
 import { holBody } from '../home/home.js';
-import { paidTag } from '../holidays/holidays.js';
 import { emptyArt } from '../../ui/components/art.js';
-import { holTag } from '../../ui/components/tags.js';
 import { setUI, uiState } from '../../ui/ui-state.js';
 
 /* ---------------- calendar ---------------- */
@@ -21,13 +23,14 @@ export function evs(k) {
     mine = (x) => Ad || (m && forPerson(m, x));
   if (L.fit)
     state.contracts
-      .filter((c) => c.fit == k && c.stage != 'Complete' && (Ad || mine(c.fitter) || c.soldBy == USER))
+      /* every fitting shows for everyone, so the calendar matches the Next Fitting card on the overview */
+      .filter((c) => c.fit == k && c.stage != 'Complete')
       .forEach((c) =>
         e.push({
-          c: 'fit',
+          c: 'fit' + (Ad || mine(c.fitter) ? '' : ' oth'),
           t: jobTitle(c.id, c.name),
           s: c.product + ' (' + (c.fitter || 'no fitter') + ')',
-          f: ['openContract', c.id],
+          f: ['calFit', c.id],
           k: 'Fitting',
         })
       );
@@ -37,7 +40,8 @@ export function evs(k) {
       .forEach((c) =>
         e.push({
           c: 'svc',
-          t: (c.visitTime ? c.visitTime + ' ' : '') + 'Service: ' + (c.contract ? jobTitle(c.contract, c.name) : c.name),
+          t:
+            (c.visitTime ? c.visitTime + ' ' : '') + 'Service: ' + (c.contract ? jobTitle(c.contract, c.name) : c.name),
           s: c.issue,
           f: ['editCall', c.id],
           k: 'Service visit',
@@ -65,6 +69,23 @@ export function evs(k) {
   return e;
 }
 export const evA = (x) => onClick(...x.f);
+/** a fitting on the calendar: open the contract, or (for accounts without contracts) show the job in a pop-up */
+export function calFit(id) {
+  if (canSee('contracts')) return openContract(id);
+  const c = state.contracts.find((x) => x.id == id);
+  if (!c) return;
+  openModal(
+    html`<h2>${jobTitle(c.id, c.name)}</h2>
+      <dl class="cal-job">
+        <dt>Fitting</dt><dd>${fd(c.fit)}</dd>
+        <dt>Job</dt><dd>${c.product || '-'}</dd>
+        <dt>Where</dt><dd>${siteOf(c) || c.town || '-'}</dd>
+        <dt>Fitting Team</dt><dd>${c.fitter || 'Not set'}</dd>
+      </dl>
+      <div class="mact"><button class="btn" data-act="closeModal">Close</button></div>`,
+    'sm'
+  );
+}
 export function calCells(days, full) {
   const td = today();
   return days
@@ -90,11 +111,10 @@ export function calMine() {
   if (!m)
     return '<div class="panel" style="margin-top:1rem"><p class="empty">Your name is not in the staff list yet.</p></div>';
   const td = today(),
-    H = state.hols.filter((h) => h.sid == m.id && h.to >= td).sort((a, b) => a.from.localeCompare(b.from)),
     J = state.contracts
       .filter((c) => c.fit && c.fit >= td && c.stage != 'Complete' && forPerson(m, c.fitter))
       .sort((a, b) => a.fit.localeCompare(b.fit));
-  return `<div class="two" style="margin-top:1rem"><div class="panel"><h2><span>My Holiday</span><span class="acts"><button class="btn sm" data-act="bookMine">Book Holiday</button></span></h2>${holBody(m)}${H.length ? `<div class="hprev"><div class="hprev-h"><b>Coming Up</b></div>${H.map((h) => `<div class="row"><span>${fd(h.from)} to ${fd(h.to)} · ${h.days} day${h.days == 1 ? '' : 's'}${h.note ? `<br><span class="muted">${esc(h.note)}</span>` : ''}</span><span class="acts">${paidTag(h)}${holTag(h)}</span></div>`).join('')}</div>` : ''}</div>
+  return `<div class="two" style="margin-top:1rem"><div class="panel"><h2><span>My Holiday</span><span class="acts"><button class="btn sm" data-act="bookMine">Book Holiday</button></span></h2>${holBody(m)}</div>
   <div class="panel"><h2>My Jobs</h2>${J.map((c) => `<div class="row"><span><b>${fd(c.fit)}</b> ${esc(jobTitle(c.id, c.name))}<br><span class="muted">${esc(c.product)}, ${esc(c.town || '')}</span></span></div>`).join('') || emptyArt('done', 'No fittings booked for you.')}</div></div>`;
 }
 export function vCalendar() {

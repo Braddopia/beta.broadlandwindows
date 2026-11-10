@@ -3,7 +3,13 @@ import assert from 'node:assert/strict';
 import { exactKeys, isExact } from '../../src/domain/exact.js';
 
 test('an exact number, name, phone, email or postcode matches', () => {
-  const lead = { id: 'L0001', name: 'Sample Customer A', mob1: '07700 900 014', email1: 'a@example.com', homePc: 'NR1 1AA' };
+  const lead = {
+    id: 'L0001',
+    name: 'Sample Customer A',
+    mob1: '07700 900 014',
+    email1: 'a@example.com',
+    homePc: 'NR1 1AA',
+  };
   for (const q of ['L0001', 'l0001', 'sample customer a', '07700900014', '07700 900 014', 'A@Example.com', 'nr11aa'])
     assert.equal(isExact(lead, q), true, q);
 });

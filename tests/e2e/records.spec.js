@@ -136,7 +136,9 @@ test('the invoice prints with VAT and balance', async ({ app }) => {
   expect(t).toContain('£6,594.00');
 });
 
-test('the Work In Progress notice shows when the Leads or Contracts tab opens, and can be turned off', async ({ app }) => {
+test('the Work In Progress notice shows when the Leads or Contracts tab opens, and can be turned off', async ({
+  app,
+}) => {
   await app.run(() => localStorage.removeItem('bb_preview_seen'));
   await app.role('beta');
   await app.go('leads');
