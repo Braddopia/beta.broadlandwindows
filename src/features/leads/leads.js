@@ -1,6 +1,5 @@
 /* features/leads/leads: The Leads page, new lead wizard and lead actions. */
 import { CSTAGES, CTYPES, PTYPES, SOURCES, STAGES } from '../../config/constants.js';
-import { previewNotice } from '../records/preview-notice.js';
 import { onClick, onEvent } from '../../core/actions.js';
 import { addDays, fd, today, weekRange } from '../../core/dates.js';
 import { $, esc } from '../../core/dom.js';
@@ -193,7 +192,6 @@ export function editLead(id) {
   else leadWizard();
 }
 export function leadWizard() {
-  setTimeout(() => previewNotice('lead'), 120);
   const id = nextLeadId();
   wizard({
     title: 'New Lead ' + id,

@@ -136,26 +136,27 @@ test('the invoice prints with VAT and balance', async ({ app }) => {
   expect(t).toContain('£6,594.00');
 });
 
-test('the Work In Progress notice shows once over a lead or contract, and can be turned off', async ({ app }) => {
+test('the Work In Progress notice shows when the Leads or Contracts tab opens, and can be turned off', async ({ app }) => {
   await app.run(() => localStorage.removeItem('bb_preview_seen'));
   await app.role('beta');
-  await app.openLead('L0001');
+  await app.go('leads');
   await expect(app.page.locator('#pvn')).toBeVisible();
   await expect(app.page.locator('#pvn h2')).toHaveText('Work In Progress');
-  await expect(app.page.locator('#pvn')).toContainText('Leads windows are not in their final state');
+  await expect(app.page.locator('#pvn')).toContainText('Leads pages are not in their final state');
   await app.page.click('#pvnOk');
   await expect(app.page.locator('#pvn')).toHaveCount(0);
-  // not again for leads this time round
+  // not when adding or opening a lead, and not again for this tab this time round
+  await app.call('editLead');
+  await expect(app.page.locator('#pvn')).toHaveCount(0);
   await app.closeAll();
-  await app.openLead('L0002');
+  await app.go('home');
+  await app.go('leads');
   await expect(app.page.locator('#pvn')).toHaveCount(0);
   // contracts get it once too; ticking the box stops it for good
-  await app.closeAll();
-  await app.openContract('2402318');
+  await app.go('contracts');
   await expect(app.page.locator('#pvn')).toContainText('Contracts');
   await app.page.check('#pvnX');
   await app.page.keyboard.press('Escape');
   await expect(app.page.locator('#pvn')).toHaveCount(0);
   expect(await app.run(() => localStorage.getItem('bb_preview_seen'))).toBe('1');
-  expect(await app.run(() => !!document.querySelector('#modal.open'))).toBe(true);
 });

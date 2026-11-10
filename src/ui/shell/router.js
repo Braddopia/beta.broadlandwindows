@@ -1,5 +1,6 @@
 /* ui/shell/router: The pages, the side menu and drawing the current page. */
 import { ROLES } from '../../config/roles.js';
+import { previewNotice } from '../../features/records/preview-notice.js';
 import { onClick } from '../../core/actions.js';
 import { $, $$, esc } from '../../core/dom.js';
 import { initials } from '../../core/format.js';
@@ -123,6 +124,8 @@ export function go(v) {
   $('#q').value = '';
   sbSync();
   render();
+  /* the Work In Progress notice, as soon as the Leads or Contracts tab opens */
+  if (v == 'leads' || v == 'contracts') previewNotice(v == 'leads' ? 'lead' : 'contract');
 }
 export function render(soft) {
   if (!canSee(view) || (view == 'admin' && !can('manage'))) view = HOME();

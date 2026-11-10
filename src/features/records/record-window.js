@@ -1,6 +1,5 @@
 /* features/records/record-window: The lead and contract window: steps, saving, closing and moving between records. */
 import { MAX_PHOTOS } from '../../config/constants.js';
-import { previewNotice } from './preview-notice.js';
 import { onClick } from '../../core/actions.js';
 import { fd, today } from '../../core/dates.js';
 import { $, $$, esc } from '../../core/dom.js';
@@ -141,7 +140,6 @@ export function recOpen(kind, id) {
     });
     recTab(todo || W.steps[0]);
   }
-  previewNotice(kind);
   grpInit($('#mbox .rw-p.on'));
   $('#mbox .rw-x').addEventListener('change', (e) => {
     const g = e.target.closest && e.target.closest('.rg.gc');
