@@ -11,7 +11,7 @@ import { TAB_TOURS, WELCOME } from './tour-steps.js';
 /* ---------------- tours ----------------
    The welcome tour plays once, the very first time someone opens the site. Each tab then has its own short
    tour the first time it is opened (TAB_TOURS in tour-steps.js). Both are "locked" when they play by
-   themselves: no Skip, and Next unlocks once a timer bar fills. Esc three times in a row still leaves.
+   themselves: no Skip, and Next unlocks once a timer bar fills. (Hidden: Esc three times in a row leaves.)
    The ? button replays the tour for the tab you are on (or the welcome tour), with Skip and no wait. */
 export const TOUR = WELCOME;
 export { TAB_TOURS };
@@ -191,13 +191,12 @@ export function tourDraw() {
   }
   const r = vis ? rr : null,
     pad = 8;
-  const lockNote = FIRST ? '<p class="tesc">Press Esc three times to leave the tour.</p>' : '';
   o.innerHTML = `<div class="tspot ${vis ? '' : 'none'}" style="${vis ? `left:${r.left - pad}px;top:${r.top - pad}px;width:${r.width + pad * 2}px;height:${r.height + pad * 2}px` : ''}"></div>
    <div class="tcard ${vis ? '' : 'mid'}">${!vis && s.art && ART_IC[s.art] ? `<div class="tban lkp">${svg(ART_IC[s.art])}</div>` : ''}<small>${TI + 1} of ${STEPS.length}</small><h3>${esc(s.t)}</h3><p>${esc(s.d)}</p>
     <div class="tdots">${STEPS.map((_, i) => `<i class="${i == TI ? 'on' : ''}"></i>`).join('')}</div>
     ${KEY == 'welcome' && (can('manage') || ROLE == 'beta') ? `<label class="ttest"><input type="checkbox" id="tourTest" ${tourTest() ? 'checked' : ''} data-onchange="tourToggle" data-args-change="[{&quot;$&quot;:&quot;checked&quot;}]"> Show every time (testing)</label>` : ''}
     ${left ? `<div class="ttime" aria-hidden="true"><i style="animation-duration:${TOUR_WAIT}ms;animation-delay:-${TOUR_WAIT - left}ms"></i></div>` : ''}
-    <div class="tbtn">${FIRST ? '' : `<button class="btn ghost sm" data-act="endTour">${last ? 'Close' : 'Skip Tour'}</button>`}<span></span>${TI ? '<button class="btn ghost sm" data-act="tourGo" data-args="[-1]">Back</button>' : ''}<button class="btn sm" ${left ? 'disabled title="Next unlocks when the bar fills"' : ''} ${last ? 'data-act="endTour"' : 'data-act="tourGo" data-args="[1]"'}>${last ? 'Finish' : 'Next'}</button></div>${lockNote}</div>`;
+    <div class="tbtn">${FIRST ? '' : `<button class="btn ghost sm" data-act="endTour">${last ? 'Close' : 'Skip Tour'}</button>`}<span></span>${TI ? '<button class="btn ghost sm" data-act="tourGo" data-args="[-1]">Back</button>' : ''}<button class="btn sm" ${left ? 'disabled title="Next unlocks when the bar fills"' : ''} ${last ? 'data-act="endTour"' : 'data-act="tourGo" data-args="[1]"'}>${last ? 'Finish' : 'Next'}</button></div></div>`;
   clearTimeout(tourDraw.u);
   if (left)
     tourDraw.u = setTimeout(() => {
@@ -279,10 +278,8 @@ export function listenForTourKeys() {
         const now = performance.now();
         ESCS = now - ESC_AT < 1500 ? ESCS + 1 : 1;
         ESC_AT = now;
-        if (ESCS >= 3) {
-          endTour();
-          toast('Tour closed. Press ? any time to see it again.');
-        } else toast('Press Esc ' + (3 - ESCS) + ' more time' + (ESCS == 2 ? '' : 's') + ' to leave the tour');
+        /* hidden way out: Esc three times in a row */
+        if (ESCS >= 3) endTour();
       } else if (e.key == 'ArrowRight') tourGo(1);
       else if (e.key == 'ArrowLeft') tourGo(-1);
     },

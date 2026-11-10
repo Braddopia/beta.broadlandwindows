@@ -12,7 +12,6 @@ test('first-ever tour: no Skip, Next unlocks when the bar fills; a replay keeps 
   await expect(next).toBeDisabled();
   // one Escape and the arrow key don't jump past it
   await app.page.keyboard.press('Escape');
-  await expect(app.page.locator('.toast')).toContainText('2 more times');
   await app.page.keyboard.press('ArrowRight');
   await expect(app.page.locator('#tour')).toHaveClass(/open/);
   await expect(card).toContainText('1 of');

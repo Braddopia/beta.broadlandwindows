@@ -595,8 +595,6 @@ body[data-theme=dark] .smap .land{fill:rgba(120,170,255,.08);stroke:#6ea3e8}
 #tour .ttime.done i{background:var(--green,#1f9d55)}
 #tour .tbtn .btn[disabled]{opacity:.45;cursor:not-allowed}
 @keyframes ttFill{from{transform:scaleX(0)}to{transform:scaleX(1)}}
-#tour .tesc{margin:.6rem 0 0;font-size:.72rem;color:var(--muted);opacity:.8}
-#tour .tcard.mid .tesc{text-align:center}
 #tour .tbtn .btn:focus-visible{outline:2px solid rgba(78,163,255,.55);outline-offset:2px;box-shadow:none}
 /* tour spotlight: soft blue ring, not yellow */
 #tour .tspot:not(.none){box-shadow:0 0 0 200vmax rgba(1,18,40,.62),0 0 0 2px rgba(90,184,255,.85),0 0 18px 2px rgba(90,184,255,.35)}
