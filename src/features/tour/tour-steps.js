@@ -105,11 +105,16 @@ export const TAB_TOURS = {
   contacts: [
     T('#main .azbar', 'A To Z', 'Jump straight to a letter in the contact book.'),
     T(
-      '#main .cbook',
+      '#main .cbook .cc2',
       'Contact Cards',
-      'Customers, suppliers and sub-contractors in one book, with phone, email and town. Edit a contact straight from its card.'
+      'Each card is one customer, supplier or sub-contractor, with phone, email and town. Edit a contact straight from its card.'
     ),
-    T(TOOL, 'Import Customers', 'Bring in a list of customers from a spreadsheet.', 'Import'),
+    T(
+      TOOL,
+      'Import Customers',
+      'Have your customers in a spreadsheet already? Bring them all in at once here, instead of typing each one.',
+      'Import'
+    ),
     T(TOOL, 'New Contact', 'Add a single person or company by hand.', 'New Contact'),
   ],
   leads: [
@@ -150,7 +155,11 @@ export const TAB_TOURS = {
       'Today In Numbers',
       'Deliveries due and overdue, and jobs in progress, big enough to read from across the room.'
     ),
-    T('#main .lvg', 'The Boards', 'Live boards for deliveries and jobs. Mark a delivery received straight from here.'),
+    T(
+      '#main .lvg > .panel',
+      'The Boards',
+      'Live boards for deliveries and jobs. Mark a delivery received straight from here.'
+    ),
   ],
   deliveries: [
     T('#main .seg2', 'List Or Board', 'A table, or cards grouped by when they are due.'),
@@ -197,7 +206,11 @@ export const TAB_TOURS = {
   ],
   suppliers: [
     T(TOOL, 'Add Supplier', 'Add a company you buy from, with account number and contacts.', 'Add Supplier'),
-    T('#main .sups', 'Supplier Cards', 'Phone, email, account number and the people you deal with, all on one card.'),
+    T(
+      '#main .sups .supw',
+      'Supplier Cards',
+      'Phone, email, account number and the people you deal with, all on one card.'
+    ),
   ],
   cutting: [
     T(
@@ -243,7 +256,7 @@ export const TAB_TOURS = {
   ],
   downloads: [
     T('#main .chips', 'Filter Brochures', 'Show just the range you need: hardwood, PVCu, doors and more.'),
-    T('#main .book', 'Brochures', 'Open, download or email a brochure to a customer.'),
+    T('#main .book .bc', 'Brochures', 'Each brochure can be opened, downloaded or emailed to a customer.'),
     T(TOOL, 'Copy All Links', 'Copy every brochure link to paste into an email.', 'Copy'),
   ],
   finance: [
@@ -266,7 +279,7 @@ export const TAB_TOURS = {
   ],
   settings: [
     T(
-      '#main .set',
+      '#main .set .set-c',
       'Your Settings',
       'Your details, light or dark, background, fewer animations, the help tour and more, each on its own row.'
     ),

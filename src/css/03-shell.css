@@ -3,7 +3,7 @@
    ========================================================================== */
 .app{display:grid;grid-template-columns:var(--sw) minmax(0,1fr);height:100dvh}
 .wrap{display:flex;flex-direction:column;min-width:0;height:100dvh}
-.main{flex:1;overflow:auto;padding:var(--gap) calc(var(--gap)*1.6) calc(var(--gap)*1.6 + var(--safe-b));scrollbar-gutter:stable}
+.main{flex:1;overflow:auto;padding:var(--gap) calc(var(--gap)*1.6 - var(--sbw,0px)) calc(var(--gap)*1.6 + var(--safe-b)) calc(var(--gap)*1.6);scrollbar-gutter:stable}
 
 /* ---- sidebar ---- */
 .side{margin:.75rem 0 .75rem .75rem;padding:1rem .8rem .8rem;border-radius:20px;background:var(--card);border:1px solid var(--line);box-shadow:var(--sh);display:flex;flex-direction:column;min-height:0;overflow:hidden}

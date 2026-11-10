@@ -28,7 +28,7 @@
   #mnb{display:grid}
   .top{margin:.5rem .5rem 0;border-radius:14px}
   .adminbar,.secbar{margin:.4rem .5rem 0}
-  .main{padding:.8rem .8rem calc(1.2rem + var(--safe-b))}
+  .main{padding:.8rem max(0px,calc(.8rem - var(--sbw,0px))) calc(1.2rem + var(--safe-b)) .8rem}
   .lvg{grid-template-columns:1fr}
   body.lv .main{overflow:auto;display:block}
   body.lv .fl{display:block}

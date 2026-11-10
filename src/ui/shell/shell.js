@@ -23,7 +23,17 @@ import { go, render, setQuery } from './router.js';
 import { setTh } from './theme.js';
 import { uiState } from '../ui-state.js';
 
+/* The page area keeps room for its scrollbar so nothing jumps when one appears. That room comes off the
+   right-hand padding, so every page lines up exactly with the right edge of the top bar. */
+export function fitGutter() {
+  const m = $('#main');
+  if (!m) return;
+  const w = m.offsetWidth - m.clientWidth - (parseFloat(getComputedStyle(m).borderRightWidth) || 0);
+  document.documentElement.style.setProperty('--sbw', Math.max(0, w) + 'px');
+}
 export function shell() {
+  fitGutter();
+  addEventListener('resize', fitGutter);
   $('#mnb').innerHTML = svg(ICONS.menu);
   $('#sbIc').outerHTML = svg(ICONS.search);
   $('#bell').insertAdjacentHTML('afterbegin', svg(ICONS.bell));

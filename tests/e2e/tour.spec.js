@@ -70,7 +70,9 @@ test('each tab plays its own tour once, the first time it opens; Esc three times
       go(v);
       for (const s of steps) {
         const els = [...document.querySelectorAll(s.sel)];
-        const el = s.txt ? els.find((e) => (e.innerText || '').trim().toLowerCase().startsWith(s.txt.toLowerCase())) : els[0];
+        const el = s.txt
+          ? els.find((e) => (e.innerText || '').trim().toLowerCase().startsWith(s.txt.toLowerCase()))
+          : els[0];
         if (!el) out.push(v + ': ' + s.t);
       }
     }
@@ -78,4 +80,20 @@ test('each tab plays its own tour once, the first time it opens; Esc three times
   });
   expect(missing).toEqual([]);
   expect(app.errors).toEqual([]);
+});
+
+test('every page lines up with the top bar, left and right', async ({ app }) => {
+  await app.role('beta');
+  await app.page.waitForTimeout(300); // the page padding settles once the scrollbar room is measured
+  const off = await app.run(() => {
+    const out = [];
+    for (const v of ['home', 'leads', 'contracts', 'service', 'stock', 'contacts', 'settings']) {
+      go(v);
+      const t = document.querySelector('.top').getBoundingClientRect();
+      const m = document.querySelector('#main > *').getBoundingClientRect();
+      if (Math.abs(t.left - m.left) > 1 || Math.abs(t.right - m.right) > 1) out.push(v);
+    }
+    return out;
+  });
+  expect(off).toEqual([]);
 });

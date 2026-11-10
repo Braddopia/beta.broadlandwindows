@@ -228,17 +228,19 @@ export function tourDraw() {
       left = side.right + 16;
       top = r.height > innerHeight * 0.5 ? r.top + 40 : r.bottom - ch;
     } else {
-      if (top + ch > innerHeight - 12) top = Math.max(12, r.top - ch - 16);
-      if (r.width < 260 && r.left > innerWidth / 2) left = r.right - cw;
-      /* a tall block: beside it if there is room, otherwise over its top corner */
-      if (r.height > innerHeight * 0.5) {
-        if (r.right + 20 + cw < innerWidth) {
+      /* line the card up with the page's own edges: things on the right share the page's right edge,
+         things on the left share its left edge; below what it points at, or above if there is no room */
+      const head = $('#main > *'),
+        pg = head ? head.getBoundingClientRect() : { left: r.left, right: r.right };
+      const onRight = r.left + r.width / 2 > (pg.left + pg.right) / 2;
+      left = onRight ? pg.right - cw : pg.left;
+      if (top + ch > innerHeight - 12) top = r.top - ch - 16;
+      /* a tall block with no room above or below: beside it if it is narrow, otherwise over its top edge */
+      if (top < 12 && r.bottom + 16 + ch > innerHeight - 12) {
+        if (r.right + 20 + cw < innerWidth - 12) {
           left = r.right + 20;
-          top = r.top + 40;
-        } else if (r.left - 20 - cw > 0) {
-          left = r.left - 20 - cw;
-          top = r.top + 40;
-        } else top = r.top + 24;
+          top = r.top;
+        } else top = r.top + 16;
       }
     }
     c.style.left = Math.max(12, Math.min(innerWidth - cw - 12, left)) + 'px';
