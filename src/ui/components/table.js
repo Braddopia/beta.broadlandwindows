@@ -31,7 +31,7 @@ export function pagerH(key, p, label) {
 /* sortable header cell */
 export const thS = (key, col, label, cls = '') => {
   const st = uiState[key];
-  return `<th class="srt ${cls}" ${onClick('sortBy', key, col)} aria-sort="${st.sort == col ? (st.dir > 0 ? 'ascending' : 'descending') : 'none'}">${esc(label)}${st.sort == col ? `<span class="ar">${st.dir > 0 ? '▲' : '▼'}</span>` : ''}</th>`;
+  return `<th class="srt ${cls}" data-col="${esc(col)}" ${onClick('sortBy', key, col)} aria-sort="${st.sort == col ? (st.dir > 0 ? 'ascending' : 'descending') : 'none'}">${esc(label)}${st.sort == col ? `<span class="ar">${st.dir > 0 ? '▲' : '▼'}</span>` : ''}</th>`;
 };
 export function sortBy(key, col) {
   const st = uiState[key];

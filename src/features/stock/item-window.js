@@ -652,15 +652,14 @@ export function lenBox(unit) {
   if (unit == 'Meters (M)')
     return {
       l: 'Length (m)',
-      ph: 'e.g. 6.5',
       mode: 'decimal',
       re: /^\d+(\.\d+)?\s*m?$/i,
       err: 'Length in metres, as a number (e.g. 6.5)',
     };
   if (unit == 'PCS')
-    return { l: 'Pieces per pack', ph: 'e.g. 100', mode: 'numeric', re: /^\d+$/, err: 'Pieces per pack, as a whole number' };
+    return { l: 'Pieces per pack', ph: '', mode: 'numeric', re: /^\d+$/, err: 'Pieces per pack, as a whole number' };
   /* Each, Units, Pair, Single: how many come in one */
-  return { l: 'Qty (how many in one)', ph: 'e.g. 10', mode: 'numeric', re: /^\d+$/, err: 'How many in one, as a whole number' };
+  return { l: 'Qty (how many in one)', ph: '', mode: 'numeric', re: /^\d+$/, err: 'How many in one, as a whole number' };
 }
 export function lenSync() {
   const u = $('#f_unit'),
