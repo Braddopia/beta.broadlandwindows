@@ -11,6 +11,10 @@ import { store } from '../../data/persistence.js';
 import { SAFE } from '../../data/sanitize.js';
 import { state } from '../../data/state.js';
 import { optimise } from '../../domain/cutlist.js';
+import { jobTitle } from '../../domain/job-title.js';
+import { canSee } from '../../domain/permissions.js';
+import { uuid } from '../../core/ids.js';
+import { fx } from '../files/files.js';
 import { printDoc } from '../../print/print.js';
 import { fieldControl } from '../../ui/forms/fields.js';
 import { form } from '../../ui/forms/form.js';
@@ -137,14 +141,27 @@ const kpis = (S, pct) =>
   String(
     html`<div class="kpi"><small>Boards Needed</small><b>${S.boards}</b>${S.byType.length ? html`<span class="ksub">${S.byType.map((t) => t.used + ' × ' + t.label).join(' · ')}</span>` : ''}</div><div class="kpi"><small>Pieces Placed</small><b>${S.pieces}</b>${S.unplaced ? html`<span class="ksub">${S.unplaced} not placed</span>` : ''}</div><div class="kpi ${pct < 60 && S.boards ? 'warn' : ''}"><small>Board Used</small><b>${pct}%</b><span class="cut-meter"><i style="width:${pct}%"></i></span></div><div class="kpi"><small>Waste</small><b>${m2(S.waste)}</b></div>`
   );
+/** the contract the job number belongs to, if any */
+export const cutContract = (D = cutData()) => {
+  const n = String(D.jobNo || '').trim();
+  return n ? state.contracts.find((c) => String(c.id) == n) || null : null;
+};
+/** "1023456 - JOB NAME", or the page name when no job is given */
+const cutTitle = (D) => jobTitle(D.jobNo, D.jobName) || 'Panel Optimiser';
 export function vCutting() {
   const D = cutData(),
-    S = optimise(D).stats;
-  return String(html`<div class="head"><div><h1>Panel Optimiser</h1><span class="muted" id="cutSub">${D.name ? D.name + ' · ' : ''}Plan how to cut pieces from whole boards with the least waste</span></div>
-    <div class="tools"><button class="mini" ${raw(onClick('cutJobs'))}>Saved Lists (${D.jobs.length})</button><button class="mini" ${raw(onClick('cutNew'))}>New List</button><button class="mini" ${raw(onClick('cutSave'))}>Save</button><button class="btn" ${raw(onClick('cutPrint'))}>Print Plan</button></div></div>
-  <div class="kpis cut-k" id="cutKpis">${raw(kpis(S, Math.round(S.efficiency * 100)))}</div>
-  <div class="cut">
-    <div class="cut-in" ${raw(onEvent('oninput', 'cutEdit', 'event'))} ${raw(onEvent('onchange', 'cutEdit', 'event'))}>
+    S = optimise(D).stats,
+    k = cutContract(D);
+  return String(html`<div class="head"><div><h1 id="cutTitle">${cutTitle(D)}</h1><span class="muted">Panel Optimiser · plan how to cut pieces from whole boards with the least waste</span></div>
+    <div class="tools"><button class="mini" ${raw(onClick('cutJobs'))}>Saved Lists (${D.jobs.length})</button><button class="mini" ${raw(onClick('cutNew'))}>New List</button><button class="mini" ${raw(onClick('cutSave'))}>Save</button><button class="mini pri" id="cutToC" ${raw(onClick('cutToContract'))} ${k && canSee('contracts') ? '' : raw('hidden')}>Save To Contract</button><button class="btn" ${raw(onClick('cutPrint'))}>Print Plan</button></div></div>
+  <div class="cut-in" ${raw(onEvent('oninput', 'cutEdit', 'event'))} ${raw(onEvent('onchange', 'cutEdit', 'event'))}>
+    <div class="panel cut-job"><h2><span>Job</span><small class="muted nocap" id="cutJobHint">${k ? 'Contract ' + k.id + ' found: Save To Contract keeps the plan with its documents' : 'Type the contract number to link the plan to it'}</small></h2><div class="cut-og cut-og4">
+      <div class="ff"><label for="cut_job_no">Job Number</label>${raw(fieldControl({ k: '', max: 30, list: 'cutCons', ph: 'e.g. 1023456' }, D.jobNo || '', { id: 'cut_job_no' }))}</div>
+      <div class="ff wide"><label for="cut_job_name">Job Name</label>${raw(fieldControl({ k: '', max: 80, ph: 'e.g. Smith kitchen' }, D.jobName || '', { id: 'cut_job_name' }))}</div>
+      <div class="ff"><label for="cut_opt_kerf">Saw Blade Width <span class="nocap">(mm)</span></label>${raw(fieldControl({ k: '', t: 'number', max: 20 }, D.kerf, { id: 'cut_opt_kerf' }))}</div>
+      <div class="ff"><label for="cut_opt_trim">Edge Trim Each Side <span class="nocap">(mm)</span></label>${raw(fieldControl({ k: '', t: 'number', max: 100 }, D.trim, { id: 'cut_opt_trim' }))}</div>
+    </div><datalist id="cutCons">${canSee('contracts') ? state.contracts.map((c) => html`<option value="${c.id}">${jobTitle(c.id, c.name)}</option>`) : ''}</datalist></div>
+    <div class="cut-lists">
       <div class="panel"><h2><span>Boards In Stock</span><small class="muted nocap">mm · how many 0 = as many as needed</small></h2>${table('sheets', D.sheets)}
         <div class="cut-add"><button class="mini" ${raw(onClick('cutAdd', 'sheets'))}>+ Add Board</button>${PRESETS.map(
           (p, i) =>
@@ -152,13 +169,10 @@ export function vCutting() {
         )}</div></div>
       <div class="panel"><h2><span>Pieces To Cut</span><small class="muted nocap">mm</small></h2>${table('parts', D.parts)}
         <div class="cut-add"><button class="mini" ${raw(onClick('cutAdd', 'parts'))}>+ Add Piece</button></div></div>
-      <div class="panel cut-o"><h2><span>Options</span><small class="muted nocap">mm</small></h2><div class="cut-og">
-        <div class="ff"><label for="cut_opt_kerf">Saw Blade Width</label>${raw(fieldControl({ k: '', t: 'number', max: 20 }, D.kerf, { id: 'cut_opt_kerf' }))}</div>
-        <div class="ff"><label for="cut_opt_trim">Edge Trim Each Side</label>${raw(fieldControl({ k: '', t: 'number', max: 100 }, D.trim, { id: 'cut_opt_trim' }))}</div>
-      </div></div>
     </div>
-    <div class="cut-out" id="cutOut">${raw(cutResults())}</div>
-  </div>`);
+  </div>
+  <div class="kpis cut-k" id="cutKpis">${raw(kpis(S, Math.round(S.efficiency * 100)))}</div>
+  <div class="cut-out" id="cutOut">${raw(cutResults())}</div>`);
 }
 /* redraw only the plan and the totals, so the box being typed in keeps its place */
 let saveT = 0;
@@ -175,13 +189,39 @@ function refresh() {
   clearTimeout(saveT);
   saveT = setTimeout(store, 400);
 }
+/* the title, the contract hint and the Save To Contract button follow the job boxes */
+function jobBits() {
+  const D = cutData(),
+    k = cutContract(D),
+    t = $('#cutTitle'),
+    h = $('#cutJobHint'),
+    b = $('#cutToC');
+  if (t) t.textContent = cutTitle(D);
+  if (h)
+    h.textContent = k
+      ? 'Contract ' + k.id + ' found: Save To Contract keeps the plan with its documents'
+      : 'Type the contract number to link the plan to it';
+  if (b) b.hidden = !(k && canSee('contracts'));
+}
 /* a box changed: read it back into the list (ids are cut_<kind>_<row>_<field>) */
 export function cutEdit(e) {
   const t = e && e.target,
-    m = t && /^cut_(sheets|parts|opt)_(\w+?)(?:_(\w+))?$/.exec(t.id);
+    m = t && /^cut_(sheets|parts|opt|job)_(\w+?)(?:_(\w+))?$/.exec(t.id);
   if (!m) return;
   const D = cutData();
-  if (m[1] == 'opt') D[m[2]] = SAFE.num(t.value, { min: 0, max: m[2] == 'kerf' ? 20 : 100, dp: 1 }) ?? 0;
+  if (m[1] == 'job') {
+    if (m[2] == 'no') {
+      D.jobNo = SAFE.text(t.value, 30);
+      /* a known contract fills the job name in (unless one was typed) */
+      const k = cutContract(D),
+        nm = $('#cut_job_name');
+      if (k && nm && (!D.jobName || D.jobName == D.autoName)) {
+        D.jobName = D.autoName = k.name || '';
+        nm.value = D.jobName;
+      }
+    } else D.jobName = SAFE.text(t.value, 80);
+    jobBits();
+  } else if (m[1] == 'opt') D[m[2]] = SAFE.num(t.value, { min: 0, max: m[2] == 'kerf' ? 20 : 100, dp: 1 }) ?? 0;
   else {
     const r = D[m[1]][+m[2]],
       k = m[3];
@@ -241,10 +281,20 @@ export function cutSave() {
   form(
     'Save Cut List',
     [{ k: 'name', l: 'Name', req: 1, max: 60, ph: 'e.g. Job 2402318 kitchen units' }],
-    { name: D.name },
+    { name: D.name || jobTitle(D.jobNo, D.jobName) },
     (o) => {
       const name = SAFE.text(o.name, 60),
-        copy = JSON.parse(JSON.stringify({ name, kerf: D.kerf, trim: D.trim, sheets: D.sheets, parts: D.parts }));
+        copy = JSON.parse(
+          JSON.stringify({
+            name,
+            jobNo: D.jobNo,
+            jobName: D.jobName,
+            kerf: D.kerf,
+            trim: D.trim,
+            sheets: D.sheets,
+            parts: D.parts,
+          })
+        );
       D.name = name;
       D.jobs = D.jobs.filter((j) => j.name != name);
       D.jobs.unshift({ ...copy, at: today(), by: USER });
@@ -275,7 +325,17 @@ export function cutOpen(i) {
   if (!j) return;
   Object.assign(
     D,
-    JSON.parse(JSON.stringify({ name: j.name, kerf: j.kerf, trim: j.trim, sheets: j.sheets, parts: j.parts }))
+    JSON.parse(
+      JSON.stringify({
+        name: j.name,
+        jobNo: j.jobNo || '',
+        jobName: j.jobName || '',
+        kerf: j.kerf,
+        trim: j.trim,
+        sheets: j.sheets,
+        parts: j.parts,
+      })
+    )
   );
   store();
   closeModal();
@@ -299,25 +359,40 @@ export function cutForget(i) {
     true
   );
 }
-/* the plan on the company's standard A4 report: totals, the cut list, then each board to scale */
-export function cutPrint() {
+/* the plan on the company's standard A4 report: job first, totals, the cut list, then each board.
+   asHtml: hand the page back (to keep on the contract) instead of opening it */
+function planDoc(asHtml) {
   const D = cutData(),
     R = optimise(D),
     S = R.stats;
-  if (!R.boards.length) return toast('Add a board and some pieces first');
+  if (!R.boards.length) {
+    toast('Add a board and some pieces first');
+    return null;
+  }
   const boards = R.boards
     .map(
       (b, i) =>
         `<section class="cbp"><h3>Board ${i + 1} of ${R.boards.length}: ${html`${b.sheet}`} <span>${mm(b.L)} × ${mm(b.W)} mm · ${b.pieces.length} pieces · ${Math.round((b.used / b.area) * 100)}% used</span></h3>${boardSvg(b, i, true)}</section>`
     )
     .join('');
-  printDoc(
-    'Cutting Plan',
-    (D.name ? D.name + ' · ' : '') + 'Saw blade ' + D.kerf + ' mm · edge trim ' + D.trim + ' mm',
+  const title = jobTitle(D.jobNo, D.jobName);
+  return printDoc(
+    title || 'Cutting Plan',
+    (title ? 'Cutting plan · ' : '') + 'Saw blade ' + D.kerf + ' mm · edge trim ' + D.trim + ' mm',
     [],
     [],
     {
-      kind: 'Panel Optimiser',
+      kind: 'Cutting Plan',
+      asHtml,
+      groups: [
+        {
+          t: 'Job',
+          r: [
+            ['Job number', D.jobNo || '-'],
+            ['Job name', D.jobName ? String(D.jobName).toLocaleUpperCase('en-GB') : '-'],
+          ],
+        },
+      ],
       kpis: [
         ['Boards needed', String(S.boards), S.byType.map((t) => t.used + ' × ' + t.label).join(', ')],
         ['Pieces', String(S.pieces), S.unplaced ? S.unplaced + ' not placed' : ''],
@@ -351,4 +426,39 @@ export function cutPrint() {
       post: `<style>.cbp{break-inside:avoid;margin:5mm 0 0}.cbp h3{display:flex;justify-content:flex-start;align-items:baseline;gap:4mm}.cbp h3 span{margin-left:auto;font-weight:400;color:#5b6b80;font-size:8pt}.cut-b{display:block;width:100%;height:auto;max-height:110mm;border:.3mm solid #13233a;border-radius:1.5mm}.cut-b .bd{fill:#f7f9fc}.cut-b .gl{fill:none;stroke:#e3e8ef;stroke-width:1}.cut-b rect{stroke-width:2}.cut-b text{text-anchor:middle;dominant-baseline:middle;fill:#13233a;font-weight:700;font-family:Arial,sans-serif}.cut-b text.sz{font-weight:400}</style>${boards}`,
     }
   );
+}
+export function cutPrint() {
+  planDoc(false);
+}
+/* keep the plan with the contract's documents (Photos And Docs in the contract window) */
+export async function cutToContract() {
+  const D = cutData(),
+    k = cutContract(D);
+  if (!k) return toast('Type the contract number in Job Number first');
+  if (!canSee('contracts')) return toast('Your account cannot open contracts');
+  const page = planDoc(true);
+  if (!page) return;
+  const name = jobTitle(k.id, D.jobName || k.name) + ' Cutting Plan ' + today() + '.html',
+    blob = new Blob([page], { type: 'text/html' });
+  try {
+    await fx('readwrite', (st) =>
+      st.put({
+        id: uuid(),
+        ref: 'contract:' + k.id,
+        name: SAFE.text(name, 120),
+        cat: 'Drawing',
+        size: blob.size,
+        type: 'text/html',
+        gen: 'cutplan',
+        time: Date.now(),
+        by: USER,
+        blob,
+      })
+    );
+    audit('Cutting plan saved to contract', k.id, name);
+    store();
+    toast('Saved to contract ' + k.id + ' documents');
+  } catch (e) {
+    toast('Document storage is not available here');
+  }
 }

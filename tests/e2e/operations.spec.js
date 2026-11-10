@@ -73,7 +73,7 @@ test('service visits show on the calendar for every role that can see them', asy
           .join('|')
       ),
       role
-    ).toContain('Service: Sample Customer I');
+    ).toContain('Service: 2402311 - SAMPLE CUSTOMER I');
   }
 });
 

@@ -1,5 +1,6 @@
 /* features/contracts/contract-record: The contract window: its steps, fields and saving. */
 import { company } from '../../data/company.js';
+import { jobTitle } from '../../domain/job-title.js';
 import { CTYPES } from '../../config/constants.js';
 import { onClick, rowClick } from '../../core/actions.js';
 import { fd, today } from '../../core/dates.js';
@@ -53,7 +54,8 @@ export function defineContractRecord() {
       log: [],
     }),
     heading: (W) =>
-      `${W.v.id}  ${[W.v.title, W.v.name].filter(Boolean).join(' ') || 'New contract'}${W.v.company ? ' · ' + W.v.company : ''}`,
+      (W.v.name ? jobTitle(W.v.id, [W.v.title, W.v.name].filter(Boolean).join(' ')) : W.v.id + '  New contract') +
+      (W.v.company ? ' · ' + W.v.company : ''),
     headStats: (W) =>
       `${W.v.flash ? `<span class="flash">${esc(W.v.flash)}</span>` : ''}<span><small>Value</small><b>${m0(W.v.value)}</b></span><span><small>Paid</small><b>${m0(W.v.paid)}</b></span><span class="${(+W.v.value || 0) - (+W.v.paid || 0) > 0 ? 'hk-due' : 'hk-ok'}"><small>Outstanding</small><b>${(+W.v.value || 0) - (+W.v.paid || 0) > 0 ? m0((+W.v.value || 0) - (+W.v.paid || 0)) : 'Paid'}</b></span><span><small>Fit</small><b>${W.v.fit ? fd(W.v.fit) : '-'}</b></span>`,
     actions: (W) =>

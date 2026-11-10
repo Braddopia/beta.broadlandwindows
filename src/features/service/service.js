@@ -1,5 +1,6 @@
 /* features/service/service: Service calls: the page, the call sheet and service reports. */
 import { MAX_PHOTOS, SVC_CAT, SVC_PR, SVC_ST } from '../../config/constants.js';
+import { jobTitle } from '../../domain/job-title.js';
 import { onClick, rowClick } from '../../core/actions.js';
 import { fd, fdl, today } from '../../core/dates.js';
 import { $, esc } from '../../core/dom.js';
@@ -323,8 +324,8 @@ export function reportCall(id, mode) {
     return;
   }
   printDoc(
-    'Service Call ' + c.id,
-    c.name + (c.town ? ' · ' + c.town : ''),
+    c.contract ? jobTitle(c.contract, c.name) : 'Service Call ' + c.id,
+    (c.contract ? 'Service call ' + c.id + ' · ' : '') + c.name + (c.town ? ' · ' + c.town : ''),
     [
       ['Phone', c.phone],
       ['Address', [c.address, c.town].filter(Boolean).join(', ')],

@@ -1,5 +1,6 @@
 /* features/search/search: Search: the top bar list, the Ctrl+K box and the rotating hints. */
 import { $, $$, esc } from '../../core/dom.js';
+import { jobTitle } from '../../domain/job-title.js';
 import { tc } from '../../core/format.js';
 import { ICONS, svg } from '../../core/icons.js';
 import { SAFE } from '../../data/sanitize.js';
@@ -83,7 +84,7 @@ export const SRCH = [
     'contracts',
     'Contracts',
     () => state.contracts,
-    (c) => [c.name || 'Contract ' + c.id, ['Contract ' + c.id, c.stage, c.town].filter(Boolean).join(' · ')],
+    (c) => [jobTitle(c.id, c.name), ['Contract', c.stage, c.town].filter(Boolean).join(' · ')],
     (c) => openContract(c.id),
   ],
   [

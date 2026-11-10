@@ -15,3 +15,13 @@ test('exactKeys skips empty and non-text values', () => {
   assert.deepEqual(exactKeys({ id: 'S-0871', name: '', photos: ['x'] }), ['s0871']);
   assert.deepEqual(exactKeys(null), []);
 });
+
+import { jobTitle, recTitle } from '../../src/domain/job-title.js';
+test('jobs are named "number - NAME IN CAPS"', () => {
+  assert.equal(jobTitle('1023456', 'Smith kitchen'), '1023456 - SMITH KITCHEN');
+  assert.equal(jobTitle(' 2402318 ', '  sample   customer e '), '2402318 - SAMPLE CUSTOMER E');
+  assert.equal(jobTitle('', 'Smith'), 'SMITH');
+  assert.equal(jobTitle('1023456', ''), '1023456');
+  assert.equal(recTitle({ id: 'L0001', name: 'Sample Customer A' }), 'L0001 - SAMPLE CUSTOMER A');
+  assert.equal(recTitle(null), '');
+});

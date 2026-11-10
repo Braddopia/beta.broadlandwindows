@@ -173,8 +173,9 @@ export function printDoc(t, sub, rows, ph, o) {
   rows = (rows || []).filter((r) => r && !blankV(r[1]));
   ph = (ph || []).map((p) => SAFE.img(p)).filter((p) => p && p !== PH_BLANK);
   const cus = !!o.customer;
-  const w = o.__w || window.open('', '_blank');
-  if (!w) {
+  /* o.asHtml: hand back the finished page (to keep as a document) instead of opening a window */
+  const w = o.asHtml ? null : o.__w || window.open('', '_blank');
+  if (!w && !o.asHtml) {
     toast('Allow pop-ups to open reports');
     return;
   }
@@ -240,9 +241,10 @@ export function printDoc(t, sub, rows, ph, o) {
   const foot = cus
     ? `<span>${esc(company.name)} · ${esc(company.addr)}${company.vatNo ? ' · VAT ' + esc(company.vatNo) : ''}${company.fensa ? ' · FENSA ' + esc(company.fensa) : ''}</span><span>${esc(ref)}</span>`
     : `<span>Broadland Windows · Internal use only</span><span>Printed ${now.toLocaleString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>`;
-  w.document
-    .write(`<!doctype html><html><head><meta charset="utf-8"><title>${esc(t)}</title><style>${PRINT_BASE}${cus ? PRINT_CUS : PRINT_INT}</style></head><body>
-  <div class="tb"><button data-pa="print">Print or save as PDF</button><button data-pa="close">Close</button></div><div class="pg">${page}</div><footer class="ft">${foot}</footer></body></html>`);
+  const doc = `<!doctype html><html><head><meta charset="utf-8"><title>${esc(t)}</title><style>${PRINT_BASE}${cus ? PRINT_CUS : PRINT_INT}</style></head><body>
+  ${o.asHtml ? '' : '<div class="tb"><button data-pa="print">Print or save as PDF</button><button data-pa="close">Close</button></div>'}<div class="pg">${page}</div><footer class="ft">${foot}</footer></body></html>`;
+  if (o.asHtml) return doc;
+  w.document.write(doc);
   w.document.close();
   fitPage(w);
 }

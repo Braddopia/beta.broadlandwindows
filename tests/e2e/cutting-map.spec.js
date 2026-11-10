@@ -58,7 +58,7 @@ test('Panel Optimiser: change a piece, the plan updates; save, reopen and print 
   await w.waitForLoadState();
   // the company's standard A4 portrait report
   await expect(w.locator('h1')).toHaveText('Cutting Plan');
-  await expect(w.locator('.pg')).toContainText('Sample kitchen');
+  await expect(w.locator('.pg')).toContainText('Cut List');
   await expect(w.locator('.ih img')).toHaveCount(1);
   await expect(w.locator('.cut-b')).toHaveCount(4);
   await expect(w.locator('table.dt').first()).toContainText('Name');
@@ -79,12 +79,59 @@ test('Panel Optimiser: the Smarts Aluminium boards are one click away', async ({
   await expect(app.page.locator('.toast')).toContainText('already listed');
 });
 
-test('Remove Stock has Scan buttons for the Stock ID and the item code', async ({ app }) => {
+test('Remove Stock has a scan icon inside the Stock ID and item code boxes', async ({ app }) => {
   await app.role('staff');
   await app.go('stock');
   await app.call('stockForm', 'remove');
-  await expect(app.page.locator('#mbox .ff:has(#f_pid) .scan')).toHaveCount(1);
-  await expect(app.page.locator('#mbox .ff:has(#f_item) .scan')).toHaveCount(1);
-  await app.page.click('#mbox .ff:has(#f_pid) .scan');
+  await expect(app.page.locator('#mbox .ff:has(#f_pid) .fscan-b')).toHaveCount(1);
+  await expect(app.page.locator('#mbox .ff:has(#f_item) .fscan-b')).toHaveCount(1);
+  await app.page.click('#mbox .ff:has(#f_pid) .fscan-b');
   await expect(app.page.locator('#scanner')).toHaveClass(/open/);
+});
+
+test('Panel Optimiser: job number and name lead everywhere, and the plan can be kept on the contract', async ({ app }) => {
+  await app.role('beta');
+  await app.go('cutting');
+  await expect(app.page.locator('#cutToC')).toBeHidden();
+  await app.page.fill('#cut_job_no', '2402318');
+  // a known contract fills the job name in and offers Save To Contract
+  await expect(app.page.locator('#cut_job_name')).toHaveValue('Sample Customer E');
+  await expect(app.page.locator('#cutTitle')).toHaveText('2402318 - SAMPLE CUSTOMER E');
+  await expect(app.page.locator('#cutToC')).toBeVisible();
+  // printed plan: the job first
+  const [w] = await Promise.all([app.nextPopup(), app.page.click('#main >> text=Print Plan')]);
+  await w.waitForLoadState();
+  await expect(w.locator('h1')).toHaveText('2402318 - SAMPLE CUSTOMER E');
+  await expect(w.locator('.pg')).toContainText('Job number');
+  await w.close();
+  // kept with the contract's documents
+  await app.page.click('#cutToC');
+  await expect(app.page.locator('.toast')).toContainText('Saved to contract 2402318');
+  const docs = await app.page.evaluate(
+    () =>
+      new Promise((ok) => {
+        const r = indexedDB.open('bb_files');
+        r.onsuccess = () => {
+          const q = r.result.transaction('f').objectStore('f').getAll();
+          q.onsuccess = () => ok(q.result.map((f) => [f.ref, f.name, f.cat]));
+        };
+        r.onerror = () => ok([]);
+      })
+  );
+  expect(docs.some(([ref, name]) => ref == 'contract:2402318' && /^2402318 - SAMPLE CUSTOMER E Cutting Plan/.test(name))).toBe(
+    true
+  );
+  expect(app.errors).toEqual([]);
+});
+
+test('contracts are named "number - NAME" in the window, the list, search and the calendar', async ({ app }) => {
+  await app.role('beta');
+  await app.openContract('2402318');
+  await expect(app.page.locator('#mbox .rw-h h2')).toContainText('2402318 - SAMPLE CUSTOMER E');
+  await app.closeAll();
+  await app.go('contracts');
+  await expect(app.page.locator('#main tbody')).toContainText('SAMPLE CUSTOMER E');
+  await app.page.fill('#sb input', 'Sample Customer E');
+  await expect(app.page.locator('#sres')).toContainText('2402318 - SAMPLE CUSTOMER E');
+  expect(await app.run(() => evs('2026-11-12').map((e) => e.t))).toContain('2402318 - SAMPLE CUSTOMER E');
 });

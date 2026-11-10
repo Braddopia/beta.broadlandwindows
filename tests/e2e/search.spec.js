@@ -60,7 +60,7 @@ test('an exact number, name or phone is highlighted first, for every kind of rec
     await app.page.fill('#sb input', q);
     const first = app.page.locator('#sres .sri').first();
     await expect(first, q).toHaveClass(/sri-x/);
-    await expect(first, q).toContainText(label);
+    await expect(first, q).toContainText(new RegExp(label, 'i'));
     const row = app.page.locator('#main .clk-r.xhit');
     await expect(row, q).toHaveCount(1);
     await expect(row, q).toContainText('Exact Match');

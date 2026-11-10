@@ -140,7 +140,10 @@ export async function recDocType(id, v) {
 export function recDocOpen(id) {
   const f = (recordWin.docs || []).find((x) => x.id == id);
   if (!f) return;
-  if (/^(application\/pdf|image\/(png|jpe?g|gif|webp)|text\/plain)/.test(f.blob.type))
+  if (
+    /^(application\/pdf|image\/(png|jpe?g|gif|webp)|text\/plain)/.test(f.blob.type) ||
+    (f.gen == 'cutplan' && f.blob.type == 'text/html')
+  )
     window.open(URL.createObjectURL(f.blob), '_blank', 'noopener');
   else download(f.name, f.blob);
 }

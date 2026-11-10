@@ -1,5 +1,6 @@
 /* features/calendar/calendar: The Calendar: fittings, service visits, deliveries and holidays. */
 import { onClick } from '../../core/actions.js';
+import { jobTitle } from '../../domain/job-title.js';
 import { BH, fd, isWk, iso, today } from '../../core/dates.js';
 import { esc } from '../../core/dom.js';
 import { state } from '../../data/state.js';
@@ -24,7 +25,7 @@ export function evs(k) {
       .forEach((c) =>
         e.push({
           c: 'fit',
-          t: c.name,
+          t: jobTitle(c.id, c.name),
           s: c.product + ' (' + (c.fitter || 'no fitter') + ')',
           f: ['openContract', c.id],
           k: 'Fitting',
@@ -36,7 +37,7 @@ export function evs(k) {
       .forEach((c) =>
         e.push({
           c: 'svc',
-          t: (c.visitTime ? c.visitTime + ' ' : '') + 'Service: ' + c.name,
+          t: (c.visitTime ? c.visitTime + ' ' : '') + 'Service: ' + (c.contract ? jobTitle(c.contract, c.name) : c.name),
           s: c.issue,
           f: ['editCall', c.id],
           k: 'Service visit',
@@ -94,7 +95,7 @@ export function calMine() {
       .filter((c) => c.fit && c.fit >= td && c.stage != 'Complete' && forPerson(m, c.fitter))
       .sort((a, b) => a.fit.localeCompare(b.fit));
   return `<div class="two" style="margin-top:1rem"><div class="panel"><h2><span>My Holiday</span><span class="acts"><button class="btn sm" data-act="bookMine">Book Holiday</button></span></h2>${holBody(m)}${H.length ? `<div class="hprev"><div class="hprev-h"><b>Coming Up</b></div>${H.map((h) => `<div class="row"><span>${fd(h.from)} to ${fd(h.to)} · ${h.days} day${h.days == 1 ? '' : 's'}${h.note ? `<br><span class="muted">${esc(h.note)}</span>` : ''}</span><span class="acts">${paidTag(h)}${holTag(h)}</span></div>`).join('')}</div>` : ''}</div>
-  <div class="panel"><h2>My Jobs</h2>${J.map((c) => `<div class="row"><span><b>${fd(c.fit)}</b> ${esc(c.name)}<br><span class="muted">${esc(c.product)}, ${esc(c.town || '')}</span></span></div>`).join('') || emptyArt('done', 'No fittings booked for you.')}</div></div>`;
+  <div class="panel"><h2>My Jobs</h2>${J.map((c) => `<div class="row"><span><b>${fd(c.fit)}</b> ${esc(jobTitle(c.id, c.name))}<br><span class="muted">${esc(c.product)}, ${esc(c.town || '')}</span></span></div>`).join('') || emptyArt('done', 'No fittings booked for you.')}</div></div>`;
 }
 export function vCalendar() {
   const n = new Date(),
@@ -172,8 +173,8 @@ export function vCalendar() {
   <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:.6rem;margin-bottom:.8rem;align-items:center"><h2 style="margin:0">${esc(title)}</h2><div class="chips" style="margin:0">${[['fit', 'Fittings', '#034ea2'], ['svc', 'Service visits', '#e08a00'], ...(can('manage') ? [['del', 'Deliveries', '#7a4fd0']] : []), ['hol', 'Holidays', '#12794c']].map(([k, t, c]) => `<button class="chip ${L[k] ? 'on' : ''}" ${onClick('togUI', 'cal.ly.' + k)}><span class="ldot" style="background:${c}"></span>${t}</button>`).join('')}</div></div>${grid}${day}
   ${
     can('manage')
-      ? `<div class="two" style="margin-top:1rem"><div class="panel"><h2>Upcoming Fittings</h2>${fits.map((c) => `<div class="row"><span><b>${fd(c.fit)}</b> ${esc(c.name)}<br><span class="muted">${esc(c.product)}, ${esc(c.town)} (${esc(c.fitter || 'no fitter')})</span></span><button class="mini pri" ${onClick('markFit', c.id)}>Mark fitted</button></div>`).join('') || '<p class="empty">No fittings booked.</p>'}</div>
-  <div class="panel"><h2>Needs A Fit Date</h2>${un.map((c) => `<div class="row"><span><b>${esc(c.name)}</b> <span class="muted">#${esc(c.id)}</span><br><span class="muted">${esc(c.product)}</span></span><button class="mini" ${onClick('editContract', c.id)}>Set date</button></div>`).join('') || '<p class="empty">Everything has a date.</p>'}</div></div>`
+      ? `<div class="two" style="margin-top:1rem"><div class="panel"><h2>Upcoming Fittings</h2>${fits.map((c) => `<div class="row"><span><b>${fd(c.fit)}</b> ${esc(jobTitle(c.id, c.name))}<br><span class="muted">${esc(c.product)}, ${esc(c.town)} (${esc(c.fitter || 'no fitter')})</span></span><button class="mini pri" ${onClick('markFit', c.id)}>Mark fitted</button></div>`).join('') || '<p class="empty">No fittings booked.</p>'}</div>
+  <div class="panel"><h2>Needs A Fit Date</h2>${un.map((c) => `<div class="row"><span><b>${esc(jobTitle(c.id, c.name))}</b><br><span class="muted">${esc(c.product)}</span></span><button class="mini" ${onClick('editContract', c.id)}>Set date</button></div>`).join('') || '<p class="empty">Everything has a date.</p>'}</div></div>`
       : calMine()
   }`;
 }

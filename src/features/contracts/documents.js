@@ -1,5 +1,6 @@
 /* features/contracts/documents: Printed contract documents: summary, job sheet, customer details and invoice. */
 import { company } from '../../data/company.js';
+import { recTitle } from '../../domain/job-title.js';
 import { fd, fdl, today } from '../../core/dates.js';
 import { esc } from '../../core/dom.js';
 import { money, sum } from '../../core/format.js';
@@ -49,7 +50,7 @@ export function reportContract(id, mode) {
       : null;
   if (mode == 'c') {
     printDoc(
-      'Contract ' + c.id,
+      recTitle(c),
       c.product,
       [
         ['Installation address', addr],
@@ -79,8 +80,8 @@ export function reportContract(id, mode) {
     todo = CK.filter((k) => !(c.chk || {})[k]),
     mg = c.cost && c.value ? Math.round((100 * (c.value - c.cost)) / c.value) + '%' : '';
   printDoc(
-    'Contract ' + c.id,
-    c.name + (c.product ? ' · ' + c.product : ''),
+    recTitle(c),
+    c.product || '',
     [
       ['Phone', telOf(c)],
       ['Email', mailOf(c)],
@@ -175,12 +176,14 @@ export function reportCust(kind, id) {
   const r = kind == 'lead' ? state.leads.find((x) => x.id == id) : state.contracts.find((x) => x.id == id);
   if (!r) return;
   printDoc(
-    'Customer details',
-    [r.title, r.name].filter(Boolean).join(' ') + (r.company ? ' · ' + r.company : ''),
+    kind == 'lead' ? 'Customer details' : recTitle(r),
+    kind == 'lead'
+      ? [r.title, r.name].filter(Boolean).join(' ') + (r.company ? ' · ' + r.company : '')
+      : 'Customer details' + (r.company ? ' · ' + r.company : ''),
     [],
     [],
     {
-      kind: (kind == 'lead' ? 'Lead ' : 'Contract ') + r.id,
+      kind: kind == 'lead' ? 'Lead ' + r.id : 'Customer details',
       ref: r.id,
       groups: custGroups(r),
       post:
@@ -233,8 +236,8 @@ export function reportJob(id) {
     bal = c.value - c.paid,
     ph = [c.mob1, c.mob2, c.home1, c.home2, c.work].filter(Boolean),
     bad = O.filter(opSafe).length;
-  printDoc('Fitting job sheet', [c.title, c.name].filter(Boolean).join(' ') + ' · ' + siteOf(c), [], c.photos, {
-    kind: 'Job ' + c.id,
+  printDoc(recTitle(c), siteOf(c), [], c.photos, {
+    kind: 'Fitting job sheet',
     ref: c.id,
     kpis: [
       [
@@ -337,8 +340,8 @@ export function invoicePrint(id) {
     .filter(Boolean)
     .join(', ');
   printDoc(
-    'Invoice ' + no,
-    c.product || '',
+    recTitle(c),
+    'Invoice ' + no + (c.product ? ' · ' + c.product : ''),
     [
       ['Invoice number', no],
       ['Invoice date', fdl(c.invoiceDate || today())],
