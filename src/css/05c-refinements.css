@@ -638,3 +638,20 @@ body[data-view=messages]:not(:has(#modal.open)) #rpb{display:none}
 .cc2-b .cpr{display:grid;grid-template-columns:4.8rem minmax(0,1fr);align-items:start;gap:.6rem}
 .cc2-b .cpr .cpl{justify-content:center;margin-top:.05rem}
 .cc2-b .cpv{display:flex;flex-direction:column;gap:.3rem;min-width:0}
+
+/* Panel Optimiser: the job in its own card, cutting settings beside it; boards and pieces as two equal halves
+   with the size columns centred under their headings */
+.cut-top{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:1rem;margin:0}
+.cut-top>.panel{margin:0}
+.cut-og.cut-og2{grid-template-columns:1fr 1fr}
+.cut-job .cut-og2{grid-template-columns:minmax(0,1fr) minmax(0,2fr)}
+.cut-lists{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0 2.2rem}
+.cut-lists>section+section{padding-left:2.2rem}
+.cut-t th.n,.cut-t td.n input,.cut-t th.c-turn,.cut-t td select{text-align:center;text-align-last:center}
+.cut-t th{text-align:left}
+.cut-t th.n{text-align:center!important}
+.cut-add{display:flex;flex-wrap:wrap;gap:.45rem;margin-top:.6rem}
+@media(max-width:1100px){.cut-top{grid-template-columns:1fr}.cut-lists>section+section{padding-left:0}}
+.cut-t td:not(:first-child) input{text-align:center!important}
+.cut-in>.cut-lists{margin:0}
+.cut-in{margin-bottom:1rem!important}

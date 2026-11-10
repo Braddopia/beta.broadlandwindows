@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#012b59">
 <meta name="referrer" content="no-referrer">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-VjW6hshJ7heQawO85Cr8k9Xe+NYer4FEuvgaEZEw34g=' 'sha256-Gh9GINpwNHzge6silreuWhXcLn4blmXGC0YJXRJDzXY=' https://cdn.jsdelivr.net https://accounts.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https:; media-src 'self' blob:; object-src 'none'; frame-src https://accounts.google.com https://login.microsoftonline.com; base-uri 'none'; form-action 'none'; upgrade-insecure-requests">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-VjW6hshJ7heQawO85Cr8k9Xe+NYer4FEuvgaEZEw34g=' 'sha256-oN8pM4B3wY2nINkCx7dWuz5fcdbFFfFsyUVjwkvnlfA=' https://cdn.jsdelivr.net https://accounts.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https:; media-src 'self' blob:; object-src 'none'; frame-src https://accounts.google.com https://login.microsoftonline.com; base-uri 'none'; form-action 'none'; upgrade-insecure-requests">
 <title>Broadland Windows CRM</title>
 <link rel="icon" id="fav" type="image/png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -2003,6 +2003,23 @@ body[data-view=messages]:not(:has(#modal.open)) #rpb{display:none}
 .cc2-b .cpr .cpl{justify-content:center;margin-top:.05rem}
 .cc2-b .cpv{display:flex;flex-direction:column;gap:.3rem;min-width:0}
 
+/* Panel Optimiser: the job in its own card, cutting settings beside it; boards and pieces as two equal halves
+   with the size columns centred under their headings */
+.cut-top{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:1rem;margin:0}
+.cut-top>.panel{margin:0}
+.cut-og.cut-og2{grid-template-columns:1fr 1fr}
+.cut-job .cut-og2{grid-template-columns:minmax(0,1fr) minmax(0,2fr)}
+.cut-lists{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0 2.2rem}
+.cut-lists>section+section{padding-left:2.2rem}
+.cut-t th.n,.cut-t td.n input,.cut-t th.c-turn,.cut-t td select{text-align:center;text-align-last:center}
+.cut-t th{text-align:left}
+.cut-t th.n{text-align:center!important}
+.cut-add{display:flex;flex-wrap:wrap;gap:.45rem;margin-top:.6rem}
+@media(max-width:1100px){.cut-top{grid-template-columns:1fr}.cut-lists>section+section{padding-left:0}}
+.cut-t td:not(:first-child) input{text-align:center!important}
+.cut-in>.cut-lists{margin:0}
+.cut-in{margin-bottom:1rem!important}
+
 /* ==========================================================================
    06 · Adaptive layout
    Breakpoints: 1400 (laptop) · 1100 (small laptop / tablet landscape)
@@ -2683,23 +2700,27 @@ td small{color:#444;font-size:8pt}.tot{margin:2mm 0 0;font-size:8pt;color:#444}
     <rect class="bd" x="0" y="0" width="${b.L}" height="${b.W}" rx="${print2?0:6}"/>
     <rect x="0" y="0" width="${b.L}" height="${b.W}" fill="url(#${id}g)"/>
     ${b.pieces.map(p=>{const small=p.l<fs*4||p.w<fs*1.6,r=Math.min(8,Math.min(p.l,p.w)*.04);return html`<g class="pc"><rect x="${p.x}" y="${p.y}" width="${p.l}" height="${p.w}" rx="${print2?0:r}" fill="url(#${id}h${hue(p.label)})" style="stroke:hsl(${hue(p.label)} ${print2?"45% 40%":"90% 85%"})"/>${small?"":html`<text x="${p.x+p.l/2}" y="${p.y+p.w/2-fs*.15}" style="font-size:${fs}px">${p.label}</text><text class="sz" x="${p.x+p.l/2}" y="${p.y+p.w/2+fs*1}" style="font-size:${fs*.78}px">${mm(p.l)} × ${mm(p.w)}${p.rot?" ↻":""}</text>`}<title>${p.label}: ${mm(p.l)} × ${mm(p.w)} mm${p.rot?" (turned)":""}</title></g>`})}
-  </svg>`}function table(kind,rows){const C=COLS[kind];return html`<div class="cut-t"><table><colgroup>${C.map(([k])=>html`<col class="c-${k}">`)}<col class="c-x"></colgroup><thead><tr>${C.map(([k,l])=>html`<th class="${k=="label"||k=="turn"?"":"n"}">${l}</th>`)}<th></th></tr></thead><tbody>${rows.map((r,i)=>html`<tr>${C.map(([k,,t])=>{const f=t=="select"?{k:"",t:"select",o:[["yes","Yes"],["no","No (grain)"]]}:{k:"",t,max:t=="number"?1e5:60};const v=k=="turn"?r.turn===false?"no":"yes":r[k];return html`<td class="${t=="number"?"n":""}">${raw(fieldControl(f,v,{id:"cut_"+kind+"_"+i+"_"+k}))}</td>`})}<td><button class="cut-x" aria-label="Remove row ${i+1}" title="Remove" ${raw(onClick("cutDel",kind,i))}>&times;</button></td></tr>`)}</tbody></table></div>`}function cutResults(){const D=cutData(),R2=optimise(D),S=R2.stats,pct=Math.round(S.efficiency*100);return String(html`
+  </svg>`}function table(kind,rows){const C=COLS[kind];return html`<div class="cut-t"><table><colgroup>${C.map(([k])=>html`<col class="c-${k}">`)}<col class="c-x"></colgroup><thead><tr>${C.map(([k,l])=>html`<th class="${k=="label"?"":"n"}">${l}</th>`)}<th></th></tr></thead><tbody>${rows.map((r,i)=>html`<tr>${C.map(([k,,t])=>{const f=t=="select"?{k:"",t:"select",o:[["yes","Yes"],["no","No (grain)"]]}:{k:"",t,max:t=="number"?1e5:60};const v=k=="turn"?r.turn===false?"no":"yes":r[k];return html`<td class="${t=="number"?"n":""}">${raw(fieldControl(f,v,{id:"cut_"+kind+"_"+i+"_"+k}))}</td>`})}<td><button class="cut-x" aria-label="Remove row ${i+1}" title="Remove" ${raw(onClick("cutDel",kind,i))}>&times;</button></td></tr>`)}</tbody></table></div>`}function cutResults(){const D=cutData(),R2=optimise(D),S=R2.stats,pct=Math.round(S.efficiency*100);return String(html`
     ${R2.unplaced.length?html`<div class="note bad"><b>${R2.unplaced.length} piece${R2.unplaced.length==1?"":"s"} would not fit:</b> ${[...new Set(R2.unplaced.map(u=>u.label+" ("+mm(u.L)+" × "+mm(u.W)+")"))].join(", ")}. Add a bigger board, more boards, or let them turn.</div>`:""}
     ${R2.boards.map((b,i)=>html`<div class="panel cut-bp"><h2><span>Board ${i+1} <span class="muted">of ${R2.boards.length}</span> · ${b.sheet}</span><small class="muted nocap">${mm(b.L)} × ${mm(b.W)} mm · ${b.pieces.length} pieces · ${Math.round(b.used/b.area*100)}% used</small></h2><div class="cut-frame">${boardSvg(b,i)}</div></div>`)}
     ${R2.boards.length?"":html`<div class="panel"><p class="empty">Add a board and some pieces to see the plan.</p></div>`}
   `)+`<template id="cutK">${kpis(S,pct)}</template>`}var kpis=(S,pct)=>String(html`<div class="kpi"><small>Boards Needed</small><b>${S.boards}</b>${S.byType.length?html`<span class="ksub">${S.byType.map(t=>t.used+" × "+t.label).join(" · ")}</span>`:""}</div><div class="kpi"><small>Pieces Placed</small><b>${S.pieces}</b>${S.unplaced?html`<span class="ksub">${S.unplaced} not placed</span>`:""}</div><div class="kpi ${pct<60&&S.boards?"warn":""}"><small>Board Used</small><b>${pct}%</b><span class="cut-meter"><i style="width:${pct}%"></i></span></div><div class="kpi"><small>Waste</small><b>${m2(S.waste)}</b></div>`);var cutContract=(D=cutData())=>{const n=String(D.jobNo||"").trim();return n?state.contracts.find(c=>String(c.id)==n)||null:null};var cutTitle=D=>jobTitle(D.jobNo,D.jobName)||"Panel Optimiser";function vCutting(){const D=cutData(),S=optimise(D).stats,k=cutContract(D);return String(html`<div class="head"><div><h1 id="cutTitle">${cutTitle(D)}</h1><span class="muted">${D.jobNo||D.jobName?"Panel Optimiser · p":"P"}lan how to cut pieces from whole boards with the least waste</span></div>
     <div class="tools"><button class="mini" ${raw(onClick("cutJobs"))}>Saved Lists (${D.jobs.length})</button><button class="mini" ${raw(onClick("cutNew"))}>New List</button><button class="mini" ${raw(onClick("cutSave"))}>Save</button><button class="mini pri" id="cutToC" ${raw(onClick("cutToContract"))} ${k&&canSee("contracts")?"":raw("hidden")}>Save To Contract</button><button class="btn" ${raw(onClick("cutPrint"))}>Print Plan</button></div></div>
   <div class="cut-in" ${raw(onEvent("oninput","cutEdit","event"))} ${raw(onEvent("onchange","cutEdit","event"))}>
-    <div class="panel cut-job"><h2><span>Job</span><small class="muted nocap" id="cutJobHint">${k?"Contract "+k.id+" found: Save To Contract keeps the plan with its documents":"Type the contract number to link the plan to it"}</small></h2><div class="cut-og cut-og4">
-      <div class="ff"><label for="cut_job_no">Job Number</label>${raw(fieldControl({k:"",max:30,list:"cutCons"},D.jobNo||"",{id:"cut_job_no"}))}</div>
-      <div class="ff wide"><label for="cut_job_name">Job Name</label>${raw(fieldControl({k:"",max:80},D.jobName||"",{id:"cut_job_name"}))}</div>
-      <div class="ff"><label for="cut_opt_kerf">Saw Blade Width <span class="nocap">(mm)</span></label>${raw(fieldControl({k:"",t:"number",max:20},D.kerf,{id:"cut_opt_kerf"}))}</div>
-      <div class="ff"><label for="cut_opt_trim">Edge Trim Each Side <span class="nocap">(mm)</span></label>${raw(fieldControl({k:"",t:"number",max:100},D.trim,{id:"cut_opt_trim"}))}</div>
-    </div><datalist id="cutCons">${canSee("contracts")?state.contracts.map(c=>html`<option value="${c.id}">${jobTitle(c.id,c.name)}</option>`):""}</datalist></div>
+    <div class="cut-top">
+      <div class="panel cut-job"><h2><span>Job</span><small class="muted nocap" id="cutJobHint">${k?"Contract "+k.id+" found: Save To Contract keeps the plan with its documents":"Type the contract number to link the plan to it"}</small></h2><div class="cut-og cut-og2">
+        <div class="ff"><label for="cut_job_no">Job Number</label>${raw(fieldControl({k:"",max:30,list:"cutCons"},D.jobNo||"",{id:"cut_job_no"}))}</div>
+        <div class="ff"><label for="cut_job_name">Job Name</label>${raw(fieldControl({k:"",max:80},D.jobName||"",{id:"cut_job_name"}))}</div>
+      </div><datalist id="cutCons">${canSee("contracts")?state.contracts.map(c=>html`<option value="${c.id}">${jobTitle(c.id,c.name)}</option>`):""}</datalist></div>
+      <div class="panel cut-set"><h2><span>Cutting Settings</span></h2><div class="cut-og cut-og2">
+        <div class="ff"><label for="cut_opt_kerf">Saw Blade Width <span class="nocap">(mm)</span></label>${raw(fieldControl({k:"",t:"number",max:20},D.kerf,{id:"cut_opt_kerf"}))}</div>
+        <div class="ff"><label for="cut_opt_trim">Edge Trim Each Side <span class="nocap">(mm)</span></label>${raw(fieldControl({k:"",t:"number",max:100},D.trim,{id:"cut_opt_trim"}))}</div>
+      </div></div>
+    </div>
     <div class="panel cut-lists">
-      <section><h2><span>Boards In Stock</span><small class="muted nocap">mm · how many 0 = as many as needed</small></h2>${table("sheets",D.sheets)}
+      <section><h2><span>Boards In Stock</span><small class="muted nocap">Sizes in mm · How Many 0 means as many as needed</small></h2>${table("sheets",D.sheets)}
         <div class="cut-add"><button class="mini" ${raw(onClick("cutAdd","sheets"))}>+ Add Board</button>${PRESETS.map((p,i)=>html`<button class="mini cut-pre" ${raw(onClick("cutPreset",i))}><b>${p.label}</b> <span class="nocap">${p.W} × ${p.L} mm</span></button>`)}</div></section>
-      <section><h2><span>Pieces To Cut</span><small class="muted nocap">mm</small></h2>${table("parts",D.parts)}
+      <section><h2><span>Pieces To Cut</span><small class="muted nocap">Sizes in mm</small></h2>${table("parts",D.parts)}
         <div class="cut-add"><button class="mini" ${raw(onClick("cutAdd","parts"))}>+ Add Piece</button></div></section>
     </div>
   </div>
