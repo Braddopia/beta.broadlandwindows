@@ -35,16 +35,22 @@ test('paid or unpaid is required, and unpaid leave keeps the allowance', async (
   ).toBe('U');
 });
 
-test('My Holiday shows days left large, and previous holidays', async ({ app }) => {
+test('My Holiday shows days left in a ring, the numbers beside it, and previous holidays', async ({ app }) => {
   await app.role('staff');
   await app.go('home');
-  const big = await app.page.locator('.hl .big b').evaluate((e) => parseFloat(getComputedStyle(e).fontSize));
+  const ring = app.page.locator('.hring');
+  await expect(ring).toContainText('Days Left');
+  const big = await ring.locator('b').evaluate((e) => parseFloat(getComputedStyle(e).fontSize));
   const other = await app.page
-    .locator('.hl > div:not(.big) b')
+    .locator('.hlist dd')
     .first()
     .evaluate((e) => parseFloat(getComputedStyle(e).fontSize));
   expect(big).toBeGreaterThan(other * 1.6);
-  await expect(app.page.locator('.hprev')).toContainText('Previous Holidays');
+  await expect(app.page.locator('.hlist')).toContainText('Allowance');
+  await expect(app.page.locator('.hrows')).toContainText('Previous');
+  // the same panel on My Calendar
+  await app.go('fitting');
+  await expect(app.page.locator('#main .hring')).toBeVisible();
   await app.page.click('text=All My Holidays');
   await expect(app.page.locator('#mbox h2')).toContainText('All Holidays');
 });

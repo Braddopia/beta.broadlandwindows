@@ -8,10 +8,6 @@
 .hero p{margin:.3rem 0 0;color:#cfe0f7}
 .hero .rt{display:inline-block;margin-bottom:.4rem;padding:.12rem .6rem;border-radius:20px;background:rgba(255,255,255,.18);font-size:.74rem}
 .wave{display:inline-block;transform-origin:70% 70%;animation:wave 2s .6s 2}
-.hl{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin:.6rem 0;text-align:center}
-.hl b{display:block;font:600 1.45rem var(--head);color:var(--navy)}
-.hl small{color:var(--muted);font-size:.74rem}
-.hl .big b{font-size:1.9rem;color:var(--blue)}
 
 /* ---- leads kanban ---- */
 .kan{display:grid;grid-template-columns:repeat(5,minmax(15rem,1fr));gap:.8rem;overflow-x:auto;padding-bottom:.5rem}

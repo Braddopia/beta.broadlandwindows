@@ -1,5 +1,6 @@
 /* ui/shell/shell: Wiring up the top bar, side menu and global keys at start-up. */
 import { LOGO_SRC } from '../../core/assets.js';
+import { pvnClose } from '../../features/records/preview-notice.js';
 import { $, $$ } from '../../core/dom.js';
 import { ICONS, svg } from '../../core/icons.js';
 import { SAFE } from '../../data/sanitize.js';
@@ -98,6 +99,15 @@ export function shell() {
   document.addEventListener('keydown', (e) => {
     if (e.key == 'Escape') {
       if (typeof ASKI != 'undefined' && ASKI) return;
+      /* Esc closes the top-most thing only: a colour picker or the search list before the popup under it */
+      const cp = $('#cpop.open'),
+        sr = $('#sres.open');
+      if ($('#pvn')) return pvnClose();
+      if (cp || sr) {
+        if (cp) cp.classList.remove('open');
+        if (sr) sr.classList.remove('open');
+        return;
+      }
       if ($('#modal.open .rw') && recordWin && recordWin.dirty) {
         if (!$('#rwAsk')) recClose();
         return;

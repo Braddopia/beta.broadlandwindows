@@ -238,9 +238,6 @@ body[data-theme=dark] .rw-rail{background:rgba(255,255,255,.02)}
 
 .ask{text-align:center;padding:.4rem .4rem 0}.ask h2{margin:.6rem 0 .3rem}.ask p{margin:0 auto;max-width:24rem}
 .ask-ic{width:3rem;height:3rem;margin:0 auto;border-radius:50%;display:grid;place-items:center;font:700 1.3rem var(--head);background:var(--blue-bg);color:var(--blue)}.ask-ic.r{background:rgba(191,52,52,.12);color:var(--red)}
-.svc{display:grid;grid-template-columns:auto auto 1fr auto;align-items:center;gap:.4rem 1rem;width:100%;margin-top:.8rem;padding:.6rem .8rem;border:1px solid var(--line);border-radius:12px;background:var(--card);text-align:left;cursor:pointer;color:var(--ink)}
-.svc:hover{border-color:var(--blue)}.svc small{display:block;font-size:.68rem;color:var(--muted)}.svc b{font:600 1.1rem var(--head);color:var(--navy)}.svc .muted{font-size:.78rem}.svc-go{font-size:.78rem;color:var(--blue);font-weight:600;white-space:nowrap}
-@media(max-width:600px){.svc{grid-template-columns:1fr 1fr}.svc .muted,.svc-go{grid-column:1/-1}}
 /* filter toolbar for leads and contracts: its own glass bar under the main one */
 .subbar{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:.6rem;margin:0 0 1rem;padding:.5rem .6rem .5rem .9rem;border-radius:16px;background:var(--lg-fill,var(--card));border:1px solid var(--lg-edge,var(--line));box-shadow:var(--lg-spec,none),0 6px 20px -12px rgba(1,43,89,.3);-webkit-backdrop-filter:blur(22px) saturate(180%);backdrop-filter:blur(22px) saturate(180%)}
 .subbar .views{margin:0;flex:1;min-width:0;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}.subbar .views::-webkit-scrollbar{display:none}
@@ -274,11 +271,8 @@ body[data-theme=dark] .tcard{background:rgba(22,27,38,.97);border-color:rgba(255
 .ttest{display:flex;align-items:center;gap:.4rem;font-size:.78rem;color:var(--muted);margin:.5rem 0 0;cursor:pointer}.tcard.mid .ttest{justify-content:center}
 .tbtn{display:flex;align-items:center;gap:.4rem;margin-top:.8rem}.tbtn span{flex:1}
 .tsw{display:flex;align-items:center;gap:.6rem;cursor:pointer;font-weight:500}.tsw input{width:1.15rem;height:1.15rem;accent-color:#034ea2}
-.svc{display:flex;flex-wrap:wrap;gap:.3rem 1.2rem}.svc>span:nth-child(3){flex:1 1 100%;order:3}.svc-go{order:4;flex:1 1 100%}
 
 /* My Holiday: room for the bar */
-.hl+.svc{margin-bottom:.9rem}.svc+.bar2,.hl~.bar2{margin:.2rem 0 .5rem}
-.panel .hl{margin-bottom:.4rem}
 
 /* toggles: every option the same width, sized to the longest label */
 .seg,.seg2{display:inline-grid!important;grid-auto-flow:column;grid-auto-columns:1fr}
@@ -320,7 +314,6 @@ body[data-theme=dark] .tcard{background:rgba(22,27,38,.97);border-color:rgba(255
 .so-due{text-align:right;font-weight:600;font-size:.84rem;white-space:nowrap}.so-due small{display:block;font-weight:400;color:var(--muted);font-size:.72rem}
 .so-r.late .so-due{color:var(--red)}
 .lvg .emp .art{width:min(7rem,45%)}
-.hbar2{display:flex;align-items:center;gap:.7rem;margin:.3rem 0 .2rem}.hbar2 .bar2{flex:1;margin:0}.hbar2 small{white-space:nowrap;font-size:.74rem;color:var(--muted)}
 
 /* holiday chart: type a code into each day */
 .xl-g td.ed{padding:0}.xl-g .hci{width:100%;height:100%;min-height:1.45rem;border:0;background:transparent;text-align:center;font:600 10.5px Arial,sans-serif;color:#13233a;text-transform:uppercase!important;padding:0;cursor:text;outline:none}
@@ -552,13 +545,6 @@ body[data-theme=dark] .mb .rg{background:#1a202b}
 /* link buttons start with capitals like every other button (plain web links stay as typed) */
 a.btn[href],a.mini[href],a.rb1[href]{text-transform:capitalize!important}
 /* years of service box on My Calendar */
-div.svc{cursor:default}
-.svc{grid-template-columns:auto auto auto 1fr auto}
-@media(max-width:600px){.svc{grid-template-columns:1fr 1fr 1fr}.svc .muted,.svc-go{grid-column:1/-1}}
-.svc{display:flex!important;flex-wrap:wrap;align-items:flex-end;gap:.5rem 1.4rem}
-.svc .muted{flex:1 1 100%;order:5}.svc-go{order:6;margin-left:auto}
-.svc>span:nth-child(3){flex:0 0 auto;order:0}
-.svc>span.muted{flex:1 1 100%;order:5}
 
 /* Messages: the page stays still; only the chat list and the conversation scroll */
 body.vmsg .main{overflow:hidden;display:flex;flex-direction:column;padding-bottom:.75rem}

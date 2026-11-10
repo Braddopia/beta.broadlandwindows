@@ -86,6 +86,7 @@ export function viewPhoto(p) {
     `<title>Photo</title><body style="margin:0;background:#111;display:grid;place-items:center;height:100vh"><img src="${SAFE.img(p)}" style="max-width:100%;max-height:100vh">`
   );
   w.document.close();
+  w.document.addEventListener('keydown', (e) => e.key == 'Escape' && w.close());
 }
 export const phCount = (a) =>
   a && a.length ? `<span class="tag n">${a.length} photo${a.length > 1 ? 's' : ''}</span>` : '';

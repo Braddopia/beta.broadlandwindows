@@ -214,7 +214,7 @@ test('Remove Stock: typing a Stock ID picks that product', async ({ app }) => {
 test('the Length box follows the unit: metres and pieces must be numbers', async ({ app }) => {
   await app.call('stockForm', 'add');
   const lab = app.page.locator('label[for=f_length]');
-  await expect(lab).toHaveText('Size');
+  await expect(lab).toHaveText('Qty (how many in one)');
   await app.page.selectOption('#f_unit', 'Meters (M)');
   await expect(lab).toHaveText('Length (m)');
   await app.page.selectOption('#f_unit', 'PCS');

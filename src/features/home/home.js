@@ -17,6 +17,8 @@ import { ROLE } from '../../data/session.js';
 import { can, canSee } from '../../domain/permissions.js';
 import { need } from '../auth/session.js';
 import { holBook, paidTag } from '../holidays/holidays.js';
+import { html, raw } from '../../core/html.js';
+import { holTag } from '../../ui/components/tags.js';
 import { ratingsH } from './reviews.js';
 import { dTag, prTag } from '../../ui/components/tags.js';
 import { closeModal, openModal } from '../../ui/modal.js';
@@ -184,7 +186,7 @@ export function vHome() {
   };
   cfg.beta = cfg.admin;
   const C = cfg[R] || cfg.staff;
-  const holP = `<div class="panel"><h2><span>My Holiday</span><span class="acts"><button class="btn sm" data-act="bookMine">Book Holiday</button>${canSee('holidays') ? `<button class="mini" ${onClick('go', 'holidays')}>Holiday Planner</button>` : canSee('fitting') ? `<button class="mini" ${onClick('go', 'fitting')}>My Calendar</button>` : ''}</span></h2>${holBody(m, true)}</div>`;
+  const holP = `<div class="panel"><h2><span>My Holiday</span><span class="acts"><button class="btn sm" data-act="bookMine">Book Holiday</button>${canSee('holidays') ? `<button class="mini" ${onClick('go', 'holidays')}>Holiday Planner</button>` : canSee('fitting') ? `<button class="mini" ${onClick('go', 'fitting')}>My Calendar</button>` : ''}</span></h2>${holBody(m)}</div>`;
   /* widgets: every tile and panel the person may see; they choose which show and in what order */
   const KP = {
     pipe: ['Pipeline Value', m0(pipe), '', 'leads'],
@@ -393,20 +395,6 @@ export function dashReset() {
   render();
   toast('Back to the default layout');
 }
-/* the last few holidays already taken, with a link to all of them */
-function prevHols(m, td) {
-  const L = state.hols
-    .filter((h) => h.sid == m.id && h.to < td && h.status != 'Rejected')
-    .sort((a, b) => b.from.localeCompare(a.from));
-  return `<div class="hprev"><div class="hprev-h"><b>Previous Holidays</b><button class="mini" ${onClick('myHolidays', m.id)}>All My Holidays</button></div>${
-    L.slice(0, 3)
-      .map(
-        (h) =>
-          `<div class="row"><span>${fd(h.from)} to ${fd(h.to)} · ${h.days} day${h.days == 1 ? '' : 's'}</span>${paidTag(h)}</div>`
-      )
-      .join('') || '<p class="muted" style="margin:.2rem 0">None yet.</p>'
-  }</div>`;
-}
 export function bookMine() {
   const m = me();
   if (!m) {
@@ -424,34 +412,62 @@ export function bookMine() {
     }
   }
 }
-/* years of service and the extra holiday days they earn (overview and My Calendar) */
-export function svcBox(m, link) {
-  const y = svcYears(m),
-    x = svcExtra(m),
-    tip = m.start
-      ? y >= 15
-        ? 'Maximum service days reached'
-        : 5 - (y % 5) + ' year' + (5 - (y % 5) == 1 ? '' : 's') + ' to the next extra day'
-      : 'Start date not set';
-  const inner = `<span><small>Years Of Service</small><b>${m.start ? y : '-'}</b></span><span><small>Service Days</small><b>${x ? '+' + x : '0'}</b></span><span><small>Started</small><b>${m.start ? new Date(m.start + 'T00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '-'}</b></span><span class="muted">${tip}</span>`;
-  return link
-    ? `<button type="button" class="svc" ${onClick('go', canSee('holidays') ? 'holidays' : 'fitting')} title="Open your holidays">${inner}<span class="svc-go">${canSee('holidays') ? 'Holiday planner' : 'My calendar'} &rarr;</span></button>`
-    : `<div class="svc">${inner}</div>`;
-}
-
-/** the My Holiday summary (days left, booked, pending, allowance, next, previous, service years):
-    the same on the overview and on My Calendar */
-export function holBody(m, link) {
+/** the My Holiday summary, the same on the overview and on My Calendar: a ring with the days left,
+    the numbers beside it, then the next and previous holidays and a line about years of service */
+export function holBody(m) {
   if (!m) return '<p class="empty">Your name is not in the staff list yet, so there is no allowance to show.</p>';
   const td = today(),
     allow = allowTot(m),
     used = hu(m),
+    left = allow - used,
     pend = sum(
       state.hols.filter((h) => h.sid == m.id && h.status == 'Pending'),
       (h) => h.days
     ),
-    nxt = state.hols
-      .filter((h) => h.sid == m.id && h.status != 'Rejected' && h.to >= td)
-      .sort((a, b) => a.from.localeCompare(b.from))[0];
-  return `<div class="hl"><div class="big"><b>${allow - used}</b><small>Days Left</small></div><div><b>${used}</b><small>Booked</small></div><div><b>${pend}</b><small>Pending</small></div><div><b>${allow}</b><small>Allowance</small></div></div><div class="hbar2"><div class="bar2"><i style="width:${allow ? Math.min(100, Math.round((100 * (used + pend)) / allow)) : 0}%"></i></div><small>${used + pend} of ${allow} days used</small></div><p class="muted" style="margin:.5rem 0 0">${nxt ? `Next: ${fd(nxt.from)} to ${fd(nxt.to)}, ${nxt.days} days, ${esc(nxt.status)}${nxt.paid === false ? ', unpaid' : ''}` : 'No holiday booked yet.'}</p>${prevHols(m, td)}${svcBox(m, link)}`;
+    mine = state.hols.filter((h) => h.sid == m.id && h.status != 'Rejected'),
+    nxt = mine.filter((h) => h.to >= td).sort((x, y) => x.from.localeCompare(y.from))[0],
+    prev = mine.filter((h) => h.to < td).sort((x, y) => y.from.localeCompare(x.from)),
+    y = svcYears(m),
+    xd = svcExtra(m),
+    /* ring: what is left (blue) and what is waiting for approval (amber) */
+    R = 52,
+    C = 2 * Math.PI * R,
+    part = (n) => (allow ? Math.max(0, Math.min(1, n / allow)) : 0) * C,
+    days = (h) => `${fd(h.from)} to ${fd(h.to)} · ${h.days} day${h.days == 1 ? '' : 's'}`,
+    when = m.start
+      ? new Date(m.start + 'T00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+      : '';
+  const svc = m.start
+    ? `${y} year${y == 1 ? '' : 's'} service · started ${when} · ${
+        y >= 15
+          ? 'maximum service days reached'
+          : 5 - (y % 5) + ' year' + (5 - (y % 5) == 1 ? '' : 's') + ' to the next extra day'
+      }`
+    : 'Start date not set, so no service days yet';
+  return String(html`<div class="hol2">
+    <div class="hring" role="img" aria-label="${left} of ${allow} days left">
+      <svg viewBox="0 0 120 120" aria-hidden="true"><circle class="t" cx="60" cy="60" r="${R}"/><circle class="p" cx="60" cy="60" r="${R}" stroke-dasharray="${part(left).toFixed(1)} ${C.toFixed(1)}"/>${pend > 0 && left > 0 ? raw(`<circle class="w" cx="60" cy="60" r="${R}" stroke-dasharray="${part(Math.min(pend, left)).toFixed(1)} ${C.toFixed(1)}" stroke-dashoffset="${(-part(left - Math.min(pend, left))).toFixed(1)}"/>`) : ''}</svg>
+      <div><b>${left}</b><small>Days Left</small></div>
+    </div>
+    <dl class="hlist">
+      <div><dt>Booked</dt><dd>${used}</dd></div>
+      <div><dt>Pending</dt><dd class="${pend ? 'pd' : ''}">${pend}</dd></div>
+      <div><dt>Allowance</dt><dd>${allow}</dd></div>
+      <div><dt>Service days</dt><dd>${xd ? '+' + xd : '0'}</dd></div>
+    </dl>
+  </div>
+  <div class="hrows">
+    <div class="hrow"><span class="hk">Next</span><span>${nxt ? raw(esc(days(nxt)) + ' ' + holTag(nxt) + (nxt.paid === false ? ' ' + paidTag(nxt) : '')) : html`<span class="muted">None booked</span>`}</span></div>
+    <div class="hrow"><span class="hk">Previous</span><span class="hprevl">${
+      prev.length
+        ? raw(
+            prev
+              .slice(0, 3)
+              .map((h) => `<span>${esc(days(h))} ${paidTag(h)}</span>`)
+              .join('')
+          )
+        : html`<span class="muted">None yet</span>`
+    }</span><button class="mini" ${raw(onClick('myHolidays', m.id))}>All My Holidays</button></div>
+  </div>
+  <p class="hsvc">${svc}</p>`);
 }

@@ -250,6 +250,8 @@ export function printDoc(t, sub, rows, ph, o) {
 export function fitPage(w) {
   try {
     w.document.querySelectorAll('[data-pa]').forEach((b) => b.addEventListener('click', () => w[b.dataset.pa]()));
+    /* Esc closes the printed-document window too */
+    w.document.addEventListener('keydown', (e) => e.key == 'Escape' && w.close());
   } catch (e) {}
   setTimeout(() => {
     try {

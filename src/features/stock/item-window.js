@@ -81,7 +81,7 @@ export function ieFields() {
       ? { k: 'stock', l: 'Current stock', t: 'number', max: 1e7, sec: 'p', hint: 'Changing this logs an adjustment' }
       : { k: 'qty', l: 'Quantity', t: 'number', req: 1, pos: 1, max: 1e6, sec: 'p' },
     { k: 'barcode', l: 'Barcode', max: 64, sec: 'p' },
-    { k: 'length', l: lenBox(r.unit || 'Each').l, max: 30, sec: 'p', ph: lenBox(r.unit || 'Each').ph },
+    { k: 'length', l: lenBox(unitOf(r)).l, max: 30, sec: 'p', ph: lenBox(unitOf(r)).ph },
     { k: 'cInName', l: 'Colour in (B)', t: 'colour', w: 'full', sec: 'c' },
     { k: 'cOutName', l: 'Colour out (A)', t: 'colour', w: 'full', sec: 'c' },
     ...(ieMode != 'remove'
@@ -306,7 +306,8 @@ export function ieSave() {
   o.item = SAFE.code(o.item);
   if (mode != 'remove' && mode != 'request') {
     const lb = lenBox(o.unit);
-    if (o.length && lb.re && !lb.re.test(o.length.trim())) {
+    const was = ieKey && prod(ieKey) ? String(prod(ieKey).length || '') : '';
+    if (o.length && o.length != was && lb.re && !lb.re.test(o.length.trim())) {
       fieldErr($('#f_length'), lb.err);
       return;
     }
@@ -643,8 +644,9 @@ export function iePickProd(pid) {
   $('#f_item').dispatchEvent(new Event('input'));
 }
 
-/* the Length box for each unit: Meters is a number of metres, PCS the pieces in a pack, anything else
-   a size as written on the product (e.g. 4-5MM). The value is stored as typed, so products match. */
+/* the Length box for each unit: Meters is a number of metres, PCS the pieces in a pack, and Each,
+   Units, Pair or Single how many come in one. The value is stored as typed, so products match;
+   an older value (e.g. a size like 4-5MM) is only checked once someone changes it. */
 export function lenBox(unit) {
   if (unit == 'Meters (M)')
     return {
@@ -656,7 +658,8 @@ export function lenBox(unit) {
     };
   if (unit == 'PCS')
     return { l: 'Pieces per pack', ph: 'e.g. 100', mode: 'numeric', re: /^\d+$/, err: 'Pieces per pack, as a whole number' };
-  return { l: 'Size', ph: 'e.g. 4-5MM', mode: 'text', re: null, err: '' };
+  /* Each, Units, Pair, Single: how many come in one */
+  return { l: 'Qty (how many in one)', ph: 'e.g. 10', mode: 'numeric', re: /^\d+$/, err: 'How many in one, as a whole number' };
 }
 export function lenSync() {
   const u = $('#f_unit'),

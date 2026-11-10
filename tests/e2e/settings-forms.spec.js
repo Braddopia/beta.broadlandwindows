@@ -133,3 +133,38 @@ test('report a problem from inside a form, then the form comes back as it was', 
     1,
   ]);
 });
+
+test('Esc closes every kind of popup, top-most first', async ({ app }) => {
+  await app.role('beta');
+  const esc = () => app.page.keyboard.press('Escape');
+  // a form popup
+  await app.call('editContact');
+  await expect(app.page.locator('#modal')).toHaveClass(/open/);
+  await esc();
+  await expect(app.page.locator('#modal')).not.toHaveClass(/open/);
+  // the colour picker closes before the product window under it
+  await app.call('stockForm', 'add');
+  await app.call('cpOpen', 'cInName');
+  await expect(app.page.locator('#cpop')).toHaveClass(/open/);
+  await esc();
+  await expect(app.page.locator('#cpop')).not.toHaveClass(/open/);
+  await expect(app.page.locator('#modal')).toHaveClass(/open/);
+  await esc();
+  await expect(app.page.locator('#modal')).not.toHaveClass(/open/);
+  // the search list, even after clicking away from the box
+  await app.page.fill('#sb input', 'sample');
+  await expect(app.page.locator('#sres')).toHaveClass(/open/);
+  await app.page.evaluate(() => document.querySelector('#sb input').blur());
+  await esc();
+  await expect(app.page.locator('#sres')).not.toHaveClass(/open/);
+  // the Ctrl+K box
+  await app.call('cmdk', true);
+  await expect(app.page.locator('#cmdk')).toHaveClass(/open/);
+  await esc();
+  await expect(app.page.locator('#cmdk')).not.toHaveClass(/open/);
+  // the barcode scanner
+  await app.page.evaluate(() => document.querySelector('#scanner').classList.add('open'));
+  await esc();
+  await expect(app.page.locator('#scanner')).not.toHaveClass(/open/);
+  expect(app.errors).toEqual([]);
+});
