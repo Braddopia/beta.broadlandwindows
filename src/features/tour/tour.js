@@ -1,70 +1,67 @@
 /* features/tour/tour: The welcome tour. */
-import { $, esc } from '../../core/dom.js';
+import { $, $$, esc } from '../../core/dom.js';
 import { svg } from '../../core/icons.js';
 import { ROLE } from '../../data/session.js';
 import { can } from '../../domain/permissions.js';
 import { ART_IC } from '../../ui/components/art.js';
 import { go, render, view } from '../../ui/shell/router.js';
 import { toast } from '../../ui/toast.js';
+import { TAB_TOURS, WELCOME } from './tour-steps.js';
 
-/* ---------------- welcome tour ----------------
-   Steps go in screen order: the side menu top to bottom, then the top bar left to right, then the page. */
-export const TOUR = [
-  {
-    art: 'team',
-    t: 'Welcome to Broadland Windows CRM',
-    d: 'A quick look round the main parts of the site. It takes about a minute.',
-  },
-  {
-    sel: '#nav',
-    t: 'Your menu',
-    d: 'Every page you can use is here, grouped by job: sales, operations, stock and insights. What you see depends on your account.',
-  },
-  { sel: '#meBtn', t: 'Your details', d: 'Update your phone and email, and check your holiday allowance.' },
-  {
-    sel: '#acct',
-    t: 'Switch account',
-    d: 'Sign in as an administrator with your PIN when you need more access. It signs you out again after 30 minutes idle.',
-  },
-  {
-    sel: '#sb',
-    t: 'Search',
-    d: 'Type a name, postcode, item code or contract number to filter the page you are on. Press / on the keyboard to jump here.',
-  },
-  { sel: '#scanBtn', t: 'Scan a barcode', d: 'Use the camera to find a product or book stock in and out.' },
-  {
-    sel: '#nwb',
-    t: 'Add something new',
-    d: 'Start a new lead, service call, contact or stock movement from any page.',
-  },
-  {
-    sel: '#bell',
-    t: 'Notifications',
-    d: 'Stock requests, low stock, deliveries due and FENSA reminders all land here.',
-  },
-  {
-    sel: '#lookBtn',
-    t: 'Change the look',
-    d: 'Pick the page background, and a pattern for the blue greeting box on the overview.',
-  },
-  { sel: '#thb', t: 'Light or dark', d: 'Switch the look to suit the room. The factory screen works well in dark.' },
-  {
-    sel: '.hero-cz',
-    page: 'home',
-    t: 'Make the overview yours',
-    d: 'Choose which numbers and panels show on your dashboard, and in what order.',
-  },
-  { art: 'done', t: "You're all set", d: 'Press the ? button at the top any time to see this tour again.' },
-];
+/* ---------------- tours ----------------
+   The welcome tour plays once, the very first time someone opens the site. Each tab then has its own short
+   tour the first time it is opened (TAB_TOURS in tour-steps.js). Both are "locked" when they play by
+   themselves: no Skip, and Next unlocks once a timer bar fills. Esc three times in a row still leaves.
+   The ? button replays the tour for the tab you are on (or the welcome tour), with Skip and no wait. */
+export const TOUR = WELCOME;
+export { TAB_TOURS };
 export let TI = 0;
-/* The first-ever tour can't be skipped: Next unlocks once a short timer bar fills, so each step gets read.
-   A replay from the ? button keeps Skip and has no wait. Steps already seen open straight away. */
+let STEPS = WELCOME,
+  KEY = 'welcome';
 export const TOUR_WAIT = 4000;
 let FIRST = false,
-  SEEN = 0;
+  SEEN = 0,
+  ESCS = 0,
+  ESC_AT = 0;
 const OPEN_AT = {};
+/* time left before Next unlocks on this step (the closing "all set" card has no wait) */
 const waitLeft = () =>
-  FIRST && TI >= SEEN && TI < TOUR.length - 1 ? Math.max(0, TOUR_WAIT - (performance.now() - (OPEN_AT[TI] || 0))) : 0;
+  FIRST && TI >= SEEN && STEPS[TI].art != 'done'
+    ? Math.max(0, TOUR_WAIT - (performance.now() - (OPEN_AT[TI] || 0)))
+    : 0;
+
+/* which tours have played: the welcome one, and each tab's ('*' means all of them, e.g. for tests) */
+const SEEN_KEY = 'bb_tours_seen';
+function seenTabs() {
+  try {
+    const v = localStorage.getItem(SEEN_KEY) || '';
+    return v == '*' ? '*' : v.split(',').filter(Boolean);
+  } catch (e) {
+    return [];
+  }
+}
+function markSeen(k) {
+  if (k == 'welcome') {
+    try {
+      localStorage.setItem('bb_tour_seen', '1');
+    } catch (e) {}
+    return;
+  }
+  const s = seenTabs();
+  if (s == '*' || s.includes(k)) return;
+  try {
+    localStorage.setItem(SEEN_KEY, s.concat(k).join(','));
+  } catch (e) {}
+}
+const welcomeSeen = () => {
+  try {
+    return localStorage.getItem('bb_tour_seen') == '1';
+  } catch (e) {
+    return false;
+  }
+};
+export const tourOpen = () => !!$('#tour.open');
+
 export const tourTest = () => {
   try {
     return localStorage.getItem('bb_tour_test') == '1';
@@ -81,11 +78,17 @@ export function tourToggle(on) {
   if (c) c.checked = on;
   render();
 }
-export function startTour(first) {
+/** start a tour: first=true when it plays by itself (locked); key = 'welcome' or a tab's view name */
+export function startTour(first, key) {
+  KEY = typeof key == 'string' && TAB_TOURS[key] ? key : 'welcome';
+  STEPS = KEY == 'welcome' ? WELCOME : TAB_TOURS[KEY];
   FIRST = first === true;
   SEEN = 0;
+  ESCS = 0;
   for (const k in OPEN_AT) delete OPEN_AT[k];
-  if (view != 'home' && TOUR.some((s) => s.page == 'home')) go('home');
+  if (KEY == 'welcome' && view != 'home' && STEPS.some((s) => s.page == 'home')) go('home');
+  /* a tour that plays by itself only ever plays once */
+  if (FIRST) markSeen(KEY);
   TI = 0;
   let o = $('#tour');
   if (!o) {
@@ -98,31 +101,60 @@ export function startTour(first) {
   o.classList.add('open');
   setTimeout(tourDraw, 60);
 }
+/** the ? button: this tab's tour if it has one, otherwise the welcome tour */
+export function tourHere() {
+  startTour(false, TAB_TOURS[view] ? view : 'welcome');
+}
+const splashUp = () => {
+  const sp = $('#splash');
+  return !!sp && getComputedStyle(sp).visibility != 'hidden' && getComputedStyle(sp).display != 'none';
+};
+/** the first visit to a tab: play its tour once (after the welcome tour, and not over a window or notice) */
+export function tabTour(v, tries = 0) {
+  if (!TAB_TOURS[v] || document.body.classList.contains('gated')) return;
+  if (!welcomeSeen() && !tourTest()) return;
+  const s = seenTabs();
+  if (s == '*' || s.includes(v)) return;
+  setTimeout(() => {
+    if (view != v) return;
+    const busy = tourOpen() || $('#modal.open') || $('#pvn') || $('.aski') || splashUp();
+    if (busy) {
+      if (tries < 40) tabTour(v, tries + 1);
+      return;
+    }
+    startTour(true, v);
+  }, 600);
+}
 export function endTour() {
   const o = $('#tour');
   if (o) o.classList.remove('open');
+  clearTimeout(tourDraw.u);
   if (document.body.dataset.tourMenu) {
     document.body.classList.remove('sopen');
     delete document.body.dataset.tourMenu;
   }
-  try {
-    localStorage.setItem('bb_tour_seen', '1');
-  } catch (e) {}
+  markSeen(KEY);
 }
 export function tourGo(d) {
   if (d > 0 && waitLeft() > 0) return;
   if (d > 0) SEEN = Math.max(SEEN, TI + 1);
-  TI = Math.max(0, Math.min(TOUR.length - 1, TI + d));
+  TI = Math.max(0, Math.min(STEPS.length - 1, TI + d));
   tourDraw();
+}
+/* the element a step points at: the first match, or the first whose text starts with `txt` */
+function stepEl(s) {
+  if (!s.sel) return null;
+  if (!s.txt) return $(s.sel);
+  return [...$$(s.sel)].find((e) => (e.innerText || '').trim().toLowerCase().startsWith(s.txt.toLowerCase())) || null;
 }
 export function tourDraw() {
   const o = $('#tour');
   if (!o) return;
-  const s = TOUR[TI],
-    last = TI == TOUR.length - 1;
+  const s = STEPS[TI],
+    last = TI == STEPS.length - 1;
   if (FIRST && !OPEN_AT[TI]) OPEN_AT[TI] = performance.now();
   const left = waitLeft();
-  let el = s.sel && $(s.sel);
+  const el = stepEl(s);
   const inSide = el && el.closest('.side'),
     narrow = matchMedia('(max-width:900px)').matches;
   /* on a phone the menu is tucked away: slide it open for steps that point at it */
@@ -136,24 +168,36 @@ export function tourDraw() {
     document.body.classList.remove('sopen');
     delete document.body.dataset.tourMenu;
   }
-  const rr = el && el.getBoundingClientRect(),
-    vis = !!(
-      el &&
-      el.offsetParent !== null &&
-      rr.width > 0 &&
-      rr.right > 0 &&
-      rr.bottom > 0 &&
-      rr.left < innerWidth &&
-      rr.top < innerHeight
-    );
+  /* bring a step lower down the page into view first */
+  if (el && el.offsetParent !== null) {
+    const b = el.getBoundingClientRect();
+    if (b.top < 0 || b.top > innerHeight - 80) el.scrollIntoView({ block: 'center' });
+  }
+  let rr = el && el.getBoundingClientRect();
+  const vis = !!(
+    el &&
+    el.offsetParent !== null &&
+    rr.width > 0 &&
+    rr.right > 0 &&
+    rr.bottom > 0 &&
+    rr.left < innerWidth &&
+    rr.top < innerHeight
+  );
+  /* a big block (a whole table) only lights up the part on screen */
+  if (vis) {
+    const t = Math.max(rr.top, 8),
+      b = Math.min(rr.bottom, innerHeight - 8);
+    rr = { left: rr.left, right: rr.right, width: rr.width, top: t, bottom: b, height: b - t };
+  }
   const r = vis ? rr : null,
     pad = 8;
+  const lockNote = FIRST ? '<p class="tesc">Press Esc three times to leave the tour.</p>' : '';
   o.innerHTML = `<div class="tspot ${vis ? '' : 'none'}" style="${vis ? `left:${r.left - pad}px;top:${r.top - pad}px;width:${r.width + pad * 2}px;height:${r.height + pad * 2}px` : ''}"></div>
-   <div class="tcard ${vis ? '' : 'mid'}">${!vis && s.art && ART_IC[s.art] ? `<div class="tban lkp">${svg(ART_IC[s.art])}</div>` : ''}<small>${TI + 1} of ${TOUR.length}</small><h3>${esc(s.t)}</h3><p>${esc(s.d)}</p>
-    <div class="tdots">${TOUR.map((_, i) => `<i class="${i == TI ? 'on' : ''}"></i>`).join('')}</div>
-    ${can('manage') || ROLE == 'beta' ? `<label class="ttest"><input type="checkbox" id="tourTest" ${tourTest() ? 'checked' : ''} data-onchange="tourToggle" data-args-change="[{&quot;$&quot;:&quot;checked&quot;}]"> Show every time (testing)</label>` : ''}
+   <div class="tcard ${vis ? '' : 'mid'}">${!vis && s.art && ART_IC[s.art] ? `<div class="tban lkp">${svg(ART_IC[s.art])}</div>` : ''}<small>${TI + 1} of ${STEPS.length}</small><h3>${esc(s.t)}</h3><p>${esc(s.d)}</p>
+    <div class="tdots">${STEPS.map((_, i) => `<i class="${i == TI ? 'on' : ''}"></i>`).join('')}</div>
+    ${KEY == 'welcome' && (can('manage') || ROLE == 'beta') ? `<label class="ttest"><input type="checkbox" id="tourTest" ${tourTest() ? 'checked' : ''} data-onchange="tourToggle" data-args-change="[{&quot;$&quot;:&quot;checked&quot;}]"> Show every time (testing)</label>` : ''}
     ${left ? `<div class="ttime" aria-hidden="true"><i style="animation-duration:${TOUR_WAIT}ms;animation-delay:-${TOUR_WAIT - left}ms"></i></div>` : ''}
-    <div class="tbtn">${FIRST && !last ? '' : `<button class="btn ghost sm" data-act="endTour">${last ? 'Close' : 'Skip Tour'}</button>`}<span></span>${TI ? '<button class="btn ghost sm" data-act="tourGo" data-args="[-1]">Back</button>' : ''}<button class="btn sm" ${left ? 'disabled title="Next unlocks when the bar fills"' : ''} ${last ? 'data-act="endTour"' : 'data-act="tourGo" data-args="[1]"'}>${last ? 'Finish' : 'Next'}</button></div></div>`;
+    <div class="tbtn">${FIRST ? '' : `<button class="btn ghost sm" data-act="endTour">${last ? 'Close' : 'Skip Tour'}</button>`}<span></span>${TI ? '<button class="btn ghost sm" data-act="tourGo" data-args="[-1]">Back</button>' : ''}<button class="btn sm" ${left ? 'disabled title="Next unlocks when the bar fills"' : ''} ${last ? 'data-act="endTour"' : 'data-act="tourGo" data-args="[1]"'}>${last ? 'Finish' : 'Next'}</button></div>${lockNote}</div>`;
   clearTimeout(tourDraw.u);
   if (left)
     tourDraw.u = setTimeout(() => {
@@ -161,7 +205,7 @@ export function tourDraw() {
       if (n) {
         n.disabled = false;
         n.removeAttribute('title');
-        n.focus();
+        n.focus({ preventScroll: true });
       }
       const t = o.querySelector('.ttime');
       if (t) t.classList.add('done');
@@ -179,49 +223,71 @@ export function tourDraw() {
       ch = c.offsetHeight;
     let top = r.bottom + 16,
       left = r.left;
-    if (top + ch > innerHeight - 12) top = Math.max(12, r.top - ch - 16);
-    if (r.width < 260 && r.left > innerWidth / 2) left = r.right - cw;
-    if (r.left < 300 && r.height > innerHeight * 0.5) {
-      left = r.right + 20;
-      top = Math.max(12, Math.min(innerHeight - ch - 12, r.top + 40));
+    if (inSide) {
+      /* anything in the side menu: the card sits just right of the menu, level with what it points at */
+      const side = el.closest('.side').getBoundingClientRect();
+      left = side.right + 16;
+      top = r.height > innerHeight * 0.5 ? r.top + 40 : r.bottom - ch;
+    } else {
+      if (top + ch > innerHeight - 12) top = Math.max(12, r.top - ch - 16);
+      if (r.width < 260 && r.left > innerWidth / 2) left = r.right - cw;
+      /* a tall block: beside it if there is room, otherwise over its top corner */
+      if (r.height > innerHeight * 0.5) {
+        if (r.right + 20 + cw < innerWidth) {
+          left = r.right + 20;
+          top = r.top + 40;
+        } else if (r.left - 20 - cw > 0) {
+          left = r.left - 20 - cw;
+          top = r.top + 40;
+        } else top = r.top + 24;
+      }
     }
     c.style.left = Math.max(12, Math.min(innerWidth - cw - 12, left)) + 'px';
     c.style.top = Math.max(12, Math.min(innerHeight - ch - 12, top)) + 'px';
   }
   const b = o.querySelector('.tbtn .btn:last-child');
-  if (b) b.focus();
+  if (b) b.focus({ preventScroll: true });
 }
 export function tourBoot() {
   const b = document.createElement('button');
   b.className = 'ib';
   b.id = 'helpBtn';
   b.type = 'button';
-  b.title = 'Show the tour';
-  b.setAttribute('aria-label', 'Show the tour');
+  b.title = 'Show the tour for this page';
+  b.setAttribute('aria-label', 'Show the tour for this page');
   b.innerHTML = svg('M9.1 9a3 3 0 015.8 1c0 2-3 3-3 3M12 17h.01M12 22a10 10 0 100-20 10 10 0 000 20z');
-  b.onclick = () => startTour();
+  b.onclick = tourHere;
   const t = $('#thb');
   if (t) t.after(b);
   let seen = false;
   try {
     seen = localStorage.getItem('bb_tour_seen') == '1';
   } catch (e) {}
-  if (tourTest() || !seen) setTimeout(() => startTour(true), 4200);
+  if (tourTest() || !seen) setTimeout(() => startTour(true), 2800);
 }
 /* start-up step (run once by main.js) */
 export function listenForTourKeys() {
-  document.addEventListener('keydown', (e) => {
-    const o = $('#tour');
-    if (!o || !o.classList.contains('open')) return;
-    if (e.key == 'Escape') {
-      if (!FIRST) endTour();
-    } else if (e.key == 'ArrowRight') tourGo(1);
-    else if (e.key == 'ArrowLeft') tourGo(-1);
-  });
-  addEventListener('resize', () => {
-    const o = $('#tour');
-    if (o && o.classList.contains('open')) tourDraw();
-  });
+  document.addEventListener(
+    'keydown',
+    (e) => {
+      const o = $('#tour');
+      if (!o || !o.classList.contains('open')) return;
+      if (e.key == 'Escape') {
+        e.stopPropagation();
+        if (!FIRST) return endTour();
+        /* a locked tour: Esc three times in a row leaves it */
+        const now = performance.now();
+        ESCS = now - ESC_AT < 1500 ? ESCS + 1 : 1;
+        ESC_AT = now;
+        if (ESCS >= 3) {
+          endTour();
+          toast('Tour closed. Press ? any time to see it again.');
+        } else toast('Press Esc ' + (3 - ESCS) + ' more time' + (ESCS == 2 ? '' : 's') + ' to leave the tour');
+      } else if (e.key == 'ArrowRight') tourGo(1);
+      else if (e.key == 'ArrowLeft') tourGo(-1);
+    },
+    true
+  );
   /* keep the tour in place when the screen turns or resizes */
   addEventListener('resize', () => {
     const o = $('#tour');

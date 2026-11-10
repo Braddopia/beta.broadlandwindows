@@ -10,8 +10,9 @@ test('first-ever tour: no Skip, Next unlocks when the bar fills; a replay keeps 
   await expect(card.locator('.ttime')).toHaveCount(1);
   const next = card.locator('.tbtn .btn:last-child');
   await expect(next).toBeDisabled();
-  // Escape and the arrow key don't jump past it either
+  // one Escape and the arrow key don't jump past it
   await app.page.keyboard.press('Escape');
+  await expect(app.page.locator('.toast')).toContainText('2 more times');
   await app.page.keyboard.press('ArrowRight');
   await expect(app.page.locator('#tour')).toHaveClass(/open/);
   await expect(card).toContainText('1 of');
@@ -25,12 +26,57 @@ test('first-ever tour: no Skip, Next unlocks when the bar fills; a replay keeps 
   await expect(card.locator('.tbtn .btn:last-child')).toBeEnabled();
   await app.call('endTour');
 
-  // replay from the ? button: Skip is there and Next works at once
+  // replay from the ? button on the overview: the welcome tour, with Skip, and Next works at once
   await app.page.click('#helpBtn');
+  await expect(card).toContainText('Welcome To Broadland Windows CRM');
   await expect(card.locator('text=Skip Tour')).toHaveCount(1);
   await expect(card.locator('.ttime')).toHaveCount(0);
   await expect(card.locator('.tbtn .btn:last-child')).toBeEnabled();
   await app.page.keyboard.press('Escape');
   await expect(app.page.locator('#tour')).not.toHaveClass(/open/);
+  expect(app.errors).toEqual([]);
+});
+
+test('each tab plays its own tour once, the first time it opens; Esc three times leaves it', async ({ app }) => {
+  test.setTimeout(30000);
+  await app.role('beta');
+  await app.page.evaluate(() => localStorage.setItem('bb_tours_seen', ''));
+  await app.go('stock');
+  const card = app.page.locator('#tour .tcard');
+  await expect(card).toContainText('Find Stock');
+  await expect(card).toContainText('1 of 7');
+  await expect(card.locator('text=Skip Tour')).toHaveCount(0);
+  await expect(card.locator('.tbtn .btn:last-child')).toBeDisabled();
+  // the spotlight is on the stock search box
+  const spot = await app.page.locator('#tour .tspot').boundingBox();
+  const box = await app.page.locator('#invQ').boundingBox();
+  expect(Math.abs(spot.x + 8 - box.x)).toBeLessThan(3);
+  for (let i = 0; i < 3; i++) await app.page.keyboard.press('Escape');
+  await expect(app.page.locator('#tour')).not.toHaveClass(/open/);
+  // never again by itself
+  await app.go('home');
+  await app.go('stock');
+  await app.page.waitForTimeout(1000);
+  await expect(app.page.locator('#tour.open')).toHaveCount(0);
+  expect(await app.page.evaluate(() => localStorage.getItem('bb_tours_seen'))).toContain('stock');
+  // the ? button replays this tab's tour, with Skip
+  await app.page.click('#helpBtn');
+  await expect(card).toContainText('Find Stock');
+  await expect(card.locator('text=Skip Tour')).toHaveCount(1);
+  await app.call('endTour');
+  // every tab's tour points at things that are really on the page
+  const missing = await app.run(() => {
+    const out = [];
+    for (const [v, steps] of Object.entries(TAB_TOURS)) {
+      go(v);
+      for (const s of steps) {
+        const els = [...document.querySelectorAll(s.sel)];
+        const el = s.txt ? els.find((e) => (e.innerText || '').trim().toLowerCase().startsWith(s.txt.toLowerCase())) : els[0];
+        if (!el) out.push(v + ': ' + s.t);
+      }
+    }
+    return out;
+  });
+  expect(missing).toEqual([]);
   expect(app.errors).toEqual([]);
 });

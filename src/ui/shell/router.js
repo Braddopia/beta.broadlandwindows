@@ -29,6 +29,7 @@ import { vReports } from '../../features/reports/reports.js';
 import { sbSync, srchMatch, srchText } from '../../features/search/search.js';
 import { vService } from '../../features/service/service.js';
 import { vCutting } from '../../features/cutting/cutting.js';
+import { tabTour } from '../../features/tour/tour.js';
 import { vSettings } from '../../features/settings/settings.js';
 import { vStaff } from '../../features/staff/staff.js';
 import { vStock } from '../../features/stock/stock.js';
@@ -129,6 +130,8 @@ export function go(v) {
   render();
   /* the Work In Progress notice, as soon as the Leads or Contracts tab opens */
   if (v == 'leads' || v == 'contracts') previewNotice(v == 'leads' ? 'lead' : 'contract');
+  /* the first visit to a tab plays its own short tour */
+  tabTour(v);
 }
 export function render(soft) {
   if (!canSee(view) || (view == 'admin' && !can('manage'))) view = HOME();

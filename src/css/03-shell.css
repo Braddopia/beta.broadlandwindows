@@ -67,12 +67,12 @@ body[data-theme=dark] .adminbar{background:rgba(255,208,2,.16);color:#ffe27a}
 /* ---- splash, scrim, toast ---- */
 /* start-up: the stork draws itself in a thin line of light, then fills in.
    Centred by its visual weight (the body sits low in its box), a little above the middle of the screen. */
-#splash{position:fixed;inset:0;z-index:5000;overflow:hidden;pointer-events:none;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 47%,#034ea2,#012b59 70%);animation:spOut .55s 3.6s ease-in forwards}
-#splash .sp-glow{position:absolute;left:50%;top:47%;width:min(620px,95vw);aspect-ratio:1;border-radius:50%;transform:translate(-50%,-50%);background:radial-gradient(circle,rgba(127,192,255,.28),rgba(127,192,255,0) 65%);animation:spGlow 3.2s ease-out both}
-#splash .sp-fly{position:relative;width:min(380px,66vw);translate:0 calc(min(380px,66vw)*-.031 - 3vh);animation:spRise 4.1s ease-out both}
+#splash{position:fixed;inset:0;z-index:5000;overflow:hidden;pointer-events:none;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 47%,#034ea2,#012b59 70%);animation:spOut .45s 2.25s ease-in forwards}
+#splash .sp-glow{position:absolute;left:50%;top:47%;width:min(620px,95vw);aspect-ratio:1;border-radius:50%;transform:translate(-50%,-50%);background:radial-gradient(circle,rgba(127,192,255,.28),rgba(127,192,255,0) 65%);animation:spGlow 2.3s ease-out both}
+#splash .sp-fly{position:relative;width:min(380px,66vw);translate:0 calc(min(380px,66vw)*-.031 - 3vh);animation:spRise 2.7s ease-out both}
 #splash .sp-bird{display:block;width:100%;height:auto;overflow:visible}
-#splash .sp-line{fill:none;stroke:#e6f2ff;stroke-width:3;stroke-linejoin:round;stroke-dasharray:1;stroke-dashoffset:1;filter:drop-shadow(0 0 6px rgba(160,210,255,.9));animation:spDraw 2.6s .15s cubic-bezier(.45,.1,.4,1) forwards,spLineOut .6s 2.65s ease forwards}
-#splash .sp-fill{opacity:0;filter:drop-shadow(0 12px 30px rgba(0,0,0,.35));animation:spFillIn .8s 2.35s ease forwards}
+#splash .sp-line{fill:none;stroke:#e6f2ff;stroke-width:3;stroke-linejoin:round;stroke-dasharray:1;stroke-dashoffset:1;filter:drop-shadow(0 0 6px rgba(160,210,255,.9));animation:spDraw 1.7s .1s cubic-bezier(.45,.1,.4,1) forwards,spLineOut .45s 1.75s ease forwards}
+#splash .sp-fill{opacity:0;filter:drop-shadow(0 12px 30px rgba(0,0,0,.35));animation:spFillIn .6s 1.5s ease forwards}
 .scrim{display:none;position:fixed;inset:0;z-index:65;background:rgba(0,0,0,.45)}
 .toast{position:fixed;left:50%;bottom:calc(1.2rem + var(--safe-b));transform:translateX(-50%);z-index:300;display:none;max-width:calc(100vw - 2rem);padding:.65rem 1.1rem;border-radius:10px;border-left:4px solid var(--yellow);background:#012b59;color:#fff;animation:tin .3s}
 
