@@ -59,7 +59,7 @@ export const TOUR = [
 export let TI = 0;
 /* The first-ever tour can't be skipped: Next unlocks once a short timer bar fills, so each step gets read.
    A replay from the ? button keeps Skip and has no wait. Steps already seen open straight away. */
-export const TOUR_WAIT = 7000;
+export const TOUR_WAIT = 4000;
 let FIRST = false,
   SEEN = 0;
 const OPEN_AT = {};
