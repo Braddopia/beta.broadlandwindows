@@ -598,3 +598,18 @@ body[data-theme=dark] .smap .land{fill:rgba(120,170,255,.08);stroke:#6ea3e8}
 #tour .tbtn .btn:focus-visible{outline:2px solid rgba(78,163,255,.55);outline-offset:2px;box-shadow:none}
 /* tour spotlight: soft blue ring, not yellow */
 #tour .tspot:not(.none){box-shadow:0 0 0 200vmax rgba(1,18,40,.62),0 0 0 2px rgba(90,184,255,.85),0 0 18px 2px rgba(90,184,255,.35)}
+
+/* messages: a small card that pops up in the middle of the screen (no strip along the bottom) */
+.toast.tpop{left:50%;top:50%;bottom:auto;transform:translate(-50%,-50%);z-index:4000;flex-direction:column;align-items:center;gap:.55rem;min-width:13rem;max-width:min(22rem,calc(100vw - 2rem));padding:1.1rem 1.4rem 1rem;border:1px solid var(--line);border-left:1px solid var(--line);border-radius:18px;background:var(--pop,var(--card));color:var(--navy);font:600 .92rem var(--body);text-align:center;box-shadow:0 18px 50px rgba(1,30,70,.28);pointer-events:auto;cursor:pointer;animation:none}
+.toast.tpop.in{animation:tpIn .28s cubic-bezier(.2,.9,.3,1.25) both}
+.toast.tpop.out{animation:tpOut .2s ease-in both}
+.toast.tpop .tp-i{width:3rem;height:3rem}
+.toast.tpop .tp-i circle{fill:none;stroke-width:3;stroke-dasharray:150;stroke-dashoffset:150;animation:dnc .45s ease-out forwards}
+.toast.tpop .tp-i path{fill:none;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:40;stroke-dashoffset:40;animation:dnc .3s .35s ease-out forwards}
+.toast.tpop.ok .tp-i *{stroke:#12794c}
+.toast.tpop.bad .tp-i *{stroke:#d97706}
+body[data-theme=dark] .toast.tpop{color:#e8eef8;border-color:rgba(255,255,255,.12)}
+body[data-theme=dark] .toast.tpop.ok .tp-i *{stroke:#7fe0aa}
+body[data-theme=dark] .toast.tpop.bad .tp-i *{stroke:#ffc35c}
+@keyframes tpIn{from{opacity:0;transform:translate(-50%,-50%) scale(.85)}to{opacity:1;transform:translate(-50%,-50%) scale(1)}}
+@keyframes tpOut{to{opacity:0;transform:translate(-50%,-50%) scale(.94)}}
