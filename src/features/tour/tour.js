@@ -13,7 +13,7 @@ export const TOUR = [
   {
     art: 'team',
     t: 'Welcome to Broadland Windows CRM',
-    d: 'A quick look round the main parts of the site. It takes about a minute, and you can skip it at any time.',
+    d: 'A quick look round the main parts of the site. It takes about a minute.',
   },
   {
     sel: '#nav',
@@ -57,6 +57,14 @@ export const TOUR = [
   { art: 'done', t: "You're all set", d: 'Press the ? button at the top any time to see this tour again.' },
 ];
 export let TI = 0;
+/* The first-ever tour can't be skipped: Next unlocks once a short timer bar fills, so each step gets read.
+   A replay from the ? button keeps Skip and has no wait. Steps already seen open straight away. */
+export const TOUR_WAIT = 7000;
+let FIRST = false,
+  SEEN = 0;
+const OPEN_AT = {};
+const waitLeft = () =>
+  FIRST && TI >= SEEN && TI < TOUR.length - 1 ? Math.max(0, TOUR_WAIT - (performance.now() - (OPEN_AT[TI] || 0))) : 0;
 export const tourTest = () => {
   try {
     return localStorage.getItem('bb_tour_test') == '1';
@@ -73,7 +81,10 @@ export function tourToggle(on) {
   if (c) c.checked = on;
   render();
 }
-export function startTour() {
+export function startTour(first) {
+  FIRST = first === true;
+  SEEN = 0;
+  for (const k in OPEN_AT) delete OPEN_AT[k];
   if (view != 'home' && TOUR.some((s) => s.page == 'home')) go('home');
   TI = 0;
   let o = $('#tour');
@@ -99,6 +110,8 @@ export function endTour() {
   } catch (e) {}
 }
 export function tourGo(d) {
+  if (d > 0 && waitLeft() > 0) return;
+  if (d > 0) SEEN = Math.max(SEEN, TI + 1);
   TI = Math.max(0, Math.min(TOUR.length - 1, TI + d));
   tourDraw();
 }
@@ -107,6 +120,8 @@ export function tourDraw() {
   if (!o) return;
   const s = TOUR[TI],
     last = TI == TOUR.length - 1;
+  if (FIRST && !OPEN_AT[TI]) OPEN_AT[TI] = performance.now();
+  const left = waitLeft();
   let el = s.sel && $(s.sel);
   const inSide = el && el.closest('.side'),
     narrow = matchMedia('(max-width:900px)').matches;
@@ -137,7 +152,20 @@ export function tourDraw() {
    <div class="tcard ${vis ? '' : 'mid'}">${!vis && s.art && ART_IC[s.art] ? `<div class="tban lkp">${svg(ART_IC[s.art])}</div>` : ''}<small>${TI + 1} of ${TOUR.length}</small><h3>${esc(s.t)}</h3><p>${esc(s.d)}</p>
     <div class="tdots">${TOUR.map((_, i) => `<i class="${i == TI ? 'on' : ''}"></i>`).join('')}</div>
     ${can('manage') || ROLE == 'beta' ? `<label class="ttest"><input type="checkbox" id="tourTest" ${tourTest() ? 'checked' : ''} data-onchange="tourToggle" data-args-change="[{&quot;$&quot;:&quot;checked&quot;}]"> Show every time (testing)</label>` : ''}
-    <div class="tbtn"><button class="btn ghost sm" data-act="endTour">${last ? 'Close' : 'Skip tour'}</button><span></span>${TI ? '<button class="btn ghost sm" data-act="tourGo" data-args="[-1]">Back</button>' : ''}<button class="btn sm" ${last ? 'data-act="endTour"' : 'data-act="tourGo" data-args="[1]"'}>${last ? 'Finish' : 'Next'}</button></div></div>`;
+    ${left ? `<div class="ttime" aria-hidden="true"><i style="animation-duration:${TOUR_WAIT}ms;animation-delay:-${TOUR_WAIT - left}ms"></i></div>` : ''}
+    <div class="tbtn">${FIRST && !last ? '' : `<button class="btn ghost sm" data-act="endTour">${last ? 'Close' : 'Skip Tour'}</button>`}<span></span>${TI ? '<button class="btn ghost sm" data-act="tourGo" data-args="[-1]">Back</button>' : ''}<button class="btn sm" ${left ? 'disabled title="Next unlocks when the bar fills"' : ''} ${last ? 'data-act="endTour"' : 'data-act="tourGo" data-args="[1]"'}>${last ? 'Finish' : 'Next'}</button></div></div>`;
+  clearTimeout(tourDraw.u);
+  if (left)
+    tourDraw.u = setTimeout(() => {
+      const n = o.querySelector('.tbtn .btn:last-child');
+      if (n) {
+        n.disabled = false;
+        n.removeAttribute('title');
+        n.focus();
+      }
+      const t = o.querySelector('.ttime');
+      if (t) t.classList.add('done');
+    }, left);
   const c = o.querySelector('.tcard');
   const sm = innerWidth < 640;
   if (vis && sm) {
@@ -171,22 +199,23 @@ export function tourBoot() {
   b.title = 'Show the tour';
   b.setAttribute('aria-label', 'Show the tour');
   b.innerHTML = svg('M9.1 9a3 3 0 015.8 1c0 2-3 3-3 3M12 17h.01M12 22a10 10 0 100-20 10 10 0 000 20z');
-  b.onclick = startTour;
+  b.onclick = () => startTour();
   const t = $('#thb');
   if (t) t.after(b);
   let seen = false;
   try {
     seen = localStorage.getItem('bb_tour_seen') == '1';
   } catch (e) {}
-  if (tourTest() || !seen) setTimeout(startTour, 1600);
+  if (tourTest() || !seen) setTimeout(() => startTour(true), 4200);
 }
 /* start-up step (run once by main.js) */
 export function listenForTourKeys() {
   document.addEventListener('keydown', (e) => {
     const o = $('#tour');
     if (!o || !o.classList.contains('open')) return;
-    if (e.key == 'Escape') endTour();
-    else if (e.key == 'ArrowRight') tourGo(1);
+    if (e.key == 'Escape') {
+      if (!FIRST) endTour();
+    } else if (e.key == 'ArrowRight') tourGo(1);
     else if (e.key == 'ArrowLeft') tourGo(-1);
   });
   addEventListener('resize', () => {

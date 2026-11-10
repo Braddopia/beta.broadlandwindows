@@ -588,3 +588,10 @@ body[data-theme=dark] .smap .land{fill:rgba(120,170,255,.08);stroke:#6ea3e8}
 .cut-lists .cut-in .panel h2,.cut-lists h2{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:.3rem .8rem}
 .cut-lists h2 small{font-weight:400;font-size:.76rem}
 @media(min-width:900px){.ptb.fx.t-inv td.ac .acts{justify-content:flex-start}}
+
+/* first-ever tour: a thin bar fills before Next unlocks */
+#tour .ttime{height:4px;margin:.2rem 0 .7rem;border-radius:4px;background:var(--line);overflow:hidden}
+#tour .ttime i{display:block;height:100%;width:100%;border-radius:inherit;background:linear-gradient(90deg,#4ea3ff,var(--blue));transform-origin:left;animation:ttFill linear both}
+#tour .ttime.done i{background:var(--green,#1f9d55)}
+#tour .tbtn .btn[disabled]{opacity:.45;cursor:not-allowed}
+@keyframes ttFill{from{transform:scaleX(0)}to{transform:scaleX(1)}}
