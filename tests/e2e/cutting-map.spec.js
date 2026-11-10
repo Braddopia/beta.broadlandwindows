@@ -30,14 +30,15 @@ test('Panel Optimiser: change a piece, the plan updates; save, reopen and print 
   await expect(app.page.locator('#main h1')).toHaveText('Panel Optimiser');
   await expect(app.page.locator('#main .cut-b')).toHaveCount(1);
   // more shelves than fit on one board
+  // the plan updates while typing, and the box keeps its place
   await app.page.fill('#cut_parts_1_qty', '12');
-  await app.page.locator('#cut_parts_1_qty').blur();
-  await expect(app.page.locator('#main .cut-b')).toHaveCount(3);
+  await expect(app.page.locator('#main .cut-b')).toHaveCount(4);
+  await expect(app.page.locator('#cut_parts_1_qty')).toBeFocused();
+  await expect(app.page.locator('#cutKpis')).toContainText('4');
   expect(await app.run(() => state.cut.parts[1].qty)).toBe(12);
   // a piece bigger than the board is reported, not lost
   await app.page.click('#main >> text=+ Add Piece');
   await app.page.fill('#cut_parts_2_L', '3000');
-  await app.page.locator('#cut_parts_2_L').blur();
   await expect(app.page.locator('#main .note.bad')).toContainText('would not fit');
   await app.page.click('#main .cut-t >> nth=1 >> [aria-label="Remove row 3"]');
   await expect(app.page.locator('#main .note.bad')).toHaveCount(0);
@@ -51,12 +52,39 @@ test('Panel Optimiser: change a piece, the plan updates; save, reopen and print 
   await expect(app.page.locator('#main .cut-b')).toHaveCount(0);
   await app.page.click('#main >> text=Saved Lists (1)');
   await app.page.click('#mbox >> text=Open');
-  await expect(app.page.locator('#main .cut-b')).toHaveCount(3);
+  await expect(app.page.locator('#main .cut-b')).toHaveCount(4);
   // print
   const [w] = await Promise.all([app.nextPopup(), app.page.click('#main >> text=Print Plan')]);
   await w.waitForLoadState();
-  await expect(w.locator('h1')).toContainText('Sample kitchen');
-  await expect(w.locator('svg')).toHaveCount(3);
+  // the company's standard A4 portrait report
+  await expect(w.locator('h1')).toHaveText('Cutting Plan');
+  await expect(w.locator('.pg')).toContainText('Sample kitchen');
+  await expect(w.locator('.ih img')).toHaveCount(1);
+  await expect(w.locator('.cut-b')).toHaveCount(4);
+  await expect(w.locator('table.dt').first()).toContainText('Name');
   await w.close();
   expect(app.errors).toEqual([]);
+});
+
+test('Panel Optimiser: the Smarts Aluminium boards are one click away', async ({ app }) => {
+  await app.role('beta');
+  await app.go('cutting');
+  await app.page.click('#main .cut-pre >> text=Smarts Aluminium Half');
+  expect(await app.run(() => state.cut.sheets.map((s) => [s.label, s.L, s.W]))).toContainEqual([
+    'Smarts Aluminium Half',
+    1195,
+    1200,
+  ]);
+  await app.page.click('#main .cut-pre >> text=Smarts Aluminium Half');
+  await expect(app.page.locator('.toast')).toContainText('already listed');
+});
+
+test('Remove Stock has Scan buttons for the Stock ID and the item code', async ({ app }) => {
+  await app.role('staff');
+  await app.go('stock');
+  await app.call('stockForm', 'remove');
+  await expect(app.page.locator('#mbox .ff:has(#f_pid) .scan')).toHaveCount(1);
+  await expect(app.page.locator('#mbox .ff:has(#f_item) .scan')).toHaveCount(1);
+  await app.page.click('#mbox .ff:has(#f_pid) .scan');
+  await expect(app.page.locator('#scanner')).toHaveClass(/open/);
 });

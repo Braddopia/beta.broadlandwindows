@@ -63,11 +63,12 @@ export function ieFields() {
       req: ieMode != 'remove',
       max: 24,
       sec: 'p',
-      ...(ieMode == 'remove' ? { ph: 'Type or scan the Stock ID' } : {}),
+      ...(ieMode == 'remove' ? { ph: 'Type or scan', scan: 1 } : {}),
     },
     {
       k: 'item',
       l: 'Item code',
+      scan: ieMode != 'edit',
       ro: ed && !Ad,
       req: 1,
       max: 64,

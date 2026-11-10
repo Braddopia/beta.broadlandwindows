@@ -139,7 +139,10 @@ export function plugInForms(h) {
 }
 export function fieldH(f, v) {
   const val = v[f.k] ?? '';
-  const inp = fieldControl(f, val);
+  let inp = fieldControl(f, val);
+  /* a Scan button beside the box when the scanner is plugged in */
+  if (f.scan && HOOKS.scan && !f.ro)
+    inp = `<div class="inl">${inp}<button type="button" class="btn scan sm" ${onClick('scanInto', 'f_' + f.k)}>${svg(ICONS.scan)}Scan</button></div>`;
   return `<div class="ff ${f.w || ''}" ${f.nx ? `data-nx="${f.nx}"` : ''} ${nxHid(f, v) ? 'hidden' : ''}><label for="f_${f.k}">${esc(f.l)}${MARK(f.req, f.adm)}</label>${inp}${f.hint ? `<span class="hint ${/https?:|@/.test(f.hint) ? 'nocap' : ''}">${esc(f.hint)}</span>` : ''}</div>`;
 }
 /* start-up step (run once by main.js) */

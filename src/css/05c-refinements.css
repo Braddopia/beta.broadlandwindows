@@ -519,23 +519,39 @@ body[data-theme=dark] .smap .land{fill:rgba(120,170,255,.08);stroke:#6ea3e8}
 .smap-t:hover{background:var(--blue-bg)}.smap-t .dot{margin-right:.5rem}
 .smap-off{margin-top:.8rem;font-size:.85rem}.smap-off summary{cursor:pointer;color:var(--muted)}
 @media(max-width:900px){.smap{grid-template-columns:1fr}}
-/* Panel Optimiser: lists on the left, the plan on the right; boards drawn to scale */
-.cut{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);gap:1rem;align-items:start}
-.cut-in{display:grid;gap:1rem}.cut-out{display:grid;gap:1rem}
-.cut-t td{padding:.3rem .35rem}.cut-t input,.cut-t select{width:100%;min-width:4.5rem;padding:.4rem .5rem;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);font:inherit}
-.cut-t td:first-child input{min-width:8rem}
-.cut-t+.mini{margin-top:.6rem}
-.cut-o .grid{display:grid;grid-template-columns:1fr 1fr;gap:.8rem}
-.cut-o input{width:100%;padding:.5rem .6rem;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);font:inherit}
-.cut-out .kpis{grid-template-columns:repeat(4,minmax(0,1fr))}
-.cut-bp h2{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:.3rem}
-.cut-b{display:block;width:100%;height:auto;max-height:70vh}
-.cut-b .bd{fill:rgba(127,140,160,.1);stroke:var(--ink);stroke-width:3}
-.cut-b rect{stroke-width:2}
-.cut-b text{text-anchor:middle;dominant-baseline:middle;fill:#13233a;font-family:var(--body);font-weight:700;pointer-events:none}
-.cut-b text.sz{font-weight:500}
-.cut-by{margin:-.4rem 0 0}
+/* Panel Optimiser: totals across the top, lists on the left, the plan on the right (both start level).
+   Boards are a dark cutting mat with a fine grid, glossy pieces and a slow-moving RGB frame. */
+.cut-k{margin-bottom:1rem}
+.cut-k .ksub{display:block;margin-top:.15rem;font-size:.72rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cut-meter{display:block;height:5px;margin-top:.45rem;border-radius:5px;background:var(--line);overflow:hidden}
+.cut-meter i{display:block;height:100%;border-radius:5px;background:var(--rgb);background-size:300% 100%;animation:rgbflow 6s linear infinite}
+.cut{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:1rem;align-items:start}
+.cut-in,.cut-out{display:grid;gap:1rem;align-content:start}
+.cut-in .panel h2,.cut-bp h2{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:.3rem .8rem}
+.cut-in .panel h2 small,.cut-bp h2 small{font-weight:400;font-size:.76rem}
+.cut-t table{width:100%;border-collapse:separate;border-spacing:0 .35rem;table-layout:fixed}
+.cut-t th{padding:0 .3rem .1rem;font:600 .72rem var(--body);color:var(--muted);text-align:left;letter-spacing:.02em}
+.cut-t th.n{text-align:right}
+.cut-t td{padding:0 .3rem}
+.cut-t col.c-label{width:auto}.cut-t col.c-L,.cut-t col.c-W{width:5.6rem}.cut-t col.c-qty{width:4.6rem}.cut-t col.c-turn{width:7.2rem}.cut-t col.c-x{width:2.2rem}
+.cut-t input,.cut-t select,.cut-og input{width:100%;height:2.3rem;padding:0 .6rem;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);font:inherit;font-size:.9rem}
+.cut-t td.n input{text-align:right;font-variant-numeric:tabular-nums}
+.cut-t input:focus,.cut-t select:focus,.cut-og input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(43,143,224,.18)}
+.cut-x{width:2rem;height:2rem;border:0;border-radius:8px;background:none;color:var(--muted);font-size:1.2rem;line-height:1;cursor:pointer}
+.cut-x:hover{background:var(--red-bg);color:var(--red)}
+.cut-add{display:flex;flex-wrap:wrap;gap:.45rem;margin-top:.5rem}
+.cut-pre{border-style:dashed}.cut-pre b{font-weight:600}.cut-pre span{color:var(--muted);font-weight:400}
+.cut-og{display:grid;grid-template-columns:1fr 1fr;gap:.8rem}
+.cut-og label{display:block;margin-bottom:.3rem;font-size:.8rem;color:var(--muted)}
+.cut-frame{position:relative;padding:3px;border-radius:12px;background:var(--rgb);background-size:300% 100%;animation:rgbflow 8s linear infinite;box-shadow:0 18px 40px -22px rgba(1,20,45,.7)}
+.cut-b{display:block;width:100%;height:auto;max-height:68vh;border-radius:9px;background:#0d1828}
+.cut-b .bd{fill:#0f1c2f}
+.cut-b .gl{fill:none;stroke:rgba(140,180,230,.13);stroke-width:1.2}
+.cut-b .pc rect{stroke-width:2.5;stroke-opacity:.65;transition:filter .15s}
+.cut-b .pc:hover rect{filter:brightness(1.12) drop-shadow(0 0 8px rgba(255,255,255,.35))}
+.cut-b text{text-anchor:middle;dominant-baseline:middle;fill:#fff;font-family:var(--body);font-weight:700;pointer-events:none;paint-order:stroke;stroke:rgba(5,15,30,.55);stroke-width:3px}
+.cut-b text.sz{font-weight:500;fill:rgba(255,255,255,.88)}
 .note.bad{padding:.7rem .9rem;border-radius:10px;background:var(--red-bg);color:var(--red);font-size:.88rem}
+@media(prefers-reduced-motion:reduce){.cut-frame,.cut-meter i{animation:none}}
 @media(max-width:1100px){.cut{grid-template-columns:1fr}}
-@media(max-width:560px){.cut-out .kpis{grid-template-columns:1fr 1fr}.cut-o .grid{grid-template-columns:1fr}}
-.cut-in .panel h2{display:flex;justify-content:space-between;align-items:baseline}.cut-in .panel h2 small{font-weight:400;font-size:.78rem}
+@media(max-width:560px){.cut-k{grid-template-columns:1fr 1fr}.cut-og{grid-template-columns:1fr}.cut-t col.c-L,.cut-t col.c-W{width:4.6rem}.cut-t col.c-turn{width:5.6rem}}
