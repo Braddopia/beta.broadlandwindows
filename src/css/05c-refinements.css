@@ -69,8 +69,6 @@ p,li,small{text-wrap:pretty}
 .top .sb:focus-within{box-shadow:inset 0 1px 0 #fff,0 8px 22px -14px rgba(1,43,89,.45)}
 body[data-theme=dark] .top .sb:focus-within{box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 8px 22px -14px rgba(0,0,0,.7)}
 /* overview already has lots of colour: brand blues and yellow only there */
-body[data-view=home] .top .sb::before,body[data-view=home] .top .sb::after{background:conic-gradient(from var(--sa),#034ea2,#5ac8ff,#ffd002,#5ac8ff,#034ea2)}
-body[data-view=home] .top .sb::before{opacity:.4}body[data-view=home] .top .sb::after{opacity:.2}
 /* Ctrl+K box: plain divider instead of a rainbow line */
 .ck-in::after{display:none}
 .srn b{color:var(--ink);font-weight:600}
@@ -336,7 +334,6 @@ body[data-theme=dark] .pda-b b{color:#fff}
 .top .sb::after{background:conic-gradient(from var(--sa),#ff6ec4,#ffad7a,#ffd36b,#9cf59a,#5ad7ff,#7c87ff,#d873e0,#ff6ec4);filter:blur(16px)}
 .top .sb:focus-within::before{opacity:.95;filter:blur(1px)}
 .top .sb:focus-within::after{opacity:.6;left:3%;right:3%;bottom:-12px;height:20px;filter:blur(18px)}
-body[data-view=home] .top .sb:focus-within::before{opacity:.75}body[data-view=home] .top .sb:focus-within::after{opacity:.4}
 .ck-b::before{background:conic-gradient(from var(--sa),#ff6ec4,#ff8a9a,#ffad7a,#ffd36b,#e6f26b,#9cf59a,#6bf0c8,#5ad7ff,#5aa8ff,#7c87ff,#a979f5,#d873e0,#ff6ec4);filter:blur(1px);opacity:.75}
 
 /* floor boards: empty-state art sits in the middle of its panel */
@@ -348,15 +345,7 @@ body[data-view=home] .top .sb:focus-within::before{opacity:.75}body[data-view=ho
 .invq svg{width:1.05rem;height:1.05rem;color:var(--muted);flex-shrink:0}
 .invq input{flex:1;min-width:0;height:100%;border:0;background:transparent;outline:none;font-size:.92rem;padding:0}
 .invq:focus-within{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-bg)}
-tr.xhit td{background:#e4f2ff!important}
-body[data-theme=dark] tr.xhit td{background:rgba(90,170,255,.18)!important}
-tr.xhit td:first-child{box-shadow:inset 4px 0 0 #2b8fe0}
-.xtag{display:block;margin-top:.2rem;font-size:.66rem;font-weight:700;color:#1667a8;letter-spacing:.04em}
-body[data-theme=dark] .xtag{color:#8cc8ff}
 .idesc{display:block;font-size:.74rem;color:var(--muted);font-weight:400;max-width:22rem;white-space:normal}
-.sri.sri-x{background:#e4f2ff;border-radius:8px;box-shadow:inset 3px 0 0 #2b8fe0}
-body[data-theme=dark] .sri.sri-x{background:rgba(90,170,255,.18)}
-.srg.xm{color:#1667a8}
 /* ==== stock take ==== */
 .tk-prog{position:relative;height:1.5rem;margin:0 0 .8rem;border-radius:8px;background:var(--card2);border:1px solid var(--line);overflow:hidden}
 .tk-prog i{position:absolute;inset:0 auto 0 0;background:linear-gradient(90deg,#1f9d55,#4cc47f);transition:width .4s}
@@ -421,7 +410,6 @@ body.tv #rpb,body.signin #rpb{display:none}
 @keyframes rgbflow{to{background-position:300% 0}}
 .top .sb::before,.top .sb::after,.ck-b::before,.ck-in::after{background:linear-gradient(90deg,#ff6ec4,#ff9a8a,#ffc46b,#e9ef72,#9cf59a,#6be6d8,#5ab8ff,#7c87ff,#b67cf0,#ff6ec4)!important;background-size:300% 100%!important;animation:rgbflow 10s linear infinite!important}
 .top .sb:focus-within::before,.top .sb:focus-within::after{animation-duration:5s!important}
-body[data-view=home] .top .sb::before,body[data-view=home] .top .sb::after{background:linear-gradient(90deg,#034ea2,#3d8be0,#5ac8ff,#ffd002,#5ac8ff,#3d8be0,#034ea2)!important;background-size:300% 100%!important}
 @media(prefers-reduced-motion:reduce){.top .sb::before,.top .sb::after,.ck-b::before,.ck-in::after{animation:none!important}}
 /* Messages: the typing box is focused for you, so no yellow focus ring; a soft blue edge instead */
 .msn-in textarea:focus,.msn-in textarea:focus-visible{outline:none;box-shadow:0 0 0 2px rgba(43,143,224,.45)}
@@ -480,5 +468,16 @@ body:has(#modal.open) #rpb span{display:none}
 @media(prefers-reduced-motion:reduce){#pvn,.pvn-b{transition:none}}
 #pvnOk:focus-visible{outline:2px solid #5ab8ff;outline-offset:2px}
 /* exact search match on any list page (rows) or card list (contacts) */
-.clk-r.xhit:not(tr){box-shadow:inset 3px 0 0 #2b8fe0,0 0 0 2px rgba(43,143,224,.35)!important;background:#e4f2ff}
-body[data-theme=dark] .clk-r.xhit:not(tr){background:rgba(90,170,255,.14)}
+/* exact search match: the same slow-moving rainbow as the search bar, as a thin edge
+   (rows: a line above and below, continuous across the cells; results and cards: a rounded edge) */
+:root{--rgb:linear-gradient(90deg,#ff6ec4,#ff9a8a,#ffc46b,#e9ef72,#9cf59a,#6be6d8,#5ab8ff,#7c87ff,#b67cf0,#ff6ec4)}
+tr.xhit{background-image:var(--rgb),var(--rgb)!important;background-size:300% 2px,300% 2px!important;background-position:0 0,0 100%;background-repeat:no-repeat!important;animation:rgbrow 10s linear infinite}
+tr.xhit td:first-child{box-shadow:inset 3px 0 0 #b67cf0}
+@keyframes rgbrow{to{background-position:300% 0,300% 100%}}
+.sri.sri-x,.clk-r.xhit:not(tr){border:2px solid transparent!important;border-radius:10px;background:linear-gradient(var(--card),var(--card)) padding-box,var(--rgb) border-box!important;background-size:100% 100%,300% 100%!important;animation:rgbflow2 10s linear infinite}
+.sri.sri-x:hover,.sri.sri-x.on{background:linear-gradient(var(--blue-bg),var(--blue-bg)) padding-box,var(--rgb) border-box!important;background-size:100% 100%,300% 100%!important}
+@keyframes rgbflow2{to{background-position:0 0,300% 0}}
+.xtag{display:block;margin-top:.2rem;font-size:.66rem;font-weight:800;letter-spacing:.04em;background:var(--rgb);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:rgbflow 10s linear infinite;filter:saturate(1.3)}
+body:not([data-theme=dark]) .xtag{filter:saturate(1.6) brightness(.8)}
+.srg.xm{background:var(--rgb);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:rgbflow 10s linear infinite}
+@media(prefers-reduced-motion:reduce){tr.xhit,.sri.sri-x,.clk-r.xhit:not(tr),.xtag,.srg.xm{animation:none}}

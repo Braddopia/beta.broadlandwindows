@@ -194,3 +194,36 @@ test('Remove Stock never makes a new product: it offers the products with that c
   await app.page.click('#mbox .mact >> text=Remove stock');
   expect(await app.run(() => products().length)).toBe(before);
 });
+
+test('Remove Stock: typing a Stock ID picks that product', async ({ app }) => {
+  const p = await app.run(() => {
+    const r = products()[2];
+    return { pid: r.pid, item: r.item, stock: r.stock };
+  });
+  await app.call('stockForm', 'remove');
+  await app.page.fill('#f_pid', p.pid);
+  await expect(app.page.locator('#f_item')).toHaveValue(p.item);
+  await expect(app.page.locator('#iePick')).toContainText('picked');
+  await app.page.click('#mbox .mact >> text=Remove stock');
+  expect(await app.run((k) => prod(k).stock, p.pid)).toBe(p.stock - 1);
+  await app.call('stockForm', 'remove');
+  await app.page.fill('#f_pid', 'ZZ99');
+  await expect(app.page.locator('#iePick')).toContainText('No product has Stock ID ZZ99');
+});
+
+test('the Length box follows the unit: metres and pieces must be numbers', async ({ app }) => {
+  await app.call('stockForm', 'add');
+  const lab = app.page.locator('label[for=f_length]');
+  await expect(lab).toHaveText('Size');
+  await app.page.selectOption('#f_unit', 'Meters (M)');
+  await expect(lab).toHaveText('Length (m)');
+  await app.page.selectOption('#f_unit', 'PCS');
+  await expect(lab).toHaveText('Pieces per pack');
+  await app.page.fill('#f_item', 'UNITTEST1');
+  await app.page.fill('#f_length', 'lots');
+  await app.page.selectOption('#f_supplier', { index: 1 });
+  const n = await app.run(() => products().length);
+  await app.page.click('#mbox .mact >> text=Add stock');
+  await expect(app.page.locator('#mbox .ferr')).toContainText('whole number');
+  expect(await app.run(() => products().length)).toBe(n);
+});

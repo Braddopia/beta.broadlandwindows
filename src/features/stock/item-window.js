@@ -32,7 +32,7 @@ import { need } from '../auth/session.js';
 import { SEL, pphotos } from './stock.js';
 import { SUPN } from '../suppliers/suppliers.js';
 import { pickC } from '../../ui/forms/colour-picker.js';
-import { fieldH, readFields } from '../../ui/forms/form.js';
+import { fieldErr, fieldH, readFields } from '../../ui/forms/form.js';
 import { gallery, setPhotoList, tmp } from '../../ui/forms/photos.js';
 import { askIn, askYes, closeModal, openModal } from '../../ui/modal.js';
 import { go, render, view } from '../../ui/shell/router.js';
@@ -59,11 +59,11 @@ export function ieFields() {
     {
       k: 'pid',
       l: ed && Own && !ieView ? 'Stock ID (admin override, must be unique)' : 'Stock ID',
-      ro: !(ed && Own),
+      ro: !(ed && Own) && ieMode != 'remove',
       req: ieMode != 'remove',
       max: 24,
       sec: 'p',
-      ...(ieMode == 'remove' ? { ph: 'Pick a product below' } : {}),
+      ...(ieMode == 'remove' ? { ph: 'Type or scan the Stock ID' } : {}),
     },
     {
       k: 'item',
@@ -81,7 +81,7 @@ export function ieFields() {
       ? { k: 'stock', l: 'Current stock', t: 'number', max: 1e7, sec: 'p', hint: 'Changing this logs an adjustment' }
       : { k: 'qty', l: 'Quantity', t: 'number', req: 1, pos: 1, max: 1e6, sec: 'p' },
     { k: 'barcode', l: 'Barcode', max: 64, sec: 'p' },
-    { k: 'length', l: 'Length', max: 30, sec: 'p' },
+    { k: 'length', l: lenBox(r.unit || 'Each').l, max: 30, sec: 'p', ph: lenBox(r.unit || 'Each').ph },
     { k: 'cInName', l: 'Colour in (B)', t: 'colour', w: 'full', sec: 'c' },
     { k: 'cOutName', l: 'Colour out (A)', t: 'colour', w: 'full', sec: 'c' },
     ...(ieMode != 'remove'
@@ -191,7 +191,7 @@ export function itemWindow(mode, k, pre) {
     B = { edit: 'Save changes', add: 'Add stock', remove: 'Remove stock', request: 'Send request' }[mode];
   const s = r ? stt(r) : null;
   openModal(
-    `<div class="ie-h"><div><h2>${esc(T)}</h2><span class="muted" id="ieSub">${r ? `Stock ID ${esc(r.pid)} · ${prodRows(r.pid).filter((x) => x.type != 'import').length} movements · <span class="tag ${s[1]}">${s[0]}</span>` : mode == 'remove' ? 'Type or scan the item code, then pick the product' : 'New product: a Stock ID is given automatically'}</span>${!r && mode == 'remove' ? '<div class="ie-pick" id="iePick"></div>' : ''}</div><button class="mx" data-act="closeModal" aria-label="Close">&times;</button></div>
+    `<div class="ie-h"><div><h2>${esc(T)}</h2><span class="muted" id="ieSub">${r ? `Stock ID ${esc(r.pid)} · ${prodRows(r.pid).filter((x) => x.type != 'import').length} movements · <span class="tag ${s[1]}">${s[0]}</span>` : mode == 'remove' ? 'Type or scan the Stock ID or item code, then pick the product' : 'New product: a Stock ID is given automatically'}</span>${!r && mode == 'remove' ? '<div class="ie-pick" id="iePick"></div>' : ''}</div><button class="mx" data-act="closeModal" aria-label="Close">&times;</button></div>
   <div class="ie"><div class="ie-ph"><div class="ie-main" id="ieMain"></div><div class="ie-strip" id="ieStrip"></div>
      <div class="prow"><label class="btn ghost sm">${svg(ICONS.photo)}Take photo<input type="file" accept="image/*" capture="environment" hidden data-onchange="addPh" data-args-change="[{&quot;$&quot;:&quot;this&quot;}]"></label><label class="btn ghost sm">Upload photos<input type="file" accept="image/*" multiple hidden data-onchange="addPh" data-args-change="[{&quot;$&quot;:&quot;this&quot;}]"></label><span class="muted" style="align-self:center;font-size:.75rem">Up to ${MAX_PHOTOS}, resized automatically</span></div>
      <div class="ie-stats" id="ieStats"></div></div>
@@ -202,6 +202,21 @@ export function itemWindow(mode, k, pre) {
   ieDraw();
   ieStats();
   bcDeco({ diff: !!(r && r.barcode && r.barcode != r.item), val: r ? r.barcode || '' : '' });
+  /* the Length box follows the unit (metres, pieces per pack, or a size) */
+  const un = $('#f_unit');
+  if (un) {
+    un.addEventListener('change', lenSync);
+    lenSync();
+  }
+  /* Remove Stock: a Stock ID typed or scanned picks that product */
+  const pidBox = $('#f_pid');
+  if (mode == 'remove' && !r && pidBox)
+    pidBox.addEventListener('input', () => {
+      const v = normCode(pidBox.value),
+        x = v && products().find((p) => normCode(p.pid) == v);
+      if (x && x.pid != ieKey) iePickProd(x.pid);
+      else if (!x && v) removePick(null, '', 'No product has Stock ID ' + pidBox.value.trim());
+    });
   if (view) {
     const b = $('#mbox');
     b.classList.add('ie-view');
@@ -289,6 +304,13 @@ export function ieSave() {
     o = readFields(ieFields());
   if (!o) return;
   o.item = SAFE.code(o.item);
+  if (mode != 'remove' && mode != 'request') {
+    const lb = lenBox(o.unit);
+    if (o.length && lb.re && !lb.re.test(o.length.trim())) {
+      fieldErr($('#f_length'), lb.err);
+      return;
+    }
+  }
   if (!o.item) {
     toast('Item code can use letters, numbers, spaces, dots, dashes and slashes');
     return;
@@ -569,7 +591,7 @@ export function newFromCode(c) {
 
 /* Remove Stock started without a product: the products with this code are offered to pick from,
    and picking one fills in its length, colours and area. Removing never makes a new product. */
-function removePick(ex, code) {
+function removePick(ex, code, msg) {
   const el = $('#iePick');
   if (!el) return;
   const c = normCode(code),
@@ -595,8 +617,8 @@ function removePick(ex, code) {
               `<button type="button" class="mini" ${onClick('iePickProd', p.pid)}>${esc(p.item)}${p.desc ? ' · ' + esc(p.desc) : ''}${p.length && p.length != '-' ? ' · ' + esc(p.length) : ''}${colTxt(p) != '-' ? ' · ' + esc(colTxt(p)) : ''}${p.area ? ' · ' + esc(p.area) : ''} (${esc(String(p.stock))})</button>`
           )
           .join('')}`
-      : c
-        ? '<span class="muted">No product has this code</span>'
+      : msg || c
+        ? `<span class="muted">${esc(msg || 'No product has this code')}</span>`
         : '';
   /* leaving the code box redraws this; keep the same buttons so a click on one is not lost */
   if (el.dataset.h != h) {
@@ -619,4 +641,30 @@ export function iePickProd(pid) {
   pickC('cInName', clean(r.cInName), r.cIn || '#8a8a8a');
   pickC('cOutName', clean(r.cOutName), r.cOut || '#8a8a8a');
   $('#f_item').dispatchEvent(new Event('input'));
+}
+
+/* the Length box for each unit: Meters is a number of metres, PCS the pieces in a pack, anything else
+   a size as written on the product (e.g. 4-5MM). The value is stored as typed, so products match. */
+export function lenBox(unit) {
+  if (unit == 'Meters (M)')
+    return {
+      l: 'Length (m)',
+      ph: 'e.g. 6.5',
+      mode: 'decimal',
+      re: /^\d+(\.\d+)?\s*m?$/i,
+      err: 'Length in metres, as a number (e.g. 6.5)',
+    };
+  if (unit == 'PCS')
+    return { l: 'Pieces per pack', ph: 'e.g. 100', mode: 'numeric', re: /^\d+$/, err: 'Pieces per pack, as a whole number' };
+  return { l: 'Size', ph: 'e.g. 4-5MM', mode: 'text', re: null, err: '' };
+}
+export function lenSync() {
+  const u = $('#f_unit'),
+    e = $('#f_length'),
+    lab = $('label[for=f_length]');
+  if (!u || !e) return;
+  const b = lenBox(u.value);
+  if (lab) lab.textContent = b.l;
+  e.placeholder = b.ph;
+  e.inputMode = b.mode;
 }
