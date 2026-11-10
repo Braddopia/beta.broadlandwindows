@@ -655,3 +655,10 @@ body[data-view=messages]:not(:has(#modal.open)) #rpb{display:none}
 .cut-t td:not(:first-child) input{text-align:center!important}
 .cut-in>.cut-lists{margin:0}
 .cut-in{margin-bottom:1rem!important}
+
+/* search: a straight answer at the top, and a label found on a page lit up when you get there */
+.srg.ans{color:var(--blue)}
+.sri.sri-a{background:linear-gradient(90deg,rgba(43,143,224,.12),transparent 70%);border-radius:10px}
+.sri.sri-a b{font-size:1.02rem}
+.sx-hit{animation:sxHit 2.4s ease-out}
+@keyframes sxHit{0%,35%{box-shadow:0 0 0 3px rgba(90,184,255,.85),0 0 22px rgba(90,184,255,.45)}100%{box-shadow:0 0 0 0 rgba(90,184,255,0)}}

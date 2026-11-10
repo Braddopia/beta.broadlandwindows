@@ -75,6 +75,14 @@ core/  config/  generic helpers and fixed settings
   (`domain/exact.js` `isExact`, ignoring spaces, brackets, dots and dashes).
 - On list pages, `features/search/exact-rows.js` moves the exactly matching row to the top, marks it
   and scrolls to it after each draw. Inventory does the same itself.
+- Questions get a straight answer first: `features/search/facts.js` (amount outstanding, stock value,
+  holiday left, next fitting, VAT...). Words are matched in plain form by `domain/ask.js`, which folds
+  words that mean the same ("outstanding", "owing", "balance", "to collect") together.
+- "On The Pages": `features/search/site-index.js` draws each page this account can open (with no search
+  typed) and indexes its headings, number cards, columns, settings and the boxes in lead, contract and
+  service windows. Clicking a match opens the page and lights up the spot. It is kept for a minute.
+- Everything runs in the browser. Real AI (sending a question to Claude) is for later, once the
+  Microsoft 365 backend can hold the key and keep customer data on the server.
 
 ## Service map and Panel Optimiser
 

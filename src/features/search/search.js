@@ -25,6 +25,8 @@ import { bugReport } from '../problems/problems.js';
 import { editProfile } from '../profile/profile.js';
 import { scan } from '../scanner/scanner.js';
 import { nlqAll } from './answers.js';
+import { factsFor } from './facts.js';
+import { siteFind, siteGo } from './site-index.js';
 import { cmdSmart, cmdkSet } from './commands.js';
 import { editCall } from '../service/service.js';
 import { coEditK, motionSet } from '../settings/settings.js';
@@ -340,6 +342,15 @@ export function srchBuild(raw, big) {
       `<div class="srg xm">Exact Match${XR.length > 1 ? `<span>${XR.length}</span>` : ''}</div>` +
         XR.map((h) => h.replace('class="sri"', 'class="sri sri-x"')).join('')
     );
+  /* straight answers to a question: "amount outstanding", "stock value", "holiday left" */
+  const FA = cmdOnly || query.length < 3 ? [] : factsFor(raw);
+  if (FA.length)
+    grp.push(
+      `<div class="srg ans">Answer</div>` +
+        FA.map(([t, s, fn]) => row(t, s, fn, 'M12 3l2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8L3.5 9.2l5.9-.9z'))
+          .join('')
+          .replace(/class="sri"/g, 'class="sri sri-a"')
+    );
   const NQ = cmdOnly ? null : nlq(raw);
   if (NQ) {
     NLQ = NQ;
@@ -405,6 +416,22 @@ export function srchBuild(raw, big) {
             .join('')
       );
     });
+  /* anything shown on a page: a number card, a column, a setting or a box's name */
+  if (!cmdOnly && query.length >= 3) {
+    const SF = siteFind(raw, big ? 8 : 5);
+    if (SF.length)
+      grp.push(
+        `<div class="srg">On The Pages<span>${SF.length}</span></div>` +
+          SF.map((x) =>
+            row(
+              x.box ? x.t : x.t + (x.s ? ': ' + x.s : ''),
+              x.box ? x.s : VIEWS[x.v].t,
+              () => siteGo(x.v, x.t),
+              'M5 12h14M13 6l6 6-6 6'
+            )
+          ).join('')
+      );
+  }
   const empty = !grp.length
     ? query.length < 2 && !cmdOnly
       ? ''
@@ -521,7 +548,7 @@ export function cmdkRun(raw) {
   CXi = 0;
   $('#cres').innerHTML =
     b.html ||
-    '<p class="srn">Type a name, postcode, contract number or item code.<br>Or tell it what to do: <b class="nocap">pay 500 1023421</b>, <b class="nocap">call sample</b>, <b class="nocap">won L0002</b>, <b class="nocap">note 1023421 rang customer</b>.</p>';
+    '<p class="srn">Type a name, postcode, contract number or item code.<br>Ask a question: <b class="nocap">amount outstanding</b>, <b class="nocap">stock value</b>, <b class="nocap">holiday left</b>, <b class="nocap">who is off today</b>.<br>Or tell it what to do: <b class="nocap">pay 500 1023421</b>, <b class="nocap">call sample</b>, <b class="nocap">won L0002</b>, <b class="nocap">note 1023421 rang customer</b>.</p>';
   srchMark('#cres', 0);
 }
 /* ---- the hint in the box cycles through real examples ---- */

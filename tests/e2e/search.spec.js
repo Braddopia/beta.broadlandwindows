@@ -71,3 +71,23 @@ test('an exact number, name or phone is highlighted first, for every kind of rec
   await app.page.fill('#sb input', 'Sample');
   await expect(app.page.locator('#sres .sri-x')).toHaveCount(0);
 });
+
+test('search answers questions and finds labels on any page: "amount outstanding", "vat", "trickle vents"', async ({ app }) => {
+  await app.role('beta');
+  await app.page.fill('#sb input', 'amount outstanding');
+  await expect(app.page.locator('#sres .srg.ans')).toHaveText('Answer');
+  await expect(app.page.locator('#sres .sri-a').first()).toContainText('£26,742 Still To Collect');
+  await expect(app.page.locator('#sres')).toContainText('Balance To Collect: £26,742');
+  // a label found on a page opens that page and lights the spot up
+  await app.page.locator('#sres .sri', { hasText: 'Balance To Collect' }).first().click();
+  await expect(app.page.locator('#main .sx-hit')).toHaveCount(1);
+  await app.page.fill('#sb input', 'vat');
+  await expect(app.page.locator('#sres .sri-a').first()).toContainText('VAT Is 20%');
+  await app.page.fill('#sb input', 'trickle vents');
+  await expect(app.page.locator('#sres')).toContainText('Column in the Survey step');
+  // money answers stay hidden from accounts without money access
+  await app.role('staff');
+  await app.page.fill('#sb input', 'amount outstanding');
+  await expect(app.page.locator('#sres')).not.toContainText('Still To Collect');
+  expect(app.errors).toEqual([]);
+});
