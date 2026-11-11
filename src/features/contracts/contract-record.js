@@ -54,8 +54,7 @@ export function defineContractRecord() {
       log: [],
     }),
     heading: (W) =>
-      (W.v.name ? jobTitle(W.v.id, W.v.name) : W.v.id + '  New contract') +
-      (W.v.company ? ' · ' + W.v.company : ''),
+      (W.v.name ? jobTitle(W.v.id, W.v.name) : W.v.id + '  New contract') + (W.v.company ? ' · ' + W.v.company : ''),
     headStats: (W) =>
       `${W.v.flash ? `<span class="flash">${esc(W.v.flash)}</span>` : ''}<span><small>Value</small><b>${m0(W.v.value)}</b></span><span><small>Paid</small><b>${m0(W.v.paid)}</b></span><span class="${(+W.v.value || 0) - (+W.v.paid || 0) > 0 ? 'hk-due' : 'hk-ok'}"><small>Outstanding</small><b>${(+W.v.value || 0) - (+W.v.paid || 0) > 0 ? m0((+W.v.value || 0) - (+W.v.paid || 0)) : 'Paid'}</b></span><span><small>Fit</small><b>${W.v.fit ? fd(W.v.fit) : '-'}</b></span>`,
     actions: (W) =>

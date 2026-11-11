@@ -1,4 +1,5 @@
 /* features/contracts/contracts: The Contracts page, new contract wizard and contract actions. */
+import { plugInCombo } from '../../ui/components/pickers.js';
 import { company } from '../../data/company.js';
 import { jobTitle } from '../../domain/job-title.js';
 import { CSTAGES, CTYPES, SOURCES } from '../../config/constants.js';
@@ -224,4 +225,17 @@ export function vContracts() {
     state.contracts.map((c) => c.cdate)
   )}</div><span class="sb-sp"></span>${tog}</div>
   ${stgPipe('contract')}${ckpi(L)}${U.v == 'board' ? board : list}`;
+}
+
+/* start-up step (run once by main.js): the job lists that drop down under a Job Number or Contract Number box.
+   'contracts' is every contract (service calls and deliveries); 'jobs' only for accounts that can open contracts */
+export function plugJobPickers() {
+  const rows = () =>
+    state.contracts.map((c) => ({
+      v: c.id,
+      t: jobTitle(c.id, c.name),
+      s: [c.town, c.homePc, c.stage].filter(Boolean).join(' · '),
+    }));
+  plugInCombo('contracts', rows);
+  plugInCombo('jobs', () => (canSee('contracts') ? rows() : []));
 }

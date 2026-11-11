@@ -1,7 +1,8 @@
 /* ui/forms/fields: the one place that draws the box for a form field (text, number, date, select,
    text area, colour). Every form in the app uses it, so a rule changed here changes everywhere.
 
-   A field is described as { k: key, l: label, t: type, o: options, max, min, rows, ro, adm, list, ph }.
+   A field is described as { k: key, l: label, t: type, o: options, max, min, rows, ro, adm, list, combo, ph }.
+   combo: the name of a pick list (ui/components/pickers.js) shown under the box as you type.
    Select options are plain values, or [value, label] pairs. */
 import { html, raw } from '../../core/html.js';
 import { can } from '../../domain/permissions.js';
@@ -32,6 +33,6 @@ export function fieldControl(f, value, { id = 'f_' + f.k, rows = 3, lockedAsText
       ? html` step="any" min="${f.min ?? 0}"${when(f.max, html` max="${f.max}"`)} inputmode="decimal"`
       : html` maxlength="${f.max || 120}"`;
   return String(
-    html`<input id="${id}" type="${f.t || 'text'}"${size} value="${val}"${when(f.ro, ' readonly')}${when(f.list, html` list="${f.list}"`)}${when(f.ph, html` placeholder="${f.ph}"`)}${when(keepsCase(f), ' class="nocap"')} autocomplete="off">`
+    html`<input id="${id}" type="${f.t || 'text'}"${size} value="${val}"${when(f.ro, ' readonly')}${when(f.list, html` list="${f.list}"`)}${when(f.combo, html` data-combo="${f.combo}"`)}${when(f.ph, html` placeholder="${f.ph}"`)}${when(keepsCase(f), ' class="nocap"')} autocomplete="off">`
   );
 }

@@ -138,7 +138,9 @@ test('contracts are named "number - NAME" in the window, the list, search and th
   expect(await app.run(() => evs('2026-11-12').map((e) => e.t))).toContain('1023421 - SAMPLE CUSTOMER E');
 });
 
-test('Cutting Optimiser: cuts with angles plan into bars as you type, print as a saw list, link profiles from Inventory', async ({ app }) => {
+test('Cutting Optimiser: cuts with angles plan into bars as you type, print as a saw list, link profiles from Inventory', async ({
+  app,
+}) => {
   await app.role('beta');
   // link a stock item as a profile with its bar length
   await app.go('stock');

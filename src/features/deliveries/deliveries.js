@@ -120,7 +120,7 @@ export function editDel(id, supName, con) {
         req: 1,
         hint: 'The status follows this date: Due a week before, In transit 4 days before, Overdue after',
       },
-      { k: 'contract', l: 'Job / contract no.', max: 30 },
+      { k: 'contract', l: 'Job / contract no.', max: 30, combo: 'contracts' },
       { k: 'ref', l: 'Order or delivery note number', max: 40 },
       { t: 'h', l: 'When It Arrives' },
       { k: 'status', l: 'Received?', t: 'select', o: ['Not yet', 'Received'] },

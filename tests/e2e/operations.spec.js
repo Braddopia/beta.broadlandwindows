@@ -182,3 +182,43 @@ test('calendar: fittings show on every view for every account; the chip hides th
   await expect(app.page.locator('#mbox')).toContainText('1023421 - SAMPLE CUSTOMER E');
   expect(app.errors).toEqual([]);
 });
+
+test('service call form: the job list drops down in the app style and fills the customer in; dates pick from our calendar', async ({
+  app,
+}) => {
+  await app.role('staff');
+  await app.go('service');
+  await app.call('callWizard');
+  await app.page.selectOption('#f_existing', { index: 0 });
+  await app.page.click('#f_contract');
+  await app.page.keyboard.type('aylsham');
+  const list = app.page.locator('#pkpop.pk-list.open');
+  await expect(list.locator('.pk-i')).toHaveCount(1);
+  await expect(list).toContainText('1023421 - SAMPLE CUSTOMER E');
+  // Enter picks the job without moving the wizard on
+  await app.page.keyboard.press('Enter');
+  await expect(app.page.locator('#f_contract')).toHaveValue('1023421');
+  await expect(app.page.locator('#f_name')).toHaveValue('Sample Customer E');
+  await expect(app.page.locator('#mbox')).toContainText('Step 1 of 6');
+  await expect(list).toHaveCount(0);
+  // picking another job replaces what the first one filled in
+  await app.page.fill('#f_contract', '');
+  await app.page.keyboard.type('1023418');
+  await app.page.locator('#f_contract').blur();
+  await expect(app.page.locator('#f_name')).toHaveValue('Sample Customer I');
+  await app.page.click('#mbox .mact >> text=Next');
+  await app.page.selectOption('#f_cat', { index: 2 });
+  await app.page.fill('#f_issue', 'Handle stiff');
+  await app.page.click('#mbox .mact >> text=Next');
+  await app.page.click('#mbox .mact >> text=Next');
+  // the visit date: our month calendar, not the browser's
+  await app.page.click('#f_visit');
+  const cal = app.page.locator('#pkpop.pk-cal.open');
+  await expect(cal).toContainText('November 2026');
+  await cal.locator('[data-dp=next]').click();
+  await expect(cal).toContainText('December 2026');
+  await cal.locator('[data-d="2026-12-03"]').click();
+  await expect(app.page.locator('#f_visit')).toHaveValue('2026-12-03');
+  await expect(cal).toHaveCount(0);
+  expect(app.errors).toEqual([]);
+});

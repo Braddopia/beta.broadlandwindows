@@ -580,7 +580,7 @@ body[data-theme=dark] .smap .land{fill:rgba(120,170,255,.08);stroke:#6ea3e8}
   .ptb.fx.t-inv th[data-col=sel]{width:2.6rem}.ptb.fx.t-inv th[data-col=pid]{width:5rem}.ptb.fx.t-inv th[data-col=length]{width:5.5rem}.ptb.fx.t-inv th[data-col=unit]{width:4.5rem}
   .ptb.fx.t-inv th[data-col=stock]{width:5rem}.ptb.fx.t-inv th[data-col=cost]{width:5.5rem}.ptb.fx.t-inv th[data-col=value]{width:6rem}.ptb.fx.t-inv th[data-col=act]{width:20.5rem}
   .ptb.fx.t-svc th[data-col=id]{width:7rem}.ptb.fx.t-svc th[data-col=pr]{width:6.5rem}.ptb.fx.t-svc th[data-col=st]{width:7rem}.ptb.fx.t-svc th[data-col=visit]{width:6.5rem}
-  .ptb.fx.t-svc th[data-col=fitter]{width:7.5rem}.ptb.fx.t-svc th[data-col=act]{width:5.5rem}
+  .ptb.fx.t-svc th[data-col=fitter]{width:7.5rem}.ptb.fx.t-svc th[data-col=act]{width:9.6rem}.ptb.fx.t-svc th[data-col=name]{width:15.5rem}
 }
 /* the optimiser's table headings sit on the glass, not a grey bar */
 .cut-t thead tr,.cut-t th{background:transparent!important;border:0;position:static;backdrop-filter:none}
@@ -738,3 +738,83 @@ body:not([data-theme=dark]) .bar-s .bo{fill:#f6f8fb;stroke:#9aa7b8}
 .emp{gap:1.1rem;padding:1.4rem .75rem 1.5rem}
 .emp p{max-width:34ch;line-height:1.5}
 .panel>.emp{gap:1.1rem}
+
+/* pick list and calendar pop-ups (ui/components/pickers.js) */
+#pkpop{position:fixed;z-index:3500;display:none;padding:.35rem;border:1px solid var(--line);border-radius:14px;background:var(--pop,var(--card));box-shadow:0 18px 44px rgba(1,30,70,.3);color:var(--ink)}
+#pkpop.open{display:block;animation:pkIn .14s ease-out}
+@keyframes pkIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+.pk-i{display:flex;flex-direction:column;gap:.1rem;width:100%;padding:.5rem .7rem;border:0;border-radius:10px;background:none;color:inherit;text-align:left;cursor:pointer;font:inherit}
+.pk-i b{font:600 .9rem var(--body);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pk-i small{font-size:.76rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pk-i:hover,.pk-i.on{background:var(--blue-bg)}
+.pk-m{margin:.3rem .7rem .35rem;font-size:.74rem;color:var(--muted)}
+.pk-cal{padding:.7rem!important}
+.dp-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem}
+.dp-h b{font:600 .95rem var(--head)}
+.dp-h button{width:2rem;height:2rem;border:1px solid var(--line);border-radius:9px;background:none;color:inherit;font-size:1.1rem;line-height:1;cursor:pointer}
+.dp-h button:hover{background:var(--blue-bg)}
+.dp-g{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.dp-g span{padding:.25rem 0;text-align:center;font-size:.68rem;font-weight:700;color:var(--muted)}
+.dp-g button{height:2.1rem;border:0;border-radius:9px;background:none;color:inherit;font:500 .86rem var(--body);cursor:pointer;font-variant-numeric:tabular-nums}
+.dp-g button:hover{background:var(--blue-bg)}
+.dp-g button.we{color:var(--muted)}.dp-g button.out{opacity:.35}
+.dp-g button.bh{box-shadow:inset 0 -2px 0 rgba(217,119,6,.7)}
+.dp-g button.td{box-shadow:inset 0 0 0 1.5px var(--blue);font-weight:700}
+.dp-g button.on{background:var(--blue);color:#fff;font-weight:700}
+.dp-g button:disabled{opacity:.2;cursor:not-allowed}
+.dp-f{display:flex;justify-content:space-between;margin-top:.55rem;padding-top:.5rem;border-top:1px solid var(--line)}
+.dp-f button{border:0;background:none;color:var(--blue);font:600 .8rem var(--body);cursor:pointer;padding:.2rem .3rem;border-radius:6px}
+.dp-f button:hover{background:var(--blue-bg)}
+/* date boxes: our own calendar mark, and the browser's hidden (it still takes the click) */
+@media(pointer:fine){
+  input[type=date]{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235a9be8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='5' width='18' height='16' rx='3'/%3E%3Cpath d='M3 10h18M8 3v4M16 3v4'/%3E%3C/svg%3E")!important;background-repeat:no-repeat!important;background-position:right .7rem center!important;background-size:1.05rem!important;cursor:pointer}
+  input[type=date]::-webkit-calendar-picker-indicator{opacity:0;cursor:pointer}
+}
+
+/* service call wizard: what we know sits apart from the boxes to fill in; no dead space under the photo buttons */
+.wz-know{margin:0 0 1.3rem;padding:0 0 1.2rem;border-bottom:1px solid var(--line)}
+.wz-know .fsec{margin:1rem 0 .5rem}.wz-know p.muted{margin:0}
+.wz-b:has(.phg){min-height:0}
+.wz-b:has(.phg) .prow{margin-bottom:.4rem}
+
+/* service call list: every row the same height, columns the same width on every row, buttons at the right */
+.t-svc td{padding-top:.42rem!important;padding-bottom:.42rem!important}
+.t-svc .svn{display:flex;align-items:center;gap:.5rem;min-width:0}
+.t-svc .svn b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.t-svc .svb{flex:0 0 auto;margin:0;font-size:.66rem;padding:.05rem .4rem}
+.t-svc .cl2{-webkit-line-clamp:1;max-width:none}
+.t-svc small.sub{max-width:none}
+.t-svc td.ac .acts{justify-content:flex-end;flex-wrap:nowrap}
+.t-svc th[data-col=pr],.t-svc th[data-col=st]{text-align:left}
+
+/* service map, polished: sea, land with a soft edge, roads, rivers and broads, landmark towns, pins with a count */
+.smap-m{padding:.7rem!important}
+.smap .seabg{fill:#d9e9f7}
+.smap .land{fill:#f4f7ee;stroke:none}
+.smap .coast{fill:none;stroke:#7fa8cf;stroke-width:2;stroke-linejoin:round;filter:drop-shadow(0 0 6px rgba(60,120,180,.35))}
+.smap .rd{fill:none;stroke:#fff;stroke-width:5;stroke-linecap:round;stroke-linejoin:round;paint-order:stroke;filter:drop-shadow(0 0 .8px rgba(90,100,120,.9))}
+.smap .rv{fill:none;stroke:#9cc7ea;stroke-width:2.2;stroke-linecap:round}
+.smap .br{fill:#9cc7ea}
+.smap .sea{font:italic 600 17px var(--body);fill:#5b86ad;opacity:.85}
+.smap .nb{font:600 13px var(--body);fill:#8794a6;letter-spacing:.12em;text-transform:uppercase}
+.smap .lm circle{fill:#fff;stroke:#6b7a90;stroke-width:1.6}
+.smap .lm text{font:500 12.5px var(--body);fill:#4a5a70;text-anchor:middle;paint-order:stroke;stroke:#f4f7ee;stroke-width:3.5px}
+.smap .tl{font:700 14.5px var(--body);fill:#12233b;text-anchor:middle;paint-order:stroke;stroke:#f4f7ee;stroke-width:4.5px;pointer-events:none}
+.smap .scale path{fill:none;stroke:#6b7a90;stroke-width:1.5}.smap .scale text{font:600 11px var(--body);fill:#6b7a90;text-anchor:middle}
+.pin circle{stroke:#fff;stroke-width:3;filter:drop-shadow(0 3px 5px rgba(0,20,50,.4))}
+.pin .halo{stroke:none;opacity:.22;filter:none}
+.pin.u .halo{fill:#d43c3c}.pin.o .halo{fill:#e08a00}.pin.b .halo{fill:#2b8fe0}.pin.d .halo{fill:#8a97a8}
+.pin.u .halo{animation:pinPulse 1.8s ease-in-out infinite}
+@keyframes pinPulse{0%,100%{opacity:.14}50%{opacity:.36}}
+.pin text{font:700 14px var(--body)}
+body[data-theme=dark] .smap .seabg{fill:#0a1626}
+body[data-theme=dark] .smap .land{fill:#17263c}
+body[data-theme=dark] .smap .coast{stroke:#4f83bd}
+body[data-theme=dark] .smap .rd{stroke:#3b4d68;filter:none}
+body[data-theme=dark] .smap .rv{stroke:#28507a}body[data-theme=dark] .smap .br{fill:#28507a}
+body[data-theme=dark] .smap .sea{fill:#5f8bb8}body[data-theme=dark] .smap .nb{fill:#5d6c82}
+body[data-theme=dark] .smap .lm circle{fill:#17263c;stroke:#8fa3bd}
+body[data-theme=dark] .smap .lm text{fill:#9fb0c6;stroke:#17263c}
+body[data-theme=dark] .smap .tl{fill:#f1f5fb;stroke:#17263c}
+body[data-theme=dark] .smap .scale path{stroke:#8fa3bd}body[data-theme=dark] .smap .scale text{fill:#8fa3bd}
+body.rm .pin.u .halo{animation:none}

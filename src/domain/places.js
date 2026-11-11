@@ -2,45 +2,186 @@
    (tested in tests/unit). Nothing leaves the computer: towns are placed from this list, not looked up.
    Positions are longitude / latitude, close enough to put a pin in the right part of the county. */
 
-/* the county outline, clockwise from the Wash (approximate) */
+/* the county outline, clockwise from the Wash: the coast round to Hopton, then the Waveney and Little Ouse
+   along the Suffolk border and the Fens back up to the Nene (approximate) */
 export const NORFOLK = [
-  [0.19, 52.74],
-  [0.33, 52.8],
-  [0.4, 52.78],
-  [0.46, 52.87],
+  [0.21, 52.8],
+  [0.3, 52.8],
+  [0.38, 52.78],
+  [0.42, 52.8],
+  [0.44, 52.84],
+  [0.45, 52.875],
+  [0.48, 52.91],
   [0.49, 52.94],
-  [0.57, 52.97],
-  [0.7, 52.98],
+  [0.54, 52.97],
+  [0.64, 52.975],
+  [0.75, 52.975],
   [0.85, 52.97],
-  [1.0, 52.96],
-  [1.2, 52.95],
-  [1.3, 52.93],
-  [1.43, 52.88],
-  [1.53, 52.82],
-  [1.64, 52.75],
-  [1.7, 52.7],
-  [1.74, 52.64],
-  [1.74, 52.58],
-  [1.73, 52.53],
+  [0.93, 52.965],
+  [0.98, 52.975],
+  [1.05, 52.96],
+  [1.14, 52.945],
+  [1.21, 52.945],
+  [1.3, 52.933],
+  [1.34, 52.917],
+  [1.44, 52.877],
+  [1.48, 52.855],
+  [1.535, 52.825],
+  [1.6, 52.79],
+  [1.655, 52.755],
+  [1.695, 52.715],
+  [1.735, 52.65],
+  [1.742, 52.605],
+  [1.737, 52.575],
+  [1.735, 52.54],
+  [1.7, 52.52],
+  [1.66, 52.535],
   [1.62, 52.53],
-  [1.55, 52.49],
-  [1.45, 52.46],
-  [1.3, 52.4],
-  [1.15, 52.37],
-  [1.0, 52.38],
-  [0.9, 52.4],
-  [0.75, 52.41],
+  [1.585, 52.49],
+  [1.57, 52.465],
+  [1.5, 52.455],
+  [1.44, 52.45],
+  [1.37, 52.42],
+  [1.3, 52.398],
+  [1.2, 52.375],
+  [1.11, 52.366],
+  [1.03, 52.37],
+  [0.96, 52.368],
+  [0.88, 52.385],
+  [0.8, 52.395],
+  [0.745, 52.395],
+  [0.68, 52.43],
   [0.62, 52.45],
-  [0.5, 52.46],
-  [0.42, 52.5],
-  [0.35, 52.53],
-  [0.25, 52.53],
-  [0.2, 52.58],
-  [0.17, 52.63],
-  [0.14, 52.67],
-  [0.18, 52.71],
+  [0.55, 52.45],
+  [0.5, 52.455],
+  [0.44, 52.47],
+  [0.4, 52.49],
+  [0.37, 52.5],
+  [0.3, 52.51],
+  [0.25, 52.52],
+  [0.22, 52.56],
+  [0.2, 52.6],
+  [0.17, 52.64],
+  [0.165, 52.68],
+  [0.17, 52.72],
+  [0.19, 52.76],
 ];
-
+/* main roads, as the towns and points they run through (drawn as smooth lines) */
+export const ROADS = [
+  {
+    n: 'A47',
+    p: [
+      [0.17, 52.68],
+      "king's lynn",
+      [0.55, 52.7],
+      'swaffham',
+      'dereham',
+      [1.12, 52.655],
+      [1.24, 52.6],
+      [1.36, 52.615],
+      'acle',
+      'great yarmouth',
+    ],
+  },
+  { n: 'A11', p: [[0.6, 52.36], 'thetford', 'attleborough', 'wymondham', [1.24, 52.6], 'norwich'] },
+  {
+    n: 'A140',
+    p: [[1.12, 52.3], [1.13, 52.39], 'long stratton', [1.27, 52.59], 'norwich', [1.28, 52.7], 'aylsham', 'cromer'],
+  },
+  { n: 'A148', p: ["king's lynn", [0.62, 52.8], 'fakenham', 'holt', 'cromer'] },
+  {
+    n: 'A149',
+    p: [
+      "king's lynn",
+      'snettisham',
+      'hunstanton',
+      [0.64, 52.96],
+      'wells-next-the-sea',
+      [1.02, 52.95],
+      'sheringham',
+      'cromer',
+      'north walsham',
+      'stalham',
+      [1.66, 52.68],
+      'great yarmouth',
+    ],
+  },
+  { n: 'A10', p: ["king's lynn", 'downham market', [0.36, 52.5]] },
+  { n: 'A1065', p: ['fakenham', 'swaffham', [0.69, 52.5], [0.62, 52.42]] },
+  { n: 'A146', p: ['norwich', [1.38, 52.58], 'loddon', 'beccles', 'lowestoft'] },
+  { n: 'A143', p: ['diss', 'harleston', 'bungay', 'beccles', [1.66, 52.55], 'gorleston'] },
+  { n: 'A1067', p: ['norwich', 'drayton', [1.05, 52.76], 'fakenham'] },
+];
+/* water: the main rivers (lines) and the larger broads (lon, lat, width, height in map units) */
+export const RIVERS = [
+  [
+    [1.297, 52.628],
+    [1.39, 52.61],
+    [1.47, 52.585],
+    [1.57, 52.56],
+    [1.64, 52.59],
+    [1.7, 52.61],
+    [1.735, 52.6],
+  ],
+  [
+    [1.25, 52.79],
+    [1.33, 52.74],
+    [1.403, 52.708],
+    [1.47, 52.69],
+    [1.546, 52.64],
+    [1.62, 52.635],
+    [1.71, 52.615],
+  ],
+  [
+    [0.85, 52.83],
+    [0.98, 52.76],
+    [1.1, 52.71],
+    [1.2, 52.68],
+    [1.28, 52.645],
+    [1.297, 52.628],
+  ],
+  [
+    [0.36, 52.5],
+    [0.37, 52.6],
+    [0.39, 52.72],
+    [0.39, 52.79],
+  ],
+  [
+    [1.62, 52.53],
+    [1.585, 52.49],
+    [1.5, 52.455],
+    [1.37, 52.42],
+    [1.2, 52.375],
+    [1.03, 52.37],
+  ],
+];
+export const BROADS = [
+  [1.58, 52.74, 26, 13],
+  [1.497, 52.74, 13, 20],
+  [1.42, 52.697, 14, 8],
+  [1.655, 52.607, 34, 9],
+  [1.6, 52.7, 12, 8],
+];
+/* places named on the map as landmarks, whether or not there is a call there */
+export const LANDMARKS = [
+  "king's lynn",
+  'hunstanton',
+  'wells-next-the-sea',
+  'cromer',
+  'great yarmouth',
+  'norwich',
+  'thetford',
+  'swaffham',
+  'dereham',
+  'fakenham',
+  'diss',
+  'downham market',
+  'north walsham',
+  'wymondham',
+  'aylsham',
+  'lowestoft',
+  'attleborough',
+];
 /* towns and villages the company works in (longitude, latitude) */
 export const TOWNS = {
   norwich: [1.297, 52.63],
@@ -145,8 +286,25 @@ export const project = ([lon, lat]) => [
   Math.round((lon - LON0) * COS * K * 10) / 10,
   Math.round((LAT0 - lat) * K * 10) / 10,
 ];
+/** a smooth line through points (each a [lon, lat] or the name of a town) */
+export function smoothPath(points, closed) {
+  const P = points.map((q) => project(typeof q == 'string' ? TOWNS[q] : q));
+  if (P.length < 3) return P.map((q, i) => (i ? 'L' : 'M') + q.join(' ')).join(' ');
+  const at = (i) => (closed ? P[(i + P.length) % P.length] : P[Math.max(0, Math.min(P.length - 1, i))]),
+    r = (v) => Math.round(v * 10) / 10;
+  let d = 'M' + P[0].join(' ');
+  for (let i = 0; i < (closed ? P.length : P.length - 1); i++) {
+    const p0 = at(i - 1),
+      p1 = at(i),
+      p2 = at(i + 1),
+      p3 = at(i + 2);
+    /* a Catmull-Rom curve, written as the cubic curve SVG understands */
+    d += ` C${r(p1[0] + (p2[0] - p0[0]) / 6)} ${r(p1[1] + (p2[1] - p0[1]) / 6)} ${r(p2[0] - (p3[0] - p1[0]) / 6)} ${r(p2[1] - (p3[1] - p1[1]) / 6)} ${p2[0]} ${p2[1]}`;
+  }
+  return d + (closed ? ' Z' : '');
+}
 /** the county outline as an SVG path */
-export const outlinePath = () => NORFOLK.map((p, i) => (i ? 'L' : 'M') + project(p).join(' ')).join(' ') + ' Z';
+export const outlinePath = () => smoothPath(NORFOLK, true);
 /** calls grouped by town: [{ key, name, x, y, items }] for towns on the map, and the ones that are not */
 export function groupByTown(items, townOf) {
   const on = new Map(),

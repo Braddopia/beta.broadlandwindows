@@ -12,7 +12,19 @@ import { addrOf, mailOf, telOf } from '../../domain/customers.js';
 import { nid } from '../../domain/numbering.js';
 import { FITL, staffNames } from '../../domain/people.js';
 import { SVCV, svcOpen } from '../../domain/service.js';
-import { MAP_H, MAP_W, groupByTown, outlinePath } from '../../domain/places.js';
+import {
+  BROADS,
+  LANDMARKS,
+  MAP_H,
+  MAP_W,
+  RIVERS,
+  ROADS,
+  TOWNS,
+  groupByTown,
+  outlinePath,
+  project,
+  smoothPath,
+} from '../../domain/places.js';
 import { html, raw } from '../../core/html.js';
 import { can } from '../../domain/permissions.js';
 import { R } from '../reports/reports.js';
@@ -60,7 +72,7 @@ export function vService() {
     U.mode == 'map'
       ? svcMap(L0)
       : `<div class="tw"><table class="ptb abt fx t-svc"><thead><tr><th data-col="id">Ref</th><th data-col="name">Customer</th><th data-col="issue">Problem</th><th data-col="pr">Priority</th><th data-col="st">Status</th><th class="c-sm" data-col="visit">Visit</th><th class="c-md" data-col="fitter">Engineer</th><th class="ac" data-col="act"></th></tr></thead><tbody>
-  ${pg.rows.map((c) => `<tr class="clk-r" ${rowClick('editCall', c.id)}><td><b class="lref">${esc(c.id)}</b>${c.contract ? `<small class="sub">${esc(c.contract)}</small>` : ''}</td><td><b>${esc(c.name)}</b><small class="sub">${esc([c.town, c.phone].filter(Boolean).join(' · '))}</small>${svcBal(c)}</td><td><span class="cl2">${esc(c.issue)}</span><small class="sub">${esc(c.cat || '')}${c.cat && c.photos && c.photos.length ? ' · ' : ''}${phCount(c.photos)}</small></td><td>${prTag(c.priority)}</td><td>${svcTag(c.status)}</td><td class="c-sm">${c.visit ? `<b class="${svcOpen(c) && c.visit < td ? 'od' : ''}">${fd(c.visit)}</b>${c.visitTime ? `<small class="sub">${esc(c.visitTime)}</small>` : ''}` : '<span class="muted">Not booked</span>'}</td><td class="c-md">${esc(c.fitter || '-')}</td><td class="ac"><div class="acts r"><button class="mini" ${onClick('reportCall', c.id)}>Report</button>${can('manage') ? `<button class="mini del" ${onClick('del', 'calls', c.id)}>Delete</button>` : ''}</div></td></tr>`).join('') || '<tr><td colspan="8" class="empty">No service calls here.</td></tr>'}
+  ${pg.rows.map((c) => `<tr class="clk-r" ${rowClick('editCall', c.id)}><td><b class="lref">${esc(c.id)}</b>${c.contract ? `<small class="sub">${esc(c.contract)}</small>` : ''}</td><td><span class="svn"><b>${esc(c.name)}</b>${svcBal(c)}</span><small class="sub">${esc([c.town, c.phone].filter(Boolean).join(' · '))}</small></td><td><span class="cl2">${esc(c.issue)}</span><small class="sub">${esc(c.cat || '')}${c.cat && c.photos && c.photos.length ? ' · ' : ''}${phCount(c.photos)}</small></td><td>${prTag(c.priority)}</td><td>${svcTag(c.status)}</td><td class="c-sm">${c.visit ? `<b class="${svcOpen(c) && c.visit < td ? 'od' : ''}">${fd(c.visit)}</b>${c.visitTime ? `<small class="sub">${esc(c.visitTime)}</small>` : ''}` : '<span class="muted">Not booked</span>'}</td><td class="c-md">${esc(c.fitter || '-')}</td><td class="ac"><div class="acts r"><button class="mini" ${onClick('reportCall', c.id)}>Report</button>${can('manage') ? `<button class="mini del" ${onClick('del', 'calls', c.id)}>Delete</button>` : ''}</div></td></tr>`).join('') || '<tr><td colspan="8" class="empty">No service calls here.</td></tr>'}
   </tbody></table></div>${pagerH('svc', pg, 'calls')}`
   }`;
 }
@@ -82,8 +94,8 @@ export const SVCF = () => [
     k: 'contract',
     l: 'Contract number',
     max: 30,
-    list: 'dlCon',
-    hint: 'Type the number or pick the customer: their details fill in',
+    combo: 'contracts',
+    hint: 'Type a number, name or town and pick the job',
   },
   { k: 'name', l: 'Customer', req: 1 },
   { k: 'phone', l: 'Phone', t: 'tel', max: 30, hint: 'Needed for a new customer' },
@@ -120,12 +132,6 @@ export const SVCF = () => [
 const pick = (L, keys) => L.filter((f) => keys.includes(f.k));
 /* contract number box: list of contracts, and picking one fills the customer in */
 function contractHelp(v) {
-  const g = $('#mbox .wz-b .grid');
-  if (g && !$('#dlCon'))
-    g.insertAdjacentHTML(
-      'beforeend',
-      `<datalist id="dlCon">${state.contracts.map((x) => `<option value="${esc(x.id)}">${esc([x.name, x.town].filter(Boolean).join(', '))}</option>`).join('')}</datalist>`
-    );
   const ex = $('#f_existing'),
     ct = $('#f_contract'),
     cw = ct && ct.closest('.ff'),
@@ -133,7 +139,16 @@ function contractHelp(v) {
       const yes = /^Yes/.test(ex.value);
       if (cw) cw.hidden = !yes;
       star('contract', yes);
-      ['phone', 'address', 'town'].forEach((f) => star(f, !yes));
+      ['phone', 'address', 'town'].forEach((f) => {
+        star(f, !yes);
+        /* "Needed for a new customer" only shows when it applies */
+        const h =
+          $('#f_' + f) &&
+          $('#f_' + f)
+            .closest('.ff')
+            .querySelector('.hint');
+        if (h) h.hidden = yes;
+      });
     };
   if (ex) {
     ex.addEventListener('change', sync);
@@ -151,7 +166,8 @@ function contractHelp(v) {
         ['town', x.town],
       ].forEach(([f, val]) => {
         const e = $('#f_' + f);
-        if (e && !e.value && val) e.value = val;
+        /* fill empty boxes, and boxes still holding what the last contract picked put there */
+        if (e && val && (!e.value || e.value == e.dataset.auto)) e.value = e.dataset.auto = val;
       });
       v.guarantee = v.guarantee || 'Yes';
       toast('Filled in from contract ' + x.id);
@@ -170,12 +186,14 @@ function callCheck(v) {
   const k = /^Yes/.test(v.existing || '') && state.contracts.find((x) => x.id == v.contract),
     past = state.calls.filter((c) => (k ? c.contract == k.id : c.name && c.name == v.name)).slice(0, 5),
     bal = k ? (+k.value || 0) - (+k.paid || 0) : 0,
-    yrs = k && k.fit ? Math.floor((Date.now() - new Date(k.fit + 'T00:00')) / (365.25 * 864e5)) : null;
-  return `<div class="wz-info">${
+    /* years since it was fitted (a fitting still to come is not fitted yet) */
+    yrs =
+      k && k.fit && k.fit <= today() ? Math.floor((Date.now() - new Date(k.fit + 'T00:00')) / (365.25 * 864e5)) : null;
+  return `<div class="wz-know"><div class="wz-info">${
     k
-      ? `<div><small>Contract</small><b>${esc(k.id)}</b><span>${esc([k.contractType, k.fit ? 'fitted ' + fd(k.fit) : ''].filter(Boolean).join(', '))}</span></div><div><small>Guarantee</small><b>${yrs == null ? 'Not fitted yet' : yrs < 10 ? 'Likely covered' : 'Check'}</b><span>${yrs == null ? '' : yrs + ' year' + (yrs == 1 ? '' : 's') + ' since fitting'}</span></div><div><small>Balance</small><b class="${bal > 0 ? 'od' : ''}">${bal > 0 ? m0(bal) + ' owed' : 'Paid up'}</b><span>${bal > 0 ? 'Mention before booking' : ''}</span></div>`
+      ? `<div><small>Contract</small><b>${esc(k.id)}</b><span>${esc([k.contractType, k.fit ? (k.fit <= today() ? 'fitted ' : 'fitting ') + fd(k.fit) : ''].filter(Boolean).join(', '))}</span></div><div><small>Guarantee</small><b>${yrs == null ? 'Not fitted yet' : yrs < 10 ? 'Likely covered' : 'Check'}</b><span>${yrs == null ? '' : yrs + ' year' + (yrs == 1 ? '' : 's') + ' since fitting'}</span></div><div><small>Balance</small><b class="${bal > 0 ? 'od' : ''}">${bal > 0 ? m0(bal) + ' owed' : 'Paid up'}</b><span>${bal > 0 ? 'Mention before booking' : ''}</span></div>`
       : '<div><small>Customer</small><b>New customer</b><span>Not one of our fitted jobs</span></div>'
-  }</div><h3 class="fsec">Past Tickets (${past.length})</h3>${past.map((c) => `<div class="row"><span><b>${esc(c.id)}</b> ${esc(c.issue || '')}</span><span>${svcTag(c.status)}</span></div>`).join('') || '<p class="muted">No earlier service calls.</p>'}`;
+  }</div><h3 class="fsec">Past Tickets (${past.length})</h3>${past.map((c) => `<div class="row"><span><b>${esc(c.id)}</b> ${esc(c.issue || '')}</span><span>${svcTag(c.status)}</span></div>`).join('') || '<p class="muted">No earlier service calls.</p>'}</div>`;
 }
 export function callWizard(cid, id) {
   const c = id ? state.calls.find((x) => x.id == id) : null;
@@ -428,30 +446,52 @@ export function svcMap(L) {
     { towns, off } = groupByTown(L, (c) => c.town),
     sel = towns.find((t) => t.key == U.town),
     list = sel ? sel.items : [],
+    /* a pin for each town with calls: bigger with more calls, the number inside */
+    pinR = (n) => Math.min(26, 11 + Math.sqrt(n) * 4),
     pins = towns
       .slice()
       .reverse()
       .map((t) => {
         const n = t.items.length,
-          r = Math.min(30, 9 + Math.sqrt(n) * 5);
-        return html`<g class="pin ${pinCol(t.items)} ${t.key == U.town ? 'on' : ''}" transform="translate(${t.x} ${t.y})" ${raw(onClick('svcTown', t.key))} role="button" tabindex="0" aria-label="${t.name}: ${n} call${n == 1 ? '' : 's'}"><circle r="${r}"/>${n > 1 ? html`<text dy="5">${n}</text>` : ''}<title>${t.name}: ${n} call${n == 1 ? '' : 's'}</title></g>`;
+          r = pinR(n);
+        return html`<g class="pin ${pinCol(t.items)} ${t.key == U.town ? 'on' : ''}" transform="translate(${t.x} ${t.y})" ${raw(onClick('svcTown', t.key))} role="button" tabindex="0" aria-label="${t.name}: ${n} call${n == 1 ? '' : 's'}"><circle class="halo" r="${r + 9}"/><circle r="${r}"/><text dy="5">${n}</text><title>${t.name}: ${n} call${n == 1 ? '' : 's'}</title></g>`;
       }),
-    labels = towns
-      .slice(0, 12)
-      .map(
-        (t) =>
-          html`<text class="tl" x="${t.x}" y="${t.y + Math.min(30, 9 + Math.sqrt(t.items.length) * 5) + 22}">${t.name}</text>`
-      );
+    labels = towns.map(
+      (t) => html`<text class="tl" x="${t.x}" y="${t.y + pinR(t.items.length) + 20}">${t.name}</text>`
+    ),
+    /* the map underneath: roads, rivers and broads, and the main towns as landmarks */
+    has = new Set(towns.map((t) => t.key)),
+    /* a landmark right beside a pin would only fight its label: leave it out */
+    clear = (k) => {
+      const [x, y] = project(TOWNS[k]);
+      return towns.every((t) => Math.hypot(t.x - x, t.y - y) > 62);
+    },
+    marks = LANDMARKS.filter((k) => !has.has(k) && clear(k)).map((k) => {
+      const [x, y] = project(TOWNS[k]);
+      return html`<g class="lm"><circle cx="${x}" cy="${y}" r="3.2"/><text x="${x}" y="${y - 9}">${k.replace(/(^|[\s-])\S/g, (c) => c.toUpperCase()).replace('-Next-The-Sea', '')}</text></g>`;
+    }),
+    roads = ROADS.map((r) => html`<path class="rd" d="${smoothPath(r.p)}"><title>${r.n}</title></path>`),
+    rivers = RIVERS.map((r) => html`<path class="rv" d="${smoothPath(r)}"/>`),
+    broads = BROADS.map(([lon, lat, w, h]) => {
+      const [x, y] = project([lon, lat]);
+      return html`<ellipse class="br" cx="${x}" cy="${y}" rx="${w / 2}" ry="${h / 2}"/>`;
+    });
   const row = (c) =>
     html`<div class="row clk-r" ${raw(rowClick('editCall', c.id))}><span><b>${c.id}</b> ${c.name}<br><span class="muted">${c.issue || ''}</span></span><span class="acts">${raw(prTag(c.priority))}${raw(svcTag(c.status))}${c.visit ? html`<span class="tag">${fd(c.visit)}</span>` : ''}</span></div>`;
   return String(html`<div class="smap">
     <div class="panel smap-m">
       <svg viewBox="-20 -20 ${MAP_W + 40} ${MAP_H + 40}" role="img" aria-label="Map of Norfolk with service calls by town">
+        <defs><clipPath id="smLand"><path d="${outlinePath()}"/></clipPath></defs>
+        <rect class="seabg" x="-20" y="-20" width="${MAP_W + 40}" height="${MAP_H + 40}" rx="14"/>
         <path class="land" d="${outlinePath()}"/>
-        <text class="sea" x="${MAP_W - 70}" y="120">North Sea</text><text class="sea" x="40" y="60">The Wash</text>
-        ${labels}${pins}
+        <g clip-path="url(#smLand)">${rivers}${broads}${roads}</g>
+        <path class="coast" d="${outlinePath()}"/>
+        <text class="sea" x="${MAP_W - 150}" y="150">North Sea</text><text class="sea" x="60" y="70">The Wash</text>
+        <text class="nb" x="830" y="${MAP_H - 12}">Suffolk</text><text class="nb" x="60" y="${MAP_H - 100}">Cambridgeshire</text>
+        ${marks}${labels}${pins}
+        <g class="scale" transform="translate(${MAP_W - 150} ${MAP_H + 2})"><path d="M0 0v6h105v-6"/><text x="52" y="-4">10 miles</text></g>
       </svg>
-      <div class="smap-key"><span><i class="u"></i>Urgent</span><span><i class="o"></i>Not booked</span><span><i class="b"></i>Booked</span><span><i class="d"></i>Complete</span><span class="muted">Approximate, by town</span></div>
+      <div class="smap-key"><span><i class="u"></i>Urgent</span><span><i class="o"></i>Not booked</span><span><i class="b"></i>Booked</span><span><i class="d"></i>Complete</span><span class="muted">Drawn map: pins are placed by town</span></div>
     </div>
     <div class="panel smap-l">
       <h2><span>${sel ? sel.name : 'Towns'}</span>${sel ? html`<button class="mini" ${raw(onClick('svcTown', ''))}>All Towns</button>` : ''}</h2>

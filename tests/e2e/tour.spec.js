@@ -98,7 +98,9 @@ test('every page lines up with the top bar, left and right', async ({ app }) => 
   expect(off).toEqual([]);
 });
 
-test('tours are switched off until go-live: no tab tour starts by itself, the ? button still plays one', async ({ app }) => {
+test('tours are switched off until go-live: no tab tour starts by itself, the ? button still plays one', async ({
+  app,
+}) => {
   await app.role('beta');
   await app.page.evaluate(() => {
     localStorage.removeItem('bb_tours_force');

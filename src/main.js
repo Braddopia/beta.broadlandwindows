@@ -1,5 +1,6 @@
 /* main: the entry point. Loads every module, registers the actions buttons can run,
    then runs the start-up steps in a fixed order (load data, update old data, wire the page, first draw). */
+import * as uiComponentsPickers from './ui/components/pickers.js';
 import * as dataCompany from './data/company.js';
 import * as configConstants from './config/constants.js';
 import * as configRoles from './config/roles.js';
@@ -290,6 +291,9 @@ startMigrations.migrateCustomers();
 featuresLeadsLeadRecord.defineLeadRecord();
 featuresContractsContractRecord.defineContractRecord();
 featuresTourTour.listenForTourKeys();
+uiComponentsPickers.listenForPickers();
+featuresContractsContracts.plugJobPickers();
+featuresBarsBars.plugProfilePicker();
 featuresSignInSignIn.resetSignIn();
 featuresSignInSignIn.watchSignInExpiry();
 uiShellLooks.looks();

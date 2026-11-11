@@ -72,7 +72,9 @@ test('an exact number, name or phone is highlighted first, for every kind of rec
   await expect(app.page.locator('#sres .sri-x')).toHaveCount(0);
 });
 
-test('search answers questions and finds labels on any page: "amount outstanding", "vat", "trickle vents"', async ({ app }) => {
+test('search answers questions and finds labels on any page: "amount outstanding", "vat", "trickle vents"', async ({
+  app,
+}) => {
   await app.role('beta');
   await app.page.fill('#sb input', 'amount outstanding');
   await expect(app.page.locator('#sres .srg.ans')).toHaveText('Answer');
@@ -92,7 +94,9 @@ test('search answers questions and finds labels on any page: "amount outstanding
   expect(app.errors).toEqual([]);
 });
 
-test('a question typed on a list page filters the list the way the search answers it, and never empties it by mistake', async ({ app }) => {
+test('a question typed on a list page filters the list the way the search answers it, and never empties it by mistake', async ({
+  app,
+}) => {
   await app.role('beta');
   await app.go('contracts');
   await app.run(() => setUI('con.f', 'all'));

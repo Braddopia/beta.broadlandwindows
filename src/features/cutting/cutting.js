@@ -158,9 +158,9 @@ export function vCutting() {
   <div class="cut-in" ${raw(onEvent('oninput', 'cutEdit', 'event'))} ${raw(onEvent('onchange', 'cutEdit', 'event'))}>
     <div class="cut-top">
       <div class="panel cut-job"><h2><span>Job</span><small class="muted nocap" id="cutJobHint">${k ? 'Contract ' + k.id + ' found: Save To Contract keeps the plan with its documents' : 'Type the contract number to link the plan to it'}</small></h2><div class="cut-og cut-og2">
-        <div class="ff"><label for="cut_job_no">Job Number</label>${raw(fieldControl({ k: '', max: 30, list: 'cutCons' }, D.jobNo || '', { id: 'cut_job_no' }))}</div>
+        <div class="ff"><label for="cut_job_no">Job Number</label>${raw(fieldControl({ k: '', max: 30, combo: 'jobs' }, D.jobNo || '', { id: 'cut_job_no' }))}</div>
         <div class="ff"><label for="cut_job_name">Job Name</label>${raw(fieldControl({ k: '', max: 80 }, D.jobName || '', { id: 'cut_job_name' }))}</div>
-      </div><datalist id="cutCons">${canSee('contracts') ? state.contracts.map((c) => html`<option value="${c.id}">${jobTitle(c.id, c.name)}</option>`) : ''}</datalist></div>
+      </div></div>
       <div class="panel cut-set"><h2><span>Cutting Settings</span></h2><div class="cut-og cut-og2">
         <div class="ff"><label for="cut_opt_kerf">Saw Blade Width <span class="nocap">(mm)</span></label>${raw(fieldControl({ k: '', t: 'number', max: 20 }, D.kerf, { id: 'cut_opt_kerf' }))}</div>
         <div class="ff"><label for="cut_opt_trim">Edge Trim Each Side <span class="nocap">(mm)</span></label>${raw(fieldControl({ k: '', t: 'number', max: 100 }, D.trim, { id: 'cut_opt_trim' }))}</div>

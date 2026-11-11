@@ -4,6 +4,7 @@
    waste, updating as you type. It prints as a saw cutting list on the company's A4 report, can be kept
    on the contract, and lists can be saved and opened again. Profiles can come from Inventory once they
    are linked there (Inventory, Cutting Data). */
+import { plugInCombo } from '../../ui/components/pickers.js';
 import { onClick, onEvent } from '../../core/actions.js';
 import { fd, today } from '../../core/dates.js';
 import { $ } from '../../core/dom.js';
@@ -139,9 +140,9 @@ export function vBars() {
   <div class="cut-in bar-in" ${raw(onEvent('oninput', 'barEdit', 'event'))} ${raw(onEvent('onchange', 'barEdit', 'event'))}>
     <div class="cut-top">
       <div class="panel cut-job"><h2><span>Job</span><small class="muted nocap" id="barJobHint">${k ? 'Contract ' + k.id + ' found: Save To Contract keeps the list with its documents' : 'Type the contract number to link the list to it'}</small></h2><div class="cut-og cut-og2">
-        <div class="ff"><label for="bar_job_no">Job Number</label><input id="bar_job_no" maxlength="30" list="barCons" value="${D.jobNo || ''}" autocomplete="off"></div>
+        <div class="ff"><label for="bar_job_no">Job Number</label><input id="bar_job_no" maxlength="30" data-combo="jobs" value="${D.jobNo || ''}" autocomplete="off"></div>
         <div class="ff"><label for="bar_job_name">Job Name</label><input id="bar_job_name" maxlength="80" value="${D.jobName || ''}" autocomplete="off"></div>
-      </div><datalist id="barCons">${canSee('contracts') ? state.contracts.map((c) => html`<option value="${c.id}">${jobTitle(c.id, c.name)}</option>`) : ''}</datalist><datalist id="barProfs">${L.map((x) => html`<option value="${x.r.item}">${x.r.desc || ''} · ${mm(x.bar)}mm bar</option>`)}</datalist></div>
+      </div></div>
       <div class="panel cut-set"><h2><span>Saw Settings</span></h2><div class="cut-og cut-og2">
         <div class="ff"><label for="bar_opt_kerf">Saw Blade Width <span class="nocap">(mm)</span></label><input id="bar_opt_kerf" type="number" min="0" max="20" step="0.1" value="${D.kerf}"></div>
         <div class="ff"><label for="bar_opt_trim">End Trim Each End <span class="nocap">(mm)</span></label><input id="bar_opt_trim" type="number" min="0" max="200" step="1" value="${D.trim}"></div>
@@ -150,7 +151,7 @@ export function vBars() {
     ${D.profiles.map(
       (p, pi) => html`<div class="panel bar-p">
         <div class="bar-ph"><span class="bar-pn">Profile ${pi + 1}</span>
-          <label class="bar-f bar-code"><span>Profile Code</span><input id="bar_p_${pi}_code" maxlength="40" list="barProfs" value="${p.code}" autocomplete="off"></label>
+          <label class="bar-f bar-code"><span>Profile Code</span><input id="bar_p_${pi}_code" maxlength="40" data-combo="profiles" value="${p.code}" autocomplete="off"></label>
           <label class="bar-f bar-desc"><span>Description</span><input id="bar_p_${pi}_desc" maxlength="80" value="${p.desc}" autocomplete="off"></label>
           <label class="bar-f bar-n"><span>Bar Length <i class="nocap">(mm)</i></span><input id="bar_p_${pi}_bar" type="number" min="500" max="20000" step="1" value="${p.bar}"></label>
           ${D.profiles.length > 1 ? html`<button class="mini del" ${raw(onClick('barProfDel', pi))}>Remove Profile</button>` : ''}</div>
@@ -500,4 +501,15 @@ export function barProfSave() {
   closeModal();
   toast('Saved ' + Object.keys(O).length + ' profiles');
   render(true);
+}
+
+/* start-up step (run once by main.js): the list of linked profiles under a Profile Code box */
+export function plugProfilePicker() {
+  plugInCombo('profiles', () =>
+    barProducts().map((x) => ({
+      v: x.r.item,
+      t: x.r.item + (x.r.desc ? ' · ' + x.r.desc : ''),
+      s: mm(x.bar) + 'mm bar · ' + x.r.stock + ' ' + unitOf(x.r) + ' in stock',
+    }))
+  );
 }
