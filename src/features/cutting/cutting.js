@@ -154,27 +154,19 @@ export function vCutting() {
     S = optimise(D).stats,
     k = cutContract(D);
   return String(html`<div class="head"><div><h1 id="cutTitle">${cutTitle(D)}</h1><span class="muted">${D.jobNo || D.jobName ? 'Panel Optimiser · p' : 'P'}lan how to cut pieces from whole boards with the least waste</span></div>
-    <div class="tools"><button class="mini" ${raw(onClick('cutJobs'))}>Saved Lists (${D.jobs.length})</button><button class="mini" ${raw(onClick('cutNew'))}>New List</button><button class="mini" ${raw(onClick('cutSave'))}>Save</button><button class="mini pri" id="cutToC" ${raw(onClick('cutToContract'))} ${k && canSee('contracts') ? '' : raw('hidden')}>Save To Contract</button><button class="btn" ${raw(onClick('cutPrint'))}>Print Plan</button></div></div>
+    <div class="tools"><button class="mini" ${raw(onClick('cutJobs'))}>Saved Lists (${D.jobs.length})</button><button class="mini" ${raw(onClick('cutNew'))}>New List</button><button class="mini" ${raw(onClick('cutSave'))}>Save</button><button class="mini" ${raw(onClick('cutSettings'))}>Cutting Settings</button><button class="mini pri" id="cutToC" ${raw(onClick('cutToContract'))} ${k && canSee('contracts') ? '' : raw('hidden')}>Save To Contract</button><button class="btn" ${raw(onClick('cutPrint'))}>Print Plan</button></div></div>
   <div class="cut-in" ${raw(onEvent('oninput', 'cutEdit', 'event'))} ${raw(onEvent('onchange', 'cutEdit', 'event'))}>
-    <div class="cut-top">
-      <div class="panel cut-job"><h2><span>Job</span><small class="muted nocap" id="cutJobHint">${k ? 'Contract ' + k.id + ' found: Save To Contract keeps the plan with its documents' : 'Type the contract number to link the plan to it'}</small></h2><div class="cut-og cut-og2">
-        <div class="ff"><label for="cut_job_no">Job Number</label>${raw(fieldControl({ k: '', max: 30, combo: 'jobs' }, D.jobNo || '', { id: 'cut_job_no' }))}</div>
-        <div class="ff"><label for="cut_job_name">Job Name</label>${raw(fieldControl({ k: '', max: 80 }, D.jobName || '', { id: 'cut_job_name' }))}</div>
-      </div></div>
-      <div class="panel cut-set"><h2><span>Cutting Settings</span></h2><div class="cut-og cut-og2">
-        <div class="ff"><label for="cut_opt_kerf">Saw Blade Width <span class="nocap">(mm)</span></label>${raw(fieldControl({ k: '', t: 'number', max: 20 }, D.kerf, { id: 'cut_opt_kerf' }))}</div>
-        <div class="ff"><label for="cut_opt_trim">Edge Trim Each Side <span class="nocap">(mm)</span></label>${raw(fieldControl({ k: '', t: 'number', max: 100 }, D.trim, { id: 'cut_opt_trim' }))}</div>
-      </div></div>
-    </div>
-    <div class="panel cut-lists">
-      <section><h2><span>Boards In Stock</span><small class="muted nocap">How Many 0 means as many as needed</small></h2>${table('sheets', D.sheets)}
-        <div class="cut-add"><button class="mini" ${raw(onClick('cutAdd', 'sheets'))}>+ Add Board</button>${PRESETS.map(
-          (p, i) =>
-            html`<button class="mini cut-pre" ${raw(onClick('cutPreset', i))}><b>${p.label}</b> <span class="nocap">${p.W} × ${p.L}mm</span></button>`
-        )}</div></section>
-      <section><h2><span>Pieces To Cut</span></h2>${table('parts', D.parts)}
-        <div class="cut-add"><button class="mini" ${raw(onClick('cutAdd', 'parts'))}>+ Add Piece</button></div></section>
-    </div>
+    <div class="panel cut-job"><h2><span>Job</span><small class="muted nocap" id="cutJobHint">${k ? 'Contract ' + k.id + ' found: Save To Contract keeps the plan with its documents' : 'Type the contract number to link the plan to it'}</small></h2><div class="cut-og cut-eq">
+      <div class="ff"><label for="cut_job_no">Job Number</label>${raw(fieldControl({ k: '', max: 30, combo: 'jobs' }, D.jobNo || '', { id: 'cut_job_no' }))}</div>
+      <div class="ff"><label for="cut_job_name">Job Name</label>${raw(fieldControl({ k: '', max: 80 }, D.jobName || '', { id: 'cut_job_name' }))}</div>
+    </div></div>
+    <div class="panel cut-card"><h2><span>Boards In Stock</span><small class="muted nocap">How Many 0 means as many as needed</small></h2>${table('sheets', D.sheets)}
+      <div class="cut-add"><button class="mini" ${raw(onClick('cutAdd', 'sheets'))}>+ Add Board</button>${PRESETS.map(
+        (p, i) =>
+          html`<button class="mini cut-pre" ${raw(onClick('cutPreset', i))}><b>${p.label}</b> <span class="nocap">${p.W} × ${p.L}mm</span></button>`
+      )}</div></div>
+    <div class="panel cut-card"><h2><span>Pieces To Cut</span></h2>${table('parts', D.parts)}
+      <div class="cut-add"><button class="mini" ${raw(onClick('cutAdd', 'parts'))}>+ Add Piece</button></div></div>
   </div>
   <div class="kpis cut-k" id="cutKpis">${raw(kpis(S, Math.round(S.efficiency * 100)))}</div>
   <div class="cut-out" id="cutOut">${raw(cutResults())}</div>`);
@@ -236,6 +228,28 @@ export function cutEdit(e) {
     else r[k] = SAFE.num(t.value, { min: 0, max: k == 'qty' ? 5000 : 100000, dp: k == 'qty' ? 0 : 1 }) ?? 0;
   }
   refresh();
+}
+/** saw blade width and edge trim, in a small window (they rarely change) */
+export function cutSettings() {
+  const D = cutData();
+  form(
+    'Cutting Settings',
+    [
+      { k: 'kerf', l: 'Saw blade width', t: 'number', max: 20, hint: 'In millimetres: lost on every cut' },
+      {
+        k: 'trim',
+        l: 'Edge trim each side',
+        t: 'number',
+        max: 100,
+        hint: 'In millimetres: taken off every edge of a board',
+      },
+    ],
+    { kerf: D.kerf, trim: D.trim },
+    (o) => {
+      D.kerf = SAFE.num(o.kerf, { min: 0, max: 20, dp: 1 }) ?? 0;
+      D.trim = SAFE.num(o.trim, { min: 0, max: 100, dp: 1 }) ?? 0;
+    }
+  );
 }
 export function cutAdd(kind) {
   const D = cutData();

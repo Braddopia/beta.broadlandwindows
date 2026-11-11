@@ -14,10 +14,10 @@ import { audit } from '../../data/audit.js';
 import { store } from '../../data/persistence.js';
 import { SAFE } from '../../data/sanitize.js';
 import { state } from '../../data/state.js';
-import { barLenOf, groupBars, optimiseBars } from '../../domain/barcut.js';
+import { barLenOf, groupBars, offcutsOf, optimiseBars } from '../../domain/barcut.js';
 import { jobTitle } from '../../domain/job-title.js';
 import { canSee } from '../../domain/permissions.js';
-import { products, unitOf } from '../../domain/stock.js';
+import { ikey, moveRow, prod, products, stkId, unitOf } from '../../domain/stock.js';
 import { printDoc } from '../../print/print.js';
 import { form } from '../../ui/forms/form.js';
 import { askIn, closeModal, openModal } from '../../ui/modal.js';
@@ -25,16 +25,27 @@ import { render } from '../../ui/shell/router.js';
 import { toast } from '../../ui/toast.js';
 import { fx } from '../files/files.js';
 
-const ANG = [90, 45];
 const cut0 = (label = '', len = 1000, qty = 1) => ({ label, ref: '', len, qty, aL: 45, aR: 45 });
 const prof0 = () => ({ code: '', desc: '', bar: 6500, cuts: [cut0('', 1000, 1)] });
-const BLANK = () => ({ name: '', jobNo: '', jobName: '', kerf: 4, trim: 10, profiles: [prof0()] });
+/* end trim: 50mm off each end of a bar; offcuts over `keep` mm are worth putting back in stock */
+const BLANK = () => ({ name: '', jobNo: '', jobName: '', kerf: 4, trim: 50, keep: 500, profiles: [prof0()] });
+/* an end angle as typed: 90 is a square cut; anything from 15 to 90 degrees */
+const ang = (v) => {
+  const n = Math.round((+v || 90) * 10) / 10;
+  return n >= 15 && n <= 90 ? n : 90;
+};
 
 /** the cutting list being worked on (kept with the rest of the data) */
 export function barData() {
   if (!state.bars || !Array.isArray(state.bars.profiles))
     state.bars = { ...BLANK(), jobs: (state.bars && state.bars.jobs) || [] };
   state.bars.jobs = state.bars.jobs || [];
+  if (state.bars.keep == null) state.bars.keep = 500;
+  /* lists started before the 50mm end trim became the usual one */
+  if (!state.bars.trimV2) {
+    if (state.bars.trim == 10) state.bars.trim = 50;
+    state.bars.trimV2 = 1;
+  }
   return state.bars;
 }
 /* whole millimetres, or to the half millimetre when a length has one (965.5) */
@@ -54,7 +65,12 @@ const findProd = (code) => {
   const c = String(code || '')
     .trim()
     .toUpperCase();
-  return c ? barProducts().find((x) => String(x.r.item).toUpperCase() == c) || null : null;
+  /* offcuts put back in stock share the code: the full bar is the longest one */
+  return c
+    ? barProducts()
+        .filter((x) => String(x.r.item).toUpperCase() == c)
+        .sort((a, b) => b.bar - a.bar)[0] || null
+    : null;
 };
 
 /** one bar drawn as it comes off the saw: each cut a shape with its end angles, labels above, the offcut at the end.
@@ -70,8 +86,9 @@ export function barSvg(b, bar, trim, print) {
   b.cuts.forEach((c, i) => {
     if (i) x += kerfPx;
     const w = c.len * s,
-      dl = c.aL == 45 ? Math.min(H * 0.55, w / 3) : 0,
-      dr = c.aR == 45 ? Math.min(H * 0.55, w / 3) : 0,
+      slant = (a) => (a >= 89.5 ? 0 : Math.min(H * 0.9, w / 3, (H * 0.55) / Math.tan((a * Math.PI) / 180))),
+      dl = slant(c.aL),
+      dr = slant(c.aR),
       h = hue(c.label);
     out.push(
       html`<g class="bc"><polygon points="${x},${y} ${x + w},${y} ${x + w - dr},${y + H} ${x + dl},${y + H}" style="fill:hsl(${h} ${print ? '70% 92%' : '65% 55%'});stroke:hsl(${h} ${print ? '40% 35%' : '85% 80%'})"/>${
@@ -98,8 +115,8 @@ const cutRow = (pi, c, ci) =>
     <label class="bar-f bar-ref"><span>Ref</span><input id="bar_c_${pi}_${ci}_ref" maxlength="12" value="${c.ref}" autocomplete="off"></label>
     <label class="bar-f bar-n"><span>Length <i class="nocap">(mm)</i></span><input id="bar_c_${pi}_${ci}_len" type="number" min="0" max="20000" step="0.5" inputmode="decimal" value="${c.len}"></label>
     <label class="bar-f bar-q"><span>How Many</span><input id="bar_c_${pi}_${ci}_qty" type="number" min="0" max="1000" step="1" inputmode="numeric" value="${c.qty}"></label>
-    <label class="bar-f bar-a"><span>Left End</span><select id="bar_c_${pi}_${ci}_aL">${ANG.map((a) => html`<option value="${a}" ${raw(+c.aL == a ? 'selected' : '')}>${a}°</option>`)}</select></label>
-    <label class="bar-f bar-a"><span>Right End</span><select id="bar_c_${pi}_${ci}_aR">${ANG.map((a) => html`<option value="${a}" ${raw(+c.aR == a ? 'selected' : '')}>${a}°</option>`)}</select></label>
+    <label class="bar-f bar-a"><span>Left End °</span><input id="bar_c_${pi}_${ci}_aL" type="number" min="15" max="90" step="0.5" inputmode="decimal" list="barAngles" value="${c.aL}"></label>
+    <label class="bar-f bar-a"><span>Right End °</span><input id="bar_c_${pi}_${ci}_aR" type="number" min="15" max="90" step="0.5" inputmode="decimal" list="barAngles" value="${c.aR}"></label>
     <button class="cut-x" aria-label="Remove cut ${ci + 1}" title="Remove" ${raw(onClick('barCutDel', pi, ci))}>&times;</button></div>`;
 
 /** the plan for one profile: totals line, then each bar (bars cut the same way are counted together) */
@@ -136,18 +153,12 @@ export function vBars() {
     k = barContract(D),
     L = barProducts();
   return String(html`<div class="head"><div><h1 id="barTitle">${barTitle(D)}</h1><span class="muted">Cut lengths of profile from full bars with the least waste</span></div>
-    <div class="tools"><button class="mini" ${raw(onClick('barJobs'))}>Saved Lists (${D.jobs.length})</button><button class="mini" ${raw(onClick('barNew'))}>New List</button><button class="mini" ${raw(onClick('barSave'))}>Save</button><button class="mini pri" id="barToC" ${raw(onClick('barToContract'))} ${k && canSee('contracts') ? '' : raw('hidden')}>Save To Contract</button><button class="btn" ${raw(onClick('barPrint'))}>Print Cutting List</button></div></div>
+    <div class="tools"><button class="mini" ${raw(onClick('barJobs'))}>Saved Lists (${D.jobs.length})</button><button class="mini" ${raw(onClick('barNew'))}>New List</button><button class="mini" ${raw(onClick('barSave'))}>Save</button><button class="mini" ${raw(onClick('barSettings'))}>Saw Settings</button><button class="mini" id="barBookB" ${raw(onClick('barBook'))} ${L.some((x) => D.profiles.some((p) => String(p.code).toUpperCase() == String(x.r.item).toUpperCase())) ? '' : raw('hidden')}>Book Into Stock</button><button class="mini pri" id="barToC" ${raw(onClick('barToContract'))} ${k && canSee('contracts') ? '' : raw('hidden')}>Save To Contract</button><button class="btn" ${raw(onClick('barPrint'))}>Print Cutting List</button></div></div>
   <div class="cut-in bar-in" ${raw(onEvent('oninput', 'barEdit', 'event'))} ${raw(onEvent('onchange', 'barEdit', 'event'))}>
-    <div class="cut-top">
-      <div class="panel cut-job"><h2><span>Job</span><small class="muted nocap" id="barJobHint">${k ? 'Contract ' + k.id + ' found: Save To Contract keeps the list with its documents' : 'Type the contract number to link the list to it'}</small></h2><div class="cut-og cut-og2">
-        <div class="ff"><label for="bar_job_no">Job Number</label><input id="bar_job_no" maxlength="30" data-combo="jobs" value="${D.jobNo || ''}" autocomplete="off"></div>
-        <div class="ff"><label for="bar_job_name">Job Name</label><input id="bar_job_name" maxlength="80" value="${D.jobName || ''}" autocomplete="off"></div>
-      </div></div>
-      <div class="panel cut-set"><h2><span>Saw Settings</span></h2><div class="cut-og cut-og2">
-        <div class="ff"><label for="bar_opt_kerf">Saw Blade Width <span class="nocap">(mm)</span></label><input id="bar_opt_kerf" type="number" min="0" max="20" step="0.1" value="${D.kerf}"></div>
-        <div class="ff"><label for="bar_opt_trim">End Trim Each End <span class="nocap">(mm)</span></label><input id="bar_opt_trim" type="number" min="0" max="200" step="1" value="${D.trim}"></div>
-      </div></div>
-    </div>
+    <div class="panel cut-job"><h2><span>Job</span><small class="muted nocap" id="barJobHint">${k ? 'Contract ' + k.id + ' found: Save To Contract keeps the list with its documents' : 'Type the contract number to link the list to it'}</small></h2><div class="cut-og cut-eq">
+      <div class="ff"><label for="bar_job_no">Job Number</label><input id="bar_job_no" maxlength="30" data-combo="jobs" value="${D.jobNo || ''}" autocomplete="off"></div>
+      <div class="ff"><label for="bar_job_name">Job Name</label><input id="bar_job_name" maxlength="80" value="${D.jobName || ''}" autocomplete="off"></div>
+    </div><datalist id="barAngles"><option value="90"></option><option value="45"></option><option value="67.5"></option><option value="60"></option><option value="30"></option><option value="22.5"></option></datalist></div>
     ${D.profiles.map(
       (p, pi) => html`<div class="panel bar-p">
         <div class="bar-ph"><span class="bar-pn">Profile ${pi + 1}</span>
@@ -193,7 +204,7 @@ function jobBits() {
 }
 export function barEdit(e) {
   const t = e && e.target,
-    m = t && /^bar_(job|opt|p|c)_(\w+?)(?:_(\w+?))?(?:_(\w+))?$/.exec(t.id);
+    m = t && /^bar_(job|p|c)_(\w+?)(?:_(\w+?))?(?:_(\w+))?$/.exec(t.id);
   if (!m) return;
   const D = barData();
   if (m[1] == 'job') {
@@ -210,10 +221,6 @@ export function barEdit(e) {
     clearTimeout(saveT);
     saveT = setTimeout(store, 400);
     return;
-  }
-  if (m[1] == 'opt') {
-    D[m[2]] = SAFE.num(t.value, { min: 0, max: m[2] == 'kerf' ? 20 : 200, dp: 1 }) ?? 0;
-    return refresh();
   }
   if (m[1] == 'p') {
     const pi = +m[2],
@@ -235,6 +242,8 @@ export function barEdit(e) {
         if (bEl) bEl.value = p.bar;
       }
     }
+    const bk = $('#barBookB');
+    if (bk) bk.hidden = !D.profiles.some((x) => findProd(x.code));
     return refresh(pi);
   }
   const pi = +m[2],
@@ -244,7 +253,7 @@ export function barEdit(e) {
   if (!c) return;
   if (f == 'label') c.label = SAFE.text(t.value, 40);
   else if (f == 'ref') c.ref = SAFE.text(t.value, 12);
-  else if (f == 'aL' || f == 'aR') c[f] = ANG.includes(+t.value) ? +t.value : 90;
+  else if (f == 'aL' || f == 'aR') c[f] = ang(t.value);
   else c[f] = SAFE.num(t.value, { min: 0, max: f == 'qty' ? 1000 : 20000, dp: f == 'qty' ? 0 : 1 }) ?? 0;
   refresh(pi);
 }
@@ -290,11 +299,115 @@ export function barNew() {
     'Start New',
     () => {
       const jobs = barData().jobs;
-      state.bars = { ...BLANK(), jobs };
+      state.bars = { ...BLANK(), jobs, trimV2: 1 };
       store();
       render();
     }
   );
+}
+/** saw blade, end trim and the shortest offcut worth keeping, in a small window */
+export function barSettings() {
+  const D = barData();
+  form(
+    'Saw Settings',
+    [
+      { k: 'kerf', l: 'Saw blade width', t: 'number', max: 20, hint: 'In millimetres: lost on every cut' },
+      {
+        k: 'trim',
+        l: 'End trim each end',
+        t: 'number',
+        max: 200,
+        hint: 'In millimetres: taken off both ends of every bar',
+      },
+      { k: 'keep', l: 'Keep offcuts over', t: 'number', max: 10000, hint: 'In millimetres: shorter offcuts are scrap' },
+    ],
+    { kerf: D.kerf, trim: D.trim, keep: D.keep },
+    (o) => {
+      D.kerf = SAFE.num(o.kerf, { min: 0, max: 20, dp: 1 }) ?? 0;
+      D.trim = SAFE.num(o.trim, { min: 0, max: 200, dp: 0 }) ?? 0;
+      D.keep = SAFE.num(o.keep, { min: 0, max: 10000, dp: 0 }) ?? 500;
+    }
+  );
+}
+/* ---- Book Into Stock: full bars out, offcuts worth keeping back in as their own stock lines ---- */
+function bookPlan(D = barData()) {
+  return D.profiles
+    .map((p) => {
+      const lp = findProd(p.code);
+      if (!lp) return null;
+      const R = optimiseBars({ bar: p.bar, kerf: D.kerf, trim: D.trim, cuts: p.cuts });
+      return R.stats.bars ? { p, lp, bars: R.stats.bars, offs: offcutsOf(R.bars, D.keep) } : null;
+    })
+    .filter(Boolean);
+}
+export function barBook() {
+  if (!canSee('stock')) return toast('Your account cannot change stock');
+  const D = barData(),
+    P = bookPlan(D);
+  if (!P.length) return toast('Link a profile under Inventory, Cutting Data first');
+  const job = jobTitle(D.jobNo, D.jobName);
+  openModal(
+    String(html`<button class="mx" data-act="closeModal" aria-label="Close">&times;</button><h2>Book Into Stock</h2>
+      <p class="muted">${job ? job + ': ' : ''}the full bars used come out of stock, and offcuts over ${mm(D.keep)}mm go back in as their own stock lines, with their length.</p>
+      ${D.bookedAt ? html`<div class="note bad"><b>Already booked</b> on ${fd(D.bookedAt)}${D.bookedBy ? ' by ' + D.bookedBy : ''}. Booking again takes the bars out a second time.</div>` : ''}
+      <div class="tw bar-link"><table class="ptb"><thead><tr><th>Profile</th><th class="n">In Stock</th><th class="n">Bars Out</th><th>Offcuts Back In</th></tr></thead><tbody>${P.map(
+        (x) =>
+          html`<tr><td><b>${x.lp.r.item}</b><small class="sub">${mm(x.p.bar)}mm bar</small></td><td class="n ${x.lp.r.stock < x.bars ? 'od' : ''}">${x.lp.r.stock}</td><td class="n"><b>${x.bars}</b></td><td>${x.offs.length ? x.offs.map((o) => mm(o) + 'mm').join(', ') : html`<span class="muted">None long enough</span>`}</td></tr>`
+      )}</tbody></table></div>
+      ${P.some((x) => x.lp.r.stock < x.bars) ? html`<p class="muted">Some profiles do not show enough bars in stock. Their count stops at 0.</p>` : ''}
+      <div class="mact"><button class="btn ghost" data-act="closeModal">Cancel</button><button class="btn" ${raw(onClick('barBookGo'))}>Book Into Stock</button></div>`),
+    'md'
+  );
+}
+export function barBookGo() {
+  if (!canSee('stock')) return;
+  const D = barData(),
+    P = bookPlan(D);
+  if (!P.length) return;
+  const note = 'Cutting list' + (jobTitle(D.jobNo, D.jobName) ? ' ' + jobTitle(D.jobNo, D.jobName) : '');
+  let out = 0,
+    back = 0;
+  P.forEach(({ lp, bars, offs }) => {
+    const r = prod(lp.r.pid);
+    if (!r) return;
+    /* the full bars used come out */
+    state.items.unshift(moveRow(r, 'remove', bars, Math.max(0, (+r.stock || 0) - bars), { note }));
+    out += bars;
+    /* each offcut length goes back as its own line: the same profile, with the shorter length */
+    const by = new Map();
+    offs.forEach((o) => by.set(o, (by.get(o) || 0) + 1));
+    by.forEach((n, len) => {
+      const length = len + 'MM',
+        like = { ...r, length },
+        ex = state.items.find((x) => ikey(x) == ikey(like)),
+        base = ex
+          ? prod(ex.pid)
+          : {
+              ...r,
+              pid: stkId(),
+              length,
+              stock: 0,
+              reorder: 0,
+              reorderQty: undefined,
+              barcode: '',
+              desc: r.desc || '',
+              notes: 'Offcut of ' + r.item,
+            };
+      state.items.unshift(moveRow(base, 'add', n, (+base.stock || 0) + n, { note: note + ' (offcut)' }));
+      back += n;
+    });
+  });
+  D.bookedAt = today();
+  D.bookedBy = USER;
+  audit(
+    'Cutting list booked into stock',
+    jobTitle(D.jobNo, D.jobName) || D.name || 'Cutting list',
+    out + ' bars out, ' + back + ' offcuts in'
+  );
+  store();
+  closeModal();
+  toast(out + ' bar' + (out == 1 ? '' : 's') + ' removed, ' + back + ' offcut' + (back == 1 ? '' : 's') + ' added');
+  render(true);
 }
 const copyOf = (D) =>
   JSON.parse(
@@ -304,6 +417,7 @@ const copyOf = (D) =>
       jobName: D.jobName,
       kerf: D.kerf,
       trim: D.trim,
+      keep: D.keep,
       profiles: D.profiles,
     })
   );
@@ -343,7 +457,7 @@ export function barOpen(i) {
   const D = barData(),
     j = D.jobs[i];
   if (!j) return;
-  Object.assign(D, copyOf(j));
+  Object.assign(D, copyOf(j), { bookedAt: '', bookedBy: '' });
   store();
   closeModal();
   render();

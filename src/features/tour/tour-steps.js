@@ -219,7 +219,7 @@ export const TAB_TOURS = {
       'Type the contract number. The job name fills in and you can save the plan to that contract.'
     ),
     T(
-      '#main .cut-lists',
+      '#main .cut-card',
       'Boards And Pieces',
       'List the boards you have in stock and the pieces you need. The plan updates as you type.'
     ),

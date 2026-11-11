@@ -76,6 +76,13 @@ export function optimiseBars({ bar, kerf = 4, trim = 10, cuts }) {
   };
 }
 
+/** what is left of each bar that is worth keeping: whole millimetres, at least `min` long, longest first */
+export function offcutsOf(bars, min = 500) {
+  return (bars || [])
+    .map((b) => Math.floor(b.off || 0))
+    .filter((o) => o > 0 && o >= (+min || 0))
+    .sort((a, b) => b - a);
+}
 /** bars cut exactly the same way, counted together ("2x") as on the saw list */
 export function groupBars(bars) {
   const out = [];

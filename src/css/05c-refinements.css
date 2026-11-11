@@ -834,3 +834,19 @@ body.rm .pin.u .halo{animation:none}
 .ie-f .grid.ie-three{grid-template-columns:repeat(3,minmax(0,1fr));align-items:start}
 body[data-theme=dark] .ie-f legend{color:#e8eef8}
 @media(max-width:700px){.ie-f .grid.ie-three,.ie-f .grid.ie-prod{grid-template-columns:1fr}}
+
+/* optimisers: the job in one full-width card with two equal boxes; lists as their own full-width cards */
+.cut-og.cut-eq{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+.cut-in>.panel{margin:0}
+.cut-card h2{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:.3rem .8rem}
+.cut-card h2 small{font-weight:400;font-size:.76rem}
+@media(max-width:560px){.cut-og.cut-eq{grid-template-columns:1fr}}
+/* number boxes in the optimisers: no spinner arrows, so the figure sits dead centre */
+.cut-r input[type=number],.bar-r input[type=number],.bar-ph input[type=number]{-moz-appearance:textfield;appearance:textfield;text-align:center;padding:0 .3rem}
+.cut-r input[type=number]::-webkit-inner-spin-button,.cut-r input[type=number]::-webkit-outer-spin-button,.bar-r input[type=number]::-webkit-inner-spin-button,.bar-r input[type=number]::-webkit-outer-spin-button,.bar-ph input[type=number]::-webkit-inner-spin-button,.bar-ph input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+.bar-r input::-webkit-calendar-picker-indicator{display:none!important}
+.bar-r{grid-template-columns:.7rem minmax(0,1fr) 7.5rem 7.5rem 5.5rem 5.8rem 5.8rem 2rem}
+.bar-ref input{text-align:center}
+#barBookB[hidden]{display:none!important}
+.bar-link td.od{color:var(--red);font-weight:700}
+.bar-link small.sub{display:block;color:var(--muted);font-size:.74rem}

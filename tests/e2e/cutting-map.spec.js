@@ -154,6 +154,12 @@ test('Cutting Optimiser: cuts with angles plan into bars as you type, print as a
 
   await app.go('bars');
   await expect(app.page.locator('#main h1')).toHaveText('Cutting Optimiser');
+  // a new list trims 50mm off each end; the saw sheet this test copies used 10
+  expect(await app.run(() => state.bars.trim)).toBe(50);
+  await app.page.click('#main .tools >> text=Saw Settings');
+  await app.page.fill('#f_trim', '10');
+  await app.page.click('#saveBtn');
+  await app.call('closeModal');
   // picking the linked profile fills in its bar length and shows the stock
   await app.page.fill('#bar_p_0_bar', '3000');
   await app.page.fill('#bar_p_0_code', item);
@@ -169,8 +175,9 @@ test('Cutting Optimiser: cuts with angles plan into bars as you type, print as a
   await app.page.fill('#bar_c_0_1_qty', '4');
   await expect(app.page.locator('#barOut_0 .bar-sum')).toContainText('2 bars');
   await expect(app.page.locator('#barOut_0 .bar-sum')).toContainText('1,748mm = 13.4%');
-  await app.page.selectOption('#bar_c_0_1_aL', '90');
-  expect(await app.run(() => state.bars.profiles[0].cuts[1].aL)).toBe(90);
+  // any angle can be typed
+  await app.page.fill('#bar_c_0_1_aL', '67.5');
+  expect(await app.run(() => state.bars.profiles[0].cuts[1].aL)).toBe(67.5);
   // print: our report, job first, a section per profile with its bars
   await app.page.fill('#bar_job_no', '1023421');
   await expect(app.page.locator('#barTitle')).toHaveText('1023421 - SAMPLE CUSTOMER E');
@@ -185,5 +192,15 @@ test('Cutting Optimiser: cuts with angles plan into bars as you type, print as a
   // kept with the contract
   await app.page.click('#barToC');
   await expect(app.page.locator('.toast')).toContainText('Saved to contract 1023421');
+  // Book Into Stock: the 2 full bars come out, and the 1,624mm offcut goes back in as its own stock line
+  const before = await app.run((p) => prod(p).stock, pid);
+  await app.page.click('#barBookB');
+  await expect(app.page.locator('#mbox')).toContainText('1,624mm');
+  await app.page.click('#mbox .mact >> text=Book Into Stock');
+  expect(await app.run((p) => prod(p).stock, pid)).toBe(before - 2);
+  const off = await app.run((it) => products().find((r) => r.item == it && r.length == '1624MM'), item);
+  expect(off.stock).toBe(1);
+  expect(off.pid).not.toBe(pid);
+  expect(await app.run(() => state.bars.bookedAt)).toBeTruthy();
   expect(app.errors).toEqual([]);
 });
