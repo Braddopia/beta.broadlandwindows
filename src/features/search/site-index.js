@@ -117,5 +117,3 @@ export function siteGo(v, t) {
     setTimeout(() => box.classList.remove('sx-hit'), 2600);
   }, 80);
 }
-/** forget the index (after data changes that add or remove labels) */
-export const siteForget = () => (IDX = null);

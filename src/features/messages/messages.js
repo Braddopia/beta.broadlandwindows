@@ -70,8 +70,7 @@ export function vMessages() {
           sep +
           `<div class="bub ${mine ? 'me' : ''}">${!mine && cur == 'Everyone' ? `<small class="bub-n">${esc(n.by)}</small>` : ''}<p>${esc(n.t)}</p><span class="bub-t">${new Date(n.at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}${mine ? `<button class="bub-x" title="Delete" aria-label="Delete message" ${onClick('msgDel', n.id)}>&times;</button>` : ''}</span></div>`
         );
-      }).join('') ||
-      `<div class="msn-empty">${emptyArt('team', '')}</div>`
+      }).join('') || `<div class="msn-empty">${emptyArt('team', '')}</div>`
     }</div>
     <div class="msn-in"><textarea id="m_t" rows="1" maxlength="1000" placeholder="Aa" aria-label="Message" data-onkeydown="msgKey" data-args-keydown="[{&quot;$&quot;:&quot;event&quot;}]"></textarea><button class="msn-send" data-act="msgSend" aria-label="Send">${svg('M4 12l16-8-6 16-3-7z')}</button></div></section></div>`;
 }

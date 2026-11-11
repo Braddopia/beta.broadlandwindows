@@ -6,7 +6,6 @@
 .hero::after{content:"";position:absolute;right:-40px;top:-60px;width:220px;height:220px;border-radius:50%;background:rgba(255,208,2,.12)}
 .hero h1{color:#fff;font-size:1.6rem}
 .hero p{margin:.3rem 0 0;color:#cfe0f7}
-.hero .rt{display:inline-block;margin-bottom:.4rem;padding:.12rem .6rem;border-radius:20px;background:rgba(255,255,255,.18);font-size:.74rem}
 .wave{display:inline-block;transform-origin:70% 70%;animation:wave 2s .6s 2}
 
 /* ---- leads kanban ---- */
@@ -144,7 +143,7 @@ body.lv .lvg{flex:1;min-height:0;grid-template-rows:repeat(2,minmax(0,1fr))}
 .ie-f fieldset{border:0;padding:0;margin:0 0 1.1rem}
 .ie-f legend{font:600 .82rem var(--head);color:var(--navy);padding:0 0 .5rem;width:100%;border-bottom:1px solid var(--line);margin-bottom:.7rem}
 .ie-f .grid{grid-template-columns:repeat(auto-fit,minmax(min(100%,12rem),1fr))}
-/* Product row: Stock ID | Item | Unit, then Qty | Barcode | Length (length directly under unit) */
+/* Product row: Stock ID | Item | Unit,then Qty | Barcode | Length (length directly under unit) */
 .ie-f .grid.ie-prod{grid-template-columns:repeat(3,minmax(0,1fr));align-items:start}
 .sws .mini.on{border-color:var(--blue);color:var(--blue)}
 .mb.xl .mact{margin:0;border-top:1px solid var(--line)}
@@ -216,7 +215,7 @@ body.lv .lvg{flex:1;min-height:0;grid-template-rows:repeat(2,minmax(0,1fr))}
 
 .cc{min-width:0}.ci a,.ci b,.ci div{overflow-wrap:anywhere}
 
-/* colour picker: round, like the preset swatches */
+/* colour picker: round,like the preset swatches */
 input[type=color]{-webkit-appearance:none;appearance:none;width:2.3rem!important;height:2.3rem;flex:0 0 auto;padding:0!important;border:2px solid #fff!important;border-radius:50%!important;box-shadow:0 0 0 1px var(--line),0 2px 6px rgba(1,43,89,.15);background:none;cursor:pointer;transition:transform .15s}
 input[type=color]:hover{transform:scale(1.08)}
 input[type=color]::-webkit-color-swatch-wrapper{padding:0}
@@ -224,7 +223,7 @@ input[type=color]::-webkit-color-swatch{border:0;border-radius:50%}
 input[type=color]::-moz-color-swatch{border:0;border-radius:50%}
 .ff .inl{align-items:center}
 
-/* light glass: soft colour wash behind translucent, lightly blurred surfaces */
+/* light glass: soft colour wash behind translucent,lightly blurred surfaces */
 body{background:radial-gradient(1100px 700px at -5% -10%,rgba(3,78,162,.13),transparent 60%),radial-gradient(900px 600px at 105% -5%,rgba(255,208,2,.14),transparent 60%),radial-gradient(1000px 700px at 85% 110%,rgba(3,78,162,.10),transparent 60%),var(--bg);background-attachment:fixed}
 body[data-theme=dark]{background:radial-gradient(1100px 700px at -5% -10%,rgba(42,98,201,.22),transparent 60%),radial-gradient(900px 600px at 105% -5%,rgba(255,208,2,.07),transparent 60%),radial-gradient(1000px 700px at 85% 110%,rgba(42,98,201,.14),transparent 60%),var(--bg);background-attachment:fixed}
 :root{--glass:rgba(255,255,255,.66);--glass-b:rgba(255,255,255,.75);--glass-hi:inset 0 1px 0 rgba(255,255,255,.8)}

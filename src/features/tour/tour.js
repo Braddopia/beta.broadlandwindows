@@ -13,7 +13,6 @@ import { TAB_TOURS, WELCOME } from './tour-steps.js';
    tour the first time it is opened (TAB_TOURS in tour-steps.js). Both are "locked" when they play by
    themselves: no Skip, and Next unlocks once a timer bar fills. (Hidden: Esc three times in a row leaves.)
    The ? button replays the tour for the tab you are on (or the welcome tour), with Skip and no wait. */
-export const TOUR = WELCOME;
 export { TAB_TOURS };
 export let TI = 0;
 let STEPS = WELCOME,

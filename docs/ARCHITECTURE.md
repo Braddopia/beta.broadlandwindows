@@ -145,3 +145,17 @@ See [docs/adr](adr/).
   reference and date, key figures, payment bar, timeline, details, each table or section by title, photos,
   signatures, barcode, reviews, thank-you note and footer. The titles a document prints are remembered
   (`state.docSeen`) so the builder can list them. Stock labels have their own parts.
+
+## Shared pop-ups, PINs and the page filter
+
+- `ui/components/pickers.js`: an input with `data-combo="<source>"` (or a field with `combo:`) gets an
+  app-styled pick list as you type; pages register sources with `plugInCombo` (`contracts`, `jobs`,
+  `profiles`). With a mouse, every `input[type=date]` opens the app's own month calendar.
+- PINs (`features/auth/pins.js`): each PIN has its own random salt and is hashed `PIN_ROUNDS` times
+  (`core/crypto.js` `stretch`). PINs saved the older way still work once and are then re-saved. Wrong-PIN
+  lock-outs are kept in localStorage and double each time. The data itself is not encrypted: that waits for
+  the Microsoft 365 backend.
+- List pages filter through `hit()` in `ui/shell/router.js`. A question the search understands filters the
+  list the way it is answered; a question about something else leaves the list alone.
+- Cutting Optimiser, Book Into Stock (`features/bars/bars.js`): for profiles linked to Inventory, the full
+  bars used are booked out and offcuts over the "keep" length go back in as their own stock lines.

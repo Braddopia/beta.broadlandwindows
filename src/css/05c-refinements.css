@@ -1,5 +1,5 @@
 /* Later refinements, grouped by what they change. They override earlier rules, so keep them last before responsive.css */
-/* ==== lead and contract forms: guidance, field feedback and motion ==== */
+/* ==== lead and contract forms: guidance,field feedback and motion ==== */
 
 /* 'still to fill in' box at the top of each step */
 .rw-todo:empty{display:none}
@@ -27,7 +27,7 @@ button.td-i:hover{border-color:var(--blue);color:var(--blue)}
 .nav.on{background:rgba(255,255,255,.42);box-shadow:inset 0 0 0 1px rgba(255,255,255,.5);-webkit-backdrop-filter:none;backdrop-filter:none}
 body[data-theme=dark] .nav.on{background:rgba(255,255,255,.06);box-shadow:inset 0 0 0 1px rgba(255,255,255,.06)}
 
-/* search: soft moving rainbow glow around the edge, Siri-style */
+/* search: soft moving rainbow glow around the edge,Siri-style */
 @property --sa{syntax:"<angle>";inherits:false;initial-value:0deg}
 .top .sb{isolation:isolate}
 .top .sb::before{content:"";position:absolute;inset:-2px;border-radius:18px;padding:2px;z-index:-1;pointer-events:none;
@@ -54,7 +54,7 @@ body[data-theme=dark] .nav.on{background:rgba(255,255,255,.06);box-shadow:inset 
 .card,.panel{--ro:var(--r)}
 .card .btn,.panel .btn{border-radius:max(6px,calc(var(--ro) - .55rem))}
 .mb .mact .btn,.rg-nx .btn,.rw-foot .btn{border-radius:12px}
-/* headlines wrap evenly, long words break */
+/* headlines wrap evenly,long words break */
 h1,h2,h3,h4,.rw-h h2,.rg-n{text-wrap:balance;overflow-wrap:anywhere}
 p,li,small{text-wrap:pretty}
 
@@ -62,7 +62,7 @@ p,li,small{text-wrap:pretty}
 .rw-todo{max-width:760px}
 .rw-steps b{display:flex;flex-wrap:wrap;align-items:center;gap:.1rem .35rem}
 
-/* ==== search glow, finance step and settings page ==== */
+/* ==== search glow,finance step and settings page ==== */
 /* search glow: calm when clicked (same gentle flow, just a touch clearer) */
 .top .sb:focus-within::before{opacity:.7;filter:none;animation-duration:6s}
 .top .sb:focus-within::after{opacity:.4;animation-duration:6s}
@@ -128,7 +128,7 @@ body.rm *,body.rm *::before,body.rm *::after{animation:none!important;transition
 .seg button.on{background:var(--card);color:var(--ink);box-shadow:0 1px 3px rgba(1,43,89,.15)}
 .set-c h2{justify-content:flex-start}.set-dl dd{overflow-wrap:break-word}
 
-/* ==== required marks, scan button, fewer animations ==== */
+/* ==== required marks,scan button,fewer animations ==== */
 /* required star and admin lock: one look everywhere */
 .rq{color:var(--red);font-weight:700;margin-left:.2rem}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
@@ -203,7 +203,7 @@ body.rm #splash{display:none}
 body[data-theme=dark] .path li.done button{background:#0f3a29;color:#7fe0aa}
 .path-x{border:1px solid var(--line);background:var(--card);color:var(--muted);border-radius:10px;height:2.1rem;padding:0 .8rem;font:500 .8rem var(--body);cursor:pointer}
 .path-x:hover{color:var(--red);border-color:var(--red)}
-/* rail: next step box, then Steps and Extras */
+/* rail: next step box,then Steps and Extras */
 .rw-next{padding:.75rem .8rem;margin:0 0 .9rem;border-radius:14px;background:var(--card);border:1px solid var(--line);box-shadow:0 6px 16px -12px rgba(1,43,89,.35)}
 .rw-next small{font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:var(--blue)}
 .rw-next p{margin:.2rem 0 .5rem;font-size:.92rem;line-height:1.35;color:var(--ink)}
@@ -227,7 +227,7 @@ body[data-theme=dark] .path li.done button{background:#0f3a29;color:#7fe0aa}
 .path button{background:rgba(1,43,89,.07)}body[data-theme=dark] .path button{background:rgba(255,255,255,.07)}
 @media(max-width:900px){.rw-rail{display:flex;flex-wrap:nowrap;gap:.3rem;overflow-x:auto}.rw-rail .rw-steps{flex-wrap:nowrap;flex:0 0 auto}}
 
-/* ==== confirm box, contract header, list stage bars, glassier record window ==== */
+/* ==== confirm box,contract header,list stage bars,glassier record window ==== */
 /* in-app confirm box (layered over any window) */
 .aski{position:fixed;inset:0;z-index:900;display:grid;place-items:center;padding:16px;background:rgba(1,20,45,.42);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);animation:fade .15s}
 .aski-b{width:min(26rem,100%);padding:1.5rem 1.5rem 1.3rem;border-radius:20px;background:var(--pop,var(--card));border:1px solid var(--line);box-shadow:0 30px 70px -20px rgba(0,0,0,.55);text-align:center;animation:pop .2s cubic-bezier(.2,.9,.3,1.2)}
@@ -241,7 +241,7 @@ body[data-theme=dark] .btn.red{background:#c24444}
 /* contract header: outstanding stands out */
 .rw-hk .hk-due b{color:var(--red)}.rw-hk .hk-ok b{color:var(--green)}
 .ptb th.ac{text-align:left}
-/* lead/contract window: glassier, still fully readable (the glass sits on our own tint, not the page) */
+/* lead/contract window: glassier,still fully readable (the glass sits on our own tint, not the page) */
 .mb.full:has(.rw){background:linear-gradient(160deg,#f7faff 0%,#eef4fc 45%,#f6f2e6 100%);overflow:hidden}
 .mb.full:has(.rw)::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(40rem 22rem at 8% 0%,rgba(90,160,255,.22),transparent 70%),radial-gradient(34rem 20rem at 100% 100%,rgba(255,208,2,.16),transparent 70%)}
 .mb.full:has(.rw)>*{position:relative}
@@ -267,7 +267,7 @@ td b.od{color:var(--red)}
 body[data-theme=dark] .path li.on button{background:#2f6fd0;color:#fff}body[data-theme=dark] .path li.done button{background:#0f3a29;color:#7fe0aa}
 @media(max-width:900px){.path{min-width:max-content}.path li{flex:0 0 auto}.path button{padding:0 1.1rem}}
 
-/* record window on small screens: wide tables scroll inside their box, the window never scrolls sideways */
+/* record window on small screens: wide tables scroll inside their box,the window never scrolls sideways */
 .rw-x>*,.rw-main,.rw-b,.rw-p,.rw-p .rcols,.rw-p .rg{min-width:0}
 .rw-p .rg,.rw-p .tw{max-width:100%;overflow-x:auto}
 .rw-b{overflow-x:hidden}
@@ -282,7 +282,7 @@ body[data-theme=dark] .path li.on button{background:#2f6fd0;color:#fff}body[data
 .rw-rail .rw-prog{margin:.3rem .35rem 1rem;font-size:.74rem}
 .rw-rail .rw-prog i{margin-top:.5rem;height:6px}
 
-/* ==== saved tick, photo grid, file rows, phone stock mode, search answers ==== */
+/* ==== saved tick,photo grid,file rows,phone stock mode,search answers ==== */
 /* success inside the same window */
 .donein{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.7rem;padding:1.6rem 1rem 1.4rem;text-align:center;animation:pop .25s ease-out}
 .donein h2{margin:0;font:600 1.3rem var(--head);color:var(--navy)}
@@ -306,7 +306,7 @@ body[data-theme=dark] .phb{background:linear-gradient(160deg,rgba(255,255,255,.0
 /* contracts list: stage aligned on the right */
 .svb{display:inline-block;margin-top:.25rem;font-size:.7rem}
 
-/* files: category and size sit right next to the buttons, every row lined up */
+/* files: category and size sit right next to the buttons,every row lined up */
 .frow{grid-template-columns:minmax(0,1fr) 9.5rem 4rem var(--fa,11.75rem);gap:.4rem .9rem}
 body.isadm .frow{--fa:15.5rem}
 .frow>.tag{justify-self:start}
@@ -329,7 +329,7 @@ body[data-theme=dark] .pda-b b{color:#fff}
 /* search: the plain-English answer group stands out a little */
 .srg.nlg{color:var(--blue)}
 .nlq-l{display:flex;flex-direction:column;max-height:60vh;overflow:auto;margin-top:.5rem}
-/* search glow: smoother colour flow, a touch brighter when in use */
+/* search glow: smoother colour flow,a touch brighter when in use */
 .top .sb::before{background:conic-gradient(from var(--sa),#ff6ec4,#ff8a9a,#ffad7a,#ffd36b,#e6f26b,#9cf59a,#6bf0c8,#5ad7ff,#5aa8ff,#7c87ff,#a979f5,#d873e0,#ff6ec4);filter:blur(1.5px)}
 .top .sb::after{background:conic-gradient(from var(--sa),#ff6ec4,#ffad7a,#ffd36b,#9cf59a,#5ad7ff,#7c87ff,#d873e0,#ff6ec4);filter:blur(16px)}
 .top .sb:focus-within::before{opacity:.95;filter:blur(1px)}
@@ -339,7 +339,7 @@ body[data-theme=dark] .pda-b b{color:#fff}
 /* floor boards: empty-state art sits in the middle of its panel */
 .lvg>.panel>.emp{flex:1;justify-content:center;min-height:6rem}
 @media(max-width:640px){.rw-foot{flex-wrap:wrap;gap:.5rem}.rw-foot .btn{flex:1 1 auto;min-width:0;white-space:normal;justify-content:center;text-align:center}.rw-foot .rw-sp{display:none}}
-/* ==== inventory: own search, exact match, description and area lines ==== */
+/* ==== inventory: own search,exact match,description and area lines ==== */
 .invbar{display:flex;gap:.6rem;align-items:center;margin:0 0 .8rem}
 .invq{flex:1;display:flex;align-items:center;gap:.5rem;height:2.5rem;padding:0 .85rem;border:1px solid var(--line);border-radius:10px;background:var(--card)}
 .invq svg{width:1.05rem;height:1.05rem;color:var(--muted);flex-shrink:0}
@@ -364,22 +364,19 @@ body[data-theme=dark] .pda-b b{color:#fff}
 button.brand{width:100%;border:0;background:none;cursor:pointer;color:inherit;font:inherit;border-radius:12px}
 button.brand:hover .lg{opacity:.85}
 button.brand:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
-.hprev{margin-top:.7rem;padding-top:.6rem;border-top:1px solid var(--line)}
-.hprev-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:.2rem;font-size:.86rem}
-.hprev .row{padding:.3rem 0;font-size:.84rem}
 .paidq{border:0;padding:0;margin:.6rem 0 .2rem}.paidq legend{font-size:.82rem;font-weight:600;margin-bottom:.3rem}
 .paidq .cbl{display:flex;gap:.5rem;align-items:center;margin:.2rem 0}
 .paidq.bad legend{color:var(--red)}
-/* Report a problem: always in the bottom corner, above popups too */
+/* Report a problem: always in the bottom corner,above popups too */
 #rpb{position:fixed;right:calc(.9rem + var(--safe-r,0px));bottom:calc(.9rem + var(--safe-b,0px));z-index:120;display:flex;align-items:center;gap:.4rem;height:2.2rem;padding:0 .75rem;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--muted);font:600 .74rem var(--body);box-shadow:0 4px 14px rgba(1,43,89,.14);cursor:pointer;opacity:.9}
 #rpb:hover{opacity:1;color:var(--red);border-color:var(--red)}
 #rpb svg{width:1rem;height:1rem;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 @media(max-width:700px){#rpb{width:2.4rem;padding:0;justify-content:center;bottom:calc(4.6rem + var(--safe-b,0px))}#rpb span{display:none}}
 body.tv #rpb,body.signin #rpb{display:none}
 @media print{#rpb{display:none}}
-/* ==== house look: plainer, squarer controls (no pill shapes, no rainbow glow) ====
+/* ==== house look: plainer,squarer controls (no pill shapes, no rainbow glow) ====
    border-radius uses !important on purpose: the older blocks above set it in many places with stronger selectors.
-   Change the look here, in one place. */
+   Change the look here,in one place. */
 .btn,.btn.ms,.mini,.rb,.rb1,.fbtn,.ib,.sb-scan,.acct,.fsel,.rw-foot .btn,.rg-nx .btn{border-radius:6px!important}
 .seg,.seg2{border-radius:7px!important}.seg button,.seg2 button{border-radius:5px!important}
 .chip{border-radius:6px!important}.chip i{border-radius:4px!important}
@@ -398,19 +395,19 @@ body.tv #rpb,body.signin #rpb{display:none}
 .wz-info b.od{color:var(--red)}
 .wz-info span{display:block;font-size:.76rem;color:var(--muted)}
 
-/* RGB glow: one long rainbow slid along the edge, zoomed in (3x the width) so colours blend with no hard
+/* RGB glow: one long rainbow slid along the edge,zoomed in (3x the width) so colours blend with no hard
    breaks; the round (conic) version squashed the colours at the ends of the long bar */
 @keyframes rgbflow{to{background-position:300% 0}}
 .top .sb::before,.top .sb::after,.ck-b::before,.ck-in::after{background:linear-gradient(90deg,#ff6ec4,#ff9a8a,#ffc46b,#e9ef72,#9cf59a,#6be6d8,#5ab8ff,#7c87ff,#b67cf0,#ff6ec4)!important;background-size:300% 100%!important;animation:rgbflow 10s linear infinite!important}
 .top .sb:focus-within::before,.top .sb:focus-within::after{animation-duration:5s!important}
 @media(prefers-reduced-motion:reduce){.top .sb::before,.top .sb::after,.ck-b::before,.ck-in::after{animation:none!important}}
-/* Messages: the typing box is focused for you, so no yellow focus ring; a soft blue edge instead */
+/* Messages: the typing box is focused for you,so no yellow focus ring; a soft blue edge instead */
 .msn-in textarea:focus,.msn-in textarea:focus-visible{outline:none;box-shadow:0 0 0 2px rgba(43,143,224,.45)}
 .msn-send:focus-visible{outline:2px solid #5ab8ff;outline-offset:2px}
-/* the one Report A Problem button stays bottom right, over popups too, and clear of the message send button */
+/* the one Report A Problem button stays bottom right,over popups too,and clear of the message send button */
 #rpb{z-index:1000}
 body[data-view=messages] #rpb{bottom:calc(5.2rem + var(--safe-b,0px))}
-/* Inventory Reports: every button the same height, one line, an arrow at the end (details on hover) */
+/* Inventory Reports: every button the same height,one line,an arrow at the end (details on hover) */
 .rl2 .rb{display:flex;flex-direction:row;align-items:center;justify-content:space-between;gap:.6rem;min-height:2.75rem;padding:.55rem .8rem}
 .rl2 .rb b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .rl2 .rb::after{content:"\203A";font-size:1.15rem;line-height:1;color:var(--muted);flex:0 0 auto}
@@ -420,7 +417,7 @@ body[data-view=messages] #rpb{bottom:calc(5.2rem + var(--safe-b,0px))}
 /* step-by-step forms: room between the step numbers and the step title */
 .stp.wz{margin-bottom:1.1rem}.stp.wz i{margin-bottom:.35rem}
 .wz-d{margin:.2rem 0 1rem!important;padding-top:.9rem;border-top:1px solid var(--line)}
-/* the Review step: one card per step, label above value in two columns */
+/* the Review step: one card per step,label above value in two columns */
 .wz-rev{display:grid;gap:.75rem}
 .wz-rev .wz-r{padding:.8rem 1rem .9rem;border:1px solid var(--line);border-radius:12px;background:var(--bg2,rgba(127,140,160,.06));display:grid;grid-template-columns:1fr 1fr;gap:.55rem 1.2rem}
 .wz-rev .wz-r h3{grid-column:1/-1;margin:0 0 .2rem;font-size:.95rem}
@@ -432,7 +429,7 @@ body[data-view=messages] #rpb{bottom:calc(5.2rem + var(--safe-b,0px))}
 .wz-rev .si b .muted{font-weight:400}
 .wz-ph{grid-column:1/-1;display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:.4rem}.wz-ph img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px}
 @media(max-width:560px){.wz-rev .wz-r{grid-template-columns:1fr}.wz-ph{grid-template-columns:repeat(4,minmax(0,1fr))}}
-/* Leads and Contracts lists: stage straight after the customer, its name over a thin progress bar */
+/* Leads and Contracts lists: stage straight after the customer,its name over a thin progress bar */
 .ptb th.stcol,.ptb td.stcol{width:9.5rem;min-width:8rem}
 .sprog2{display:flex;flex-direction:column;gap:.3rem;min-width:7rem;max-width:9rem}
 .sprog2 b{font-weight:600;font-size:.82rem;white-space:nowrap}
@@ -443,10 +440,10 @@ body[data-view=messages] #rpb{bottom:calc(5.2rem + var(--safe-b,0px))}
 .ptb td.ac{width:1%;white-space:nowrap}
 .ie-pick{display:flex;flex-wrap:wrap;gap:.35rem;align-items:center;margin-top:.45rem;max-width:52rem}.ie-pick>b{font-size:.8rem;margin-right:.2rem}
 .wz-rev .si b,.wz-rev .si span{text-align:left!important;align-self:stretch}
-/* while a popup is open: the report button is just the flag, lifted above the popup's button row */
+/* while a popup is open: the report button is just the flag,lifted above the popup's button row */
 body:has(#modal.open) #rpb{width:2.4rem;padding:0;justify-content:center;bottom:calc(5.4rem + var(--safe-b,0px))}
 body:has(#modal.open) #rpb span{display:none}
-/* "Work In Progress" notice over the lead and contract windows: solid, centred, must be closed */
+/* "Work In Progress" notice over the lead and contract windows: solid,centred,must be closed */
 #pvn{position:fixed;inset:0;z-index:1100;display:grid;place-items:center;padding:1rem;background:rgba(1,20,45,.55);opacity:0;transition:opacity .18s}
 #pvn.on{opacity:1}
 .pvn-b{width:min(26rem,100%);padding:1.6rem 1.5rem 1.2rem;border-radius:14px;background:var(--card);color:var(--ink);border:1px solid var(--line);box-shadow:0 24px 60px -20px rgba(0,0,0,.6);text-align:center;transform:translateY(8px) scale(.98);transition:transform .2s}
@@ -461,7 +458,7 @@ body:has(#modal.open) #rpb span{display:none}
 @media(prefers-reduced-motion:reduce){#pvn,.pvn-b{transition:none}}
 #pvnOk:focus-visible{outline:2px solid #5ab8ff;outline-offset:2px}
 /* exact search match on any list page (rows) or card list (contacts) */
-/* exact search match: the same slow-moving rainbow as the search bar, as a thin edge
+/* exact search match: the same slow-moving rainbow as the search bar,as a thin edge
    (rows: a line above and below, continuous across the cells; results and cards: a rounded edge) */
 :root{--rgb:linear-gradient(90deg,#ff6ec4,#ff9a8a,#ffc46b,#e9ef72,#9cf59a,#6be6d8,#5ab8ff,#7c87ff,#b67cf0,#ff6ec4)}
 tr.xhit{background-image:var(--rgb),var(--rgb)!important;background-size:200% 2px,200% 2px!important;background-position:0 0,0 100%;background-repeat:no-repeat!important;animation:rgbrow 4s linear infinite!important}
@@ -474,7 +471,7 @@ tr.xhit td:first-child{background:linear-gradient(180deg,#ff6ec4,#ffc46b,#9cf59a
 body:not([data-theme=dark]) .xtag{filter:saturate(1.6) brightness(.8)}
 .srg.xm{background:var(--rgb);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:rgbflow 4s linear infinite}
 @media(prefers-reduced-motion:reduce){tr.xhit,tr.xhit td:first-child,.sri.sri-x,.clk-r.xhit:not(tr),.xtag,.srg.xm{animation:none!important}}
-/* My Holiday: a ring with the days left, the numbers listed beside it, then next / previous rows */
+/* My Holiday: a ring with the days left,the numbers listed beside it,then next / previous rows */
 .hol2{display:grid;grid-template-columns:auto 1fr;gap:1.4rem;align-items:center;margin:.4rem 0 .9rem}
 .hring{position:relative;width:8.2rem;height:8.2rem}
 .hring svg{width:100%;height:100%;transform:rotate(-90deg)}
@@ -489,15 +486,8 @@ body[data-theme=dark] .hring b,body[data-theme=dark] .hring small{color:#7fb6ff}
 .hlist>div:last-child{border-bottom:0}
 .hlist dt{color:var(--muted);font-size:.86rem}
 .hlist dd{margin:0;font:600 1.05rem var(--head);color:var(--ink)}.hlist dd.pd{color:#c98a00}
-.hrows{border-top:1px solid var(--line);padding-top:.5rem}
-.hrow{display:flex;align-items:flex-start;gap:.8rem;padding:.4rem 0;font-size:.88rem}
-.hrow .hk{flex:0 0 4.6rem;color:var(--muted);font-size:.8rem;padding-top:.1rem}
-.hrow>span:nth-child(2){flex:1;min-width:0}
-.hrow .mini{flex:0 0 auto}
-.hprevl{display:flex;flex-direction:column;gap:.25rem}
-.hsvc{margin:.5rem 0 0;padding-top:.5rem;border-top:1px solid var(--line);font-size:.78rem;color:var(--muted)}
-@media(max-width:480px){.hol2{grid-template-columns:1fr;justify-items:center}.hlist{width:100%}.hrow{flex-wrap:wrap}}
-/* service-call map: Norfolk outline with a pin per town, and the town's calls beside it */
+@media(max-width:480px){.hol2{grid-template-columns:1fr;justify-items:center}.hlist{width:100%}}
+/* service-call map: Norfolk outline with a pin per town,and the town's calls beside it */
 .smap{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(16rem,1fr);gap:1rem;align-items:start}
 .smap-m svg{display:block;width:100%;height:auto}
 .smap .land{fill:rgba(3,78,162,.07);stroke:#2b6cb0;stroke-width:2.5;stroke-linejoin:round}
@@ -519,23 +509,16 @@ body[data-theme=dark] .smap .land{fill:rgba(120,170,255,.08);stroke:#6ea3e8}
 .smap-t:hover{background:var(--blue-bg)}.smap-t .dot{margin-right:.5rem}
 .smap-off{margin-top:.8rem;font-size:.85rem}.smap-off summary{cursor:pointer;color:var(--muted)}
 @media(max-width:900px){.smap{grid-template-columns:1fr}}
-/* Panel Optimiser: totals across the top, lists on the left, the plan on the right (both start level).
-   Boards are a dark cutting mat with a fine grid, glossy pieces and a slow-moving RGB frame. */
-.cut-k{margin-bottom:1rem}.cut-og.cut-og4{grid-template-columns:1fr 1.6fr 1fr 1fr}.cut-job .ff input{font-size:.95rem}
+/* Panel Optimiser: totals across the top,lists on the left,the plan on the right (both start level).
+   Boards are a dark cutting mat with a fine grid,glossy pieces and a slow-moving RGB frame. */
+.cut-k{margin-bottom:1rem}.cut-job .ff input{font-size:.95rem}
 .cut-k .ksub{display:block;margin-top:.15rem;font-size:.72rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cut-meter{display:block;height:4px;margin-top:.45rem;border-radius:4px;background:var(--line);overflow:hidden}
 .cut-meter i{display:block;height:100%;border-radius:4px;background:var(--rgb-soft);background-size:300% 100%;animation:rgbflow 14s linear infinite}
-.cut-lists{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:0 2rem;align-items:start}.cut-lists>section+section{border-left:1px solid var(--line);padding-left:2rem}
 .cut-in{display:grid;gap:1rem;margin-bottom:1rem}.cut-out{display:grid;gap:1rem}
 .cut-in .panel h2,.cut-bp h2{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:.3rem .8rem}
 .cut-in .panel h2 small,.cut-bp h2 small{font-weight:400;font-size:.76rem}
-.cut-t table{width:100%;border-collapse:separate;border-spacing:0 .35rem;table-layout:fixed}
-.cut-t th{padding:0 .3rem .1rem;font:600 .72rem var(--body);color:var(--muted);text-align:left;letter-spacing:.02em}
-.cut-t th.n{text-align:right}
-.cut-t td{padding:0 .3rem}
-.cut-t col.c-label{width:auto}.cut-t col.c-L,.cut-t col.c-W{width:5.6rem}.cut-t col.c-qty{width:4.6rem}.cut-t col.c-turn{width:7.2rem}.cut-t col.c-x{width:2.2rem}
 .cut-t input,.cut-t select,.cut-og input{width:100%;height:2.3rem;padding:0 .6rem;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);font:inherit;font-size:.9rem}
-.cut-t td.n input{text-align:right;font-variant-numeric:tabular-nums}
 .cut-t input:focus,.cut-t select:focus,.cut-og input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(43,143,224,.18)}
 .cut-x{width:2rem;height:2rem;border:0;border-radius:8px;background:none;color:var(--muted);font-size:1.2rem;line-height:1;cursor:pointer}
 .cut-x:hover{background:var(--red-bg);color:var(--red)}
@@ -553,21 +536,20 @@ body[data-theme=dark] .smap .land{fill:rgba(120,170,255,.08);stroke:#6ea3e8}
 .cut-b text.sz{font-weight:500;fill:rgba(255,255,255,.88)}
 .note.bad{padding:.7rem .9rem;border-radius:10px;background:var(--red-bg);color:var(--red);font-size:.88rem}
 @media(prefers-reduced-motion:reduce){.cut-frame,.cut-meter i{animation:none}}
-@media(max-width:1100px){.cut-lists{grid-template-columns:1fr;gap:1.4rem}.cut-lists>section+section{border-left:0;padding-left:0;border-top:1px solid var(--line);padding-top:1.2rem}.cut-og.cut-og4{grid-template-columns:1fr 1fr}}
-@media(max-width:560px){.cut-k{grid-template-columns:1fr 1fr}.cut-og{grid-template-columns:1fr}.cut-t col.c-L,.cut-t col.c-W{width:4.6rem}.cut-t col.c-turn{width:5.6rem}}
+@media(max-width:560px){.cut-k{grid-template-columns:1fr 1fr}.cut-og{grid-template-columns:1fr}}
 
 :root{--rgb-soft:linear-gradient(90deg,rgba(255,110,196,.5),rgba(255,196,107,.45),rgba(156,245,154,.45),rgba(90,184,255,.5),rgba(182,124,240,.5),rgba(255,110,196,.5))}
 .cut-bp .cut-b{max-height:62vh}
 .cut-bp .cut-frame{max-width:1000px;margin:0 auto}.cut-bp .cut-b{max-height:none}
-/* scan icon inside a box, like the search bar */
+/* scan icon inside a box,like the search bar */
 .fscan{position:relative}
 .fscan>input{width:100%;padding-right:2.9rem!important}
 .fscan-b{position:absolute;top:50%;right:.35rem;transform:translateY(-50%);display:grid;place-items:center;width:2.1rem;height:2.1rem;border:0;border-radius:8px;background:#ffd002;color:#012b59;cursor:pointer;transition:filter .15s}
 .fscan-b:hover{filter:brightness(1.06)}.fscan-b:focus-visible{outline:2px solid #5ab8ff;outline-offset:1px}
 .fscan-b svg{width:1.15rem;height:1.15rem}
 #cutToC[hidden]{display:none!important}
-/* list tables: the same, predictable column widths on every account. Fixed columns (numbers, dates,
-   short codes, buttons) keep their width; the name / address columns share whatever is left, so a
+/* list tables: the same,predictable column widths on every account. Fixed columns (numbers, dates,
+   short codes, buttons) keep their width; the name / address columns share whatever is left,so a
    table with fewer columns (a standard account) still fills the width evenly. */
 @media(min-width:900px){
   .ptb.fx{table-layout:fixed;width:100%}
@@ -582,11 +564,6 @@ body[data-theme=dark] .smap .land{fill:rgba(120,170,255,.08);stroke:#6ea3e8}
   .ptb.fx.t-svc th[data-col=id]{width:7rem}.ptb.fx.t-svc th[data-col=pr]{width:6.5rem}.ptb.fx.t-svc th[data-col=st]{width:7rem}.ptb.fx.t-svc th[data-col=visit]{width:6.5rem}
   .ptb.fx.t-svc th[data-col=fitter]{width:7.5rem}.ptb.fx.t-svc th[data-col=act]{width:9.6rem}.ptb.fx.t-svc th[data-col=name]{width:15.5rem}
 }
-/* the optimiser's table headings sit on the glass, not a grey bar */
-.cut-t thead tr,.cut-t th{background:transparent!important;border:0;position:static;backdrop-filter:none}
-.cut-t th{border-bottom:1px solid var(--line)!important;padding-bottom:.4rem!important}
-.cut-lists .cut-in .panel h2,.cut-lists h2{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:.3rem .8rem}
-.cut-lists h2 small{font-weight:400;font-size:.76rem}
 @media(min-width:900px){.ptb.fx.t-inv td.ac .acts{justify-content:flex-end}}
 
 /* first-ever tour: a thin bar fills before Next unlocks */
@@ -596,10 +573,10 @@ body[data-theme=dark] .smap .land{fill:rgba(120,170,255,.08);stroke:#6ea3e8}
 #tour .tbtn .btn[disabled]{opacity:.45;cursor:not-allowed}
 @keyframes ttFill{from{transform:scaleX(0)}to{transform:scaleX(1)}}
 #tour .tbtn .btn:focus-visible{outline:2px solid rgba(78,163,255,.55);outline-offset:2px;box-shadow:none}
-/* tour spotlight: soft blue ring, not yellow */
+/* tour spotlight: soft blue ring,not yellow */
 #tour .tspot:not(.none){box-shadow:0 0 0 200vmax rgba(1,18,40,.62),0 0 0 2px rgba(90,184,255,.85),0 0 18px 2px rgba(90,184,255,.35)}
 
-/* messages: a neat card at the bottom of the screen, clear of what you are working on */
+/* messages: a neat card at the bottom of the screen,clear of what you are working on */
 .toast.tpop{left:50%;top:auto;bottom:calc(1.5rem + var(--safe-b,0px));transform:translateX(-50%);z-index:4000;flex-direction:row;align-items:center;gap:.7rem;min-width:0;max-width:min(34rem,calc(100vw - 2rem));padding:.6rem 1.1rem .6rem .65rem;border:1px solid var(--line);border-left:1px solid var(--line);border-radius:14px;background:var(--pop,var(--card));color:var(--ink);font:600 .88rem/1.35 var(--body);text-align:left;box-shadow:0 14px 38px rgba(1,30,70,.28);pointer-events:auto;cursor:pointer;animation:none}
 .toast.tpop.in{animation:tpIn .2s cubic-bezier(.2,.9,.3,1.15) both}
 .toast.tpop.out{animation:tpOut .16s ease-in both}
@@ -617,24 +594,24 @@ body[data-theme=dark] .toast.tpop.bad .tp-i *{stroke:#ffc35c}
 @keyframes tpIn{from{opacity:0;transform:translate(-50%,14px)}to{opacity:1;transform:translate(-50%,0)}}
 @keyframes tpOut{to{opacity:0;transform:translate(-50%,8px)}}
 
-/* messages: the report button sits at the bottom of the chat list, centred, instead of over the send box */
+/* messages: the report button sits at the bottom of the chat list,centred,instead of over the send box */
 .msn-l .msn-list{flex:1;min-height:0}
 .msn-rp{display:flex;justify-content:center;padding:.7rem .8rem .9rem;border-top:1px solid var(--line)}
 .msn-rp .btn{gap:.4rem;color:var(--muted)}.msn-rp .btn:hover{color:var(--red);border-color:var(--red)}
 .msn-rp svg{width:.95rem;height:.95rem;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 body[data-view=messages]:not(:has(#modal.open)) #rpb{display:none}
-/* empty panels: picture centred in the space, words under it with room below */
+/* empty panels: picture centred in the space,words under it with room below */
 .panel:has(>.emp){display:flex;flex-direction:column}
 .panel>.emp{flex:1;justify-content:center;min-height:9rem;padding:1.2rem .5rem 1.5rem;gap:.7rem}
 /* a fitting opened from the calendar by an account without contracts */
 .cal-job{display:grid;grid-template-columns:7.5rem 1fr;gap:.55rem 1rem;margin:.6rem 0 1rem}.cal-job dt{color:var(--muted);font-size:.82rem}.cal-job dd{margin:0;font-weight:600}
 .ce.fit.oth{opacity:.75}
-/* holiday widget: ring and numbers, then three equal buttons that open pop-ups */
+/* holiday widget: ring and numbers,then three equal buttons that open pop-ups */
 .hbtns{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin-top:1rem}
 .hbtns .btn{justify-content:center;gap:.35rem}.hbtns .btn small{opacity:.7;font-weight:500}
 .hol-seg{display:inline-flex;margin:.2rem 0 .9rem}.hol-svc{margin:-.3rem 0 .6rem;font-size:.82rem}
 
-/* contact lines: what the line is for, its number and its email, side by side */
+/* contact lines: what the line is for,its number and its email,side by side */
 .cphr{grid-template-columns:minmax(7.5rem,9.5rem) minmax(0,1fr) minmax(0,1.3fr) 2.4rem}
 .cphh{display:grid;grid-template-columns:minmax(7.5rem,9.5rem) minmax(0,1fr) minmax(0,1.3fr) 2.4rem;gap:.5rem;margin:0 0 .3rem;font-size:.74rem;font-weight:600;color:var(--muted)}
 @media(max-width:600px){.cphr{grid-template-columns:1fr 1fr 2.4rem}.cphr select{grid-column:1/-1}.cphh{display:none}}
@@ -642,31 +619,18 @@ body[data-view=messages]:not(:has(#modal.open)) #rpb{display:none}
 .cc2-b .cpr .cpl{justify-content:center;margin-top:.05rem}
 .cc2-b .cpv{display:flex;flex-direction:column;gap:.3rem;min-width:0}
 
-/* Panel Optimiser: the job in its own card, cutting settings beside it; boards and pieces as two equal halves
-   with the size columns centred under their headings */
-.cut-top{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:1rem;margin:0}
-.cut-top>.panel{margin:0}
-.cut-og.cut-og2{grid-template-columns:1fr 1fr}
-.cut-job .cut-og2{grid-template-columns:minmax(0,1fr) minmax(0,2fr)}
-.cut-lists{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0 2.2rem}
-.cut-lists>section+section{padding-left:2.2rem}
-.cut-t th.n,.cut-t td.n input,.cut-t th.c-turn,.cut-t td select{text-align:center;text-align-last:center}
-.cut-t th{text-align:left}
-.cut-t th.n{text-align:center!important}
+/* Panel Optimiser: the job in its own card{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:1rem;margin:0}
 .cut-add{display:flex;flex-wrap:wrap;gap:.45rem;margin-top:.6rem}
-@media(max-width:1100px){.cut-top{grid-template-columns:1fr}.cut-lists>section+section{padding-left:0}}
-.cut-t td:not(:first-child) input{text-align:center!important}
-.cut-in>.cut-lists{margin:0}
 .cut-in{margin-bottom:1rem!important}
 
-/* search: a straight answer at the top, and a label found on a page lit up when you get there */
+/* search: a straight answer at the top,and a label found on a page lit up when you get there */
 .srg.ans{color:var(--blue)}
 .sri.sri-a{background:linear-gradient(90deg,rgba(43,143,224,.12),transparent 70%);border-radius:10px}
 .sri.sri-a b{font-size:1.02rem}
 .sx-hit{animation:sxHit 2.4s ease-out}
 @keyframes sxHit{0%,35%{box-shadow:0 0 0 3px rgba(90,184,255,.85),0 0 22px rgba(90,184,255,.45)}100%{box-shadow:0 0 0 0 rgba(90,184,255,0)}}
 
-/* Document Builder: documents down the left, their parts as switches on the right */
+/* Document Builder: documents down the left,their parts as switches on the right */
 .db-intro{margin:-.2rem 0 1rem;font-size:.88rem}
 .db{display:grid;grid-template-columns:15rem minmax(0,1fr);gap:1.2rem;min-height:22rem}
 .db-l{display:flex;flex-direction:column;gap:.15rem;padding-right:1rem;border-right:1px solid var(--line);max-height:60vh;overflow:auto}
@@ -684,7 +648,7 @@ body[data-view=messages]:not(:has(#modal.open)) #rpb{display:none}
 body[data-theme=dark] .db-r h3{color:#e8eef8}
 @media(max-width:760px){.db{grid-template-columns:1fr}.db-l{border-right:0;border-bottom:1px solid var(--line);padding:0 0 .8rem;max-height:none}.db-sws{grid-template-columns:1fr}}
 
-/* Cutting Optimiser: profiles as cards, cuts as soft rows, each bar drawn as it comes off the saw */
+/* Cutting Optimiser: profiles as cards,cuts as soft rows,each bar drawn as it comes off the saw */
 .bar-p{display:flex;flex-direction:column;gap:.7rem}
 .bar-ph{display:flex;flex-wrap:wrap;align-items:flex-end;gap:.7rem}
 .bar-pn{align-self:center;font:600 1rem var(--head);color:var(--navy);margin-right:.3rem}
@@ -765,7 +729,7 @@ body:not([data-theme=dark]) .bar-s .bo{fill:#f6f8fb;stroke:#9aa7b8}
 .dp-f{display:flex;justify-content:space-between;margin-top:.55rem;padding-top:.5rem;border-top:1px solid var(--line)}
 .dp-f button{border:0;background:none;color:var(--blue);font:600 .8rem var(--body);cursor:pointer;padding:.2rem .3rem;border-radius:6px}
 .dp-f button:hover{background:var(--blue-bg)}
-/* date boxes: our own calendar mark, and the browser's hidden (it still takes the click) */
+/* date boxes: our own calendar mark,and the browser's hidden (it still takes the click) */
 @media(pointer:fine){
   input[type=date]{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235a9be8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='5' width='18' height='16' rx='3'/%3E%3Cpath d='M3 10h18M8 3v4M16 3v4'/%3E%3C/svg%3E")!important;background-repeat:no-repeat!important;background-position:right .7rem center!important;background-size:1.05rem!important;cursor:pointer}
   input[type=date]::-webkit-calendar-picker-indicator{opacity:0;cursor:pointer}
@@ -777,7 +741,7 @@ body:not([data-theme=dark]) .bar-s .bo{fill:#f6f8fb;stroke:#9aa7b8}
 .wz-b:has(.phg){min-height:0}
 .wz-b:has(.phg) .prow{margin-bottom:.4rem}
 
-/* service call list: every row the same height, columns the same width on every row, buttons at the right */
+/* service call list: every row the same height,columns the same width on every row,buttons at the right */
 .t-svc td{padding-top:.42rem!important;padding-bottom:.42rem!important}
 .t-svc .svn{display:flex;align-items:center;gap:.5rem;min-width:0}
 .t-svc .svn b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
@@ -787,7 +751,7 @@ body:not([data-theme=dark]) .bar-s .bo{fill:#f6f8fb;stroke:#9aa7b8}
 .t-svc td.ac .acts{justify-content:flex-end;flex-wrap:nowrap}
 .t-svc th[data-col=pr],.t-svc th[data-col=st]{text-align:left}
 
-/* service map, polished: sea, land with a soft edge, roads, rivers and broads, landmark towns, pins with a count */
+/* service map,polished: sea,land with a soft edge,roads,rivers and broads,landmark towns,pins with a count */
 .smap-m{padding:.7rem!important}
 .smap .seabg{fill:#d9e9f7}
 .smap .land{fill:#f4f7ee;stroke:none}
@@ -819,7 +783,7 @@ body[data-theme=dark] .smap .tl{fill:#f1f5fb;stroke:#17263c}
 body[data-theme=dark] .smap .scale path{stroke:#8fa3bd}body[data-theme=dark] .smap .scale text{fill:#8fa3bd}
 body.rm .pin.u .halo{animation:none}
 
-/* inventory list: buttons hard right on every row, and the filter at the far right of the heading row */
+/* inventory list: buttons hard right on every row,and the filter at the far right of the heading row */
 .t-inv td.ac .acts{justify-content:flex-start!important;flex-wrap:nowrap}
 .t-inv td.ac .acts .tag.fw+.mini{margin-left:auto}
 .t-inv th[data-col=act]{text-align:left}
@@ -841,7 +805,7 @@ body[data-theme=dark] .ie-f legend{color:#e8eef8}
 .cut-card h2{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:.3rem .8rem}
 .cut-card h2 small{font-weight:400;font-size:.76rem}
 @media(max-width:560px){.cut-og.cut-eq{grid-template-columns:1fr}}
-/* number boxes in the optimisers: no spinner arrows, so the figure sits dead centre */
+/* number boxes in the optimisers: no spinner arrows,so the figure sits dead centre */
 .cut-r input[type=number],.bar-r input[type=number],.bar-ph input[type=number]{-moz-appearance:textfield;appearance:textfield;text-align:center;padding:0 .3rem}
 .cut-r input[type=number]::-webkit-inner-spin-button,.cut-r input[type=number]::-webkit-outer-spin-button,.bar-r input[type=number]::-webkit-inner-spin-button,.bar-r input[type=number]::-webkit-outer-spin-button,.bar-ph input[type=number]::-webkit-inner-spin-button,.bar-ph input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
 .bar-r input::-webkit-calendar-picker-indicator{display:none!important}
@@ -850,3 +814,17 @@ body[data-theme=dark] .ie-f legend{color:#e8eef8}
 #barBookB[hidden]{display:none!important}
 .bar-link td.od{color:var(--red);font-weight:700}
 .bar-link small.sub{display:block;color:var(--muted);font-size:.74rem}
+/* optimiser rows on a phone: the name on its own line with the remove button, the sizes in a row underneath */
+@media(max-width:700px){
+  .cut-r,.bar-r{grid-template-columns:repeat(6,minmax(0,1fr));align-items:end;gap:.5rem}
+  .cut-r .cut-dot,.bar-r .cut-dot{display:none}
+  .cut-r .cut-f-label,.bar-r .bar-room{grid-column:1/6;grid-row:1}
+  .cut-r .cut-x,.bar-r .cut-x{grid-column:6;grid-row:1;justify-self:end;margin-top:1rem}
+  .cut-r .cut-f-L,.cut-r .cut-f-W,.cut-r .cut-f-qty,.bar-r .bar-ref,.bar-r .bar-n,.bar-r .bar-q{grid-column:span 2}
+  .cut-r .cut-f-turn{grid-column:1/-1}
+  .bar-r .bar-a{grid-column:span 3}
+  .bar-ph{display:grid;grid-template-columns:1fr 1fr;align-items:end}
+  .bar-ph .bar-pn,.bar-ph .bar-desc{grid-column:1/-1}
+  .bar-ph .bar-code,.bar-ph .bar-n{width:auto}
+  .bar-row{grid-template-columns:1.4rem 1.8rem minmax(0,1fr)}
+}
