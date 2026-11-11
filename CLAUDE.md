@@ -21,6 +21,11 @@ Rules for code in `src/`:
 - Check permissions with `can()` (or `need()` to also show a message) inside every action, not only when hiding buttons.
 - No personal data in the repo: sample names only.
 
+## Before going live
+
+- Turn the tours back on: set `TOURS_AUTO = true` in `src/features/tour/tour.js`. The welcome tour (first ever visit) and each tab's first-visit tour are built and tested but switched off while the site is being designed; the ? button still plays them.
+- Turn off "Show the welcome tour every time" in Admin Console, Testing Tools, and change any account PINs still set to 1234.
+
 ## Agent skills
 
 ### Issue tracker

@@ -110,8 +110,19 @@ const splashUp = () => {
   return !!sp && getComputedStyle(sp).visibility != 'hidden' && getComputedStyle(sp).display != 'none';
 };
 /** the first visit to a tab: play its tour once (after the welcome tour, and not over a window or notice) */
+/* ======== BEFORE GOING LIVE: set TOURS_AUTO to true. ========
+   The welcome tour and every tab's first-visit tour are built and tested, but switched off while the
+   site is still being designed, so they do not keep popping up. The ? button still plays them.
+   (Tests turn them on for themselves with localStorage 'bb_tours_force'.) */
+export const TOURS_AUTO = false;
+const toursAuto = () => {
+  try {
+    if (localStorage.getItem('bb_tours_force') == '1') return true;
+  } catch (e) {}
+  return TOURS_AUTO;
+};
 export function tabTour(v, tries = 0) {
-  if (!TAB_TOURS[v] || document.body.classList.contains('gated')) return;
+  if (!toursAuto() || !TAB_TOURS[v] || document.body.classList.contains('gated')) return;
   if (!welcomeSeen() && !tourTest()) return;
   const s = seenTabs();
   if (s == '*' || s.includes(v)) return;
@@ -264,7 +275,7 @@ export function tourBoot() {
   try {
     seen = localStorage.getItem('bb_tour_seen') == '1';
   } catch (e) {}
-  if (tourTest() || !seen) setTimeout(() => startTour(true), 2800);
+  if (toursAuto() && (tourTest() || !seen)) setTimeout(() => startTour(true), 2800);
 }
 /* start-up step (run once by main.js) */
 export function listenForTourKeys() {

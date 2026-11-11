@@ -25,6 +25,7 @@ const test = base.extend({
     await page.addInitScript(() => {
       try {
         localStorage.setItem('bb_tour_seen', '1');
+        localStorage.setItem('bb_tours_force', '1'); // tours are switched off until go-live; the tests still cover them
         if (!localStorage.getItem('bb_tours_seen')) localStorage.setItem('bb_tours_seen', '*'); // each tab's first-visit tour has its own test
         localStorage.setItem('bb_preview_seen', '1'); // the Work In Progress notice has its own test
       } catch (e) {}

@@ -97,3 +97,18 @@ test('every page lines up with the top bar, left and right', async ({ app }) => 
   });
   expect(off).toEqual([]);
 });
+
+test('tours are switched off until go-live: no tab tour starts by itself, the ? button still plays one', async ({ app }) => {
+  await app.role('beta');
+  await app.page.evaluate(() => {
+    localStorage.removeItem('bb_tours_force');
+    localStorage.setItem('bb_tours_seen', '');
+  });
+  expect(await app.run(() => TOURS_AUTO)).toBe(false);
+  await app.go('stock');
+  await app.page.waitForTimeout(1200);
+  await expect(app.page.locator('#tour.open')).toHaveCount(0);
+  await app.page.click('#helpBtn');
+  await expect(app.page.locator('#tour .tcard')).toContainText('Find Stock');
+  expect(app.errors).toEqual([]);
+});
