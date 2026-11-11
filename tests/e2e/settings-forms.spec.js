@@ -193,3 +193,33 @@ test('contact lines pair a label with a phone and an email; old main and account
   );
   expect(app.errors).toEqual([]);
 });
+
+test('Document Builder: switch parts of a printed document off and the next print leaves them out', async ({ app }) => {
+  await app.role('beta');
+  await app.go('cutting');
+  // print once, so the builder knows this document's tables
+  let [w] = await Promise.all([app.nextPopup(), app.page.click('#main >> text=Print Plan')]);
+  await w.waitForLoadState();
+  await expect(w.locator('h3', { hasText: 'Cut List' })).toHaveCount(1);
+  await expect(w.locator('.figs')).toHaveCount(1);
+  await w.close();
+  await app.go('settings');
+  await app.page.click('#main .set-c:has-text("Printed Documents") >> text=Customise');
+  await app.page.click('#mbox .db-d:has-text("Cutting Plan")');
+  await app.page.locator('#mbox .db-sw', { hasText: 'Key figures panel' }).locator('input').uncheck();
+  await app.page.locator('#mbox .db-sw', { hasText: 'Cut List' }).locator('input').uncheck();
+  await expect(app.page.locator('#mbox .db-d.on')).toContainText('2 off');
+  await app.call('closeModal');
+  await app.go('cutting');
+  [w] = await Promise.all([app.nextPopup(), app.page.click('#main >> text=Print Plan')]);
+  await w.waitForLoadState();
+  await expect(w.locator('h3', { hasText: 'Cut List' })).toHaveCount(0);
+  await expect(w.locator('.figs')).toHaveCount(0);
+  await expect(w.locator('.cut-b').first()).toBeVisible();
+  await w.close();
+  // labels: the barcode can be left off
+  await app.run(() => docToggle('Stock labels', 'barcode', false));
+  expect(await app.run(() => state.docOpts['Stock labels'])).toEqual({ barcode: false });
+  expect(await app.run(() => state.audit.some((a) => a.a == 'Document changed'))).toBe(true);
+  expect(app.errors).toEqual([]);
+});

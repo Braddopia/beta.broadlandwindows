@@ -87,6 +87,7 @@ import * as featuresSearchQuestions from './features/search/questions.js';
 import * as featuresSearchSearch from './features/search/search.js';
 import * as featuresServiceService from './features/service/service.js';
 import * as featuresSettingsSettings from './features/settings/settings.js';
+import * as featuresSettingsDocBuilder from './features/settings/doc-builder.js';
 import * as featuresSignInSignIn from './features/sign-in/sign-in.js';
 import * as featuresStaffStaff from './features/staff/staff.js';
 import * as featuresStockItemWindow from './features/stock/item-window.js';
@@ -208,6 +209,7 @@ const modules = {
   featuresSearchSearch,
   featuresServiceService,
   featuresSettingsSettings,
+  featuresSettingsDocBuilder,
   featuresSignInSignIn,
   featuresStaffStaff,
   featuresStockItemWindow,

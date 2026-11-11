@@ -1,4 +1,5 @@
 /* print/print: The printed document engine: letterhead, tables, photos and print windows. */
+import { docOn, docSaw } from './doc-options.js';
 import { company } from '../data/company.js';
 import { actRun, onClick } from '../core/actions.js';
 import { LOGO_SRC } from '../core/assets.js';
@@ -170,6 +171,25 @@ export function printDoc(t, sub, rows, ph, o) {
     phLoad(PR).then(() => printDoc(t, sub, rows, ph, { ...o, __w: w0 }));
     return;
   }
+  /* the parts switched off for this kind of document in Settings, Document Builder */
+  const DK = o.doc || o.kind || '',
+    on = (part) => docOn(DK, part);
+  docSaw(DK, [...(o.tables || []), ...(o.sections || [])].map((x) => x.t).filter(Boolean));
+  o = {
+    ...o,
+    tables: (o.tables || []).filter((x) => on('t:' + x.t)),
+    sections: (o.sections || []).filter((x) => on('t:' + x.t)),
+    kpis: on('kpis') ? o.kpis : null,
+    money: on('money') ? o.money : null,
+    steps: on('steps') ? o.steps : null,
+    groups: on('details') ? o.groups : [],
+    pre: on('extra') ? o.pre : '',
+    post: on('extra') ? o.post : '',
+    sign: on('sign') && o.sign,
+    barcode: on('barcode') && o.barcode,
+  };
+  if (!on('details')) rows = [];
+  if (!on('photos')) ph = [];
   rows = (rows || []).filter((r) => r && !blankV(r[1]));
   ph = (ph || []).map((p) => SAFE.img(p)).filter((p) => p && p !== PH_BLANK);
   const cus = !!o.customer;
@@ -227,22 +247,36 @@ export function printDoc(t, sub, rows, ph, o) {
   const body = `${steps(o.steps)}${gps}${det}${o.pre || ''}${(o.tables || []).map(tb).join('')}${secs}${o.post || ''}${ph.length ? `<h3>Photos</h3><div class="ph">${ph.map((p, i) => `<figure><img src="${p}"><figcaption>Photo ${i + 1}</figcaption></figure>`).join('')}</div>` : ''}`;
   const tp = state.brand.tp,
     g = state.brand.g;
+  /* the customer layout's closing line and review scores, each only if switched on */
+  const thanksH = on('thanks')
+      ? `<p><b>Thank you for choosing Broadland Windows.</b> ${esc(o.thanks || 'If you have any questions about this document, our team is always happy to help.')}${o.customer && o.customer.contact ? ` Your contact here is ${esc(o.customer.contact)}.` : ''}</p>`
+      : '<p></p>',
+    reviewsH = on('reviews')
+      ? `<div class="rv"><small>Rated by our customers</small><div class="rvb">${[['Google', g.score, 5], ['Trustpilot', tp.score, 5], ...(state.brand.tt ? [['Trusted Trader', state.brand.tt.score, 5]] : []), ...(state.brand.rl ? [['ReferenceLine', state.brand.rl.score, 10]] : [])].map(([n, s, o]) => `<span><b>${(+s || 0).toFixed(1)}<i>/${o}</i></b><em>${esc(n)}</em></span>`).join('')}</div></div>`
+      : '',
+    endH = on('thanks') || on('reviews') ? `<div class="end">${thanksH}${reviewsH}</div>` : '',
+    metaC = on('meta')
+      ? `<dl class="meta"><div><dt>Prepared for</dt><dd><b>${esc((o.customer && o.customer.name) || 'Customer')}</b>${o.customer && o.customer.address ? `<br><span>${esc(o.customer.address)}</span>` : ''}</dd></div><div><dt>Date</dt><dd>${date}</dd></div><div><dt>Reference</dt><dd>${esc(ref)}</dd></div></dl>`
+      : '',
+    metaI = on('meta')
+      ? `<div class="mt"><div><b>Reference</b>${esc(ref)}</div><div><b>Date</b>${date}</div><div><b>Prepared by</b>${esc(USER)}</div></div>`
+      : '';
   const page = cus
-    ? `<header class="lh"><img src="${LOGO_SRC.full}" alt="Broadland Windows"><div class="co">${esc(company.tel)}<br>${esc(company.em)}<br>${esc(company.web)}</div></header>
+    ? `<header class="lh">${on('logo') ? `<img src="${LOGO_SRC.full}" alt="Broadland Windows">` : '<span></span>'}<div class="co">${esc(company.tel)}<br>${esc(company.em)}<br>${esc(company.web)}</div></header>
       <section class="tt">${o.kind && o.kind.toLowerCase() != t.toLowerCase() ? `<div class="ov">${esc(o.kind)}</div>` : ''}<h1>${esc(t)}</h1>${sub ? `<p class="sb">${esc(sub)}</p>` : ''}
-        <dl class="meta"><div><dt>Prepared for</dt><dd><b>${esc(o.customer.name || 'Customer')}</b>${o.customer.address ? `<br><span>${esc(o.customer.address)}</span>` : ''}</dd></div><div><dt>Date</dt><dd>${date}</dd></div><div><dt>Reference</dt><dd>${esc(ref)}</dd></div></dl></section>
+        ${metaC}</section>
       <div class="c">${panel(o.kpis, o.money)}${body}${o.sign ? '<div class="sg"><div>Customer signature and date</div><div>For Broadland Windows</div></div>' : ''}
-      <div class="end"><p><b>Thank you for choosing Broadland Windows.</b> ${esc(o.thanks || 'If you have any questions about this document, our team is always happy to help.')}${o.customer.contact ? ` Your contact here is ${esc(o.customer.contact)}.` : ''}</p><div class="rv"><small>Rated by our customers</small><div class="rvb">${[['Google', g.score, 5], ['Trustpilot', tp.score, 5], ...(state.brand.tt ? [['Trusted Trader', state.brand.tt.score, 5]] : []), ...(state.brand.rl ? [['ReferenceLine', state.brand.rl.score, 10]] : [])].map(([n, s, o]) => `<span><b>${(+s || 0).toFixed(1)}<i>/${o}</i></b><em>${esc(n)}</em></span>`).join('')}</div></div></div></div>`
-    : `<header class="ih"><div class="r1"><img src="${LOGO_SRC.white}" alt="Broadland"><span>Internal · not for customers</span></div>
+      ${endH}</div>`
+    : `<header class="ih"><div class="r1">${on('logo') ? `<img src="${LOGO_SRC.white}" alt="Broadland">` : '<span></span>'}${on('tag') ? '<span>Internal · not for customers</span>' : ''}</div>
       ${o.kind && o.kind.toLowerCase() != t.toLowerCase() ? `<div class="ov">${esc(o.kind)}</div>` : '<div style="height:5mm"></div>'}<h1>${esc(t)}</h1>${sub ? `<p class="sb">${esc(sub)}</p>` : ''}
-      <div class="mt"><div><b>Reference</b>${esc(ref)}</div><div><b>Date</b>${date}</div><div><b>Prepared by</b>${esc(USER)}</div></div></header>
+      ${metaI}</header>
       ${(o.kpis && o.kpis.length) || o.money ? `<div class="lift">${panel(o.kpis, o.money)}</div>` : '<div style="height:2mm"></div>'}
       <div class="c">${body}${o.sign ? '<div class="sg"><div>Prepared by</div><div>Checked by</div><div>Date</div></div>' : ''}${o.barcode ? `<div class="bcode"><div><b>${esc(String(o.barcode).toUpperCase())}</b>Scan to open in the CRM</div>${c39(o.barcode, 40)}</div>` : ''}</div>`;
   const foot = cus
     ? `<span>${esc(company.name)} · ${esc(company.addr)}${company.vatNo ? ' · VAT ' + esc(company.vatNo) : ''}${company.fensa ? ' · FENSA ' + esc(company.fensa) : ''}</span><span>${esc(ref)}</span>`
     : `<span>Broadland Windows · Internal use only</span><span>Printed ${now.toLocaleString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>`;
   const doc = `<!doctype html><html><head><meta charset="utf-8"><title>${esc(t)}</title><style>${PRINT_BASE}${cus ? PRINT_CUS : PRINT_INT}</style></head><body>
-  ${o.asHtml ? '' : '<div class="tb"><button data-pa="print">Print or save as PDF</button><button data-pa="close">Close</button></div>'}<div class="pg">${page}</div><footer class="ft">${foot}</footer></body></html>`;
+  ${o.asHtml ? '' : '<div class="tb"><button data-pa="print">Print or save as PDF</button><button data-pa="close">Close</button></div>'}<div class="pg">${page}</div>${on('footer') ? `<footer class="ft">${foot}</footer>` : ''}</body></html>`;
   if (o.asHtml) return doc;
   w.document.write(doc);
   w.document.close();

@@ -126,3 +126,12 @@ later refinements (`05c`), responsive, looks.
 ## Decisions
 
 See [docs/adr](adr/).
+
+## Printed documents
+
+- `print/doc-options.js` lists every printed document (`DOCS`) and the parts each one has. Everything is
+  shown until it is switched off in Settings, Printed Documents (`features/settings/doc-builder.js`).
+- `printDoc` takes the document's key from `o.doc` or `o.kind` and leaves out what is switched off: logo,
+  reference and date, key figures, payment bar, timeline, details, each table or section by title, photos,
+  signatures, barcode, reviews, thank-you note and footer. The titles a document prints are remembered
+  (`state.docSeen`) so the builder can list them. Stock labels have their own parts.

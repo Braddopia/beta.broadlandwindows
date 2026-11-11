@@ -408,7 +408,7 @@ export function svcReport() {
     new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }),
     [],
     [],
-    { kind: 'Report', sections: [d] }
+    { kind: 'Report', doc: 'Service report', sections: [d] }
   );
 }
 

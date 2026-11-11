@@ -671,7 +671,7 @@ export function repPrint(all) {
     all ? 'Sales, contracts, service, stock' + (can('money') ? ' and finance' : '') : '',
     [],
     [],
-    { kind: all ? 'Management Report' : 'Report', sections: ds }
+    { kind: all ? 'Management Report' : 'Report', doc: 'Management Report', sections: ds }
   );
 }
 export function repCsv() {

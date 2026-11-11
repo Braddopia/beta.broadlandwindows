@@ -1,4 +1,5 @@
 /* features/settings/settings: The Settings page. */
+import { docCard } from './doc-builder.js';
 import { company } from '../../data/company.js';
 import { ROLES } from '../../config/roles.js';
 import { onClick, onEvent } from '../../core/actions.js';
@@ -104,6 +105,7 @@ export function vSettings() {
    <section class="panel set-c"><h2><span class="set-ic">${svg(ICONS.contracts)}</span><span>Numbering</span><button class="btn sm" data-act="numEdit">Change</button></h2>
     ${NUMS.map(([k, n]) => row(n, 'Next one will be <b class="nocap">' + esc(numNext(k)) + '</b>' + (state.num[k] ? ' (set by hand)' : ' (automatic)'), state.num[k] ? `<button class="btn ghost sm" ${onClick('numReset', k)}>Reset</button>` : '')).join('')}
    </section>
+   ${docCard()}
    <section class="panel set-c"><h2><span class="set-ic">${svg(ICONS.reports)}</span><span>Export Data</span></h2>
     ${[
       ['leads', 'Leads'],

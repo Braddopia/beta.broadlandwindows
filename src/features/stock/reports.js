@@ -1,4 +1,5 @@
 /* features/stock/reports: Stock reports and labels. */
+import { docOn } from '../../print/doc-options.js';
 import { onClick } from '../../core/actions.js';
 import { today } from '../../core/dates.js';
 import { $, esc } from '../../core/dom.js';
@@ -591,6 +592,19 @@ const EXTRA = {
     });
   },
 };
+/* one stock label, showing only the parts switched on in Settings, Document Builder */
+function labelH(r) {
+  const on = (p) => docOn('Stock labels', p),
+    spec = [r.length, colTxt(r), unitOf(r)].filter((x) => x && x != '-').join(', '),
+    foot = [
+      on('pid') ? 'ID ' + r.pid : '',
+      on('loc') ? (hasLoc(r) ? r.location : 'No location') : '',
+      on('supplier') ? r.supplier || '' : '',
+    ]
+      .filter(Boolean)
+      .join(' | ');
+  return `<div class="l"><div>${on('item') ? `<b>${esc(r.item)}</b><br>` : ''}${on('desc') && r.desc ? `<small>${esc(r.desc)}</small><br>` : ''}${on('spec') && spec ? `<small>${esc(spec)}</small>` : ''}</div>${on('barcode') || on('code') ? `<div style="text-align:center">${on('barcode') ? c39(r.item, 40) : ''}${on('code') ? `<div style="font:7pt monospace">${esc(r.item)}</div>` : ''}</div>` : ''}${foot ? `<small>${esc(foot)}</small>` : ''}</div>`;
+}
 export function invLabels() {
   const L = products().filter((r) => SEL.has(key(r)));
   if (!L.length) return;
@@ -600,7 +614,7 @@ export function invLabels() {
     return;
   }
   w.document.write(
-    `<!doctype html><html><head><meta charset="utf-8"><title>Labels</title><style>@page{size:A4;margin:8mm}body{margin:0;font-family:Arial,sans-serif}.tb{padding:8px;background:#012b59;text-align:center}.tb button{padding:8px 14px;border:0;border-radius:8px;background:#ffd002;color:#012b59;font-weight:700;cursor:pointer}.g{display:grid;grid-template-columns:repeat(3,1fr);gap:3mm;padding:3mm}.l{border:.3mm dashed #9aa6b8;padding:3mm;height:38mm;display:flex;flex-direction:column;justify-content:space-between;break-inside:avoid}.l b{font-size:11pt}.l small{font-size:7.5pt;color:#444}.l svg{max-width:100%;height:auto}@media print{.tb{display:none}.g{padding:0}}</style></head><body><div class="tb"><button data-pa="print">Print labels</button></div><div class="g">${L.map((r) => `<div class="l"><div><b>${esc(r.item)}</b><br><small>${esc([r.length, colTxt(r), unitOf(r)].filter((x) => x && x != '-').join(', '))}</small></div><div style="text-align:center">${c39(r.item, 40)}<div style="font:7pt monospace">${esc(r.item)}</div></div><small>ID ${esc(r.pid)} | ${esc(hasLoc(r) ? r.location : 'No location')}</small></div>`).join('')}</div></body></html>`
+    `<!doctype html><html><head><meta charset="utf-8"><title>Labels</title><style>@page{size:A4;margin:8mm}body{margin:0;font-family:Arial,sans-serif}.tb{padding:8px;background:#012b59;text-align:center}.tb button{padding:8px 14px;border:0;border-radius:8px;background:#ffd002;color:#012b59;font-weight:700;cursor:pointer}.g{display:grid;grid-template-columns:repeat(3,1fr);gap:3mm;padding:3mm}.l{border:.3mm dashed #9aa6b8;padding:3mm;height:38mm;display:flex;flex-direction:column;justify-content:space-between;break-inside:avoid}.l b{font-size:11pt}.l small{font-size:7.5pt;color:#444}.l svg{max-width:100%;height:auto}@media print{.tb{display:none}.g{padding:0}}</style></head><body><div class="tb"><button data-pa="print">Print labels</button></div><div class="g">${L.map((r) => labelH(r)).join('')}</div></body></html>`
   );
   w.document.close();
 }

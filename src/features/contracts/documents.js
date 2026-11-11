@@ -184,6 +184,7 @@ export function reportCust(kind, id) {
     [],
     {
       kind: kind == 'lead' ? 'Lead ' + r.id : 'Customer details',
+      doc: 'Customer details',
       ref: r.id,
       groups: custGroups(r),
       post:

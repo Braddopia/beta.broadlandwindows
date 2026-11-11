@@ -662,3 +662,21 @@ body[data-view=messages]:not(:has(#modal.open)) #rpb{display:none}
 .sri.sri-a b{font-size:1.02rem}
 .sx-hit{animation:sxHit 2.4s ease-out}
 @keyframes sxHit{0%,35%{box-shadow:0 0 0 3px rgba(90,184,255,.85),0 0 22px rgba(90,184,255,.45)}100%{box-shadow:0 0 0 0 rgba(90,184,255,0)}}
+
+/* Document Builder: documents down the left, their parts as switches on the right */
+.db-intro{margin:-.2rem 0 1rem;font-size:.88rem}
+.db{display:grid;grid-template-columns:15rem minmax(0,1fr);gap:1.2rem;min-height:22rem}
+.db-l{display:flex;flex-direction:column;gap:.15rem;padding-right:1rem;border-right:1px solid var(--line);max-height:60vh;overflow:auto}
+.db-g{margin:.8rem 0 .25rem;font-size:.68rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}.db-g:first-child{margin-top:0}
+.db-d{display:flex;justify-content:space-between;align-items:center;gap:.5rem;padding:.5rem .65rem;border:0;border-radius:9px;background:none;color:var(--ink);font:500 .88rem var(--body);text-align:left;cursor:pointer}
+.db-d:hover{background:var(--card2)}.db-d.on{background:var(--blue-bg);color:var(--blue);font-weight:600}
+.db-d i{font-style:normal;font-size:.7rem;padding:.05rem .4rem;border-radius:6px;background:rgba(217,119,6,.15);color:#b45309}
+.db-r h3{display:flex;align-items:baseline;gap:.6rem;margin:0 0 .8rem;font:600 1.1rem var(--head);color:var(--navy)}.db-r h3 small{font:500 .75rem var(--body);color:var(--muted)}
+.db-r h4{margin:1.2rem 0 .6rem;font-size:.8rem;color:var(--muted);font-weight:600}
+.db-sws{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.45rem .9rem}
+.db-sw{display:flex;align-items:center;gap:.6rem;padding:.55rem .7rem;border:1px solid var(--line);border-radius:10px;cursor:pointer;font-size:.88rem}
+.db-sw:has(input:not(:checked)){opacity:.6}
+.db-sw input{width:1.05rem;height:1.05rem;accent-color:var(--blue)}
+.db-none{font-size:.85rem}.db-f{margin-top:1.2rem}
+body[data-theme=dark] .db-r h3{color:#e8eef8}
+@media(max-width:760px){.db{grid-template-columns:1fr}.db-l{border-right:0;border-bottom:1px solid var(--line);padding:0 0 .8rem;max-height:none}.db-sws{grid-template-columns:1fr}}
