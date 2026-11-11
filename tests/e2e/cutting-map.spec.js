@@ -137,3 +137,51 @@ test('contracts are named "number - NAME" in the window, the list, search and th
   await expect(app.page.locator('#sres')).toContainText('1023421 - SAMPLE CUSTOMER E');
   expect(await app.run(() => evs('2026-11-12').map((e) => e.t))).toContain('1023421 - SAMPLE CUSTOMER E');
 });
+
+test('Cutting Optimiser: cuts with angles plan into bars as you type, print as a saw list, link profiles from Inventory', async ({ app }) => {
+  await app.role('beta');
+  // link a stock item as a profile with its bar length
+  await app.go('stock');
+  await app.page.click('#main >> text=Cutting Data');
+  const pid = await app.run(() => products()[0].pid);
+  const item = await app.run(() => products()[0].item);
+  await app.page.locator(`#mbox .blk[data-pid="${pid}"]`).check();
+  await app.page.locator(`#mbox .blen[data-pid="${pid}"]`).fill('6500');
+  await app.page.click('#mbox >> text=/^Save$/');
+  expect(await app.run((p) => state.cutProf[p].bar, pid)).toBe(6500);
+
+  await app.go('bars');
+  await expect(app.page.locator('#main h1')).toHaveText('Cutting Optimiser');
+  // picking the linked profile fills in its bar length and shows the stock
+  await app.page.fill('#bar_p_0_bar', '3000');
+  await app.page.fill('#bar_p_0_code', item);
+  await expect(app.page.locator('#bar_p_0_bar')).toHaveValue('6500');
+  await expect(app.page.locator('#barOut_0 .bar-sum')).toContainText('in stock');
+  // the frame from the saw sheet
+  await app.page.fill('#bar_c_0_0_label', 'Ensuite');
+  await app.page.fill('#bar_c_0_0_len', '1603');
+  await app.page.fill('#bar_c_0_0_qty', '4');
+  await expect(app.page.locator('#bar_c_0_0_qty')).toBeFocused();
+  await app.page.click('#main >> text=+ Add Cut');
+  await app.page.fill('#bar_c_0_1_len', '1210');
+  await app.page.fill('#bar_c_0_1_qty', '4');
+  await expect(app.page.locator('#barOut_0 .bar-sum')).toContainText('2 bars');
+  await expect(app.page.locator('#barOut_0 .bar-sum')).toContainText('1,748 mm = 13.4%');
+  await app.page.selectOption('#bar_c_0_1_aL', '90');
+  expect(await app.run(() => state.bars.profiles[0].cuts[1].aL)).toBe(90);
+  // print: our report, job first, a section per profile with its bars
+  await app.page.fill('#bar_job_no', '1023421');
+  await expect(app.page.locator('#barTitle')).toHaveText('1023421 - SAMPLE CUSTOMER E');
+  const [w] = await Promise.all([app.nextPopup(), app.page.click('#main >> text=Print Cutting List')]);
+  await w.waitForLoadState();
+  await expect(w.locator('h1')).toHaveText('1023421 - SAMPLE CUSTOMER E');
+  await expect(w.locator('.bsec')).toHaveCount(1);
+  await expect(w.locator('.bsec .bar-s')).toHaveCount(2);
+  await expect(w.locator('.bsec')).toContainText('Bar length 6,500 mm');
+  await expect(w.locator('.pg')).toContainText('Cut List');
+  await w.close();
+  // kept with the contract
+  await app.page.click('#barToC');
+  await expect(app.page.locator('.toast')).toContainText('Saved to contract 1023421');
+  expect(app.errors).toEqual([]);
+});

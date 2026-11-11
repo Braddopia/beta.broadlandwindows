@@ -97,28 +97,29 @@ export function boardSvg(b, i, print) {
     })}
   </svg>`;
 }
+/* each board or piece is its own soft row: a dot in its colour on the plan, then its boxes, each with its name above */
 function table(kind, rows) {
   const C = COLS[kind];
-  return html`<div class="cut-t"><table><colgroup>${C.map(([k]) => html`<col class="c-${k}">`)}<col class="c-x"></colgroup><thead><tr>${C.map(
-    ([k, l]) => html`<th class="${k == 'label' ? '' : 'n'}">${l}</th>`
-  )}<th></th></tr></thead><tbody>${rows.map(
+  return html`<div class="cut-t cut-rows">${rows.map(
     (r, i) =>
-      html`<tr>${C.map(([k, , t]) => {
-        const f =
-          t == 'select'
-            ? {
-                k: '',
-                t: 'select',
-                o: [
-                  ['yes', 'Yes'],
-                  ['no', 'No (grain)'],
-                ],
-              }
-            : { k: '', t, max: t == 'number' ? 100000 : 60 };
-        const v = k == 'turn' ? (r.turn === false ? 'no' : 'yes') : r[k];
-        return html`<td class="${t == 'number' ? 'n' : ''}">${raw(fieldControl(f, v, { id: 'cut_' + kind + '_' + i + '_' + k }))}</td>`;
-      })}<td><button class="cut-x" aria-label="Remove row ${i + 1}" title="Remove" ${raw(onClick('cutDel', kind, i))}>&times;</button></td></tr>`
-  )}</tbody></table></div>`;
+      html`<div class="cut-r cut-r-${kind}"><span class="cut-dot" style="--h:${kind == 'parts' ? hue(r.label) : 215}"></span>${C.map(
+        ([k, l, t]) => {
+          const f =
+            t == 'select'
+              ? {
+                  k: '',
+                  t: 'select',
+                  o: [
+                    ['yes', 'Yes'],
+                    ['no', 'No (grain)'],
+                  ],
+                }
+              : { k: '', t, max: t == 'number' ? 100000 : 60 };
+          const v = k == 'turn' ? (r.turn === false ? 'no' : 'yes') : r[k];
+          return html`<label class="bar-f cut-f-${k}" for="${'cut_' + kind + '_' + i + '_' + k}"><span>${l}${k == 'L' || k == 'W' ? raw(' <i class="nocap">(mm)</i>') : ''}</span>${raw(fieldControl(f, v, { id: 'cut_' + kind + '_' + i + '_' + k }))}</label>`;
+        }
+      )}<button class="cut-x" aria-label="Remove row ${i + 1}" title="Remove" ${raw(onClick('cutDel', kind, i))}>&times;</button></div>`
+  )}${rows.length ? '' : html`<p class="muted bar-none">Nothing here yet.</p>`}</div>`;
 }
 /** the plan side: totals, warnings and every board. Redrawn on its own as you type */
 export function cutResults() {
@@ -166,12 +167,12 @@ export function vCutting() {
       </div></div>
     </div>
     <div class="panel cut-lists">
-      <section><h2><span>Boards In Stock</span><small class="muted nocap">Sizes in mm · How Many 0 means as many as needed</small></h2>${table('sheets', D.sheets)}
+      <section><h2><span>Boards In Stock</span><small class="muted nocap">How Many 0 means as many as needed</small></h2>${table('sheets', D.sheets)}
         <div class="cut-add"><button class="mini" ${raw(onClick('cutAdd', 'sheets'))}>+ Add Board</button>${PRESETS.map(
           (p, i) =>
             html`<button class="mini cut-pre" ${raw(onClick('cutPreset', i))}><b>${p.label}</b> <span class="nocap">${p.W} × ${p.L} mm</span></button>`
         )}</div></section>
-      <section><h2><span>Pieces To Cut</span><small class="muted nocap">Sizes in mm</small></h2>${table('parts', D.parts)}
+      <section><h2><span>Pieces To Cut</span></h2>${table('parts', D.parts)}
         <div class="cut-add"><button class="mini" ${raw(onClick('cutAdd', 'parts'))}>+ Add Piece</button></div></section>
     </div>
   </div>

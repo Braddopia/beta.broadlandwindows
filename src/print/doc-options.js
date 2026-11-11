@@ -90,6 +90,12 @@ export const DOCS = [
     parts: [LOGO, META, KPIS, DETAILS, EXTRA, ...INT, FOOT],
   },
   {
+    k: 'Cutting List',
+    n: 'Cutting List (Bars)',
+    g: 'Service And Cutting',
+    parts: [LOGO, META, KPIS, DETAILS, EXTRA, ...INT, FOOT],
+  },
+  {
     k: 'Stock Report',
     n: 'Inventory Reports',
     g: 'Stock And Other Reports',

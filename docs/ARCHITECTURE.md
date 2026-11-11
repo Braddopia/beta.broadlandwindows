@@ -127,6 +127,16 @@ later refinements (`05c`), responsive, looks.
 
 See [docs/adr](adr/).
 
+## Cutting Optimiser (bars)
+
+- `features/bars/bars.js` (view `bars`, under Panel Optimiser): profiles with a bar length, and cuts with a
+  room or position, a frame reference, a length, how many and the angle at each end. `domain/barcut.js`
+  plans the bars (longest first, each into the bar it fits best, saw blade and end trims allowed for) and
+  counts bars cut the same way together. It prints as a saw list (`kind: 'Cutting List'`) and can be kept
+  on the contract like the panel plan.
+- Inventory, Cutting Data marks products as profiles with their bar length (`state.cutProf`, by Stock ID).
+  A linked profile fills in its bar length in the optimiser and shows how many are in stock.
+
 ## Printed documents
 
 - `print/doc-options.js` lists every printed document (`DOCS`) and the parts each one has. Everything is

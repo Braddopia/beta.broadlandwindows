@@ -232,6 +232,25 @@ export const TAB_TOURS = {
       'Print Plan'
     ),
   ],
+  bars: [
+    T(
+      '#bar_job_no',
+      'Job Number',
+      'Type the contract number. The job name fills in and the list can be kept with the contract.'
+    ),
+    T(
+      '#main .bar-ph',
+      'The Profile',
+      'The profile code and its full bar length. Profiles linked under Inventory, Cutting Data fill themselves in.'
+    ),
+    T('#main .bar-cuts', 'The Cuts', 'Room or position, frame reference, length, how many and the angle at each end.'),
+    T(
+      '#main .bar-out',
+      'The Bars',
+      'Every bar as it comes off the saw, with the offcut left at the end and the wastage.'
+    ),
+    T(TOOL, 'Print Cutting List', 'Prints the saw list on A4 in the company style, profile by profile.', 'Print'),
+  ],
   staff: [
     T('#main .views', 'Choose A View', 'Show everyone, or just salespeople, fitters, office or factory staff.'),
     T('#main .tw', 'The Team', 'Click a person to open their details.'),

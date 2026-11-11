@@ -1,4 +1,5 @@
 /* ui/shell/router: The pages, the side menu and drawing the current page. */
+import { vBars } from '../../features/bars/bars.js';
 import { ROLES } from '../../config/roles.js';
 import { markExact } from '../../features/search/exact-rows.js';
 import { previewNotice } from '../../features/records/preview-notice.js';
@@ -57,6 +58,7 @@ export const VIEWS = {
   fitting: { t: 'Calendar', fn: vCalendar },
   service: { t: 'Service Calls', fn: vService },
   cutting: { t: 'Panel Optimiser', fn: vCutting },
+  bars: { t: 'Cutting Optimiser', fn: vBars },
   stock: { t: 'Inventory', fn: vStock },
   contacts: { t: 'Contact Book', fn: vContacts },
   staff: { t: 'Staff', fn: vStaff },
@@ -71,7 +73,7 @@ export const NG = [
   ['Workspace', ['home', 'messages', 'fitting', 'contacts']],
   ['Sales', ['leads', 'contracts']],
   ['Operations', ['live', 'deliveries', 'service']],
-  ['Stock', ['stock', 'suppliers', 'cutting']],
+  ['Stock', ['stock', 'suppliers', 'cutting', 'bars']],
   ['People', ['staff', 'holidays']],
   ['Insights', ['reports', 'downloads']],
   ['Admin', ['finance', 'admin', 'settings']],

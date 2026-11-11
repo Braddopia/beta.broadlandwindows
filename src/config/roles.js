@@ -13,6 +13,7 @@ export const FOCUS = [
   'stock',
   'suppliers',
   'cutting',
+  'bars',
   'downloads',
   'settings',
 ];

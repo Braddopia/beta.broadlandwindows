@@ -680,3 +680,53 @@ body[data-view=messages]:not(:has(#modal.open)) #rpb{display:none}
 .db-none{font-size:.85rem}.db-f{margin-top:1.2rem}
 body[data-theme=dark] .db-r h3{color:#e8eef8}
 @media(max-width:760px){.db{grid-template-columns:1fr}.db-l{border-right:0;border-bottom:1px solid var(--line);padding:0 0 .8rem;max-height:none}.db-sws{grid-template-columns:1fr}}
+
+/* Cutting Optimiser: profiles as cards, cuts as soft rows, each bar drawn as it comes off the saw */
+.bar-p{display:flex;flex-direction:column;gap:.7rem}
+.bar-ph{display:flex;flex-wrap:wrap;align-items:flex-end;gap:.7rem}
+.bar-pn{align-self:center;font:600 1rem var(--head);color:var(--navy);margin-right:.3rem}
+body[data-theme=dark] .bar-pn{color:#e8eef8}
+.bar-f{display:flex;flex-direction:column;gap:.25rem;min-width:0}
+.bar-f span{font-size:.7rem;font-weight:600;color:var(--muted)}
+.bar-f input,.bar-f select{height:2.3rem;padding:0 .6rem;border:1px solid var(--line);border-radius:9px;background:var(--card);color:var(--ink);font:500 .9rem var(--body);width:100%}
+.bar-f input:focus,.bar-f select:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(43,143,224,.18)}
+.bar-code{width:11rem}.bar-desc{flex:1;min-width:12rem}.bar-n{width:8rem}.bar-n input,.bar-q input{text-align:center}
+.bar-cuts{display:flex;flex-direction:column;gap:.45rem}
+.bar-r{display:grid;grid-template-columns:.7rem minmax(0,1fr) 5rem 7.5rem 5.5rem 5.5rem 5.5rem 2rem;align-items:end;gap:.55rem;padding:.55rem .7rem;border:1px solid var(--line);border-radius:12px;background:var(--card2,rgba(255,255,255,.03))}
+.bar-r .cut-dot{align-self:center;margin-top:1rem}
+.bar-r .cut-x{align-self:center;margin-top:1rem}
+.bar-a select{text-align:center;text-align-last:center}
+.bar-sum{display:flex;flex-wrap:wrap;align-items:baseline;gap:.4rem 1rem;padding-top:.6rem;border-top:1px solid var(--line);font-size:.86rem;color:var(--muted)}
+.bar-sum b{font:600 1rem var(--head);color:var(--ink)}.bar-sum .ok{color:#12794c}.bar-sum .bad{color:var(--red)}
+.bar-row{display:grid;grid-template-columns:1.8rem 2.2rem minmax(0,1fr);align-items:center;gap:.3rem}
+.bar-no,.bar-x{font-weight:700;font-size:.85rem;color:var(--muted)}
+.bar-svg{min-width:0}
+.bar-s{display:block;width:100%;height:auto}
+.bar-s .bb{fill:rgba(1,20,45,.35);stroke:rgba(255,255,255,.12)}
+.bar-s .bo{fill:repeating-linear-gradient(45deg,transparent,transparent 4px,rgba(255,255,255,.1) 4px,rgba(255,255,255,.1) 6px);fill:rgba(255,255,255,.06);stroke:rgba(255,255,255,.25);stroke-dasharray:3 2}
+.bar-s polygon{stroke-width:1.2}
+.bar-s text{font-family:var(--body);fill:var(--ink)}
+.bar-s .bl{font-size:8px;letter-spacing:.06em;text-anchor:middle;font-weight:700;fill:var(--muted)}
+.bar-s .bn{font-size:10px;text-anchor:middle;dominant-baseline:middle;font-weight:700;fill:#fff}
+.bar-s .ba{font-size:7.5px;fill:var(--muted)}.bar-s .ba.e{text-anchor:end}
+.bar-s .bw{font-size:10px;font-weight:700;dominant-baseline:middle;fill:var(--muted)}
+body:not([data-theme=dark]) .bar-s .bb{fill:#eef2f8;stroke:#c9d3e0}
+body:not([data-theme=dark]) .bar-s .bo{fill:#f6f8fb;stroke:#9aa7b8}
+.bar-addp{display:flex;align-items:center;gap:1rem;flex-wrap:wrap}
+.bar-none{margin:.3rem 0 0;font-size:.85rem}
+.bar-link{max-height:55vh;overflow:auto}.bar-link input.blen{width:7rem;text-align:center;height:2rem;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink)}
+@media(max-width:1000px){.bar-r{grid-template-columns:.7rem 1fr 1fr 2rem;align-items:end}.bar-r .bar-room{grid-column:2/4}.bar-r .cut-x{grid-row:1;grid-column:4}}
+.bar-f span i{font-style:normal}
+
+/* Panel Optimiser: boards and pieces as soft rows (the same look as the Cutting Optimiser) */
+.cut-rows{display:flex;flex-direction:column;gap:.45rem}
+.cut-r{display:grid;align-items:end;gap:.55rem;padding:.55rem .7rem;border:1px solid var(--line);border-radius:12px;background:var(--card2,rgba(255,255,255,.03))}
+.cut-r-sheets{grid-template-columns:.7rem minmax(0,1fr) 5.4rem 5.4rem 5rem 2rem}
+.cut-r-parts{grid-template-columns:.7rem minmax(0,1fr) 5.4rem 5.4rem 5rem 6.6rem 2rem}
+.cut-r .cut-dot,.cut-r .cut-x{align-self:center;margin-top:1rem}
+.cut-dot{width:.7rem;height:.7rem;border-radius:50%;background:hsl(var(--h) 70% 58%);box-shadow:0 0 0 3px hsl(var(--h) 70% 58% / .18)}
+.cut-r input,.cut-r select{height:2.3rem;padding:0 .6rem;border:1px solid var(--line);border-radius:9px;background:var(--card);color:var(--ink);font:500 .9rem var(--body);width:100%}
+.cut-r .cut-f-L input,.cut-r .cut-f-W input,.cut-r .cut-f-qty input,.cut-r select{text-align:center;text-align-last:center}
+.cut-r input:focus,.cut-r select:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(43,143,224,.18)}
+@media(max-width:700px){.cut-r-sheets,.cut-r-parts{grid-template-columns:.7rem 1fr 1fr 2rem}.cut-r .cut-f-label{grid-column:2/4}}
+.bar-s .bn.sm{font-size:7.5px}
