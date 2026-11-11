@@ -8,7 +8,7 @@ import { audit } from '../../data/audit.js';
 import { store } from '../../data/persistence.js';
 import { state } from '../../data/state.js';
 import { siteOf } from '../../domain/customers.js';
-import { fitPage } from '../../print/print.js';
+import { PRINT_BAR_CSS, fitPage, printBar } from '../../print/print.js';
 import { fieldErr } from '../../ui/forms/form.js';
 import { closeModal, openModal } from '../../ui/modal.js';
 import { toast } from '../../ui/toast.js';
@@ -39,14 +39,14 @@ export function openCert(title, body) {
   }
   w.document
     .write(`<!doctype html><html><head><meta charset="utf-8"><title>${esc(title)}</title><style>@page{size:A4;margin:0}*{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;color:#000;background:#e9edf3;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-  .pg{width:210mm;min-height:297mm;margin:0 auto;background:#fff;padding:9mm 12mm 8mm;display:flex;flex-direction:column}.bar{position:sticky;top:0;z-index:5;background:#012b59;padding:10px;text-align:center}.bar button{background:#ffd002;color:#012b59;border:0;border-radius:8px;padding:8px 20px;font:600 13px Arial,sans-serif;cursor:pointer}
+  .pg{width:210mm;min-height:297mm;margin:0 auto;background:#fff;padding:9mm 12mm 8mm;display:flex;flex-direction:column}
   .lg{display:block;margin:0 auto 9mm;width:78mm}.gt{font:700 26pt/1.05 Arial,sans-serif;text-align:center;margin:0 0 8mm}.gt span{display:block;font-size:20pt}
   .gp{font-size:10.5pt;line-height:1.3;text-align:center;margin:0 auto 5mm;max-width:132mm}.gn{font-size:7.5pt;font-weight:700;text-decoration:underline;text-align:center;margin:0 0 5mm}.gs{font-size:7.5pt;text-align:center;margin:0 auto 5mm;max-width:135mm}
   .gc{font-size:10pt;text-align:center;margin:0 0 3.5mm}.gd{margin-top:5mm}
   .gr{display:flex;justify-content:space-between;align-items:flex-end;margin:6mm 2mm 5mm;font-size:10pt}.gr small{font-size:7.5pt}.sn{font:italic 15pt 'Segoe Script','Brush Script MT',cursive}
   hr{border:0;border-top:.3mm solid #000;margin:0 0 6mm}.gb{border:.3mm solid #000;padding:5mm 4mm;font-size:8.6pt;line-height:1.4}.gb h4{margin:0 0 1mm;font-size:10.5pt}.gb ol{margin:0 0 5mm;padding-left:6mm}.gb p{margin:0}
-  .ft{margin-top:auto;padding-top:8mm;text-align:center;font-size:7.5pt;line-height:1.4}@media print{body{background:#fff}.bar{display:none}.pg{width:auto}}</style></head><body>
-  <div class="bar"><button data-pa="print">Print or save as PDF</button></div><div class="pg"><img class="lg" src="${LOGO_SRC.full}" alt="Broadland">${body}<div class="ft">${esc(company.tel)}<br>${esc(company.em)} &bull; ${esc(company.web)}<br>${esc(company.addr)}${company.vatNo ? '<br>VAT No. ' + esc(company.vatNo) : ''}${company.coNo ? ' &bull; Company No. ' + esc(company.coNo) : ''}</div></div></body></html>`);
+  .ft{margin-top:auto;padding-top:8mm;text-align:center;font-size:7.5pt;line-height:1.4}@media print{body{background:#fff}.pg{width:auto}}${PRINT_BAR_CSS}</style></head><body>
+  ${printBar(title)}<div class="pg"><img class="lg" src="${LOGO_SRC.full}" alt="Broadland">${body}<div class="ft">${esc(company.tel)}<br>${esc(company.em)} &bull; ${esc(company.web)}<br>${esc(company.addr)}${company.vatNo ? '<br>VAT No. ' + esc(company.vatNo) : ''}${company.coNo ? ' &bull; Company No. ' + esc(company.coNo) : ''}</div></div></body></html>`);
   w.document.close();
   fitPage(w);
 }

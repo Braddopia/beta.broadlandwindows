@@ -12,8 +12,8 @@ export function busyBtn(b, ms) {
     b.removeAttribute('aria-busy');
   }, ms || 600);
 }
-/* Messages pop up as a small card in the middle of the screen: a drawn tick for things that worked,
-   a warning sign for problems. Plain information ("Signed in as ...", "Opened ...") is not shown at all. */
+/* Messages show as a neat card at the bottom of the screen, out of the way: a drawn tick for things that
+   worked, a warning sign for problems. Plain information ("Signed in as ...", "Opened ...") is not shown at all. */
 const INFO = /^(signed in as|opened |getting the |picked at random|the tour will|back to (the default|automatic))/i;
 const OK =
   /\b(saved|added|deleted|removed|created|booked|sent|updated|copied|approved|recorded|restored|imported|exported|undone|marked|moved|applied|uploaded|brought back|downloaded|filled in|given to|now contract|now order|paid|counts set)\b/i;
@@ -47,7 +47,7 @@ export function toast(t) {
       e.classList.add('out');
       toast.t = setTimeout(() => (e.style.display = 'none'), 220);
     },
-    kind == 'ok' ? 1900 : 3400
+    kind == 'ok' ? 1800 : 2800
   );
 }
 /* tap the card to close it early */

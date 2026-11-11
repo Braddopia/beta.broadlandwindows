@@ -599,20 +599,23 @@ body[data-theme=dark] .smap .land{fill:rgba(120,170,255,.08);stroke:#6ea3e8}
 /* tour spotlight: soft blue ring, not yellow */
 #tour .tspot:not(.none){box-shadow:0 0 0 200vmax rgba(1,18,40,.62),0 0 0 2px rgba(90,184,255,.85),0 0 18px 2px rgba(90,184,255,.35)}
 
-/* messages: a small card that pops up in the middle of the screen (no strip along the bottom) */
-.toast.tpop{left:50%;top:50%;bottom:auto;transform:translate(-50%,-50%);z-index:4000;flex-direction:column;align-items:center;gap:.55rem;min-width:13rem;max-width:min(22rem,calc(100vw - 2rem));padding:1.1rem 1.4rem 1rem;border:1px solid var(--line);border-left:1px solid var(--line);border-radius:18px;background:var(--pop,var(--card));color:var(--navy);font:600 .92rem var(--body);text-align:center;box-shadow:0 18px 50px rgba(1,30,70,.28);pointer-events:auto;cursor:pointer;animation:none}
-.toast.tpop.in{animation:tpIn .28s cubic-bezier(.2,.9,.3,1.25) both}
-.toast.tpop.out{animation:tpOut .2s ease-in both}
-.toast.tpop .tp-i{width:3rem;height:3rem}
-.toast.tpop .tp-i circle{fill:none;stroke-width:3;stroke-dasharray:150;stroke-dashoffset:150;animation:dnc .45s ease-out forwards}
-.toast.tpop .tp-i path{fill:none;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:40;stroke-dashoffset:40;animation:dnc .3s .35s ease-out forwards}
+/* messages: a neat card at the bottom of the screen, clear of what you are working on */
+.toast.tpop{left:50%;top:auto;bottom:calc(1.5rem + var(--safe-b,0px));transform:translateX(-50%);z-index:4000;flex-direction:row;align-items:center;gap:.7rem;min-width:0;max-width:min(34rem,calc(100vw - 2rem));padding:.6rem 1.1rem .6rem .65rem;border:1px solid var(--line);border-left:1px solid var(--line);border-radius:14px;background:var(--pop,var(--card));color:var(--ink);font:600 .88rem/1.35 var(--body);text-align:left;box-shadow:0 14px 38px rgba(1,30,70,.28);pointer-events:auto;cursor:pointer;animation:none}
+.toast.tpop.in{animation:tpIn .2s cubic-bezier(.2,.9,.3,1.15) both}
+.toast.tpop.out{animation:tpOut .16s ease-in both}
+.toast.tpop .tp-i{flex:0 0 auto;width:2rem;height:2rem;padding:.3rem;border-radius:50%}
+.toast.tpop.ok .tp-i{background:rgba(18,121,76,.14)}
+.toast.tpop.bad .tp-i{background:rgba(217,119,6,.16)}
+.toast.tpop .tp-i circle{display:none}
+.toast.tpop .tp-i path{fill:none;stroke-width:5;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:40;stroke-dashoffset:40;animation:dnc .22s .08s ease-out forwards}
 .toast.tpop.ok .tp-i *{stroke:#12794c}
-.toast.tpop.bad .tp-i *{stroke:#d97706}
+.toast.tpop.bad .tp-i *{stroke:#c26a05}
 body[data-theme=dark] .toast.tpop{color:#e8eef8;border-color:rgba(255,255,255,.12)}
 body[data-theme=dark] .toast.tpop.ok .tp-i *{stroke:#7fe0aa}
 body[data-theme=dark] .toast.tpop.bad .tp-i *{stroke:#ffc35c}
-@keyframes tpIn{from{opacity:0;transform:translate(-50%,-50%) scale(.85)}to{opacity:1;transform:translate(-50%,-50%) scale(1)}}
-@keyframes tpOut{to{opacity:0;transform:translate(-50%,-50%) scale(.94)}}
+@media(max-width:700px){.toast.tpop{bottom:calc(5rem + var(--safe-b,0px))}}
+@keyframes tpIn{from{opacity:0;transform:translate(-50%,14px)}to{opacity:1;transform:translate(-50%,0)}}
+@keyframes tpOut{to{opacity:0;transform:translate(-50%,8px)}}
 
 /* messages: the report button sits at the bottom of the chat list, centred, instead of over the send box */
 .msn-l .msn-list{flex:1;min-height:0}
@@ -730,3 +733,8 @@ body:not([data-theme=dark]) .bar-s .bo{fill:#f6f8fb;stroke:#9aa7b8}
 .cut-r input:focus,.cut-r select:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(43,143,224,.18)}
 @media(max-width:700px){.cut-r-sheets,.cut-r-parts{grid-template-columns:.7rem 1fr 1fr 2rem}.cut-r .cut-f-label{grid-column:2/4}}
 .bar-s .bn.sm{font-size:7.5px}
+
+/* empty panels and lists: clear room between the picture and its words */
+.emp{gap:1.1rem;padding:1.4rem .75rem 1.5rem}
+.emp p{max-width:34ch;line-height:1.5}
+.panel>.emp{gap:1.1rem}

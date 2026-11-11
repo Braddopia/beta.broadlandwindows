@@ -166,7 +166,7 @@ test('Cutting Optimiser: cuts with angles plan into bars as you type, print as a
   await app.page.fill('#bar_c_0_1_len', '1210');
   await app.page.fill('#bar_c_0_1_qty', '4');
   await expect(app.page.locator('#barOut_0 .bar-sum')).toContainText('2 bars');
-  await expect(app.page.locator('#barOut_0 .bar-sum')).toContainText('1,748 mm = 13.4%');
+  await expect(app.page.locator('#barOut_0 .bar-sum')).toContainText('1,748mm = 13.4%');
   await app.page.selectOption('#bar_c_0_1_aL', '90');
   expect(await app.run(() => state.bars.profiles[0].cuts[1].aL)).toBe(90);
   // print: our report, job first, a section per profile with its bars
@@ -177,7 +177,7 @@ test('Cutting Optimiser: cuts with angles plan into bars as you type, print as a
   await expect(w.locator('h1')).toHaveText('1023421 - SAMPLE CUSTOMER E');
   await expect(w.locator('.bsec')).toHaveCount(1);
   await expect(w.locator('.bsec .bar-s')).toHaveCount(2);
-  await expect(w.locator('.bsec')).toContainText('Bar length 6,500 mm');
+  await expect(w.locator('.bsec')).toContainText('Bar length 6,500mm');
   await expect(w.locator('.pg')).toContainText('Cut List');
   await w.close();
   // kept with the contract

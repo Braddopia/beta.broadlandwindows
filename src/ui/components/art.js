@@ -18,4 +18,4 @@ export const ART_IC = {
   files: ICONS.downloads,
 };
 export const emptyArt = (k, txt) =>
-  `<div class="emp">${ART_IC[k] ? `<span class="pmed lkp">${svg(ART_IC[k])}</span>` : ''}<p>${esc(txt)}</p></div>`;
+  `<div class="emp">${ART_IC[k] ? `<span class="pmed lkp">${svg(ART_IC[k])}</span>` : ''}${txt ? `<p>${esc(txt)}</p>` : ''}</div>`;

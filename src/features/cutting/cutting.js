@@ -93,7 +93,7 @@ export function boardSvg(b, i, print) {
         small
           ? ''
           : html`<text x="${p.x + p.l / 2}" y="${p.y + p.w / 2 - fs * 0.15}" style="font-size:${fs}px">${p.label}</text><text class="sz" x="${p.x + p.l / 2}" y="${p.y + p.w / 2 + fs * 1}" style="font-size:${fs * 0.78}px">${mm(p.l)} × ${mm(p.w)}${p.rot ? ' ↻' : ''}</text>`
-      }<title>${p.label}: ${mm(p.l)} × ${mm(p.w)} mm${p.rot ? ' (turned)' : ''}</title></g>`;
+      }<title>${p.label}: ${mm(p.l)} × ${mm(p.w)}mm${p.rot ? ' (turned)' : ''}</title></g>`;
     })}
   </svg>`;
 }
@@ -132,7 +132,7 @@ export function cutResults() {
     ${R.unplaced.length ? html`<div class="note bad"><b>${R.unplaced.length} piece${R.unplaced.length == 1 ? '' : 's'} would not fit:</b> ${[...new Set(R.unplaced.map((u) => u.label + ' (' + mm(u.L) + ' × ' + mm(u.W) + ')'))].join(', ')}. Add a bigger board, more boards, or let them turn.</div>` : ''}
     ${R.boards.map(
       (b, i) =>
-        html`<div class="panel cut-bp"><h2><span>Board ${i + 1} <span class="muted">of ${R.boards.length}</span> · ${b.sheet}</span><small class="muted nocap">${mm(b.L)} × ${mm(b.W)} mm · ${b.pieces.length} pieces · ${Math.round((b.used / b.area) * 100)}% used</small></h2><div class="cut-frame">${boardSvg(b, i)}</div></div>`
+        html`<div class="panel cut-bp"><h2><span>Board ${i + 1} <span class="muted">of ${R.boards.length}</span> · ${b.sheet}</span><small class="muted nocap">${mm(b.L)} × ${mm(b.W)}mm · ${b.pieces.length} pieces · ${Math.round((b.used / b.area) * 100)}% used</small></h2><div class="cut-frame">${boardSvg(b, i)}</div></div>`
     )}
     ${R.boards.length ? '' : html`<div class="panel"><p class="empty">Add a board and some pieces to see the plan.</p></div>`}
   `) + `<template id="cutK">${kpis(S, pct)}</template>`
@@ -170,7 +170,7 @@ export function vCutting() {
       <section><h2><span>Boards In Stock</span><small class="muted nocap">How Many 0 means as many as needed</small></h2>${table('sheets', D.sheets)}
         <div class="cut-add"><button class="mini" ${raw(onClick('cutAdd', 'sheets'))}>+ Add Board</button>${PRESETS.map(
           (p, i) =>
-            html`<button class="mini cut-pre" ${raw(onClick('cutPreset', i))}><b>${p.label}</b> <span class="nocap">${p.W} × ${p.L} mm</span></button>`
+            html`<button class="mini cut-pre" ${raw(onClick('cutPreset', i))}><b>${p.label}</b> <span class="nocap">${p.W} × ${p.L}mm</span></button>`
         )}</div></section>
       <section><h2><span>Pieces To Cut</span></h2>${table('parts', D.parts)}
         <div class="cut-add"><button class="mini" ${raw(onClick('cutAdd', 'parts'))}>+ Add Piece</button></div></section>
@@ -377,13 +377,13 @@ function planDoc(asHtml) {
   const boards = R.boards
     .map(
       (b, i) =>
-        `<section class="cbp"><h3>Board ${i + 1} of ${R.boards.length}: ${html`${b.sheet}`} <span>${mm(b.L)} × ${mm(b.W)} mm · ${b.pieces.length} pieces · ${Math.round((b.used / b.area) * 100)}% used</span></h3>${boardSvg(b, i, true)}</section>`
+        `<section class="cbp"><h3>Board ${i + 1} of ${R.boards.length}: ${html`${b.sheet}`} <span>${mm(b.L)} × ${mm(b.W)}mm · ${b.pieces.length} pieces · ${Math.round((b.used / b.area) * 100)}% used</span></h3>${boardSvg(b, i, true)}</section>`
     )
     .join('');
   const title = jobTitle(D.jobNo, D.jobName);
   return printDoc(
     title || 'Cutting Plan',
-    (title ? 'Cutting plan · ' : '') + 'Saw blade ' + D.kerf + ' mm · edge trim ' + D.trim + ' mm',
+    (title ? 'Cutting plan · ' : '') + 'Saw blade ' + D.kerf + 'mm · edge trim ' + D.trim + 'mm',
     [],
     [],
     {

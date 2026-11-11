@@ -135,7 +135,7 @@ export function editContact(id, draft, after) {
     `<button class="mx" data-act="closeModal" aria-label="Close">&times;</button><h2>${c ? 'Edit Contact' : 'New Contact'}</h2>
    <div class="cform">
     <section><h3>Who</h3><div class="grid">${fld('type', 'Type', { sel: CT })}${fld('co', 'Company', { max: 80 })}${fld('name', 'Contact name', { max: 60 })}${fld('role', 'Job title', { max: 60 })}</div></section>
-    <section><h3>Phone Numbers And Emails <small>At least one number *</small></h3><div class="cphh" aria-hidden="true"><span>For</span><span>Phone</span><span>Email<span data-rq="email"></span></span></div><div id="cphs" class="cphs">${(v.lines || []).map(cphRow).join('')}</div><p class="hint">Pick what each line is for, such as Accounts or Sales, then its number and email. Another line appears when you fill one in.</p></section>
+    <section><h3>Phone Numbers And Emails <small>At least one number *</small></h3><div class="cphh" aria-hidden="true"><span>For</span><span>Phone</span><span>Email<span data-rq="email"></span></span></div><div id="cphs" class="cphs">${(v.lines || []).map(cphRow).join('')}</div><p class="hint">One line each for Accounts, Sales and so on.</p></section>
     <section><h3>Web</h3><div class="grid">${fld('web', 'Website', { w: 'full', max: 200, ph: 'https://' })}</div></section>
     <section><h3>Address</h3><div class="grid">${fld('addr', 'Address', { w: 'full', max: 200 })}${fld('town', 'Town', { max: 60 })}${fld('pc', 'Postcode', { max: 10 })}</div></section>
     <section><h3>Notes</h3>${fld('notes', 'Notes', { area: 1, w: 'full' })}</section>

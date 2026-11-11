@@ -77,12 +77,12 @@ export function barSvg(b, bar, trim, print) {
         w > 34
           ? html`<text class="bl" x="${x + w / 2}" y="${y - 6}">${c.label ? c.label.toUpperCase().slice(0, Math.floor(w / 7)) : ''}</text><text class="bn${w < 80 ? ' sm' : ''}" x="${x + w / 2}" y="${y + H / 2 + 1}">${mm(c.len)}${c.ref ? ` (${c.ref})` : ''}</text>`
           : ''
-      }${w > 50 ? html`<text class="ba" x="${x + 4}" y="${y + H + 12}">${c.aL}°</text><text class="ba e" x="${x + w - 4}" y="${y + H + 12}">${c.aR}°</text>` : ''}<title>${c.label || 'Cut'}${c.ref ? ' (' + c.ref + ')' : ''}: ${mm(c.len)} mm, ${c.aL}° / ${c.aR}°</title></g>`
+      }${w > 50 ? html`<text class="ba" x="${x + 4}" y="${y + H + 12}">${c.aL}°</text><text class="ba e" x="${x + w - 4}" y="${y + H + 12}">${c.aR}°</text>` : ''}<title>${c.label || 'Cut'}${c.ref ? ' (' + c.ref + ')' : ''}: ${mm(c.len)}mm, ${c.aL}° / ${c.aR}°</title></g>`
     );
     x += w;
   });
   const offX = x + (b.cuts.length ? kerfPx : 0);
-  return html`<svg class="bar-s ${print ? 'pr' : ''}" viewBox="-2 0 ${W + 70} ${y + H + 18}" role="img" aria-label="Bar with ${b.cuts.length} cuts, ${mm(b.off)} mm left">
+  return html`<svg class="bar-s ${print ? 'pr' : ''}" viewBox="-2 0 ${W + 70} ${y + H + 18}" role="img" aria-label="Bar with ${b.cuts.length} cuts, ${mm(b.off)}mm left">
     <rect class="bb" x="0" y="${y}" width="${W}" height="${H}" rx="${print ? 0 : 3}"/>
     ${out}
     ${b.off > 0 ? html`<rect class="bo" x="${offX}" y="${y}" width="${Math.max(0, W - offX - trim * s)}" height="${H}"/>` : ''}
@@ -107,10 +107,10 @@ export function barPlan(D, p, pi) {
     S = R.stats,
     G = groupBars(R.bars.map((b) => ({ ...b, kerf: D.kerf })));
   const lp = findProd(p.code);
-  return String(html`<div class="bar-sum"><b>${S.bars} bar${S.bars == 1 ? '' : 's'}</b><span>Wastage, including what is left of each bar: ${mm(S.waste)} mm = ${pct(S.wastePct)}</span>${
+  return String(html`<div class="bar-sum"><b>${S.bars} bar${S.bars == 1 ? '' : 's'}</b><span>Wastage, including what is left of each bar: ${mm(S.waste)}mm = ${pct(S.wastePct)}</span>${
     lp ? html`<span class="${lp.r.stock < S.bars ? 'bad' : 'ok'}">${lp.r.stock} ${unitOf(lp.r)} in stock</span>` : ''
   }</div>
-    ${R.unplaced.length ? html`<div class="note bad"><b>${R.unplaced.length} cut${R.unplaced.length == 1 ? '' : 's'} longer than the bar:</b> ${[...new Set(R.unplaced.map((u) => mm(u.len) + ' mm'))].join(', ')}.</div>` : ''}
+    ${R.unplaced.length ? html`<div class="note bad"><b>${R.unplaced.length} cut${R.unplaced.length == 1 ? '' : 's'} longer than the bar:</b> ${[...new Set(R.unplaced.map((u) => mm(u.len) + 'mm'))].join(', ')}.</div>` : ''}
     ${G.map((g, i) => html`<div class="bar-row"><span class="bar-no">${i + 1})</span><span class="bar-x">${g.n}×</span><div class="bar-svg">${barSvg(g.bar, p.bar, D.trim)}</div></div>`)}
     ${R.bars.length ? '' : html`<p class="muted bar-none">Add a cut to see the bars.</p>`}`);
 }
@@ -121,7 +121,7 @@ const kpis = (D) => {
     total = A.reduce((s, x) => s + x.total, 0),
     waste = A.reduce((s, x) => s + x.waste, 0);
   return String(
-    html`<div class="kpi"><small>Bars Needed</small><b>${bars}</b><span class="ksub">${D.profiles.length} profile${D.profiles.length == 1 ? '' : 's'}</span></div><div class="kpi"><small>Cuts</small><b>${cuts}</b></div><div class="kpi ${total && waste / total > 0.2 ? 'warn' : ''}"><small>Wastage</small><b>${total ? pct(waste / total) : '0%'}</b></div><div class="kpi"><small>Wastage Length</small><b>${mm(waste)} mm</b></div>`
+    html`<div class="kpi"><small>Bars Needed</small><b>${bars}</b><span class="ksub">${D.profiles.length} profile${D.profiles.length == 1 ? '' : 's'}</span></div><div class="kpi"><small>Cuts</small><b>${cuts}</b></div><div class="kpi ${total && waste / total > 0.2 ? 'warn' : ''}"><small>Wastage</small><b>${total ? pct(waste / total) : '0%'}</b></div><div class="kpi"><small>Wastage Length</small><b>${mm(waste)}mm</b></div>`
   );
 };
 export const barContract = (D = barData()) => {
@@ -141,7 +141,7 @@ export function vBars() {
       <div class="panel cut-job"><h2><span>Job</span><small class="muted nocap" id="barJobHint">${k ? 'Contract ' + k.id + ' found: Save To Contract keeps the list with its documents' : 'Type the contract number to link the list to it'}</small></h2><div class="cut-og cut-og2">
         <div class="ff"><label for="bar_job_no">Job Number</label><input id="bar_job_no" maxlength="30" list="barCons" value="${D.jobNo || ''}" autocomplete="off"></div>
         <div class="ff"><label for="bar_job_name">Job Name</label><input id="bar_job_name" maxlength="80" value="${D.jobName || ''}" autocomplete="off"></div>
-      </div><datalist id="barCons">${canSee('contracts') ? state.contracts.map((c) => html`<option value="${c.id}">${jobTitle(c.id, c.name)}</option>`) : ''}</datalist><datalist id="barProfs">${L.map((x) => html`<option value="${x.r.item}">${x.r.desc || ''} · ${mm(x.bar)} mm bar</option>`)}</datalist></div>
+      </div><datalist id="barCons">${canSee('contracts') ? state.contracts.map((c) => html`<option value="${c.id}">${jobTitle(c.id, c.name)}</option>`) : ''}</datalist><datalist id="barProfs">${L.map((x) => html`<option value="${x.r.item}">${x.r.desc || ''} · ${mm(x.bar)}mm bar</option>`)}</datalist></div>
       <div class="panel cut-set"><h2><span>Saw Settings</span></h2><div class="cut-og cut-og2">
         <div class="ff"><label for="bar_opt_kerf">Saw Blade Width <span class="nocap">(mm)</span></label><input id="bar_opt_kerf" type="number" min="0" max="20" step="0.1" value="${D.kerf}"></div>
         <div class="ff"><label for="bar_opt_trim">End Trim Each End <span class="nocap">(mm)</span></label><input id="bar_opt_trim" type="number" min="0" max="200" step="1" value="${D.trim}"></div>
@@ -381,16 +381,16 @@ function listDoc(asHtml) {
     title = jobTitle(D.jobNo, D.jobName);
   const secs = P.map(({ p, R }) => {
     const G = groupBars(R.bars.map((b) => ({ ...b, kerf: D.kerf })));
-    return `<section class="bsec"><h3>${html`${[p.code, p.desc].filter(Boolean).join(', ') || 'Profile'}`}<span>Bar length <b>${mm(p.bar)} mm</b></span></h3>${G.map(
+    return `<section class="bsec"><h3>${html`${[p.code, p.desc].filter(Boolean).join(', ') || 'Profile'}`}<span>Bar length <b>${mm(p.bar)}mm</b></span></h3>${G.map(
       (g, i) =>
         `<div class="brow"><span class="bno">${i + 1})</span><span class="bx">${g.n}×</span>${barSvg(g.bar, p.bar, D.trim, true)}</div>`
     ).join(
       ''
-    )}<p class="bft"><b>${R.stats.bars} bar${R.stats.bars == 1 ? '' : 's'}</b> Wastage, including what is left of each bar: ${mm(R.stats.waste)} mm = ${pct(R.stats.wastePct)}${R.unplaced.length ? ` · <b class="bad">${R.unplaced.length} cut${R.unplaced.length == 1 ? '' : 's'} longer than the bar</b>` : ''}</p></section>`;
+    )}<p class="bft"><b>${R.stats.bars} bar${R.stats.bars == 1 ? '' : 's'}</b> Wastage, including what is left of each bar: ${mm(R.stats.waste)}mm = ${pct(R.stats.wastePct)}${R.unplaced.length ? ` · <b class="bad">${R.unplaced.length} cut${R.unplaced.length == 1 ? '' : 's'} longer than the bar</b>` : ''}</p></section>`;
   }).join('');
   return printDoc(
     title || 'Cutting List',
-    (title ? 'Cutting list · ' : '') + 'Saw blade ' + D.kerf + ' mm · end trim ' + D.trim + ' mm',
+    (title ? 'Cutting list · ' : '') + 'Saw blade ' + D.kerf + 'mm · end trim ' + D.trim + 'mm',
     [],
     [],
     {
@@ -410,7 +410,7 @@ function listDoc(asHtml) {
         ['Bars needed', String(bars), P.length + ' profile' + (P.length == 1 ? '' : 's')],
         ['Cuts', String(P.reduce((s, x) => s + x.R.stats.cuts, 0))],
         ['Wastage', total ? pct(waste / total) : '0%'],
-        ['Wastage length', mm(waste) + ' mm'],
+        ['Wastage length', mm(waste) + 'mm'],
       ],
       tables: [
         {

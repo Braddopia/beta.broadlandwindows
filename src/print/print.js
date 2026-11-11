@@ -82,13 +82,23 @@ export function c39(t, h) {
   x -= 1;
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="-10 0 ${x + 20} ${h}" width="${(x + 20) * 0.8}" height="${h * 0.8}" fill="#000" shape-rendering="crispEdges">${r}</svg>`;
 }
+/* The bar across the top of every printed-document window: what it is, how to keep a PDF, then Print and Close.
+   It never prints. */
+export const PRINT_BAR_CSS = `.tb{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:10px;padding:10px 18px;background:rgba(1,26,54,.94);color:#fff;font:500 13px "Segoe UI",system-ui,Arial,sans-serif;box-shadow:0 2px 16px rgba(1,20,45,.35)}
+.tb .tbt{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px;overflow:hidden}.tb .tbt b{font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.tb .tbt span{font-size:11.5px;opacity:.7}
+.tb button{display:inline-flex;align-items:center;gap:8px;height:38px;padding:0 16px;border-radius:10px;border:1px solid rgba(255,255,255,.28);background:rgba(255,255,255,.08);color:#fff;font:600 13px "Segoe UI",system-ui,Arial,sans-serif;cursor:pointer;white-space:nowrap}
+.tb button:hover{background:rgba(255,255,255,.18)}.tb button:focus-visible{outline:2px solid #8ec5ff;outline-offset:2px}
+.tb button.pri{background:#2f7fdb;border-color:#2f7fdb}.tb button.pri:hover{background:#3f8fea}
+.tb svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+@media(max-width:560px){.tb .tbt span{display:none}.tb button{padding:0 12px}}
+@media print{.tb{display:none!important}}`;
+export const printBar = (title, printLabel = 'Print') =>
+  `<div class="tb"><div class="tbt"><b>${esc(title)}</b><span>To keep a PDF, press ${esc(printLabel)} and choose Save As PDF as the printer</span></div><button class="pri" data-pa="print"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9V3h12v6M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2M6 14h12v7H6z"/></svg>${esc(printLabel)}</button><button data-pa="close"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>Close</button></div>`;
 /* Print styles. One frosted panel per document (money or key figures) over a soft colour mesh.
    Real blur does not print, so the glass is see-through tint, a bright edge and a soft shadow. */
 export const PRINT_BASE = `@page{size:A4;margin:0 0 13mm}*{box-sizing:border-box}
 body{margin:0;font:9.3pt/1.5 "Segoe UI",Inter,"Helvetica Neue",Arial,sans-serif;color:#13233a;-webkit-print-color-adjust:exact;print-color-adjust:exact;background:#dde4ee;font-variant-numeric:tabular-nums}
 .pg{width:210mm;min-height:284mm;margin:0 auto;background:#fff;position:relative}
-.tb{position:sticky;top:0;z-index:5;display:flex;gap:8px;justify-content:center;padding:10px;background:#012b59}
-.tb button{border:0;border-radius:8px;padding:8px 18px;background:#ffd002;color:#012b59;font:600 13px system-ui,sans-serif;cursor:pointer}.tb button+button{background:#fff}
 .ov{font-size:7pt;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:#034ea2}
 h1{margin:1.5mm 0 0;font:600 21pt/1.12 "Segoe UI",Inter,Arial,sans-serif;letter-spacing:-.02em;color:#012b59}
 .sb{margin:1.2mm 0 0;font-size:10pt;color:#5a6a82}
@@ -275,8 +285,8 @@ export function printDoc(t, sub, rows, ph, o) {
   const foot = cus
     ? `<span>${esc(company.name)} · ${esc(company.addr)}${company.vatNo ? ' · VAT ' + esc(company.vatNo) : ''}${company.fensa ? ' · FENSA ' + esc(company.fensa) : ''}</span><span>${esc(ref)}</span>`
     : `<span>Broadland Windows · Internal use only</span><span>Printed ${now.toLocaleString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>`;
-  const doc = `<!doctype html><html><head><meta charset="utf-8"><title>${esc(t)}</title><style>${PRINT_BASE}${cus ? PRINT_CUS : PRINT_INT}</style></head><body>
-  ${o.asHtml ? '' : '<div class="tb"><button data-pa="print">Print or save as PDF</button><button data-pa="close">Close</button></div>'}<div class="pg">${page}</div>${on('footer') ? `<footer class="ft">${foot}</footer>` : ''}</body></html>`;
+  const doc = `<!doctype html><html><head><meta charset="utf-8"><title>${esc(t)}</title><style>${PRINT_BASE}${cus ? PRINT_CUS : PRINT_INT}${PRINT_BAR_CSS}</style></head><body>
+  ${o.asHtml ? '' : printBar(t)}<div class="pg">${page}</div>${on('footer') ? `<footer class="ft">${foot}</footer>` : ''}</body></html>`;
   if (o.asHtml) return doc;
   w.document.write(doc);
   w.document.close();

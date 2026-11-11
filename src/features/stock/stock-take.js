@@ -35,7 +35,7 @@ import { pagerH, paginate } from '../../ui/components/table.js';
 import { download } from '../../ui/download.js';
 import { form } from '../../ui/forms/form.js';
 import { askYes, closeModal, openModal } from '../../ui/modal.js';
-import { fitPage, printDoc } from '../../print/print.js';
+import { fitPage, printDoc, PRINT_BAR_CSS, printBar } from '../../print/print.js';
 import { render } from '../../ui/shell/router.js';
 import { toast } from '../../ui/toast.js';
 import { uiState } from '../../ui/ui-state.js';
@@ -470,7 +470,7 @@ th,td{border:.25mm solid #000;padding:1.2mm 1.6mm;text-align:left;vertical-align
 th{background:#d9e2ef;font-weight:700;font-size:9.5pt}td.c{font-family:Consolas,monospace;font-size:9pt}td.n{text-align:right}td.q{text-align:center;font-weight:700;font-size:11pt}
 td small{color:#444;font-size:8pt}.tot{margin:2mm 0 0;font-size:8pt;color:#444}
 @media print{.tb{display:none}section{padding:0}}
-</style></head><body><div class="tb"><button data-pa="print">Print</button><button data-pa="close">Close</button></div>${body}</body></html>`);
+${PRINT_BAR_CSS}</style></head><body>${printBar('Count Sheets')}${body}</body></html>`);
   w.document.close();
   fitPage(w);
 }

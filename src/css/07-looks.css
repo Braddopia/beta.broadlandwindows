@@ -5,10 +5,10 @@
    - Greeting Box pattern (body[data-hero]): drawn on the blue greeting box on the
      overview, the empty-list tiles and the tour banner (all .lkp). Never on the page.
    ========================================================================== */
-:root{--au1:rgba(3,78,162,.30);--au2:rgba(20,170,160,.20);--au3:rgba(255,208,2,.28)}
-body[data-theme=dark]{--au1:rgba(42,98,201,.38);--au2:rgba(20,150,140,.20);--au3:rgba(255,208,2,.10)}
+:root{--au1:rgba(3,78,162,.30);--au2:rgba(20,170,160,.20);--au3:rgba(255,208,2,.28);--au4:rgba(106,90,220,.20)}
+body[data-theme=dark]{--au1:rgba(42,98,201,.38);--au2:rgba(20,150,140,.20);--au3:rgba(255,208,2,.10);--au4:rgba(120,96,235,.24)}
 /* page background */
-body[data-bg=aurora]::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(60% 50% at 20% 30%,var(--au1),transparent 70%),radial-gradient(50% 45% at 80% 70%,var(--au2),transparent 70%),radial-gradient(40% 40% at 70% 20%,var(--au3),transparent 70%)}
+body[data-bg=aurora]::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(52% 46% at 16% 20%,var(--au1),transparent 70%),radial-gradient(46% 44% at 84% 16%,var(--au3),transparent 70%),radial-gradient(52% 48% at 86% 84%,var(--au2),transparent 70%),radial-gradient(50% 46% at 12% 88%,var(--au4),transparent 70%)}
 body[data-bg=plain]{background:#eef2f8}
 body[data-theme=dark][data-bg=plain]{background:#0d1117}
 /* pattern tiles (greeting box, empty lists, tour) */
@@ -35,7 +35,7 @@ body[data-theme=dark] #lookPop{background:#161b26;border-color:rgba(255,255,255,
 .lkb i::before{content:"";position:absolute;inset:0;z-index:-1}
 body[data-theme=dark] .lkb i{background:#0d1117}
 .lkb.hp i{background:linear-gradient(120deg,#012b59,#034ea2);--pc:rgba(255,255,255,.3);--pc2:rgba(255,255,255,.14);--pc3:rgba(255,255,255,.42)}
-.lkb.bg-aurora i::before{background:radial-gradient(60% 50% at 20% 30%,var(--au1),transparent 70%),radial-gradient(50% 45% at 80% 70%,var(--au2),transparent 70%),radial-gradient(40% 40% at 70% 20%,var(--au3),transparent 70%);--au1:rgba(3,78,162,.45);--au2:rgba(20,170,160,.4);--au3:rgba(255,208,2,.55)}
+.lkb.bg-aurora i::before{background:radial-gradient(52% 46% at 16% 20%,var(--au1),transparent 70%),radial-gradient(46% 44% at 84% 16%,var(--au3),transparent 70%),radial-gradient(52% 48% at 86% 84%,var(--au2),transparent 70%),radial-gradient(50% 46% at 12% 88%,var(--au4),transparent 70%);--au1:rgba(3,78,162,.45);--au2:rgba(20,170,160,.4);--au4:rgba(106,90,220,.4);--au3:rgba(255,208,2,.55)}
 .lkb.bg-glow i::before{background:radial-gradient(70% 60% at 15% 20%,rgba(3,78,162,.35),transparent 70%),radial-gradient(60% 55% at 90% 90%,rgba(255,208,2,.4),transparent 70%)}
 body[data-hero=contour] .lkp::before,.lkb.hp-contour i::before{background:var(--pc3);-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='192'%3E%3Cpath d='M0 8C66 1.0 133 1.0 200 8S333 15.0 400 8M0 24C66 11.2 133 11.2 200 24S333 36.8 400 24M0 40C66 29.9 133 29.9 200 40S333 50.1 400 40M0 56C66 53.1 133 53.1 200 56S333 58.9 400 56M0 72C66 70.3 133 70.3 200 72S333 73.7 400 72M0 88C66 79.7 133 79.7 200 88S333 96.3 400 88M0 104C66 91.0 133 91.0 200 104S333 117.0 400 104M0 120C66 111.1 133 111.1 200 120S333 128.9 400 120M0 136C66 134.0 133 134.0 200 136S333 138.0 400 136M0 152C66 149.6 133 149.6 200 152S333 154.4 400 152M0 168C66 158.5 133 158.5 200 168S333 177.5 400 168M0 184C66 171.1 133 171.1 200 184S333 196.9 400 184' fill='none' stroke='black' stroke-width='1.3'/%3E%3C/svg%3E") 0 0/400px 192px;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='192'%3E%3Cpath d='M0 8C66 1.0 133 1.0 200 8S333 15.0 400 8M0 24C66 11.2 133 11.2 200 24S333 36.8 400 24M0 40C66 29.9 133 29.9 200 40S333 50.1 400 40M0 56C66 53.1 133 53.1 200 56S333 58.9 400 56M0 72C66 70.3 133 70.3 200 72S333 73.7 400 72M0 88C66 79.7 133 79.7 200 88S333 96.3 400 88M0 104C66 91.0 133 91.0 200 104S333 117.0 400 104M0 120C66 111.1 133 111.1 200 120S333 128.9 400 120M0 136C66 134.0 133 134.0 200 136S333 138.0 400 136M0 152C66 149.6 133 149.6 200 152S333 154.4 400 152M0 168C66 158.5 133 158.5 200 168S333 177.5 400 168M0 184C66 171.1 133 171.1 200 184S333 196.9 400 184' fill='none' stroke='black' stroke-width='1.3'/%3E%3C/svg%3E") 0 0/400px 192px}
 body[data-hero=dots] .lkp::before,.lkb.hp-dots i::before{background-image:radial-gradient(circle,var(--pc3) 1.1px,transparent 1.6px);background-size:18px 18px}

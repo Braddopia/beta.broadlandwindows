@@ -23,7 +23,7 @@ import {
 import { areaList } from '../../domain/stock-take.js';
 import { can } from '../../domain/permissions.js';
 import { SEL } from './stock.js';
-import { c39, printDoc } from '../../print/print.js';
+import { PRINT_BAR_CSS, c39, fitPage, printBar, printDoc } from '../../print/print.js';
 import { closeModal, openModal } from '../../ui/modal.js';
 import { toast } from '../../ui/toast.js';
 
@@ -614,7 +614,8 @@ export function invLabels() {
     return;
   }
   w.document.write(
-    `<!doctype html><html><head><meta charset="utf-8"><title>Labels</title><style>@page{size:A4;margin:8mm}body{margin:0;font-family:Arial,sans-serif}.tb{padding:8px;background:#012b59;text-align:center}.tb button{padding:8px 14px;border:0;border-radius:8px;background:#ffd002;color:#012b59;font-weight:700;cursor:pointer}.g{display:grid;grid-template-columns:repeat(3,1fr);gap:3mm;padding:3mm}.l{border:.3mm dashed #9aa6b8;padding:3mm;height:38mm;display:flex;flex-direction:column;justify-content:space-between;break-inside:avoid}.l b{font-size:11pt}.l small{font-size:7.5pt;color:#444}.l svg{max-width:100%;height:auto}@media print{.tb{display:none}.g{padding:0}}</style></head><body><div class="tb"><button data-pa="print">Print labels</button></div><div class="g">${L.map((r) => labelH(r)).join('')}</div></body></html>`
+    `<!doctype html><html><head><meta charset="utf-8"><title>Labels</title><style>@page{size:A4;margin:8mm}body{margin:0;font-family:Arial,sans-serif}.g{display:grid;grid-template-columns:repeat(3,1fr);gap:3mm;padding:3mm}.l{border:.3mm dashed #9aa6b8;padding:3mm;height:38mm;display:flex;flex-direction:column;justify-content:space-between;break-inside:avoid}.l b{font-size:11pt}.l small{font-size:7.5pt;color:#444}.l svg{max-width:100%;height:auto}@media print{.g{padding:0}}${PRINT_BAR_CSS}</style></head><body>${printBar('Stock Labels', 'Print Labels')}<div class="g">${L.map((r) => labelH(r)).join('')}</div></body></html>`
   );
   w.document.close();
+  fitPage(w);
 }

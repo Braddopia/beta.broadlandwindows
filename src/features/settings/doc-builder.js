@@ -3,6 +3,7 @@
    Changes apply to the next print straight away, are saved, and are recorded in the audit log. */
 import { onClick, onEvent } from '../../core/actions.js';
 import { html, raw } from '../../core/html.js';
+import { ICONS, svg } from '../../core/icons.js';
 import { audit } from '../../data/audit.js';
 import { store } from '../../data/persistence.js';
 import { DOCS, docInfo, docOff, docOn, docReset, docSet, docTables } from '../../print/doc-options.js';
@@ -16,7 +17,7 @@ let SEL = DOCS[0].k;
 export function docCard() {
   const groups = [...new Set(DOCS.map((d) => d.g))];
   return html`<section class="panel set-c">
-    <h2><span>Printed Documents</span><button class="btn sm" ${raw(onClick('docBuilder'))}>Customise</button></h2>
+    <h2><span class="set-ic">${raw(svg(ICONS.reports))}</span><span>Printed Documents</span><button class="btn sm" ${raw(onClick('docBuilder'))}>Customise</button></h2>
     ${groups.map((g) => {
       const L = DOCS.filter((d) => d.g == g),
         off = L.reduce((t, d) => t + docOff(d.k), 0);
