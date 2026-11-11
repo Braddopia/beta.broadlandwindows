@@ -1,4 +1,5 @@
 /* features/stock/item-window: The product window: adding, removing, requesting and editing stock. */
+import { barLenOf } from '../../domain/barcut.js';
 import { MAX_PHOTOS, UNITS } from '../../config/constants.js';
 import { today } from '../../core/dates.js';
 import { onClick } from '../../core/actions.js';
@@ -85,12 +86,12 @@ export function ieFields() {
       ph: 'What it is, as on the count sheet',
       ro: ieMode == 'remove',
     },
-    { k: 'unit', l: 'Unit', t: 'select', o: UNITS, sec: 'p', ro: ieMode == 'remove' },
+    { k: 'unit', l: 'Unit', t: 'select', o: UNITS, sec: 's', ro: ieMode == 'remove' },
+    { k: 'length', l: lenBox(unitOf(r)).l, max: 30, sec: 's', ph: lenBox(unitOf(r)).ph },
     ed
-      ? { k: 'stock', l: 'Current stock', t: 'number', max: 1e7, sec: 'p', hint: 'Changing this logs an adjustment' }
-      : { k: 'qty', l: 'Quantity', t: 'number', req: 1, pos: 1, max: 1e6, sec: 'p' },
-    { k: 'barcode', l: 'Barcode', max: 64, sec: 'p' },
-    { k: 'length', l: lenBox(unitOf(r)).l, max: 30, sec: 'p', ph: lenBox(unitOf(r)).ph },
+      ? { k: 'stock', l: 'Current stock', t: 'number', max: 1e7, sec: 's', hint: 'Changing this logs an adjustment' }
+      : { k: 'qty', l: 'Quantity', t: 'number', req: 1, pos: 1, max: 1e6, sec: 's' },
+    { k: 'barcode', l: 'Barcode', max: 64, sec: 'b' },
     { k: 'cInName', l: 'Colour in (B)', t: 'colour', w: 'full', sec: 'c' },
     { k: 'cOutName', l: 'Colour out (A)', t: 'colour', w: 'full', sec: 'c' },
     ...(ieMode != 'remove'
@@ -125,6 +126,20 @@ export function ieFields() {
     ...(ieMode == 'remove'
       ? [{ k: 'supplier', l: 'Supplier', ro: 1, sec: 'l' }]
       : [{ k: 'supplier', l: 'Supplier', t: 'select', o: SUPN(r.supplier), req: ieMode == 'add' && !r.pid, sec: 'l' }]),
+    /* profiles cut from full bars: listed in the Cutting Optimiser with their bar length */
+    ...(ieMode == 'edit' || ieMode == 'add'
+      ? [
+          {
+            k: 'isBar',
+            l: 'Cut from full bars?',
+            t: 'select',
+            o: ['No', 'Yes'],
+            sec: 'k',
+            hint: 'Yes lists it in the Cutting Optimiser',
+          },
+          { k: 'barLen', l: 'Full bar length', t: 'number', max: 20000, dp: 0, sec: 'k', hint: 'In millimetres' },
+        ]
+      : []),
     ...(ieMode == 'edit' || ieMode == 'add'
       ? [
           { k: 'qc', l: 'QC status', t: 'select', o: QC_STATUS, sec: 'q' },
@@ -167,6 +182,8 @@ export function itemWindow(mode, k, pre) {
         cost: ed ? r.cost : 0,
         barcode: r.barcode || r.item,
         notes: r.notes || '',
+        isBar: (state.cutProf || {})[r.pid] ? 'Yes' : 'No',
+        barLen: ((state.cutProf || {})[r.pid] || {}).bar || barLenOf(r.length) || '',
       }
     : {
         pid: mode == 'remove' ? '' : stkId(),
@@ -204,7 +221,7 @@ export function itemWindow(mode, k, pre) {
   <div class="ie"><div class="ie-ph"><div class="ie-main" id="ieMain"></div><div class="ie-strip" id="ieStrip"></div>
      <div class="prow"><label class="btn ghost sm">${svg(ICONS.photo)}Take photo<input type="file" accept="image/*" capture="environment" hidden data-onchange="addPh" data-args-change="[{&quot;$&quot;:&quot;this&quot;}]"></label><label class="btn ghost sm">Upload photos<input type="file" accept="image/*" multiple hidden data-onchange="addPh" data-args-change="[{&quot;$&quot;:&quot;this&quot;}]"></label><span class="muted" style="align-self:center;font-size:.75rem">Up to ${MAX_PHOTOS}, resized automatically</span></div>
      <div class="ie-stats" id="ieStats"></div></div>
-   <div class="ie-f">${sec('Product', 'p', 'ie-prod')}${sec('Colours', 'c')}${sec('Stock And Ordering', 'o')}${sec('Location And Supplier', 'l')}${sec('Quality Check', 'q')}${sec(mode == 'request' ? 'Request' : 'Notes', 'n')}</div></div>
+   <div class="ie-f">${sec('Product', 'p', 'ie-prod')}${sec('Size And Quantity', 's', 'ie-three')}${sec('Barcode', 'b')}${sec('Colours', 'c')}${sec('Stock And Ordering', 'o')}${sec('Location And Supplier', 'l')}${sec('Cutting', 'k')}${sec('Quality Check', 'q')}${sec(mode == 'request' ? 'Request' : 'Notes', 'n')}</div></div>
   ${view ? `<div class="mact"><button class="btn ghost" ${onClick('reportProd', r.pid)}>Report</button><button class="btn ghost" ${onClick('stockForm', 'request', r.pid)}>Request stock</button><button class="btn ghost" data-act="closeModal">Close</button><button class="btn" ${onClick('itemWindow', 'edit', r.pid)}>Edit</button>` : `<div class="mact">${ed && can('manage') ? `<button class="btn ghost l" style="color:var(--red)" ${onClick('delProduct', r.pid)}>Delete product</button>` : ''}${r ? `<button class="btn ghost" ${onClick('reportProd', r.pid)}>Report</button>` : ''}<button class="btn ghost" data-act="closeModal">Cancel</button><button class="btn ${mode == 'remove' ? 'red' : mode == 'add' ? 'green' : ''}" data-act="ieSave">${B}</button>`}</div>`,
     'xl'
   );
@@ -374,6 +391,7 @@ export function ieSave() {
       ...(Ad ? { cost: o.cost } : {}),
     };
     prodRows(k).forEach((x) => Object.assign(x, upd));
+    linkBar(np, o, k);
     if (changed)
       state.items.unshift(
         moveRow(prod(np), o.stock > r.stock ? 'add' : 'remove', Math.abs(o.stock - r.stock), o.stock, {
@@ -460,6 +478,7 @@ export function ieSave() {
     kind == 'request' ? { reqStatus: 'Pending', ord: nextOrd('P'), note: o.note } : {}
   );
   state.items.unshift(row);
+  if (kind == 'add') linkBar(pid, o);
   iePhotos(pid);
   if (iePre.fromReq) {
     const q = byUid(iePre.fromReq);
@@ -484,6 +503,14 @@ export function ieSave() {
         ? 'Added ' + o.qty + ' ' + o.unit + ', now ' + st
         : 'Removed ' + o.qty + ' ' + o.unit + ', now ' + st
   );
+}
+/* Cutting section: keep the product's bar length for the Cutting Optimiser (state.cutProf, by Stock ID) */
+function linkBar(pid, o, old) {
+  if (o.isBar === undefined) return;
+  const L = (state.cutProf = state.cutProf && typeof state.cutProf == 'object' ? state.cutProf : {});
+  if (old && old != pid) delete L[old];
+  if (o.isBar == 'Yes') L[pid] = { bar: Math.round(+o.barLen) || barLenOf(o.length) || 6500 };
+  else delete L[pid];
 }
 /* barcode follows the item code unless "use a different barcode" is ticked */
 /* description, area and quality-check details from the form; QC stamps who checked and when */

@@ -587,7 +587,7 @@ body[data-theme=dark] .smap .land{fill:rgba(120,170,255,.08);stroke:#6ea3e8}
 .cut-t th{border-bottom:1px solid var(--line)!important;padding-bottom:.4rem!important}
 .cut-lists .cut-in .panel h2,.cut-lists h2{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:.3rem .8rem}
 .cut-lists h2 small{font-weight:400;font-size:.76rem}
-@media(min-width:900px){.ptb.fx.t-inv td.ac .acts{justify-content:flex-start}}
+@media(min-width:900px){.ptb.fx.t-inv td.ac .acts{justify-content:flex-end}}
 
 /* first-ever tour: a thin bar fills before Next unlocks */
 #tour .ttime{height:4px;margin:1rem 0 1rem;border-radius:4px;background:var(--line);overflow:hidden}
@@ -818,3 +818,19 @@ body[data-theme=dark] .smap .lm text{fill:#9fb0c6;stroke:#17263c}
 body[data-theme=dark] .smap .tl{fill:#f1f5fb;stroke:#17263c}
 body[data-theme=dark] .smap .scale path{stroke:#8fa3bd}body[data-theme=dark] .smap .scale text{fill:#8fa3bd}
 body.rm .pin.u .halo{animation:none}
+
+/* inventory list: buttons hard right on every row, and the filter at the far right of the heading row */
+.t-inv td.ac .acts{justify-content:flex-start!important;flex-wrap:nowrap}
+.t-inv td.ac .acts .tag.fw+.mini{margin-left:auto}
+.t-inv th[data-col=act]{text-align:left}
+.t-inv th #invF{float:right}
+/* product window: each stage is its own numbered card */
+.ie-f{counter-reset:ies}
+.ie-f fieldset{border:1px solid var(--line);border-radius:14px;padding:.9rem 1rem 1rem;margin:0 0 .9rem;background:var(--card2,rgba(127,140,160,.05));min-width:0}
+.ie-f legend{float:left;display:flex;align-items:center;gap:.55rem;width:100%;padding:0 0 .6rem;margin:0 0 .8rem;border-bottom:1px solid var(--line);font:600 .95rem var(--head)}
+.ie-f legend+*{clear:both}
+.ie-f legend::before{counter-increment:ies;content:counter(ies);display:grid;place-items:center;width:1.45rem;height:1.45rem;border-radius:50%;background:var(--blue);color:#fff;font:700 .74rem var(--body)}
+.ie-f .grid.ie-prod{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+.ie-f .grid.ie-three{grid-template-columns:repeat(3,minmax(0,1fr));align-items:start}
+body[data-theme=dark] .ie-f legend{color:#e8eef8}
+@media(max-width:700px){.ie-f .grid.ie-three,.ie-f .grid.ie-prod{grid-template-columns:1fr}}

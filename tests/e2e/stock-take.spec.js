@@ -227,3 +227,34 @@ test('the Length box follows the unit: metres and pieces must be numbers', async
   await expect(app.page.locator('#mbox .ferr')).toContainText('whole number');
   expect(await app.run(() => products().length)).toBe(n);
 });
+
+test('a product is marked as a profile bar in its own window (Cutting), and the stages are numbered cards', async ({
+  app,
+}) => {
+  await app.role('beta');
+  await app.go('stock');
+  const pid = await app.run(() => products()[0].pid);
+  await app.call('stockForm', 'edit', pid);
+  await expect(app.page.locator('#mbox .ie-f fieldset legend')).toHaveText([
+    'Product',
+    'Size And Quantity',
+    'Barcode',
+    'Colours',
+    'Stock And Ordering',
+    'Location And Supplier',
+    'Cutting',
+    'Quality Check',
+    'Notes',
+  ]);
+  await app.page.selectOption('#f_isBar', 'Yes');
+  await app.page.fill('#f_barLen', '6500');
+  await app.page.click('#mbox [data-act=ieSave]');
+  expect(await app.run((p) => state.cutProf[p], pid)).toEqual({ bar: 6500 });
+  // and it can be switched off again
+  await app.call('stockForm', 'edit', pid);
+  await expect(app.page.locator('#f_isBar')).toHaveValue('Yes');
+  await app.page.selectOption('#f_isBar', 'No');
+  await app.page.click('#mbox [data-act=ieSave]');
+  expect(await app.run((p) => state.cutProf[p], pid)).toBeUndefined();
+  expect(app.errors).toEqual([]);
+});
