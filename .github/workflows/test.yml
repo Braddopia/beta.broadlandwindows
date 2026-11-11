@@ -9,7 +9,18 @@ jobs:
       - uses: actions/setup-node@v5
         with: { node-version: 22 }
       - run: npm ci
-      - run: npx playwright install --with-deps chromium
+      # the browser itself, then the system packages it likes to have. The package servers are sometimes
+      # unreachable from the test machine: try three times, then carry on (the machine already has what
+      # the browser needs to start; only extra fonts would be missing)
+      - run: npx playwright install chromium
+      - name: Install browser system packages (best effort)
+        run: |
+          for i in 1 2 3; do
+            if npx playwright install-deps chromium; then exit 0; fi
+            echo "Package servers did not answer (try $i of 3)"
+            sleep 20
+          done
+          echo "Carrying on without the extra packages"
       - run: npm run lint
       - run: npm run test:unit
       - run: npm run build

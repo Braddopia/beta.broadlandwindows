@@ -190,3 +190,31 @@ test('strict security policy: injected scripts and inline handlers are blocked',
   expect(csp.length, 'the browser reported the blocked code').toBeGreaterThan(0);
   app.errors.splice(0, app.errors.length, ...app.errors.filter((e) => !e.startsWith('CSP:')));
 });
+
+test('PINs are stored stretched with their own salt; an old-style PIN still works once and is upgraded', async ({
+  app,
+}) => {
+  await app.role('beta');
+  const r = await app.run(() => {
+    const out = {};
+    // a new PIN, saved the way the Account PINs window saves it
+    state.sec.pins.admin = pinMake('admin', '482913', 0);
+    const p = state.sec.pins.admin;
+    out.shape = [p.v, p.n == PIN_ROUNDS, p.s.length, p.h.length, JSON.stringify(p).includes('482913')];
+    out.right = pinOk('admin', '482913');
+    out.wrong = pinOk('admin', '482914');
+    out.otherRole = pinOk('beta', '482913');
+    // the same PIN twice never stores the same thing
+    out.differs = pinMake('admin', '482913', 0).h != p.h;
+    // a PIN saved the old way (one salted hash): accepted, then re-saved the new way
+    state.sec.pins.admin = { h: sha256(state.sec.salt + ':admin:771204'), def: 0 };
+    out.oldWrong = pinOk('admin', '000000');
+    out.stillOld = state.sec.pins.admin.v === undefined;
+    out.oldRight = pinOk('admin', '771204');
+    out.upgraded = state.sec.pins.admin.v == 2 && pinOk('admin', '771204');
+    return out;
+  });
+  expect(r.shape).toEqual([2, true, 32, 64, false]);
+  expect([r.right, r.wrong, r.otherRole, r.differs]).toEqual([true, false, false, true]);
+  expect([r.oldWrong, r.stillOld, r.oldRight, r.upgraded]).toEqual([false, true, true, true]);
+});

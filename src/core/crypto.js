@@ -1,9 +1,10 @@
-/* core/crypto: SHA-256 hashing (used for PINs). */
+/* core/crypto: SHA-256 hashing and key stretching (used for PINs). */
 
 /* ---- SHA-256 (used for PIN hashes; works offline and on file://) ---- */
-export function sha256(str) {
-  const K = [],
-    H = [];
+/* the SHA-256 constants, worked out once */
+const K = [],
+  H0 = [];
+{
   let n = 2,
     c = 0;
   const prime = (x) => {
@@ -13,12 +14,15 @@ export function sha256(str) {
     frac = (x) => ((x - (x | 0)) * 4294967296) | 0;
   while (c < 64) {
     if (prime(n)) {
-      if (c < 8) H[c] = frac(Math.pow(n, 1 / 2));
+      if (c < 8) H0[c] = frac(Math.pow(n, 1 / 2));
       K[c] = frac(Math.pow(n, 1 / 3));
       c++;
     }
     n++;
   }
+}
+export function sha256(str) {
+  const H = H0.slice();
   const b = unescape(encodeURIComponent(str)),
     l = b.length * 8,
     w = [];
@@ -47,4 +51,18 @@ export function sha256(str) {
     for (let i = 0; i < 8; i++) H[i] = (H[i] + h[i]) | 0;
   }
   return H.map((x) => (x >>> 0).toString(16).padStart(8, '0')).join('');
+}
+
+/** Key stretching: the secret hashed with its salt over and over, so that trying every possible PIN against
+    a stolen copy of the data takes thousands of times longer than one plain hash would. */
+export function stretch(secret, salt, rounds) {
+  let h = sha256(salt + ':' + secret);
+  for (let i = 1; i < rounds; i++) h = sha256(h + ':' + salt + ':' + secret);
+  return h;
+}
+/** a random salt (from the browser's secure random numbers) */
+export function randomSalt() {
+  const a = new Uint8Array(16);
+  crypto.getRandomValues(a);
+  return [...a].map((x) => x.toString(16).padStart(2, '0')).join('');
 }

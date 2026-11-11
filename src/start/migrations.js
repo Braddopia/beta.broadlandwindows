@@ -8,7 +8,7 @@ import { seed } from '../data/seed.js';
 import { state } from '../data/state.js';
 import { CK3, CK_OLD } from '../domain/checklists.js';
 import { ikey, stkId } from '../domain/stock.js';
-import { pinHash } from '../features/auth/pins.js';
+import { pinMake } from '../features/auth/pins.js';
 import { fitSync } from '../features/contracts/finance-step.js';
 import { conOf } from '../features/suppliers/suppliers.js';
 
@@ -198,7 +198,9 @@ export function migrate() {
   state.sec.salt = state.sec.salt || uuid();
   state.sec.pins = state.sec.pins || {};
   ['admin', 'beta'].forEach((r) => {
-    if (!state.sec.pins[r]) state.sec.pins[r] = { h: pinHash(r, '1234'), def: 1 };
+    /* a default PIN still stored the older, weaker way is re-saved the stronger way (the PIN is known: 1234) */
+    if (!state.sec.pins[r] || (state.sec.pins[r].def && state.sec.pins[r].v != 2))
+      state.sec.pins[r] = pinMake(r, '1234', 1);
   });
   ['finance', 'sales', 'stock', 'fitter'].forEach((r) => delete state.sec.pins[r]);
 }

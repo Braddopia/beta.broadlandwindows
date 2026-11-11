@@ -1,7 +1,7 @@
 /* features/auth/pins: Account PINs: checking, locking after wrong tries and changing them. */
 import { PIN_LOCK_S, PIN_TRIES, ROLES } from '../../config/roles.js';
 import { onClick } from '../../core/actions.js';
-import { sha256 } from '../../core/crypto.js';
+import { randomSalt, sha256, stretch } from '../../core/crypto.js';
 import { $, esc } from '../../core/dom.js';
 import { audit } from '../../data/audit.js';
 import { store } from '../../data/persistence.js';
@@ -12,17 +12,36 @@ import { form } from '../../ui/forms/form.js';
 import { closeModal, openModal } from '../../ui/modal.js';
 import { toast } from '../../ui/toast.js';
 
-export function pinHash(role, pin) {
-  return sha256(state.sec.salt + ':' + role + ':' + pin);
+/* How a PIN is kept: never the PIN itself. Each PIN has its own random salt and is hashed PIN_ROUNDS times
+   over (v: 2), so a copy of the data cannot be searched for the PIN quickly. PINs saved the older way
+   (one salted hash) still work, and are re-saved the stronger way the next time they are used. */
+export const PIN_ROUNDS = 12000;
+/** the record to store for a PIN */
+export function pinMake(role, pin, def) {
+  const s = randomSalt();
+  /* the default PIN is public knowledge, so there is nothing to protect by working hard on it */
+  const n = def ? 500 : PIN_ROUNDS;
+  return { v: 2, s, n, h: stretch(role + ':' + pin, s, n), def: def ? 1 : 0 };
+}
+const legacyHash = (role, pin) => sha256(state.sec.salt + ':' + role + ':' + pin);
+/** is this the PIN for the role? */
+export function pinOk(role, pin) {
+  const p = state.sec.pins[role];
+  if (!p || typeof pin != 'string' || !pin) return false;
+  if (p.v == 2) return stretch(role + ':' + pin, p.s, p.n || PIN_ROUNDS) === p.h;
+  if (legacyHash(role, pin) !== p.h) return false;
+  state.sec.pins[role] = pinMake(role, pin, p.def);
+  return true;
 }
 export function pinKey(el) {
   if (event.key == 'Enter') chkPin(el.dataset.r);
 }
 export function pinState() {
   try {
-    return JSON.parse(sessionStorage.getItem('bb_pin')) || { n: 0, until: 0 };
+    /* kept in the browser, not the tab: closing the tab does not hand out fresh tries */
+    return JSON.parse(localStorage.getItem('bb_pin')) || { n: 0, until: 0, locks: 0 };
   } catch (e) {
-    return { n: 0, until: 0 };
+    return { n: 0, until: 0, locks: 0 };
   }
 }
 export function chkPin(k) {
@@ -33,9 +52,9 @@ export function chkPin(k) {
     return;
   }
   const v = $('#pin').value;
-  if (state.sec.pins[k] && pinHash(k, v) === state.sec.pins[k].h) {
+  if (pinOk(k, v)) {
     try {
-      sessionStorage.removeItem('bb_pin');
+      localStorage.removeItem('bb_pin');
     } catch (e) {}
     closeModal();
     setRole(k);
@@ -47,25 +66,27 @@ export function chkPin(k) {
   }
   st.n++;
   if (st.n >= PIN_TRIES) {
-    st.until = Date.now() + PIN_LOCK_S * 1000;
+    /* each lock-out in a row lasts twice as long as the one before (up to 15 minutes) */
+    st.locks = (st.locks || 0) + 1;
+    st.until = Date.now() + Math.min(900, PIN_LOCK_S * 2 ** (st.locks - 1)) * 1000;
     st.n = 0;
     audit('PIN locked', ROLES[k].n, PIN_TRIES + ' wrong attempts');
     store();
   }
   try {
-    sessionStorage.setItem('bb_pin', JSON.stringify(st));
+    localStorage.setItem('bb_pin', JSON.stringify(st));
   } catch (e) {}
   $('#pin').value = '';
   $('#pinMsg').textContent =
     st.until > Date.now()
-      ? 'Locked for ' + PIN_LOCK_S + ' seconds.'
+      ? 'Locked for ' + Math.ceil((st.until - Date.now()) / 1000) + ' seconds.'
       : 'Wrong PIN, ' + (PIN_TRIES - st.n) + ' tries left.';
 }
 /* ---- PIN management (owner accounts) ---- */
 export function chPin() {
   if (!need('manage', 'Changing PINs')) return;
   openModal(
-    `<h2>Account PINs</h2><p class="muted">PINs are stored as salted SHA-256 hashes. Use 4 to 12 digits.</p>${Object.entries(
+    `<h2>Account PINs</h2><p class="muted">PINs are never stored as typed: each is scrambled thousands of times with its own random salt. Use 4 to 12 digits; longer is safer.</p>${Object.entries(
       ROLES
     )
       .filter(([k]) => k != 'staff')
@@ -98,7 +119,7 @@ export function setPin(k) {
         toast('Pick a PIN that is harder to guess');
         return false;
       }
-      state.sec.pins[k] = { h: pinHash(k, o.a), def: 0 };
+      state.sec.pins[k] = pinMake(k, o.a, 0);
       audit('PIN changed', ROLES[k].n, '');
       setTimeout(chPin, 50);
     }
