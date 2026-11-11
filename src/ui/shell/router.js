@@ -1,4 +1,7 @@
 /* ui/shell/router: The pages, the side menu and drawing the current page. */
+import { nlq } from '../../features/search/questions.js';
+import { factsFor } from '../../features/search/facts.js';
+import { siteKnows } from '../../features/search/site-index.js';
 import { vBars } from '../../features/bars/bars.js';
 import { ROLES } from '../../config/roles.js';
 import { markExact } from '../../features/search/exact-rows.js';
@@ -88,7 +91,54 @@ export let view = '',
 /* render() opens the right first page for the account */
 
 /* page filter: same matching as the top-bar search (19-search.js), so phone lists and spacing differences match too */
-export const hit = (o) => !q || srchMatch(srchText(o), q);
+/* A question the search box understands filters a list page the same way it is answered:
+     "jobs in norwich", "overdue deliveries", and on its own page just "balance outstanding" or "urgent".
+   A question about something else ("stock value" typed on Contracts) leaves the page as it is, so a list
+   never goes empty just because the words are not in its rows. Worked out once per draw. */
+const PAGE_KIND = { leads: 'lead', contracts: 'con', service: 'call', deliveries: 'del', stock: 'stock' },
+  PAGE_ROWS = {
+    leads: () => state.leads,
+    contracts: () => state.contracts,
+    service: () => state.calls,
+    deliveries: () => state.deliveries,
+    contacts: () => state.contacts,
+    staff: () => state.staff,
+    stock: () => state.items,
+  };
+let hitFn = null,
+  hitFor = '';
+function pageHit() {
+  const plain = (o) => srchMatch(srchText(o), q),
+    asSet = (N) => {
+      const S = new Set(N.L),
+        ids = new Set(N.L.map((r) => r.pid).filter(Boolean));
+      return (o) => S.has(o) || (!!o.pid && ids.has(o.pid));
+    };
+  let N = null,
+    D = null,
+    rows = null;
+  try {
+    N = nlq(q);
+    if (N && N.n && N.E.v == view) return asSet(N);
+    rows = PAGE_ROWS[view] ? PAGE_ROWS[view]() : null;
+    if (!rows || rows.some(plain)) return plain;
+    D = PAGE_KIND[view] ? nlq(q, PAGE_KIND[view]) : null;
+    if (D && D.n && D.E.v == view) return asSet(D);
+    if ((N && N.n) || factsFor(q).length || siteKnows(q)) return () => true;
+  } catch (e) {
+    /* anything going wrong here falls back to plain matching */
+  }
+  return plain;
+}
+export const hit = (o) => {
+  if (!q) return true;
+  const k = view + '|' + q;
+  if (hitFor != k || !hitFn) {
+    hitFor = k;
+    hitFn = pageHit();
+  }
+  return hitFn(o);
+};
 export function badges() {
   return {
     messages: msgUnread(),
@@ -136,6 +186,7 @@ export function go(v) {
   tabTour(v);
 }
 export function render(soft) {
+  hitFn = null;
   if (!canSee(view) || (view == 'admin' && !can('manage'))) view = HOME();
   const V = VIEWS[view];
   $('#nav').innerHTML = navHtml(badges());

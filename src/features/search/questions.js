@@ -147,7 +147,8 @@ export function nlRange(q) {
   if (y) return [y + '-01-01', y + '-12-31', y];
   return null;
 }
-export function nlq(raw) {
+/** dflt: the kind of record to assume when the question names none (a list page passes its own) */
+export function nlq(raw, dflt) {
   const q =
     ' ' +
     String(raw || '')
@@ -156,7 +157,7 @@ export function nlq(raw) {
       .replace(/\s+/g, ' ') +
     ' ';
   if (q.trim().length < 4) return null;
-  const E = NLE().find((e) => e.re.test(q) && canSee(e.v));
+  const E = NLE().find((e) => e.re.test(q) && canSee(e.v)) || (dflt && NLE().find((e) => e.k == dflt && canSee(e.v)));
   if (!E) return null;
   const td = today(),
     F = [],
@@ -340,6 +341,8 @@ export function nlq(raw) {
   return {
     E,
     L,
+    /* how many things the question narrowed the list by (0 = it only named the kind of record) */
+    n: F.length,
     title: (pre.length ? pre.join(', ') + ' ' + E.n.toLowerCase() : E.n) + (rest.length ? ' ' + rest.join(', ') : ''),
   };
 }

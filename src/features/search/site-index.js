@@ -88,6 +88,11 @@ export function siteIndex() {
   FOR = ROLE;
   return out;
 }
+/** does a label on some page match? Only looks if the index is already built: safe to call while a page draws */
+export const siteKnows = (q) => {
+  const W = askWords(q);
+  return !!IDX && FOR == ROLE && W.length > 0 && IDX.some((x) => labelHit(W, x.t));
+};
 /** labels on any page that match every word of the question */
 export function siteFind(q, max = 6) {
   const W = askWords(q);

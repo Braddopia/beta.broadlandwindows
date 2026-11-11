@@ -20,6 +20,16 @@ export const NCTABS_ALL = ['All', 'Requests', 'Stock In/Out', 'Alerts'],
   NCTABS_STD = ['All', 'My Requests', 'Alerts'];
 export const ncTabs = () => (can('money') ? NCTABS_ALL : NCTABS_STD);
 export let ncAlerts = [];
+/* read marks for requests and alerts (stock movements keep theirs in state.seen). A request is unread again
+   when its status changes, and a low-stock alert when the stock level changes. */
+const nread = () => (state.nread && typeof state.nread == 'object' ? state.nread : (state.nread = {}));
+const reqKey = (r) => 'r:' + r.uid + ':' + r.reqStatus;
+const alrKey = (x) => (x.uid ? 'u:' + x.uid : 'a:' + x.key + ':' + x.stock);
+export const ncUnread = (d = ncData()) =>
+  d.req.filter((r) => !nread()[reqKey(r)]).length +
+  d.mov.filter((x) => x.n).length +
+  d.alr.filter((x) => !nread()[alrKey(x)]).length +
+  d.men.filter((n) => !n.read).length;
 export function ncData() {
   const td = today(),
     req = [],
@@ -78,14 +88,9 @@ export function ncData() {
     men: [],
   };
 }
+/** the number on the bell: everything not yet read */
 export function ncCount() {
-  const d = ncData();
-  return (
-    d.req.filter((r) => (can('money') ? r.reqStatus == 'Pending' : r.reqStatus == 'Approved')).length +
-    d.mov.filter((x) => x.n).length +
-    d.alr.length +
-    d.men.filter((n) => !n.read).length
-  );
+  return ncUnread();
 }
 export function ncDraw() {
   const nc = $('#nc'),
@@ -98,13 +103,13 @@ export function ncDraw() {
   const rq = d.req
     .map(
       (r) =>
-        `<div class="nrow ${r.flag ? 'hot' : ''}"><span><span class="tag ${r.reqStatus == 'Pending' ? 'y' : 'g'}">${esc(r.reqStatus)}</span> <b>${ordTag(r)} ${r.qty} ${esc(unitOf(r))} x ${esc(r.item)}</b><small>${esc(colTxt(r))}, ${esc(r.user)}, ${esc(r.time)}${r.note ? ', ' + esc(r.note) : ''}</small></span><span class="acts">${r.reqStatus == 'Pending' && Ad ? `<button class="mini pri" ${onClick('ncAct', 'approve', r.uid)}>Approve</button><button class="mini del" ${onClick('ncAct', 'reject', r.uid)}>Reject</button>` : ''}${r.reqStatus == 'Approved' ? `<button class="mini" ${onClick('ncAct', 'receive', r.uid)}>Receive</button><button class="mini" ${onClick('ncAct', 'clr', r.uid)}>Clear</button>` : ''}</span></div>`
+        `<div class="nrow ${r.flag ? 'hot' : ''} ${nread()[reqKey(r)] ? 'seen' : ''}"><span><span class="tag ${r.reqStatus == 'Pending' ? 'y' : 'g'}">${esc(r.reqStatus)}</span> <b>${ordTag(r)} ${r.qty} ${esc(unitOf(r))} x ${esc(r.item)}</b><small>${esc(colTxt(r))}, ${esc(r.user)}, ${esc(r.time)}${r.note ? ', ' + esc(r.note) : ''}</small></span><span class="acts">${r.reqStatus == 'Pending' && Ad ? `<button class="mini pri" ${onClick('ncAct', 'approve', r.uid)}>Approve</button><button class="mini del" ${onClick('ncAct', 'reject', r.uid)}>Reject</button>` : ''}${r.reqStatus == 'Approved' ? `<button class="mini" ${onClick('ncAct', 'receive', r.uid)}>Receive</button><button class="mini" ${onClick('ncAct', 'clr', r.uid)}>Clear</button>` : ''}</span></div>`
     )
     .join('');
   const al = d.alr
     .map(
       (x, j) =>
-        `<div class="nrow"><span><span class="tag ${x.k == 'Alert' ? 'r' : 'y'}">${esc(x.k)}</span> <b>${esc(x.t)}</b><small>${esc(x.s)}</small></span><span class="acts">${x.go ? `<button class="mini" ${onClick('ncAct', 'go', x.go)}>Open</button>` : ''}<button class="mini pri" ${onClick('ncAct', 'alr', j)}>Clear</button></span></div>`
+        `<div class="nrow ${nread()[alrKey(x)] ? 'seen' : ''}"><span><span class="tag ${x.k == 'Alert' ? 'r' : 'y'}">${esc(x.k)}</span> <b>${esc(x.t)}</b><small>${esc(x.s)}</small></span><span class="acts">${x.go ? `<button class="mini" ${onClick('ncAct', 'go', x.go)}>Open</button>` : ''}<button class="mini pri" ${onClick('ncAct', 'alr', j)}>Clear</button></span></div>`
     )
     .join('');
   const mv = d.mov
@@ -164,7 +169,14 @@ export function ncAct(a, x) {
     if (n) n.read = true;
   } else if (a == 'del') state.notes = state.notes.filter((n) => n.id != x);
   else if (a == 'readall') {
-    ncData().mov.forEach((m) => (state.seen[m.r.uid] = 1));
+    /* everything on the tab being looked at (or everything, on All) is marked read: the rows stay, dimmed,
+       and stop counting on the bell */
+    const d = ncData(),
+      T = uiState.nc.t,
+      all = T == 'All';
+    if (all || T == 'Stock In/Out') d.mov.forEach((m) => (state.seen[m.r.uid] = 1));
+    if (all || T == 'Requests' || T == 'My Requests') d.req.forEach((r) => (nread()[reqKey(r)] = 1));
+    if (all || T == 'Alerts') d.alr.forEach((x) => (nread()[alrKey(x)] = 1));
     state.notes.forEach((n) => {
       if (n.to == USER) n.read = true;
     });
@@ -196,6 +208,11 @@ export function ncAct(a, x) {
   const keep = new Set(state.items.map((r) => r.uid));
   Object.keys(state.seen).forEach((k) => {
     if (!keep.has(k)) delete state.seen[k];
+  });
+  const now = ncData(),
+    live = new Set([...now.req.map(reqKey), ...now.alr.map(alrKey)]);
+  Object.keys(nread()).forEach((k) => {
+    if (!live.has(k)) delete state.nread[k];
   });
   store();
   render();

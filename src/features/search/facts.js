@@ -22,7 +22,9 @@ const n = (x) => +x || 0;
 const live = (c) => c.stage != 'Complete' && c.cancelled != 'Yes';
 const bal = (c) => n(c.value) - n(c.paid);
 const many = (k, w) =>
-  k + ' ' + (k == 1 ? w : w == 'person' ? 'people' : w == 'Person' ? 'People' : w.replace(/([^aeiou])y$/i, '$1ie') + 's');
+  k +
+  ' ' +
+  (k == 1 ? w : w == 'person' ? 'people' : w == 'Person' ? 'People' : w.replace(/([^aeiou])y$/i, '$1ie') + 's');
 
 /* each answer: the words that ask for it, who may see it, and how to work it out */
 const FACTS = () => [

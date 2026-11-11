@@ -91,3 +91,47 @@ test('search answers questions and finds labels on any page: "amount outstanding
   await expect(app.page.locator('#sres')).not.toContainText('Still To Collect');
   expect(app.errors).toEqual([]);
 });
+
+test('a question typed on a list page filters the list the way the search answers it, and never empties it by mistake', async ({ app }) => {
+  await app.role('beta');
+  await app.go('contracts');
+  await app.run(() => setUI('con.f', 'all'));
+  const rows = app.page.locator('#main tbody tr.clk-r');
+  await app.page.fill('#sb input', 'jobs in norwich');
+  await expect(rows).toHaveCount(1);
+  await expect(rows.first()).toContainText('1023418');
+  // no kind of record named: on its own page the question is about that page's records
+  await app.page.fill('#sb input', 'balance outstanding');
+  await expect(rows).toHaveCount(4);
+  // a question about something else leaves the list alone
+  await app.page.fill('#sb input', 'stock value');
+  await expect(rows).toHaveCount(5);
+  // plain words still filter as before, and nonsense still finds nothing
+  await app.page.fill('#sb input', 'aylsham');
+  await expect(rows).toHaveCount(1);
+  await app.page.fill('#sb input', 'zzzz');
+  await expect(rows).toHaveCount(0);
+  expect(app.errors).toEqual([]);
+});
+
+test('Mark All Read clears the number on the bell and dims the rows; a new alert counts again', async ({ app }) => {
+  await app.role('beta');
+  const before = await app.run(() => ncCount());
+  expect(before).toBeGreaterThan(0);
+  await app.page.click('#bell');
+  await app.page.click('#nc >> text=Mark All Read');
+  expect(await app.run(() => ncCount())).toBe(0);
+  await expect(app.page.locator('#bellN')).toBeHidden();
+  expect(await app.page.locator('#nc .nrow:not(.seen)').count()).toBe(0);
+  // nothing was deleted: the alerts are still listed
+  expect(await app.page.locator('#nc .nrow').count()).toBeGreaterThan(0);
+  // a low-stock alert whose stock level changes is new again
+  await app.run(() => {
+    const a = ncData().alr.find((x) => x.k == 'Low Stock');
+    const r = state.items.find((x) => 'low:' + x.pid == a.key);
+    r.stock = Math.max(0, r.stock - 1);
+    render();
+  });
+  expect(await app.run(() => ncCount())).toBe(1);
+  expect(app.errors).toEqual([]);
+});
