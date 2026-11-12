@@ -12,18 +12,19 @@ import { askYes } from '../../ui/modal.js';
 import { render } from '../../ui/shell/router.js';
 import { toast } from '../../ui/toast.js';
 
-/* review scores (Trustpilot / Google): figures set by an admin in Admin Console > Reviews */
+/* review scores (Trustpilot / Google): figures set by an admin in Admin Console > Reviews.
+   On a phone only the stars and the platform show (the score and the number of reviews are hidden in CSS). */
 export function ratingsH() {
   const r = (x, n) => {
     const u = SAFE.url(x.url),
-      t = `${stars(x.score)} <b>${(+x.score).toFixed(1)}</b> on ${n}${x.count ? ' <span>(' + esc(x.count) + ' reviews)</span>' : ''}`;
+      t = `${stars(x.score)} <b class="rt-n">${(+x.score).toFixed(1)}</b> <span class="rt-on">on</span> ${n}${x.count ? ' <span class="rt-c">(' + esc(x.count) + ' reviews)</span>' : ''}`;
     return u ? `<a href="${esc(u)}" target="_blank" rel="noopener noreferrer">${t}</a>` : `<span>${t}</span>`;
   };
   const tt = state.brand.tt,
     rl = state.brand.rl,
     r10 = (x, n) => {
       const u = SAFE.url(x.url),
-        t = `${stars((+x.score || 0) / 2)} <b>${(+x.score || 0).toFixed(1)}/10</b> on ${n}${x.count ? ' <span>(' + esc(x.count) + ' reviews)</span>' : ''}`;
+        t = `${stars((+x.score || 0) / 2)} <b class="rt-n">${(+x.score || 0).toFixed(1)}/10</b> <span class="rt-on">on</span> ${n}${x.count ? ' <span class="rt-c">(' + esc(x.count) + ' reviews)</span>' : ''}`;
       return u ? `<a href="${esc(u)}" target="_blank" rel="noopener noreferrer">${t}</a>` : `<span>${t}</span>`;
     };
   return `<div class="rate">${r(state.brand.g, 'Google')}${r(state.brand.tp, 'Trustpilot')}${tt ? r(tt, 'Trusted Trader') : ''}${rl ? r10(rl, 'ReferenceLine') : ''}</div>`;

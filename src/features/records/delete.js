@@ -9,17 +9,17 @@ import { askYes, closeModal } from '../../ui/modal.js';
 import { render } from '../../ui/shell/router.js';
 import * as repos from '../../data/repository.js';
 
-/* deleting is admin-only, and only for these lists */
+/* deleting is admin-only, and only for these lists (service calls: anyone; a null permission means every account) */
 export const DEL_RULE = {
   contracts: ['manage', 'Deleting contracts'],
   staff: ['manage', 'Removing staff'],
-  calls: ['manage', 'Deleting service calls'],
+  calls: [null, 'Deleting service calls'],
   contacts: ['manage', 'Deleting contacts'],
   fin: ['money', 'Deleting bills'],
 };
 export function del(k, id) {
   const r = DEL_RULE[k];
-  if (!r || !Array.isArray(state[k]) || !need(r[0], r[1])) return;
+  if (!r || !Array.isArray(state[k]) || (r[0] && !need(r[0], r[1]))) return;
   askYes(
     'Delete ' + id + '?',
     'This cannot be undone.',

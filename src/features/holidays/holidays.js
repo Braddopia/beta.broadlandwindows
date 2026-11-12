@@ -26,6 +26,8 @@ import { forPerson, holOn, me, staffName } from '../../domain/people.js';
 import { can } from '../../domain/permissions.js';
 import { need } from '../auth/session.js';
 import { holTag } from '../../ui/components/tags.js';
+import { html, raw } from '../../core/html.js';
+import { MARK } from '../../ui/forms/form.js';
 import { closeModal, openModal } from '../../ui/modal.js';
 import { render } from '../../ui/shell/router.js';
 import { toast } from '../../ui/toast.js';
@@ -349,8 +351,20 @@ export function holBook(sid, day) {
     const m = me();
     if (m) sid = m.id;
   }
+  const choice = (v, t, sub) =>
+    html`<label class="chc"><input type="radio" name="hpaid" value="${v}" data-onchange="holChk"><span><b>${t}</b><small>${sub}</small></span></label>`;
   openModal(
-    `<h2>Book Holiday</h2><div class="dfm"><label>Staff member<select id="hs" data-onchange="holChk">${state.staff.map((s) => `<option value="${esc(s.id)}" ${s.id == sid ? 'selected' : ''}>${esc(s.name)}</option>`).join('')}</select></label><label>From<input type="date" id="hf" value="${esc(d)}" data-onchange="holChk"></label><label>To<input type="date" id="ht" value="${esc(d)}" data-onchange="holChk"></label><fieldset class="paidq"><legend>Paid or unpaid<span class="req" aria-hidden="true">*</span></legend><label class="cbl"><input type="radio" name="hpaid" value="paid" data-onchange="holChk"> Paid holiday (uses allowance)</label><label class="cbl"><input type="radio" name="hpaid" value="unpaid" data-onchange="holChk"> Unpaid leave</label></fieldset><label>Note (optional)<input id="hn" maxlength="120"></label><div id="hi" style="margin-top:.7rem;font-size:.88rem"></div></div><div class="mact"><button class="btn ghost" data-act="closeModal">Cancel</button><button class="btn" data-act="holSave">${can('manage') ? 'Book holiday' : 'Send request'}</button></div>`
+    String(html`<button class="mx" data-act="closeModal" aria-label="Close">&times;</button><h2>Book Holiday</h2>
+    <div class="grid">
+      <div class="ff full"><label for="hs">Staff member</label><select id="hs" data-onchange="holChk">${state.staff.map((s) => html`<option value="${s.id}"${raw(s.id == sid ? ' selected' : '')}>${s.name}</option>`)}</select></div>
+      <div class="ff"><label for="hf">First day off</label><input type="date" id="hf" value="${d}" data-onchange="holChk"></div>
+      <div class="ff"><label for="ht">Last day off</label><input type="date" id="ht" value="${d}" data-onchange="holChk"></div>
+      <fieldset class="ff full paidq"><legend>Paid or unpaid${raw(MARK(1))}</legend><div class="chq">${choice('paid', 'Paid holiday', 'Uses your allowance')}${choice('unpaid', 'Unpaid leave', 'Does not use your allowance')}</div></fieldset>
+      <div class="ff full"><label for="hn">Note <span class="muted">(optional)</span></label><input id="hn" maxlength="120" placeholder="For example: family wedding"></div>
+    </div>
+    <div id="hi" class="hol-sum" aria-live="polite"></div>
+    <div class="mact"><button class="btn ghost" data-act="closeModal">Cancel</button><button class="btn" data-act="holSave">${can('manage') ? 'Book holiday' : 'Send request'}</button></div>`),
+    'md'
   );
   holChk();
 }
@@ -380,7 +394,7 @@ export function holChk() {
   );
   if (mates.length) w.push('Also off in this period: ' + mates.map((x) => x.name.split(' ')[0]).join(', '));
   $('#hi').innerHTML =
-    `<b>${n} working day${n == 1 ? '' : 's'}</b> <span class="muted">(${left} left)</span>` +
+    `<p class="hol-n"><b>${n} working day${n == 1 ? '' : 's'}</b> <span class="muted">${unpaid ? 'unpaid' : left + ' left this year'}</span></p>` +
     w.map((x) => `<div class="warn">${esc(x)}</div>`).join('');
 }
 export function holSave() {
@@ -413,8 +427,9 @@ export function holSave() {
     toast('You can only request your own holiday');
     return;
   }
+  const id = shortId('H');
   repos.holidays.add({
-    id: shortId('H'),
+    id,
     sid,
     from: f,
     to: t,
@@ -427,29 +442,61 @@ export function holSave() {
   store();
   closeModal();
   render();
-  toast(can('manage') ? 'Holiday booked' : 'Request sent for approval');
+  toast(can('manage') ? 'Holiday booked' : 'Request sent for approval', {
+    action: { label: 'Undo', run: () => holTakeBack(id, 'Holiday undone') },
+  });
+}
+/** may this account cancel the holiday? Administrators always; anyone their own one that has not started yet */
+export const canCancelHol = (h) =>
+  !!h && (can('manage') || (!!me() && me().id == h.sid && (h.status == 'Pending' || h.from > today())));
+/* take a booking back out (Undo, Cancel request, Cancel holiday), with Undo on the banner to put it back */
+function holTakeBack(id, msg) {
+  const h = state.hols.find((x) => x.id == id);
+  if (!h) return;
+  if (!canCancelHol(h)) {
+    toast('Only an administrator can cancel a holiday that has already started');
+    return;
+  }
+  const copy = { ...h };
+  repos.holidays.remove((x) => x.id == id);
+  audit(
+    h.status == 'Pending' ? 'Holiday request withdrawn' : 'Holiday cancelled',
+    staffName(h.sid),
+    h.from + ' to ' + h.to
+  );
+  store();
+  render();
+  toast(msg, {
+    action: {
+      label: 'Undo',
+      run: () => {
+        if (state.hols.some((x) => x.id == copy.id)) return;
+        repos.holidays.add(copy);
+        audit('Holiday put back', staffName(copy.sid), copy.from + ' to ' + copy.to);
+        store();
+        render();
+        toast('Holiday put back');
+      },
+    },
+  });
 }
 export function holEdit(id) {
   const h = state.hols.find((x) => x.id == id);
   if (!h) return;
-  const Ad = can('manage'),
-    mine = me() && me().id == h.sid;
+  const Ad = can('manage');
   openModal(
-    `<h2>${esc(staffName(h.sid))}</h2><p>${fd(h.from)} to ${fd(h.to)}, ${h.days} working day${h.days == 1 ? '' : 's'}<br>${holTag(h)} ${paidTag(h)}</p>${h.note ? `<p class="muted">${esc(h.note)}</p>` : ''}<div class="mact"><button class="btn ghost" data-act="closeModal">Close</button>${Ad && h.status != 'Approved' ? `<button class="btn green" ${onClick('holSetClose', id, 'Approved')}>Approve</button>` : ''}${Ad && h.status == 'Pending' ? `<button class="btn red" ${onClick('holSetClose', id, 'Rejected')}>Reject</button>` : ''}${Ad || (mine && h.status == 'Pending') ? `<button class="btn ghost" ${onClick('holDel', id)}>${h.status == 'Pending' && !Ad ? 'Cancel request' : 'Delete'}</button>` : ''}</div>`
+    `<h2>${esc(staffName(h.sid))}</h2><p>${fd(h.from)} to ${fd(h.to)}, ${h.days} working day${h.days == 1 ? '' : 's'}<br>${holTag(h)} ${paidTag(h)}</p>${h.note ? `<p class="muted">${esc(h.note)}</p>` : ''}<div class="mact"><button class="btn ghost" data-act="closeModal">Close</button>${Ad && h.status != 'Approved' ? `<button class="btn green" ${onClick('holSetClose', id, 'Approved')}>Approve</button>` : ''}${Ad && h.status == 'Pending' ? `<button class="btn red" ${onClick('holSetClose', id, 'Rejected')}>Reject</button>` : ''}${canCancelHol(h) ? `<button class="btn ghost red-t" ${onClick('holDel', id)}>${h.status == 'Pending' ? 'Cancel request' : 'Cancel holiday'}</button>` : ''}</div>`
   );
 }
 export function holDel(id) {
   const h = state.hols.find((x) => x.id == id);
   if (!h) return;
-  if (!can('manage') && !(me() && me().id == h.sid && h.status == 'Pending')) {
-    toast('Only an administrator can remove this');
+  if (!canCancelHol(h)) {
+    toast('Only an administrator can cancel a holiday that has already started');
     return;
   }
-  repos.holidays.remove((x) => x.id == id);
-  audit('Holiday removed', staffName(h.sid), h.from + ' to ' + h.to);
-  store();
   closeModal();
-  render();
+  holTakeBack(id, h.status == 'Pending' ? 'Holiday request withdrawn' : 'Holiday cancelled');
 }
 /* start-up step (run once by main.js) */
 export function listenForHolidayChart() {
@@ -539,6 +586,13 @@ function svcLine(m) {
     to = 5 - (y % 5);
   return `${y} year${y == 1 ? '' : 's'} service · started ${when} · ${y >= 15 ? 'maximum service days reached' : to + ' year' + (to == 1 ? '' : 's') + ' to the next extra day'}`;
 }
+/** Cancel from the list of someone's holidays: the list is drawn again without it */
+export function holDelList(id, sid, which) {
+  const h = state.hols.find((x) => x.id == id);
+  if (!h || !canCancelHol(h)) return holDel(id);
+  holTakeBack(id, h.status == 'Pending' ? 'Holiday request withdrawn' : 'Holiday cancelled');
+  myHolidays(sid, which);
+}
 /** a person's holidays in a pop-up: what is coming up ('next'), what has been taken ('prev'), or everything */
 export function myHolidays(sid, which = 'all') {
   const s = state.staff.find((x) => x.id == sid);
@@ -556,7 +610,7 @@ export function myHolidays(sid, which = 'all') {
     none =
       which == 'next' ? 'Nothing booked yet.' : which == 'prev' ? 'No holidays taken yet.' : 'No holidays booked yet.',
     row = (h) =>
-      `<div class="row"><span>${fd(h.from)} to ${fd(h.to)} · ${h.days} day${h.days == 1 ? '' : 's'}${h.note ? `<br><span class="muted">${esc(h.note)}</span>` : ''}</span><span class="acts">${paidTag(h)}${holTag(h)}</span></div>`;
+      `<div class="row"><span>${fd(h.from)} to ${fd(h.to)} · ${h.days} day${h.days == 1 ? '' : 's'}${h.note ? `<br><span class="muted">${esc(h.note)}</span>` : ''}</span><span class="acts">${paidTag(h)}${holTag(h)}${h.to >= td && canCancelHol(h) ? `<button class="mini del" ${onClick('holDelList', h.id, sid, which)}>${h.status == 'Pending' ? 'Cancel request' : 'Cancel'}</button>` : ''}</span></div>`;
   const tabs = ['next', 'prev', 'all']
     .map(
       (k) =>

@@ -82,7 +82,9 @@ test('each tab plays its own tour once, the first time it opens; Esc three times
   expect(app.errors).toEqual([]);
 });
 
-test('every page lines up with the top bar, left and right', async ({ app }) => {
+test('every page lines up with the top bar, left and right, and Report A Problem lines up on the right', async ({
+  app,
+}) => {
   await app.role('beta');
   await app.page.waitForTimeout(300); // the page padding settles once the scrollbar room is measured
   const off = await app.run(() => {
@@ -91,7 +93,9 @@ test('every page lines up with the top bar, left and right', async ({ app }) => 
       go(v);
       const t = document.querySelector('.top').getBoundingClientRect();
       const m = document.querySelector('#main > *').getBoundingClientRect();
-      if (Math.abs(t.left - m.left) > 1 || Math.abs(t.right - m.right) > 1) out.push(v);
+      const r = document.querySelector('#rpb').getBoundingClientRect();
+      if (Math.abs(t.left - m.left) > 1 || Math.abs(t.right - m.right) > 1 || Math.abs(t.right - r.right) > 1)
+        out.push(v);
     }
     return out;
   });

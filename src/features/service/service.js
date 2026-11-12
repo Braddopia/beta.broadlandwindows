@@ -7,26 +7,30 @@ import { $, esc } from '../../core/dom.js';
 import { m0, money } from '../../core/format.js';
 import { SAFE } from '../../data/sanitize.js';
 import { audit } from '../../data/audit.js';
+import { store } from '../../data/persistence.js';
 import { state } from '../../data/state.js';
 import { addrOf, mailOf, telOf } from '../../domain/customers.js';
 import { nid } from '../../domain/numbering.js';
 import { FITL, staffNames } from '../../domain/people.js';
 import { SVCV, svcOpen } from '../../domain/service.js';
 import {
+  BASE,
   BROADS,
+  FIT_MILES,
   LANDMARKS,
   MAP_H,
   MAP_W,
+  MILE,
   RIVERS,
   ROADS,
   TOWNS,
   groupByTown,
+  landPath,
   outlinePath,
   project,
   smoothPath,
 } from '../../domain/places.js';
 import { html, raw } from '../../core/html.js';
-import { can } from '../../domain/permissions.js';
 import { R } from '../reports/reports.js';
 import { docChoice, printDoc } from '../../print/print.js';
 import { pagerH, paginate } from '../../ui/components/table.js';
@@ -35,6 +39,7 @@ import { drawThumbs, phCount, setPhotoList, tmp } from '../../ui/forms/photos.js
 import { wizard } from '../../ui/forms/wizard.js';
 import { hit, render } from '../../ui/shell/router.js';
 import { toast } from '../../ui/toast.js';
+import { closeModal, openModal } from '../../ui/modal.js';
 import { uiState } from '../../ui/ui-state.js';
 import * as repos from '../../data/repository.js';
 
@@ -71,10 +76,52 @@ export function vService() {
   ${
     U.mode == 'map'
       ? svcMap(L0)
-      : `<div class="tw"><table class="ptb abt fx t-svc"><thead><tr><th data-col="id">Ref</th><th data-col="name">Customer</th><th data-col="issue">Problem</th><th data-col="pr">Priority</th><th data-col="st">Status</th><th class="c-sm" data-col="visit">Visit</th><th class="c-md" data-col="fitter">Engineer</th><th class="ac" data-col="act"></th></tr></thead><tbody>
-  ${pg.rows.map((c) => `<tr class="clk-r" ${rowClick('editCall', c.id)}><td><b class="lref">${esc(c.id)}</b>${c.contract ? `<small class="sub">${esc(c.contract)}</small>` : ''}</td><td><span class="svn"><b>${esc(c.name)}</b>${svcBal(c)}</span><small class="sub">${esc([c.town, c.phone].filter(Boolean).join(' · '))}</small></td><td><span class="cl2">${esc(c.issue)}</span><small class="sub">${esc(c.cat || '')}${c.cat && c.photos && c.photos.length ? ' · ' : ''}${phCount(c.photos)}</small></td><td>${prTag(c.priority)}</td><td>${svcTag(c.status)}</td><td class="c-sm">${c.visit ? `<b class="${svcOpen(c) && c.visit < td ? 'od' : ''}">${fd(c.visit)}</b>${c.visitTime ? `<small class="sub">${esc(c.visitTime)}</small>` : ''}` : '<span class="muted">Not booked</span>'}</td><td class="c-md">${esc(c.fitter || '-')}</td><td class="ac"><div class="acts r"><button class="mini" ${onClick('reportCall', c.id)}>Report</button>${can('manage') ? `<button class="mini del" ${onClick('del', 'calls', c.id)}>Delete</button>` : ''}</div></td></tr>`).join('') || '<tr><td colspan="8" class="empty">No service calls here.</td></tr>'}
+      : `<div class="tw"><table class="ptb abt fx t-svc"><thead><tr><th data-col="id">Ref</th><th data-col="name">Customer</th><th data-col="issue">Problem</th><th class="c" data-col="pr">Priority</th><th class="c" data-col="st">Status</th><th class="c-sm" data-col="visit">Visit</th><th class="c-md" data-col="fitter">Engineer</th><th class="ac" data-col="act"></th></tr></thead><tbody>
+  ${pg.rows.map((c) => `<tr class="clk-r" ${rowClick('editCall', c.id)}><td><b class="lref">${esc(c.id)}</b>${c.contract ? `<small class="sub">${esc(c.contract)}</small>` : ''}</td><td><span class="svn"><b>${esc(c.name)}</b>${svcBal(c)}</span><small class="sub">${esc([c.town, c.phone].filter(Boolean).join(' · '))}</small></td><td><span class="cl2">${esc(c.issue)}</span><small class="sub">${esc(c.cat || '')}${c.cat && c.photos && c.photos.length ? ' · ' : ''}${phCount(c.photos)}</small></td><td class="c">${prTag(c.priority)}</td><td class="c">${svcTag(c.status)}</td><td class="c-sm">${c.visit ? `<b class="${svcOpen(c) && c.visit < td ? 'od' : ''}">${fd(c.visit)}</b>${c.visitTime ? `<small class="sub">${esc(c.visitTime)}</small>` : ''}` : '<span class="muted">Not booked</span>'}</td><td class="c-md">${esc(c.fitter || '-')}</td><td class="ac"><div class="acts r">${svcQuick(c)}<button class="mini" ${onClick('reportCall', c.id)}>Report</button><button class="mini del" ${onClick('del', 'calls', c.id)}>Delete</button></div></td></tr>`).join('') || '<tr><td colspan="8" class="empty">No service calls here.</td></tr>'}
   </tbody></table></div>${pagerH('svc', pg, 'calls')}`
   }`;
+}
+/* ---- quick actions on each row: finish a call, put it back, or mark it waiting for parts, each with Undo ---- */
+export function svcQuick(c) {
+  if (c.status == 'Complete') return `<button class="mini" ${onClick('svcSetStatus', c.id, 'Open')}>Reopen</button>`;
+  return `<button class="mini ok" ${onClick('svcSetStatus', c.id, 'Complete')}>Complete</button>${
+    c.status == 'Awaiting parts'
+      ? `<button class="mini" ${onClick('svcSetStatus', c.id, c.visit ? 'Booked' : 'Open')}>Parts In</button>`
+      : `<button class="mini" ${onClick('svcSetStatus', c.id, 'Awaiting parts')}>Parts</button>`
+  }`;
+}
+export function svcSetStatus(id, st) {
+  const c = state.calls.find((x) => x.id == id);
+  if (!c || !SVC_ST.includes(st) || c.status == st) return;
+  const was = { status: c.status, doneAt: c.doneAt || '' };
+  c.status = st;
+  c.doneAt = st == 'Complete' ? c.doneAt || today() : '';
+  repos.calls.changed(c);
+  audit('Service call ' + st.toLowerCase(), c.id, 'was ' + was.status);
+  store();
+  render(true);
+  toast(
+    st == 'Complete'
+      ? 'Service call ' + c.id + ' completed'
+      : st == 'Awaiting parts'
+        ? c.id + ' marked awaiting parts'
+        : c.id + ' moved to ' + st.toLowerCase(),
+    {
+      action: {
+        label: 'Undo',
+        run: () => {
+          const x = state.calls.find((y) => y.id == id);
+          if (!x) return;
+          Object.assign(x, was);
+          repos.calls.changed(x);
+          audit('Service call status undone', x.id, was.status);
+          store();
+          render(true);
+          toast('Undone');
+        },
+      },
+    }
+  );
 }
 /* the call sheet: who rang, what is wrong, who is going, what was done */
 export const SVCF = () => [
@@ -304,7 +351,60 @@ export function callWizard(cid, id) {
 export function editCall(id, cid) {
   return callWizard(cid, id);
 }
-export function reportCall(id, mode) {
+/** the photos a service report can include: the call's own, then the linked contract's (with their tags) */
+export function callPhotos(c) {
+  const k = c.contract && state.contracts.find((x) => x.id == c.contract),
+    own = (c.photos || []).filter(SAFE.img).map((p, i) => ({ p, from: 'Service call', tag: 'Photo ' + (i + 1) })),
+    job = k
+      ? (k.photos || [])
+          .filter(SAFE.img)
+          .map((p, i) => ({ p, from: 'Contract ' + k.id, tag: ((k.phTags || [])[i] || 'Photo') + ' ' + (i + 1) }))
+      : [];
+  return [...own, ...job];
+}
+/* step two of a report: tick the photos to print (the call's own are ticked to start with) */
+export function reportPhotos(id, mode) {
+  const c = state.calls.find((x) => x.id == id);
+  if (!c) return;
+  const L = callPhotos(c),
+    groups = [...new Set(L.map((x) => x.from))];
+  openModal(
+    String(html`<button class="mx" data-act="closeModal" aria-label="Close">&times;</button><h2>Photos For The Report</h2>
+    <p class="muted">Tick the photos to print with the ${mode == 'c' ? 'customer copy' : 'internal sheet'}.</p>
+    ${groups.map(
+      (g) =>
+        html`<h3 class="fsec">${g}<button type="button" class="mini rp-all" ${raw(onClick('reportPhotosAll', g))}>Tick All</button></h3><div class="rp-g">${L.map(
+          (x, i) =>
+            x.from == g
+              ? html`<label class="rp-ph"><input type="checkbox" class="rp-ck" data-i="${i}" data-g="${g}" ${raw(x.from == 'Service call' ? 'checked' : '')}><img src="${SAFE.img(x.p)}" alt="${x.tag}"><span>${x.tag}</span></label>`
+              : ''
+        )}</div>`
+    )}
+    <div class="mact"><button class="btn ghost" data-act="closeModal">Cancel</button><button class="btn" ${raw(onClick('reportCallGo', id, mode))}>Print report</button></div>`),
+    'md'
+  );
+}
+/* Tick All / untick all in one group */
+export function reportPhotosAll(g) {
+  const B = [...document.querySelectorAll('#mbox .rp-ck')].filter((b) => b.dataset.g == g),
+    on = !B.every((b) => b.checked);
+  B.forEach((b) => (b.checked = on));
+}
+export function reportCallGo(id, mode) {
+  const c = state.calls.find((x) => x.id == id);
+  if (!c) return;
+  const L = callPhotos(c),
+    pick = [...document.querySelectorAll('#mbox .rp-ck:checked')].map((b) => L[+b.dataset.i]).filter(Boolean);
+  closeModal();
+  reportCall(
+    id,
+    mode,
+    pick.map((x) => x.p)
+  );
+}
+/** print a service report: customer copy ('c') or internal sheet ('i'). When the call (or its contract) has photos,
+    the person ticks which to include first (reportPhotos); photos is that list. */
+export function reportCall(id, mode, photos) {
   const c = state.calls.find((x) => x.id == id);
   if (!c) return;
 
@@ -312,6 +412,11 @@ export function reportCall(id, mode) {
     docChoice('Service Call ' + c.id, ['reportCall', id, 'c'], ['reportCall', id, 'i']);
     return;
   }
+  if (!Array.isArray(photos)) {
+    if (callPhotos(c).length) return reportPhotos(id, mode);
+    photos = [];
+  }
+
   const when = c.visit ? fdl(c.visit) + (c.visitTime ? ' at ' + c.visitTime : '') : 'To be arranged',
     onsite = c.arrived ? c.arrived + (c.left ? ' to ' + c.left : '') : '';
   if (mode == 'c') {
@@ -330,7 +435,7 @@ export function reportCall(id, mode) {
         ['Charge', +c.charge > 0 ? money(c.charge) : c.guarantee == 'Yes' ? 'Covered by your guarantee' : ''],
         ['Status', c.status],
       ],
-      c.photos,
+      photos,
       {
         customer: { name: c.name, address: [c.address, c.town].filter(Boolean).join(', ') },
         kind: 'Service visit',
@@ -365,7 +470,7 @@ export function reportCall(id, mode) {
       ['Customer signed off', c.signed],
       ['Completed', c.doneAt ? fd(c.doneAt) : ''],
     ],
-    c.photos,
+    photos,
     {
       kind: 'Service sheet',
       ref: c.id,
@@ -478,20 +583,31 @@ export function svcMap(L) {
     });
   const row = (c) =>
     html`<div class="row clk-r" ${raw(rowClick('editCall', c.id))}><span><b>${c.id}</b> ${c.name}<br><span class="muted">${c.issue || ''}</span></span><span class="acts">${raw(prTag(c.priority))}${raw(svcTag(c.status))}${c.visit ? html`<span class="tag">${fd(c.visit)}</span>` : ''}</span></div>`;
+  const [bx, by] = project(BASE.at),
+    zoneR = Math.round(FIT_MILES * MILE),
+    zx = (a) => Math.round(bx + zoneR * Math.cos(a)),
+    zy = (a) => Math.round(by + zoneR * Math.sin(a));
   return String(html`<div class="smap">
     <div class="panel smap-m">
-      <svg viewBox="-20 -20 ${MAP_W + 40} ${MAP_H + 40}" role="img" aria-label="Map of Norfolk with service calls by town">
-        <defs><clipPath id="smLand"><path d="${outlinePath()}"/></clipPath></defs>
-        <rect class="seabg" x="-20" y="-20" width="${MAP_W + 40}" height="${MAP_H + 40}" rx="14"/>
-        <path class="land" d="${outlinePath()}"/>
+      <svg viewBox="-20 -20 ${MAP_W + 40} ${MAP_H + 40}" role="img" aria-label="Map of Norfolk and its borders with service calls by town. The shaded circle is the ${FIT_MILES}-mile area we fit in, from ${BASE.postcode}.">
+        <defs><clipPath id="smLand"><path d="${landPath()}"/></clipPath><clipPath id="smView"><rect x="-20" y="-20" width="${MAP_W + 40}" height="${MAP_H + 40}" rx="14"/></clipPath></defs>
+        <g clip-path="url(#smView)">
+        <rect class="seabg" x="-20" y="-20" width="${MAP_W + 40}" height="${MAP_H + 40}"/>
+        <path class="land out" d="${landPath()}"/>
+        <circle class="zone" clip-path="url(#smLand)" cx="${bx}" cy="${by}" r="${zoneR}"/>
         <g clip-path="url(#smLand)">${rivers}${broads}${roads}</g>
-        <path class="coast" d="${outlinePath()}"/>
-        <text class="sea" x="${MAP_W - 150}" y="150">North Sea</text><text class="sea" x="60" y="70">The Wash</text>
-        <text class="nb" x="830" y="${MAP_H - 12}">Suffolk</text><text class="nb" x="60" y="${MAP_H - 100}">Cambridgeshire</text>
+        <path class="county" d="${outlinePath()}"/>
+        <path class="coast" d="${landPath()}"/>
+        <circle class="zone-e" cx="${bx}" cy="${by}" r="${zoneR}"/>
+        <text class="zone-t" x="${zx(1.95)}" y="${zy(1.95) - 16}">${FIT_MILES} miles from ${BASE.postcode}</text>
+        </g>
+        <text class="sea" x="${MAP_W - 170}" y="160">North Sea</text><text class="sea mid" x="${project([0.27, 53.02])[0]}" y="${project([0.27, 53.02])[1]}">The Wash</text>
+        <text class="nb" x="${project([1.05, 52.27])[0]}" y="${project([1.05, 52.27])[1]}">Suffolk</text><text class="nb" x="${project([0.02, 52.47])[0]}" y="${project([0.02, 52.47])[1]}">Cambs</text><text class="nb" x="${project([-0.01, 53.05])[0]}" y="${project([-0.01, 53.05])[1]}">Lincs</text>
+        <g class="base" transform="translate(${bx} ${by})"><rect x="-7" y="-7" width="14" height="14" rx="3" transform="rotate(45)"/><title>${BASE.name}, ${BASE.postcode}</title></g>
         ${marks}${labels}${pins}
-        <g class="scale" transform="translate(${MAP_W - 150} ${MAP_H + 2})"><path d="M0 0v6h105v-6"/><text x="52" y="-4">10 miles</text></g>
+        <g class="scale" transform="translate(${MAP_W - 150} ${MAP_H - 14})"><path d="M0 0v6h${Math.round(10 * MILE)}v-6"/><text x="${Math.round(5 * MILE)}" y="-4">10 miles</text></g>
       </svg>
-      <div class="smap-key"><span><i class="u"></i>Urgent</span><span><i class="o"></i>Not booked</span><span><i class="b"></i>Booked</span><span><i class="d"></i>Complete</span><span class="muted">Drawn map: pins are placed by town</span></div>
+      <div class="smap-key"><span><i class="u"></i>Urgent</span><span><i class="o"></i>Not booked</span><span><i class="b"></i>Booked</span><span><i class="d"></i>Complete</span><span><i class="zk"></i>Our ${FIT_MILES}-mile area</span><span><i class="bk"></i>Yard (${BASE.postcode})</span><span class="muted">Drawn map: pins are placed by town</span></div>
     </div>
     <div class="panel smap-l">
       <h2><span>${sel ? sel.name : 'Towns'}</span>${sel ? html`<button class="mini" ${raw(onClick('svcTown', ''))}>All Towns</button>` : ''}</h2>

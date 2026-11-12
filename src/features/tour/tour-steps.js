@@ -241,7 +241,7 @@ export const TAB_TOURS = {
     T(
       '#main .bar-ph',
       'The Profile',
-      'The profile code and its full bar length. Profiles linked under Inventory, Cutting Data fill themselves in.'
+      'The profile code and its full bar length. Products marked "Cut from full bars" in Inventory fill themselves in.'
     ),
     T('#main .bar-cuts', 'The Cuts', 'Room or position, frame reference, length, how many and the angle at each end.'),
     T(

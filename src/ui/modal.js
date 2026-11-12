@@ -2,6 +2,7 @@
 import { $, esc } from '../core/dom.js';
 import { syncIfPending } from '../data/sync.js';
 import { setPhotoList, tmp, tmpDraw } from './forms/photos.js';
+import { toast } from './toast.js';
 
 /* The lead/contract window plugs in here at start-up (features/records), so a popup opened from it
    can park it and hand back to it. ui/ never imports a page. */
@@ -77,16 +78,10 @@ export function askIn(title, msg, okLabel, cb, danger) {
   document.body.appendChild(o);
   o.querySelector('[data-a="1"]').focus();
 }
-/* "done" shown inside the same window with a tick, then it closes by itself */
+/* a save inside a window: the window closes and the banner at the bottom says it worked (same as everywhere) */
 export function doneIn(msg) {
-  if (!$('#modal').classList.contains('open')) return;
-  const b = $('#mbox'),
-    id = 'dn' + Date.now();
-  b.className = 'mb sm';
-  b.innerHTML = `<div class="donein" id="${id}" role="status" aria-live="polite"><svg viewBox="0 0 52 52" class="dn-svg" aria-hidden="true"><circle cx="26" cy="26" r="23"/><path d="M15 27l7 7 15-15"/></svg><h2>${esc(msg || 'Saved')}</h2></div>`;
-  setTimeout(() => {
-    if ($('#' + id)) closeModal();
-  }, 1150);
+  if ($('#modal').classList.contains('open')) closeModal();
+  toast(msg || 'Saved');
 }
 export function askNo() {
   const f = ASK_NO;

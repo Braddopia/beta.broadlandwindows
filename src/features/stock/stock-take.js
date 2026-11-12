@@ -36,6 +36,9 @@ import { download } from '../../ui/download.js';
 import { form } from '../../ui/forms/form.js';
 import { askYes, closeModal, openModal } from '../../ui/modal.js';
 import { fitPage, printDoc, PRINT_BAR_CSS, printBar } from '../../print/print.js';
+import { LOGO_SRC } from '../../core/assets.js';
+import { html, raw } from '../../core/html.js';
+import { company } from '../../data/company.js';
 import { render } from '../../ui/shell/router.js';
 import { toast } from '../../ui/toast.js';
 import { uiState } from '../../ui/ui-state.js';
@@ -425,13 +428,44 @@ export function takeImportRun() {
 /* ---------------- count sheets: print ---------------- */
 export function takePrint() {
   const A = areasNow(),
-    Own = can('manage');
+    Own = can('manage'),
+    T = openTake();
   if (!products().length) return toast('No products to print yet');
+  const opt = (id, t, sub, on = true) =>
+    html`<label class="chc"><input type="checkbox" id="${id}"${raw(on ? '' : ' disabled')}><span><b>${t}</b><small>${sub}</small></span></label>`;
   openModal(
-    `<h2>Print Count Sheets</h2><p class="muted">One sheet per area, in the stock-take layout, ready for the team to fill in.</p><div class="grid"><div class="ff full"><label for="tkA">Area</label><select id="tkA"><option value="">All areas (${A.length})</option>${A.map((a) => `<option value="${esc(a)}" ${uiState.take.area == a ? 'selected' : ''}>${esc(a)}</option>`).join('')}</select></div><div class="ff"><label for="tkB">Blank lines after each area</label><input id="tkB" type="number" min="0" max="40" value="5"></div><div class="ff"><label for="tkN">Extra blank sheets</label><input id="tkN" type="number" min="0" max="10" value="0"></div></div><div class="ff">${Own ? '<label class="cbl"><input type="checkbox" id="tkS"> Show the system quantity (for checking, not for a blind count)</label>' : ''}<label class="cbl"><input type="checkbox" id="tkC" ${openTake() ? '' : 'disabled'}> Fill in counts already typed</label></div><div class="mact"><button class="btn ghost" data-act="closeModal">Cancel</button><button class="btn" data-act="takePrintRun">Print</button></div>`,
+    String(html`<button class="mx" data-act="closeModal" aria-label="Close">&times;</button><h2>Print Count Sheets</h2>
+    <p class="muted">One sheet per area in the stock-take layout, ready for the team to fill in.</p>
+    <div class="grid">
+      <div class="ff full"><label for="tkA">Area</label><select id="tkA"><option value="">All areas (${A.length})</option>${A.map((a) => html`<option value="${a}"${raw(uiState.take.area == a ? ' selected' : '')}>${a}</option>`)}</select></div>
+      <div class="ff"><label for="tkB">Blank lines after each area</label><input id="tkB" type="number" min="0" max="40" value="5"></div>
+      <div class="ff"><label for="tkN">Extra blank sheets</label><input id="tkN" type="number" min="0" max="10" value="0"></div>
+      <fieldset class="ff full paidq"><legend>On The Sheet</legend><div class="chq">${Own ? opt('tkS', 'System quantity', 'For checking, not for a blind count') : ''}${opt('tkC', 'Counts already typed', T ? 'From ' + T.name : 'No stock take running', !!T)}</div></fieldset>
+    </div>
+    <div class="mact"><button class="btn ghost" data-act="closeModal">Cancel</button><button class="btn" data-act="takePrintRun">Print</button></div>`),
     'md'
   );
 }
+/* the count sheet, in the company style but kept plain: a slim navy band with the logo, the area as the title,
+   boxes for who counted and checked, then the lines with a highlighted box to write the count in */
+const SHEET_CSS = `@page{size:A4 portrait;margin:9mm 9mm 12mm}*{box-sizing:border-box}
+body{margin:0;font:9.5pt/1.35 "Segoe UI",Inter,Arial,sans-serif;color:#13233a;-webkit-print-color-adjust:exact;print-color-adjust:exact;font-variant-numeric:tabular-nums}
+section{break-after:page;padding:6mm 0}section:last-child{break-after:auto}
+.band{display:flex;align-items:center;justify-content:space-between;gap:6mm;padding:3.2mm 5mm;border-radius:2.5mm;background:linear-gradient(120deg,#011a36,#012b59 60%,#023f86);border-bottom:1mm solid #ffd002;color:#fff}
+.band img{height:7.5mm;display:block}.band .tg{font-size:7pt;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#ffd002}
+.sh{display:flex;justify-content:space-between;align-items:flex-end;gap:6mm;margin:5mm 0 4mm}
+.sh h1{margin:0;font:600 18pt/1.1 "Segoe UI",Inter,Arial,sans-serif;color:#012b59;letter-spacing:-.01em}.sh .sub{margin-top:1mm;font-size:9pt;color:#5a6a82}
+.who{display:grid;grid-template-columns:repeat(3,34mm);gap:3mm}.who div{border:.3mm solid #c9d3e0;border-radius:1.5mm;padding:1.2mm 2mm 5.5mm}.who span{font-size:6.8pt;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#6b7a90}
+table{width:100%;border-collapse:collapse;table-layout:fixed}thead{display:table-header-group}tr{break-inside:avoid}
+th{background:#012b59;color:#fff;font-size:8pt;font-weight:600;text-align:left;padding:2mm 2mm;letter-spacing:.02em}
+th:first-child{border-radius:1.5mm 0 0 0}th:last-child{border-radius:0 1.5mm 0 0}
+td{border-bottom:.25mm solid #d5dde8;padding:1.4mm 2mm;height:8mm;vertical-align:middle;overflow:hidden}
+tbody tr:nth-child(even) td{background:#f5f8fc}
+td.c{font-family:Consolas,"Courier New",monospace;font-size:8.8pt;font-weight:600;color:#012b59}td.n{text-align:right;color:#5a6a82}
+td.q{text-align:center;font-weight:700;font-size:11pt;background:#fffbe6!important;border-left:.4mm solid #ffd002;border-right:.4mm solid #ffd002}
+td small{display:block;color:#6b7a90;font-size:7.6pt}
+.ft{display:flex;justify-content:space-between;margin:2.5mm 0 0;font-size:7.6pt;color:#6b7a90}
+@media print{.tb{display:none}section{padding:0}}`;
 export function takePrintRun() {
   const area = $('#tkA').value,
     blanks = Math.min(40, Math.max(0, +$('#tkB').value || 0)),
@@ -441,36 +475,31 @@ export function takePrintRun() {
     T = openTake(),
     title = T ? T.name : 'Stock Take ' + new Date().getFullYear(),
     P = products(),
-    A = area ? [area] : areaList(P, state.stockAreas);
+    A = area ? [area] : areaList(P, state.stockAreas),
+    printed = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
   closeModal();
   const w = window.open('', '_blank');
   if (!w) return toast('Allow pop-ups to print count sheets');
   const head = `<tr><th>Stock Code</th><th>Description</th>${sys ? '<th>System</th>' : ''}<th>Quantity In Stock</th><th>Location</th><th>Notes</th></tr>`,
-    blankRow = `<tr class="b"><td></td><td></td>${sys ? '<td></td>' : ''}<td></td><td></td><td></td></tr>`;
+    blankRow = `<tr class="b"><td></td><td></td>${sys ? '<td></td>' : ''}<td class="q"></td><td></td><td></td></tr>`;
   const sheet = (a, L) =>
-    `<section><div class="sh"><div><h1>${esc(a)}</h1><span>${esc(title)}</span></div><div class="who"><span>Counted by</span><span>Checked by</span><span>Date</span></div></div><table><colgroup><col style="width:17%"><col>${sys ? '<col style="width:9%">' : ''}<col style="width:14%"><col style="width:12%"><col style="width:14%"></colgroup><thead>${head}</thead><tbody>${L.map(
+    `<section><div class="band"><img src="${LOGO_SRC.white}" alt="Broadland"><span class="tg">Stock Take · Count Sheet</span></div>
+    <div class="sh"><div><h1>${esc(a)}</h1><div class="sub">${esc(title)} · printed ${esc(printed)}</div></div><div class="who"><div><span>Counted by</span></div><div><span>Checked by</span></div><div><span>Date</span></div></div></div>
+    <table><colgroup><col style="width:17%"><col>${sys ? '<col style="width:9%">' : ''}<col style="width:15%"><col style="width:13%"><col style="width:15%"></colgroup><thead>${head}</thead><tbody>${L.map(
       (r) =>
-        `<tr><td class="c">${esc(r.nocode ? '' : r.item)}</td><td>${esc(r.desc || r.item)}${(r.length && r.length != '-') || colTxt(r) != '-' ? ` <small>${esc([r.length, colTxt(r)].filter((x) => x && x != '-').join(', '))}</small>` : ''}</td>${sys ? `<td class="n">${r.stock}</td>` : ''}<td class="q">${withCounts && T && T.counts[r.pid] ? T.counts[r.pid].q : ''}</td><td>${esc(r.location && r.location != '-' ? r.location : '')}</td><td>${esc(r.notes && r.notes.length < 40 ? r.notes : '')}</td></tr>`
+        `<tr><td class="c">${esc(r.nocode ? '' : r.item)}</td><td>${esc(r.desc || r.item)}${(r.length && r.length != '-') || colTxt(r) != '-' ? `<small>${esc([r.length, colTxt(r)].filter((x) => x && x != '-').join(' · '))}</small>` : ''}</td>${sys ? `<td class="n">${r.stock}</td>` : ''}<td class="q">${withCounts && T && T.counts[r.pid] ? T.counts[r.pid].q : ''}</td><td>${esc(r.location && r.location != '-' ? r.location : '')}</td><td>${esc(r.notes && r.notes.length < 40 ? r.notes : '')}</td></tr>`
     ).join(
       ''
-    )}${blankRow.repeat(blanks)}</tbody></table><p class="tot">${L.length} lines · ${esc(unitNote(L))}</p></section>`;
+    )}${blankRow.repeat(blanks)}</tbody></table><p class="ft"><span>${L.length} lines · ${esc(unitNote(L))}</span><span>Broadland Windows · ${esc(company.tel)}</span></p></section>`;
   const body =
     A.map((a) => sheet(a, areaLines(P, a))).join('') +
     Array.from({ length: extra }, () =>
-      sheet('Blank Sheet', []).replace('<tbody>', '<tbody>' + blankRow.repeat(28))
+      sheet('Blank Sheet', []).replace('<tbody>', '<tbody>' + blankRow.repeat(26))
     ).join('');
-  w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${esc(title)} Count Sheets</title><style>
-@page{size:A4 portrait;margin:10mm 9mm 12mm}*{box-sizing:border-box}body{margin:0;font:10pt Calibri,Arial,sans-serif;color:#000}
-.tb{position:sticky;top:0;padding:8px;background:#012b59;text-align:center}.tb button{margin:0 4px;padding:8px 14px;border:0;border-radius:6px;background:#ffd002;color:#012b59;font-weight:700;cursor:pointer}
-section{break-after:page;padding:6mm 0}section:last-child{break-after:auto}
-.sh{display:flex;justify-content:space-between;align-items:flex-end;gap:6mm;margin:0 0 3mm}.sh h1{margin:0;font-size:16pt}.sh span{font-size:9pt;color:#333}
-.who{display:flex;gap:4mm}.who span{display:block;min-width:30mm;border-bottom:.3mm solid #000;padding-top:5mm;font-size:8pt}
-table{width:100%;border-collapse:collapse;table-layout:fixed}thead{display:table-header-group}tr{break-inside:avoid}
-th,td{border:.25mm solid #000;padding:1.2mm 1.6mm;text-align:left;vertical-align:middle;height:7.2mm;overflow:hidden}
-th{background:#d9e2ef;font-weight:700;font-size:9.5pt}td.c{font-family:Consolas,monospace;font-size:9pt}td.n{text-align:right}td.q{text-align:center;font-weight:700;font-size:11pt}
-td small{color:#444;font-size:8pt}.tot{margin:2mm 0 0;font-size:8pt;color:#444}
-@media print{.tb{display:none}section{padding:0}}
-${PRINT_BAR_CSS}</style></head><body>${printBar('Count Sheets')}${body}</body></html>`);
+  w.document.write(
+    `<!doctype html><html><head><meta charset="utf-8"><title>${esc(title)} Count Sheets</title><style>${SHEET_CSS}
+${PRINT_BAR_CSS}</style></head><body>${printBar('Count Sheets')}${body}</body></html>`
+  );
   w.document.close();
   fitPage(w);
 }

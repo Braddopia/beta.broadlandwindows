@@ -3,7 +3,7 @@
    (domain/barcut.js) shows every bar with its cuts drawn as they come off the saw, the offcut and the
    waste, updating as you type. It prints as a saw cutting list on the company's A4 report, can be kept
    on the contract, and lists can be saved and opened again. Profiles can come from Inventory once they
-   are linked there (Inventory, Cutting Data). */
+   are marked in their Inventory window (Cutting: "Cut from full bars?"). */
 import { plugInCombo } from '../../ui/components/pickers.js';
 import { onClick, onEvent } from '../../core/actions.js';
 import { fd, today } from '../../core/dates.js';
@@ -14,10 +14,10 @@ import { audit } from '../../data/audit.js';
 import { store } from '../../data/persistence.js';
 import { SAFE } from '../../data/sanitize.js';
 import { state } from '../../data/state.js';
-import { barLenOf, groupBars, offcutsOf, optimiseBars } from '../../domain/barcut.js';
+import { DEFAULT_KERF, MIN_OFFCUT, barLenOf, groupBars, offcutsOf, optimiseBars } from '../../domain/barcut.js';
 import { jobTitle } from '../../domain/job-title.js';
 import { canSee } from '../../domain/permissions.js';
-import { ikey, moveRow, prod, products, stkId, unitOf } from '../../domain/stock.js';
+import { colTxt, ikey, moveRow, prod, products, stkId, unitOf } from '../../domain/stock.js';
 import { printDoc } from '../../print/print.js';
 import { form } from '../../ui/forms/form.js';
 import { askIn, closeModal, openModal } from '../../ui/modal.js';
@@ -26,9 +26,17 @@ import { toast } from '../../ui/toast.js';
 import { fx } from '../files/files.js';
 
 const cut0 = (label = '', len = 1000, qty = 1) => ({ label, ref: '', len, qty, aL: 45, aR: 45 });
-const prof0 = () => ({ code: '', desc: '', bar: 6500, cuts: [cut0('', 1000, 1)] });
-/* end trim: 50mm off each end of a bar; offcuts over `keep` mm are worth putting back in stock */
-const BLANK = () => ({ name: '', jobNo: '', jobName: '', kerf: 4, trim: 50, keep: 500, profiles: [prof0()] });
+const prof0 = () => ({ code: '', desc: '', colour: '', bar: 6500, cuts: [cut0('', 1000, 1)] });
+/* a 10mm saw blade, 50mm end trim off each end of a bar; offcuts of at least `keep` mm (1 m or more) go back in stock */
+const BLANK = () => ({
+  name: '',
+  jobNo: '',
+  jobName: '',
+  kerf: DEFAULT_KERF,
+  trim: 50,
+  keep: MIN_OFFCUT,
+  profiles: [prof0()],
+});
 /* an end angle as typed: 90 is a square cut; anything from 15 to 90 degrees */
 const ang = (v) => {
   const n = Math.round((+v || 90) * 10) / 10;
@@ -40,7 +48,13 @@ export function barData() {
   if (!state.bars || !Array.isArray(state.bars.profiles))
     state.bars = { ...BLANK(), jobs: (state.bars && state.bars.jobs) || [] };
   state.bars.jobs = state.bars.jobs || [];
-  if (state.bars.keep == null) state.bars.keep = 500;
+  /* offcuts under 1 m are never kept */
+  if (!(state.bars.keep >= MIN_OFFCUT)) state.bars.keep = MIN_OFFCUT;
+  /* lists started when the usual saw blade was 4mm: it is 10mm */
+  if (!state.bars.kerfV2) {
+    if (state.bars.kerf == 4) state.bars.kerf = DEFAULT_KERF;
+    state.bars.kerfV2 = 1;
+  }
   /* lists started before the 50mm end trim became the usual one */
   if (!state.bars.trimV2) {
     if (state.bars.trim == 10) state.bars.trim = 50;
@@ -54,7 +68,7 @@ const pct = (x) => (Math.round(x * 1000) / 10).toFixed(1) + '%';
 const HUES = [212, 172, 262, 38, 328, 192, 148, 14, 234, 52];
 const hue = (s) => HUES[[...String(s || '-')].reduce((a, c) => (a * 31 + c.charCodeAt(0)) % 9973, 7) % HUES.length];
 
-/* ---- profiles linked in Inventory (Cutting Data): Stock ID -> bar length ---- */
+/* ---- profiles marked in Inventory (the product window, Cutting): Stock ID -> bar length ---- */
 const linked = () => (state.cutProf && typeof state.cutProf == 'object' ? state.cutProf : (state.cutProf = {}));
 /** the inventory products marked as profiles, with their bar length */
 export const barProducts = () =>
@@ -158,20 +172,21 @@ export function vBars() {
     <div class="panel cut-job"><h2><span>Job</span><small class="muted nocap" id="barJobHint">${k ? 'Contract ' + k.id + ' found: Save To Contract keeps the list with its documents' : 'Type the contract number to link the list to it'}</small></h2><div class="cut-og cut-eq">
       <div class="ff"><label for="bar_job_no">Job Number</label><input id="bar_job_no" maxlength="30" data-combo="jobs" value="${D.jobNo || ''}" autocomplete="off"></div>
       <div class="ff"><label for="bar_job_name">Job Name</label><input id="bar_job_name" maxlength="80" value="${D.jobName || ''}" autocomplete="off"></div>
-    </div><datalist id="barAngles"><option value="90"></option><option value="45"></option><option value="67.5"></option><option value="60"></option><option value="30"></option><option value="22.5"></option></datalist></div>
+    </div><datalist id="barAngles"><option value="90"></option><option value="45"></option><option value="67.5"></option><option value="60"></option><option value="30"></option><option value="22.5"></option></datalist><datalist id="barLens"><option value="6500">6.5M (most bars)</option><option value="7000">7M</option><option value="5000">5M</option></datalist></div>
     ${D.profiles.map(
       (p, pi) => html`<div class="panel bar-p">
         <div class="bar-ph"><span class="bar-pn">Profile ${pi + 1}</span>
           <label class="bar-f bar-code"><span>Profile Code</span><input id="bar_p_${pi}_code" maxlength="40" data-combo="profiles" value="${p.code}" autocomplete="off"></label>
           <label class="bar-f bar-desc"><span>Description</span><input id="bar_p_${pi}_desc" maxlength="80" value="${p.desc}" autocomplete="off"></label>
-          <label class="bar-f bar-n"><span>Bar Length <i class="nocap">(mm)</i></span><input id="bar_p_${pi}_bar" type="number" min="500" max="20000" step="1" value="${p.bar}"></label>
+          <label class="bar-f bar-col"><span>Bar Colour</span><input id="bar_p_${pi}_colour" maxlength="40" value="${p.colour || ''}" placeholder="e.g. White / Anthracite" autocomplete="off"></label>
+          <label class="bar-f bar-n"><span>Bar Length <i class="nocap">(mm)</i></span><input id="bar_p_${pi}_bar" type="number" min="500" max="20000" step="1" list="barLens" value="${p.bar}"></label>
           ${D.profiles.length > 1 ? html`<button class="mini del" ${raw(onClick('barProfDel', pi))}>Remove Profile</button>` : ''}</div>
         <div class="bar-cuts">${p.cuts.map((c, ci) => cutRow(pi, c, ci))}</div>
         <div class="cut-add"><button class="mini" ${raw(onClick('barCutAdd', pi))}>+ Add Cut</button></div>
         <div class="bar-out" id="barOut_${pi}">${raw(barPlan(D, p, pi))}</div>
       </div>`
     )}
-    <div class="cut-add bar-addp"><button class="btn ghost" ${raw(onClick('barProfAdd'))}>+ Add Profile</button>${L.length ? '' : html`<span class="muted">Profiles can come from Inventory once they are linked under Inventory, Cutting Data.</span>`}</div>
+    <div class="cut-add bar-addp"><button class="btn ghost" ${raw(onClick('barProfAdd'))}>+ Add Profile</button>${L.length ? '' : html`<span class="muted">Profiles fill themselves in from Inventory once a product is marked "Cut from full bars" in its window.</span>`}</div>
   </div>
   <div class="kpis cut-k" id="barKpis">${raw(kpis(D))}</div>`);
 }
@@ -229,17 +244,22 @@ export function barEdit(e) {
     if (!p) return;
     if (f == 'bar') p.bar = SAFE.num(t.value, { min: 0, max: 20000, dp: 0 }) ?? 0;
     else if (f == 'desc') p.desc = SAFE.text(t.value, 80);
+    else if (f == 'colour') p.colour = SAFE.text(t.value, 40);
     else if (f == 'code') {
       p.code = SAFE.text(t.value, 40).toUpperCase();
-      /* a profile linked in Inventory fills in its description and bar length */
+      /* a profile linked in Inventory fills in its description, colour and bar length */
       const lp = findProd(p.code);
       if (lp) {
         p.desc = p.desc || lp.r.desc || '';
+        p.colour = p.colour || (colTxt(lp.r) != '-' ? colTxt(lp.r) : '');
         p.bar = lp.bar;
-        const dEl = $('#bar_p_' + pi + '_desc'),
-          bEl = $('#bar_p_' + pi + '_bar');
-        if (dEl) dEl.value = p.desc;
-        if (bEl) bEl.value = p.bar;
+        const set = (k, v) => {
+          const e = $('#bar_p_' + pi + '_' + k);
+          if (e) e.value = v;
+        };
+        set('desc', p.desc);
+        set('colour', p.colour);
+        set('bar', p.bar);
       }
     }
     const bk = $('#barBookB');
@@ -299,7 +319,7 @@ export function barNew() {
     'Start New',
     () => {
       const jobs = barData().jobs;
-      state.bars = { ...BLANK(), jobs, trimV2: 1 };
+      state.bars = { ...BLANK(), jobs, trimV2: 1, kerfV2: 1 };
       store();
       render();
     }
@@ -319,13 +339,20 @@ export function barSettings() {
         max: 200,
         hint: 'In millimetres: taken off both ends of every bar',
       },
-      { k: 'keep', l: 'Keep offcuts over', t: 'number', max: 10000, hint: 'In millimetres: shorter offcuts are scrap' },
+      {
+        k: 'keep',
+        l: 'Keep offcuts of at least',
+        t: 'number',
+        min: MIN_OFFCUT,
+        max: 10000,
+        hint: 'In millimetres, 1000 (1M) or more: shorter offcuts are scrap',
+      },
     ],
     { kerf: D.kerf, trim: D.trim, keep: D.keep },
     (o) => {
-      D.kerf = SAFE.num(o.kerf, { min: 0, max: 20, dp: 1 }) ?? 0;
+      D.kerf = SAFE.num(o.kerf, { min: 0, max: 20, dp: 1 }) ?? DEFAULT_KERF;
       D.trim = SAFE.num(o.trim, { min: 0, max: 200, dp: 0 }) ?? 0;
-      D.keep = SAFE.num(o.keep, { min: 0, max: 10000, dp: 0 }) ?? 500;
+      D.keep = Math.max(MIN_OFFCUT, SAFE.num(o.keep, { min: 0, max: 10000, dp: 0 }) ?? MIN_OFFCUT);
     }
   );
 }
@@ -344,7 +371,7 @@ export function barBook() {
   if (!canSee('stock')) return toast('Your account cannot change stock');
   const D = barData(),
     P = bookPlan(D);
-  if (!P.length) return toast('Link a profile under Inventory, Cutting Data first');
+  if (!P.length) return toast('Mark a product as cut from full bars in its Inventory window first');
   const job = jobTitle(D.jobNo, D.jobName);
   openModal(
     String(html`<button class="mx" data-act="closeModal" aria-label="Close">&times;</button><h2>Book Into Stock</h2>
@@ -496,7 +523,7 @@ function listDoc(asHtml) {
     title = jobTitle(D.jobNo, D.jobName);
   const secs = P.map(({ p, R }) => {
     const G = groupBars(R.bars.map((b) => ({ ...b, kerf: D.kerf })));
-    return `<section class="bsec"><h3>${html`${[p.code, p.desc].filter(Boolean).join(', ') || 'Profile'}`}<span>Bar length <b>${mm(p.bar)}mm</b></span></h3>${G.map(
+    return `<section class="bsec"><h3>${html`${[p.code, p.desc].filter(Boolean).join(', ') || 'Profile'}`}${p.colour ? html`<i class="bcol">${p.colour}</i>` : ''}<span>Bar length <b>${mm(p.bar)}mm</b></span></h3>${G.map(
       (g, i) =>
         `<div class="brow"><span class="bno">${i + 1})</span><span class="bx">${g.n}×</span>${barSvg(g.bar, p.bar, D.trim, true)}</div>`
     ).join(
@@ -505,7 +532,7 @@ function listDoc(asHtml) {
   }).join('');
   return printDoc(
     title || 'Cutting List',
-    (title ? 'Cutting list · ' : '') + 'Saw blade ' + D.kerf + 'mm · end trim ' + D.trim + 'mm',
+    (title ? 'Cutting List · ' : '') + 'Saw Blade ' + mm(D.kerf) + 'mm · End Trim ' + mm(D.trim) + 'mm',
     [],
     [],
     {
@@ -530,12 +557,13 @@ function listDoc(asHtml) {
       tables: [
         {
           t: 'Cut List',
-          h: ['Profile', 'Room / position', 'Ref', 'Length (mm)', 'How many', 'Ends'],
+          h: ['Profile', 'Bar colour', 'Room / position', 'Ref', 'Length (mm)', 'How many', 'Ends'],
           r: P.flatMap(({ p }) =>
             p.cuts
               .filter((c) => +c.len > 0 && +c.qty > 0)
               .map((c) => [
                 p.code || '-',
+                p.colour || '-',
                 c.label || '-',
                 c.ref || '-',
                 mm(c.len),
@@ -545,7 +573,7 @@ function listDoc(asHtml) {
           ),
         },
       ],
-      post: `<style>.bsec{break-inside:avoid;margin:7mm 0 0}.bsec h3{display:flex;align-items:baseline;gap:4mm;padding-bottom:1.5mm;border-bottom:.35mm solid #012b59;text-transform:uppercase}.bsec h3 span{margin-left:auto;font-weight:400;text-transform:none;color:#5b6b80;font-size:8.5pt}.bsec h3 span b{color:#012b59}.brow{display:grid;grid-template-columns:7mm 8mm 1fr;align-items:center;break-inside:avoid;margin:1.5mm 0}.bno,.bx{font-weight:700;font-size:8.5pt}.bar-s{display:block;width:100%;height:auto}.bar-s .bb{fill:#f7f9fc;stroke:#c9d3e0;stroke-width:1}.bar-s .bo{fill:url(#none);fill:#eef1f6;stroke:#9aa7b8;stroke-dasharray:3 2}.bar-s polygon{stroke-width:1.2}.bar-s text{font-family:Arial,sans-serif;fill:#13233a}.bar-s .bl{font-size:7.5px;letter-spacing:.06em;text-anchor:middle;font-weight:700}.bar-s .bn{font-size:9px;text-anchor:middle;dominant-baseline:middle}.bar-s .bn.sm{font-size:7px}.bar-s .ba{font-size:7px;fill:#5b6b80}.bar-s .ba.e{text-anchor:end}.bar-s .bw{font-size:9px;font-weight:700;dominant-baseline:middle}.bft{margin:2mm 0 0;font-size:8.6pt;color:#34465f}.bft b{color:#012b59;margin-right:3mm}.bft .bad{color:#b42318}</style>${secs}`,
+      post: `<style>.bsec{break-inside:avoid;margin:7mm 0 0}.bsec h3{display:flex;align-items:baseline;gap:4mm;padding-bottom:1.5mm;border-bottom:.35mm solid #012b59;text-transform:uppercase}.bsec h3 .bcol{font-style:normal;font-weight:600;text-transform:none;color:#5b6b80;font-size:9pt}.bsec h3 span{margin-left:auto;font-weight:400;text-transform:none;color:#5b6b80;font-size:8.5pt}.bsec h3 span b{color:#012b59}.brow{display:grid;grid-template-columns:7mm 8mm 1fr;align-items:center;break-inside:avoid;margin:1.5mm 0}.bno,.bx{font-weight:700;font-size:8.5pt}.bar-s{display:block;width:100%;height:auto}.bar-s .bb{fill:#f7f9fc;stroke:#c9d3e0;stroke-width:1}.bar-s .bo{fill:url(#none);fill:#eef1f6;stroke:#9aa7b8;stroke-dasharray:3 2}.bar-s polygon{stroke-width:1.2}.bar-s text{font-family:Arial,sans-serif;fill:#13233a}.bar-s .bl{font-size:7.5px;letter-spacing:.06em;text-anchor:middle;font-weight:700}.bar-s .bn{font-size:9px;text-anchor:middle;dominant-baseline:middle}.bar-s .bn.sm{font-size:7px}.bar-s .ba{font-size:7px;fill:#5b6b80}.bar-s .ba.e{text-anchor:end}.bar-s .bw{font-size:9px;font-weight:700;dominant-baseline:middle}.bft{margin:2mm 0 0;font-size:8.6pt;color:#34465f}.bft b{color:#012b59;margin-right:3mm}.bft .bad{color:#b42318}</style>${secs}`,
     }
   );
 }
@@ -582,39 +610,6 @@ export async function barToContract() {
   } catch (e) {
     toast('Document storage is not available here');
   }
-}
-
-/* ---- Inventory, Cutting Data: which products are profiles, and their bar length ---- */
-export function barProfiles() {
-  if (!canSee('stock')) return;
-  const P = products(),
-    Lk = linked();
-  openModal(
-    String(html`<button class="mx" data-act="closeModal" aria-label="Close">&times;</button><h2>Cutting Data</h2>
-      <p class="muted">Tick the products that are lengths of profile and give each its full bar length. They can then be picked by code in the Cutting Optimiser, which also shows how many bars you have.</p>
-      <div class="tw bar-link"><table class="ptb"><thead><tr><th>Profile</th><th>Item Code</th><th>Description</th><th class="n">Bar Length (mm)</th><th class="n">In Stock</th></tr></thead><tbody>${P.map(
-        (r) =>
-          html`<tr><td><input type="checkbox" class="blk" data-pid="${r.pid}" aria-label="${r.item} is a profile" ${raw(Lk[r.pid] ? 'checked' : '')}></td><td><b>${r.item}</b></td><td>${r.desc || '-'}</td><td class="n"><input class="blen" data-pid="${r.pid}" type="number" min="500" max="20000" step="1" value="${(Lk[r.pid] && Lk[r.pid].bar) || barLenOf(r.length) || 6500}" aria-label="Bar length for ${r.item}"></td><td class="n">${r.stock} ${unitOf(r)}</td></tr>`
-      )}</tbody></table></div>
-      <div class="mact"><button class="btn ghost" data-act="closeModal">Cancel</button><button class="btn" ${raw(onClick('barProfSave'))}>Save</button></div>`),
-    'lg'
-  );
-}
-export function barProfSave() {
-  if (!canSee('stock')) return;
-  const O = {};
-  document.querySelectorAll('#mbox .blk').forEach((b) => {
-    if (!b.checked) return;
-    const pid = b.dataset.pid,
-      len = document.querySelector('#mbox .blen[data-pid="' + CSS.escape(pid) + '"]');
-    O[pid] = { bar: SAFE.num(len && len.value, { min: 500, max: 20000, dp: 0 }) || 6500 };
-  });
-  state.cutProf = O;
-  audit('Cutting data changed', Object.keys(O).length + ' profiles', '');
-  store();
-  closeModal();
-  toast('Saved ' + Object.keys(O).length + ' profiles');
-  render(true);
 }
 
 /* start-up step (run once by main.js): the list of linked profiles under a Profile Code box */

@@ -142,23 +142,31 @@ test('Cutting Optimiser: cuts with angles plan into bars as you type, print as a
   app,
 }) => {
   await app.role('beta');
-  // link a stock item as a profile with its bar length
+  // mark a stock item as a profile with its bar length, in its own window (there is no separate Cutting Data list)
   await app.go('stock');
-  await app.page.click('#main >> text=Cutting Data');
+  await expect(app.page.locator('#main .tools')).not.toContainText('Cutting Data');
   const pid = await app.run(() => products()[0].pid);
   const item = await app.run(() => products()[0].item);
-  await app.page.locator(`#mbox .blk[data-pid="${pid}"]`).check();
-  await app.page.locator(`#mbox .blen[data-pid="${pid}"]`).fill('6500');
-  await app.page.click('#mbox >> text=/^Save$/');
+  await app.call('stockForm', 'edit', pid);
+  await app.page.selectOption('#f_isBar', 'Yes');
+  await app.page.selectOption('#f_barLen', '6500');
+  await app.page.click('#mbox [data-act=ieSave]');
   expect(await app.run((p) => state.cutProf[p].bar, pid)).toBe(6500);
 
   await app.go('bars');
   await expect(app.page.locator('#main h1')).toHaveText('Cutting Optimiser');
-  // a new list trims 50mm off each end; the saw sheet this test copies used 10
-  expect(await app.run(() => state.bars.trim)).toBe(50);
+  // a new list: 10mm saw blade, 50mm off each end, offcuts kept only from 1M; the saw sheet this test copies used 4 and 10
+  expect(await app.run(() => [state.bars.kerf, state.bars.trim, state.bars.keep])).toEqual([10, 50, 1000]);
   await app.page.click('#main .tools >> text=Saw Settings');
+  await app.page.fill('#f_kerf', '4');
   await app.page.fill('#f_trim', '10');
+  // shorter offcuts than 1M are never kept: 500 is refused
+  await app.page.fill('#f_keep', '500');
   await app.page.click('#saveBtn');
+  await expect(app.page.locator('#mbox .ferr')).toContainText('between 1000');
+  await app.page.fill('#f_keep', '1000');
+  await app.page.click('#saveBtn');
+  expect(await app.run(() => [state.bars.kerf, state.bars.trim, state.bars.keep])).toEqual([4, 10, 1000]);
   await app.call('closeModal');
   // picking the linked profile fills in its bar length and shows the stock
   await app.page.fill('#bar_p_0_bar', '3000');
@@ -188,6 +196,9 @@ test('Cutting Optimiser: cuts with angles plan into bars as you type, print as a
   await expect(w.locator('.bsec .bar-s')).toHaveCount(2);
   await expect(w.locator('.bsec')).toContainText('Bar length 6,500mm');
   await expect(w.locator('.pg')).toContainText('Cut List');
+  // the line under the job: Title Case, with the saw blade and end trim
+  await expect(w.locator('.pg')).toContainText('Cutting List · Saw Blade 4mm · End Trim 10mm');
+  await expect(w.locator('table').first()).toContainText('Bar colour');
   await w.close();
   // kept with the contract
   await app.page.click('#barToC');

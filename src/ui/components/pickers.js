@@ -1,9 +1,12 @@
-/* ui/components/pickers: two small pop-ups shared by every form, in the app's own style.
+/* ui/components/pickers: small pop-ups shared by every form, in the app's own style.
    - Pick list: an input with data-combo="<source>" shows matches under it as you type (jobs, profiles),
      instead of the browser's own drop-down. A page registers a source with plugInCombo(name, () => rows),
      each row { v: value put in the box, t: title, s: small print }.
    - Calendar: with a mouse, a date box opens a month calendar instead of the browser's. Typing the date
-     still works, and phones keep their own date wheel. */
+     still works, and phones keep their own date wheel.
+   - Drop-down: with a mouse, every <select> opens the app's own list instead of the browser's grey one.
+     The real <select> stays underneath (its value, change events and keyboard arrows are unchanged),
+     and phones keep their own picker. */
 import { esc } from '../../core/dom.js';
 import { BH, iso, today } from '../../core/dates.js';
 
@@ -27,9 +30,10 @@ function box() {
     /* mousedown, not click: the box must not lose focus before the choice lands */
     pop.addEventListener('mousedown', (e) => {
       e.preventDefault();
-      const b = e.target.closest('[data-i],[data-d],[data-dp]');
-      if (!b) return;
-      if (b.dataset.i != null) choose(+b.dataset.i);
+      const b = e.target.closest('[data-i],[data-d],[data-dp],[data-o]');
+      if (!b || b.disabled) return;
+      if (b.dataset.o != null) chooseOpt(+b.dataset.o);
+      else if (b.dataset.i != null) choose(+b.dataset.i);
       else if (b.dataset.d) setDate(b.dataset.d);
       else if (b.dataset.dp == 'today') setDate(today());
       else if (b.dataset.dp == 'clear') setDate('');
@@ -44,7 +48,7 @@ function box() {
 function place() {
   if (!pop || !forEl) return;
   const r = forEl.getBoundingClientRect(),
-    w = kind == 'date' ? 280 : Math.max(r.width, 300),
+    w = kind == 'date' ? 280 : kind == 'select' ? Math.max(r.width, 180) : Math.max(r.width, 300),
     h = pop.offsetHeight,
     below = r.bottom + 6 + h < innerHeight - 8 || r.top < h + 14;
   pop.style.width = Math.min(w, innerWidth - 16) + 'px';
@@ -53,6 +57,7 @@ function place() {
 }
 export function pickClose() {
   if (pop) pop.classList.remove('open');
+  if (forEl && kind == 'select') forEl.removeAttribute('aria-expanded');
   forEl = null;
   kind = '';
 }
@@ -103,6 +108,53 @@ function choose(i) {
   pickClose();
   fire(el);
 }
+
+/* ---- drop-down list for a <select> ---- */
+function drawSelect() {
+  const el = forEl,
+    opts = [...el.options];
+  let html = '',
+    grp = null;
+  opts.forEach((o, i) => {
+    const g = o.parentElement && o.parentElement.tagName == 'OPTGROUP' ? o.parentElement : null;
+    if (g !== grp) {
+      grp = g;
+      if (g) html += `<p class="pk-g">${esc(g.label)}</p>`;
+    }
+    if (o.hidden) return;
+    html += `<button type="button" class="pk-o ${i == at ? 'on' : ''} ${o.selected ? 'sel' : ''}" data-o="${i}" role="option" aria-selected="${o.selected}" ${o.disabled ? 'disabled' : ''}>${esc(o.textContent || '\u00a0')}</button>`;
+  });
+  box().className = 'pk-list pk-sel open';
+  pop.innerHTML = html;
+  place();
+  const on = pop.querySelector('.pk-o.on');
+  if (on) on.scrollIntoView({ block: 'nearest' });
+}
+function openSelect(el) {
+  forEl = el;
+  kind = 'select';
+  at = Math.max(0, el.selectedIndex);
+  el.setAttribute('aria-expanded', 'true');
+  drawSelect();
+}
+function chooseOpt(i) {
+  const el = forEl,
+    o = el && el.options[i];
+  if (!o || o.disabled) return;
+  pickClose();
+  el.focus({ preventScroll: true });
+  if (el.selectedIndex == i) return;
+  el.selectedIndex = i;
+  fire(el);
+}
+/* the next option that can be picked, going one way or the other */
+function stepOpt(d) {
+  const L = forEl.options;
+  for (let i = at + d; i >= 0 && i < L.length; i += d) if (!L[i].disabled && !L[i].hidden) return i;
+  return at;
+}
+let typed = '',
+  typedT = 0;
 
 /* ---- calendar ---- */
 const MONTHS = 'January February March April May June July August September October November December'.split(' ');
@@ -168,6 +220,26 @@ export function listenForPickers() {
   document.addEventListener('focusout', (e) => {
     if (e.target == forEl && kind == 'combo') setTimeout(() => document.activeElement != forEl && pickClose(), 120);
   });
+  /* a drop-down: our list instead of the browser's (mouse only) */
+  const isSel = (t) =>
+    t && t.tagName == 'SELECT' && !t.multiple && !(t.size > 1) && !t.disabled && !t.closest('[data-native]');
+  document.addEventListener(
+    'mousedown',
+    (e) => {
+      if (e.button || !isSel(e.target) || !matchMedia('(pointer:fine)').matches) return;
+      e.preventDefault();
+      if (forEl == e.target && kind == 'select') return pickClose();
+      e.target.focus({ preventScroll: true });
+      openSelect(e.target);
+    },
+    true
+  );
+  document.addEventListener('mousedown', (e) => {
+    if (kind == 'select' && pop && !pop.contains(e.target) && e.target != forEl) pickClose();
+  });
+  document.addEventListener('focusout', (e) => {
+    if (e.target == forEl && kind == 'select') setTimeout(() => document.activeElement != forEl && pickClose(), 120);
+  });
   /* a date box: our calendar instead of the browser's (mouse only) */
   document.addEventListener('click', (e) => {
     if (isDate(e.target) && matchMedia('(pointer:fine)').matches) {
@@ -179,7 +251,54 @@ export function listenForPickers() {
   document.addEventListener(
     'keydown',
     (e) => {
+      /* Space, Enter or Alt+Down on a drop-down opens our list too (with a mouse about) */
+      if (
+        isSel(e.target) &&
+        kind != 'select' &&
+        matchMedia('(pointer:fine)').matches &&
+        (e.key == ' ' || e.key == 'Enter' || e.key == 'F4' || (e.altKey && e.key == 'ArrowDown'))
+      ) {
+        e.preventDefault();
+        openSelect(e.target);
+        return;
+      }
       if (!forEl || !pop || !pop.classList.contains('open')) return;
+      if (kind == 'select') {
+        const k = e.key;
+        if (k == 'Escape' || k == 'Tab') {
+          if (k == 'Escape') {
+            e.preventDefault();
+            e.stopPropagation();
+          }
+          pickClose();
+        } else if (k == 'ArrowDown' || k == 'ArrowUp') {
+          e.preventDefault();
+          at = stepOpt(k == 'ArrowDown' ? 1 : -1);
+          drawSelect();
+        } else if (k == 'Home' || k == 'End') {
+          e.preventDefault();
+          at = k == 'Home' ? -1 : forEl.options.length;
+          at = stepOpt(k == 'Home' ? 1 : -1);
+          drawSelect();
+        } else if (k == 'Enter' || k == ' ') {
+          e.preventDefault();
+          e.stopPropagation();
+          chooseOpt(at);
+        } else if (k.length == 1 && !e.ctrlKey && !e.metaKey) {
+          /* type the first letters to jump to an option */
+          e.preventDefault();
+          clearTimeout(typedT);
+          typed += k.toLowerCase();
+          typedT = setTimeout(() => (typed = ''), 700);
+          const L = [...forEl.options],
+            i = L.findIndex((o) => !o.disabled && o.textContent.trim().toLowerCase().startsWith(typed));
+          if (i >= 0) {
+            at = i;
+            drawSelect();
+          }
+        }
+        return;
+      }
       if (e.key == 'Escape') {
         e.preventDefault();
         e.stopPropagation();

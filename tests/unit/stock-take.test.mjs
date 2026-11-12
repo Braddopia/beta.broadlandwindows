@@ -173,3 +173,15 @@ test('one code can name several products: kept apart by description', () => {
     ['2', '1']
   );
 });
+
+import { sizeNote, unitLabel } from '../../src/domain/stock.js';
+test('Inventory Unit column: the length for stock kept in lengths, otherwise PCS', () => {
+  assert.equal(unitLabel({ length: '6.5M', unit: 'Each' }), '6.5M');
+  assert.equal(unitLabel({ length: '7000MM', unit: 'Meters (M)' }), '7M');
+  assert.equal(unitLabel({ length: '4MM', unit: 'Each' }), 'PCS');
+  assert.equal(unitLabel({ length: '', unit: 'Pair' }), 'Pairs');
+  assert.equal(unitLabel({ length: '-', unit: 'Meters (M)' }), 'M');
+  /* a size that is not a length shows under the item instead */
+  assert.equal(sizeNote({ length: '4MM' }), '4MM');
+  assert.equal(sizeNote({ length: '6.5M' }), '');
+});

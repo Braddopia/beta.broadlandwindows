@@ -1,4 +1,4 @@
-/* domain/places: an approximate map of Norfolk for the service-call map. Plain data and functions
+/* domain/places: an approximate map of Norfolk and its borders for the service-call map. Plain data and functions
    (tested in tests/unit). Nothing leaves the computer: towns are placed from this list, not looked up.
    Positions are longitude / latitude, close enough to put a pin in the right part of the county. */
 
@@ -181,6 +181,12 @@ export const LANDMARKS = [
   'aylsham',
   'lowestoft',
   'attleborough',
+  'southwold',
+  'bury st edmunds',
+  'ipswich',
+  'wisbech',
+  'ely',
+  'stowmarket',
 ];
 /* towns and villages the company works in (longitude, latitude) */
 export const TOWNS = {
@@ -241,6 +247,25 @@ export const TOWNS = {
   hemsby: [1.693, 52.694],
   martham: [1.627, 52.704],
   'ormesby st margaret': [1.689, 52.672],
+  /* just over the border: north Suffolk and the Fens */
+  southwold: [1.68, 52.327],
+  halesworth: [1.502, 52.344],
+  kessingland: [1.718, 52.418],
+  eye: [1.146, 52.32],
+  framlingham: [1.343, 52.221],
+  saxmundham: [1.49, 52.215],
+  leiston: [1.577, 52.21],
+  aldeburgh: [1.602, 52.153],
+  stowmarket: [0.997, 52.188],
+  'bury st edmunds': [0.711, 52.246],
+  woodbridge: [1.318, 52.094],
+  ipswich: [1.155, 52.059],
+  brandon: [0.62, 52.448],
+  mildenhall: [0.51, 52.344],
+  wisbech: [0.16, 52.666],
+  march: [0.088, 52.551],
+  ely: [0.263, 52.399],
+  'long sutton': [0.12, 52.785],
 };
 /* other ways people write the same town */
 const ALIAS = {
@@ -262,6 +287,8 @@ const ALIAS = {
   'gorleston on sea': 'gorleston',
   downham: 'downham market',
   'north walsham town': 'north walsham',
+  bury: 'bury st edmunds',
+  'bury st. edmunds': 'bury st edmunds',
 };
 /** the TOWNS key for a town as typed, or '' when it is not on the map */
 export function townKey(t) {
@@ -274,17 +301,62 @@ export function townKey(t) {
   if (ALIAS[k] && TOWNS[ALIAS[k]]) return ALIAS[k];
   return '';
 }
-/* map drawing: longitude is narrowed by cos(latitude) so the county keeps its shape */
+/* map drawing: longitude is narrowed by cos(latitude) so the county keeps its shape.
+   The map covers the area we fit in (45 miles round the yard, NR6 5DR) and a little beyond:
+   the Wash and the Fens to the west, north Suffolk down to Ipswich and Felixstowe to the south. */
 export const MAP_W = 1000,
-  MAP_H = 660;
-const LON0 = 0.1,
-  LAT0 = 53.01,
-  K = 969,
+  MAP_H = 1000;
+const LON0 = -0.02,
+  LAT0 = 53.13,
+  K = 823,
   COS = Math.cos((52.6 * Math.PI) / 180);
 /** [x, y] on the map for a longitude / latitude */
 export const project = ([lon, lat]) => [
   Math.round((lon - LON0) * COS * K * 10) / 10,
   Math.round((LAT0 - lat) * K * 10) / 10,
+];
+/** one mile on the map, in map units */
+export const MILE = (K * 1.609344) / 111.2;
+/* the yard (148 Hellesdon Park Road, NR6 5DR) and how far we fit from it */
+export const BASE = { name: 'Broadland Windows', postcode: 'NR6 5DR', at: [1.258, 52.655] };
+export const FIT_MILES = 45;
+/** miles between two [lon, lat] points (flat-earth sum, close enough across East Anglia) */
+export const milesBetween = ([a, b], [c, d]) =>
+  Math.hypot((c - a) * 111.2 * Math.cos((((b + d) / 2) * Math.PI) / 180), (d - b) * 111.2) / 1.609344;
+/** is a town (TOWNS key) inside the fitting area? */
+export const inFitArea = (k) => !!TOWNS[k] && milesBetween(BASE.at, TOWNS[k]) <= FIT_MILES;
+/* the land around the county for the map: the Lincolnshire shore of the Wash, the Norfolk coast (from NORFOLK)
+   and the Suffolk coast down to Felixstowe, closed off past the edges of the map (approximate) */
+const WASH_WEST = [
+  [0.36, 53.3],
+  [0.34, 53.14],
+  [0.33, 53.1],
+  [0.22, 53.04],
+  [0.1, 52.98],
+  [0.05, 52.93],
+  [0.1, 52.87],
+  [0.17, 52.83],
+];
+const SUFFOLK_COAST = [
+  [1.758, 52.48],
+  [1.735, 52.43],
+  [1.705, 52.37],
+  [1.675, 52.315],
+  [1.635, 52.27],
+  [1.622, 52.21],
+  [1.605, 52.15],
+  [1.578, 52.085],
+  [1.47, 52.015],
+  [1.37, 51.96],
+  [1.28, 51.93],
+  [1.2, 51.8],
+];
+export const LAND = [
+  ...WASH_WEST,
+  ...NORFOLK.slice(0, NORFOLK.findIndex(([x, y]) => x == 1.735 && y == 52.54) + 1),
+  ...SUFFOLK_COAST,
+  [-0.3, 51.8],
+  [-0.3, 53.3],
 ];
 /** a smooth line through points (each a [lon, lat] or the name of a town) */
 export function smoothPath(points, closed) {
@@ -305,6 +377,8 @@ export function smoothPath(points, closed) {
 }
 /** the county outline as an SVG path */
 export const outlinePath = () => smoothPath(NORFOLK, true);
+/** the land (Norfolk and its neighbours) as an SVG path */
+export const landPath = () => smoothPath(LAND, true);
 /** calls grouped by town: [{ key, name, x, y, items }] for towns on the map, and the ones that are not */
 export function groupByTown(items, townOf) {
   const on = new Map(),

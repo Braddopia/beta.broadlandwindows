@@ -21,11 +21,13 @@ export function editProfile() {
   const p = state.profile,
     m = me() || {},
     adm = can('manage'),
+    nm = nameParts(p),
     lk = (t) => MARK(0, 1);
   openModal(
     `<button class="mx" data-act="closeModal" aria-label="Close">&times;</button><div class="pf"><span class="av2">${esc(initials(p.name))}</span><div><h2 style="margin:0">My Details</h2><span class="muted">${esc(ROLES[ROLE].n)} account</span></div></div>
   <div class="grid">
-   <div class="ff"><label for="p_name">Display name *</label><input id="p_name" maxlength="60" value="${esc(p.name)}"></div>
+   <div class="ff"><label for="p_first">First name${MARK(1)}</label><input id="p_first" maxlength="40" autocomplete="given-name" value="${esc(nm.first)}"></div>
+   <div class="ff"><label for="p_last">Last name${MARK(1)}</label><input id="p_last" maxlength="40" autocomplete="family-name" value="${esc(nm.last)}"></div>
    <div class="ff"><label for="p_email">Email${MARK(1)}</label><input id="p_email" class="nocap" type="email" maxlength="120" value="${esc((window.SSO && SSO.email) || p.email || m.email || '')}" ${window.SSO && SSO.email ? 'readonly' : ''}>${window.SSO && SSO.email ? '<span class="hint">From your Microsoft 365 sign-in</span>' : '<span class="hint">Fills in by itself once you sign in with Microsoft 365</span>'}</div>
    <div class="ff"><label for="p_phone">Work phone${MARK(1)}</label><input id="p_phone" type="tel" maxlength="30" value="${esc(p.phone || m.phone || company.tel || '01603 483002')}"></div>
    <div class="ff"><label for="p_mobile">Mobile</label><input id="p_mobile" type="tel" maxlength="30" value="${esc(p.mobile || '')}"></div>
@@ -42,6 +44,14 @@ export function editProfile() {
     'md'
   );
 }
+/** first and last name: kept apart since v19.3; older details only had one name, split at the first space */
+export const nameParts = (p) => {
+  if (p.first != null || p.last != null) return { first: p.first || '', last: p.last || '' };
+  const w = String(p.name || '')
+    .trim()
+    .split(/\s+/);
+  return { first: w[0] || '', last: w.slice(1).join(' ') };
+};
 /* emergency contacts: up to three people, each with a name, how they know you and a number */
 export const emerList = (p) =>
   Array.isArray(p.emer) ? p.emer.slice(0, 3) : p.emergency ? [{ n: p.emergency, r: '', t: '' }] : [];
@@ -70,17 +80,23 @@ export function saveProfile() {
   const v = (i) => SAFE.text(($('#' + i) || {}).value, i == 'p_sig' ? 400 : 120),
     p = state.profile,
     m = me();
-  const name = v('p_name');
-  if (name.length < 2) {
-    toast('Please enter your name');
-    return;
-  }
-  const em = (window.SSO && SSO.email) || v('p_email'),
+  const first = SAFE.text(($('#p_first') || {}).value, 40),
+    last = SAFE.text(($('#p_last') || {}).value, 40),
+    name = [first, last].filter(Boolean).join(' '),
     bad = (id, m) => {
       const e = $('#' + id);
       if (e) fieldErr(e, m);
       else toast(m);
     };
+  if (!first) {
+    bad('p_first', 'Enter your first name');
+    return;
+  }
+  if (!last) {
+    bad('p_last', 'Enter your last name');
+    return;
+  }
+  const em = (window.SSO && SSO.email) || v('p_email');
   if (!em) {
     bad('p_email', 'Enter your work email');
     return;
@@ -108,6 +124,8 @@ export function saveProfile() {
   const old = p.name;
   Object.assign(p, {
     name,
+    first,
+    last,
     email: em,
     phone: ph,
     mobile: v('p_mobile'),

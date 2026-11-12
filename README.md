@@ -1,6 +1,6 @@
-# Broadland Windows CRM v19.2
+# Broadland Windows CRM v19.3
 
-**To use:** open `dist/Broadland-Windows-CRM-v19.2.html` (a single self-contained file).
+**To use:** open `dist/Broadland-Windows-CRM-v19.3.html` (a single self-contained file).
 It reads the same browser storage as earlier versions, so existing data carries over.
 
 ## Editing
@@ -9,7 +9,7 @@ Run `npm install` once. Change files in `src/`, then:
 
 | Command | What it does |
 |---|---|
-| `npm run build` | writes `dist/Broadland-Windows-CRM-v19.2.html` and the root `index.html` |
+| `npm run build` | writes `dist/Broadland-Windows-CRM-v19.3.html` and the root `index.html` |
 | `npm run check` | lint, unit tests, build and the browser tests: run before pushing |
 | `npm run test:unit` | business-rule tests (no browser) |
 | `npm run test:e2e` | browser tests: every page, every account type, phone/tablet/desktop, security |

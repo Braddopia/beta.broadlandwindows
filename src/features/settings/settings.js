@@ -32,21 +32,36 @@ import { toast } from '../../ui/toast.js';
    so printed documents, invoices and VAT sums all use them.
    ========================================================================== */
 export const SET_CO = [
-  { k: 'name', l: 'Company name', req: 1, w: 'full', max: 120 },
+  { k: 'name', l: 'Business name', req: 1, w: 'full', max: 120 },
+  { k: 'addr', l: 'Business address', w: 'full', max: 200 },
+  { k: 'hours', l: 'Opening hours', w: 'full', max: 160, hint: 'For example: Mon to Fri 9am to 5pm, Sat 10am to 2pm' },
   { k: 'tel', l: 'Main phone', t: 'tel', max: 30 },
   { k: 'web', l: 'Website', max: 120 },
   { k: 'em', l: 'Sales email', t: 'email', max: 120 },
   { k: 'em2', l: 'Second email', t: 'email', max: 120 },
-  { k: 'addr', l: 'Address', w: 'full', max: 200 },
   { k: 'vatNo', l: 'VAT number', max: 30 },
   { k: 'coNo', l: 'Company number', max: 30 },
   { k: 'fensa', l: 'FENSA number', max: 30 },
 ];
 export const SET_MONEY = [
-  { k: 'vat', l: 'VAT rate for new contracts (%)', t: 'select', o: ['20', '5', '0'] },
-  { k: 'depRes', l: 'Deposit for home jobs (% of contract)', t: 'number', max: 100, dp: 0 },
-  { k: 'depCom', l: 'Deposit for commercial jobs (% of contract)', t: 'number', max: 100, dp: 0 },
-  { k: 'terms', l: 'Balance due (days after fitting)', t: 'number', max: 365, dp: 0 },
+  { k: 'vat', l: 'VAT rate for new contracts (%)', t: 'select', o: ['20', '5', '0'], show: (v) => v + '%' },
+  { k: 'depRes', l: 'Deposit for home jobs (% of contract)', t: 'number', max: 100, dp: 0, show: (v) => v + '%' },
+  {
+    k: 'depCom',
+    l: 'Deposit for commercial jobs (% of contract)',
+    t: 'number',
+    max: 100,
+    dp: 0,
+    show: (v) => v + '%',
+  },
+  {
+    k: 'terms',
+    l: 'Balance due (days after fitting)',
+    t: 'number',
+    max: 365,
+    dp: 0,
+    show: (v) => v + ' day' + (v == 1 ? '' : 's') + ' after fitting',
+  },
   { k: 'invPrefix', l: 'Invoice number starts with', max: 12 },
   { k: 'bank', l: 'Bank account name', max: 80, w: 'full' },
   { k: 'sort', l: 'Sort code', max: 12 },
@@ -77,8 +92,14 @@ export function vSettings() {
     rm = document.body.classList.contains('rm');
   const row = (t, s, act) =>
     `<div class="set-r"><span><b>${esc(t)}</b>${s ? `<small>${s}</small>` : ''}</span><span class="set-a">${act}</span></div>`;
-  const dl = (F) =>
-    `<dl class="set-dl">${F.map((f) => `<div><dt>${esc(f.l.replace(/ \(.*\)/, ''))}</dt><dd class="${/em|web/.test(f.k) ? 'nocap' : ''}">${esc(String(company[f.k] ?? '')) || '<span class="muted">Not set</span>'}</dd></div>`).join('')}</dl>`;
+  /* only what is filled in is shown; the rest is named once underneath so it can be added */
+  const dl = (F) => {
+    const has = (f) => String(company[f.k] ?? '').trim() !== '',
+      shown = F.filter(has),
+      empty = F.filter((f) => !has(f)),
+      lab = (f) => f.l.replace(/ \(.*\)/, '');
+    return `<dl class="set-dl">${shown.map((f) => `<div class="${f.w == 'full' ? 'full' : ''}"><dt>${esc(lab(f))}</dt><dd class="${/em|web/.test(f.k) ? 'nocap' : ''}">${esc(f.show ? f.show(company[f.k]) : String(company[f.k]))}</dd></div>`).join('')}</dl>${empty.length ? `<p class="muted set-n">Not filled in yet: ${esc(empty.map(lab).join(', '))}</p>` : ''}`;
+  };
   return `<div class="head"><h1>Settings</h1></div>
   <div class="set">
    <section class="panel set-c"><h2><span class="set-ic">${svg(ICONS.user)}</span><span>My Settings</span></h2>

@@ -65,3 +65,50 @@ test('phone: record window never scrolls sideways', async ({ app }) => {
     await app.closeAll();
   }
 });
+
+test('Overview: every card links to its page, and each line opens its own record', async ({ app }) => {
+  await app.role('beta');
+  await app.go('home');
+  await app.page.click('#main .pan-go:has-text("Next Fittings")');
+  expect(await app.run(() => document.body.dataset.view)).toBe('fitting');
+  await app.go('home');
+  await app.page.click('#main .hpan:has-text("Next Fittings") .row.clk-r >> nth=0');
+  await expect(app.page.locator('#mbox .rw')).toHaveCount(1);
+  await app.closeAll();
+  await app.go('home');
+  await app.page.click('#main .hpan:has-text("Deliveries Due") .row.clk-r >> nth=0');
+  await expect(app.page.locator('#modal')).toHaveClass(/open/);
+  expect(app.errors).toEqual([]);
+});
+
+test('Overview on a phone: the greeting shows the stars per platform, not the review numbers', async ({ app }) => {
+  await app.page.setViewportSize({ width: 390, height: 844 });
+  await app.role('beta');
+  await app.go('home');
+  await expect(app.page.locator('.hero .rate .rt-c').first()).toBeHidden();
+  await expect(app.page.locator('.hero .rate .rt-n').first()).toBeHidden();
+  await expect(app.page.locator('.hero .rate')).toContainText('Google');
+});
+
+test('Inventory columns: ID, Item, Colours, Stock, Unit (PCS or the length), Location, Cost, Total Value, Supplier', async ({
+  app,
+}) => {
+  await app.role('beta');
+  await app.go('stock');
+  const th = await app.run(() =>
+    [...document.querySelectorAll('#main .t-inv thead th')].map((t) => t.innerText.replace(/[▲▼]/g, '').trim())
+  );
+  expect(th.slice(1, 10)).toEqual([
+    'ID',
+    'Item',
+    'Colours',
+    'Stock',
+    'Unit',
+    'Location',
+    'Cost',
+    'Total Value',
+    'Supplier',
+  ]);
+  await expect(app.page.locator('#main .t-inv td.c-u').first()).toHaveText(/^(PCS|Pairs|M|[\d.]+M)$/);
+  await expect(app.page.locator('#main .tools')).not.toContainText('Cutting Data');
+});

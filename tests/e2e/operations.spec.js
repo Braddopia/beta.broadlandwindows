@@ -5,7 +5,8 @@ test('standard user: new service call step by step, from an existing contract', 
   await app.role('staff');
   expect(await app.run(() => canSee('service'))).toBe(true);
   await app.go('service');
-  expect(await app.run(() => document.querySelectorAll('#main .mini.del').length)).toBe(0);
+  /* anyone may delete a service call */
+  expect(await app.run(() => document.querySelectorAll('#main .mini.del').length)).toBeGreaterThan(0);
   await app.call('editCall');
   await expect(app.page.locator('#mbox .stp.wz')).toContainText('Customer');
   await app.page.selectOption('#f_existing', { index: 0 });
@@ -221,4 +222,58 @@ test('service call form: the job list drops down in the app style and fills the 
   await expect(app.page.locator('#f_visit')).toHaveValue('2026-12-03');
   await expect(cal).toHaveCount(0);
   expect(app.errors).toEqual([]);
+});
+
+test('service calls: Complete and Parts from the list, each with Undo; Status and Priority centred; anyone can delete', async ({
+  app,
+}) => {
+  await app.role('staff');
+  await app.go('service');
+  const id = await app.run(() => state.calls.find((c) => c.status != 'Complete').id);
+  const row = app.page.locator(`#main tr:has-text("${id}")`);
+  await row.locator('text=Complete').click();
+  expect(
+    await app.run((i) => [state.calls.find((c) => c.id == i).status, state.calls.find((c) => c.id == i).doneAt], id)
+  ).toEqual(['Complete', '2026-11-08']);
+  await expect(app.page.locator('.toast.ok')).toContainText('completed');
+  await app.page.click('.toast .tp-a');
+  expect(await app.run((i) => state.calls.find((c) => c.id == i).status, id)).not.toBe('Complete');
+  await app.page.locator(`#main tr:has-text("${id}") >> text=Parts`).click();
+  expect(await app.run((i) => state.calls.find((c) => c.id == i).status, id)).toBe('Awaiting parts');
+  expect(await app.run(() => getComputedStyle(document.querySelector('#main .t-svc td.c')).textAlign)).toBe('center');
+  // a standard account may delete a service call
+  const n = await app.run(() => state.calls.length);
+  await app.page.locator(`#main tr:has-text("${id}") >> text=Delete`).click();
+  await app.page.click('#mbox [data-act=askGo]');
+  expect(await app.run(() => state.calls.length)).toBe(n - 1);
+  expect(app.errors).toEqual([]);
+});
+
+test('service report: tick which of the call and contract photos to print', async ({ app }) => {
+  await app.role('beta');
+  const RED =
+    'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8DwHwAFBQIAX8jx0gAAAABJRU5ErkJggg==';
+  const BLUE =
+    'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPj/HwADAgH/6Q0CYwAAAABJRU5ErkJggg==';
+  const id = await app.run(
+    ([r, b]) => {
+      const c = state.calls.find((x) => x.contract && state.contracts.some((k) => k.id == x.contract));
+      c.photos = [r];
+      state.contracts.find((k) => k.id == c.contract).photos = [b];
+      return c.id;
+    },
+    [RED, BLUE]
+  );
+  await app.call('reportCall', id, 'c');
+  await expect(app.page.locator('#mbox .rp-ck')).toHaveCount(2);
+  // the call's own photo starts ticked, the contract's does not
+  await expect(app.page.locator('#mbox .rp-ck:checked')).toHaveCount(1);
+  await app.page.click('#mbox .rp-all >> nth=1');
+  await app.page.locator('#mbox .rp-ck >> nth=0').uncheck();
+  const [w] = await Promise.all([app.nextPopup(), app.page.click('#mbox >> text=Print report')]);
+  await w.waitForLoadState();
+  const html = await w.content();
+  expect(html.includes(BLUE)).toBe(true);
+  expect(html.includes(RED)).toBe(false);
+  await w.close();
 });

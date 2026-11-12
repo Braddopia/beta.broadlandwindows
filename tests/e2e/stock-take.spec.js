@@ -246,10 +246,20 @@ test('a product is marked as a profile bar in its own window (Cutting), and the 
     'Quality Check',
     'Notes',
   ]);
+  // the bar length is only asked for once it is a profile: 6.5M, 7M, 5M or another length
+  await expect(app.page.locator('#f_barLen')).toBeHidden();
   await app.page.selectOption('#f_isBar', 'Yes');
-  await app.page.fill('#f_barLen', '6500');
+  await expect(app.page.locator('#f_barLen')).toHaveValue('6500');
+  await app.page.selectOption('#f_barLen', 'other');
+  await app.page.fill('#f_barLenX', '6000');
   await app.page.click('#mbox [data-act=ieSave]');
-  expect(await app.run((p) => state.cutProf[p], pid)).toEqual({ bar: 6500 });
+  expect(await app.run((p) => state.cutProf[p], pid)).toEqual({ bar: 6000 });
+  await app.call('stockForm', 'edit', pid);
+  await expect(app.page.locator('#f_barLen')).toHaveValue('other');
+  await expect(app.page.locator('#f_barLenX')).toHaveValue('6000');
+  await app.page.selectOption('#f_barLen', '7000');
+  await app.page.click('#mbox [data-act=ieSave]');
+  expect(await app.run((p) => state.cutProf[p], pid)).toEqual({ bar: 7000 });
   // and it can be switched off again
   await app.call('stockForm', 'edit', pid);
   await expect(app.page.locator('#f_isBar')).toHaveValue('Yes');

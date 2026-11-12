@@ -1,7 +1,15 @@
 // Cutting lengths of profile from full bars.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { barLenOf, cutsOf, groupBars, offcutsOf, optimiseBars } from '../../src/domain/barcut.js';
+import {
+  DEFAULT_KERF,
+  MIN_OFFCUT,
+  barLenOf,
+  cutsOf,
+  groupBars,
+  offcutsOf,
+  optimiseBars,
+} from '../../src/domain/barcut.js';
 
 const SHEET = [
   { label: 'Ensuite', ref: '2', len: 1603, qty: 2 },
@@ -61,4 +69,11 @@ test('offcuts worth keeping: at least the minimum length, longest first', () => 
   assert.deepEqual(offcutsOf(R.bars, 500), [1624]);
   assert.deepEqual(offcutsOf(R.bars, 50), [1624, 52]);
   assert.deepEqual(offcutsOf(R.bars, 2000), []);
+});
+
+test('the usual saw blade is 10mm and offcuts are only kept from 1M', () => {
+  assert.equal(DEFAULT_KERF, 10);
+  assert.equal(MIN_OFFCUT, 1000);
+  /* most bars are 6.5M; some are 7M or 5M */
+  assert.deepEqual(['6.5M', '7M', '5M', '6500'].map(barLenOf), [6500, 7000, 5000, 6500]);
 });

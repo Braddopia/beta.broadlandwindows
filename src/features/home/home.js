@@ -1,5 +1,5 @@
 /* features/home/home: The Overview page and its widgets. */
-import { onClick } from '../../core/actions.js';
+import { onClick, rowClick } from '../../core/actions.js';
 import { addDays, fd, greet, inWeek, today } from '../../core/dates.js';
 import { $, esc } from '../../core/dom.js';
 import { m0, pc, sum } from '../../core/format.js';
@@ -58,8 +58,15 @@ export function vHome() {
     dueFit = live.filter((c) => c.value - c.paid > 0 && c.fit && c.fit >= td && c.fit <= fort),
     dep = state.contracts.filter((c) => c.stage == 'Deposit due'),
     reqP = state.items.filter((r) => r.type == 'request' && r.reqStatus == 'Pending').length;
-  const row = (a, b) => `<div class="row"><span>${a}</span><span>${b || ''}</span></div>`,
-    pan = (t, h, e) => `<div class="panel"><h2>${t}</h2>${h || `<p class="empty">${e}</p>`}</div>`;
+  /* every card links somewhere: its heading opens the page, each line opens its own record */
+  const row = (a, b, open) =>
+      `<div class="row ${open ? 'clk-r' : ''}" ${open ? rowClick(...open) : ''}><span>${a}</span><span>${b || ''}</span></div>`,
+    goH = (t, view) =>
+      canSee(view)
+        ? `<button type="button" class="pan-go" ${onClick('go', view)}>${t}<span class="pan-ar" aria-hidden="true">${svg(ICONS.chevron)}</span></button>`
+        : t,
+    pan = (t, h, e, view) =>
+      `<div class="panel hpan"><h2>${goH(t, view)}</h2>${h || `<p class="empty">${e}</p>`}</div>`;
   const fitsP = pan(
     'Next Fittings',
     fits
@@ -67,11 +74,13 @@ export function vHome() {
       .map((c) =>
         row(
           `<b>${fd(c.fit)}</b> ${esc(c.name)}<br><span class="muted">${esc(c.product)}, ${esc(c.town)}</span>`,
-          `<span class="tag">${esc(c.fitter)}</span>`
+          `<span class="tag">${esc(c.fitter)}</span>`,
+          ['openContract', c.id]
         )
       )
       .join(''),
-    'No fittings booked.'
+    'No fittings booked.',
+    'fitting'
   );
   const callsP = pan(
     'Service Calls To Action',
@@ -79,9 +88,15 @@ export function vHome() {
       .slice()
       .sort((a, b) => ['Urgent', 'Normal', 'Low'].indexOf(a.priority) - ['Urgent', 'Normal', 'Low'].indexOf(b.priority))
       .slice(0, 4)
-      .map((c) => row(`<b>${esc(c.name)}</b><br><span class="muted">${esc(c.issue)}</span>`, prTag(c.priority)))
+      .map((c) =>
+        row(`<b>${esc(c.name)}</b><br><span class="muted">${esc(c.issue)}</span>`, prTag(c.priority), [
+          'editCall',
+          c.id,
+        ])
+      )
       .join(''),
-    'All clear.'
+    'All clear.',
+    'service'
   );
   const lowP = pan(
     'Reorder List',
@@ -90,20 +105,25 @@ export function vHome() {
       .map((r) =>
         row(
           `<b>${esc(r.item)}</b> <span class="muted">${esc(hasLoc(r) ? r.location : 'No location')}${r.supplier ? ', ' + esc(r.supplier) : ''}</span>`,
-          `<span class="tag ${r.stock <= 0 ? 'r' : 'y'}">${r.stock} Left</span>`
+          `<span class="tag ${r.stock <= 0 ? 'r' : 'y'}">${r.stock} Left</span>`,
+          ['viewItem', r.pid]
         )
       )
       .join(''),
-    'Nothing needs reordering.'
+    'Nothing needs reordering.',
+    'stock'
   );
   const delP = pan(
     'Deliveries Due',
     D.slice()
       .sort((a, b) => a.due.localeCompare(b.due))
       .slice(0, 5)
-      .map((x) => row(`<b>${esc(x.supplier)}</b><br><span class="muted">${esc(x.items)}</span>`, dTag(x)))
+      .map((x) =>
+        row(`<b>${esc(x.supplier)}</b><br><span class="muted">${esc(x.items)}</span>`, dTag(x), ['editDel', x.id])
+      )
       .join(''),
-    'Nothing outstanding.'
+    'Nothing outstanding.',
+    'deliveries'
   );
   const chaseP = pan(
     'Leads To Chase',
@@ -114,11 +134,13 @@ export function vHome() {
       .map((l) =>
         row(
           `<b>${esc(l.name)}</b><br><span class="muted">${esc(l.next || l.product)}</span>`,
-          `<span class="tag">${m0(l.value)}</span>`
+          `<span class="tag">${m0(l.value)}</span>`,
+          ['openLead', l.id]
         )
       )
       .join(''),
-    'No open leads.'
+    'No open leads.',
+    'leads'
   );
   const depP = pan(
     'Awaiting Deposit',
@@ -126,11 +148,13 @@ export function vHome() {
       .map((c) =>
         row(
           `<b>${esc(c.name)}</b><br><span class="muted">${esc(c.product)}</span>`,
-          `<span class="tag y">${m0(c.value)}</span>`
+          `<span class="tag y">${m0(c.value)}</span>`,
+          ['openContract', c.id]
         )
       )
       .join(''),
-    'No deposits outstanding.'
+    'No deposits outstanding.',
+    'contracts'
   );
   const payP = pan(
     'Payments Due Before Fit',
@@ -138,11 +162,13 @@ export function vHome() {
       .map((c) =>
         row(
           `<b>${esc(c.name)}</b><br><span class="muted">Fit ${fd(c.fit)}, #${esc(c.id)}</span>`,
-          `<span class="tag r">${m0(c.value - c.paid)}</span>`
+          `<span class="tag r">${m0(c.value - c.paid)}</span>`,
+          ['openContract', c.id]
         )
       )
       .join(''),
-    'No balances due before a fitting.'
+    'No balances due before a fitting.',
+    'contracts'
   );
   const billP = pan(
     'Bills To Pay',
@@ -151,13 +177,22 @@ export function vHome() {
       .map((b) =>
         row(
           `<b>${esc(b.payee)}</b><br><span class="muted">${esc(b.ref || '')} due ${fd(b.due)}</span>`,
-          `<span class="tag ${b.due < td ? 'r' : ''}">${m0(b.amount)}</span>`
+          `<span class="tag ${b.due < td ? 'r' : ''}">${m0(b.amount)}</span>`,
+          ['editBill', b.id]
         )
       )
       .join(''),
-    'No unpaid bills.'
+    'No unpaid bills.',
+    'finance'
   );
-  const resP = pan('Lead Results', row('Won', won) + row('Lost', lost) + row('Conversion', pc(won, won + lost)));
+  const resP = pan(
+    'Lead Results',
+    row('Won', won, ['go', 'leads']) +
+      row('Lost', lost, ['go', 'leads']) +
+      row('Conversion', pc(won, won + lost), ['go', 'leads']),
+    '',
+    'leads'
+  );
   const cfg = {
     admin: {
       k: [
@@ -184,7 +219,7 @@ export function vHome() {
   };
   cfg.beta = cfg.admin;
   const C = cfg[R] || cfg.staff;
-  const holP = `<div class="panel"><h2><span>My Holiday</span><span class="acts"><button class="btn sm" data-act="bookMine">Book Holiday</button>${canSee('holidays') ? `<button class="mini" ${onClick('go', 'holidays')}>Holiday Planner</button>` : canSee('fitting') ? `<button class="mini" ${onClick('go', 'fitting')}>My Calendar</button>` : ''}</span></h2>${holBody(m)}</div>`;
+  const holP = `<div class="panel hpan hol-p"><h2>${goH('My Holiday', canSee('holidays') ? 'holidays' : 'fitting')}<span class="acts"><button class="btn sm" data-act="bookMine">Book Holiday</button>${canSee('holidays') ? `<button class="mini" ${onClick('go', 'holidays')}>Holiday Planner</button>` : canSee('fitting') ? `<button class="mini" ${onClick('go', 'fitting')}>My Calendar</button>` : ''}</span></h2>${holBody(m)}</div>`;
   /* widgets: every tile and panel the person may see; they choose which show and in what order */
   const KP = {
     pipe: ['Pipeline Value', m0(pipe), '', 'leads'],

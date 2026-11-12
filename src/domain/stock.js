@@ -2,6 +2,7 @@
 import { LOW, UNITS } from '../config/constants.js';
 import { nowT } from '../core/dates.js';
 import { uuid } from '../core/ids.js';
+import { barLenOf } from './barcut.js';
 import { state } from '../data/state.js';
 
 /* ---- migrate older versions, fill gaps ---- */
@@ -48,6 +49,15 @@ export const reorderQty = (r) => +r.reorderQty || Math.max(ro(r) * 2 - r.stock, 
 export const isLow = (r) => r.stock < ro(r);
 export const hasLoc = (r) => r.location && r.location != '-';
 export const unitOf = (r) => (UNITS.includes(r.unit) ? r.unit : 'Each');
+/** the Unit column: stock kept in lengths shows its length (6.5M), pairs show Pairs, everything else PCS */
+export function unitLabel(r) {
+  const mm = barLenOf(r.length);
+  if (mm) return +(mm / 1000).toFixed(3) + 'M';
+  const u = unitOf(r);
+  return u == 'Meters (M)' ? 'M' : u == 'Pair' ? 'Pairs' : 'PCS';
+}
+/** the size to show under the item when it is not already the Unit (e.g. 4MM packers) */
+export const sizeNote = (r) => (r.length && r.length != '-' && !barLenOf(r.length) ? String(r.length) : '');
 export const colTxt = (r) => [r.cInName, r.cOutName].filter((x) => x && x != '-').join(' / ') || '-';
 export const stt = (r) => (r.stock <= 0 ? ['Out', 'r'] : isLow(r) ? ['Low', 'y'] : ['OK', 'g']);
 export function moveRow(b, kind, qty, stock, extra) {

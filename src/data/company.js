@@ -8,6 +8,8 @@ export const company = {
   em2: 'commercial@broadlandwindows.co.uk',
   web: 'www.broadlandwindows.co.uk',
   addr: '148 Hellesdon Park Road, Norwich, Norfolk NR6 5DR',
+  /* from the public business listing; change it in Settings, Company Details */
+  hours: 'Mon to Fri 9am to 5pm · Sat 10am to 2pm · Sun closed',
 };
 export function coLoad() {
   state.co = state.co && typeof state.co == 'object' ? state.co : {};

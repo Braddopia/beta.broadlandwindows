@@ -61,3 +61,41 @@ test('My Holiday shows days left in a ring, the numbers beside it, and Next / Pr
   await app.page.click('#main .hbtns >> text=All Holidays');
   await expect(app.page.locator('#mbox h2')).toContainText('All Holidays');
 });
+
+test('a booking can be undone from the banner, and a holiday that has not started can be cancelled (with Undo)', async ({
+  app,
+}) => {
+  await app.role('beta');
+  const sid = await app.run(() => me().id);
+  const count = () => app.run((id) => state.hols.filter((h) => h.sid == id).length, sid);
+  const n = await count();
+  await app.call('holBook', sid, '2026-11-23');
+  await app.page.check('input[name=hpaid][value=paid]');
+  await app.page.click('#mbox [data-act=holSave]');
+  expect(await count()).toBe(n + 1);
+  // the banner at the bottom says it worked and offers Undo
+  await expect(app.page.locator('.toast.ok')).toContainText('Holiday booked');
+  await app.page.click('.toast .tp-a');
+  expect(await count()).toBe(n);
+  // book it again, then cancel it from the list of coming holidays
+  await app.call('holBook', sid, '2026-11-23');
+  await app.page.check('input[name=hpaid][value=paid]');
+  await app.page.click('#mbox [data-act=holSave]');
+  await app.call('myHolidays', sid, 'next');
+  await app.page.click('#mbox .row:has-text("23 Nov") >> text=Cancel');
+  expect(await count()).toBe(n);
+  await expect(app.page.locator('.toast.ok')).toContainText('Holiday cancelled');
+  await app.page.click('.toast .tp-a');
+  expect(await count()).toBe(n + 1);
+  expect(app.errors).toEqual([]);
+});
+
+test('Book Holiday uses the site form style: labelled boxes, paid or unpaid as two cards', async ({ app }) => {
+  await app.role('beta');
+  await app.call('bookMine');
+  await expect(app.page.locator('#mbox label[for=hf]')).toHaveText('First day off');
+  await expect(app.page.locator('#mbox .chq .chc')).toHaveCount(2);
+  // tick boxes and radio buttons keep their own small size (not the 2.8rem of a text box)
+  const h = await app.run(() => document.querySelector('#mbox input[name=hpaid]').getBoundingClientRect().height);
+  expect(h).toBeLessThan(24);
+});

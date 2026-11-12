@@ -3,7 +3,7 @@
    ========================================================================== */
 .app{display:grid;grid-template-columns:var(--sw) minmax(0,1fr);height:100dvh}
 .wrap{display:flex;flex-direction:column;min-width:0;height:100dvh}
-.main{flex:1;overflow:auto;padding:var(--gap) calc(var(--gap)*1.6 - var(--sbw,0px)) calc(var(--gap)*1.6 + var(--safe-b)) calc(var(--gap)*1.6);scrollbar-gutter:stable}
+.main{flex:1;overflow:auto;padding:var(--gap) max(0px,calc(var(--edge) - var(--sbw,0px))) calc(var(--edge) + var(--safe-b)) var(--edge);scrollbar-gutter:stable}
 
 /* ---- sidebar ---- */
 .side{margin:.75rem 0 .75rem .75rem;padding:1rem .8rem .8rem;border-radius:20px;background:var(--card);border:1px solid var(--line);box-shadow:var(--sh);display:flex;flex-direction:column;min-height:0;overflow:hidden}
@@ -39,7 +39,7 @@ body[data-theme=dark] .nav i{background:var(--yellow);color:#0c1a2e}
 body.isadm .acct{background:var(--yellow);color:#012b59}
 
 /* ---- top bar ---- */
-.top{position:relative;z-index:60;display:flex;align-items:center;gap:.55rem;margin:.75rem calc(var(--gap)*1.6) 0;padding:.45rem .55rem .45rem .7rem;border-radius:18px;background:var(--card);border:1px solid var(--line);box-shadow:var(--sh)}
+.top{position:relative;z-index:60;display:flex;align-items:center;gap:.55rem;margin:.75rem var(--edge) 0;padding:.45rem .55rem .45rem .7rem;border-radius:18px;background:var(--card);border:1px solid var(--line);box-shadow:var(--sh)}
 .sb{flex:1 1 auto;min-width:0;display:flex;align-items:center;gap:.55rem;height:2.45rem;padding:0 .9rem;border-radius:999px;background:var(--card2);border:1px solid var(--line);transition:box-shadow .2s}
 .sb:focus-within{box-shadow:0 0 0 3px rgba(3,78,162,.25)}
 .sb svg{width:17px;height:17px;opacity:.55;flex-shrink:0}
@@ -58,10 +58,10 @@ body.isadm .acct{background:var(--yellow);color:#012b59}
 .menu.open{display:block}
 .menu button{display:flex;gap:.6rem;width:100%;padding:.55rem .7rem;border:0;border-radius:8px;background:none;text-align:left;cursor:pointer}
 .menu button:hover{background:var(--blue-bg)}
-.adminbar{display:none;margin:.5rem calc(var(--gap)*1.6) 0;padding:.35rem .9rem;border-radius:10px;background:linear-gradient(90deg,#ffd002,#ffe26b);color:#012b59;font-size:.78rem;font-weight:600}
+.adminbar{display:none;margin:.5rem var(--edge) 0;padding:.35rem .9rem;border-radius:10px;background:linear-gradient(90deg,#ffd002,#ffe26b);color:#012b59;font-size:.78rem;font-weight:600}
 body.isadm .adminbar{display:block}
 body[data-theme=dark] .adminbar{background:rgba(255,208,2,.16);color:#ffe27a}
-.secbar{display:none;margin:.5rem calc(var(--gap)*1.6) 0;padding:.35rem .9rem;border-radius:10px;background:var(--red-bg);color:var(--red);font-size:.78rem;font-weight:600}
+.secbar{display:none;margin:.5rem var(--edge) 0;padding:.35rem .9rem;border-radius:10px;background:var(--red-bg);color:var(--red);font-size:.78rem;font-weight:600}
 .secbar.on{display:block}
 
 /* ---- splash, scrim, toast ---- */

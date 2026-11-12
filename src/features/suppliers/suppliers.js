@@ -26,7 +26,7 @@ export const sups = () => state.suppliers;
 export const SUPN = (cur) => ['', ...new Set([...sups().map((x) => x.name), cur || ''].filter(Boolean))];
 export const supOrders = (x) => state.orders.filter((o) => (o.supplier || 'Smart Systems') == x.name);
 export const supCol = (n) =>
-  ['#034ea2', '#e0a800', '#12794c', '#8a4fd1', '#c2410c', '#0e7490'][
+  ['#034ea2', '#a16207', '#12794c', '#7a3fc4', '#b33a0a', '#0e6a84'][
     [...String(n)].reduce((a, c) => a + c.charCodeAt(0), 0) % 6
   ];
 export const telA = (n) => `<a href="tel:${esc(n.replace(/[^\d+]/g, ''))}">${esc(n)}</a>`,

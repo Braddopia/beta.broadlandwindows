@@ -283,14 +283,6 @@ body[data-theme=dark] .path li.on button{background:#2f6fd0;color:#fff}body[data
 .rw-rail .rw-prog i{margin-top:.5rem;height:6px}
 
 /* ==== saved tick,photo grid,file rows,phone stock mode,search answers ==== */
-/* success inside the same window */
-.donein{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.7rem;padding:1.6rem 1rem 1.4rem;text-align:center;animation:pop .25s ease-out}
-.donein h2{margin:0;font:600 1.3rem var(--head);color:var(--navy)}
-.dn-svg{width:4.2rem;height:4.2rem}
-.dn-svg circle{fill:none;stroke:#12794c;stroke-width:3;stroke-dasharray:150;stroke-dashoffset:150;animation:dnc .5s ease-out forwards}
-.dn-svg path{fill:none;stroke:#12794c;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:40;stroke-dashoffset:40;animation:dnc .35s .4s ease-out forwards}
-@keyframes dnc{to{stroke-dashoffset:0}}
-body[data-theme=dark] .dn-svg circle,body[data-theme=dark] .dn-svg path{stroke:#7fe0aa}
 /* photo grid: one row of 8 boxes across the full width (4 a row on phones) */
 .thumbs.phg{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:.5rem;width:100%;margin:.3rem 0 .6rem}
 @media(max-width:700px){.thumbs.phg{grid-template-columns:repeat(4,minmax(0,1fr))}}
@@ -368,7 +360,7 @@ button.brand:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
 .paidq .cbl{display:flex;gap:.5rem;align-items:center;margin:.2rem 0}
 .paidq.bad legend{color:var(--red)}
 /* Report a problem: always in the bottom corner,above popups too */
-#rpb{position:fixed;right:calc(.9rem + var(--safe-r,0px));bottom:calc(.9rem + var(--safe-b,0px));z-index:120;display:flex;align-items:center;gap:.4rem;height:2.2rem;padding:0 .75rem;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--muted);font:600 .74rem var(--body);box-shadow:0 4px 14px rgba(1,43,89,.14);cursor:pointer;opacity:.9}
+#rpb{position:fixed;right:calc(var(--edge) + var(--safe-r,0px));bottom:calc(.9rem + var(--safe-b,0px));z-index:120;display:flex;align-items:center;gap:.4rem;height:2.2rem;padding:0 .75rem;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--muted);font:600 .74rem var(--body);box-shadow:0 4px 14px rgba(1,43,89,.14);cursor:pointer;opacity:.9}
 #rpb:hover{opacity:1;color:var(--red);border-color:var(--red)}
 #rpb svg{width:1rem;height:1rem;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 @media(max-width:700px){#rpb{width:2.4rem;padding:0;justify-content:center;bottom:calc(4.6rem + var(--safe-b,0px))}#rpb span{display:none}}
@@ -562,7 +554,7 @@ body[data-theme=dark] .smap .land{fill:rgba(120,170,255,.08);stroke:#6ea3e8}
   .ptb.fx.t-inv th[data-col=sel]{width:2.6rem}.ptb.fx.t-inv th[data-col=pid]{width:5rem}.ptb.fx.t-inv th[data-col=length]{width:5.5rem}.ptb.fx.t-inv th[data-col=unit]{width:4.5rem}
   .ptb.fx.t-inv th[data-col=stock]{width:5rem}.ptb.fx.t-inv th[data-col=cost]{width:5.5rem}.ptb.fx.t-inv th[data-col=value]{width:6rem}.ptb.fx.t-inv th[data-col=act]{width:20.5rem}
   .ptb.fx.t-svc th[data-col=id]{width:7rem}.ptb.fx.t-svc th[data-col=pr]{width:6.5rem}.ptb.fx.t-svc th[data-col=st]{width:7rem}.ptb.fx.t-svc th[data-col=visit]{width:6.5rem}
-  .ptb.fx.t-svc th[data-col=fitter]{width:7.5rem}.ptb.fx.t-svc th[data-col=act]{width:9.6rem}.ptb.fx.t-svc th[data-col=name]{width:15.5rem}
+  .ptb.fx.t-svc th[data-col=fitter]{width:7.5rem}.ptb.fx.t-svc th[data-col=act]{width:17rem}.ptb.fx.t-svc th[data-col=name]{width:15.5rem}
 }
 @media(min-width:900px){.ptb.fx.t-inv td.ac .acts{justify-content:flex-end}}
 
@@ -576,22 +568,27 @@ body[data-theme=dark] .smap .land{fill:rgba(120,170,255,.08);stroke:#6ea3e8}
 /* tour spotlight: soft blue ring,not yellow */
 #tour .tspot:not(.none){box-shadow:0 0 0 200vmax rgba(1,18,40,.62),0 0 0 2px rgba(90,184,255,.85),0 0 18px 2px rgba(90,184,255,.35)}
 
-/* messages: a neat card at the bottom of the screen,clear of what you are working on */
-.toast.tpop{left:50%;top:auto;bottom:calc(1.5rem + var(--safe-b,0px));transform:translateX(-50%);z-index:4000;flex-direction:row;align-items:center;gap:.7rem;min-width:0;max-width:min(34rem,calc(100vw - 2rem));padding:.6rem 1.1rem .6rem .65rem;border:1px solid var(--line);border-left:1px solid var(--line);border-radius:14px;background:var(--pop,var(--card));color:var(--ink);font:600 .88rem/1.35 var(--body);text-align:left;box-shadow:0 14px 38px rgba(1,30,70,.28);pointer-events:auto;cursor:pointer;animation:none}
-.toast.tpop.in{animation:tpIn .2s cubic-bezier(.2,.9,.3,1.15) both}
+/* messages: a small banner ("snackbar") at the bottom centre, the same for every confirmation and warning.
+   Dark in light mode and light in dark mode, so it stands out from the page without covering work. */
+.toast.tpop{left:50%;top:auto;bottom:calc(1.25rem + var(--safe-b,0px));transform:translateX(-50%);z-index:4000;flex-direction:row;align-items:center;gap:.6rem;min-width:min(18rem,calc(100vw - 2rem));max-width:min(36rem,calc(100vw - 2rem));padding:.45rem .45rem .45rem .8rem;border:0;border-radius:10px;background:#13233a;color:#fff;font:500 .9rem/1.35 var(--body);text-align:left;box-shadow:0 8px 28px rgba(1,20,45,.32);pointer-events:auto;animation:none}
+.toast.tpop.in{animation:tpIn .18s ease-out both}
 .toast.tpop.out{animation:tpOut .16s ease-in both}
-.toast.tpop .tp-i{flex:0 0 auto;width:2rem;height:2rem;padding:.3rem;border-radius:50%}
-.toast.tpop.ok .tp-i{background:rgba(18,121,76,.14)}
-.toast.tpop.bad .tp-i{background:rgba(217,119,6,.16)}
-.toast.tpop .tp-i circle{display:none}
-.toast.tpop .tp-i path{fill:none;stroke-width:5;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:40;stroke-dashoffset:40;animation:dnc .22s .08s ease-out forwards}
-.toast.tpop.ok .tp-i *{stroke:#12794c}
-.toast.tpop.bad .tp-i *{stroke:#c26a05}
-body[data-theme=dark] .toast.tpop{color:#e8eef8;border-color:rgba(255,255,255,.12)}
-body[data-theme=dark] .toast.tpop.ok .tp-i *{stroke:#7fe0aa}
-body[data-theme=dark] .toast.tpop.bad .tp-i *{stroke:#ffc35c}
+.toast.tpop .tp-t{flex:1;min-width:0;padding:.25rem 0}
+.toast.tpop .tp-i{flex:0 0 auto;width:1.35rem;height:1.35rem;fill:none;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+.toast.tpop.ok .tp-i{stroke:#7fe0aa}
+.toast.tpop.bad .tp-i{stroke:#ffc35c;border:2px solid #ffc35c;border-radius:50%;stroke-width:2.4;padding:1px}
+.toast.tpop .tp-a{flex:0 0 auto;border:0;border-radius:7px;padding:.4rem .7rem;background:transparent;color:#ffd84d;font:700 .85rem var(--body);cursor:pointer}
+.toast.tpop .tp-a:hover,.toast.tpop .tp-a:focus-visible{background:rgba(255,255,255,.12)}
+.toast.tpop .tp-x{flex:0 0 auto;width:2rem;height:2rem;border:0;border-radius:7px;background:transparent;color:#c9d4e3;font-size:1.25rem;line-height:1;cursor:pointer}
+.toast.tpop .tp-x:hover,.toast.tpop .tp-x:focus-visible{background:rgba(255,255,255,.12);color:#fff}
+body[data-theme=dark] .toast.tpop{background:#e9eef6;color:#0c1a2e;box-shadow:0 8px 28px rgba(0,0,0,.5)}
+body[data-theme=dark] .toast.tpop.ok .tp-i{stroke:#0f6b42}
+body[data-theme=dark] .toast.tpop.bad .tp-i{stroke:#8a4b00;border-color:#8a4b00}
+body[data-theme=dark] .toast.tpop .tp-a{color:#034ea2}
+body[data-theme=dark] .toast.tpop .tp-x{color:#46566e}
+body[data-theme=dark] .toast.tpop .tp-a:hover,body[data-theme=dark] .toast.tpop .tp-x:hover{background:rgba(1,43,89,.1)}
 @media(max-width:700px){.toast.tpop{bottom:calc(5rem + var(--safe-b,0px))}}
-@keyframes tpIn{from{opacity:0;transform:translate(-50%,14px)}to{opacity:1;transform:translate(-50%,0)}}
+@keyframes tpIn{from{opacity:0;transform:translate(-50%,12px)}to{opacity:1;transform:translate(-50%,0)}}
 @keyframes tpOut{to{opacity:0;transform:translate(-50%,8px)}}
 
 /* messages: the report button sits at the bottom of the chat list,centred,instead of over the send box */
@@ -657,7 +654,7 @@ body[data-theme=dark] .bar-pn{color:#e8eef8}
 .bar-f span{font-size:.7rem;font-weight:600;color:var(--muted)}
 .bar-f input,.bar-f select{height:2.3rem;padding:0 .6rem;border:1px solid var(--line);border-radius:9px;background:var(--card);color:var(--ink);font:500 .9rem var(--body);width:100%}
 .bar-f input:focus,.bar-f select:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(43,143,224,.18)}
-.bar-code{width:11rem}.bar-desc{flex:1;min-width:12rem}.bar-n{width:8rem}.bar-n input,.bar-q input{text-align:center}
+.bar-code{width:11rem}.bar-desc{flex:1;min-width:12rem}.bar-col{width:12rem}.bar-n{width:8rem}.bar-n input,.bar-q input{text-align:center}
 .bar-cuts{display:flex;flex-direction:column;gap:.45rem}
 .bar-r{display:grid;grid-template-columns:.7rem minmax(0,1fr) 5rem 7.5rem 5.5rem 5.5rem 5.5rem 2rem;align-items:end;gap:.55rem;padding:.55rem .7rem;border:1px solid var(--line);border-radius:12px;background:var(--card2,rgba(255,255,255,.03))}
 .bar-r .cut-dot{align-self:center;margin-top:1rem}
@@ -749,7 +746,7 @@ body:not([data-theme=dark]) .bar-s .bo{fill:#f6f8fb;stroke:#9aa7b8}
 .t-svc .cl2{-webkit-line-clamp:1;max-width:none}
 .t-svc small.sub{max-width:none}
 .t-svc td.ac .acts{justify-content:flex-end;flex-wrap:nowrap}
-.t-svc th[data-col=pr],.t-svc th[data-col=st]{text-align:left}
+.t-svc th[data-col=pr],.t-svc th[data-col=st],.t-svc td.c{text-align:center}
 
 /* service map,polished: sea,land with a soft edge,roads,rivers and broads,landmark towns,pins with a count */
 .smap-m{padding:.7rem!important}
@@ -825,6 +822,125 @@ body[data-theme=dark] .ie-f legend{color:#e8eef8}
   .bar-r .bar-a{grid-column:span 3}
   .bar-ph{display:grid;grid-template-columns:1fr 1fr;align-items:end}
   .bar-ph .bar-pn,.bar-ph .bar-desc{grid-column:1/-1}
-  .bar-ph .bar-code,.bar-ph .bar-n{width:auto}
+  .bar-ph .bar-code,.bar-ph .bar-n,.bar-ph .bar-col{width:auto}
   .bar-row{grid-template-columns:1.4rem 1.8rem minmax(0,1fr)}
 }
+
+/* ==== v19.3 Overview: every card links to its page; My Holiday fills its card; phone ratings ==== */
+.pan-go{display:inline-flex;align-items:center;gap:.25rem;margin:0;padding:0;border:0;background:none;color:inherit;font:inherit;cursor:pointer;text-align:left}
+.pan-go .pan-ar svg{width:1rem;height:1rem;opacity:.45;transition:transform .15s,opacity .15s}
+.pan-go:hover,.pan-go:focus-visible{color:var(--blue)}
+.pan-go:hover .pan-ar svg,.pan-go:focus-visible .pan-ar svg{opacity:1;transform:translateX(2px)}
+.hpan .row.clk-r{margin:0 -.5rem;padding-left:.5rem;padding-right:.5rem;border-radius:8px}
+.hpan .row.clk-r:hover{background:var(--hover)}
+/* My Holiday: the ring and the numbers share out the card's height, the buttons sit at the bottom */
+.hol-p{display:flex;flex-direction:column}
+.hol-p .hol2{flex:1;margin:.4rem 0 .6rem;gap:clamp(1.2rem,3vw,2rem)}
+.hol-p .hring{width:clamp(8.2rem,11vw,10rem);height:clamp(8.2rem,11vw,10rem)}
+.hol-p .hlist{align-self:stretch;align-content:space-evenly}
+.hol-p .hlist>div{padding:.5rem 0}
+.hol-p .hbtns{margin-top:auto}
+@media(max-width:480px){.hol-p .hol2{gap:.6rem}.hol-p .hlist>div{padding:.38rem 0}}
+@media(max-width:700px){.hero .rate{gap:.35rem 1rem}.hero .rate .rt-n,.hero .rate .rt-on,.hero .rate .rt-c{display:none}}
+
+/* ==== v19.3 drop-downs: the app's own list (ui/components/pickers.js) and one arrow for every closed box ==== */
+.pk-sel{max-height:min(22rem,calc(100vh - 2rem));overflow-y:auto;overscroll-behavior:contain}
+.pk-o{display:flex;align-items:center;gap:.5rem;width:100%;min-height:2.3rem;padding:.45rem 2rem .45rem .7rem;border:0;border-radius:9px;background:none;color:inherit;font:500 .92rem var(--body);text-align:left;cursor:pointer;position:relative}
+.pk-o:hover,.pk-o.on{background:var(--blue-bg)}
+.pk-o.sel{font-weight:700;color:var(--blue)}
+.pk-o.sel::after{content:"";position:absolute;right:.75rem;top:50%;width:.4rem;height:.75rem;margin-top:-.45rem;border:solid currentColor;border-width:0 2px 2px 0;transform:rotate(45deg)}
+.pk-o:disabled{opacity:.45;cursor:default;background:none}
+.pk-g{margin:.45rem .7rem .2rem;font:700 .7rem var(--body);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+select:not([multiple]):not([size]){-webkit-appearance:none;appearance:none;padding-right:2.1rem!important;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2356657d' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")!important;background-repeat:no-repeat!important;background-position:right .65rem center!important;background-size:1rem!important}
+body[data-theme=dark] select:not([multiple]):not([size]){background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23aab4c4' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")!important}
+select[aria-expanded=true]{border-color:var(--blue)!important;box-shadow:0 0 0 3px rgba(3,78,162,.18)}
+
+/* ==== v19.3 forms: tick boxes and radio buttons keep their own size (they were picking up the 2.8rem text-box
+   height, which spread them far apart), and two-way choices are cards you click ==== */
+input[type=checkbox],input[type=radio]{accent-color:var(--btn)}
+.mb input[type=checkbox],.mb input[type=radio],.cform input[type=checkbox],.cform input[type=radio]{width:1.15rem!important;height:1.15rem;min-height:0!important;margin:0;padding:0;flex:0 0 auto}
+.mb label.cbl,.mb .ff label.cbl,.cbl{display:flex;align-items:center;gap:.55rem;margin:.35rem 0 0;font:500 .92rem var(--body);color:var(--ink);cursor:pointer}
+.mb .ff>label.cbl+label.cbl,.mb label.cbl+label.cbl{margin-top:.5rem}
+.paidq{border:0;padding:0;margin:0;min-width:0}
+.paidq legend{padding:0;margin:0 0 .35rem;font:600 .92rem var(--body);color:var(--ink)}
+.chq{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}
+.chc{display:flex!important;align-items:flex-start;gap:.6rem;margin:0!important;padding:.7rem .8rem;border:1.5px solid #7f8ea6;border-radius:10px;background:var(--card);cursor:pointer;transition:border-color .12s,background .12s}
+.chc input{margin-top:.15rem!important}
+.chc span{display:flex;flex-direction:column;gap:.1rem}
+.chc b{font:600 .95rem var(--body);color:var(--ink)}
+.chc small{font-size:.8rem;color:var(--muted)}
+.chc:hover{border-color:var(--blue)}
+.chc:has(input:checked){border-color:var(--blue);background:var(--blue-bg)}
+.chc:has(input:focus-visible){box-shadow:0 0 0 3px rgba(3,78,162,.25)}
+.paidq.bad .chc{border-color:var(--red)}
+.paidq.bad legend{color:var(--red)}
+body[data-theme=dark] .chc{border-color:#66717f;background:#11161f}
+body[data-theme=dark] .chc:has(input:checked){border-color:var(--blue);background:var(--blue-bg)}
+.hol-sum{margin-top:.9rem}
+.hol-sum .hol-n{margin:0;font-size:.92rem}
+.hol-sum .warn{margin-top:.4rem}
+.btn.red-t{color:var(--red)}
+@media(max-width:480px){.chq{grid-template-columns:1fr}}
+
+/* ==== v19.3 service map: the land round the county, the 45-mile area we fit in highlighted, everything past it dimmed ==== */
+.smap .land.out{fill:#e4e7e0;stroke:none}
+.smap .zone{fill:#f7faef}
+.smap .zone-e{fill:none;stroke:#034ea2;stroke-width:2.5;stroke-dasharray:10 7;opacity:.75}
+.smap .zone-t{font:700 15px var(--body);fill:#034ea2;text-anchor:middle;paint-order:stroke;stroke:#f7faef;stroke-width:4px}
+.smap .county{fill:none;stroke:#8a9bb0;stroke-width:1.6;stroke-dasharray:2 5;stroke-linecap:round}
+.smap .base rect{fill:#ffd002;stroke:#012b59;stroke-width:2.5}
+.smap-key .zk{border-radius:3px;background:#f7faef;border:2px dashed #034ea2;width:.9rem;height:.9rem}
+.smap-key .bk{border-radius:2px;background:#ffd002;border:2px solid #012b59;transform:rotate(45deg);width:.6rem;height:.6rem}
+body[data-theme=dark] .smap .seabg{fill:#13233a}
+body[data-theme=dark] .smap .land.out{fill:#1e2530}
+body[data-theme=dark] .smap .zone{fill:#2a3444}
+body[data-theme=dark] .smap .coast{stroke:#4f78a3}
+body[data-theme=dark] .smap .rd{stroke:#46526a;filter:none}
+body[data-theme=dark] .smap .rv,body[data-theme=dark] .smap .br{stroke:#3b6b96;fill:#3b6b96}
+body[data-theme=dark] .smap .rv{fill:none}
+body[data-theme=dark] .smap .zone-e{stroke:#8cbcff}
+body[data-theme=dark] .smap .zone-t{fill:#a9cdff;stroke:#2a3444}
+body[data-theme=dark] .smap .tl{fill:#eef2f8;stroke:#2a3444}
+body[data-theme=dark] .smap .lm text{fill:#c4cedc;stroke:#2a3444}
+body[data-theme=dark] .smap .lm circle{fill:#2a3444;stroke:#c4cedc}
+body[data-theme=dark] .smap .sea{fill:#8fb3d6}
+body[data-theme=dark] .smap .nb{fill:#9aa7b8}
+body[data-theme=dark] .smap .county{stroke:#6b7a90}
+body[data-theme=dark] .smap .scale path{stroke:#9aa7b8}body[data-theme=dark] .smap .scale text{fill:#9aa7b8}
+body[data-theme=dark] .smap-key .zk{background:#2a3444;border-color:#8cbcff}
+.smap .sea.mid{text-anchor:middle}
+/* service report: tick the photos to print */
+.rp-g{display:grid;grid-template-columns:repeat(auto-fill,minmax(7.5rem,1fr));gap:.6rem;margin-bottom:.4rem}
+.rp-ph{position:relative;display:flex;flex-direction:column;gap:.3rem;padding:.4rem;border:1.5px solid var(--line);border-radius:10px;cursor:pointer;font-size:.78rem;color:var(--muted)}
+.rp-ph img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:7px;background:var(--card2)}
+.rp-ph input{position:absolute;top:.7rem;left:.7rem;background:#fff}
+.rp-ph:has(input:checked){border-color:var(--blue);background:var(--blue-bg);color:var(--ink)}
+.fsec .rp-all{margin-left:auto;font-size:.72rem}
+h3.fsec:has(.rp-all){display:flex;align-items:center;gap:.5rem}
+.t-inv .c-u{white-space:nowrap;font-weight:600}.ptb.fx.t-inv th[data-col=value]{width:6.8rem}
+.chc:has(input:disabled){opacity:.55;cursor:default}.chc:has(input:disabled):hover{border-color:#7f8ea6}
+
+/* ==== v19.3 settings: cards in a row are the same height; company details in two even columns, only what is filled in ==== */
+.set{align-items:stretch}
+.set>.set-c{display:flex;flex-direction:column}
+.set-dl{grid-template-columns:repeat(2,minmax(0,1fr))}
+.set-dl>.full{grid-column:1/-1}
+@media(max-width:480px){.set-dl{grid-template-columns:1fr}}
+
+/* ==== v19.3 readability: every piece of text meets WCAG AA contrast (4.5:1, or 3:1 for large text) in light and dark,
+   checked against the real pixels behind it (glass and gradients included) ==== */
+.xl-g th,.xl-g td{border-color:#1a6ab8}
+.xl-g tr.xh th,.xl-g tr.xh th.we,.xl-ct th{background:#1f6fc4!important;border-color:#1f6fc4}
+.hbtns .btn small{opacity:1;color:var(--muted)}
+.hlist dd.pd{color:#8a5d00}
+body[data-theme=dark] .hlist dd.pd{color:#ffc35c}
+.views .chip.on i{background:rgba(1,20,45,.32)}
+.azbar span{opacity:1!important;font-weight:500;color:var(--muted)!important}
+.cav{background:linear-gradient(135deg,oklch(.42 .12 var(--h)),oklch(.5 .13 calc(var(--h) + 40)))}
+.prio.p1 .pn{background:#bf3434}
+.rb1.cl{background:rgba(1,20,45,.3)}
+.rb1.cl:hover{background:rgba(1,20,45,.45)}
+body[data-theme=dark] .top .sb kbd{color:#c4ccd8}
+body[data-theme=dark] .xl-tabs button.on{color:#0d6b37}
+.xl-g tr.xh th.tdh{background:#ffd002!important;color:#013!important;border-color:#e0b800}
+.fl-head .muted{color:#3a4760}body[data-theme=dark] .fl-head .muted{color:var(--muted)}

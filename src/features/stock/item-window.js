@@ -135,9 +135,19 @@ export function ieFields() {
             t: 'select',
             o: ['No', 'Yes'],
             sec: 'k',
-            hint: 'Yes lists it in the Cutting Optimiser',
+            hint: 'Yes lists it in the Cutting Optimiser by its code',
           },
-          { k: 'barLen', l: 'Full bar length', t: 'number', max: 20000, dp: 0, sec: 'k', hint: 'In millimetres' },
+          { k: 'barLen', l: 'Full bar length', t: 'select', o: BAR_LENGTHS, sec: 'k' },
+          {
+            k: 'barLenX',
+            l: 'Other bar length (mm)',
+            t: 'number',
+            min: 500,
+            max: 20000,
+            dp: 0,
+            sec: 'k',
+            hint: 'Between 500 and 20,000',
+          },
         ]
       : []),
     ...(ieMode == 'edit' || ieMode == 'add'
@@ -183,7 +193,11 @@ export function itemWindow(mode, k, pre) {
         barcode: r.barcode || r.item,
         notes: r.notes || '',
         isBar: (state.cutProf || {})[r.pid] ? 'Yes' : 'No',
-        barLen: ((state.cutProf || {})[r.pid] || {}).bar || barLenOf(r.length) || '',
+        /* a profile keeps its bar length; otherwise its stock length if that is a usual bar length, else 6.5 m */
+        ...barLenValues(
+          ((state.cutProf || {})[r.pid] || {}).bar ||
+            (BAR_LENGTHS.some(([x]) => x == String(barLenOf(r.length))) ? barLenOf(r.length) : 6500)
+        ),
       }
     : {
         pid: mode == 'remove' ? '' : stkId(),
@@ -200,6 +214,8 @@ export function itemWindow(mode, k, pre) {
         location: '',
         supplier: '',
         barcode: '',
+        isBar: 'No',
+        barLen: '6500',
       };
   const F = ieFields(),
     sec = (t, s, cls) => {
@@ -228,6 +244,12 @@ export function itemWindow(mode, k, pre) {
   ieDraw();
   ieStats();
   bcDeco({ diff: !!(r && r.barcode && r.barcode != r.item), val: r ? r.barcode || '' : '' });
+  /* Cutting: the bar length shows only for a profile, and the "other" box only when Other is picked */
+  barBoxes();
+  ['f_isBar', 'f_barLen'].forEach((id) => {
+    const e = $('#' + id);
+    if (e) e.addEventListener('change', barBoxes);
+  });
   /* the Length box follows the unit (metres, pieces per pack, or a size) */
   const un = $('#f_unit');
   if (un) {
@@ -337,6 +359,10 @@ export function ieSave() {
       fieldErr($('#f_length'), lb.err);
       return;
     }
+  }
+  if (o.isBar == 'Yes' && o.barLen == 'other' && !(+o.barLenX >= 500 && +o.barLenX <= 20000)) {
+    fieldErr($('#f_barLenX'), 'Type the bar length in millimetres, between 500 and 20,000');
+    return;
   }
   if (!o.item) {
     toast('Item code can use letters, numbers, spaces, dots, dashes and slashes');
@@ -504,12 +530,35 @@ export function ieSave() {
         : 'Removed ' + o.qty + ' ' + o.unit + ', now ' + st
   );
 }
-/* Cutting section: keep the product's bar length for the Cutting Optimiser (state.cutProf, by Stock ID) */
+/* Cutting section: keep the product's bar length for the Cutting Optimiser (state.cutProf, by Stock ID).
+   Most bars are 6.5 m; some are 7 m or 5 m; anything else goes in the "other" box. */
+export const BAR_LENGTHS = [
+  ['6500', '6.5M (most bars)'],
+  ['7000', '7M'],
+  ['5000', '5M'],
+  ['other', 'Other length'],
+];
+/** the two boxes for a bar length in mm: one of the usual lengths, or Other with the length typed */
+export const barLenValues = (mm) =>
+  !mm || BAR_LENGTHS.some(([v]) => v == String(mm))
+    ? { barLen: String(mm || 6500), barLenX: '' }
+    : { barLen: 'other', barLenX: mm };
+function barBoxes() {
+  const yes = ($('#f_isBar') || {}).value == 'Yes',
+    other = ($('#f_barLen') || {}).value == 'other',
+    show = (id, on) => {
+      const e = $('#' + id);
+      if (e) e.closest('.ff').hidden = !on;
+    };
+  show('f_barLen', yes);
+  show('f_barLenX', yes && other);
+}
 function linkBar(pid, o, old) {
   if (o.isBar === undefined) return;
   const L = (state.cutProf = state.cutProf && typeof state.cutProf == 'object' ? state.cutProf : {});
   if (old && old != pid) delete L[old];
-  if (o.isBar == 'Yes') L[pid] = { bar: Math.round(+o.barLen) || barLenOf(o.length) || 6500 };
+  const mm = o.barLen == 'other' ? Math.round(+o.barLenX) : +o.barLen;
+  if (o.isBar == 'Yes') L[pid] = { bar: (mm >= 500 && mm <= 20000 && mm) || barLenOf(o.length) || 6500 };
   else delete L[pid];
 }
 /* barcode follows the item code unless "use a different barcode" is ticked */

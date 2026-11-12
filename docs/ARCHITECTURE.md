@@ -86,10 +86,14 @@ core/  config/  generic helpers and fixed settings
 
 ## Service map and Panel Optimiser
 
-- The Service Calls map (`svcMap` in `features/service/service.js`) draws an approximate Norfolk
-  outline and puts a pin per town from the list in `domain/places.js`. Nothing is looked up online;
-  a town not in the list is shown under the map as "not on the map". Add towns to `TOWNS` (or a
-  spelling to `ALIAS`).
+- The Service Calls map (`svcMap` in `features/service/service.js`) draws an approximate outline of Norfolk
+  and the land round it (`LAND`: the Wash, the Fens, north Suffolk to Felixstowe) and puts a pin per town from
+  the list in `domain/places.js`. The area we fit in, `FIT_MILES` (45) round the yard (`BASE`, NR6 5DR), is
+  highlighted; land beyond it is dimmed. Nothing is looked up online; a town not in the list is shown under the
+  map as "not on the map". Add towns to `TOWNS` (or a spelling to `ALIAS`).
+- Each service call row has quick actions (`svcQuick`: Complete / Reopen, Parts / Parts In), each with Undo on
+  the banner. Any account may delete a service call (`DEL_RULE.calls` has no permission). A service report asks
+  which photos to print (`reportPhotos`): the call's own, then the linked contract's.
 - The Panel Optimiser (`features/cutting/cutting.js`) plans board cutting with `domain/cutlist.js`
   (maximal-rectangles placement, saw kerf and edge trim, grain lock per piece). The current list and
   saved lists are kept in `state.cut`.
@@ -134,7 +138,11 @@ See [docs/adr](adr/).
   plans the bars (longest first, each into the bar it fits best, saw blade and end trims allowed for) and
   counts bars cut the same way together. It prints as a saw list (`kind: 'Cutting List'`) and can be kept
   on the contract like the panel plan.
-- Inventory, Cutting Data marks products as profiles with their bar length (`state.cutProf`, by Stock ID).
+- A product's own window (Inventory, Cutting: "Cut from full bars?") marks it as a profile with its bar length
+  (6.5M, 7M, 5M or another length; `state.cutProf`, by Stock ID). There is no separate Cutting Data list.
+- Defaults (`domain/barcut.js`): saw blade `DEFAULT_KERF` 10mm, end trim 50mm, offcuts kept only from
+  `MIN_OFFCUT` (1000mm). Each profile has a bar colour, printed beside the profile in the cut list.
+- Not yet allowed for: the extra length lost when a mitre has to be cut twice (see HANDOVER.md).
   A linked profile fills in its bar length in the optimiser and shows how many are in stock.
 
 ## Printed documents
@@ -145,6 +153,18 @@ See [docs/adr](adr/).
   reference and date, key figures, payment bar, timeline, details, each table or section by title, photos,
   signatures, barcode, reviews, thank-you note and footer. The titles a document prints are remembered
   (`state.docSeen`) so the builder can list them. Stock labels have their own parts.
+
+## Messages, drop-downs and confirmations
+
+- `ui/toast.js` shows every confirmation and warning as one small banner at the bottom (a "snackbar"), with an
+  optional button: `toast('Holiday booked', { action: { label: 'Undo', run } })`. `doneIn()` closes the window
+  and shows the same banner; there is no tick drawn inside windows any more.
+- `ui/components/pickers.js` also replaces the browser's grey drop-down list: with a mouse, every `<select>`
+  opens the app's own list (the real `<select>` stays, so values and change events are unchanged; keyboard:
+  Space/Enter/Alt+Down to open, arrows, type to jump, Enter to pick). Phones keep their own picker. Add
+  `data-native` on a parent to opt out.
+- Colours meet WCAG AA in light and dark (4.5:1 text, 3:1 large text and form box outlines). Keep `--muted`
+  and `--blue` (tokens) as they are; check new colours on the real background, glass included.
 
 ## Shared pop-ups, PINs and the page filter
 

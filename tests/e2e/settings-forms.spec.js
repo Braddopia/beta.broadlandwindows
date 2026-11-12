@@ -1,16 +1,16 @@
-// Settings, My Details, contact and supplier forms, the "saved" tick, numbering and the photo store.
+// Settings, My Details, contact and supplier forms, the "saved" banner, numbering and the photo store.
 const { test, expect } = require('../helpers');
 
 test.beforeEach(async ({ app }) => {
   await app.role('beta');
 });
 
-test('report a problem shows the saved tick and lists it for admins', async ({ app }) => {
+test('report a problem shows the saved banner and lists it for admins', async ({ app }) => {
   await app.call('bugReport');
   await app.page.fill('#f_what', 'Button did nothing');
   await app.page.click('#saveBtn');
-  await expect(app.page.locator('.donein')).toBeVisible();
-  await expect(app.page.locator('#modal')).not.toHaveClass(/open/, { timeout: 3000 });
+  await expect(app.page.locator('.toast.ok')).toContainText('Saved');
+  await expect(app.page.locator('#modal')).not.toHaveClass(/open/);
   expect(await app.run(() => state.bugs.length)).toBe(1);
   await app.go('settings');
   await expect(app.page.locator('#main')).toContainText('Button did nothing');
@@ -37,7 +37,7 @@ test('my details: email and work phone required, up to 3 emergency contacts', as
   await app.page.fill('#pe_t1', '07700 900 002');
   if (!(await app.page.inputValue('#p_email'))) await app.page.fill('#p_email', 'demo@example.com');
   await app.page.click('text=Save details');
-  await expect(app.page.locator('.donein')).toBeVisible();
+  await expect(app.page.locator('.toast.ok')).toContainText('Your details are saved');
   expect(await app.run(() => state.profile.emer.length)).toBe(2);
 });
 
@@ -222,4 +222,61 @@ test('Document Builder: switch parts of a printed document off and the next prin
   expect(await app.run(() => state.docOpts['Stock labels'])).toEqual({ barcode: false });
   expect(await app.run(() => state.audit.some((a) => a.a == 'Document changed'))).toBe(true);
   expect(app.errors).toEqual([]);
+});
+
+test('my details: first and last name are separate boxes, both needed', async ({ app }) => {
+  await app.call('editProfile');
+  await expect(app.page.locator('#p_first')).toHaveValue('Demo');
+  await expect(app.page.locator('#p_last')).toHaveValue('User');
+  await app.page.fill('#p_last', '');
+  await app.page.click('text=Save details');
+  await expect(app.page.locator('#mbox .ferr')).toContainText('last name');
+  await app.page.fill('#p_first', 'Sam');
+  await app.page.fill('#p_last', 'Sample');
+  if (!(await app.page.inputValue('#p_email'))) await app.page.fill('#p_email', 'demo@example.com');
+  await app.page.click('text=Save details');
+  expect(await app.run(() => [state.profile.name, state.profile.first, state.profile.last])).toEqual([
+    'Sam Sample',
+    'Sam',
+    'Sample',
+  ]);
+});
+
+test('settings: only company details that are filled in show, with opening hours; cards in a row are the same height', async ({
+  app,
+}) => {
+  await app.go('settings');
+  const main = app.page.locator('#main');
+  await expect(main).toContainText('Business address');
+  await expect(main).toContainText('Opening hours');
+  await expect(main).not.toContainText('Not set');
+  await expect(main).toContainText('Not filled in yet: VAT number');
+  await expect(main).toContainText('20%');
+  const h = await app.run(() =>
+    [...document.querySelectorAll('.set > .set-c')].slice(0, 3).map((e) => Math.round(e.getBoundingClientRect().height))
+  );
+  expect(new Set(h).size).toBe(1);
+});
+
+test("drop-downs open the app's own list with a mouse; picking one changes the box as before", async ({ app }) => {
+  await app.call('editProfile');
+  await app.page.click('#p_en');
+  const list = app.page.locator('#pkpop.pk-sel');
+  await expect(list).toBeVisible();
+  await list.locator('text=2 people').click();
+  await expect(list).toBeHidden();
+  await expect(app.page.locator('#p_en')).toHaveValue('2');
+  expect(await app.run(() => document.querySelectorAll('#p_emer .emr').length)).toBe(2);
+  // keyboard: Space opens it, arrows move, Enter picks
+  await app.page.focus('#p_en');
+  await app.page.keyboard.press(' ');
+  await expect(list).toBeVisible();
+  await app.page.keyboard.press('ArrowDown');
+  await app.page.keyboard.press('Enter');
+  await expect(app.page.locator('#p_en')).toHaveValue('3');
+});
+
+test('save confirmations are one small banner at the bottom: no tick drawn in the window', async ({ app }) => {
+  await app.call('editContact');
+  expect(await app.run(() => !!document.querySelector('.donein, .dn-svg'))).toBe(false);
 });

@@ -4,7 +4,7 @@
 :root{
   --blue:#034ea2; --navy:#012b59; --yellow:#ffd002;
   --bg:#eef2f8; --card:#fff; --card2:#f6f8fc;
-  --ink:#0c1a2e; --muted:#56657d; --line:#d9e1ee;
+  --ink:#0c1a2e; --muted:#4a5870; --line:#d9e1ee;
   --green:#12794c; --green-bg:#e0f3ea;
   --red:#bf3434;   --red-bg:#fbe7e7;
   --amber:#6b5500; --amber-bg:#fff2b8;
@@ -18,13 +18,14 @@
   --sh-lg:0 20px 50px rgba(1,43,89,.25);
   --sw:clamp(14.5rem,15vw,17.5rem);     /* sidebar width */
   --gap:clamp(.6rem,1.2vw,1.1rem);       /* page gutters */
+  --edge:calc(var(--gap)*1.6);           /* left/right edge shared by the top bar, every page and Report A Problem */
   --safe-b:env(safe-area-inset-bottom,0px);
   color-scheme:light;
 }
 body[data-theme=dark]{
-  --blue:#5a9bf5; --navy:#d3e3fb;
+  --blue:#72acf9; --navy:#d3e3fb;
   --bg:#0d1117; --card:#181d26; --card2:#1f2530;
-  --ink:#e9ebef; --muted:#9aa4b4; --line:#2b313c;
+  --ink:#e9ebef; --muted:#a7b0bf; --line:#2b313c;
   --green:#7fe0aa; --green-bg:#0f3a29;
   --red:#ffa3a3;   --red-bg:#4a2020;
   --amber:#ffd96b; --amber-bg:#4a3f0a;

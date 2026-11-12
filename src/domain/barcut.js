@@ -76,6 +76,10 @@ export function optimiseBars({ bar, kerf = 4, trim = 10, cuts }) {
   };
 }
 
+/** offcuts shorter than this (1 m) are scrap, whatever the saw settings say */
+export const MIN_OFFCUT = 1000;
+/** the saw blade most lists use, in millimetres */
+export const DEFAULT_KERF = 10;
 /** what is left of each bar that is worth keeping: whole millimetres, at least `min` long, longest first */
 export function offcutsOf(bars, min = 500) {
   return (bars || [])
