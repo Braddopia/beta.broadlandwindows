@@ -251,6 +251,17 @@ export const TAB_TOURS = {
     ),
     T(TOOL, 'Print Cutting List', 'Prints the saw list on A4 in the company style, profile by profile.', 'Print'),
   ],
+  tags: [
+    T('#tag_0_jobNo', 'Job Number', 'Type the contract number. The job name fills in by itself.'),
+    T(
+      '#main .jt-card',
+      'One Tag Per Job',
+      'Job number, name, colours inside (B) and outside (A), and how many copies.'
+    ),
+    T('#main .jt-forms .cut-add', 'More Jobs', 'Add as many tags as you need and print them all in one go.'),
+    T('#main .jt-prev', 'As They Print', 'Each tag on its own A4 landscape page, exactly as it will come out.'),
+    T(TOOL, 'Print', 'Prints every tag that has a job number, one page each.', 'Print'),
+  ],
   staff: [
     T('#main .views', 'Choose A View', 'Show everyone, or just salespeople, fitters, office or factory staff.'),
     T('#main .tw', 'The Team', 'Click a person to open their details.'),

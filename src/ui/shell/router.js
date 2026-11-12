@@ -3,6 +3,7 @@ import { nlq } from '../../features/search/questions.js';
 import { factsFor } from '../../features/search/facts.js';
 import { siteKnows } from '../../features/search/site-index.js';
 import { vBars } from '../../features/bars/bars.js';
+import { vTags } from '../../features/tags/tags.js';
 import { ROLES } from '../../config/roles.js';
 import { markExact } from '../../features/search/exact-rows.js';
 import { previewNotice } from '../../features/records/preview-notice.js';
@@ -62,6 +63,7 @@ export const VIEWS = {
   service: { t: 'Service Calls', fn: vService },
   cutting: { t: 'Panel Optimiser', fn: vCutting },
   bars: { t: 'Cutting Optimiser', fn: vBars },
+  tags: { t: 'Job Stock Tags', fn: vTags },
   stock: { t: 'Inventory', fn: vStock },
   contacts: { t: 'Contact Book', fn: vContacts },
   staff: { t: 'Staff', fn: vStaff },
@@ -76,7 +78,7 @@ export const NG = [
   ['Workspace', ['home', 'messages', 'fitting', 'contacts']],
   ['Sales', ['leads', 'contracts']],
   ['Operations', ['live', 'deliveries', 'service']],
-  ['Stock', ['stock', 'suppliers', 'cutting', 'bars']],
+  ['Stock', ['stock', 'suppliers', 'cutting', 'bars', 'tags']],
   ['People', ['staff', 'holidays']],
   ['Insights', ['reports', 'downloads']],
   ['Admin', ['finance', 'admin', 'settings']],

@@ -148,6 +148,15 @@ See [docs/adr](adr/).
 - Not yet allowed for: the extra length lost when a mitre has to be cut twice (see HANDOVER.md).
   A linked profile fills in its bar length in the optimiser and shows how many are in stock.
 
+## Job Stock Tags
+
+- `features/tags/tags.js` (view `tags`, under Stock, every account): A4 landscape signs for stock kept for a job.
+  Fill in as many tags as needed (`state.jobTags.list`: job number, name, colour inside (B) / outside (A), copies);
+  the warning and small print are shared (`warn`, `note`). Print All opens one page per tag and copy. A known
+  contract number fills the job name. Printed tags are kept in `recent` (20) to print again.
+- `tagSheet()` draws a tag for both the preview and the printout; sizes are in em where 1em = 1mm of the sheet
+  (the preview scales it with a container query), and `fitSize()` shrinks long lines to stay on one line.
+
 ## Printed documents
 
 - `print/doc-options.js` lists every printed document (`DOCS`) and the parts each one has. Everything is

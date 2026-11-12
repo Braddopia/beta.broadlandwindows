@@ -951,3 +951,23 @@ body[data-theme=dark] .xl-tabs button.on{color:#0d6b37}
 @media(max-width:1100px){.cut-r-sheets{grid-template-columns:.7rem repeat(4,minmax(0,1fr)) 2rem}.cut-r-sheets .cut-f-T{grid-column:span 1}.cut-r-sheets .cut-f-label{grid-column:2/6}.cut-r-sheets .cut-x{grid-column:6;grid-row:1}}
 @media(max-width:700px){.cut-r .cut-f-cIn,.cut-r .cut-f-cOut{grid-column:span 3}.cut-r .cut-f-T{grid-column:span 2}}
 .cut-r .cut-f-T>span{white-space:nowrap}
+
+/* ==== v19.3 Job Stock Tags: the tags on the left, each one as it prints on the right ==== */
+.jt{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:var(--gap);align-items:start}
+.jt-forms{display:flex;flex-direction:column;gap:var(--gap);min-width:0}
+.jt-forms .panel{margin:0}
+.jt-card h2{display:flex;align-items:center;gap:.6rem}
+.jt-card h2 .jt-n{flex:0 0 auto}.jt-card h2 small{flex:1}
+.jt-g{display:grid;grid-template-columns:minmax(7rem,9rem) minmax(0,1fr);gap:.7rem .8rem}
+.jt-g .jt-f-name{grid-column:2}.jt-g .jt-f-cp input{max-width:6rem}
+.jt-g{grid-template-areas:"no name" "in out" "cp cp"}
+.jt-g .jt-f-no{grid-area:no}.jt-g .jt-f-name{grid-area:name}.jt-g .jt-f-cp{grid-area:cp}
+.jt-forms .cut-add{display:flex;align-items:center;gap:.8rem;flex-wrap:wrap}
+.jt-prev{position:sticky;top:.5rem;max-height:calc(100dvh - 9rem);overflow:auto}
+.jt-pl{margin:.8rem 0 .35rem;font:600 .8rem var(--body);color:var(--muted)}.jt-pl:first-of-type{margin-top:.2rem}
+.jt-pv{container-type:inline-size;border-radius:8px;overflow:hidden;border:1px solid var(--line);box-shadow:0 6px 18px rgba(1,30,70,.12)}
+.jt-pv .jt-sheet{font-size:calc(100cqw / 297)}
+.jt-recent{margin-top:var(--gap)}
+@media(max-width:1000px){.jt{grid-template-columns:1fr}.jt-prev{position:static;max-height:none}}
+@media(max-width:480px){.jt-g{grid-template-columns:1fr;grid-template-areas:"no" "name" "in" "out" "cp"}}
+body:not([data-theme=dark]) .head>div>.muted{color:#3d4a60}

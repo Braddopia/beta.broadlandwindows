@@ -24,6 +24,8 @@ Read this first, then CLAUDE.md and docs/ARCHITECTURE.md.
   Bar length lives in the product window (6.5M / 7M / 5M / other). Count sheets print in the company style.
 - Panel Optimiser: sizes always width × height (drawn width across, height up); boards have Thickness, Colour Inside (B)
   and Colour Outside (A). Cutting Optimiser profiles have Colour Inside (B) and Colour Outside (A) too.
+- Job Stock Tags (Stock menu): fill in several tags, Print All gives one A4 landscape page per tag and copy;
+  a contract number fills the job name; printed ones are kept to print again.
 - Settings: company card shows only filled-in details, with Opening hours (default from a public business listing:
   Mon to Fri 9am to 5pm, Sat 10am to 2pm, Sun closed; the owner should confirm).
 - Colour contrast: checked with axe-core and a pixel check (text against the real background, glass included),

@@ -53,4 +53,6 @@ export const ICONS = {
   photo: 'M4 6h3l2-2h6l2 2h3v13H4zM12 17a4 4 0 100-8 4 4 0 000 8z',
   edit: 'M4 20h4L19 9l-4-4L4 16zM14 6l4 4',
   chevron: 'M9 6l6 6-6 6',
+  /* a luggage tag */
+  tags: 'M3 11.5V4a1 1 0 011-1h7.5l9.2 9.2a1.5 1.5 0 010 2.1l-6.4 6.4a1.5 1.5 0 01-2.1 0zM7.5 7.5h.01',
 };

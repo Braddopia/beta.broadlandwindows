@@ -23,6 +23,7 @@ const views = [
   'fitting',
   'service',
   'stock',
+  'tags',
   'contacts',
   'staff',
   'holidays',

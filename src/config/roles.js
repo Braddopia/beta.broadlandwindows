@@ -14,6 +14,7 @@ export const FOCUS = [
   'suppliers',
   'cutting',
   'bars',
+  'tags',
   'downloads',
   'settings',
 ];
