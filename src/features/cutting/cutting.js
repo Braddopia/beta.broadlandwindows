@@ -11,6 +11,7 @@ import { store } from '../../data/persistence.js';
 import { SAFE } from '../../data/sanitize.js';
 import { state } from '../../data/state.js';
 import { optimise } from '../../domain/cutlist.js';
+import { PRE } from '../../config/colours.js';
 import { jobTitle } from '../../domain/job-title.js';
 import { canSee } from '../../domain/permissions.js';
 import { uuid } from '../../core/ids.js';
@@ -22,7 +23,8 @@ import { askIn, closeModal, openModal } from '../../ui/modal.js';
 import { render } from '../../ui/shell/router.js';
 import { toast } from '../../ui/toast.js';
 
-/* the boards the company buys most, one click to add (length x width, mm) */
+/* the boards the company buys most, one click to add. Sizes are always width x height in mm (L is the width,
+   across the plan; W is the height, up the plan; the names L and W are kept so saved lists still open) */
 export const PRESETS = [
   { label: 'Smarts Aluminium Full', L: 2400, W: 1200 },
   { label: 'Smarts Aluminium Half', L: 1195, W: 1200 },
@@ -47,14 +49,16 @@ export function cutData() {
 const COLS = {
   sheets: [
     ['label', 'Board', 'text'],
-    ['L', 'Length', 'number'],
-    ['W', 'Width', 'number'],
+    ['L', 'Width', 'number'],
+    ['W', 'Height', 'number'],
+    ['cIn', 'Colour Inside', 'colour'],
+    ['cOut', 'Colour Outside', 'colour'],
     ['qty', 'How Many', 'number'],
   ],
   parts: [
     ['label', 'Name', 'text'],
-    ['L', 'Length', 'number'],
-    ['W', 'Width', 'number'],
+    ['L', 'Width', 'number'],
+    ['W', 'Height', 'number'],
     ['qty', 'How Many', 'number'],
     ['turn', 'Can Turn', 'select'],
   ],
@@ -114,13 +118,19 @@ function table(kind, rows) {
                     ['no', 'No (grain)'],
                   ],
                 }
-              : { k: '', t, max: t == 'number' ? 100000 : 60 };
+              : t == 'colour'
+                ? { k: '', t: 'text', max: 40, list: 'cutCols', ph: 'e.g. White' }
+                : { k: '', t, max: t == 'number' ? 100000 : 60 };
           const v = k == 'turn' ? (r.turn === false ? 'no' : 'yes') : r[k];
           return html`<label class="bar-f cut-f-${k}" for="${'cut_' + kind + '_' + i + '_' + k}"><span>${l}${k == 'L' || k == 'W' ? raw(' <i class="nocap">(mm)</i>') : ''}</span>${raw(fieldControl(f, v, { id: 'cut_' + kind + '_' + i + '_' + k }))}</label>`;
         }
       )}<button class="cut-x" aria-label="Remove row ${i + 1}" title="Remove" ${raw(onClick('cutDel', kind, i))}>&times;</button></div>`
-  )}${rows.length ? '' : html`<p class="muted bar-none">Nothing here yet.</p>`}</div>`;
+  )}${rows.length ? '' : html`<p class="muted bar-none">Nothing here yet.</p>`}${kind == 'sheets' ? html`<datalist id="cutCols">${PRE.map(([n]) => html`<option value="${n}"></option>`)}</datalist>` : ''}</div>`;
 }
+/** a board's colours, e.g. "White inside · Anthracite outside" (blank when none are given) */
+export const boardCols = (s) =>
+  [s && s.cIn ? s.cIn + ' inside' : '', s && s.cOut ? s.cOut + ' outside' : ''].filter(Boolean).join(' · ');
+const sheetOf = (D, name) => D.sheets.find((x) => x.label == name);
 /** the plan side: totals, warnings and every board. Redrawn on its own as you type */
 export function cutResults() {
   const D = cutData(),
@@ -132,7 +142,7 @@ export function cutResults() {
     ${R.unplaced.length ? html`<div class="note bad"><b>${R.unplaced.length} piece${R.unplaced.length == 1 ? '' : 's'} would not fit:</b> ${[...new Set(R.unplaced.map((u) => u.label + ' (' + mm(u.L) + ' × ' + mm(u.W) + ')'))].join(', ')}. Add a bigger board, more boards, or let them turn.</div>` : ''}
     ${R.boards.map(
       (b, i) =>
-        html`<div class="panel cut-bp"><h2><span>Board ${i + 1} <span class="muted">of ${R.boards.length}</span> · ${b.sheet}</span><small class="muted nocap">${mm(b.L)} × ${mm(b.W)}mm · ${b.pieces.length} pieces · ${Math.round((b.used / b.area) * 100)}% used</small></h2><div class="cut-frame">${boardSvg(b, i)}</div></div>`
+        html`<div class="panel cut-bp"><h2><span>Board ${i + 1} <span class="muted">of ${R.boards.length}</span> · ${b.sheet}${boardCols(sheetOf(D, b.sheet)) ? html` <span class="cut-col">${boardCols(sheetOf(D, b.sheet))}</span>` : ''}</span><small class="muted nocap">${mm(b.L)} wide × ${mm(b.W)} high (mm) · ${b.pieces.length} pieces · ${Math.round((b.used / b.area) * 100)}% used</small></h2><div class="cut-frame">${boardSvg(b, i)}</div></div>`
     )}
     ${R.boards.length ? '' : html`<div class="panel"><p class="empty">Add a board and some pieces to see the plan.</p></div>`}
   `) + `<template id="cutK">${kpis(S, pct)}</template>`
@@ -160,10 +170,10 @@ export function vCutting() {
       <div class="ff"><label for="cut_job_no">Job Number</label>${raw(fieldControl({ k: '', max: 30, combo: 'jobs' }, D.jobNo || '', { id: 'cut_job_no' }))}</div>
       <div class="ff"><label for="cut_job_name">Job Name</label>${raw(fieldControl({ k: '', max: 80 }, D.jobName || '', { id: 'cut_job_name' }))}</div>
     </div></div>
-    <div class="panel cut-card"><h2><span>Boards In Stock</span><small class="muted nocap">How Many 0 means as many as needed</small></h2>${table('sheets', D.sheets)}
+    <div class="panel cut-card"><h2><span>Boards In Stock</span><small class="muted nocap">Sizes are width × height · How Many 0 means as many as needed</small></h2>${table('sheets', D.sheets)}
       <div class="cut-add"><button class="mini" ${raw(onClick('cutAdd', 'sheets'))}>+ Add Board</button>${PRESETS.map(
         (p, i) =>
-          html`<button class="mini cut-pre" ${raw(onClick('cutPreset', i))}><b>${p.label}</b> <span class="nocap">${p.W} × ${p.L}mm</span></button>`
+          html`<button class="mini cut-pre" ${raw(onClick('cutPreset', i))}><b>${p.label}</b> <span class="nocap">${p.L} × ${p.W}mm</span></button>`
       )}</div></div>
     <div class="panel cut-card"><h2><span>Pieces To Cut</span></h2>${table('parts', D.parts)}
       <div class="cut-add"><button class="mini" ${raw(onClick('cutAdd', 'parts'))}>+ Add Piece</button></div></div>
@@ -224,6 +234,7 @@ export function cutEdit(e) {
       k = m[3];
     if (!r) return;
     if (k == 'label') r.label = SAFE.text(t.value, 60);
+    else if (k == 'cIn' || k == 'cOut') r[k] = SAFE.text(t.value, 40);
     else if (k == 'turn') r.turn = t.value != 'no';
     else r[k] = SAFE.num(t.value, { min: 0, max: k == 'qty' ? 5000 : 100000, dp: k == 'qty' ? 0 : 1 }) ?? 0;
   }
@@ -391,13 +402,18 @@ function planDoc(asHtml) {
   const boards = R.boards
     .map(
       (b, i) =>
-        `<section class="cbp"><h3>Board ${i + 1} of ${R.boards.length}: ${html`${b.sheet}`} <span>${mm(b.L)} × ${mm(b.W)}mm · ${b.pieces.length} pieces · ${Math.round((b.used / b.area) * 100)}% used</span></h3>${boardSvg(b, i, true)}</section>`
+        `<section class="cbp"><h3>Board ${i + 1} of ${R.boards.length}: ${html`${b.sheet}`}${boardCols(sheetOf(D, b.sheet)) ? html`<i class="ccol">${boardCols(sheetOf(D, b.sheet))}</i>` : ''} <span>${mm(b.L)} wide × ${mm(b.W)} high (mm) · ${b.pieces.length} pieces · ${Math.round((b.used / b.area) * 100)}% used</span></h3>${boardSvg(b, i, true)}</section>`
     )
     .join('');
   const title = jobTitle(D.jobNo, D.jobName);
   return printDoc(
     title || 'Cutting Plan',
-    (title ? 'Cutting plan · ' : '') + 'Saw blade ' + D.kerf + 'mm · edge trim ' + D.trim + 'mm',
+    (title ? 'Cutting Plan · ' : '') +
+      'Saw Blade ' +
+      mm(D.kerf) +
+      'mm · Edge Trim ' +
+      mm(D.trim) +
+      'mm · Sizes Width × Height',
     [],
     [],
     {
@@ -421,28 +437,28 @@ function planDoc(asHtml) {
       tables: [
         {
           t: 'Cut List',
-          h: ['Name', 'Length (mm)', 'Width (mm)', 'How many', 'Can turn'],
+          h: ['Name', 'Width (mm)', 'Height (mm)', 'How many', 'Can turn'],
           r: D.parts.map((p) => [p.label, mm(p.L), mm(p.W), String(p.qty), p.turn === false ? 'No (grain)' : 'Yes']),
         },
         {
           t: 'Boards',
-          h: ['Board', 'Length (mm)', 'Width (mm)', 'Used'],
+          h: ['Board', 'Width (mm)', 'Height (mm)', 'Colour inside', 'Colour outside', 'Used'],
           r: S.byType.map((t) => {
-            const s = D.sheets.find((x) => x.label == t.label) || {};
-            return [t.label, mm(s.L || 0), mm(s.W || 0), String(t.used)];
+            const s = sheetOf(D, t.label) || {};
+            return [t.label, mm(s.L || 0), mm(s.W || 0), s.cIn || '-', s.cOut || '-', String(t.used)];
           }),
         },
         ...(R.unplaced.length
           ? [
               {
                 t: 'Not Placed',
-                h: ['Name', 'Length (mm)', 'Width (mm)'],
+                h: ['Name', 'Width (mm)', 'Height (mm)'],
                 r: R.unplaced.map((u) => [u.label, mm(u.L), mm(u.W)]),
               },
             ]
           : []),
       ],
-      post: `<style>.cbp{break-inside:avoid;margin:5mm 0 0}.cbp h3{display:flex;justify-content:flex-start;align-items:baseline;gap:4mm}.cbp h3 span{margin-left:auto;font-weight:400;color:#5b6b80;font-size:8pt}.cut-b{display:block;width:100%;height:auto;max-height:110mm;border:.3mm solid #13233a;border-radius:1.5mm}.cut-b .bd{fill:#f7f9fc}.cut-b .gl{fill:none;stroke:#e3e8ef;stroke-width:1}.cut-b rect{stroke-width:2}.cut-b text{text-anchor:middle;dominant-baseline:middle;fill:#13233a;font-weight:700;font-family:Arial,sans-serif}.cut-b text.sz{font-weight:400}</style>${boards}`,
+      post: `<style>.cbp{break-inside:avoid;margin:5mm 0 0}.cbp h3{display:flex;justify-content:flex-start;align-items:baseline;gap:4mm}.cbp h3 .ccol{font-style:normal;font-weight:600;color:#5b6b80;font-size:9pt}.cbp h3 span{margin-left:auto;font-weight:400;color:#5b6b80;font-size:8pt}.cut-b{display:block;width:100%;height:auto;max-height:110mm;border:.3mm solid #13233a;border-radius:1.5mm}.cut-b .bd{fill:#f7f9fc}.cut-b .gl{fill:none;stroke:#e3e8ef;stroke-width:1}.cut-b rect{stroke-width:2}.cut-b text{text-anchor:middle;dominant-baseline:middle;fill:#13233a;font-weight:700;font-family:Arial,sans-serif}.cut-b text.sz{font-weight:400}</style>${boards}`,
     }
   );
 }

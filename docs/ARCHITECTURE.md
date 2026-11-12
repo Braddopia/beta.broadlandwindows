@@ -95,7 +95,9 @@ core/  config/  generic helpers and fixed settings
   the banner. Any account may delete a service call (`DEL_RULE.calls` has no permission). A service report asks
   which photos to print (`reportPhotos`): the call's own, then the linked contract's.
 - The Panel Optimiser (`features/cutting/cutting.js`) plans board cutting with `domain/cutlist.js`
-  (maximal-rectangles placement, saw kerf and edge trim, grain lock per piece). The current list and
+  (maximal-rectangles placement, saw kerf and edge trim, grain lock per piece). Sizes always read width × height:
+  `L` is the width (across the plan), `W` the height (up the plan); the names stay so saved lists open. Each board
+  has a colour inside and outside (`cIn`, `cOut`), shown on the plan and printed. The current list and
   saved lists are kept in `state.cut`.
 
 ## Adding a page
@@ -141,7 +143,8 @@ See [docs/adr](adr/).
 - A product's own window (Inventory, Cutting: "Cut from full bars?") marks it as a profile with its bar length
   (6.5M, 7M, 5M or another length; `state.cutProf`, by Stock ID). There is no separate Cutting Data list.
 - Defaults (`domain/barcut.js`): saw blade `DEFAULT_KERF` 10mm, end trim 50mm, offcuts kept only from
-  `MIN_OFFCUT` (1000mm). Each profile has a bar colour, printed beside the profile in the cut list.
+  `MIN_OFFCUT` (1000mm). Each profile has a colour inside and outside (filled from the product's Colour in / Colour out), printed beside
+  the profile in the cut list.
 - Not yet allowed for: the extra length lost when a mitre has to be cut twice (see HANDOVER.md).
   A linked profile fills in its bar length in the optimiser and shows how many are in stock.
 

@@ -17,7 +17,8 @@ import { state } from '../../data/state.js';
 import { DEFAULT_KERF, MIN_OFFCUT, barLenOf, groupBars, offcutsOf, optimiseBars } from '../../domain/barcut.js';
 import { jobTitle } from '../../domain/job-title.js';
 import { canSee } from '../../domain/permissions.js';
-import { colTxt, ikey, moveRow, prod, products, stkId, unitOf } from '../../domain/stock.js';
+import { ikey, moveRow, prod, products, stkId, unitOf } from '../../domain/stock.js';
+import { PRE } from '../../config/colours.js';
 import { printDoc } from '../../print/print.js';
 import { form } from '../../ui/forms/form.js';
 import { askIn, closeModal, openModal } from '../../ui/modal.js';
@@ -26,7 +27,7 @@ import { toast } from '../../ui/toast.js';
 import { fx } from '../files/files.js';
 
 const cut0 = (label = '', len = 1000, qty = 1) => ({ label, ref: '', len, qty, aL: 45, aR: 45 });
-const prof0 = () => ({ code: '', desc: '', colour: '', bar: 6500, cuts: [cut0('', 1000, 1)] });
+const prof0 = () => ({ code: '', desc: '', cIn: '', cOut: '', bar: 6500, cuts: [cut0('', 1000, 1)] });
 /* a 10mm saw blade, 50mm end trim off each end of a bar; offcuts of at least `keep` mm (1 m or more) go back in stock */
 const BLANK = () => ({
   name: '',
@@ -48,6 +49,17 @@ export function barData() {
   if (!state.bars || !Array.isArray(state.bars.profiles))
     state.bars = { ...BLANK(), jobs: (state.bars && state.bars.jobs) || [] };
   state.bars.jobs = state.bars.jobs || [];
+  /* one bar colour (v19.3 for a day) became colour inside / outside: "White / Anthracite" splits in two */
+  [state.bars, ...state.bars.jobs].forEach((L) =>
+    (L.profiles || []).forEach((p) => {
+      if (p.colour != null && p.cIn == null) {
+        const [a, b] = String(p.colour).split(' / ');
+        p.cIn = a || '';
+        p.cOut = b == null ? a || '' : b;
+      }
+      delete p.colour;
+    })
+  );
   /* offcuts under 1 m are never kept */
   if (!(state.bars.keep >= MIN_OFFCUT)) state.bars.keep = MIN_OFFCUT;
   /* lists started when the usual saw blade was 4mm: it is 10mm */
@@ -172,13 +184,14 @@ export function vBars() {
     <div class="panel cut-job"><h2><span>Job</span><small class="muted nocap" id="barJobHint">${k ? 'Contract ' + k.id + ' found: Save To Contract keeps the list with its documents' : 'Type the contract number to link the list to it'}</small></h2><div class="cut-og cut-eq">
       <div class="ff"><label for="bar_job_no">Job Number</label><input id="bar_job_no" maxlength="30" data-combo="jobs" value="${D.jobNo || ''}" autocomplete="off"></div>
       <div class="ff"><label for="bar_job_name">Job Name</label><input id="bar_job_name" maxlength="80" value="${D.jobName || ''}" autocomplete="off"></div>
-    </div><datalist id="barAngles"><option value="90"></option><option value="45"></option><option value="67.5"></option><option value="60"></option><option value="30"></option><option value="22.5"></option></datalist><datalist id="barLens"><option value="6500">6.5M (most bars)</option><option value="7000">7M</option><option value="5000">5M</option></datalist></div>
+    </div><datalist id="barAngles"><option value="90"></option><option value="45"></option><option value="67.5"></option><option value="60"></option><option value="30"></option><option value="22.5"></option></datalist><datalist id="barCols">${PRE.map(([n]) => html`<option value="${n}"></option>`)}</datalist><datalist id="barLens"><option value="6500">6.5M (most bars)</option><option value="7000">7M</option><option value="5000">5M</option></datalist></div>
     ${D.profiles.map(
       (p, pi) => html`<div class="panel bar-p">
         <div class="bar-ph"><span class="bar-pn">Profile ${pi + 1}</span>
           <label class="bar-f bar-code"><span>Profile Code</span><input id="bar_p_${pi}_code" maxlength="40" data-combo="profiles" value="${p.code}" autocomplete="off"></label>
           <label class="bar-f bar-desc"><span>Description</span><input id="bar_p_${pi}_desc" maxlength="80" value="${p.desc}" autocomplete="off"></label>
-          <label class="bar-f bar-col"><span>Bar Colour</span><input id="bar_p_${pi}_colour" maxlength="40" value="${p.colour || ''}" placeholder="e.g. White / Anthracite" autocomplete="off"></label>
+          <label class="bar-f bar-col"><span>Colour Inside</span><input id="bar_p_${pi}_cIn" maxlength="40" list="barCols" value="${p.cIn || ''}" placeholder="e.g. White" autocomplete="off"></label>
+          <label class="bar-f bar-col"><span>Colour Outside</span><input id="bar_p_${pi}_cOut" maxlength="40" list="barCols" value="${p.cOut || ''}" placeholder="e.g. Anthracite" autocomplete="off"></label>
           <label class="bar-f bar-n"><span>Bar Length <i class="nocap">(mm)</i></span><input id="bar_p_${pi}_bar" type="number" min="500" max="20000" step="1" list="barLens" value="${p.bar}"></label>
           ${D.profiles.length > 1 ? html`<button class="mini del" ${raw(onClick('barProfDel', pi))}>Remove Profile</button>` : ''}</div>
         <div class="bar-cuts">${p.cuts.map((c, ci) => cutRow(pi, c, ci))}</div>
@@ -244,21 +257,24 @@ export function barEdit(e) {
     if (!p) return;
     if (f == 'bar') p.bar = SAFE.num(t.value, { min: 0, max: 20000, dp: 0 }) ?? 0;
     else if (f == 'desc') p.desc = SAFE.text(t.value, 80);
-    else if (f == 'colour') p.colour = SAFE.text(t.value, 40);
+    else if (f == 'cIn' || f == 'cOut') p[f] = SAFE.text(t.value, 40);
     else if (f == 'code') {
       p.code = SAFE.text(t.value, 40).toUpperCase();
       /* a profile linked in Inventory fills in its description, colour and bar length */
       const lp = findProd(p.code);
       if (lp) {
         p.desc = p.desc || lp.r.desc || '';
-        p.colour = p.colour || (colTxt(lp.r) != '-' ? colTxt(lp.r) : '');
+        const col = (v) => (v && v != '-' ? v : '');
+        p.cIn = p.cIn || col(lp.r.cInName);
+        p.cOut = p.cOut || col(lp.r.cOutName);
         p.bar = lp.bar;
         const set = (k, v) => {
           const e = $('#bar_p_' + pi + '_' + k);
           if (e) e.value = v;
         };
         set('desc', p.desc);
-        set('colour', p.colour);
+        set('cIn', p.cIn);
+        set('cOut', p.cOut);
         set('bar', p.bar);
       }
     }
@@ -523,7 +539,7 @@ function listDoc(asHtml) {
     title = jobTitle(D.jobNo, D.jobName);
   const secs = P.map(({ p, R }) => {
     const G = groupBars(R.bars.map((b) => ({ ...b, kerf: D.kerf })));
-    return `<section class="bsec"><h3>${html`${[p.code, p.desc].filter(Boolean).join(', ') || 'Profile'}`}${p.colour ? html`<i class="bcol">${p.colour}</i>` : ''}<span>Bar length <b>${mm(p.bar)}mm</b></span></h3>${G.map(
+    return `<section class="bsec"><h3>${html`${[p.code, p.desc].filter(Boolean).join(', ') || 'Profile'}`}${p.cIn || p.cOut ? html`<i class="bcol">${[p.cIn ? p.cIn + ' inside' : '', p.cOut ? p.cOut + ' outside' : ''].filter(Boolean).join(' · ')}</i>` : ''}<span>Bar length <b>${mm(p.bar)}mm</b></span></h3>${G.map(
       (g, i) =>
         `<div class="brow"><span class="bno">${i + 1})</span><span class="bx">${g.n}×</span>${barSvg(g.bar, p.bar, D.trim, true)}</div>`
     ).join(
@@ -557,13 +573,23 @@ function listDoc(asHtml) {
       tables: [
         {
           t: 'Cut List',
-          h: ['Profile', 'Bar colour', 'Room / position', 'Ref', 'Length (mm)', 'How many', 'Ends'],
+          h: [
+            'Profile',
+            'Colour inside',
+            'Colour outside',
+            'Room / position',
+            'Ref',
+            'Length (mm)',
+            'How many',
+            'Ends',
+          ],
           r: P.flatMap(({ p }) =>
             p.cuts
               .filter((c) => +c.len > 0 && +c.qty > 0)
               .map((c) => [
                 p.code || '-',
-                p.colour || '-',
+                p.cIn || '-',
+                p.cOut || '-',
                 c.label || '-',
                 c.ref || '-',
                 mm(c.len),

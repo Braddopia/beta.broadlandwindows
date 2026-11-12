@@ -29,6 +29,14 @@ test('Panel Optimiser: change a piece, the plan updates; save, reopen and print 
   await app.go('cutting');
   await expect(app.page.locator('#main h1')).toHaveText('Panel Optimiser');
   await expect(app.page.locator('#main .cut-b')).toHaveCount(1);
+  // sizes are always width × height, and boards have a colour inside and outside
+  await expect(app.page.locator('#main label[for=cut_parts_0_L]')).toContainText('Width');
+  await expect(app.page.locator('#main label[for=cut_parts_0_W]')).toContainText('Height');
+  await expect(app.page.locator('#main .cut-pre').first()).toContainText('2400 × 1200mm');
+  await app.page.fill('#cut_sheets_0_cIn', 'White');
+  await app.page.fill('#cut_sheets_0_cOut', 'Anthracite');
+  expect(await app.run(() => [state.cut.sheets[0].cIn, state.cut.sheets[0].cOut])).toEqual(['White', 'Anthracite']);
+  await expect(app.page.locator('#main .cut-bp h2').first()).toContainText('White inside · Anthracite outside');
   // more shelves than fit on one board
   // the plan updates while typing, and the box keeps its place
   await app.page.fill('#cut_parts_1_qty', '12');
@@ -61,7 +69,9 @@ test('Panel Optimiser: change a piece, the plan updates; save, reopen and print 
   await expect(w.locator('.pg')).toContainText('Cut List');
   await expect(w.locator('.ih img')).toHaveCount(1);
   await expect(w.locator('.cut-b')).toHaveCount(4);
-  await expect(w.locator('table.dt').first()).toContainText('Name');
+  await expect(w.locator('table.dt').first()).toContainText('Width (mm)');
+  await expect(w.locator('table.dt').first()).not.toContainText('Length');
+  await expect(w.locator('table.dt').nth(1)).toContainText('Anthracite');
   await w.close();
   expect(app.errors).toEqual([]);
 });
@@ -168,6 +178,16 @@ test('Cutting Optimiser: cuts with angles plan into bars as you type, print as a
   await app.page.click('#saveBtn');
   expect(await app.run(() => [state.bars.kerf, state.bars.trim, state.bars.keep])).toEqual([4, 10, 1000]);
   await app.call('closeModal');
+  // a list saved with one bar colour opens with it split into inside and outside
+  expect(
+    await app.run(() => {
+      state.bars.profiles[0].colour = 'White / Anthracite';
+      delete state.bars.profiles[0].cIn;
+      const p = barData().profiles[0];
+      return [p.cIn, p.cOut, 'colour' in p];
+    })
+  ).toEqual(['White', 'Anthracite', false]);
+  await app.go('bars');
   // picking the linked profile fills in its bar length and shows the stock
   await app.page.fill('#bar_p_0_bar', '3000');
   await app.page.fill('#bar_p_0_code', item);
@@ -198,7 +218,8 @@ test('Cutting Optimiser: cuts with angles plan into bars as you type, print as a
   await expect(w.locator('.pg')).toContainText('Cut List');
   // the line under the job: Title Case, with the saw blade and end trim
   await expect(w.locator('.pg')).toContainText('Cutting List · Saw Blade 4mm · End Trim 10mm');
-  await expect(w.locator('table').first()).toContainText('Bar colour');
+  await expect(w.locator('table').first()).toContainText('Colour inside');
+  await expect(w.locator('table').first()).toContainText('Colour outside');
   await w.close();
   // kept with the contract
   await app.page.click('#barToC');
