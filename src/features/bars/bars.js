@@ -190,8 +190,8 @@ export function vBars() {
         <div class="bar-ph"><span class="bar-pn">Profile ${pi + 1}</span>
           <label class="bar-f bar-code"><span>Profile Code</span><input id="bar_p_${pi}_code" maxlength="40" data-combo="profiles" value="${p.code}" autocomplete="off"></label>
           <label class="bar-f bar-desc"><span>Description</span><input id="bar_p_${pi}_desc" maxlength="80" value="${p.desc}" autocomplete="off"></label>
-          <label class="bar-f bar-col"><span>Colour Inside</span><input id="bar_p_${pi}_cIn" maxlength="40" list="barCols" value="${p.cIn || ''}" placeholder="e.g. White" autocomplete="off"></label>
-          <label class="bar-f bar-col"><span>Colour Outside</span><input id="bar_p_${pi}_cOut" maxlength="40" list="barCols" value="${p.cOut || ''}" placeholder="e.g. Anthracite" autocomplete="off"></label>
+          <label class="bar-f bar-col"><span>Colour Inside (B)</span><input id="bar_p_${pi}_cIn" maxlength="40" list="barCols" value="${p.cIn || ''}" placeholder="e.g. White" autocomplete="off"></label>
+          <label class="bar-f bar-col"><span>Colour Outside (A)</span><input id="bar_p_${pi}_cOut" maxlength="40" list="barCols" value="${p.cOut || ''}" placeholder="e.g. Anthracite" autocomplete="off"></label>
           <label class="bar-f bar-n"><span>Bar Length <i class="nocap">(mm)</i></span><input id="bar_p_${pi}_bar" type="number" min="500" max="20000" step="1" list="barLens" value="${p.bar}"></label>
           ${D.profiles.length > 1 ? html`<button class="mini del" ${raw(onClick('barProfDel', pi))}>Remove Profile</button>` : ''}</div>
         <div class="bar-cuts">${p.cuts.map((c, ci) => cutRow(pi, c, ci))}</div>
@@ -539,7 +539,7 @@ function listDoc(asHtml) {
     title = jobTitle(D.jobNo, D.jobName);
   const secs = P.map(({ p, R }) => {
     const G = groupBars(R.bars.map((b) => ({ ...b, kerf: D.kerf })));
-    return `<section class="bsec"><h3>${html`${[p.code, p.desc].filter(Boolean).join(', ') || 'Profile'}`}${p.cIn || p.cOut ? html`<i class="bcol">${[p.cIn ? p.cIn + ' inside' : '', p.cOut ? p.cOut + ' outside' : ''].filter(Boolean).join(' · ')}</i>` : ''}<span>Bar length <b>${mm(p.bar)}mm</b></span></h3>${G.map(
+    return `<section class="bsec"><h3>${html`${[p.code, p.desc].filter(Boolean).join(', ') || 'Profile'}`}${p.cIn || p.cOut ? html`<i class="bcol">${[p.cIn ? p.cIn + ' inside (B)' : '', p.cOut ? p.cOut + ' outside (A)' : ''].filter(Boolean).join(' · ')}</i>` : ''}<span>Bar length <b>${mm(p.bar)}mm</b></span></h3>${G.map(
       (g, i) =>
         `<div class="brow"><span class="bno">${i + 1})</span><span class="bx">${g.n}×</span>${barSvg(g.bar, p.bar, D.trim, true)}</div>`
     ).join(
@@ -575,14 +575,15 @@ function listDoc(asHtml) {
           t: 'Cut List',
           h: [
             'Profile',
-            'Colour inside',
-            'Colour outside',
+            'Colour inside (B)',
+            'Colour outside (A)',
             'Room / position',
             'Ref',
             'Length (mm)',
             'How many',
             'Ends',
           ],
+          align: ['l', 'l', 'l', 'l', 'c', 'c', 'c', 'c'],
           r: P.flatMap(({ p }) =>
             p.cuts
               .filter((c) => +c.len > 0 && +c.qty > 0)

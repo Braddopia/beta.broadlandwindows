@@ -115,7 +115,7 @@ h2.sec{margin:11mm 0 1mm;font:600 14pt "Segoe UI",Arial,sans-serif;color:#012b59
 .c>h2.sec:first-child{margin-top:7mm}
 .dt{width:100%;border-collapse:collapse;font-size:8.3pt}.dt thead{display:table-header-group}.dt tr{break-inside:avoid}
 .dt th{text-align:left;padding:2mm 2.5mm;font-size:6.9pt;letter-spacing:.09em;text-transform:uppercase;font-weight:700;color:#5a6a82;border-bottom:.5mm solid #012b59}
-.dt td{padding:2.1mm 2.5mm;border-bottom:.3mm solid #e4eaf2;vertical-align:top}.dt td.n,.dt th.n{text-align:right;white-space:nowrap}
+.dt td{text-align:left;padding:2.1mm 2.5mm;border-bottom:.3mm solid #e4eaf2;vertical-align:top}.dt td.n,.dt th.n{text-align:right;white-space:nowrap}.dt td.c,.dt th.c{text-align:center;white-space:nowrap}
 .dt tfoot td{font-weight:700;border-bottom:0;border-top:.5mm solid #012b59}
 .e{text-align:center;color:#8593a7;padding:4mm!important}
 /* the glass panel */
@@ -215,8 +215,17 @@ export function printDoc(t, sub, rows, ph, o) {
     ref =
       o.ref || 'BW-' + iso(now).slice(2).replace(/-/g, '') + '-' + Math.random().toString(36).slice(2, 6).toUpperCase();
   const isN = (v) => typeof v == 'number' || /^[£-]?[\d,]+(\.\d+)?%?$/.test(String(v).trim());
-  const tb = (x) =>
-    `<h3>${esc(x.t)}</h3><table class="dt"><thead><tr>${x.h.map((h, i) => `<th class="${x.r.length && isN(x.r[0][i]) ? 'n' : ''}">${esc(h)}</th>`).join('')}</tr></thead><tbody>${x.r.map((r) => `<tr>${r.map((c) => `<td class="${isN(c) ? 'n' : ''} ${/^Needs safety glass/.test(c) ? 'warn' : ''}">${esc(c)}</td>`).join('')}</tr>`).join('') || `<tr><td colspan="${x.h.length}" class="e">Nothing to show</td></tr>`}</tbody>${x.foot ? `<tfoot><tr>${x.foot.map((c) => `<td class="${isN(c) ? 'n' : ''}">${esc(c)}</td>`).join('')}</tr></tfoot>` : ''}</table>`;
+  /* one alignment per column, header included: x.align ['l' | 'c' | 'r'] when given, otherwise a column whose
+     filled cells are all numbers lines up on the right (a '-' or blank in it no longer jumps to the left) */
+  const colAlign = (x) =>
+    x.h.map((_, i) => {
+      if (x.align && x.align[i]) return { l: '', c: 'c', r: 'n' }[x.align[i]] || '';
+      const v = x.r.map((r) => String(r[i] ?? '').trim()).filter((c) => c && c != '-');
+      return v.length && v.every(isN) ? 'n' : '';
+    });
+  const tb = (x) => tbA(x, colAlign(x));
+  const tbA = (x, A) =>
+    `<h3>${esc(x.t)}</h3><table class="dt"><thead><tr>${x.h.map((h, i) => `<th class="${A[i]}">${esc(h)}</th>`).join('')}</tr></thead><tbody>${x.r.map((r) => `<tr>${r.map((c, i) => `<td class="${A[i]} ${/^Needs safety glass/.test(c) ? 'warn' : ''}">${esc(c)}</td>`).join('')}</tr>`).join('') || `<tr><td colspan="${x.h.length}" class="e">Nothing to show</td></tr>`}</tbody>${x.foot ? `<tfoot><tr>${x.foot.map((c) => `<td class="${isN(c) ? 'n' : ''}">${esc(c)}</td>`).join('')}</tr></tfoot>` : ''}</table>`;
   const figs = (k) =>
     k && k.length
       ? `<div class="figs" style="grid-template-columns:repeat(${k.length <= 5 ? k.length : Math.ceil(k.length / 2)},1fr)">${k.map((x) => `<div><small>${esc(x[0])}</small><b>${esc(x[1])}</b>${x[2] ? `<i>${esc(x[2])}</i>` : ''}</div>`).join('')}</div>`

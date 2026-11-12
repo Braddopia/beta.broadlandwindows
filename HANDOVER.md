@@ -22,8 +22,8 @@ Read this first, then CLAUDE.md and docs/ARCHITECTURE.md.
 - Service map: 45 miles round NR6 5DR highlighted (`domain/places.js`: `BASE`, `FIT_MILES`, `LAND`).
 - Inventory: ID, Item, Colours, Stock, Unit (PCS or the length), Location, Cost, Total Value, Supplier.
   Bar length lives in the product window (6.5M / 7M / 5M / other). Count sheets print in the company style.
-- Panel Optimiser: sizes always width × height (drawn width across, height up); boards have Colour Inside and
-  Colour Outside. Cutting Optimiser profiles have Colour Inside and Colour Outside too.
+- Panel Optimiser: sizes always width × height (drawn width across, height up); boards have Thickness, Colour Inside (B)
+  and Colour Outside (A). Cutting Optimiser profiles have Colour Inside (B) and Colour Outside (A) too.
 - Settings: company card shows only filled-in details, with Opening hours (default from a public business listing:
   Mon to Fri 9am to 5pm, Sat 10am to 2pm, Sun closed; the owner should confirm).
 - Colour contrast: checked with axe-core and a pixel check (text against the real background, glass included),

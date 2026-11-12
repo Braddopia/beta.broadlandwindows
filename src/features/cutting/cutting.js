@@ -51,8 +51,9 @@ const COLS = {
     ['label', 'Board', 'text'],
     ['L', 'Width', 'number'],
     ['W', 'Height', 'number'],
-    ['cIn', 'Colour Inside', 'colour'],
-    ['cOut', 'Colour Outside', 'colour'],
+    ['T', 'Thickness', 'number'],
+    ['cIn', 'Colour Inside (B)', 'colour'],
+    ['cOut', 'Colour Outside (A)', 'colour'],
     ['qty', 'How Many', 'number'],
   ],
   parts: [
@@ -122,14 +123,20 @@ function table(kind, rows) {
                 ? { k: '', t: 'text', max: 40, list: 'cutCols', ph: 'e.g. White' }
                 : { k: '', t, max: t == 'number' ? 100000 : 60 };
           const v = k == 'turn' ? (r.turn === false ? 'no' : 'yes') : r[k];
-          return html`<label class="bar-f cut-f-${k}" for="${'cut_' + kind + '_' + i + '_' + k}"><span>${l}${k == 'L' || k == 'W' ? raw(' <i class="nocap">(mm)</i>') : ''}</span>${raw(fieldControl(f, v, { id: 'cut_' + kind + '_' + i + '_' + k }))}</label>`;
+          return html`<label class="bar-f cut-f-${k}" for="${'cut_' + kind + '_' + i + '_' + k}"><span>${l}${k == 'L' || k == 'W' || k == 'T' ? raw(' <i class="nocap">(mm)</i>') : ''}</span>${raw(fieldControl(f, v, { id: 'cut_' + kind + '_' + i + '_' + k }))}</label>`;
         }
       )}<button class="cut-x" aria-label="Remove row ${i + 1}" title="Remove" ${raw(onClick('cutDel', kind, i))}>&times;</button></div>`
   )}${rows.length ? '' : html`<p class="muted bar-none">Nothing here yet.</p>`}${kind == 'sheets' ? html`<datalist id="cutCols">${PRE.map(([n]) => html`<option value="${n}"></option>`)}</datalist>` : ''}</div>`;
 }
-/** a board's colours, e.g. "White inside · Anthracite outside" (blank when none are given) */
+/** a board's thickness and colours, e.g. "4mm thick · White inside (B) · Anthracite outside (A)" (blank when none are given) */
 export const boardCols = (s) =>
-  [s && s.cIn ? s.cIn + ' inside' : '', s && s.cOut ? s.cOut + ' outside' : ''].filter(Boolean).join(' · ');
+  [
+    s && s.T ? mm(s.T) + 'mm thick' : '',
+    s && s.cIn ? s.cIn + ' inside (B)' : '',
+    s && s.cOut ? s.cOut + ' outside (A)' : '',
+  ]
+    .filter(Boolean)
+    .join(' · ');
 const sheetOf = (D, name) => D.sheets.find((x) => x.label == name);
 /** the plan side: totals, warnings and every board. Redrawn on its own as you type */
 export function cutResults() {
@@ -236,7 +243,9 @@ export function cutEdit(e) {
     if (k == 'label') r.label = SAFE.text(t.value, 60);
     else if (k == 'cIn' || k == 'cOut') r[k] = SAFE.text(t.value, 40);
     else if (k == 'turn') r.turn = t.value != 'no';
-    else r[k] = SAFE.num(t.value, { min: 0, max: k == 'qty' ? 5000 : 100000, dp: k == 'qty' ? 0 : 1 }) ?? 0;
+    else
+      r[k] =
+        SAFE.num(t.value, { min: 0, max: k == 'qty' ? 5000 : k == 'T' ? 200 : 100000, dp: k == 'qty' ? 0 : 1 }) ?? 0;
   }
   refresh();
 }
@@ -438,14 +447,32 @@ function planDoc(asHtml) {
         {
           t: 'Cut List',
           h: ['Name', 'Width (mm)', 'Height (mm)', 'How many', 'Can turn'],
+          align: ['l', 'c', 'c', 'c', 'c'],
           r: D.parts.map((p) => [p.label, mm(p.L), mm(p.W), String(p.qty), p.turn === false ? 'No (grain)' : 'Yes']),
         },
         {
           t: 'Boards',
-          h: ['Board', 'Width (mm)', 'Height (mm)', 'Colour inside', 'Colour outside', 'Used'],
+          h: [
+            'Board',
+            'Width (mm)',
+            'Height (mm)',
+            'Thickness (mm)',
+            'Colour inside (B)',
+            'Colour outside (A)',
+            'Used',
+          ],
+          align: ['l', 'c', 'c', 'c', 'l', 'l', 'c'],
           r: S.byType.map((t) => {
             const s = sheetOf(D, t.label) || {};
-            return [t.label, mm(s.L || 0), mm(s.W || 0), s.cIn || '-', s.cOut || '-', String(t.used)];
+            return [
+              t.label,
+              mm(s.L || 0),
+              mm(s.W || 0),
+              s.T ? mm(s.T) : '-',
+              s.cIn || '-',
+              s.cOut || '-',
+              String(t.used),
+            ];
           }),
         },
         ...(R.unplaced.length
@@ -453,6 +480,7 @@ function planDoc(asHtml) {
               {
                 t: 'Not Placed',
                 h: ['Name', 'Width (mm)', 'Height (mm)'],
+                align: ['l', 'c', 'c'],
                 r: R.unplaced.map((u) => [u.label, mm(u.L), mm(u.W)]),
               },
             ]

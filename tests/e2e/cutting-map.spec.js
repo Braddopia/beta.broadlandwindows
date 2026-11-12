@@ -1,6 +1,18 @@
 // The service-call map and the Panel Optimiser.
 const { test, expect } = require('../helpers');
 
+/* every column of a printed table lines up the same way, header and every cell */
+const colsLineUp = (w) =>
+  w.evaluate(() =>
+    [...document.querySelectorAll('table.dt')].every((t) =>
+      [...t.querySelectorAll('thead th')].every((th, i) =>
+        [...t.querySelectorAll('tbody tr')].every(
+          (tr) => !tr.children[i] || getComputedStyle(tr.children[i]).textAlign == getComputedStyle(th).textAlign
+        )
+      )
+    )
+  );
+
 test('service calls on a map of Norfolk: a pin per town, click one to list its calls', async ({ app }) => {
   await app.role('beta');
   await app.go('service');
@@ -33,10 +45,19 @@ test('Panel Optimiser: change a piece, the plan updates; save, reopen and print 
   await expect(app.page.locator('#main label[for=cut_parts_0_L]')).toContainText('Width');
   await expect(app.page.locator('#main label[for=cut_parts_0_W]')).toContainText('Height');
   await expect(app.page.locator('#main .cut-pre').first()).toContainText('2400 × 1200mm');
+  await expect(app.page.locator('#main label[for=cut_sheets_0_cIn]')).toHaveText('Colour Inside (B)');
+  await expect(app.page.locator('#main label[for=cut_sheets_0_cOut]')).toHaveText('Colour Outside (A)');
+  await app.page.fill('#cut_sheets_0_T', '4');
   await app.page.fill('#cut_sheets_0_cIn', 'White');
   await app.page.fill('#cut_sheets_0_cOut', 'Anthracite');
-  expect(await app.run(() => [state.cut.sheets[0].cIn, state.cut.sheets[0].cOut])).toEqual(['White', 'Anthracite']);
-  await expect(app.page.locator('#main .cut-bp h2').first()).toContainText('White inside · Anthracite outside');
+  expect(await app.run(() => [state.cut.sheets[0].T, state.cut.sheets[0].cIn, state.cut.sheets[0].cOut])).toEqual([
+    4,
+    'White',
+    'Anthracite',
+  ]);
+  await expect(app.page.locator('#main .cut-bp h2').first()).toContainText(
+    '4mm thick · White inside (B) · Anthracite outside (A)'
+  );
   // more shelves than fit on one board
   // the plan updates while typing, and the box keeps its place
   await app.page.fill('#cut_parts_1_qty', '12');
@@ -71,7 +92,10 @@ test('Panel Optimiser: change a piece, the plan updates; save, reopen and print 
   await expect(w.locator('.cut-b')).toHaveCount(4);
   await expect(w.locator('table.dt').first()).toContainText('Width (mm)');
   await expect(w.locator('table.dt').first()).not.toContainText('Length');
+  await expect(w.locator('table.dt').nth(1)).toContainText('Thickness (mm)');
+  await expect(w.locator('table.dt').nth(1)).toContainText('Colour outside (A)');
   await expect(w.locator('table.dt').nth(1)).toContainText('Anthracite');
+  expect(await colsLineUp(w)).toBe(true);
   await w.close();
   expect(app.errors).toEqual([]);
 });
@@ -168,10 +192,13 @@ test('Cutting Optimiser: cuts with angles plan into bars as you type, print as a
   // a new list: 10mm saw blade, 50mm off each end, offcuts kept only from 1M; the saw sheet this test copies used 4 and 10
   expect(await app.run(() => [state.bars.kerf, state.bars.trim, state.bars.keep])).toEqual([10, 50, 1000]);
   await app.page.click('#main .tools >> text=Saw Settings');
+  await expect(app.page.locator('#f_kerf')).toHaveValue('10');
   await app.page.fill('#f_kerf', '4');
   await app.page.fill('#f_trim', '10');
   // shorter offcuts than 1M are never kept: 500 is refused
   await app.page.fill('#f_keep', '500');
+  await expect(app.page.locator('#f_kerf')).toHaveValue('4');
+  await expect(app.page.locator('#f_trim')).toHaveValue('10');
   await app.page.click('#saveBtn');
   await expect(app.page.locator('#mbox .ferr')).toContainText('between 1000');
   await app.page.fill('#f_keep', '1000');
@@ -218,8 +245,9 @@ test('Cutting Optimiser: cuts with angles plan into bars as you type, print as a
   await expect(w.locator('.pg')).toContainText('Cut List');
   // the line under the job: Title Case, with the saw blade and end trim
   await expect(w.locator('.pg')).toContainText('Cutting List · Saw Blade 4mm · End Trim 10mm');
-  await expect(w.locator('table').first()).toContainText('Colour inside');
-  await expect(w.locator('table').first()).toContainText('Colour outside');
+  await expect(w.locator('table').first()).toContainText('Colour inside (B)');
+  await expect(w.locator('table').first()).toContainText('Colour outside (A)');
+  expect(await colsLineUp(w)).toBe(true);
   await w.close();
   // kept with the contract
   await app.page.click('#barToC');

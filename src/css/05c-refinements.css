@@ -945,7 +945,9 @@ body[data-theme=dark] .xl-tabs button.on{color:#0d6b37}
 .xl-g tr.xh th.tdh{background:#ffd002!important;color:#013!important;border-color:#e0b800}
 .fl-head .muted{color:#3a4760}body[data-theme=dark] .fl-head .muted{color:var(--muted)}
 /* Panel Optimiser boards: colour inside and outside beside the sizes (width × height) */
-.cut-r-sheets{grid-template-columns:.7rem minmax(8rem,1fr) 5.4rem 5.4rem minmax(6.5rem,8rem) minmax(6.5rem,8rem) 5rem 2rem}
+.cut-r-sheets{grid-template-columns:.7rem minmax(8rem,1fr) 5.4rem 5.4rem 6.6rem minmax(7.5rem,9rem) minmax(7.5rem,9rem) 5rem 2rem}
+.cut-r .cut-f-T input{text-align:center}
 .cut-bp h2 .cut-col{font:500 .8rem var(--body);color:var(--muted);margin-left:.4rem}
-@media(max-width:1100px){.cut-r-sheets{grid-template-columns:.7rem repeat(4,minmax(0,1fr)) 2rem}.cut-r-sheets .cut-f-label{grid-column:2/6}.cut-r-sheets .cut-x{grid-column:6;grid-row:1}}
-@media(max-width:700px){.cut-r .cut-f-cIn,.cut-r .cut-f-cOut{grid-column:span 3}}
+@media(max-width:1100px){.cut-r-sheets{grid-template-columns:.7rem repeat(4,minmax(0,1fr)) 2rem}.cut-r-sheets .cut-f-T{grid-column:span 1}.cut-r-sheets .cut-f-label{grid-column:2/6}.cut-r-sheets .cut-x{grid-column:6;grid-row:1}}
+@media(max-width:700px){.cut-r .cut-f-cIn,.cut-r .cut-f-cOut{grid-column:span 3}.cut-r .cut-f-T{grid-column:span 2}}
+.cut-r .cut-f-T>span{white-space:nowrap}
