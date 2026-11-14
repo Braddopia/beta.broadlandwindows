@@ -66,12 +66,17 @@ export const NORFOLK = [
   [0.17, 52.72],
   [0.19, 52.76],
 ];
-/* main roads, as the towns and points they run through (drawn as smooth lines) */
+/* main roads, as the towns and points they run through (drawn as smooth lines). m: a primary route (drawn wider,
+   in yellow, with its number on a green sign as on the road). Approximate: enough to find your way round the map. */
 export const ROADS = [
   {
     n: 'A47',
+    m: 1,
     p: [
-      [0.17, 52.68],
+      [-0.06, 52.6],
+      [0.05, 52.64],
+      'wisbech',
+      [0.27, 52.72],
       "king's lynn",
       [0.55, 52.7],
       'swaffham',
@@ -83,10 +88,74 @@ export const ROADS = [
       'great yarmouth',
     ],
   },
-  { n: 'A11', p: [[0.6, 52.36], 'thetford', 'attleborough', 'wymondham', [1.24, 52.6], 'norwich'] },
+  {
+    n: 'A11',
+    m: 1,
+    p: [
+      [0.2, 52.15],
+      'newmarket',
+      [0.51, 52.335],
+      [0.6, 52.36],
+      'thetford',
+      'attleborough',
+      'wymondham',
+      [1.24, 52.6],
+      'norwich',
+    ],
+  },
   {
     n: 'A140',
-    p: [[1.12, 52.3], [1.13, 52.39], 'long stratton', [1.27, 52.59], 'norwich', [1.28, 52.7], 'aylsham', 'cromer'],
+    m: 1,
+    p: [
+      [1.06, 52.13],
+      [1.09, 52.22],
+      [1.12, 52.3],
+      [1.13, 52.39],
+      'long stratton',
+      [1.27, 52.59],
+      'norwich',
+      [1.28, 52.7],
+      'aylsham',
+      'cromer',
+    ],
+  },
+  {
+    n: 'A14',
+    m: 1,
+    p: [
+      [0.1, 52.27],
+      'newmarket',
+      'bury st edmunds',
+      'stowmarket',
+      [1.06, 52.13],
+      [1.1, 52.08],
+      'ipswich',
+      [1.3, 51.99],
+      'felixstowe',
+    ],
+  },
+  {
+    n: 'A12',
+    m: 1,
+    p: [
+      'lowestoft',
+      'kessingland',
+      [1.65, 52.36],
+      [1.6, 52.32],
+      [1.52, 52.26],
+      'saxmundham',
+      [1.43, 52.17],
+      'woodbridge',
+      'ipswich',
+      [1.0, 51.9],
+    ],
+  },
+  { n: 'A17', m: 1, p: ["king's lynn", [0.29, 52.765], 'sutton bridge', 'long sutton', 'holbeach', [-0.08, 52.82]] },
+  { n: 'A10', m: 1, p: ["king's lynn", 'downham market', [0.36, 52.5], 'ely', [0.2, 52.3], [0.12, 52.18]] },
+  {
+    n: 'A134',
+    m: 1,
+    p: ["king's lynn", [0.45, 52.66], [0.51, 52.57], [0.65, 52.51], 'thetford', [0.74, 52.33], 'bury st edmunds'],
   },
   { n: 'A148', p: ["king's lynn", [0.62, 52.8], 'fakenham', 'holt', 'cromer'] },
   {
@@ -106,12 +175,34 @@ export const ROADS = [
       'great yarmouth',
     ],
   },
-  { n: 'A10', p: ["king's lynn", 'downham market', [0.36, 52.5]] },
-  { n: 'A1065', p: ['fakenham', 'swaffham', [0.69, 52.5], [0.62, 52.42]] },
+  { n: 'A1065', p: ['fakenham', 'swaffham', [0.69, 52.5], [0.62, 52.42], 'brandon', 'mildenhall'] },
   { n: 'A146', p: ['norwich', [1.38, 52.58], 'loddon', 'beccles', 'lowestoft'] },
-  { n: 'A143', p: ['diss', 'harleston', 'bungay', 'beccles', [1.66, 52.55], 'gorleston'] },
+  {
+    n: 'A143',
+    p: [
+      'bury st edmunds',
+      [0.85, 52.32],
+      [0.97, 52.36],
+      'diss',
+      'harleston',
+      'bungay',
+      'beccles',
+      [1.66, 52.55],
+      'gorleston',
+    ],
+  },
+  { n: 'A1066', p: ['thetford', [0.95, 52.39], 'diss'] },
   { n: 'A1067', p: ['norwich', 'drayton', [1.05, 52.76], 'fakenham'] },
+  { n: 'A142', p: ['ely', [0.33, 52.3], 'newmarket'] },
+  { n: 'A1122', p: ['swaffham', [0.55, 52.62], 'downham market'] },
 ];
+/** where a road's number sign goes: half way along the middle stretch, between two places (not on a town) */
+export const roadSign = (r) => {
+  const P = r.p.map((q) => project(typeof q == 'string' ? TOWNS[q] : q)),
+    i = Math.max(0, Math.floor((P.length - 2) / 2)),
+    [a, b] = [P[i], P[Math.min(P.length - 1, i + 1)]];
+  return [Math.round((a[0] + b[0]) / 2), Math.round((a[1] + b[1]) / 2)];
+};
 /* water: the main rivers (lines) and the larger broads (lon, lat, width, height in map units) */
 export const RIVERS = [
   [
@@ -187,6 +278,13 @@ export const LANDMARKS = [
   'wisbech',
   'ely',
   'stowmarket',
+  'newmarket',
+  'felixstowe',
+  'woodbridge',
+  'mildenhall',
+  'march',
+  'holbeach',
+  'halesworth',
 ];
 /* towns and villages the company works in (longitude, latitude) */
 export const TOWNS = {
@@ -266,6 +364,10 @@ export const TOWNS = {
   march: [0.088, 52.551],
   ely: [0.263, 52.399],
   'long sutton': [0.12, 52.785],
+  newmarket: [0.404, 52.245],
+  felixstowe: [1.351, 51.963],
+  holbeach: [0.014, 52.803],
+  'sutton bridge': [0.188, 52.774],
 };
 /* other ways people write the same town */
 const ALIAS = {

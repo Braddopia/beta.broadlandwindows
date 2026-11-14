@@ -3,7 +3,7 @@
      instead of the browser's own drop-down. A page registers a source with plugInCombo(name, () => rows),
      each row { v: value put in the box, t: title, s: small print }.
    - Calendar: with a mouse, a date box opens a month calendar instead of the browser's. Typing the date
-     still works, and phones keep their own date wheel.
+     still works, and phones keep their own date wheel. data-weekdays on the box greys out Saturdays and Sundays.
    - Drop-down: with a mouse, every <select> opens the app's own list instead of the browser's grey one.
      The real <select> stays underneath (its value, change events and keyboard arrows are unchanged),
      and phones keep their own picker. */
@@ -173,7 +173,7 @@ function drawCal() {
       k = iso(d),
       out = d.getMonth() != m,
       we = d.getDay() == 0 || d.getDay() == 6,
-      no = (min && k < min) || (max && k > max);
+      no = (min && k < min) || (max && k > max) || (forEl.dataset.weekdays && we);
     cells += `<button type="button" data-d="${k}" class="${out ? 'out ' : ''}${we ? 'we ' : ''}${k == td ? 'td ' : ''}${k == sel ? 'on ' : ''}${BH[k] ? 'bh' : ''}" ${no ? 'disabled' : ''} ${BH[k] ? `title="${esc(BH[k])}"` : ''}>${d.getDate()}</button>`;
   }
   box().className = 'pk-cal open';

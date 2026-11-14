@@ -99,3 +99,34 @@ test('Book Holiday uses the site form style: labelled boxes, paid or unpaid as t
   const h = await app.run(() => document.querySelector('#mbox input[name=hpaid]').getBoundingClientRect().height);
   expect(h).toBeLessThan(24);
 });
+
+test('holidays start and end Monday to Friday; Next ignores a pending request; a turned-down request sends a System message', async ({
+  app,
+}) => {
+  await app.role('beta');
+  const sid = await app.run(() => me().id);
+  // a Saturday is moved on to the Monday, and a weekend date typed in is refused
+  await app.call('holBook', sid, '2026-11-21');
+  await expect(app.page.locator('#hf')).toHaveValue('2026-11-23');
+  await app.page.fill('#ht', '2026-11-28');
+  await app.page.dispatchEvent('#ht', 'change');
+  await expect(app.page.locator('#hi')).toContainText('Monday to Friday');
+  await app.page.check('input[name=hpaid][value=paid]');
+  const n = await app.run(() => state.hols.length);
+  await app.page.click('#mbox [data-act=holSave]');
+  expect(await app.run(() => state.hols.length)).toBe(n);
+  await expect(app.page.locator('.toast')).toContainText('Monday to Friday');
+  await app.closeAll();
+  // My Holiday's Next button shows approved holidays only
+  const pend = await app.run((id) => state.hols.find((h) => h.sid == id && h.status == 'Pending'), sid);
+  await app.go('home');
+  const next = await app.text('#main .hol-p .hbtns .btn');
+  expect(next).not.toContain(await app.run((d) => fd(d), pend.from));
+  // turned down: the person hears in Messages, from System, and cannot reply there
+  await app.call('holSet', pend.id, 'Rejected');
+  await app.go('messages');
+  await app.run(() => setUI('msg.to', 'System'));
+  await expect(app.page.locator('#main .msn-t')).toContainText('was not approved');
+  await expect(app.page.locator('#main #m_t')).toHaveCount(0);
+  expect(app.errors).toEqual([]);
+});

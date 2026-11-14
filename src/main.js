@@ -91,6 +91,7 @@ import * as featuresSettingsSettings from './features/settings/settings.js';
 import * as featuresSettingsDocBuilder from './features/settings/doc-builder.js';
 import * as featuresBarsBars from './features/bars/bars.js';
 import * as featuresTagsTags from './features/tags/tags.js';
+import * as featuresScheduleSchedule from './features/schedule/schedule.js';
 import * as featuresSignInSignIn from './features/sign-in/sign-in.js';
 import * as featuresStaffStaff from './features/staff/staff.js';
 import * as featuresStockItemWindow from './features/stock/item-window.js';
@@ -215,6 +216,7 @@ const modules = {
   featuresSettingsDocBuilder,
   featuresBarsBars,
   featuresTagsTags,
+  featuresScheduleSchedule,
   featuresSignInSignIn,
   featuresStaffStaff,
   featuresStockItemWindow,

@@ -1,4 +1,5 @@
 /* features/live-boards/live-boards: Floor boards for the office, factory and TV screens. */
+import { vSchedule } from '../schedule/schedule.js';
 import { CSTAGES, STAGES } from '../../config/constants.js';
 import { onClick, onEvent, rowClick } from '../../core/actions.js';
 import { addDays, fd, inWeek, today } from '../../core/dates.js';
@@ -39,7 +40,11 @@ export function liveData() {
     jw: J.filter((c) => c.fit && inWeek(c.fit)),
   };
 }
+/** the top of every board: title, a line under it, the clock, the board picker and the board's own buttons */
+export const flHead = (t, sub, acts = '') =>
+  `<div class="fl-head"><div>${boardTabs()}<h1>${esc(t)}</h1><span class="muted"><i class="live"></i>${esc(sub)} &middot; Updated <span id="upd">${new Date().toLocaleTimeString('en-GB')}</span></span></div><div class="clk" id="clk">${new Date().toLocaleTimeString('en-GB')}</div><div class="acts">${boardPick()}${acts}<button class="btn" data-act="toggleTV">${document.body.classList.contains('tv') ? 'Exit Full Screen' : 'Full Screen'}</button></div></div>`;
 export function vLive() {
+  if (uiState.board == 'schedule') return vSchedule(flHead);
   if (uiState.board != 'factory') return vBoard(uiState.board);
   const { td, D, J, od, dt, dw, jw } = liveData(),
     wDone = dw.filter((x) => x.status == 'Received').length,
@@ -154,13 +159,14 @@ export function vLive() {
 }
 /* ---------------- other floor boards: hardwood workshop and office ---------------- */
 export const BOARDS = [
-  ['factory', 'Factory'],
-  ['hardwood', 'Hardwood'],
-  ['office', 'Office'],
+  ['factory', 'Factory floor'],
+  ['hardwood', 'Hardwood floor'],
+  ['office', 'Office floor'],
+  ['schedule', 'Fitting Schedule'],
 ];
 export const boardTabs = () => '';
 export const boardPick = () =>
-  `<label class="bpick"><span>Board</span><select aria-label="Choose board" ${onEvent('onchange', 'setUI', 'board', 'this.value')}>${BOARDS.map(([k, t]) => `<option value="${k}" ${uiState.board == k ? 'selected' : ''}>${t} floor</option>`).join('')}</select></label>`;
+  `<label class="bpick"><span>Board</span><select aria-label="Choose board" ${onEvent('onchange', 'setUI', 'board', 'this.value')}>${BOARDS.map(([k, t]) => `<option value="${k}" ${uiState.board == k ? 'selected' : ''}>${t}</option>`).join('')}</select></label>`;
 export const isHW = (c) =>
   c.contractType == 'Domestic Timber' ||
   /hardwood|timber|\boak\b|accoya|sapele|sash/i.test((c.product || '') + ' ' + (c.notes || ''));
@@ -493,6 +499,7 @@ export const sigOf = () =>
     state.deliveries.map((d) => [d.id, d.status, d.due]),
     state.contracts.map((c) => [c.id, c.stage, c.fit]),
     state.items.slice(0, 3).map((r) => r.uid + r.reqStatus),
+    state.fitSched || null,
   ]);
 export function liveAfter() {
   liveSig = sigOf();

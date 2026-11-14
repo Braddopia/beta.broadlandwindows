@@ -71,8 +71,26 @@ export function vTake(tog) {
     : '';
   if (!T) {
     const P = products(),
-      A = areasNow();
-    return `${head}<div class="panel take-intro"><h2>No Stock Take Running</h2><ol class="steps-l"><li><b>Import the stock sheet</b> (the Excel file with one sheet per area), or add products as usual.</li><li><b>Print count sheets</b> by area for the team to fill in, or count straight on a tablet.</li><li><b>Type in the counts</b> area by area. Standard users count blind.</li><li><b>Check the differences</b>, then a manager applies the counts to stock.</li></ol><p class="muted">${P.length} products in ${A.length} area${A.length == 1 ? '' : 's'} ready to count.</p><div class="acts">${Own ? '<button class="btn" data-act="takeStart">Start Stock Take</button>' : '<span class="muted">A manager starts the stock take.</span>'}<button class="btn ghost" data-act="takeImport">Import Stock Sheet</button><button class="btn ghost" data-act="takePrint">Print Count Sheets</button></div></div>${pastH}`;
+      A = areasNow(),
+      last = past[past.length - 1],
+      per = Object.fromEntries(A.map((a) => [a, areaLines(P, a).length])),
+      step = (n, t, d, btn) =>
+        `<div class="tk-step"><span class="tk-n">${n}</span><b>${t}</b><p>${d}</p>${btn || ''}</div>`;
+    return `${head}<div class="take-home">
+    <div class="panel tk-hero"><div><h2>Stock Take</h2><p class="muted">Count everything area by area, check the differences, then put the counts into stock in one go.</p></div>
+      <dl class="tk-facts"><div><dt>Products</dt><dd>${P.length}</dd></div><div><dt>Areas</dt><dd>${A.length}</dd></div>${Ad ? `<div><dt>Stock value</dt><dd>${money(P.reduce((s2, r) => s2 + (+r.stock || 0) * (+r.cost || 0), 0))}</dd></div>` : ''}<div><dt>Last stock take</dt><dd>${last ? esc(fd(last.date)) : 'None yet'}</dd></div></dl></div>
+    <div class="tk-steps">
+      ${step(1, 'Import The Stock Sheet', 'The office Excel file, one sheet per area. Or add products as usual.', '<button class="btn ghost sm" data-act="takeImport">Import Stock Sheet</button>')}
+      ${step(2, 'Print Count Sheets', 'One sheet per area for the team to fill in by hand, or count on a tablet.', '<button class="btn ghost sm" data-act="takePrint">Print Count Sheets</button>')}
+      ${step(3, 'Count', 'Type in the counts area by area. Standard users count blind, without the system figure.', Own ? '<button class="btn sm" data-act="takeStart">Start Stock Take</button>' : '<span class="muted">A manager starts the stock take</span>')}
+      ${step(4, 'Check And Apply', 'Look over the differences, then a manager applies the counts to stock.', '')}
+    </div>
+    <div class="panel tk-areas-home"><h2><span>Areas To Count</span><small class="muted nocap">${P.length} lines</small></h2>${
+      A.length
+        ? `<div class="tk-ag">${A.map((a) => `<div class="tk-ac"><b>${esc(a)}</b><span>${per[a]} line${per[a] == 1 ? '' : 's'}</span></div>`).join('')}</div>`
+        : '<p class="empty">No products yet. Import the stock sheet to begin.</p>'
+    }</div>
+    ${pastH}</div>`;
   }
   const U = uiState.take,
     P = products(),
@@ -110,7 +128,7 @@ export function vTake(tog) {
   ];
   const pct = tot.lines ? Math.round((tot.counted / tot.lines) * 100) : 0;
   const chip = (a, t, b) =>
-    `<button class="chip ${U.area == a ? 'on' : ''}" ${onClick('takeArea', a)}>${esc(t)}${b ? ` <small>${b.c}/${b.n}</small>${b.n && b.c == b.n ? ' ✓' : ''}` : ''}</button>`;
+    `<button class="tk-card ${U.area == a ? 'on' : ''} ${b && b.n && b.c == b.n ? 'done' : ''}" ${onClick('takeArea', a)}><b>${esc(t)}</b><small>${b ? b.c + ' of ' + b.n + (b.n && b.c == b.n ? ' · done' : '') : ''}</small><i style="width:${b && b.n ? Math.round((b.c / b.n) * 100) : 0}%"></i></button>`;
   const fch = (v, t) => `<button class="chip ${U.f == v ? 'on' : ''}" ${onClick('setUI', 'take.f', v)}>${t}</button>`;
   const rows = pg.rows
     .map((v) => {
@@ -121,7 +139,7 @@ export function vTake(tog) {
   return `${head}
   <div class="kpis">${K.map((k) => `<div class="kpi ${k[2] || ''}"><small>${k[0]}</small><b>${k[1]}</b></div>`).join('')}</div>
   <div class="tk-prog"><i style="width:${pct}%"></i><span>${pct}% counted</span></div>
-  <div class="sg2 tk-areas">${chip('', 'All Areas', { n: tot.lines, c: tot.counted })}${A.map((a) => chip(a, a, byArea[a])).join('')}</div>
+  <div class="tk-areas tk-cards">${chip('', 'All Areas', { n: tot.lines, c: tot.counted })}${A.map((a) => chip(a, a, byArea[a])).join('')}</div>
   <div class="invbar"><label class="invq">${svg(ICONS.search)}<input type="search" autocomplete="off" maxlength="80" placeholder="Find a line: code, description, location" aria-label="Find a line" value="${esc(U.q || '')}" ${onEvent('oninput', 'takeSearch', 'this.value')}></label>${fch('all', 'All')}${fch('todo', 'To Count')}${fch('done', 'Counted')}${Own ? fch('diff', 'Differences') : ''}</div>
   <div class="tw"><table class="ptb tk-t"><thead><tr><th>Stock Code</th><th>Description</th><th class="c-sm">Location</th>${show ? '<th class="n">System</th>' : ''}<th class="n">Counted</th>${show ? '<th class="n">Diff</th>' : ''}<th class="c-sm">Counted By</th></tr></thead><tbody>${rows || '<tr><td colspan="7" class="empty">No lines here.</td></tr>'}</tbody></table></div>
   ${pagerH('take', pg, 'lines')}

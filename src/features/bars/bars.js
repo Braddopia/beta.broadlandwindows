@@ -117,7 +117,7 @@ export function barSvg(b, bar, trim, print) {
       dr = slant(c.aR),
       h = hue(c.label);
     out.push(
-      html`<g class="bc"><polygon points="${x},${y} ${x + w},${y} ${x + w - dr},${y + H} ${x + dl},${y + H}" style="fill:hsl(${h} ${print ? '70% 92%' : '65% 55%'});stroke:hsl(${h} ${print ? '40% 35%' : '85% 80%'})"/>${
+      html`<g class="bcut"><polygon points="${x},${y} ${x + w},${y} ${x + w - dr},${y + H} ${x + dl},${y + H}" style="fill:hsl(${h} ${print ? '70% 92%' : '65% 55%'});stroke:hsl(${h} ${print ? '40% 35%' : '85% 80%'})"/>${
         w > 34
           ? html`<text class="bl" x="${x + w / 2}" y="${y - 6}">${c.label ? c.label.toUpperCase().slice(0, Math.floor(w / 7)) : ''}</text><text class="bn${w < 80 ? ' sm' : ''}" x="${x + w / 2}" y="${y + H / 2 + 1}">${mm(c.len)}${c.ref ? ` (${c.ref})` : ''}</text>`
           : ''

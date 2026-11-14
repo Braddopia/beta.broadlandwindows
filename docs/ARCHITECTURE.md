@@ -148,6 +148,25 @@ See [docs/adr](adr/).
 - Not yet allowed for: the extra length lost when a mitre has to be cut twice (see HANDOVER.md).
   A linked profile fills in its bar length in the optimiser and shows how many are in stock.
 
+## Digital Fitting Schedule
+
+- `features/schedule/schedule.js`, shown on Floor Boards (board `schedule`): the weekly fitting sheet. Days Monday
+  to Saturday down the side, installers across the top (`state.fitSched.cols`, or the staff list's Fitters) and
+  Other Installers. Bookings are `state.fitSched.cells["YYYY-MM-DD|installer"] = { job, name, note, conf }`; a job
+  booked over neighbouring boxes is drawn as one block. Pencilled in = plain; confirmed = pink.
+- Linked to contracts (`syncContract`): a confirmed booking sets the contract's fit date (first confirmed day) and
+  fitters 1-6 (the installers), marked `fitFromBoard`; when the last confirmed booking goes, those are cleared.
+- Changed by accounts with the `schedule` permission (`config/roles.js`); everyone else sees it. Prints on A4
+  landscape like the paper sheet.
+
+## Calendar
+
+- `features/calendar/calendar.js`: month (with ISO week numbers), week and agenda. Kinds of event (`CAL_LAYERS`):
+  fittings, surveys (contract survey dates and lead visits with "survey" in their type), appointments (other lead
+  visits), service visits, deliveries (supplier deliveries and deliveries to site), follow-ups and holidays. Each
+  shows only to accounts that may open what it lists. Administrators can show one person's diary
+  (`uiState.cal.who`).
+
 ## Job Stock Tags
 
 - `features/tags/tags.js` (view `tags`, under Stock, every account): A4 landscape signs for stock kept for a job.
@@ -167,6 +186,16 @@ See [docs/adr](adr/).
   (`state.docSeen`) so the builder can list them. Stock labels have their own parts.
 
 ## Messages, drop-downs and confirmations
+
+- `msgSystem(to, text)` (features/messages) sends an automatic message from "System" (a holiday approved or turned
+  down). System messages show as their own chat and cannot be answered.
+- Holidays start and end on a weekday (Monday to Friday): the form's calendar greys out weekends and the save
+  refuses them. Next and Previous on My Holiday count approved holidays only.
+- Service calls: each row has one main button for the call's next step (`svcNext`: Book Visit, Complete, Parts In,
+  Report) and a More menu. Every step is a short form (`svcBook`, `svcParts`, `svcComplete`); Complete asks what
+  was done, so a call is never closed by a single click.
+- `render()` marks `#main` with `still` when the same page is drawn again, so entrance animations (the greeting
+  box) only play when a page is opened, not after every save here or in another tab.
 
 - `ui/toast.js` shows every confirmation and warning as one small banner at the bottom (a "snackbar"), with an
   optional button: `toast('Holiday booked', { action: { label: 'Undo', run } })`. `doneIn()` closes the window

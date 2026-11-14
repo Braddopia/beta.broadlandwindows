@@ -32,9 +32,21 @@ Read this first, then CLAUDE.md and docs/ARCHITECTURE.md.
   every page and the main windows, light and dark. Script idea: hide all text, screenshot, compare each text box's
   colour with the pixels behind it.
 
+## Added in v19.4
+
+- Digital Fitting Schedule on Floor Boards (linked to contracts; `schedule` permission for Admin and Beta).
+- Calendar: week numbers, surveys, appointments, deliveries to site, follow-ups, one person's diary.
+- Service calls: next-step button and More menu, short forms for Book Visit, Parts and Complete; map with more
+  roads and towns past the 45-mile area.
+- Holidays: weekdays only, System message in Messages when approved or turned down, Next ignores pending.
+- Inventory: Stock and Location after Item, Status in its own centred column; Stock Take page redone.
+- Overview: the greeting no longer replays its animation on every save.
+
 ## Open questions for the owner
 
 - Mitre re-cut waste in the Cutting Optimiser is not counted yet. Proposal: a "profile depth" (mm) on each
   profile (filled from the product); where two mitred ends meet and the pieces cannot be flipped to share one cut,
   add depth × tan(angle) (a 70mm deep profile at 45° loses about 70mm) plus one more saw blade. Waiting for a yes.
 - "Anyone can delete reports" was read as: every account can delete service calls. Confirm.
+- Per-person permissions (who can change the fitting schedule) wait for Microsoft 365 sign-in; today it is by
+  account type.

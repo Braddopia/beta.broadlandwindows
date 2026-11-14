@@ -1,7 +1,7 @@
 /* features/service/service: Service calls: the page, the call sheet and service reports. */
 import { MAX_PHOTOS, SVC_CAT, SVC_PR, SVC_ST } from '../../config/constants.js';
 import { jobTitle } from '../../domain/job-title.js';
-import { onClick, rowClick } from '../../core/actions.js';
+import { actJson, onClick, rowClick } from '../../core/actions.js';
 import { fd, fdl, today } from '../../core/dates.js';
 import { $, esc } from '../../core/dom.js';
 import { m0, money } from '../../core/format.js';
@@ -28,6 +28,7 @@ import {
   landPath,
   outlinePath,
   project,
+  roadSign,
   smoothPath,
 } from '../../domain/places.js';
 import { html, raw } from '../../core/html.js';
@@ -39,7 +40,10 @@ import { drawThumbs, phCount, setPhotoList, tmp } from '../../ui/forms/photos.js
 import { wizard } from '../../ui/forms/wizard.js';
 import { hit, render } from '../../ui/shell/router.js';
 import { toast } from '../../ui/toast.js';
-import { closeModal, openModal } from '../../ui/modal.js';
+import { closeFpop, openFpop } from '../../ui/components/popover.js';
+import { fieldErr, fieldH, readFields } from '../../ui/forms/form.js';
+import { del } from '../records/delete.js';
+import { askYes, closeModal, openModal } from '../../ui/modal.js';
 import { uiState } from '../../ui/ui-state.js';
 import * as repos from '../../data/repository.js';
 
@@ -76,53 +80,198 @@ export function vService() {
   ${
     U.mode == 'map'
       ? svcMap(L0)
-      : `<div class="tw"><table class="ptb abt fx t-svc"><thead><tr><th data-col="id">Ref</th><th data-col="name">Customer</th><th data-col="issue">Problem</th><th class="c" data-col="pr">Priority</th><th class="c" data-col="st">Status</th><th class="c-sm" data-col="visit">Visit</th><th class="c-md" data-col="fitter">Engineer</th><th class="ac" data-col="act"></th></tr></thead><tbody>
-  ${pg.rows.map((c) => `<tr class="clk-r" ${rowClick('editCall', c.id)}><td><b class="lref">${esc(c.id)}</b>${c.contract ? `<small class="sub">${esc(c.contract)}</small>` : ''}</td><td><span class="svn"><b>${esc(c.name)}</b>${svcBal(c)}</span><small class="sub">${esc([c.town, c.phone].filter(Boolean).join(' · '))}</small></td><td><span class="cl2">${esc(c.issue)}</span><small class="sub">${esc(c.cat || '')}${c.cat && c.photos && c.photos.length ? ' · ' : ''}${phCount(c.photos)}</small></td><td class="c">${prTag(c.priority)}</td><td class="c">${svcTag(c.status)}</td><td class="c-sm">${c.visit ? `<b class="${svcOpen(c) && c.visit < td ? 'od' : ''}">${fd(c.visit)}</b>${c.visitTime ? `<small class="sub">${esc(c.visitTime)}</small>` : ''}` : '<span class="muted">Not booked</span>'}</td><td class="c-md">${esc(c.fitter || '-')}</td><td class="ac"><div class="acts r">${svcQuick(c)}<button class="mini" ${onClick('reportCall', c.id)}>Report</button><button class="mini del" ${onClick('del', 'calls', c.id)}>Delete</button></div></td></tr>`).join('') || '<tr><td colspan="8" class="empty">No service calls here.</td></tr>'}
+      : `<div class="tw"><table class="ptb abt fx t-svc"><thead><tr><th data-col="id">Ref</th><th data-col="name">Customer</th><th data-col="issue">Problem</th><th class="c" data-col="pr">Priority</th><th class="c" data-col="st">Status</th><th class="c-sm" data-col="visit">Visit</th><th class="c-md" data-col="fitter">Engineer</th><th class="c-md" data-col="age">Open For</th><th class="ac" data-col="act"></th></tr></thead><tbody>
+  ${pg.rows.map((c) => `<tr class="clk-r" ${rowClick('editCall', c.id)}><td><b class="lref">${esc(c.id)}</b>${c.contract ? `<small class="sub">${esc(c.contract)}</small>` : ''}</td><td><span class="svn"><b>${esc(c.name)}</b>${svcBal(c)}</span><small class="sub">${esc([c.town, c.phone].filter(Boolean).join(' · '))}</small></td><td><span class="cl2">${esc(c.issue)}</span><small class="sub">${esc(c.cat || '')}${c.cat && c.photos && c.photos.length ? ' · ' : ''}${phCount(c.photos)}</small></td><td class="c">${prTag(c.priority)}</td><td class="c">${svcTag(c.status)}</td><td class="c-sm">${c.visit ? `<b class="${svcOpen(c) && c.visit < td ? 'od' : ''}">${fd(c.visit)}</b>${c.visitTime ? `<small class="sub">${esc(c.visitTime)}</small>` : ''}` : '<span class="muted">Not booked</span>'}</td><td class="c-md">${esc(c.fitter || '-')}</td><td class="c-md svc-age">${svcAge(c)}</td><td class="ac"><div class="acts r">${svcRowActs(c)}</div></td></tr>`).join('') || '<tr><td colspan="9" class="empty">No service calls here.</td></tr>'}
   </tbody></table></div>${pagerH('svc', pg, 'calls')}`
   }`;
 }
-/* ---- quick actions on each row: finish a call, put it back, or mark it waiting for parts, each with Undo ---- */
-export function svcQuick(c) {
-  if (c.status == 'Complete') return `<button class="mini" ${onClick('svcSetStatus', c.id, 'Open')}>Reopen</button>`;
-  return `<button class="mini ok" ${onClick('svcSetStatus', c.id, 'Complete')}>Complete</button>${
-    c.status == 'Awaiting parts'
-      ? `<button class="mini" ${onClick('svcSetStatus', c.id, c.visit ? 'Booked' : 'Open')}>Parts In</button>`
-      : `<button class="mini" ${onClick('svcSetStatus', c.id, 'Awaiting parts')}>Parts</button>`
-  }`;
+/* ---- what happens next on a call: one main button for its next step (Book Visit, Complete, Parts In or Report)
+   and a More menu with the rest. Each step asks for what it needs in a short form, so nothing is closed by accident. */
+const svcGet = (id) => state.calls.find((x) => x.id == id);
+/** the next step for a call: [action, label, style] */
+export function svcNext(c) {
+  if (c.status == 'Complete') return ['reportCall', 'Report', ''];
+  if (c.status == 'Awaiting parts') return ['svcPartsIn', 'Parts In', 'pri'];
+  if (!c.visit) return ['svcBook', 'Book Visit', 'pri'];
+  return ['svcComplete', 'Complete', 'ok'];
 }
-export function svcSetStatus(id, st) {
-  const c = state.calls.find((x) => x.id == id);
-  if (!c || !SVC_ST.includes(st) || c.status == st) return;
-  const was = { status: c.status, doneAt: c.doneAt || '' };
-  c.status = st;
-  c.doneAt = st == 'Complete' ? c.doneAt || today() : '';
-  repos.calls.changed(c);
-  audit('Service call ' + st.toLowerCase(), c.id, 'was ' + was.status);
-  store();
-  render(true);
-  toast(
-    st == 'Complete'
-      ? 'Service call ' + c.id + ' completed'
-      : st == 'Awaiting parts'
-        ? c.id + ' marked awaiting parts'
-        : c.id + ' moved to ' + st.toLowerCase(),
-    {
-      action: {
-        label: 'Undo',
-        run: () => {
-          const x = state.calls.find((y) => y.id == id);
-          if (!x) return;
-          Object.assign(x, was);
-          repos.calls.changed(x);
-          audit('Service call status undone', x.id, was.status);
-          store();
-          render(true);
-          toast('Undone');
-        },
-      },
+export function svcRowActs(c) {
+  const [fn, label, cls] = svcNext(c);
+  return `<button class="mini ${cls}" ${onClick(fn, c.id)}>${label}</button><button class="mini fbtn svc-more" id="svm_${esc(c.id)}" aria-haspopup="true" aria-label="More for ${esc(c.id)}" data-act="svcMore" data-args="${actJson([c.id, 'this'], 1)}">More<span aria-hidden="true" class="svc-chev">▾</span></button>`;
+}
+/** the More menu under a row's button */
+export function svcMore(id, btn) {
+  const c = svcGet(id);
+  if (!c || !btn) return;
+  const open = c.status != 'Complete',
+    item = (fn, t, cls = '') =>
+      `<button type="button" class="pm-i ${cls}" ${onClick('svcMenu', fn, c.id)}>${t}</button>`;
+  openFpop(
+    btn,
+    `<div class="pm" role="menu">${item('editCall', 'Open the call')}${open ? item('svcBook', c.visit ? 'Change the visit' : 'Book a visit') : ''}${open && c.status != 'Awaiting parts' ? item('svcParts', 'Waiting for parts') : ''}${open && c.status == 'Awaiting parts' ? item('svcPartsIn', 'Parts are in') : ''}${open ? item('svcComplete', 'Complete the call') : item('svcReopen', 'Reopen the call')}${item('reportCall', 'Service report')}<hr>${item('svcDelete', 'Delete', 'del')}</div>`
+  );
+}
+export function svcMenu(fn, id) {
+  closeFpop();
+  ({ editCall, svcBook, svcParts, svcPartsIn, svcComplete, svcReopen, reportCall, svcDelete })[fn](id);
+}
+export function svcDelete(id) {
+  del('calls', id);
+}
+/* a small form for one step; F = fields, v = values now, go(o) saves */
+function stepForm(title, sub, F, v, okLabel, go, after) {
+  openModal(
+    `<button class="mx" data-act="closeModal" aria-label="Close">&times;</button><h2>${esc(title)}</h2><p class="muted">${esc(sub)}</p><div class="grid">${F.map((f) => fieldH(f, v)).join('')}</div><div class="mact"><button class="btn ghost" data-act="closeModal">Cancel</button><button class="btn" id="svcGo">${esc(okLabel)}</button></div>`,
+    'md'
+  );
+  if (after) after();
+  $('#svcGo').onclick = () => {
+    const o = readFields(F);
+    if (o && go(o) !== false) {
+      store();
+      closeModal();
+      render(true);
+    }
+  };
+}
+const who = (c) => c.id + ' · ' + c.name + (c.town ? ', ' + c.town : '');
+/** book (or change) the visit: who is going, the day and the time */
+export function svcBook(id, title) {
+  const c = svcGet(id);
+  if (!c) return;
+  stepForm(
+    title || (c.visit ? 'Change The Visit' : 'Book A Visit'),
+    who(c),
+    [
+      { k: 'fitter', l: 'Service engineer', t: 'select', o: ['', ...FITL()], req: 1 },
+      { k: 'visit', l: 'Visit date', t: 'date', req: 1 },
+      { k: 'visitTime', l: 'Time', t: 'time' },
+    ],
+    { fitter: c.fitter, visit: c.visit || today(), visitTime: c.visitTime },
+    c.visit ? 'Save visit' : 'Book visit',
+    (o) => {
+      Object.assign(c, o);
+      if (c.status == 'Open' || (c.status == 'Awaiting parts' && !c.parts)) c.status = 'Booked';
+      repos.calls.changed(c);
+      audit('Service visit booked', c.id, fd(o.visit) + (o.visitTime ? ' ' + o.visitTime : '') + ', ' + o.fitter);
+      toast('Visit booked for ' + fd(o.visit));
     }
   );
 }
+/** waiting for parts: what is needed and when it should arrive */
+export function svcParts(id) {
+  const c = svcGet(id);
+  if (!c) return;
+  stepForm(
+    'Waiting For Parts',
+    who(c),
+    [
+      { k: 'parts', l: 'Parts needed', t: 'area', w: 'full', max: 400, req: 1 },
+      { k: 'partsFrom', l: 'Ordered from', max: 60 },
+      { k: 'partsDue', l: 'Expected', t: 'date' },
+    ],
+    { parts: c.parts, partsFrom: c.partsFrom, partsDue: c.partsDue },
+    'Mark waiting for parts',
+    (o) => {
+      const was = c.status;
+      Object.assign(c, o, { status: 'Awaiting parts' });
+      repos.calls.changed(c);
+      audit('Service call waiting for parts', c.id, o.parts);
+      toast(c.id + ' marked awaiting parts', { action: { label: 'Undo', run: () => svcBack(id, { status: was }) } });
+    }
+  );
+}
+/** the parts are in: the call goes back to booked (or open), and the visit can be booked straight away */
+export function svcPartsIn(id) {
+  const c = svcGet(id);
+  if (!c) return;
+  c.status = c.visit && c.visit >= today() ? 'Booked' : 'Open';
+  c.partsIn = today();
+  repos.calls.changed(c);
+  audit('Parts in for service call', c.id, c.parts || '');
+  store();
+  render(true);
+  if (c.status == 'Open') svcBook(id, 'Parts Are In: Book The Visit');
+  else toast('Parts in for ' + c.id + '. Visit still booked for ' + fd(c.visit));
+}
+/** finishing a call: what was done, when, any charge and sign-off. The call is not closed without this. */
+export function svcComplete(id) {
+  const c = svcGet(id);
+  if (!c) return;
+  stepForm(
+    'Complete The Call',
+    who(c) + (c.issue ? ' · ' + c.issue : ''),
+    [
+      { k: 'notes', l: 'Work carried out', t: 'area', w: 'full', req: 1 },
+      { k: 'parts', l: 'Parts used', t: 'area', w: 'full', max: 400 },
+      { k: 'doneAt', l: 'Date completed', t: 'date', req: 1 },
+      { k: 'charge', l: 'Charge to customer (£)', t: 'number', hint: 'Leave at 0 if covered by the guarantee' },
+      { k: 'signed', l: 'Customer signed off?', t: 'select', o: ['', 'Yes', 'No'] },
+      { k: 'followUp', l: 'Another visit needed?', t: 'select', o: ['No', 'Yes'] },
+      { k: 'followNote', l: 'What the next visit is for', w: 'full', max: 200 },
+    ],
+    {
+      notes: c.notes,
+      parts: c.parts,
+      doneAt: c.doneAt || today(),
+      charge: c.charge || 0,
+      signed: c.signed,
+      followUp: c.followUp || 'No',
+      followNote: c.followNote,
+    },
+    'Complete call',
+    (o) => {
+      if (o.followUp == 'Yes' && !o.followNote) {
+        fieldErr($('#f_followNote'), 'Say what the next visit is for');
+        return false;
+      }
+      const was = { status: c.status, doneAt: c.doneAt || '' };
+      Object.assign(c, o, { status: 'Complete' });
+      repos.calls.changed(c);
+      audit('Service call completed', c.id, o.notes);
+      toast('Service call ' + c.id + ' completed', { action: { label: 'Undo', run: () => svcBack(id, was) } });
+    },
+    () => {
+      /* "what the next visit is for" only when another visit is needed */
+      const f = $('#f_followUp'),
+        box = $('#f_followNote'),
+        sync = () => (box.closest('.ff').hidden = f.value != 'Yes');
+      f.addEventListener('change', sync);
+      sync();
+    }
+  );
+}
+/** reopen a finished call (asks first) */
+export function svcReopen(id) {
+  const c = svcGet(id);
+  if (!c) return;
+  askYes('Reopen ' + c.id + '?', 'It goes back on the open list.', 'Reopen', () => {
+    c.status = c.visit && c.visit >= today() ? 'Booked' : 'Open';
+    c.doneAt = '';
+    repos.calls.changed(c);
+    audit('Service call reopened', c.id, '');
+    store();
+    render(true);
+    toast(c.id + ' reopened');
+  });
+}
+/* Undo on the banner: put the status (and completed date) back */
+function svcBack(id, was) {
+  const c = svcGet(id);
+  if (!c) return;
+  Object.assign(c, was);
+  repos.calls.changed(c);
+  audit('Service call change undone', c.id, was.status);
+  store();
+  render(true);
+  toast('Undone');
+}
+/** how long a call has been open, e.g. "3 days" */
+export const svcAge = (c) => {
+  if (c.status == 'Complete' || !c.takenAt) return '';
+  const n = Math.max(0, Math.round((new Date(today() + 'T00:00') - new Date(c.takenAt + 'T00:00')) / 864e5));
+  return n == 0 ? 'Today' : n == 1 ? '1 day' : n + ' days';
+};
 /* the call sheet: who rang, what is wrong, who is going, what was done */
 export const SVCF = () => [
   { t: 'h', l: 'The Call' },
@@ -575,7 +724,18 @@ export function svcMap(L) {
       const [x, y] = project(TOWNS[k]);
       return html`<g class="lm"><circle cx="${x}" cy="${y}" r="3.2"/><text x="${x}" y="${y - 9}">${k.replace(/(^|[\s-])\S/g, (c) => c.toUpperCase()).replace('-Next-The-Sea', '')}</text></g>`;
     }),
-    roads = ROADS.map((r) => html`<path class="rd" d="${smoothPath(r.p)}"><title>${r.n}</title></path>`),
+    /* roads as on a road map: a darker edge under each, primary routes wider and yellow, minor ones white */
+    roads = [
+      ...ROADS.map((r) => html`<path class="rdc ${r.m ? 'mj' : ''}" d="${smoothPath(r.p)}"/>`),
+      ...ROADS.map(
+        (r) => html`<path class="rd ${r.m ? 'mj' : ''}" d="${smoothPath(r.p)}"><title>${r.n}</title></path>`
+      ),
+    ],
+    signs = ROADS.filter((r) => r.m).map((r) => {
+      const [x, y] = roadSign(r),
+        w = 10 + r.n.length * 8;
+      return html`<g class="rsg" transform="translate(${x} ${y})"><rect x="${-w / 2}" y="-9" width="${w}" height="18" rx="3"/><text dy="4.5">${r.n}</text></g>`;
+    }),
     rivers = RIVERS.map((r) => html`<path class="rv" d="${smoothPath(r)}"/>`),
     broads = BROADS.map(([lon, lat, w, h]) => {
       const [x, y] = project([lon, lat]);
@@ -595,7 +755,7 @@ export function svcMap(L) {
         <rect class="seabg" x="-20" y="-20" width="${MAP_W + 40}" height="${MAP_H + 40}"/>
         <path class="land out" d="${landPath()}"/>
         <circle class="zone" clip-path="url(#smLand)" cx="${bx}" cy="${by}" r="${zoneR}"/>
-        <g clip-path="url(#smLand)">${rivers}${broads}${roads}</g>
+        <g clip-path="url(#smLand)">${rivers}${broads}${roads}${signs}</g>
         <path class="county" d="${outlinePath()}"/>
         <path class="coast" d="${landPath()}"/>
         <circle class="zone-e" cx="${bx}" cy="${by}" r="${zoneR}"/>

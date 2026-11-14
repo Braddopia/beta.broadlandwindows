@@ -67,3 +67,12 @@ export const BH = {
   '2027-12-27': 'Christmas Day (substitute)',
   '2027-12-28': 'Boxing Day (substitute)',
 };
+
+/** ISO week number (weeks start on Monday; week 1 holds the year's first Thursday), e.g. 47 */
+export function isoWeek(k) {
+  const d = new Date(typeof k == 'string' ? k + 'T00:00' : k);
+  d.setHours(0, 0, 0, 0);
+  d.setDate(d.getDate() + 3 - ((d.getDay() + 6) % 7));
+  const w1 = new Date(d.getFullYear(), 0, 4);
+  return 1 + Math.round(((d - w1) / 864e5 - 3 + ((w1.getDay() + 6) % 7)) / 7);
+}

@@ -5,8 +5,8 @@ test('standard user: new service call step by step, from an existing contract', 
   await app.role('staff');
   expect(await app.run(() => canSee('service'))).toBe(true);
   await app.go('service');
-  /* anyone may delete a service call */
-  expect(await app.run(() => document.querySelectorAll('#main .mini.del').length)).toBeGreaterThan(0);
+  /* every row has its next step and a More menu (with Delete: anyone may delete a service call) */
+  expect(await app.run(() => document.querySelectorAll('#main .svc-more').length)).toBeGreaterThan(0);
   await app.call('editCall');
   await expect(app.page.locator('#mbox .stp.wz')).toContainText('Customer');
   await app.page.selectOption('#f_existing', { index: 0 });
@@ -224,26 +224,47 @@ test('service call form: the job list drops down in the app style and fills the 
   expect(app.errors).toEqual([]);
 });
 
-test('service calls: Complete and Parts from the list, each with Undo; Status and Priority centred; anyone can delete', async ({
+test('service calls: the next step on each row asks for what it needs; Complete cannot close a call by accident', async ({
   app,
 }) => {
   await app.role('staff');
   await app.go('service');
-  const id = await app.run(() => state.calls.find((c) => c.status != 'Complete').id);
+  // a booked call: the main button is Complete, which opens a short form (nothing changes until it is filled in)
+  const id = await app.run(() => state.calls.find((c) => c.status == 'Booked').id);
   const row = app.page.locator(`#main tr:has-text("${id}")`);
-  await row.locator('text=Complete').click();
+  await row.locator('button:text-is("Complete")').click();
+  await expect(app.page.locator('#mbox h2')).toHaveText('Complete The Call');
+  expect(await app.run((i) => state.calls.find((c) => c.id == i).status, id)).toBe('Booked');
+  await app.page.fill('#f_notes', '');
+  await app.page.click('#svcGo');
+  await expect(app.page.locator('#mbox .ferr')).toContainText('Work carried out');
+  await app.page.fill('#f_notes', 'Adjusted the hinge and lubricated the lock');
+  await app.page.click('#svcGo');
   expect(
     await app.run((i) => [state.calls.find((c) => c.id == i).status, state.calls.find((c) => c.id == i).doneAt], id)
   ).toEqual(['Complete', '2026-11-08']);
   await expect(app.page.locator('.toast.ok')).toContainText('completed');
   await app.page.click('.toast .tp-a');
-  expect(await app.run((i) => state.calls.find((c) => c.id == i).status, id)).not.toBe('Complete');
-  await app.page.locator(`#main tr:has-text("${id}") >> text=Parts`).click();
+  expect(await app.run((i) => state.calls.find((c) => c.id == i).status, id)).toBe('Booked');
+  // the More menu: waiting for parts, with what is needed
+  await app.page.locator(`#main tr:has-text("${id}") .svc-more`).click();
+  await app.page.click('#fpop >> text=Waiting for parts');
+  await app.page.fill('#f_parts', 'Replacement hinge');
+  await app.page.click('#svcGo');
   expect(await app.run((i) => state.calls.find((c) => c.id == i).status, id)).toBe('Awaiting parts');
+  // its main button is now Parts In
+  await expect(app.page.locator(`#main tr:has-text("${id}") button:text-is("Parts In")`)).toHaveCount(1);
+  // an open call without a visit: Book Visit
+  const open = await app.run(() => state.calls.find((c) => c.status == 'Open' && !c.visit).id);
+  await app.page.locator(`#main tr:has-text("${open}") button:text-is("Book Visit")`).click();
+  await app.page.selectOption('#f_fitter', { index: 1 });
+  await app.page.click('#svcGo');
+  expect(await app.run((i) => state.calls.find((c) => c.id == i).status, open)).toBe('Booked');
   expect(await app.run(() => getComputedStyle(document.querySelector('#main .t-svc td.c')).textAlign)).toBe('center');
-  // a standard account may delete a service call
+  // a standard account may delete a service call (from the More menu, after a check)
   const n = await app.run(() => state.calls.length);
-  await app.page.locator(`#main tr:has-text("${id}") >> text=Delete`).click();
+  await app.page.locator(`#main tr:has-text("${id}") .svc-more`).click();
+  await app.page.click('#fpop >> text=Delete');
   await app.page.click('#mbox [data-act=askGo]');
   expect(await app.run(() => state.calls.length)).toBe(n - 1);
   expect(app.errors).toEqual([]);

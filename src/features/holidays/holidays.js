@@ -1,6 +1,7 @@
 /* features/holidays/holidays: The Holiday Planner, booking and approving holidays. */
 import { onClick } from '../../core/actions.js';
-import { BH, fd, isWk, today } from '../../core/dates.js';
+import { BH, fd, isWk, iso, today } from '../../core/dates.js';
+import { msgSystem } from '../messages/messages.js';
 import { $, $$, esc } from '../../core/dom.js';
 import { pad, sum } from '../../core/format.js';
 import { shortId } from '../../core/ids.js';
@@ -339,14 +340,34 @@ export function holSetClose(id, st) {
 export function holSet(id, st) {
   if (!need('manage', 'Approving holiday')) return;
   const h = state.hols.find((x) => x.id == id);
-  if (!h) return;
+  if (!h || h.status == st) return;
   h.status = st;
   audit('Holiday ' + st.toLowerCase(), staffName(h.sid), h.from + ' to ' + h.to);
+  /* the person hears about it in Messages, from System */
+  const when =
+    fd(h.from) + (h.to != h.from ? ' to ' + fd(h.to) : '') + ' (' + h.days + ' day' + (h.days == 1 ? '' : 's') + ')';
+  if (st == 'Rejected')
+    msgSystem(
+      staffName(h.sid),
+      'Your holiday request for ' +
+        when +
+        ' was not approved by ' +
+        USER +
+        '. Speak to them if you would like to arrange other dates.'
+    );
+  else if (st == 'Approved')
+    msgSystem(staffName(h.sid), 'Your holiday for ' + when + ' has been approved by ' + USER + '.');
   store();
   render();
 }
+/** holidays start and end on a weekday: a weekend date moves on to the Monday */
+export const toWeekday = (k) => {
+  const d = new Date(k + 'T00:00');
+  while (!isWk(iso(d))) d.setDate(d.getDate() + 1);
+  return iso(d);
+};
 export function holBook(sid, day) {
-  const d = day || today();
+  const d = toWeekday(day || today());
   if (!sid && !can('manage')) {
     const m = me();
     if (m) sid = m.id;
@@ -357,8 +378,8 @@ export function holBook(sid, day) {
     String(html`<button class="mx" data-act="closeModal" aria-label="Close">&times;</button><h2>Book Holiday</h2>
     <div class="grid">
       <div class="ff full"><label for="hs">Staff member</label><select id="hs" data-onchange="holChk">${state.staff.map((s) => html`<option value="${s.id}"${raw(s.id == sid ? ' selected' : '')}>${s.name}</option>`)}</select></div>
-      <div class="ff"><label for="hf">First day off</label><input type="date" id="hf" value="${d}" data-onchange="holChk"></div>
-      <div class="ff"><label for="ht">Last day off</label><input type="date" id="ht" value="${d}" data-onchange="holChk"></div>
+      <div class="ff"><label for="hf">First day off</label><input type="date" id="hf" value="${d}" data-weekdays="1" data-onchange="holChk"></div>
+      <div class="ff"><label for="ht">Last day off</label><input type="date" id="ht" value="${d}" data-weekdays="1" data-onchange="holChk"></div>
       <fieldset class="ff full paidq"><legend>Paid or unpaid${raw(MARK(1))}</legend><div class="chq">${choice('paid', 'Paid holiday', 'Uses your allowance')}${choice('unpaid', 'Unpaid leave', 'Does not use your allowance')}</div></fieldset>
       <div class="ff full"><label for="hn">Note <span class="muted">(optional)</span></label><input id="hn" maxlength="120" placeholder="For example: family wedding"></div>
     </div>
@@ -385,6 +406,7 @@ export function holChk() {
     left = holLeft(s, +f.slice(0, 4)),
     unpaid = paidChoice() === false,
     w = [];
+  if (!isWk(f) || !isWk(t)) w.push('Holidays start and end on a weekday, Monday to Friday');
   if (n > left && !unpaid) w.push('Only ' + left + ' days left');
   state.contracts
     .filter((c) => c.fit && c.stage != 'Complete' && c.fit >= f && c.fit <= t && forPerson(s, c.fitter))
@@ -404,6 +426,10 @@ export function holSave() {
     t = SAFE.date($('#ht').value);
   if (!s || !f || !t) {
     toast('Pick valid dates');
+    return;
+  }
+  if (!isWk(f) || !isWk(t)) {
+    toast('Holidays start and end on a weekday, Monday to Friday');
     return;
   }
   const n = holDays(f, t),

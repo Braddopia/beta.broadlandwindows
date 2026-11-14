@@ -35,6 +35,9 @@ export const ROLES = {
 export const PERMISSIONS = {
   money: ['admin', 'beta'] /* prices, costs, payments, bills and approvals */,
   manage: ['admin', 'beta'] /* staff, settings, numbering, deleting records */,
+  /* booking and confirming jobs on the Digital Fitting Schedule (Floor Boards). Later, with Microsoft 365 sign-in,
+     this can be given to individual people as well as account types */
+  schedule: ['admin', 'beta'],
 };
 export const IDLE_MIN = 30,
   PIN_TRIES = 5,

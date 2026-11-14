@@ -200,6 +200,9 @@ export function render(soft) {
     h = `<div class="panel"><h2>Something Went Wrong</h2><p class="muted">${esc(e.message)}</p></div>`;
   }
   const m = $('#main');
+  /* drawing the same page again (after a save here or in another tab) must not replay the entrance animations,
+     or the greeting box looks as if it keeps refreshing */
+  m.classList.toggle('still', view == lastView);
   if (soft && view == lastView) morph(m, h);
   else m.innerHTML = h;
   document.body.dataset.view = view;

@@ -299,8 +299,12 @@ body[data-theme=dark] .phb{background:linear-gradient(160deg,rgba(255,255,255,.0
 .svb{display:inline-block;margin-top:.25rem;font-size:.7rem}
 
 /* files: category and size sit right next to the buttons,every row lined up */
-.frow{grid-template-columns:minmax(0,1fr) 9.5rem 4rem var(--fa,11.75rem);gap:.4rem .9rem}
-body.isadm .frow{--fa:15.5rem}
+/* Files lists: the name takes the room; category, size and the buttons sit together on the right, and the
+   button column is wide enough for every button (four for administrators) so nothing overlaps the size */
+.frow{grid-template-columns:minmax(0,1fr) 8.5rem 4.6rem var(--fa,13rem);gap:.4rem .7rem}
+body.isadm .frow{--fa:17rem}
+.frow>.sz{text-align:left;white-space:nowrap}
+.frow>.acts{gap:.35rem;min-width:0}
 .frow>.tag{justify-self:start}
 .set-w{grid-column:1/-1}
 
@@ -342,14 +346,11 @@ body[data-theme=dark] .pda-b b{color:#fff}
 .tk-prog{position:relative;height:1.5rem;margin:0 0 .8rem;border-radius:8px;background:var(--card2);border:1px solid var(--line);overflow:hidden}
 .tk-prog i{position:absolute;inset:0 auto 0 0;background:linear-gradient(90deg,#1f9d55,#4cc47f);transition:width .4s}
 .tk-prog span{position:relative;display:block;line-height:1.4rem;padding:0 .7rem;font-size:.76rem;font-weight:700;color:var(--ink)}
-.tk-areas .chip small{opacity:.7;font-weight:500;margin-left:.15rem}
 .tk-t td{vertical-align:middle}
 .tk-in input{width:6.5rem;height:2.1rem;text-align:right;font-weight:700;font-size:.95rem}
 .tk-done td{background:rgba(31,157,85,.06)}
 .tk-t td.up{color:var(--green);font-weight:700}.tk-t td.dn{color:var(--red);font-weight:700}
 .tk-foot{margin-top:1rem;justify-content:flex-end;flex-wrap:wrap}
-.take-intro .steps-l{margin:.4rem 0 1rem;padding-left:1.2rem;line-height:1.7}
-.take-intro .acts{flex-wrap:wrap}
 .rl.rl2{display:grid;grid-template-columns:repeat(auto-fill,minmax(15rem,1fr));gap:.5rem}
 .rl.rl2 .rb span{display:block;font-size:.74rem;color:var(--muted);font-weight:400;margin-top:.15rem}
 /* side-menu logo: a button back to the overview */
@@ -554,7 +555,7 @@ body[data-theme=dark] .smap .land{fill:rgba(120,170,255,.08);stroke:#6ea3e8}
   .ptb.fx.t-inv th[data-col=sel]{width:2.6rem}.ptb.fx.t-inv th[data-col=pid]{width:5rem}.ptb.fx.t-inv th[data-col=length]{width:5.5rem}.ptb.fx.t-inv th[data-col=unit]{width:4.5rem}
   .ptb.fx.t-inv th[data-col=stock]{width:5rem}.ptb.fx.t-inv th[data-col=cost]{width:5.5rem}.ptb.fx.t-inv th[data-col=value]{width:6rem}.ptb.fx.t-inv th[data-col=act]{width:20.5rem}
   .ptb.fx.t-svc th[data-col=id]{width:7rem}.ptb.fx.t-svc th[data-col=pr]{width:6.5rem}.ptb.fx.t-svc th[data-col=st]{width:7rem}.ptb.fx.t-svc th[data-col=visit]{width:6.5rem}
-  .ptb.fx.t-svc th[data-col=fitter]{width:7.5rem}.ptb.fx.t-svc th[data-col=act]{width:17rem}.ptb.fx.t-svc th[data-col=name]{width:15.5rem}
+  .ptb.fx.t-svc th[data-col=fitter]{width:7.5rem}.ptb.fx.t-svc th[data-col=act]{width:12.5rem}.ptb.fx.t-svc th[data-col=age]{width:6rem}.ptb.fx.t-svc th[data-col=name]{width:15.5rem}
 }
 @media(min-width:900px){.ptb.fx.t-inv td.ac .acts{justify-content:flex-end}}
 
@@ -971,3 +972,127 @@ body[data-theme=dark] .xl-tabs button.on{color:#0d6b37}
 @media(max-width:1000px){.jt{grid-template-columns:1fr}.jt-prev{position:static;max-height:none}}
 @media(max-width:480px){.jt-g{grid-template-columns:1fr;grid-template-areas:"no" "name" "in" "out" "cp"}}
 body:not([data-theme=dark]) .head>div>.muted{color:#3d4a60}
+/* the same page drawn again: no entrance animations (see render() in ui/shell/router.js) */
+.main.still .hero,.main.still .hero .wave{animation:none}
+
+/* ==== v19.4 holidays: each line (Booked, Pending, Allowance, Service days) sits in the middle of its own band,
+   the bands share out the card's height; lists of holidays and a day's events get room between lines ==== */
+.hlist>div{align-items:center}
+.hol-p .hlist{align-content:stretch;grid-auto-rows:1fr;gap:0}
+.hol-p .hlist>div{padding:.35rem 0}
+.mb .row,.cal-day .row{padding:.75rem 0;gap:1rem}
+.mb .row>span:first-child,.cal-day .row>span:first-child{line-height:1.45}
+.mb .row .muted,.cal-day .row .muted{display:inline-block;margin-top:.2rem;font-size:.86rem}
+.mb .row .acts{flex-wrap:wrap;justify-content:flex-end;gap:.35rem}
+/* Messages: automatic messages from System */
+.mav.sys{background:linear-gradient(135deg,#46546b,#2b3648);color:#fff}
+.mav.sys svg{width:1.1rem;height:1.1rem;fill:none;stroke:currentColor;stroke-width:1.8}
+.msn-sys{justify-content:center;font-size:.85rem}
+
+/* ==== v19.4 calendar: week numbers down the side, more kinds of event, one person's diary ==== */
+.cm.wn{grid-template-columns:2.6rem repeat(7,minmax(0,1fr))}
+.cm .wkn,.cm .wkh{display:flex;align-items:flex-start;justify-content:center;padding:.45rem 0;font:700 .72rem var(--body);color:var(--muted);background:var(--card2);border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
+.cm .wkh{align-items:center}
+.ce.surv{background:#dff3f7;border-color:#0e7490;color:#0b4f63}
+.ce.appt{background:#fde9df;border-color:#b33a0a;color:#7a2a08}
+.ce.fol{background:#fbe4f0;border-color:#a3216b;color:#6e1648}
+body[data-theme=dark] .ce.surv{background:#123844;color:#a6e3f2}
+body[data-theme=dark] .ce.appt{background:#3d2014;color:#ffc4a8}
+body[data-theme=dark] .ce.fol{background:#3d1630;color:#ffb3dc}
+.cal-f{display:flex;align-items:center;gap:.6rem 1rem;flex-wrap:wrap}
+.cal-who{display:flex;align-items:center;gap:.45rem;font-size:.82rem;font-weight:600;color:var(--muted)}
+.cal-who select{height:2.1rem;padding:0 .7rem;border:1px solid var(--line);border-radius:9px;background:var(--card);color:var(--ink);font:500 .85rem var(--body)}
+.ag .ag-wk{grid-column:1/-1;margin:.8rem 0 .1rem;padding-bottom:.25rem;border-bottom:1px solid var(--line);font:700 .78rem var(--body);letter-spacing:.04em;color:var(--muted)}
+.ag .ag-wk:first-child{margin-top:0}
+@media(max-width:700px){.cm.wn{grid-template-columns:1.6rem repeat(7,minmax(0,1fr))}.cm .wkn{font-size:.62rem}.ce.surv{background:#0e7490}.ce.appt{background:#b33a0a}.ce.fol{background:#a3216b}}
+
+/* ==== v19.4 Digital Fitting Schedule (Floor Boards): the paper sheet on screen ==== */
+.fs .fs-nav{display:inline-flex;gap:.3rem}
+.fs-key{display:flex;align-items:center;gap:1.2rem;flex-wrap:wrap;margin:0 0 .6rem;font-size:.82rem;font-weight:600}
+.fs-key span{display:inline-flex;align-items:center;gap:.4rem}
+.fs-key i{display:inline-block;width:1.6rem;height:.9rem;border-radius:3px;border:1px solid #9aa7b8}
+.fs-key i.pen{background:var(--card);border-style:dashed}.fs-key i.conf{background:#ffc2dc;border-color:#e36aa3}
+.fs-wrap{padding:.7rem!important;flex:1;min-height:0;display:flex;flex-direction:column}
+.fs-wrap .fs-g{flex:1;grid-template-rows:auto repeat(6,minmax(4.6rem,1fr));border-color:var(--line);border-radius:10px;overflow:hidden;background:var(--card)}
+.fs-wrap .fs-c{border-color:var(--line)}
+.fs-wrap .fs-hd{background:var(--card2);color:var(--navy);font-size:.78rem;padding:.55rem .3rem}
+.fs-wrap .fs-day{background:var(--card2);color:var(--navy);padding:.4rem .6rem}
+.fs-wrap .fs-day.td{background:var(--blue-bg);box-shadow:inset 3px 0 0 var(--blue)}
+.fs-wrap .fs-b{font-size:.86rem;cursor:pointer;transition:background .12s}
+.fs-wrap .fs-b:not(.conf):not(.pen):hover{background:var(--hover)}
+.fs-wrap .fs-b.conf:hover{background:#ffb0d2}
+.fs-wrap .fs-b.pen{background:var(--card);color:var(--muted)}
+body[data-theme=dark] .fs-wrap .fs-b.conf{background:#6b2348;color:#ffe3f0}
+body[data-theme=dark] .fs-wrap .fs-b.conf:hover{background:#7a2a54}
+body[data-theme=dark] .fs-key i.conf{background:#6b2348}
+body[data-theme=dark] .fs-wrap .fs-b.pen.jr{border-right-color:#3a4352}body[data-theme=dark] .fs-wrap .fs-b.pen.jb{border-bottom-color:#3a4352}
+.fs-notes{display:flex;align-items:center;gap:.7rem;margin-top:.7rem}
+.fs-notes label{font-weight:700;font-size:.85rem}
+.fs-notes input{flex:1;height:2.3rem;padding:0 .7rem;border:1px solid var(--line);border-radius:9px;background:var(--card);color:var(--ink);font:500 .9rem var(--body)}
+.fs-miss{margin-top:.8rem}
+.fs{display:flex;flex-direction:column;min-height:100%}
+.fs-chks{display:flex;flex-wrap:wrap;gap:.4rem .5rem}
+.fs-chks .chk{display:inline-flex;align-items:center;gap:.45rem;padding:.4rem .7rem;border:1.5px solid #7f8ea6;border-radius:9px;cursor:pointer;font:500 .88rem var(--body);margin:0}
+.fs-chks .chk:has(input:checked){border-color:var(--blue);background:var(--blue-bg)}
+.fs-set{border:0;padding:0;margin:0;min-width:0}.fs-set legend{padding:0;margin:0 0 .35rem;font:600 .92rem var(--body);color:var(--ink)}
+.chc.fs-pink:has(input:checked){border-color:#e36aa3;background:#ffe3ef}
+body[data-theme=dark] .chc.fs-pink:has(input:checked){background:#4a1a33}
+body.tv .fs-wrap .fs-b{font-size:1.15rem}body.tv .fs-wrap .fs-hd{font-size:1rem}
+@media(max-width:900px){.fs-wrap{overflow-x:auto}.fs-wrap .fs-g{min-width:52rem}}
+.fs-wrap .fs-b.conf{border-right-color:#e7a2c2;border-bottom-color:#e7a2c2}.fs-wrap .fs-b.conf.jr{border-right-color:transparent}.fs-wrap .fs-b.conf.jb{border-bottom-color:transparent}
+body[data-theme=dark] .fs-wrap .fs-b.conf{border-right-color:#9a3d6b;border-bottom-color:#9a3d6b}
+
+/* ==== v19.4 service calls: one main button for the next step, the rest in a More menu ==== */
+.fpop:has(.pm){width:auto;min-width:12rem;padding:.35rem}
+.pm{display:flex;flex-direction:column}
+.pm hr{border:0;border-top:1px solid var(--line);margin:.3rem .2rem}
+.pm-i{display:block;width:100%;padding:.5rem .7rem;border:0;border-radius:8px;background:none;color:var(--ink);font:500 .88rem var(--body);text-align:left;cursor:pointer}
+.pm-i:hover,.pm-i:focus-visible{background:var(--blue-bg)}
+.pm-i.del{color:var(--red)}
+.t-svc .svc-more{padding-right:.55rem}
+.t-svc .svc-age{color:var(--muted);white-space:nowrap}
+.t-svc td.ac .acts{gap:.35rem}
+.t-svc td.ac .acts{flex-wrap:nowrap}.t-svc .svc-more{white-space:nowrap;display:inline-flex;align-items:center;gap:.25rem}.t-svc .svc-chev{font-size:.7em}
+.t-svc .svc-more{padding:0 .55rem 0 .65rem}
+/* service map roads, as on a road map: an edge under each road, primary routes wider and yellow with green number signs */
+.smap .rdc{fill:none;stroke:#9aa5b5;stroke-width:6.5;stroke-linecap:round;stroke-linejoin:round}
+.smap .rdc.mj{stroke:#b08a2e;stroke-width:9}
+.smap .rd{stroke:#fff;stroke-width:4.2;filter:none}
+.smap .rd.mj{stroke:#f7d36b;stroke-width:6.5}
+.smap .rsg rect{fill:#0b6b3a;stroke:#fff;stroke-width:1.5}
+.smap .rsg text{font:700 11px Arial,sans-serif;fill:#ffd200;text-anchor:middle}
+body[data-theme=dark] .smap .rdc{stroke:#141a22}body[data-theme=dark] .smap .rdc.mj{stroke:#6b5418}
+body[data-theme=dark] .smap .rd{stroke:#5a6578}body[data-theme=dark] .smap .rd.mj{stroke:#b8962f}
+
+/* ==== v19.4 Stock Take page: centred, the four steps as cards, areas at a glance ==== */
+.take-home{max-width:68rem;margin:0 auto;display:flex;flex-direction:column;gap:var(--gap)}
+.take-home .panel{margin:0!important}
+.tk-hero{display:flex;align-items:center;justify-content:space-between;gap:1.5rem;flex-wrap:wrap}
+.tk-hero h2{margin:0 0 .3rem;font-size:1.35rem}.tk-hero p{margin:0;max-width:32rem}
+.tk-facts{display:flex;gap:.6rem;margin:0;flex-wrap:wrap}
+.tk-facts>div{min-width:7.5rem;padding:.6rem .9rem;border:1px solid var(--line);border-radius:12px;background:var(--card2)}
+.tk-facts dt{font-size:.74rem;font-weight:600;color:var(--muted)}.tk-facts dd{margin:.15rem 0 0;font:700 1.2rem var(--head);color:var(--navy)}
+.tk-steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--gap)}
+.tk-step{display:flex;flex-direction:column;align-items:flex-start;gap:.45rem;padding:1rem 1.1rem;border:1px solid var(--line);border-radius:var(--r);background:var(--card);box-shadow:var(--sh)}
+.tk-step b{font:600 1rem var(--body);color:var(--ink)}.tk-step p{margin:0;flex:1;font-size:.86rem;color:var(--muted);line-height:1.45}
+.tk-n{display:grid;place-items:center;width:2rem;height:2rem;border-radius:50%;background:var(--btn);color:#fff;font:700 .95rem var(--head)}
+.tk-ag{display:grid;grid-template-columns:repeat(auto-fill,minmax(11rem,1fr));gap:.5rem}
+.tk-ac{display:flex;justify-content:space-between;align-items:center;gap:.6rem;padding:.6rem .8rem;border:1px solid var(--line);border-radius:10px;background:var(--card2)}
+.tk-ac span{font-size:.82rem;color:var(--muted)}
+.tk-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(10.5rem,1fr));gap:.5rem;margin:.8rem 0}
+.tk-card{position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:flex-start;gap:.15rem;padding:.6rem .8rem .8rem;border:1.5px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);font:inherit;text-align:left;cursor:pointer}
+.tk-card b{font-weight:600;font-size:.9rem}.tk-card small{font-size:.78rem;color:var(--muted)}
+.tk-card i{position:absolute;left:0;bottom:0;height:4px;background:var(--blue);border-radius:0 4px 4px 0}
+.tk-card.done i{background:var(--green)}
+.tk-card:hover{border-color:var(--blue)}.tk-card.on{border-color:var(--blue);background:var(--blue-bg)}
+@media(max-width:900px){.tk-steps{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:520px){.tk-steps{grid-template-columns:1fr}}
+/* ==== v19.4 Inventory table: Stock and Location straight after the item; numbers to the right with room to
+   breathe, Supplier set apart from Cost; Status in its own centred column ==== */
+.t-inv th.i-st,.t-inv td.i-st{text-align:center;white-space:nowrap}
+.t-inv td.i-stock{padding-right:1.4rem!important}.t-inv th[data-col=stock]{padding-right:1.4rem!important}
+.t-inv td.i-sup,.t-inv th.i-sup{padding-left:1.6rem!important}
+.ptb.fx.t-inv th[data-col=status]{width:7rem}
+@media(min-width:900px){.ptb.fx.t-inv th[data-col=act]{width:13.5rem}}
+/* both optimisers: the same room between the last row and its "+ Add" button */
+.cut-in .cut-add,.bar-in .cut-add{margin-top:.9rem}

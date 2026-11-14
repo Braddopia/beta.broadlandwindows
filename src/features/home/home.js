@@ -457,7 +457,8 @@ export function holBody(m) {
       state.hols.filter((h) => h.sid == m.id && h.status == 'Pending'),
       (h) => h.days
     ),
-    mine = state.hols.filter((h) => h.sid == m.id && h.status != 'Rejected'),
+    /* Next and Previous count approved holidays only: a request waiting for approval shows as Pending */
+    mine = state.hols.filter((h) => h.sid == m.id && h.status == 'Approved'),
     nxt = mine.filter((h) => h.to >= td).sort((x, y) => x.from.localeCompare(y.from))[0],
     prev = mine.filter((h) => h.to < td).sort((x, y) => y.from.localeCompare(x.from)),
     xd = svcExtra(m),

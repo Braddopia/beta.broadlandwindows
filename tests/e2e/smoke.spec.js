@@ -90,7 +90,7 @@ test('Overview on a phone: the greeting shows the stars per platform, not the re
   await expect(app.page.locator('.hero .rate')).toContainText('Google');
 });
 
-test('Inventory columns: ID, Item, Colours, Stock, Unit (PCS or the length), Location, Cost, Total Value, Supplier', async ({
+test('Inventory columns: ID, Item, Stock, Location, Unit (PCS or the length), Colours, Cost, Total Value, Supplier, Status', async ({
   app,
 }) => {
   await app.role('beta');
@@ -98,17 +98,80 @@ test('Inventory columns: ID, Item, Colours, Stock, Unit (PCS or the length), Loc
   const th = await app.run(() =>
     [...document.querySelectorAll('#main .t-inv thead th')].map((t) => t.innerText.replace(/[▲▼]/g, '').trim())
   );
-  expect(th.slice(1, 10)).toEqual([
+  expect(th.slice(1, 11)).toEqual([
     'ID',
     'Item',
-    'Colours',
     'Stock',
-    'Unit',
     'Location',
+    'Unit',
+    'Colours',
     'Cost',
     'Total Value',
     'Supplier',
+    'Status',
   ]);
   await expect(app.page.locator('#main .t-inv td.c-u').first()).toHaveText(/^(PCS|Pairs|M|[\d.]+M)$/);
   await expect(app.page.locator('#main .tools')).not.toContainText('Cutting Data');
+});
+
+test("Calendar: week numbers down the side, every kind of event can be shown, and one person's diary", async ({
+  app,
+}) => {
+  await app.role('beta');
+  await app.go('fitting');
+  const rows = await app.run(() => document.querySelectorAll('#main .cm .wkn').length);
+  expect(rows).toBeGreaterThanOrEqual(4);
+  expect(await app.run(() => [...document.querySelectorAll('#main .cm .wkn')].map((e) => +e.textContent))).toContain(
+    await app.run(() => isoWeek(today()))
+  );
+  await expect(app.page.locator('#main .cal-f .chip')).toHaveText([
+    'Fittings',
+    'Surveys',
+    'Appointments',
+    'Service Visits',
+    'Deliveries',
+    'Follow-Ups',
+    'Holidays',
+  ]);
+  // one person's diary: only what is theirs
+  const sid = await app.run(() => state.staff.find((s) => s.cat == 'Fitters').id);
+  await app.page.selectOption('#main .cal-who select', sid);
+  expect(
+    await app.run((id) => {
+      const s = state.staff.find((x) => x.id == id);
+      return [...Array(28)].every((_, i) => evs(iso(new Date(2026, 10, i + 1))).every((e) => forPerson(s, e.p)));
+    }, sid)
+  ).toBe(true);
+  // the week view says which week it is
+  await app.call('calMode', 'week');
+  await expect(app.page.locator('#main h2').first()).toContainText('Week');
+});
+
+test('Overview: drawing the page again (after a save here or in another tab) does not replay the greeting animation', async ({
+  app,
+}) => {
+  await app.role('beta');
+  await app.go('home');
+  await app.run(() => render());
+  expect(await app.run(() => getComputedStyle(document.querySelector('.hero')).animationName)).toBe('none');
+  await app.go('leads');
+  expect(await app.run(() => document.querySelector('#main').classList.contains('still'))).toBe(false);
+});
+
+test('Stock Take page: the four steps as cards and the areas to count', async ({ app }) => {
+  await app.role('beta');
+  await app.go('stock');
+  await app.run(() => setUI('inv.v', 'take'));
+  await expect(app.page.locator('#main .tk-step')).toHaveCount(4);
+  await expect(app.page.locator('#main .tk-step').nth(2)).toContainText('Start Stock Take');
+  await expect(app.page.locator('#main .tk-ac')).not.toHaveCount(0);
+});
+
+test('service map: main roads with their numbers, and places past the 45-mile area', async ({ app }) => {
+  await app.role('beta');
+  await app.go('service');
+  await app.run(() => setUI('svc.mode', 'map'));
+  await expect(app.page.locator('#main .smap .rsg')).not.toHaveCount(0);
+  await expect(app.page.locator('#main .smap .rsg').first()).toContainText('A');
+  await expect(app.page.locator('#main .smap .lm')).toContainText(['Newmarket']);
 });
