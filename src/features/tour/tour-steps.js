@@ -92,9 +92,9 @@ export const TAB_TOURS = {
       'See the month at a glance, a week in detail, or a simple list of what is coming up.'
     ),
     T(
-      '#main .chips',
+      '#main .lays-bar',
       'Choose What Shows',
-      'Turn fittings, service visits, deliveries and holidays on or off so you only see what you need.'
+      'Turn fittings, service visits, deliveries and holidays on or off. Hidden ones move to the left, the ones showing sit on the right.'
     ),
     T(
       '#main .cm',

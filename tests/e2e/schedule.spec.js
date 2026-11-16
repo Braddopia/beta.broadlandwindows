@@ -12,8 +12,12 @@ test('fitting schedule: pencil in, confirm (the contract follows), one block ove
     go('live');
   });
   await expect(app.page.locator('#main h1')).toHaveText('Fitting Schedule');
-  // 6 days x (3 installers + Other Installers)
-  await expect(app.page.locator('#main .fs-b')).toHaveCount(24);
+  // 7 days (Monday to Sunday) x (3 installers + Other Installers) bookable boxes; the sheet is always 9 columns
+  // wide: Day, at least 7 installer columns (spare ones blank, ready to name) and Other Installers
+  await expect(app.page.locator('#main .fs-b')).toHaveCount(28);
+  await expect(app.page.locator('#main .fs-hd')).toHaveCount(9);
+  await expect(app.page.locator('#main .fs-hd.fs-add')).toHaveCount(4);
+  await expect(app.page.locator('#main .fs-day').last()).toContainText('Sun');
   const D = await app.run(() => weekDays(0));
   // book a job: Monday and Tuesday, two installers, pencilled in
   await app.run((d) => schedCell(d, 'Fitter A'), D[0]);

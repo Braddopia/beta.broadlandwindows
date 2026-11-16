@@ -298,16 +298,7 @@ export function vCalendar() {
     .join(
       ''
     )}</div><button class="btn ghost" aria-label="Previous" ${onClick('setUI', 'cal.o', o - 1)}>&lsaquo;</button><button class="btn ghost" ${onClick('setUI', 'cal.o', 0)}>Today</button><button class="btn ghost" aria-label="Next" ${onClick('setUI', 'cal.o', o + 1)}>&rsaquo;</button></div></div>
-  <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:.6rem;margin-bottom:.8rem;align-items:center"><h2 style="margin:0">${esc(title)}</h2><div class="cal-f"><div class="chips lays" style="margin:0"><span class="lays-l">Show</span>${CAL_LAYERS.filter(
-    (x) => x[3]()
-  )
-    .map(
-      ([k, t, c]) =>
-        `<button class="lay ${layerOn(k) ? 'on' : ''}" style="--lc:${c}" aria-pressed="${layerOn(k) ? 'true' : 'false'}" title="${layerOn(k) ? 'Showing: click to hide' : 'Hidden: click to show'}" ${onClick('calLayer', k)}><span class="lck" aria-hidden="true"></span>${t}</button>`
-    )
-    .join(
-      ''
-    )}</div>${can('manage') ? `<label class="cal-who"><span>Person</span><select aria-label="Show one person's diary" ${onEvent('onchange', 'setUI', 'cal.who', 'this.value')}><option value="">Everyone</option>${state.staff.map((x) => `<option value="${esc(x.id)}" ${uiState.cal.who == x.id ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}</select></label>` : ''}</div></div>${grid}${day}
+  <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:.6rem;margin-bottom:.6rem;align-items:center"><h2 style="margin:0">${esc(title)}</h2><div class="cal-f">${can('manage') ? `<label class="cal-who"><span>Person</span><select aria-label="Show one person's diary" ${onEvent('onchange', 'setUI', 'cal.who', 'this.value')}><option value="">Everyone</option>${state.staff.map((x) => `<option value="${esc(x.id)}" ${uiState.cal.who == x.id ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}</select></label>` : ''}</div></div>${layerBar()}${grid}${day}
   ${
     can('manage')
       ? `<div class="two" style="margin-top:1rem"><div class="panel"><h2>Upcoming Fittings</h2>${fits.map((c) => `<div class="row"><span><b>${fd(c.fit)}</b> ${esc(jobTitle(c.id, c.name))}<br><span class="muted">${esc(c.product)}, ${esc(c.town)} (${esc(c.fitter || 'no fitter')})</span></span><button class="mini pri" ${onClick('markFit', c.id)}>Mark fitted</button></div>`).join('') || '<p class="empty">No fittings booked.</p>'}</div>
@@ -315,10 +306,42 @@ export function vCalendar() {
       : calMine()
   }`;
 }
-/** turn one kind of event on or off */
+/* the layers in the order of the menu on the left: Leads (surveys, appointments, follow-ups), Contracts
+   (fittings), Deliveries, Service Calls, Holiday Planner */
+const NAV_ORDER = ['surv', 'appt', 'fol', 'fit', 'del', 'svc', 'hol'];
+/* the layer buttons: hidden ones at the start, the ones showing to the right, each group in menu order */
+function layerBar() {
+  const L = NAV_ORDER.map((k) => CAL_LAYERS.find((x) => x[0] == k)).filter((x) => x && x[3]()),
+    btn = ([k, t, c]) =>
+      `<button class="lay ${layerOn(k) ? 'on' : ''}" data-ly="${k}" style="--lc:${c}" aria-pressed="${layerOn(k) ? 'true' : 'false'}" title="${layerOn(k) ? 'Showing: click to hide' : 'Hidden: click to show'}" ${onClick('calLayer', k)}><span class="lck" aria-hidden="true"></span>${t}</button>`,
+    off = L.filter((x) => !layerOn(x[0])),
+    on = L.filter((x) => layerOn(x[0]));
+  return `<div class="lays-bar">${off.length ? `<span class="lays-l">Hidden</span><div class="lays lays-off">${off.map(btn).join('')}</div>` : ''}<span class="lays-l lays-r">Showing</span><div class="lays lays-on">${on.map(btn).join('')}</div></div>`;
+}
+/** turn one kind of event on or off; the button glides to its new place (hidden ones to the start, shown to the right) */
 export function calLayer(k) {
+  const before = {};
+  document.querySelectorAll('#main .lay[data-ly]').forEach((b) => (before[b.dataset.ly] = b.getBoundingClientRect()));
   uiState.cal.ly[k] = layerOn(k) ? 0 : 1;
   render();
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  document.querySelectorAll('#main .lay[data-ly]').forEach((b) => {
+    const a = before[b.dataset.ly];
+    if (!a || !b.animate) return;
+    const r = b.getBoundingClientRect(),
+      dx = a.left - r.left,
+      dy = a.top - r.top;
+    if (!dx && !dy) return;
+    /* a gentle arc: lift a little half-way, then settle with a small overshoot */
+    b.animate(
+      [
+        { transform: `translate(${dx}px,${dy}px)` },
+        { transform: `translate(${dx / 2}px,${dy / 2 - 10}px)`, offset: 0.5 },
+        { transform: 'translate(0,0)' },
+      ],
+      { duration: 380, easing: 'cubic-bezier(.34,1.56,.64,1)' }
+    );
+  });
 }
 /* the month and week grids: a week number at the start of each row */
 function weeks(days, full) {

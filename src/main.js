@@ -41,6 +41,7 @@ import * as domainNumbering from './domain/numbering.js';
 import * as domainPermissions from './domain/permissions.js';
 import * as domainPeople from './domain/people.js';
 import * as domainService from './domain/service.js';
+import * as domainPostcode from './domain/postcode.js';
 import * as domainStockTake from './domain/stock-take.js';
 import * as domainStock from './domain/stock.js';
 import * as featuresAdminAdmin from './features/admin/admin.js';
@@ -87,6 +88,7 @@ import * as featuresSearchCommands from './features/search/commands.js';
 import * as featuresSearchQuestions from './features/search/questions.js';
 import * as featuresSearchSearch from './features/search/search.js';
 import * as featuresServiceService from './features/service/service.js';
+import * as featuresServiceServiceMap from './features/service/service-map.js';
 import * as featuresSettingsSettings from './features/settings/settings.js';
 import * as featuresSettingsDocBuilder from './features/settings/doc-builder.js';
 import * as featuresBarsBars from './features/bars/bars.js';
@@ -166,6 +168,7 @@ const modules = {
   domainPeople,
   domainPermissions,
   domainService,
+  domainPostcode,
   domainStock,
   domainStockTake,
   featuresAdminAdmin,
@@ -212,6 +215,7 @@ const modules = {
   featuresSearchQuestions,
   featuresSearchSearch,
   featuresServiceService,
+  featuresServiceServiceMap,
   featuresSettingsSettings,
   featuresSettingsDocBuilder,
   featuresBarsBars,

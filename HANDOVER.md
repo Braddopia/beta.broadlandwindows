@@ -57,6 +57,16 @@ Read this first, then CLAUDE.md and docs/ARCHITECTURE.md.
   that shows the bar must call it (tests/e2e/print-bar.spec.js).
 - The owner's 20 UX and animation principles: `docs/UX-PRINCIPLES.md`, applied in `src/css/08-motion.css`.
 
+## Added in v19.7
+
+- Calendar: hidden layers sit at the start of their own bar, the ones showing on the right, in menu order;
+  a clicked button glides to its new place.
+- Fitting Schedule: Monday to Sunday; always 7 installer columns plus Other Installers (spare ones blank, "+
+  Installer" names one); the printout follows.
+- Service map: a real OpenStreetMap map (see docs/ARCHITECTURE.md), postcode pins, details on each pin with Open
+  Call and Directions, nearest-first list, calls outside the 45-mile area flagged. Service calls have a Postcode
+  box. Next: the route planner (several nearby calls in order from a starting point), waiting for the owner.
+
 ## Open questions for the owner
 
 - Mitre re-cut waste in the Cutting Optimiser is not counted yet. Proposal: a "profile depth" (mm) on each

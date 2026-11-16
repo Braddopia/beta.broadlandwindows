@@ -33,6 +33,7 @@ import { ncCount, ncDraw } from '../../features/notifications/notifications.js';
 import { vReports } from '../../features/reports/reports.js';
 import { sbSync, srchMatch, srchText } from '../../features/search/search.js';
 import { vService } from '../../features/service/service.js';
+import { svcMapMount } from '../../features/service/service-map.js';
 import { vCutting } from '../../features/cutting/cutting.js';
 import { tabTour } from '../../features/tour/tour.js';
 import { vSettings } from '../../features/settings/settings.js';
@@ -61,7 +62,7 @@ export const VIEWS = {
   leads: { t: 'Leads', fn: vLeads },
   contracts: { t: 'Contracts', fn: vContracts },
   fitting: { t: 'Calendar', fn: vCalendar },
-  service: { t: 'Service Calls', fn: vService },
+  service: { t: 'Service Calls', fn: vService, after: svcMapMount },
   cutting: { t: 'Panel Optimiser', fn: vCutting },
   bars: { t: 'Cutting Optimiser', fn: vBars },
   tags: { t: 'Job Stock Tags', fn: vTags },

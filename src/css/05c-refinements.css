@@ -1102,7 +1102,9 @@ body[data-theme=dark] .smap .rd{stroke:#5a6578}body[data-theme=dark] .smap .rd.m
 
 /* Calendar layers: each button says plainly whether it is showing. On: tinted in its colour with a tick.
    Off: plain, dashed edge, an empty circle and lighter text. A press squashes slightly (feedback). */
-.lays{align-items:center;gap:.4rem}.lays-l{font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-right:.15rem}
+.lays-bar{display:flex;align-items:center;flex-wrap:wrap;gap:.45rem .5rem;margin:0 0 .8rem;padding:.45rem .55rem;border:1px solid var(--line);border-radius:10px;background:var(--card2)}
+.lays{display:flex;flex-wrap:wrap;align-items:center;gap:.4rem}.lays-l{font-size:.7rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.lays-r{margin-left:auto}
 .lay{display:inline-flex;align-items:center;gap:.4rem;min-height:2.1rem;padding:.3rem .8rem .3rem .45rem;border-radius:6px;border:1.5px dashed color-mix(in srgb,var(--lc) 55%,transparent);background:transparent;color:var(--muted);font:600 .8rem var(--body);cursor:pointer;transition:background .18s ease,border-color .18s ease,color .18s ease,transform .12s cubic-bezier(.3,1.6,.5,1)}
 .lay:hover{border-color:var(--lc);color:var(--ink)}.lay:active{transform:scale(.94)}
 .lay .lck{display:grid;place-items:center;width:1.15rem;height:1.15rem;border-radius:50%;border:2px solid var(--lc);background:transparent;transition:background .18s ease,transform .25s cubic-bezier(.3,1.6,.5,1)}
@@ -1112,9 +1114,9 @@ body[data-theme=dark] .smap .rd{stroke:#5a6578}body[data-theme=dark] .smap .rd.m
 
 /* Fitting Schedule on screen: a portrait sheet (narrower and taller, centred), drawn like the Calendar:
    soft header row, the date in a circle (filled for today) with the day under it, centred in its row */
-.fs-key,.fs-wrap,.fs-miss{width:100%;max-width:880px;margin-left:auto;margin-right:auto}
+.fs-key,.fs-wrap,.fs-miss{width:100%;max-width:1040px;margin-left:auto;margin-right:auto}
 body.tv .fs-key,body.tv .fs-wrap,body.tv .fs-miss{max-width:none}
-.fs-wrap .fs-g{grid-template-rows:auto repeat(6,minmax(6.4rem,1fr));border-radius:12px}
+.fs-wrap .fs-g{grid-template-rows:auto repeat(7,minmax(6.2rem,1fr));border-radius:12px}
 .fs-wrap .fs-hd{background:var(--card2);color:var(--muted);font:600 .8rem var(--body);text-transform:none;letter-spacing:0;padding:.55rem .3rem}
 .fs-wrap .fs-day{align-items:center;justify-content:center;text-align:center;gap:.25rem;padding:.4rem .2rem;color:var(--ink)}
 .fs-wrap .fs-day b{display:grid;place-items:center;width:2.1rem;height:2.1rem;border-radius:50%;font:700 1.05rem var(--body)}
@@ -1127,3 +1129,62 @@ body.tv .fs-key,body.tv .fs-wrap,body.tv .fs-miss{max-width:none}
 .flist,.fhead{scrollbar-gutter:stable}.fhead{overflow-y:hidden}
 .frow>.tag,.fhead>span:nth-child(2){justify-self:center;text-align:center}
 .frow>.sz,.fhead>span:nth-child(3){text-align:right}
+
+/* Fitting Schedule: the spare (unnamed) columns are quiet; an administrator can click the heading to name one */
+.fs-wrap .fs-sp{background:repeating-linear-gradient(135deg,transparent 0 7px,rgba(127,142,166,.07) 7px 8px)}
+.fs-wrap .fs-hd.fs-add{border:0;border-right:1px solid var(--line);border-bottom:1px solid var(--line);color:var(--muted);font:600 .74rem var(--body);cursor:pointer;opacity:.75}
+.fs-wrap .fs-hd.fs-add:hover{opacity:1;color:var(--blue);background:var(--blue-bg)}
+
+/* ==== Service calls: the live map (OpenStreetMap through Leaflet) ==== */
+.lmap{grid-template-columns:minmax(0,2fr) minmax(17rem,1fr)}
+.lmap-m{display:flex;flex-direction:column;gap:.55rem}
+.lmap-bar{display:flex;align-items:center;justify-content:space-between;gap:.6rem;flex-wrap:wrap;font-size:.84rem}
+.lmap-tools{display:flex;gap:.35rem;flex-wrap:wrap}.lmap-tools .mini.on{border-color:var(--blue);color:var(--blue);background:var(--blue-bg)}
+.lmap-out{color:var(--red)}
+.lmap-c{height:min(72vh,680px);min-height:22rem;border-radius:10px;border:1px solid var(--line);overflow:hidden;background:#e8eef4;z-index:0}
+.lmap-note{margin:0;font-size:.82rem;color:var(--muted)}
+.lmap .leaflet-container{font:500 .8rem var(--body)}
+.lmap .leaflet-control-zoom a{color:#012b59}
+/* pins: a teardrop in the call's colour, the number of calls inside when several share a spot */
+.lpin-w{background:none;border:0}
+.lpin{position:relative;width:30px;height:30px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:var(--pc,#e08a00);border:2.5px solid #fff;box-shadow:0 3px 8px rgba(1,20,45,.45);display:grid;place-items:center;transition:transform .25s cubic-bezier(.34,1.56,.64,1)}
+.lpin span{transform:rotate(45deg);color:#fff;font:800 .78rem var(--body);text-shadow:0 1px 2px rgba(0,0,0,.35)}
+.lpin span:empty::before{content:"";display:block;width:9px;height:9px;border-radius:50%;background:#fff}
+.lpin-w:hover .lpin,.lpin-w:focus .lpin{transform:rotate(-45deg) scale(1.15)}
+.lpin.u{--pc:#d43c3c}.lpin.od{--pc:#a3216b}.lpin.o{--pc:#e08a00}.lpin.p{--pc:#7a4fd0}.lpin.b{--pc:#2b8fe0}.lpin.d{--pc:#8a97a8}
+.lpin.apx{border-style:dashed;opacity:.92}
+.lpin.u::after{content:"";position:absolute;inset:-7px;border-radius:50%;border:2px solid #d43c3c;animation:lpulse 1.6s ease-out infinite}
+@keyframes lpulse{from{opacity:.9;transform:scale(.7)}to{opacity:0;transform:scale(1.5)}}
+.lyd-w{background:none;border:0}
+.lyd{width:34px;height:34px;border-radius:9px;background:#ffd002;border:2.5px solid #012b59;display:grid;place-items:center;box-shadow:0 3px 10px rgba(1,20,45,.45)}
+.lyd svg{width:18px;height:18px;fill:#012b59}
+.lring{stroke:#034ea2;stroke-width:2.5;stroke-dasharray:8 7;fill:#034ea2;fill-opacity:.05}
+/* the details box on a pin */
+.lmap .leaflet-popup-content-wrapper{border-radius:12px;box-shadow:0 14px 40px -10px rgba(1,20,45,.5)}
+.lmap .leaflet-popup-content{margin:.75rem .9rem;line-height:1.35}
+.lmp-c+.lmp-c{margin-top:.7rem;padding-top:.7rem;border-top:1px solid #dde4ee}
+.lmp-h{display:flex;gap:.4rem;align-items:baseline;font-size:.92rem;color:#012b59}.lmp-h span{font-weight:700}
+.lmp-t{display:flex;flex-wrap:wrap;gap:.25rem;margin:.35rem 0}
+.lmp-a{font-size:.8rem;color:#3a4760}.lmp-i{margin:.35rem 0;font-size:.84rem;color:#13233a}
+.lmp-m{font-size:.78rem;color:#3a4760;margin-top:.2rem}
+.lmp-b{display:flex;gap:.35rem;margin-top:.55rem}.lmp-b a.mini{text-decoration:none}
+/* the list beside it, nearest first */
+.lmap-l #lmapList{max-height:min(72vh,680px);overflow:auto;scrollbar-gutter:stable}
+.lmap-r{width:100%;display:flex;justify-content:space-between;align-items:center;gap:.6rem;text-align:left;background:none;border:0;border-bottom:1px solid var(--line);padding:.55rem .3rem;cursor:pointer;color:var(--ink);font:inherit}
+.lmap-r:hover{background:var(--hover)}
+.lmap-rn{display:flex;gap:.5rem;align-items:flex-start;min-width:0}.lmap-rn .dot{margin-top:.3rem;flex-shrink:0}
+.lmap-r small{display:block;color:var(--muted);font-size:.74rem}
+.lmap-d{display:flex;flex-direction:column;align-items:flex-end;gap:.15rem;white-space:nowrap;text-align:right}
+.lmap-d b{font-variant-numeric:tabular-nums}
+.dot.od,.lmap-key .lk.od{background:#a3216b}.dot.p,.lmap-key .lk.p{background:#7a4fd0}
+.lmap-key .lk{width:.75rem;height:.75rem;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:1.5px solid #fff;box-shadow:0 0 0 1px rgba(1,20,45,.25)}
+.lmap-key .lk.u{background:#d43c3c}.lmap-key .lk.o{background:#e08a00}.lmap-key .lk.b{background:#2b8fe0}.lmap-key .lk.d{background:#8a97a8}
+.lmap-key .lk.apx{border-style:dashed;border-color:#fff;opacity:.85}
+.lmap-key .yk{width:.8rem;height:.8rem;border-radius:3px;background:#ffd002;border:2px solid #012b59}
+/* dark mode: the map pictures are dimmed and turned to dark tones; pins keep their colours */
+body[data-theme=dark] .lmap .leaflet-tile-pane{filter:invert(1) hue-rotate(180deg) brightness(.92) contrast(.9) saturate(.6)}
+body[data-theme=dark] .lmap-c{background:#1b222d}
+@media(prefers-reduced-motion:reduce){.lpin.u::after{animation:none}}
+@media(max-width:900px){.lmap{grid-template-columns:1fr}.lmap-c{height:60vh}}
+/* the older drawn map's "svg fills the box" rule must not squash Leaflet's own drawing layer (the 45-mile ring) */
+.lmap-m .leaflet-overlay-pane svg{width:auto;height:auto;max-width:none;max-height:none}

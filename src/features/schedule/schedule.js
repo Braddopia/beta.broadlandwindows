@@ -1,5 +1,6 @@
 /* features/schedule/schedule: the Digital Fitting Schedule, the weekly sheet the office used to print and fill in by
-   hand. Days (Monday to Saturday) down the side, installers across the top. A job is pencilled in first; once it is
+   hand. Days (Monday to Sunday) down the side, installers across the top; the sheet always has at least
+   seven installer columns plus Other Installers, the spare ones left blank and ready to name, as on the paper. A job is pencilled in first; once it is
    a confirmed booking it is coloured pink, as with a highlighter on the paper sheet.
    A confirmed booking is linked to its contract: the contract's fit date becomes the first confirmed day and its
    fitters the installers booked, so the Calendar and the Overview follow the board.
@@ -26,7 +27,9 @@ import { uiState } from '../../ui/ui-state.js';
 import { PRINT_BAR_CSS, printBar, wirePrintBar } from '../../print/print.js';
 
 export const OTHER = 'Other Installers';
-const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+/* the sheet is always this many installer columns wide (before Other Installers) */
+const MIN_COLS = 7;
 
 /** the schedule: installers (columns), bookings by "date|installer", and a notes line per week */
 export function schedData() {
@@ -42,7 +45,7 @@ export function schedCols() {
     L = S.cols && S.cols.length ? S.cols : staffIn('Fitters');
   return [...L.filter((x) => x && x != OTHER), OTHER];
 }
-/** the Monday of the week on show (o weeks from this one) and its six days */
+/** the Monday of the week on show (o weeks from this one) and its seven days */
 export function weekDays(o = uiState.sched.o) {
   const t = new Date(today() + 'T00:00');
   t.setDate(t.getDate() - ((t.getDay() + 6) % 7) + o * 7);
@@ -62,7 +65,7 @@ const contractOf = (no) => {
 
 /* the week as a grid; a job booked over neighbouring boxes is one block: the label shows once (in its first box)
    and the lines between its boxes are not drawn */
-function groups(D, C) {
+function groups(D, C, gapAfter = -1) {
   const at = (r, c) => (r >= 0 && r < D.length && c >= 0 && c < C.length ? cellOf(D[r], C[c]) : null),
     seen = new Set(),
     anchor = new Set();
@@ -76,7 +79,10 @@ function groups(D, C) {
         const [a, b] = todo.pop();
         if (seen.has(a + ',' + b) || !same(at(a, b), x)) continue;
         seen.add(a + ',' + b);
-        todo.push([a + 1, b], [a - 1, b], [a, b + 1], [a, b - 1]);
+        todo.push([a + 1, b], [a - 1, b]);
+        /* side to side, but never across the blank columns */
+        if (b != gapAfter) todo.push([a, b + 1]);
+        if (b - 1 != gapAfter) todo.push([a, b - 1]);
       }
     })
   );
@@ -84,28 +90,41 @@ function groups(D, C) {
 }
 /** the grid itself (on screen and printed) */
 export function schedGrid(D, C, print) {
-  const { at, anchor } = groups(D, C),
+  /* blank columns before Other Installers so the sheet is always full width */
+  const named = C.filter((c) => c != OTHER),
+    spare = Math.max(0, MIN_COLS - named.length),
+    { at, anchor } = groups(D, C, spare ? named.length - 1 : -1),
     edit = !print && can('schedule'),
-    td = today();
-  const head = `<div class="fs-c fs-hd fs-wk">${print ? '' : 'Day'}</div>${C.map((c) => `<div class="fs-c fs-hd ${c == OTHER ? 'oth' : ''}">${esc(c)}</div>`).join('')}`;
+    td = today(),
+    cols = [...named, ...Array(spare).fill(null), OTHER],
+    spareHead = edit
+      ? `<button class="fs-c fs-hd fs-sp fs-add" title="Name this column" data-act="schedInstallers">+ Installer</button>`
+      : `<div class="fs-c fs-hd fs-sp"></div>`;
+  const head = `<div class="fs-c fs-hd fs-wk">${print ? '' : 'Day'}</div>${cols.map((c) => (c == null ? spareHead : `<div class="fs-c fs-hd ${c == OTHER ? 'oth' : ''}">${esc(c)}</div>`)).join('')}`;
   const rows = D.map((d, r) => {
     const dt = new Date(d + 'T00:00');
     return (
-      `<div class="fs-c fs-day ${d == td ? 'td' : ''} ${dt.getDay() == 6 ? 'we' : ''}"><b>${dt.getDate()}</b><span>${DAYS[r]}</span></div>` +
-      C.map((c, ci) => {
-        const x = at(r, ci),
-          jr = x && same(at(r, ci + 1), x),
-          jb = x && same(at(r + 1, ci), x),
-          lead = x && anchor.has(r + ',' + ci);
-        const cls = ['fs-c', 'fs-b', x ? (x.conf ? 'conf' : 'pen') : '', jr ? 'jr' : '', jb ? 'jb' : ''].join(' ');
-        const label = lead
-          ? `<span class="fs-n">${esc(x.name || '')}</span>${x.job ? `<span class="fs-j">${esc(x.job)}</span>` : ''}${x.note ? `<span class="fs-x">${esc(x.note)}</span>` : ''}`
-          : '';
-        return `<div class="${cls}" ${edit || (!print && x) ? onClick('schedCell', d, c) : ''} ${x ? `title="${esc([x.name, x.job, x.note, x.conf ? 'Confirmed' : 'Pencilled in'].filter(Boolean).join(' · '))}"` : ''}>${label}</div>`;
-      }).join('')
+      `<div class="fs-c fs-day ${d == td ? 'td' : ''} ${dt.getDay() == 6 || dt.getDay() == 0 ? 'we' : ''}"><b>${dt.getDate()}</b><span>${DAYS[r]}</span></div>` +
+      named.map((c, ci) => cell(r, ci, c)).join('') +
+      '<div class="fs-c fs-sp"></div>'.repeat(spare) +
+      cell(r, C.length - 1, OTHER)
     );
   }).join('');
-  return `<div class="fs-g" style="grid-template-columns:${print ? '16mm' : '4.2rem'} repeat(${C.length},minmax(0,1fr))">${head}${rows}</div>`;
+  return `<div class="fs-g" style="grid-template-columns:${print ? '16mm' : '4.2rem'} repeat(${cols.length},minmax(0,1fr))">${head}${rows}</div>`;
+  /* one bookable box: row r, column ci of C (a block never joins across the blank columns) */
+  function cell(r, ci, c) {
+    const d = D[r],
+      x = at(r, ci),
+      gap = spare && ci == named.length - 1,
+      jr = x && !gap && same(at(r, ci + 1), x),
+      jb = x && same(at(r + 1, ci), x),
+      lead = x && anchor.has(r + ',' + ci);
+    const cls = ['fs-c', 'fs-b', x ? (x.conf ? 'conf' : 'pen') : '', jr ? 'jr' : '', jb ? 'jb' : ''].join(' ');
+    const label = lead
+      ? `<span class="fs-n">${esc(x.name || '')}</span>${x.job ? `<span class="fs-j">${esc(x.job)}</span>` : ''}${x.note ? `<span class="fs-x">${esc(x.note)}</span>` : ''}`
+      : '';
+    return `<div class="${cls}" ${edit || (!print && x) ? onClick('schedCell', d, c) : ''} ${x ? `title="${esc([x.name, x.job, x.note, x.conf ? 'Confirmed' : 'Pencilled in'].filter(Boolean).join(' · '))}"` : ''}>${label}</div>`;
+  }
 }
 /* contracts with a fit date this week that are not on the board yet */
 function missing(D) {

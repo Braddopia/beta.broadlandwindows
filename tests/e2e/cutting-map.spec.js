@@ -13,26 +13,101 @@ const colsLineUp = (w) =>
     )
   );
 
-test('service calls on a map of Norfolk: a pin per town, click one to list its calls', async ({ app }) => {
+test('service calls on a real map: pinned by postcode, nearest first, details on a pin, calls outside the area flagged', async ({
+  app,
+}) => {
+  // the postcode service answers with known spots (the map pictures stay offline in tests)
+  const SPOTS = { 'NR27 9HE': [52.931, 1.302], 'PE1 1EF': [52.574, -0.242] };
+  let asked = [];
+  const cors = { 'access-control-allow-origin': '*', 'access-control-allow-headers': 'content-type' };
+  await app.page.route('https://api.postcodes.io/**', async (r) => {
+    if (r.request().method() == 'OPTIONS') return r.fulfill({ status: 204, headers: cors });
+    /* the area lookup (GET /outcodes/..) for a postcode that was not found: none known here */
+    if (r.request().method() == 'GET') return r.fulfill({ status: 404, headers: cors, json: { status: 404 } });
+    const body = JSON.parse(r.request().postData() || '{}'),
+      pcs = body.postcodes || [];
+    asked.push(...pcs);
+    await r.fulfill({
+      headers: cors,
+      json: {
+        status: 200,
+        result: pcs.map((q) => ({
+          query: q,
+          result: SPOTS[q] ? { latitude: SPOTS[q][0], longitude: SPOTS[q][1] } : null,
+        })),
+      },
+    });
+  });
   await app.role('beta');
+  await app.run(() => {
+    state.calls.push(
+      {
+        id: 'S-0901',
+        name: 'Sample Customer P',
+        town: 'Cromer',
+        pc: 'NR27 9HE',
+        priority: 'Urgent',
+        status: 'Open',
+        issue: 'Front door will not lock',
+      },
+      {
+        id: 'S-0905',
+        name: 'Sample Customer T',
+        town: 'Peterborough',
+        pc: 'PE1 1EF',
+        priority: 'Normal',
+        status: 'Open',
+        issue: 'Roof leak',
+      }
+    );
+    setUI('svc.f', 'open');
+  });
   await app.go('service');
-  await app.run(() => setUI('svc.f', 'all'));
   await app.page.click('#main .seg2 >> text=Map');
-  await expect(app.page.locator('#main .smap .land')).toHaveCount(1);
-  const pins = app.page.locator('#main .pin');
-  expect(await pins.count()).toBeGreaterThan(1);
-  await app.page.locator('#main .pin[aria-label^="Norwich"]').dispatchEvent('click');
-  await expect(app.page.locator('#main .smap-l h2')).toContainText('Norwich');
-  const ids = await app.run(() =>
-    state.calls.filter((c) => (c.town || '').toLowerCase() == 'norwich').map((c) => c.id)
-  );
-  for (const id of ids) await expect(app.page.locator('#main .smap-l')).toContainText(id);
-  await app.page.click('#main .smap-l >> text=All Towns');
-  await expect(app.page.locator('#main .smap-l h2')).toContainText('Towns');
+  await expect(app.page.locator('#main .leaflet-container')).toHaveCount(1);
+  // only postcodes are sent, never names
+  await expect.poll(() => asked.length).toBeGreaterThan(0);
+  expect(asked).toContain('NR27 9HE');
+  expect(JSON.stringify(asked)).not.toContain('Sample');
+  // a pin for each spot; the list runs nearest first and flags the call outside the 45-mile area
+  await expect(app.page.locator('#main .lmap-r', { hasText: 'S-0905' })).toContainText('Outside area');
+  const miles = await app.page.locator('#main #lmapList .lmap-d b').allTextContents();
+  const n = miles.map((t) => parseFloat(t));
+  expect(n.length).toBeGreaterThan(2);
+  expect([...n].sort((a, b) => a - b)).toEqual(n);
+  expect(await app.page.locator('#main .lpin').count()).toBeGreaterThan(2);
+  await expect(app.page.locator('#main #lmapSum')).toContainText('1 outside our 45-mile area');
+  // the list opens a call's details on the map: problem, distance, Open Call and Directions
+  await app.page.click('#main .lmap-r:has-text("S-0901")');
+  const pop = app.page.locator('#main .leaflet-popup');
+  await expect(pop).toContainText('Front door will not lock');
+  await expect(pop).toContainText('miles from the yard');
+  await expect(pop.locator('a:has-text("Directions")')).toHaveAttribute('href', /google\.com\/maps\/dir\/.*NR27%209HE/);
+  await pop.locator('button:has-text("Open Call")').click();
+  await expect(app.page.locator('#mbox')).toContainText('S-0901');
+  await app.closeAll();
+  // the 45-mile ring can be hidden and shown
+  await app.page.click('#main .lmap-tools >> text=45-Mile Area');
+  await expect(app.page.locator('#main path.lring')).toHaveCount(0);
+  await app.page.click('#main .lmap-tools >> text=45-Mile Area');
+  await expect(app.page.locator('#main path.lring')).toHaveCount(1);
+  // a call with no postcode still goes on the map at its town
+  expect(await app.run(() => state.calls.some((c) => !c.pc && c.town))).toBe(true);
   // standard users have the map too
   await app.role('staff');
   await app.go('service');
-  await expect(app.page.locator('#main .smap')).toHaveCount(1);
+  await expect(app.page.locator('#main .leaflet-container')).toHaveCount(1);
+  expect(app.errors).toEqual([]);
+});
+
+test('a service call postcode is tidied when saved and filled in from the contract', async ({ app }) => {
+  await app.role('beta');
+  const pc = await app.run(() => {
+    const k = state.contracts[0];
+    editCall(undefined, k.id);
+    return callPostcode({}, k);
+  });
+  await expect(app.page.locator('#f_pc')).toHaveValue(pc);
   expect(app.errors).toEqual([]);
 });
 

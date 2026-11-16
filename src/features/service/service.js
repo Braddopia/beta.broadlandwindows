@@ -46,6 +46,8 @@ import { del } from '../records/delete.js';
 import { askYes, closeModal, openModal } from '../../ui/modal.js';
 import { uiState } from '../../ui/ui-state.js';
 import * as repos from '../../data/repository.js';
+import { svcLiveMap } from './service-map.js';
+import { callPostcode, pcNorm } from '../../domain/postcode.js';
 
 /* at a glance: does the customer still owe money on their contract? */
 export const svcBal = (c) => {
@@ -79,7 +81,9 @@ export function vService() {
   <div class="kpis">${k('Open Calls', O.length, 'open')}${k('Urgent', O.filter((c) => c.priority == 'Urgent').length, 'urgent', O.some((c) => c.priority == 'Urgent') ? 'bad' : '')}${k('Visits Today', O.filter((c) => c.visit == td).length, 'today')}${k('Awaiting Parts', O.filter((c) => c.status == 'Awaiting parts').length, 'parts')}${k('Not Booked Yet', O.filter((c) => !c.visit).length, 'nobook', O.some((c) => !c.visit) ? 'warn' : '')}${k('Overdue Visits', O.filter((c) => c.visit && c.visit < td).length, 'open', O.some((c) => c.visit && c.visit < td) ? 'bad' : '')}</div>
   ${
     U.mode == 'map'
-      ? svcMap(L0)
+      ? navigator.onLine === false
+        ? svcMap(L0)
+        : svcLiveMap(L0)
       : `<div class="tw"><table class="ptb abt fx t-svc"><thead><tr><th data-col="id">Ref</th><th data-col="name">Customer</th><th data-col="issue">Problem</th><th class="c" data-col="pr">Priority</th><th class="c" data-col="st">Status</th><th class="c-sm" data-col="visit">Visit</th><th class="c-md" data-col="fitter">Engineer</th><th class="c-md" data-col="age">Open For</th><th class="ac" data-col="act"></th></tr></thead><tbody>
   ${pg.rows.map((c) => `<tr class="clk-r" ${rowClick('editCall', c.id)}><td><b class="lref">${esc(c.id)}</b>${c.contract ? `<small class="sub">${esc(c.contract)}</small>` : ''}</td><td><span class="svn"><b>${esc(c.name)}</b>${svcBal(c)}</span><small class="sub">${esc([c.town, c.phone].filter(Boolean).join(' · '))}</small></td><td><span class="cl2">${esc(c.issue)}</span><small class="sub">${esc(c.cat || '')}${c.cat && c.photos && c.photos.length ? ' · ' : ''}${phCount(c.photos)}</small></td><td class="c">${prTag(c.priority)}</td><td class="c">${svcTag(c.status)}</td><td class="c-sm">${c.visit ? `<b class="${svcOpen(c) && c.visit < td ? 'od' : ''}">${fd(c.visit)}</b>${c.visitTime ? `<small class="sub">${esc(c.visitTime)}</small>` : ''}` : '<span class="muted">Not booked</span>'}</td><td class="c-md">${esc(c.fitter || '-')}</td><td class="c-md svc-age">${svcAge(c)}</td><td class="ac"><div class="acts r">${svcRowActs(c)}</div></td></tr>`).join('') || '<tr><td colspan="9" class="empty">No service calls here.</td></tr>'}
   </tbody></table></div>${pagerH('svc', pg, 'calls')}`
@@ -298,6 +302,7 @@ export const SVCF = () => [
   { k: 'email', l: 'Email', t: 'email' },
   { k: 'address', l: 'Address', w: 'full', max: 200, hint: 'Needed for a new customer' },
   { k: 'town', l: 'Town', hint: 'Needed for a new customer' },
+  { k: 'pc', l: 'Postcode', max: 10, hint: 'Puts the call on the map' },
   { t: 'h', l: 'The Problem' },
   { k: 'cat', l: 'Type of problem', t: 'select', o: ['', ...SVC_CAT], req: 1 },
   { k: 'priority', l: 'Priority', t: 'select', o: SVC_PR },
@@ -360,6 +365,7 @@ function contractHelp(v) {
         ['email', mailOf(x)],
         ['address', addrOf(x)],
         ['town', x.town],
+        ['pc', callPostcode({}, x)],
       ].forEach(([f, val]) => {
         const e = $('#f_' + f);
         /* fill empty boxes, and boxes still holding what the last contract picked put there */
@@ -401,7 +407,7 @@ export function callWizard(cid, id) {
     {
       t: 'Customer',
       d: 'Who is calling? Pick the contract for a job we fitted.',
-      f: pick(F, ['existing', 'contract', 'name', 'phone', 'email', 'address', 'town']),
+      f: pick(F, ['existing', 'contract', 'name', 'phone', 'email', 'address', 'town', 'pc']),
       after: contractHelp,
     },
     { t: 'Problem', d: 'What is wrong, in their words?', f: pick(F, ['cat', 'priority', 'issue']) },
@@ -454,6 +460,7 @@ export function callWizard(cid, id) {
           email: mailOf(k) || '',
           address: addrOf(k) || '',
           town: k.town || '',
+          pc: callPostcode({}, k),
           contract: k.id || '',
           priority: 'Normal',
           status: 'Open',
@@ -475,6 +482,12 @@ export function callWizard(cid, id) {
           if (!v.phone) return 'Add a phone number for a new customer';
           if (!v.address) return 'Add the address for a new customer';
           if (!v.town) return 'Add the town for a new customer';
+        }
+        /* a postcode is tidied to "NR6 5DR"; one that cannot be a postcode is pointed out */
+        if (v.pc) {
+          const p = pcNorm(v.pc);
+          if (!p) return 'That postcode does not look right (for example NR6 5DR)';
+          v.pc = p;
         }
       }
       if (c && st == at('Work Done') && v.status == 'Complete' && !v.doneAt)

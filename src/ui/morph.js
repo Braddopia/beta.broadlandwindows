@@ -33,6 +33,8 @@ export function morphKids(a, b) {
       continue;
     }
     if (an.isEqualNode(bn)) continue;
+    /* something drawn by a library (the live map) is left exactly as it is */
+    if (an.id && an.id == bn.id && an.hasAttribute('data-keep')) continue;
     [...an.attributes].forEach((x) => {
       if (!bn.hasAttribute(x.name)) an.removeAttribute(x.name);
     });

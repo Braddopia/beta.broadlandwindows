@@ -125,19 +125,24 @@ test("Calendar: week numbers down the side, every kind of event can be shown, an
     await app.run(() => isoWeek(today()))
   );
   // each layer button says whether it is showing (Follow-Ups starts hidden)
-  await expect(app.page.locator('#main .cal-f .lay[aria-pressed=true]')).toHaveCount(6);
-  await app.page.click('#main .cal-f .lay:has-text("Follow-Ups")');
-  await expect(app.page.locator('#main .cal-f .lay:has-text("Follow-Ups")')).toHaveAttribute('aria-pressed', 'true');
-  await app.page.click('#main .cal-f .lay:has-text("Follow-Ups")');
-  await expect(app.page.locator('#main .cal-f .lay')).toHaveText([
-    'Fittings',
+  // hidden layers sit at the start, the ones showing on the right; each group in the order of the left menu
+  await expect(app.page.locator('#main .lays-off .lay')).toHaveText(['Follow-Ups']);
+  await expect(app.page.locator('#main .lays-on .lay')).toHaveText([
     'Surveys',
     'Appointments',
-    'Service Visits',
+    'Fittings',
     'Deliveries',
-    'Follow-Ups',
+    'Service Visits',
     'Holidays',
   ]);
+  await app.page.click('#main .lay:has-text("Follow-Ups")');
+  await expect(app.page.locator('#main .lays-off .lay')).toHaveCount(0);
+  await expect(app.page.locator('#main .lays-on .lay').nth(2)).toHaveText('Follow-Ups');
+  await expect(app.page.locator('#main .lay:has-text("Follow-Ups")')).toHaveAttribute('aria-pressed', 'true');
+  await app.page.click('#main .lay:has-text("Fittings")');
+  await expect(app.page.locator('#main .lays-off .lay')).toHaveText(['Fittings']);
+  await app.page.click('#main .lay:has-text("Fittings")');
+  await app.page.click('#main .lay:has-text("Follow-Ups")');
   // one person's diary: only what is theirs
   const sid = await app.run(() => state.staff.find((s) => s.cat == 'Fitters').id);
   await app.page.selectOption('#main .cal-who select', sid);
@@ -172,8 +177,11 @@ test('Stock Take page: the four steps as cards and the areas to count', async ({
   await expect(app.page.locator('#main .tk-ac')).not.toHaveCount(0);
 });
 
-test('service map: main roads with their numbers, and places past the 45-mile area', async ({ app }) => {
+test('service map with no internet: the drawn map, main roads with their numbers, places past the 45-mile area', async ({
+  app,
+}) => {
   await app.role('beta');
+  await app.page.context().setOffline(true);
   await app.go('service');
   await app.run(() => setUI('svc.mode', 'map'));
   await expect(app.page.locator('#main .smap .rsg')).not.toHaveCount(0);

@@ -86,11 +86,16 @@ core/  config/  generic helpers and fixed settings
 
 ## Service map and Panel Optimiser
 
-- The Service Calls map (`svcMap` in `features/service/service.js`) draws an approximate outline of Norfolk
-  and the land round it (`LAND`: the Wash, the Fens, north Suffolk to Felixstowe) and puts a pin per town from
-  the list in `domain/places.js`. The area we fit in, `FIT_MILES` (45) round the yard (`BASE`, NR6 5DR), is
-  highlighted; land beyond it is dimmed. Nothing is looked up online; a town not in the list is shown under the
-  map as "not on the map". Add towns to `TOWNS` (or a spelling to `ALIAS`).
+- The Service Calls map (`features/service/service-map.js`) is a real map: OpenStreetMap pictures drawn with
+  Leaflet (bundled from npm; its styles copied to `src/css/00-leaflet.css`). Each call is pinned at its postcode
+  (`callPostcode` in `domain/postcode.js`: the call's own Postcode box, then its contract's site or home postcode,
+  then the address). Postcodes are looked up with postcodes.io in `integrations/postcodes.js` (only the postcode is
+  sent; answers are kept in localStorage `bb_geo`); an unknown postcode falls back to its area (outcode), then the
+  town in `domain/places.js`. Pins are coloured by what the call needs (`callKind`); the list runs nearest first
+  with miles and a rough drive time from the yard (`BASE`, NR6 5DR); the `FIT_MILES` (45) ring can be hidden.
+  The page is drawn first and the map mounted afterwards (`after: svcMapMount` in the router); a soft redraw keeps
+  the map (`data-keep`, honoured by `ui/morph.js`). With no internet (`navigator.onLine` false) the older drawn
+  map (`svcMap`) is shown instead. Tests run offline: tiles fail quietly and postcode answers are mocked.
 - Each service call row has quick actions (`svcQuick`: Complete / Reopen, Parts / Parts In), each with Undo on
   the banner. Any account may delete a service call (`DEL_RULE.calls` has no permission). A service report asks
   which photos to print (`reportPhotos`): the call's own, then the linked contract's.
