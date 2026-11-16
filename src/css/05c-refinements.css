@@ -1096,3 +1096,6 @@ body[data-theme=dark] .smap .rd{stroke:#5a6578}body[data-theme=dark] .smap .rd.m
 @media(min-width:900px){.ptb.fx.t-inv th[data-col=act]{width:13.5rem}}
 /* both optimisers: the same room between the last row and its "+ Add" button */
 .cut-in .cut-add,.bar-in .cut-add{margin-top:.9rem}
+
+/* Panel Optimiser: boards stand upright, so a board is drawn no wider than its height on screen allows */
+.cut-bp .cut-frame{max-width:min(1000px,calc(72vh * var(--ar,1.6)))}

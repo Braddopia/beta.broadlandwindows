@@ -95,9 +95,11 @@ core/  config/  generic helpers and fixed settings
   the banner. Any account may delete a service call (`DEL_RULE.calls` has no permission). A service report asks
   which photos to print (`reportPhotos`): the call's own, then the linked contract's.
 - The Panel Optimiser (`features/cutting/cutting.js`) plans board cutting with `domain/cutlist.js`
-  (maximal-rectangles placement, saw kerf and edge trim, grain lock per piece). Sizes always read width × height:
-  `L` is the width (across the plan), `W` the height (up the plan); the names stay so saved lists open. Each board
-  has a thickness (`T`, mm) and a colour inside (B) and outside (A) (`cIn`, `cOut`), shown on the plan and printed. The current list and
+  (maximal-rectangles placement, saw kerf and edge trim, grain lock per piece). The plan is worked out several ways
+  (placement rule, turned pieces first or last, sort order) and the one with the fewest boards kept. Sizes read
+  width × height as the company gives them (a full board is 1,200 wide × 2,400 high); boards are drawn lying down,
+  so `L` is the long side across the drawing (the height) and `W` the short side (the width). Each board has a
+  thickness (`T`, mm) and a colour inside (B) and outside (A) (`cIn`, `cOut`). The panel saw blade is 5mm. The current list and
   saved lists are kept in `state.cut`.
 
 ## Adding a page

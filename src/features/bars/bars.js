@@ -558,31 +558,22 @@ function listDoc(asHtml) {
         {
           t: 'Job',
           r: [
-            ['Job number', D.jobNo || '-'],
-            ['Job name', D.jobName ? String(D.jobName).toLocaleUpperCase('en-GB') : '-'],
-            ['Prepared by', USER],
+            ['Job Number', D.jobNo || '-'],
+            ['Job Name', D.jobName ? String(D.jobName).toLocaleUpperCase('en-GB') : '-'],
+            ['Prepared By', USER],
           ],
         },
       ],
       kpis: [
-        ['Bars needed', String(bars), P.length + ' profile' + (P.length == 1 ? '' : 's')],
+        ['Bars Needed', String(bars), P.length + ' profile' + (P.length == 1 ? '' : 's')],
         ['Cuts', String(P.reduce((s, x) => s + x.R.stats.cuts, 0))],
         ['Wastage', total ? pct(waste / total) : '0%'],
-        ['Wastage length', mm(waste) + 'mm'],
+        ['Wastage Length', mm(waste) + 'mm'],
       ],
       tables: [
         {
           t: 'Cut List',
-          h: [
-            'Profile',
-            'Colour inside (B)',
-            'Colour outside (A)',
-            'Room / position',
-            'Ref',
-            'Length (mm)',
-            'How many',
-            'Ends',
-          ],
+          h: ['Profile', 'Inside (B)', 'Outside (A)', 'Room / position', 'Ref', 'Length (mm)', 'How many', 'Ends'],
           align: ['l', 'l', 'l', 'l', 'c', 'c', 'c', 'c'],
           r: P.flatMap(({ p }) =>
             p.cuts

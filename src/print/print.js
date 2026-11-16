@@ -109,7 +109,7 @@ h2.sec{margin:11mm 0 1mm;font:600 14pt "Segoe UI",Arial,sans-serif;color:#012b59
 .dg div{display:grid;grid-template-columns:38mm 1fr;gap:4mm;padding:2.1mm 0;border-bottom:.3mm solid #dfe6ef;break-inside:avoid}
 .dg span{color:#6b7a90;font-size:8.4pt}.dg b{font-weight:500}
 .dg.one{grid-template-columns:1fr}
-.gp{display:grid;grid-template-columns:1fr 1fr;column-gap:10mm}.gp section{break-inside:avoid}.gp .dg div{grid-template-columns:30mm 1fr}
+.gp{display:grid;grid-template-columns:1fr 1fr;column-gap:10mm}.gp:has(>section:only-child){grid-template-columns:1fr}.gp section{break-inside:avoid}.gp .dg div{grid-template-columns:30mm 1fr}
 .call{margin:6mm 0 0;padding:3mm 4mm;border-left:1mm solid #ffd002;background:#fffbe6;font-size:8.8pt;break-inside:avoid}.call b{display:block;font-size:6.8pt;letter-spacing:.14em;text-transform:uppercase;color:#7a6200;margin-bottom:.8mm}
 .dt td.warn{color:#b42318;font-weight:700}
 .c>h2.sec:first-child{margin-top:7mm}

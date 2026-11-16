@@ -119,3 +119,19 @@ test('the 45-mile fitting area round NR6 5DR: on the map with room to spare, and
   for (const k of ['wisbech', 'ely', 'march']) assert.ok(!inFitArea(k), k);
   assert.equal(townKey('Bury St. Edmunds'), 'bury st edmunds');
 });
+
+test('the plan is tried several ways and the one with the fewest boards kept: 8 shelves and 2 sides on 2 boards', () => {
+  const parts = [
+    { label: 'Side', L: 720, W: 560, qty: 2, turn: true },
+    { label: 'Shelf', L: 764, W: 540, qty: 8, turn: true },
+  ];
+  /* a board standing upright (1,200 wide x 2,400 high) and lying down give the same count */
+  for (const sh of [
+    { label: 'Upright', L: 1200, W: 2400 },
+    { label: 'Flat', L: 2400, W: 1200 },
+  ]) {
+    const r = optimise({ kerf: 5, trim: 10, sheets: [sh], parts });
+    assert.equal(r.stats.boards, 2, sh.label);
+    assert.equal(r.unplaced.length, 0);
+  }
+});

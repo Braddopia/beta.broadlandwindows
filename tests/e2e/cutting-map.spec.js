@@ -42,9 +42,9 @@ test('Panel Optimiser: change a piece, the plan updates; save, reopen and print 
   await expect(app.page.locator('#main h1')).toHaveText('Panel Optimiser');
   await expect(app.page.locator('#main .cut-b')).toHaveCount(1);
   // sizes are always width × height, and boards have a colour inside and outside
-  await expect(app.page.locator('#main label[for=cut_parts_0_L]')).toContainText('Width');
-  await expect(app.page.locator('#main label[for=cut_parts_0_W]')).toContainText('Height');
-  await expect(app.page.locator('#main .cut-pre').first()).toContainText('2400 × 1200mm');
+  await expect(app.page.locator('#main label[for=cut_parts_0_W]')).toContainText('Width');
+  await expect(app.page.locator('#main label[for=cut_parts_0_L]')).toContainText('Height');
+  await expect(app.page.locator('#main .cut-pre').first()).toContainText('1200 × 2400mm');
   await expect(app.page.locator('#main label[for=cut_sheets_0_cIn]')).toHaveText('Colour Inside (B)');
   await expect(app.page.locator('#main label[for=cut_sheets_0_cOut]')).toHaveText('Colour Outside (A)');
   await app.page.fill('#cut_sheets_0_T', '4');
@@ -56,14 +56,14 @@ test('Panel Optimiser: change a piece, the plan updates; save, reopen and print 
     'Anthracite',
   ]);
   await expect(app.page.locator('#main .cut-bp h2').first()).toContainText(
-    '4mm thick · White inside (B) · Anthracite outside (A)'
+    '4mm Thickness · Inside (B) White · Outside (A) Anthracite'
   );
-  // more shelves than fit on one board
+  // more shelves than fit on one board (the plan is tried several ways: 12 shelves and 2 sides need 3 boards)
   // the plan updates while typing, and the box keeps its place
   await app.page.fill('#cut_parts_1_qty', '12');
-  await expect(app.page.locator('#main .cut-b')).toHaveCount(4);
+  await expect(app.page.locator('#main .cut-b')).toHaveCount(3);
   await expect(app.page.locator('#cut_parts_1_qty')).toBeFocused();
-  await expect(app.page.locator('#cutKpis')).toContainText('4');
+  await expect(app.page.locator('#cutKpis')).toContainText('3');
   expect(await app.run(() => state.cut.parts[1].qty)).toBe(12);
   // a piece bigger than the board is reported, not lost
   await app.page.click('#main >> text=+ Add Piece');
@@ -81,7 +81,7 @@ test('Panel Optimiser: change a piece, the plan updates; save, reopen and print 
   await expect(app.page.locator('#main .cut-b')).toHaveCount(0);
   await app.page.click('#main >> text=Saved Lists (1)');
   await app.page.click('#mbox >> text=Open');
-  await expect(app.page.locator('#main .cut-b')).toHaveCount(4);
+  await expect(app.page.locator('#main .cut-b')).toHaveCount(3);
   // print
   const [w] = await Promise.all([app.nextPopup(), app.page.click('#main >> text=Print Plan')]);
   await w.waitForLoadState();
@@ -89,12 +89,19 @@ test('Panel Optimiser: change a piece, the plan updates; save, reopen and print 
   await expect(w.locator('h1')).toHaveText('Cutting Plan');
   await expect(w.locator('.pg')).toContainText('Cut List');
   await expect(w.locator('.ih img')).toHaveCount(1);
-  await expect(w.locator('.cut-b')).toHaveCount(4);
+  await expect(w.locator('.cut-b')).toHaveCount(3);
   await expect(w.locator('table.dt').first()).toContainText('Width (mm)');
   await expect(w.locator('table.dt').first()).not.toContainText('Length');
   await expect(w.locator('table.dt').nth(1)).toContainText('Thickness (mm)');
-  await expect(w.locator('table.dt').nth(1)).toContainText('Colour outside (A)');
+  await expect(w.locator('table.dt').nth(1)).toContainText('Outside (A)');
   await expect(w.locator('table.dt').nth(1)).toContainText('Anthracite');
+  await expect(w.locator('.cbs').first()).toContainText('1,200 wide × 2,400 high');
+  await expect(w.locator('.cbspec').first().locator('span')).toHaveText([
+    '4mm Thickness',
+    'Inside (B) White',
+    'Outside (A) Anthracite',
+  ]);
+  await expect(w.locator('.ih')).toContainText('Saw Blade 5mm');
   expect(await colsLineUp(w)).toBe(true);
   await w.close();
   expect(app.errors).toEqual([]);
@@ -138,7 +145,7 @@ test('Panel Optimiser: job number and name lead everywhere, and the plan can be 
   const [w] = await Promise.all([app.nextPopup(), app.page.click('#main >> text=Print Plan')]);
   await w.waitForLoadState();
   await expect(w.locator('h1')).toHaveText('1023421 - SAMPLE CUSTOMER E');
-  await expect(w.locator('.pg')).toContainText('Job number');
+  await expect(w.locator('.pg')).toContainText('Job Number');
   await w.close();
   // kept with the contract's documents
   await app.page.click('#cutToC');
@@ -245,8 +252,8 @@ test('Cutting Optimiser: cuts with angles plan into bars as you type, print as a
   await expect(w.locator('.pg')).toContainText('Cut List');
   // the line under the job: Title Case, with the saw blade and end trim
   await expect(w.locator('.pg')).toContainText('Cutting List · Saw Blade 4mm · End Trim 10mm');
-  await expect(w.locator('table').first()).toContainText('Colour inside (B)');
-  await expect(w.locator('table').first()).toContainText('Colour outside (A)');
+  await expect(w.locator('table').first()).toContainText('Inside (B)');
+  await expect(w.locator('table').first()).toContainText('Outside (A)');
   expect(await colsLineUp(w)).toBe(true);
   await w.close();
   // kept with the contract
