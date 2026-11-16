@@ -120,6 +120,13 @@ test('Panel Optimiser: change a piece, the plan updates; save, reopen and print 
   ]);
   expect(await line.evaluate((e) => e.getBoundingClientRect().height < 25)).toBe(true);
   await expect(w.locator('.ih')).toContainText('Saw Blade 5mm');
+  // each page of boards starts on a fresh page with a clear gap at the top (about 12mm), not hard against the edge
+  expect(
+    await w
+      .locator('.cbpg')
+      .first()
+      .evaluate((e) => parseFloat(getComputedStyle(e).paddingTop))
+  ).toBeGreaterThan(40);
   expect(await colsLineUp(w)).toBe(true);
   await w.close();
   expect(app.errors).toEqual([]);
