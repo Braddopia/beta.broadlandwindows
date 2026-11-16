@@ -68,8 +68,8 @@ const COLS = {
   ],
   parts: [
     ['label', 'Name', 'text'],
-    ['W', 'Width', 'number'],
-    ['L', 'Height', 'number'],
+    ['L', 'Width', 'number'],
+    ['W', 'Height', 'number'],
     ['qty', 'How Many', 'number'],
     ['turn', 'Can Turn', 'select'],
   ],
@@ -80,6 +80,8 @@ const hue = (s) => HUES[[...String(s)].reduce((a, c) => (a * 31 + c.charCodeAt(0
 const mm = (n) => (Math.round(n * 10) / 10).toLocaleString('en-GB');
 const m2 = (n) => (n / 1e6).toFixed(2) + ' m²';
 
+/* a placed piece's size as it was typed in, width x height (on the drawing its height runs across, unless turned) */
+const pieceSize = (p) => (p.rot ? mm(p.l) + ' × ' + mm(p.w) : mm(p.w) + ' × ' + mm(p.l));
 /** one board drawn to scale. On screen: a dark cutting mat with a fine grid and glossy pieces;
     printed (print = true): light, so it uses little ink */
 export function boardSvg(b, i, print) {
@@ -107,8 +109,8 @@ export function boardSvg(b, i, print) {
       return html`<g class="pc"><rect x="${p.x}" y="${p.y}" width="${p.l}" height="${p.w}" rx="${print ? 0 : r}" fill="url(#${id}h${hue(p.label)})" style="stroke:hsl(${hue(p.label)} ${print ? '45% 40%' : '90% 85%'})"/>${
         small
           ? ''
-          : html`<text x="${p.x + p.l / 2}" y="${p.y + p.w / 2 - fs * 0.15}" style="font-size:${fs}px">${p.label}</text><text class="sz" x="${p.x + p.l / 2}" y="${p.y + p.w / 2 + fs * 1}" style="font-size:${fs * 0.78}px">${mm(p.w)} × ${mm(p.l)}${p.rot ? ' ↻' : ''}</text>`
-      }<title>${p.label}: ${mm(p.w)} × ${mm(p.l)}mm${p.rot ? ' (turned)' : ''}</title></g>`;
+          : html`<text x="${p.x + p.l / 2}" y="${p.y + p.w / 2 - fs * 0.15}" style="font-size:${fs}px">${p.label}</text><text class="sz" x="${p.x + p.l / 2}" y="${p.y + p.w / 2 + fs * 1}" style="font-size:${fs * 0.78}px">${pieceSize(p)}${p.rot ? ' ↻' : ''}</text>`
+      }<title>${p.label}: ${pieceSize(p)}mm${p.rot ? ' (turned)' : ''}</title></g>`;
     })}
   </svg>`;
 }
@@ -152,11 +154,15 @@ export const boardSpec = (s) =>
     s && s.cIn ? 'Inside (B) ' + s.cIn : '',
     s && s.cOut ? 'Outside (A) ' + s.cOut : '',
   ].filter(Boolean);
+/* the plan. A piece's Width box is its L and its Height box its W (as it always was), while a board's L is its
+   height. The optimiser keeps a piece's L along the board's L, so the piece is handed over height-first: a piece
+   that may not turn (grain) then keeps its height along the board's height. */
+const planOf = (D) => optimise({ ...D, parts: (D.parts || []).map((p) => ({ ...p, L: p.W, W: p.L })) });
 const sheetOf = (D, name) => D.sheets.find((x) => x.label == name);
 /** the plan side: totals, warnings and every board. Redrawn on its own as you type */
 export function cutResults() {
   const D = cutData(),
-    R = optimise(D),
+    R = planOf(D),
     S = R.stats,
     pct = Math.round(S.efficiency * 100);
   return (
@@ -183,7 +189,7 @@ export const cutContract = (D = cutData()) => {
 const cutTitle = (D) => jobTitle(D.jobNo, D.jobName) || 'Panel Optimiser';
 export function vCutting() {
   const D = cutData(),
-    S = optimise(D).stats,
+    S = planOf(D).stats,
     k = cutContract(D);
   return String(html`<div class="head"><div><h1 id="cutTitle">${cutTitle(D)}</h1><span class="muted">${D.jobNo || D.jobName ? 'Panel Optimiser · p' : 'P'}lan how to cut pieces from whole boards with the least waste</span></div>
     <div class="tools"><button class="mini" ${raw(onClick('cutJobs'))}>Saved Lists (${D.jobs.length})</button><button class="mini" ${raw(onClick('cutNew'))}>New List</button><button class="mini" ${raw(onClick('cutSave'))}>Save</button><button class="mini" ${raw(onClick('cutSettings'))}>Cutting Settings</button><button class="mini pri" id="cutToC" ${raw(onClick('cutToContract'))} ${k && canSee('contracts') ? '' : raw('hidden')}>Save To Contract</button><button class="btn" ${raw(onClick('cutPrint'))}>Print Plan</button></div></div>
@@ -417,7 +423,7 @@ export function cutForget(i) {
    asHtml: hand the page back (to keep on the contract) instead of opening it */
 function planDoc(asHtml) {
   const D = cutData(),
-    R = optimise(D),
+    R = planOf(D),
     S = R.stats;
   if (!R.boards.length) {
     toast('Add a board and some pieces first');
@@ -470,7 +476,7 @@ function planDoc(asHtml) {
           t: 'Cut List',
           h: ['Name', 'Width (mm)', 'Height (mm)', 'How many', 'Can turn'],
           align: ['l', 'c', 'c', 'c', 'c'],
-          r: D.parts.map((p) => [p.label, mm(p.W), mm(p.L), String(p.qty), p.turn === false ? 'No (grain)' : 'Yes']),
+          r: D.parts.map((p) => [p.label, mm(p.L), mm(p.W), String(p.qty), p.turn === false ? 'No (grain)' : 'Yes']),
         },
         {
           t: 'Boards',

@@ -42,8 +42,14 @@ test('Panel Optimiser: change a piece, the plan updates; save, reopen and print 
   await expect(app.page.locator('#main h1')).toHaveText('Panel Optimiser');
   await expect(app.page.locator('#main .cut-b')).toHaveCount(1);
   // sizes are always width × height, and boards have a colour inside and outside
-  await expect(app.page.locator('#main label[for=cut_parts_0_W]')).toContainText('Width');
-  await expect(app.page.locator('#main label[for=cut_parts_0_L]')).toContainText('Height');
+  // a piece's boxes are as they always were (Width first, saved as L); only the boards were relabelled
+  await expect(app.page.locator('#main label[for=cut_parts_0_L]')).toContainText('Width');
+  await expect(app.page.locator('#main label[for=cut_parts_0_W]')).toContainText('Height');
+  await expect(app.page.locator('#main label[for=cut_sheets_0_W]')).toContainText('Width');
+  await expect(app.page.locator('#main label[for=cut_sheets_0_L]')).toContainText('Height');
+  // the drawing shows a piece's size as typed: the sample Side is 720 wide x 560 high
+  await expect(app.page.locator('#main .cut-b text.sz', { hasText: /^720 × 560/ })).toHaveCount(2);
+  await expect(app.page.locator('#main .cut-b text.sz', { hasText: /^560 × 720/ })).toHaveCount(0);
   await expect(app.page.locator('#main .cut-pre').first()).toContainText('1200 × 2400mm');
   await expect(app.page.locator('#main label[for=cut_sheets_0_cIn]')).toHaveText('Colour Inside (B)');
   await expect(app.page.locator('#main label[for=cut_sheets_0_cOut]')).toHaveText('Colour Outside (A)');
@@ -92,6 +98,13 @@ test('Panel Optimiser: change a piece, the plan updates; save, reopen and print 
   await expect(w.locator('.cut-b')).toHaveCount(3);
   await expect(w.locator('table.dt').first()).toContainText('Width (mm)');
   await expect(w.locator('table.dt').first()).not.toContainText('Length');
+  await expect(w.locator('table.dt').first().locator('tbody tr').first().locator('td')).toHaveText([
+    'Side',
+    '720',
+    '560',
+    '2',
+    'Yes',
+  ]);
   await expect(w.locator('table.dt').nth(1)).toContainText('Thickness (mm)');
   await expect(w.locator('table.dt').nth(1)).toContainText('Outside (A)');
   await expect(w.locator('table.dt').nth(1)).toContainText('Anthracite');
