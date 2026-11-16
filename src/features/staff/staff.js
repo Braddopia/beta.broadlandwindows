@@ -15,6 +15,7 @@ import { form } from '../../ui/forms/form.js';
 import { hit } from '../../ui/shell/router.js';
 import { uiState } from '../../ui/ui-state.js';
 import * as repos from '../../data/repository.js';
+import { holWaiting } from '../../ui/components/tags.js';
 
 /* ---------------- staff ---------------- */
 export function vStaff() {
@@ -23,7 +24,7 @@ export function vStaff() {
     U = uiState.staff,
     L = state.staff.filter((s) => hit(s) && (U.c == 'all' || s.cat == U.c)),
     off = state.hols.filter((h) => h.status == 'Approved' && h.from <= td && h.to >= td).length,
-    pend = state.hols.filter((h) => h.status == 'Pending');
+    pend = state.hols.filter(holWaiting);
   return `<div class="head"><h1>Staff</h1><div class="tools">${Ad ? '<button class="btn" data-act="editStaff">Add staff member</button>' : ''}</div></div>
   <div class="kpis">${[
     ['Headcount', state.staff.length],

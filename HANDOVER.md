@@ -42,6 +42,21 @@ Read this first, then CLAUDE.md and docs/ARCHITECTURE.md.
 - Inventory: Stock and Location after Item, Status in its own centred column; Stock Take page redone.
 - Overview: the greeting no longer replays its animation on every save.
 
+## Added in v19.5 and v19.6
+
+- Panel Optimiser: 5mm blade; boards read width × height (1,200 × 2,400) while pieces keep their Width / Height
+  boxes as before; plans tried several ways (fewest boards); printed plan three boards a page with an underlined
+  title bar per board.
+- Holidays: cancelling an approved holiday is a request (it stays booked until an administrator approves); System
+  messages the person on approve, keep, or when an administrator cancels outright. Withdrawing a pending request is
+  instant.
+- Messages: time sent sits under each bubble. Calendar: narrower week column; layer buttons show a tick (on) or an
+  empty circle (off). Fitting Schedule screen: a portrait sheet styled like the Calendar (printout unchanged).
+- Files: list headings line up with the rows; Category centred.
+- Printouts: Fitting Schedule and Job Stock Tags Print / Close buttons now work (`wirePrintBar`); every printout
+  that shows the bar must call it (tests/e2e/print-bar.spec.js).
+- The owner's 20 UX and animation principles: `docs/UX-PRINCIPLES.md`, applied in `src/css/08-motion.css`.
+
 ## Open questions for the owner
 
 - Mitre re-cut waste in the Cutting Optimiser is not counted yet. Proposal: a "profile depth" (mm) on each

@@ -130,3 +130,51 @@ test('holidays start and end Monday to Friday; Next ignores a pending request; a
   await expect(app.page.locator('#main #m_t')).toHaveCount(0);
   expect(app.errors).toEqual([]);
 });
+
+test('cancelling an approved holiday is a request: it stays booked until an administrator approves, then System says so', async ({
+  app,
+}) => {
+  await app.role('staff');
+  const sid = await app.run(() => me().id);
+  const id = await app.run((s) => {
+    const h = { id: 'HTEST1', sid: s, from: '2026-12-07', to: '2026-12-08', days: 2, status: 'Approved', paid: true };
+    state.hols.push(h);
+    return h.id;
+  }, sid);
+  await app.call('myHolidays', sid, 'next');
+  await app.page.click('#mbox .row:has-text("7 Dec") >> text=Ask To Cancel');
+  await expect(app.page.locator('.toast')).toContainText('Cancellation request sent');
+  // still booked, marked as waiting, and the button has gone
+  expect(await app.run((i) => state.hols.find((h) => h.id == i).cancelReq, id)).toBe(true);
+  await expect(app.page.locator('#mbox .row:has-text("7 Dec") .tag')).toContainText(['Cancel Requested']);
+  await expect(app.page.locator('#mbox .row:has-text("7 Dec") >> text=Ask To Cancel')).toHaveCount(0);
+  await app.closeAll();
+  // a request still waiting for approval is withdrawn straight away
+  await app.run(
+    (s) =>
+      state.hols.push({
+        id: 'HTEST2',
+        sid: s,
+        from: '2026-12-14',
+        to: '2026-12-14',
+        days: 1,
+        status: 'Pending',
+        paid: true,
+      }),
+    sid
+  );
+  await app.call('holDel', 'HTEST2');
+  expect(await app.run(() => state.hols.some((h) => h.id == 'HTEST2'))).toBe(false);
+  // the administrator sees it waiting and approves the cancellation
+  await app.role('beta');
+  await app.run(() => {
+    setUI('hol.v', 'chart');
+    go('holidays');
+  });
+  await expect(app.page.locator('#main .row:has-text("wants to cancel") >> text=Approve Cancel')).toHaveCount(1);
+  await app.page.click('#main .row:has-text("wants to cancel") >> text=Approve Cancel');
+  expect(await app.run((i) => state.hols.some((h) => h.id == i), id)).toBe(false);
+  const msg = await app.run((s) => state.notes.filter((n) => n.by == 'System' && n.to == staffName(s)).pop().t, sid);
+  expect(msg).toContain('has been cancelled, approved by');
+  expect(app.errors).toEqual([]);
+});

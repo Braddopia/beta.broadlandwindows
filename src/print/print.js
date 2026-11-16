@@ -301,13 +301,16 @@ export function printDoc(t, sub, rows, ph, o) {
   w.document.close();
   fitPage(w);
 }
-/* shrink a slightly-too-long report so it prints on one A4 page (never below 72%) */
-export function fitPage(w) {
+/** make a printout's Print and Close buttons work (every window that shows printBar() calls this), and Esc close it */
+export function wirePrintBar(w) {
   try {
     w.document.querySelectorAll('[data-pa]').forEach((b) => b.addEventListener('click', () => w[b.dataset.pa]()));
-    /* Esc closes the printed-document window too */
     w.document.addEventListener('keydown', (e) => e.key == 'Escape' && w.close());
   } catch (e) {}
+}
+/* shrink a slightly-too-long report so it prints on one A4 page (never below 72%) */
+export function fitPage(w) {
+  wirePrintBar(w);
   setTimeout(() => {
     try {
       const d = w.document,

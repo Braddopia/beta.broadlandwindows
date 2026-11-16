@@ -172,9 +172,9 @@ test('calendar: fittings show on every view for every account; the chip hides th
     }
     await app.run(`setUI('cal.m', 'month')`);
     await app.run(`setUI('cal.o', 0)`);
-    await app.page.click('#main .chip:has-text("Fittings")');
+    await app.page.click('#main .lay:has-text("Fittings")');
     await expect(app.page.locator('#main .ce.fit')).toHaveCount(0);
-    await app.page.click('#main .chip:has-text("Fittings")');
+    await app.page.click('#main .lay:has-text("Fittings")');
   }
   await app.role('staff');
   await app.go('fitting');

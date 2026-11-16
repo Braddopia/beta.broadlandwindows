@@ -301,8 +301,8 @@ body[data-theme=dark] .phb{background:linear-gradient(160deg,rgba(255,255,255,.0
 /* files: category and size sit right next to the buttons,every row lined up */
 /* Files lists: the name takes the room; category, size and the buttons sit together on the right, and the
    button column is wide enough for every button (four for administrators) so nothing overlaps the size */
-.frow{grid-template-columns:minmax(0,1fr) 8.5rem 4.6rem var(--fa,13rem);gap:.4rem .7rem}
-body.isadm .frow{--fa:17rem}
+.frow{grid-template-columns:minmax(0,1fr) 8.5rem 4.8rem var(--fa,14rem);gap:.4rem .9rem}
+body.isadm .frow{--fa:18.6rem}
 .frow>.sz{text-align:left;white-space:nowrap}
 .frow>.acts{gap:.35rem;min-width:0}
 .frow>.tag{justify-self:start}
@@ -607,7 +607,7 @@ body[data-view=messages]:not(:has(#modal.open)) #rpb{display:none}
 /* holiday widget: ring and numbers,then three equal buttons that open pop-ups */
 .hbtns{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin-top:1rem}
 .hbtns .btn{justify-content:center;gap:.35rem}.hbtns .btn small{opacity:.7;font-weight:500}
-.hol-seg{display:inline-flex;margin:.2rem 0 .9rem}.hol-svc{margin:-.3rem 0 .6rem;font-size:.82rem}
+.hol-seg{display:inline-flex;margin:.2rem 0 .9rem}.hol-svc{margin:-.2rem 0 1rem;padding:.6rem 1rem;font-size:.84rem;text-align:center;border-radius:12px;background:rgba(3,78,162,.06);border:1px solid rgba(3,78,162,.1)}body[data-theme=dark] .hol-svc{background:rgba(142,197,255,.07);border-color:rgba(142,197,255,.14)}
 
 /* contact lines: what the line is for,its number and its email,side by side */
 .cphr{grid-template-columns:minmax(7.5rem,9.5rem) minmax(0,1fr) minmax(0,1.3fr) 2.4rem}
@@ -990,8 +990,8 @@ body:not([data-theme=dark]) .head>div>.muted{color:#3d4a60}
 .msn-sys{justify-content:center;font-size:.85rem}
 
 /* ==== v19.4 calendar: week numbers down the side, more kinds of event, one person's diary ==== */
-.cm.wn{grid-template-columns:2.6rem repeat(7,minmax(0,1fr))}
-.cm .wkn,.cm .wkh{display:flex;align-items:flex-start;justify-content:center;padding:.45rem 0;font:700 .72rem var(--body);color:var(--muted);background:var(--card2);border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
+.cm.wn{grid-template-columns:1.7rem repeat(7,minmax(0,1fr))}
+.cm .wkn,.cm .wkh{display:flex;align-items:flex-start;justify-content:center;padding:.5rem 0;font:700 .62rem var(--body);color:var(--muted);background:var(--card2);border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
 .cm .wkh{align-items:center}
 .ce.surv{background:#dff3f7;border-color:#0e7490;color:#0b4f63}
 .ce.appt{background:#fde9df;border-color:#b33a0a;color:#7a2a08}
@@ -1099,3 +1099,31 @@ body[data-theme=dark] .smap .rd{stroke:#5a6578}body[data-theme=dark] .smap .rd.m
 
 /* Panel Optimiser: boards stand upright, so a board is drawn no wider than its height on screen allows */
 .cut-bp .cut-frame{max-width:min(1000px,calc(72vh * var(--ar,1.6)))}
+
+/* Calendar layers: each button says plainly whether it is showing. On: tinted in its colour with a tick.
+   Off: plain, dashed edge, an empty circle and lighter text. A press squashes slightly (feedback). */
+.lays{align-items:center;gap:.4rem}.lays-l{font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-right:.15rem}
+.lay{display:inline-flex;align-items:center;gap:.4rem;min-height:2.1rem;padding:.3rem .8rem .3rem .45rem;border-radius:6px;border:1.5px dashed color-mix(in srgb,var(--lc) 55%,transparent);background:transparent;color:var(--muted);font:600 .8rem var(--body);cursor:pointer;transition:background .18s ease,border-color .18s ease,color .18s ease,transform .12s cubic-bezier(.3,1.6,.5,1)}
+.lay:hover{border-color:var(--lc);color:var(--ink)}.lay:active{transform:scale(.94)}
+.lay .lck{display:grid;place-items:center;width:1.15rem;height:1.15rem;border-radius:50%;border:2px solid var(--lc);background:transparent;transition:background .18s ease,transform .25s cubic-bezier(.3,1.6,.5,1)}
+.lay.on{border-style:solid;border-color:var(--lc);background:color-mix(in srgb,var(--lc) 13%,var(--card,#fff));color:var(--ink)}
+.lay.on .lck{background:var(--lc);transform:scale(1.05)}
+.lay.on .lck::after{content:"";width:.32rem;height:.58rem;margin-top:-.12rem;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg)}
+
+/* Fitting Schedule on screen: a portrait sheet (narrower and taller, centred), drawn like the Calendar:
+   soft header row, the date in a circle (filled for today) with the day under it, centred in its row */
+.fs-key,.fs-wrap,.fs-miss{width:100%;max-width:880px;margin-left:auto;margin-right:auto}
+body.tv .fs-key,body.tv .fs-wrap,body.tv .fs-miss{max-width:none}
+.fs-wrap .fs-g{grid-template-rows:auto repeat(6,minmax(6.4rem,1fr));border-radius:12px}
+.fs-wrap .fs-hd{background:var(--card2);color:var(--muted);font:600 .8rem var(--body);text-transform:none;letter-spacing:0;padding:.55rem .3rem}
+.fs-wrap .fs-day{align-items:center;justify-content:center;text-align:center;gap:.25rem;padding:.4rem .2rem;color:var(--ink)}
+.fs-wrap .fs-day b{display:grid;place-items:center;width:2.1rem;height:2.1rem;border-radius:50%;font:700 1.05rem var(--body)}
+.fs-wrap .fs-day span{font:600 .7rem var(--body);letter-spacing:.06em;color:var(--muted)}
+.fs-wrap .fs-day.td{background:var(--card2);box-shadow:none}.fs-wrap .fs-day.td b{background:var(--btn);color:#fff}
+.fs-wrap .fs-day.we,.fs-wrap .fs-day.we~.fs-b:not(.conf):not(.pen){background:var(--card2)}
+
+/* Files lists: the header row lines up with the rows below even when the list scrolls (both keep the same
+   scrollbar space), the Category heading is centred over its tags, and Size is right-aligned in both */
+.flist,.fhead{scrollbar-gutter:stable}.fhead{overflow-y:hidden}
+.frow>.tag,.fhead>span:nth-child(2){justify-self:center;text-align:center}
+.frow>.sz,.fhead>span:nth-child(3){text-align:right}

@@ -33,7 +33,11 @@ export const svcTag = (s) =>
   tag('tag ' + (s == 'Complete' ? 'g' : s == 'Booked' ? '' : s == 'Awaiting parts' ? 'n' : 'y'), s || 'Open');
 
 export const holTag = (h) =>
-  tag('tag ' + (h.status == 'Approved' ? 'g' : h.status == 'Rejected' ? 'r' : 'y'), h.status);
+  h.cancelReq
+    ? tag('tag y', 'Cancel Requested')
+    : tag('tag ' + (h.status == 'Approved' ? 'g' : h.status == 'Rejected' ? 'r' : 'y'), h.status);
+/** a holiday waiting on an administrator: a new request, or a request to cancel an approved holiday */
+export const holWaiting = (h) => h.status == 'Pending' || !!h.cancelReq;
 
 /** order number chip on a stock request (dashed while the number is still pending) */
 export const ordTag = (r) => {

@@ -298,12 +298,12 @@ export function vCalendar() {
     .join(
       ''
     )}</div><button class="btn ghost" aria-label="Previous" ${onClick('setUI', 'cal.o', o - 1)}>&lsaquo;</button><button class="btn ghost" ${onClick('setUI', 'cal.o', 0)}>Today</button><button class="btn ghost" aria-label="Next" ${onClick('setUI', 'cal.o', o + 1)}>&rsaquo;</button></div></div>
-  <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:.6rem;margin-bottom:.8rem;align-items:center"><h2 style="margin:0">${esc(title)}</h2><div class="cal-f"><div class="chips" style="margin:0">${CAL_LAYERS.filter(
+  <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:.6rem;margin-bottom:.8rem;align-items:center"><h2 style="margin:0">${esc(title)}</h2><div class="cal-f"><div class="chips lays" style="margin:0"><span class="lays-l">Show</span>${CAL_LAYERS.filter(
     (x) => x[3]()
   )
     .map(
       ([k, t, c]) =>
-        `<button class="chip ${layerOn(k) ? 'on' : ''}" ${onClick('calLayer', k)}><span class="ldot" style="background:${c}"></span>${t}</button>`
+        `<button class="lay ${layerOn(k) ? 'on' : ''}" style="--lc:${c}" aria-pressed="${layerOn(k) ? 'true' : 'false'}" title="${layerOn(k) ? 'Showing: click to hide' : 'Hidden: click to show'}" ${onClick('calLayer', k)}><span class="lck" aria-hidden="true"></span>${t}</button>`
     )
     .join(
       ''

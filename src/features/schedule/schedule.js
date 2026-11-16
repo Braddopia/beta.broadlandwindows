@@ -23,7 +23,7 @@ import { askYes, closeModal, openModal } from '../../ui/modal.js';
 import { render } from '../../ui/shell/router.js';
 import { toast } from '../../ui/toast.js';
 import { uiState } from '../../ui/ui-state.js';
-import { PRINT_BAR_CSS, printBar } from '../../print/print.js';
+import { PRINT_BAR_CSS, printBar, wirePrintBar } from '../../print/print.js';
 
 export const OTHER = 'Other Installers';
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -87,11 +87,11 @@ export function schedGrid(D, C, print) {
   const { at, anchor } = groups(D, C),
     edit = !print && can('schedule'),
     td = today();
-  const head = `<div class="fs-c fs-hd fs-wk">${print ? '' : ''}</div>${C.map((c) => `<div class="fs-c fs-hd ${c == OTHER ? 'oth' : ''}">${esc(c)}</div>`).join('')}`;
+  const head = `<div class="fs-c fs-hd fs-wk">${print ? '' : 'Day'}</div>${C.map((c) => `<div class="fs-c fs-hd ${c == OTHER ? 'oth' : ''}">${esc(c)}</div>`).join('')}`;
   const rows = D.map((d, r) => {
     const dt = new Date(d + 'T00:00');
     return (
-      `<div class="fs-c fs-day ${d == td ? 'td' : ''}"><b>${dt.getDate()}</b><span>${DAYS[r]}</span></div>` +
+      `<div class="fs-c fs-day ${d == td ? 'td' : ''} ${dt.getDay() == 6 ? 'we' : ''}"><b>${dt.getDate()}</b><span>${DAYS[r]}</span></div>` +
       C.map((c, ci) => {
         const x = at(r, ci),
           jr = x && same(at(r, ci + 1), x),
@@ -349,6 +349,7 @@ ${PRINT_BAR_CSS}</style></head><body>${printBar('Fitting Schedule Week ' + isoWe
 <div class="sh"><div>WEEK<span>${isoWeek(D[0])}</span></div><div>MONTH<span>${esc(months)} ${D[0].slice(0, 4)}</span></div></div>
 ${schedGrid(D, C, true)}<div class="fs-notes"><b>Notes:</b> ${esc(S.notes[D[0]] || '')}</div></body></html>`);
   w.document.close();
+  wirePrintBar(w);
 }
 /* the grid's look, used on screen (app styles) and in the printout */
 export const SCHED_CSS = `.fs-g{display:grid;border-top:1px solid #9aa7b8;border-left:1px solid #9aa7b8}

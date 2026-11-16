@@ -26,7 +26,7 @@ import {
 import { forPerson, holOn, me, staffName } from '../../domain/people.js';
 import { can } from '../../domain/permissions.js';
 import { need } from '../auth/session.js';
-import { holTag } from '../../ui/components/tags.js';
+import { holTag, holWaiting } from '../../ui/components/tags.js';
 import { html, raw } from '../../core/html.js';
 import { MARK } from '../../ui/forms/form.js';
 import { closeModal, openModal } from '../../ui/modal.js';
@@ -215,7 +215,7 @@ export function vHolidays() {
   if (uiState.hol.v == 'chart') {
     const H = uiState.hol,
       Ad = can('manage'),
-      pend = state.hols.filter((h) => h.status == 'Pending');
+      pend = state.hols.filter(holWaiting);
     return `<div class="head"><h1>Holiday Planner</h1><div class="tools"><div class="seg">${[
       ['chart', 'Chart'],
       ['tl', 'Month'],
@@ -226,7 +226,7 @@ export function vHolidays() {
         ''
       )}</div><button class="btn ghost" aria-label="Previous year" ${onClick('setUI', 'hol.y', H.y - 1)}>&lsaquo;</button><b style="min-width:3rem;text-align:center">${H.y}</b><button class="btn ghost" aria-label="Next year" ${onClick('setUI', 'hol.y', H.y + 1)}>&rsaquo;</button>${Ad ? '<button class="btn ghost" data-act="shutEdit">Christmas shutdown</button>' : ''}<button class="btn" data-act="holBook">Book holiday</button></div></div>
     ${holSheet()}
-    ${pend.length ? `<div class="panel" style="margin-top:1rem"><h2>Waiting For Approval</h2>${pend.map((h) => `<div class="row"><span><b>${esc(staffName(h.sid))}</b> <span class="muted">${fd(h.from)} to ${fd(h.to)}, ${h.days} day${h.days == 1 ? '' : 's'}</span></span><span class="acts">${Ad ? `<button class="mini pri" ${onClick('holSet', h.id, 'Approved')}>Approve</button><button class="mini del" ${onClick('holSet', h.id, 'Rejected')}>Reject</button>` : holTag(h)}</span></div>`).join('')}</div>` : ''}`;
+    ${pend.length ? `<div class="panel" style="margin-top:1rem"><h2>Waiting For Approval</h2>${pend.map((h) => `<div class="row"><span><b>${esc(staffName(h.sid))}</b> <span class="muted">${fd(h.from)} to ${fd(h.to)}, ${h.days} day${h.days == 1 ? '' : 's'}${h.cancelReq ? ' · wants to cancel' : ''}</span></span><span class="acts">${Ad ? holDecideBtns(h) : holTag(h)}</span></div>`).join('')}</div>` : ''}`;
   }
   const n = new Date(),
     H = uiState.hol,
@@ -236,7 +236,7 @@ export function vHolidays() {
     dim = new Date(y, mo + 1, 0).getDate(),
     td = today(),
     Ad = can('manage'),
-    pend = state.hols.filter((h) => h.status == 'Pending'),
+    pend = state.hols.filter(holWaiting),
     cl = clashes();
   const off = state.staff.filter((s) => holOn(s.id, td)).length,
     booked = sum(
@@ -325,10 +325,10 @@ export function vHolidays() {
     .join('')}</div>
   <div class="panel"><h2>Requests And Bookings</h2>${
     [...state.hols]
-      .sort((a, c) => (c.status == 'Pending') - (a.status == 'Pending') || c.from.localeCompare(a.from))
+      .sort((a, c) => holWaiting(c) - holWaiting(a) || c.from.localeCompare(a.from))
       .map(
         (h) =>
-          `<div class="row"><span><b>${esc(staffName(h.sid))}</b> <span class="muted">${fd(h.from)} to ${fd(h.to)}, ${h.days} day${h.days == 1 ? '' : 's'}${h.note ? ' | ' + esc(h.note) : ''}</span></span><span class="acts">${holTag(h)}${Ad && h.status == 'Pending' ? `<button class="mini pri" ${onClick('holSet', h.id, 'Approved')}>Approve</button><button class="mini del" ${onClick('holSet', h.id, 'Rejected')}>Reject</button>` : ''}</span></div>`
+          `<div class="row"><span><b>${esc(staffName(h.sid))}</b> <span class="muted">${fd(h.from)} to ${fd(h.to)}, ${h.days} day${h.days == 1 ? '' : 's'}${h.note ? ' | ' + esc(h.note) : ''}</span></span><span class="acts">${holTag(h)}${Ad && holWaiting(h) ? holDecideBtns(h) : ''}</span></div>`
       )
       .join('') || '<p class="empty">No holiday booked.</p>'
   }${Ad ? '' : '<p class="muted" style="font-size:.82rem;margin-top:.6rem">Requests are approved by an administrator.</p>'}</div></div>`;
@@ -337,15 +337,45 @@ export function holSetClose(id, st) {
   holSet(id, st);
   closeModal();
 }
+/* "17 Aug to 21 Aug (5 days)", for System messages */
+const holWhen = (h) =>
+  fd(h.from) + (h.to != h.from ? ' to ' + fd(h.to) : '') + ' (' + h.days + ' day' + (h.days == 1 ? '' : 's') + ')';
+/* an administrator's two buttons for something waiting: a new request, or a request to cancel */
+const holDecideBtns = (h) =>
+  `<button class="mini pri" ${onClick('holSet', h.id, 'Approved')}>${h.cancelReq ? 'Approve Cancel' : 'Approve'}</button><button class="mini del" ${onClick('holSet', h.id, 'Rejected')}>${h.cancelReq ? 'Keep Holiday' : 'Reject'}</button>`;
 export function holSet(id, st) {
   if (!need('manage', 'Approving holiday')) return;
   const h = state.hols.find((x) => x.id == id);
-  if (!h || h.status == st) return;
+  if (!h) return;
+  /* a request to cancel an approved holiday: Approved takes the holiday off, Rejected keeps it booked */
+  if (h.cancelReq) {
+    if (st == 'Approved') {
+      repos.holidays.remove((x) => x.id == id);
+      audit('Holiday cancellation approved', staffName(h.sid), h.from + ' to ' + h.to);
+      msgSystem(staffName(h.sid), 'Your holiday for ' + holWhen(h) + ' has been cancelled, approved by ' + USER + '.');
+    } else {
+      delete h.cancelReq;
+      repos.holidays.changed(h);
+      audit('Holiday cancellation declined', staffName(h.sid), h.from + ' to ' + h.to);
+      msgSystem(
+        staffName(h.sid),
+        'Your request to cancel your holiday for ' +
+          holWhen(h) +
+          ' was not approved by ' +
+          USER +
+          ', so it stays booked. Speak to them if you need to change it.'
+      );
+    }
+    store();
+    render();
+    return;
+  }
+  if (h.status == st) return;
   h.status = st;
+  repos.holidays.changed(h);
   audit('Holiday ' + st.toLowerCase(), staffName(h.sid), h.from + ' to ' + h.to);
   /* the person hears about it in Messages, from System */
-  const when =
-    fd(h.from) + (h.to != h.from ? ' to ' + fd(h.to) : '') + ' (' + h.days + ' day' + (h.days == 1 ? '' : 's') + ')';
+  const when = holWhen(h);
   if (st == 'Rejected')
     msgSystem(
       staffName(h.sid),
@@ -472,6 +502,9 @@ export function holSave() {
     action: { label: 'Undo', run: () => holTakeBack(id, 'Holiday undone') },
   });
 }
+/* what the cancel button says: withdraw a request, ask to cancel, or cancel outright */
+const cancelLabel = (h) =>
+  h.status == 'Pending' ? 'Cancel Request' : can('manage') ? 'Cancel Holiday' : 'Ask To Cancel';
 /** may this account cancel the holiday? Administrators always; anyone their own one that has not started yet */
 export const canCancelHol = (h) =>
   !!h && (can('manage') || (!!me() && me().id == h.sid && (h.status == 'Pending' || h.from > today())));
@@ -511,7 +544,7 @@ export function holEdit(id) {
   if (!h) return;
   const Ad = can('manage');
   openModal(
-    `<h2>${esc(staffName(h.sid))}</h2><p>${fd(h.from)} to ${fd(h.to)}, ${h.days} working day${h.days == 1 ? '' : 's'}<br>${holTag(h)} ${paidTag(h)}</p>${h.note ? `<p class="muted">${esc(h.note)}</p>` : ''}<div class="mact"><button class="btn ghost" data-act="closeModal">Close</button>${Ad && h.status != 'Approved' ? `<button class="btn green" ${onClick('holSetClose', id, 'Approved')}>Approve</button>` : ''}${Ad && h.status == 'Pending' ? `<button class="btn red" ${onClick('holSetClose', id, 'Rejected')}>Reject</button>` : ''}${canCancelHol(h) ? `<button class="btn ghost red-t" ${onClick('holDel', id)}>${h.status == 'Pending' ? 'Cancel request' : 'Cancel holiday'}</button>` : ''}</div>`
+    `<h2>${esc(staffName(h.sid))}</h2><p>${fd(h.from)} to ${fd(h.to)}, ${h.days} working day${h.days == 1 ? '' : 's'}<br>${holTag(h)} ${paidTag(h)}</p>${h.note ? `<p class="muted">${esc(h.note)}</p>` : ''}<div class="mact"><button class="btn ghost" data-act="closeModal">Close</button>${Ad && h.cancelReq ? `<button class="btn green" ${onClick('holSetClose', id, 'Approved')}>Approve Cancel</button><button class="btn red" ${onClick('holSetClose', id, 'Rejected')}>Keep Holiday</button>` : ''}${Ad && !h.cancelReq && h.status != 'Approved' ? `<button class="btn green" ${onClick('holSetClose', id, 'Approved')}>Approve</button>` : ''}${Ad && !h.cancelReq && h.status == 'Pending' ? `<button class="btn red" ${onClick('holSetClose', id, 'Rejected')}>Reject</button>` : ''}${canCancelHol(h) && !(h.cancelReq && !Ad) ? `<button class="btn ghost red-t" ${onClick('holDel', id)}>${cancelLabel(h)}</button>` : ''}</div>`
   );
 }
 export function holDel(id) {
@@ -522,7 +555,38 @@ export function holDel(id) {
     return;
   }
   closeModal();
-  holTakeBack(id, h.status == 'Pending' ? 'Holiday request withdrawn' : 'Holiday cancelled');
+  holCancel(h);
+}
+/* cancelling: a request not yet approved is withdrawn at once; an approved holiday needs an administrator, so
+   someone else asks for it to be cancelled (it stays booked until approved); an administrator cancels it outright
+   and the person hears from System */
+function holCancel(h) {
+  if (h.status == 'Pending') return holTakeBack(h.id, 'Holiday request withdrawn');
+  if (!can('manage')) {
+    if (h.cancelReq) return toast('Already asked: waiting for an administrator');
+    h.cancelReq = true;
+    repos.holidays.changed(h);
+    audit('Holiday cancellation requested', staffName(h.sid), h.from + ' to ' + h.to);
+    store();
+    render();
+    toast('Cancellation request sent for approval', {
+      action: {
+        label: 'Undo',
+        run: () => {
+          delete h.cancelReq;
+          repos.holidays.changed(h);
+          audit('Holiday cancellation request withdrawn', staffName(h.sid), h.from + ' to ' + h.to);
+          store();
+          render();
+        },
+      },
+    });
+    return;
+  }
+  const mine = me() && me().id == h.sid;
+  holTakeBack(h.id, 'Holiday cancelled');
+  if (!mine && !state.hols.some((x) => x.id == h.id))
+    msgSystem(staffName(h.sid), 'Your holiday for ' + holWhen(h) + ' has been cancelled by ' + USER + '.');
 }
 /* start-up step (run once by main.js) */
 export function listenForHolidayChart() {
@@ -616,7 +680,7 @@ function svcLine(m) {
 export function holDelList(id, sid, which) {
   const h = state.hols.find((x) => x.id == id);
   if (!h || !canCancelHol(h)) return holDel(id);
-  holTakeBack(id, h.status == 'Pending' ? 'Holiday request withdrawn' : 'Holiday cancelled');
+  holCancel(h);
   myHolidays(sid, which);
 }
 /** a person's holidays in a pop-up: what is coming up ('next'), what has been taken ('prev'), or everything */
@@ -636,7 +700,7 @@ export function myHolidays(sid, which = 'all') {
     none =
       which == 'next' ? 'Nothing booked yet.' : which == 'prev' ? 'No holidays taken yet.' : 'No holidays booked yet.',
     row = (h) =>
-      `<div class="row"><span>${fd(h.from)} to ${fd(h.to)} · ${h.days} day${h.days == 1 ? '' : 's'}${h.note ? `<br><span class="muted">${esc(h.note)}</span>` : ''}</span><span class="acts">${paidTag(h)}${holTag(h)}${h.to >= td && canCancelHol(h) ? `<button class="mini del" ${onClick('holDelList', h.id, sid, which)}>${h.status == 'Pending' ? 'Cancel request' : 'Cancel'}</button>` : ''}</span></div>`;
+      `<div class="row"><span>${fd(h.from)} to ${fd(h.to)} · ${h.days} day${h.days == 1 ? '' : 's'}${h.note ? `<br><span class="muted">${esc(h.note)}</span>` : ''}</span><span class="acts">${paidTag(h)}${holTag(h)}${h.to >= td && canCancelHol(h) && !(h.cancelReq && !can('manage')) ? `<button class="mini del" ${onClick('holDelList', h.id, sid, which)}>${cancelLabel(h)}</button>` : ''}</span></div>`;
   const tabs = ['next', 'prev', 'all']
     .map(
       (k) =>

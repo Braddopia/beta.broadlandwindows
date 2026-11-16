@@ -1,0 +1,48 @@
+/* ==========================================================================
+   08 · Motion and feel. The 20 UX & animation principles in docs/UX-PRINCIPLES.md, applied in one place.
+   Everything here is switched off for people who ask their device for less motion (02-base.css).
+   ========================================================================== */
+:root{
+  /* slow in and slow out: the one easing for anything that moves */
+  --e-out:cubic-bezier(.2,.7,.2,1);
+  /* follow-through: a spring that settles just past its mark and back */
+  --e-spring:cubic-bezier(.34,1.56,.64,1);
+}
+
+/* Squash and stretch, snappy timing and exaggerated feedback: a press squashes at once (80ms, well inside the
+   Doherty threshold) and the release springs back with a little overshoot */
+.btn,.mini,.chip,.seg button,.seg2 button,.lay,.ib,.rb1,.fbtn,.cut-x{transition:transform .32s var(--e-spring),background-color .15s var(--e-out),color .15s var(--e-out),border-color .15s var(--e-out),box-shadow .2s var(--e-out),opacity .15s var(--e-out)}
+.btn:active,.mini:active,.chip:active,.seg button:active,.seg2 button:active,.ib:active,.rb1:active,.fbtn:active,.cut-x:active{transform:scale(.95);transition-duration:.08s}
+.nav:active{transform:scale(.98)}
+.btn[disabled]:active,.mini[disabled]:active{transform:none}
+
+/* Secondary action: a button's icon lifts a touch as the pointer arrives */
+.btn svg,.mini svg,.rb1 svg{transition:transform .3s var(--e-spring)}
+.btn:hover svg,.mini:hover svg,.rb1:hover svg{transform:translateY(-1px) scale(1.06)}
+
+/* Anticipation and follow-through: a pop-up rises, overshoots slightly and settles; staging: the page behind
+   is dimmed so the eye goes to the pop-up */
+@keyframes popIn{0%{opacity:0;transform:translateY(14px) scale(.94)}60%{opacity:1;transform:translateY(-2px) scale(1.008)}100%{opacity:1;transform:none}}
+.mb{animation:popIn .36s var(--e-out)}
+
+/* Moving in arcs: the banner at the bottom swings up on a gentle curve rather than a straight line */
+@keyframes tpArc{0%{opacity:0;transform:translate(calc(-50% - 14px),18px) rotate(-1.2deg)}60%{opacity:1;transform:translate(calc(-50% + 2px),-3px) rotate(.25deg)}100%{opacity:1;transform:translate(-50%,0)}}
+.toast.tpop.in{animation:tpArc .36s var(--e-out) both}
+
+/* Fitts's law, bigger hit areas: small buttons answer a few pixels beyond their edge (above and below, so
+   neighbours in a row never steal each other's clicks) */
+:where(.mini,.chip,.fbtn,.bub-x){position:relative}
+.mini::after,.chip::after,.fbtn::after{content:"";position:absolute;inset:-5px 0}
+.bub-x::after{content:"";position:absolute;inset:-8px}
+/* on a touch screen every control is at least finger sized */
+@media(pointer:coarse){
+  .btn{min-height:2.75rem}
+  .mini{height:2.4rem;padding:0 .8rem}
+  .chip,.lay{min-height:2.4rem}
+  .fbtn{width:2.4rem;height:2.4rem}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .mb,.toast.tpop.in{animation:none}
+  .btn:hover svg,.mini:hover svg,.rb1:hover svg{transform:none}
+}

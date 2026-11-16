@@ -336,11 +336,13 @@ body[data-theme=dark] .tcard{background:rgba(22,27,38,.97);border-color:rgba(255
 .msn-h{display:flex;align-items:center;gap:.7rem;padding:.75rem 1rem;border-bottom:1px solid var(--line)}.msn-h .mav{width:2.4rem;height:2.4rem}.msn-h b{display:block}.msn-h small{color:var(--muted);font-size:.78rem}
 .msn-t{flex:1;overflow:auto;padding:1rem 1.2rem;display:flex;flex-direction:column;gap:.3rem;background:linear-gradient(180deg,transparent,rgba(3,78,162,.03))}
 .msn-day{align-self:center;font-size:.72rem;color:var(--muted);margin:.7rem 0 .3rem;padding:.15rem .6rem;border-radius:10px;background:var(--blue-bg)}
-.bub{max-width:min(70%,32rem);align-self:flex-start;background:#e9edf3;color:#13233a;padding:.5rem .8rem .35rem;border-radius:18px 18px 18px 6px}
+/* a message: the pill, with the time sent underneath it (outside the pill) */
+.bw{display:flex;flex-direction:column;align-items:flex-start;max-width:min(70%,32rem);align-self:flex-start}.bw.me{align-self:flex-end;align-items:flex-end}
+.bub{max-width:100%;background:#e9edf3;color:#13233a;padding:.5rem .85rem;border-radius:18px 18px 18px 6px}
 body[data-theme=dark] .bub{background:#2a3242;color:#e7ecf3}
-.bub.me{align-self:flex-end;background:linear-gradient(135deg,#034ea2,#2f7fdb);color:#fff;border-radius:18px 18px 6px 18px}
+.bub.me{background:linear-gradient(135deg,#034ea2,#2f7fdb);color:#fff;border-radius:18px 18px 6px 18px}
 .bub p{margin:0;white-space:pre-wrap;text-transform:none;line-height:1.4}.bub-n{display:block;font-size:.7rem;font-weight:700;color:#034ea2;margin-bottom:.1rem}
-.bub-t{display:flex;justify-content:flex-end;align-items:center;gap:.3rem;font-size:.66rem;opacity:.7;margin-top:.15rem}
+.bub-t{display:flex;align-items:center;gap:.3rem;font-size:.68rem;color:var(--muted);margin:.2rem .55rem 0}
 .bub-x{border:0;background:none;color:inherit;cursor:pointer;font-size:.9rem;line-height:1;padding:0 .1rem;opacity:.7}.bub-x:hover{opacity:1}
 .msn-empty{margin:auto}
 .msn-in{display:flex;align-items:flex-end;gap:.5rem;padding:.7rem 1rem;border-top:1px solid var(--line)}

@@ -20,6 +20,7 @@ Rules for code in `src/`:
 - Add, change and remove records through `data/repository.js` (`repos.contracts.add(c)`, `repos.contracts.changed(c)`), then save with `store()` and record the change with `audit()`.
 - Check permissions with `can()` (or `need()` to also show a message) inside every action, not only when hiding buttons.
 - No personal data in the repo: sample names only.
+- Every change to how the app looks, moves or is used follows the 20 UX and animation principles in `docs/UX-PRINCIPLES.md`; shared motion settings live in `src/css/08-motion.css`.
 
 ## Before going live
 

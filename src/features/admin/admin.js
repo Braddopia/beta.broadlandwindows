@@ -17,7 +17,7 @@ import { need } from '../auth/session.js';
 import { authPanel } from '../sign-in/sign-in.js';
 import { tourTest } from '../tour/tour.js';
 import { pagerH, paginate } from '../../ui/components/table.js';
-import { ordTag, stars } from '../../ui/components/tags.js';
+import { holWaiting, ordTag, stars } from '../../ui/components/tags.js';
 import { hit } from '../../ui/shell/router.js';
 import { uiState } from '../../ui/ui-state.js';
 
@@ -28,7 +28,7 @@ export function vAdmin() {
     owed = sum(state.contracts, (c) => Math.max(0, c.value - c.paid)),
     bills = state.fin.filter((b) => b.status == 'Unpaid'),
     pr = sum(state.staff, (x) => x.salary / 12),
-    pend = state.hols.filter((h) => h.status == 'Pending'),
+    pend = state.hols.filter(holWaiting),
     od = bills.filter((b) => b.due < td),
     won = allLeads().filter((l) => l.stage == 'Won').length,
     lost = allLeads().filter((l) => l.stage == 'Lost').length,
@@ -54,7 +54,7 @@ export function vAdmin() {
     .join('')}</div>
   <div class="two">
    <div class="panel"><h2>Stock Requests To Approve</h2>${reqs.map((r) => `<div class="row"><span><b>${ordTag(r)} ${r.qty} ${esc(unitOf(r))} x ${esc(r.item)}</b><br><small class="muted">${esc(r.user)}, ${esc(r.time)}${r.note ? ', ' + esc(r.note) : ''}</small></span><span class="acts"><button class="mini pri" ${onClick('reqApprove', r.uid)}>Approve</button><button class="mini del" ${onClick('reqReject', r.uid)}>Reject</button></span></div>`).join('') || '<p class="empty">No requests waiting.</p>'}</div>
-   <div class="panel"><h2>Holiday Requests</h2>${pend.map((h) => `<div class="row"><span><b>${esc(staffName(h.sid))}</b><br><small class="muted">${fd(h.from)} to ${fd(h.to)} (${h.days} days)</small></span><span class="acts"><button class="mini pri" ${onClick('holSet', h.id, 'Approved')}>Approve</button><button class="mini" ${onClick('holSet', h.id, 'Rejected')}>Decline</button></span></div>`).join('') || '<p class="empty">Nothing waiting for approval.</p>'}</div>
+   <div class="panel"><h2>Holiday Requests</h2>${pend.map((h) => `<div class="row"><span><b>${esc(staffName(h.sid))}</b><br><small class="muted">${fd(h.from)} to ${fd(h.to)} (${h.days} days)${h.cancelReq ? ' · wants to cancel' : ''}</small></span><span class="acts"><button class="mini pri" ${onClick('holSet', h.id, 'Approved')}>${h.cancelReq ? 'Approve Cancel' : 'Approve'}</button><button class="mini" ${onClick('holSet', h.id, 'Rejected')}>${h.cancelReq ? 'Keep Holiday' : 'Decline'}</button></span></div>`).join('') || '<p class="empty">Nothing waiting for approval.</p>'}</div>
    <div class="panel"><h2>Overdue Bills</h2>${od.map((b) => `<div class="row"><span><b>${esc(b.payee)}</b><br><small class="muted">Due ${fd(b.due)}</small></span><b>${money(b.amount)}</b></div>`).join('') || '<p class="empty">No overdue bills.</p>'}</div>
    <div class="panel"><h2>Sales Health</h2><div class="row"><span>Lead win rate</span><b>${Math.round((won / tot) * 100)}%</b></div><div class="bar"><i style="width:${(won / tot) * 100}%"></i></div><div class="row" style="margin-top:.6rem"><span>Collected vs contract value</span><b>${pc(paid, rev)}</b></div><div class="bar"><i style="width:${rev ? (paid / rev) * 100 : 0}%"></i></div><div class="row" style="margin-top:.6rem"><span>Monthly payroll</span><b>${m0(pr)}</b></div></div>
    <div class="panel"><h2>Security And Data</h2>

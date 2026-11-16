@@ -86,7 +86,7 @@ export function vMessages() {
           mine = n.by == me2;
         return (
           sep +
-          `<div class="bub ${mine ? 'me' : ''}">${!mine && cur == 'Everyone' ? `<small class="bub-n">${esc(n.by)}</small>` : ''}<p>${esc(n.t)}</p><span class="bub-t">${new Date(n.at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}${mine ? `<button class="bub-x" title="Delete" aria-label="Delete message" ${onClick('msgDel', n.id)}>&times;</button>` : ''}</span></div>`
+          `<div class="bw ${mine ? 'me' : ''}"><div class="bub ${mine ? 'me' : ''}">${!mine && cur == 'Everyone' ? `<small class="bub-n">${esc(n.by)}</small>` : ''}<p>${esc(n.t)}</p></div><span class="bub-t">${new Date(n.at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}${mine ? `<button class="bub-x" title="Delete" aria-label="Delete message" ${onClick('msgDel', n.id)}>&times;</button>` : ''}</span></div>`
         );
       }).join('') || `<div class="msn-empty">${emptyArt('team', '')}</div>`
     }</div>

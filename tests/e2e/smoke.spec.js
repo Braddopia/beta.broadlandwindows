@@ -124,7 +124,12 @@ test("Calendar: week numbers down the side, every kind of event can be shown, an
   expect(await app.run(() => [...document.querySelectorAll('#main .cm .wkn')].map((e) => +e.textContent))).toContain(
     await app.run(() => isoWeek(today()))
   );
-  await expect(app.page.locator('#main .cal-f .chip')).toHaveText([
+  // each layer button says whether it is showing (Follow-Ups starts hidden)
+  await expect(app.page.locator('#main .cal-f .lay[aria-pressed=true]')).toHaveCount(6);
+  await app.page.click('#main .cal-f .lay:has-text("Follow-Ups")');
+  await expect(app.page.locator('#main .cal-f .lay:has-text("Follow-Ups")')).toHaveAttribute('aria-pressed', 'true');
+  await app.page.click('#main .cal-f .lay:has-text("Follow-Ups")');
+  await expect(app.page.locator('#main .cal-f .lay')).toHaveText([
     'Fittings',
     'Surveys',
     'Appointments',

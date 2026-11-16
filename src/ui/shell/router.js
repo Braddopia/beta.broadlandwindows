@@ -42,6 +42,7 @@ import { vSuppliers } from '../../features/suppliers/suppliers.js';
 import { countUp } from '../components/kpi.js';
 import { closeFpop } from '../components/popover.js';
 import { morph } from '../morph.js';
+import { holWaiting } from '../components/tags.js';
 
 /* the search text typed in the top bar */
 export function setQuery(v) {
@@ -148,8 +149,8 @@ export function badges() {
     service: state.calls.filter((c) => c.status != 'Complete').length,
     fitting: can('manage') ? state.contracts.filter((c) => c.fit && c.stage != 'Complete').length : 0,
     stock: state.items.filter((r) => r.type == 'request' && r.reqStatus == 'Pending').length,
-    staff: can('manage') ? state.hols.filter((h) => h.status == 'Pending').length : 0,
-    holidays: can('manage') ? state.hols.filter((h) => h.status == 'Pending').length : 0,
+    staff: can('manage') ? state.hols.filter(holWaiting).length : 0,
+    holidays: can('manage') ? state.hols.filter(holWaiting).length : 0,
   };
 }
 export function navHtml(b) {

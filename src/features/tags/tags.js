@@ -14,7 +14,7 @@ import { fieldControl } from '../../ui/forms/fields.js';
 import { askYes } from '../../ui/modal.js';
 import { render } from '../../ui/shell/router.js';
 import { toast } from '../../ui/toast.js';
-import { PRINT_BAR_CSS, printBar } from '../../print/print.js';
+import { PRINT_BAR_CSS, printBar, wirePrintBar } from '../../print/print.js';
 
 export const TAG_WARN = 'Do not damage, stock metal used for a job upcoming!';
 export const TAG_NOTE = 'Please keep the clear sleeves if reusable';
@@ -268,5 +268,6 @@ function printTags(L) {
 ${TAG_CSS}
 ${PRINT_BAR_CSS}</style></head><body>${printBar(title)}<div class="pgs">${pages}</div></body></html>`);
   w.document.close();
+  wirePrintBar(w);
   return true;
 }
