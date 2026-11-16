@@ -95,12 +95,17 @@ test('Panel Optimiser: change a piece, the plan updates; save, reopen and print 
   await expect(w.locator('table.dt').nth(1)).toContainText('Thickness (mm)');
   await expect(w.locator('table.dt').nth(1)).toContainText('Outside (A)');
   await expect(w.locator('table.dt').nth(1)).toContainText('Anthracite');
-  await expect(w.locator('.cbs').first()).toContainText('1,200 wide × 2,400 high');
-  await expect(w.locator('.cbspec').first().locator('span')).toHaveText([
+  // each board's heading: the title underlined, then size, thickness and colours on one line
+  await expect(w.locator('.cbh h3').first()).toHaveText('Board 1 of 3: Smarts Aluminium Full');
+  await expect(w.locator('.cbh span').first()).toHaveText(/^\d+ pieces? · \d+% used$/);
+  const line = w.locator('.cbd').first();
+  await expect(line.locator('b')).toHaveText([
+    '1,200 × 2,400mm',
     '4mm Thickness',
     'Inside (B) White',
     'Outside (A) Anthracite',
   ]);
+  expect(await line.evaluate((e) => e.getBoundingClientRect().height < 25)).toBe(true);
   await expect(w.locator('.ih')).toContainText('Saw Blade 5mm');
   expect(await colsLineUp(w)).toBe(true);
   await w.close();

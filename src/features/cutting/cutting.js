@@ -140,6 +140,11 @@ function table(kind, rows) {
 }
 /** a board's thickness and colours on one line, e.g. "28mm Thickness · Inside (B) KL010 · Outside (A) KL005" */
 export const boardCols = (s) => boardSpec(s).join(' · ');
+/** the printed heading over each board: the title with a dark underline (pieces and % used on the right),
+   then the size, thickness and colours on one bold line: "1,200 × 2,400mm  28mm Thickness  Inside (B) KL010 ..." */
+function boardStrip(b, i, n, s) {
+  return html`<div class="cbh"><h3>Board ${i + 1} of ${n}: ${b.sheet}</h3><span>${b.pieces.length} piece${b.pieces.length == 1 ? '' : 's'} · ${Math.round((b.used / b.area) * 100)}% used</span></div><p class="cbd">${[mm(b.W) + ' × ' + mm(b.L) + 'mm', ...boardSpec(s)].map((x) => html`<b>${x}</b>`)}</p>`;
+}
 /** a board's details, one per line on the printed plan: "28mm Thickness", "Inside (B) KL010", "Outside (A) KL005" */
 export const boardSpec = (s) =>
   [
@@ -421,13 +426,7 @@ function planDoc(asHtml) {
   const boards = R.boards
     .map(
       (b, i) =>
-        `<section class="cbp"><div class="cbh"><div><h3>Board ${i + 1} of ${R.boards.length}: ${html`${b.sheet}`}</h3><p class="cbs">${mm(b.W)} wide × ${mm(b.L)} high (mm) · ${b.pieces.length} piece${b.pieces.length == 1 ? '' : 's'} · ${Math.round((b.used / b.area) * 100)}% used</p></div>${
-          boardSpec(sheetOf(D, b.sheet)).length
-            ? `<div class="cbspec">${boardSpec(sheetOf(D, b.sheet))
-                .map((x) => html`<span>${x}</span>`)
-                .join('')}</div>`
-            : ''
-        }</div>${boardSvg(b, i, true)}</section>`
+        `<section class="cbp">${boardStrip(b, i, R.boards.length, sheetOf(D, b.sheet))}${boardSvg(b, i, true)}</section>`
     )
     /* three boards to a printed page, starting on a fresh page */
     .reduce((pages, sec, i) => {
@@ -501,7 +500,7 @@ function planDoc(asHtml) {
             ]
           : []),
       ],
-      post: `<style>.cbpg{break-before:page;padding-top:6mm}.cbp{break-inside:avoid;margin:0 0 5mm}.cbp h3{display:flex;justify-content:flex-start;align-items:baseline;gap:4mm}.cbh{display:flex;justify-content:space-between;align-items:flex-start;gap:6mm;margin:0 0 2mm}.cbh h3{margin:0}.cbs{margin:1mm 0 0;font-size:8.6pt;color:#5b6b80}.cbspec{display:flex;flex-direction:column;align-items:flex-end;gap:.6mm;font-size:8.8pt;color:#13233a;white-space:nowrap;text-align:right}.cbspec span{padding:.4mm 2.2mm;border-radius:1.2mm;background:#eef3fa}.cbp .cut-b{width:calc(64mm * var(--ar));max-width:100%;max-height:none;margin:0 auto}.cbp h3 span{margin-left:auto;font-weight:400;color:#5b6b80;font-size:8pt}.cut-b{display:block;width:100%;height:auto;max-height:110mm;border:.3mm solid #13233a;border-radius:1.5mm}.cut-b .bd{fill:#f7f9fc}.cut-b .gl{fill:none;stroke:#e3e8ef;stroke-width:1}.cut-b rect{stroke-width:2}.cut-b text{text-anchor:middle;dominant-baseline:middle;fill:#13233a;font-weight:700;font-family:Arial,sans-serif}.cut-b text.sz{font-weight:400}</style>${boards}`,
+      post: `<style>.cbpg{break-before:page;padding-top:6mm}.cbp{break-inside:avoid;margin:0 0 5mm}.cbp h3{display:flex;justify-content:flex-start;align-items:baseline;gap:4mm}.cbh{display:flex;align-items:baseline;gap:4mm;border-bottom:.5mm solid #012b59;padding-bottom:1.2mm}.cbh h3{margin:0;display:block}.cbh h3::before{content:none}.cbh span{margin-left:auto;font-size:8.6pt;color:#5b6b80;white-space:nowrap}.cbd{display:flex;flex-wrap:wrap;gap:1mm 6mm;margin:1.6mm 0 2.5mm;font-size:9pt;color:#13233a}.cbd b{white-space:nowrap}.cbp .cut-b{width:calc(64mm * var(--ar));max-width:100%;max-height:none;margin:0 auto}.cbp h3 span{margin-left:auto;font-weight:400;color:#5b6b80;font-size:8pt}.cut-b{display:block;width:100%;height:auto;max-height:110mm;border:.3mm solid #13233a;border-radius:1.5mm}.cut-b .bd{fill:#f7f9fc}.cut-b .gl{fill:none;stroke:#e3e8ef;stroke-width:1}.cut-b rect{stroke-width:2}.cut-b text{text-anchor:middle;dominant-baseline:middle;fill:#13233a;font-weight:700;font-family:Arial,sans-serif}.cut-b text.sz{font-weight:400}</style>${boards}`,
     }
   );
 }
