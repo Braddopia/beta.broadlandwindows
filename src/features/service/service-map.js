@@ -19,6 +19,8 @@ import { prTag, svcTag } from '../../ui/components/tags.js';
 import { uiState } from '../../ui/ui-state.js';
 
 const YARD = [BASE.at[1], BASE.at[0]];
+/* the yard's icon: a window, our trade */
+const WIN = '<rect x="4" y="3.5" width="16" height="17" rx="1.5"/><path d="M12 3.5v17M4 12h16"/>';
 const AREA_M = FIT_MILES * 1609.34;
 /* what each pin colour means, most pressing first (a pin with several calls takes the most pressing colour) */
 const KINDS = [
@@ -65,12 +67,36 @@ export function svcLiveMap(list) {
     <div class="panel smap-m lmap-m"><div class="lmap-stage">
       <div id="svcLeaf" class="lmap-c" data-keep role="region" aria-label="Map of service calls. Pins are placed by postcode; the dashed ring is the ${FIT_MILES}-mile area we fit in, from ${BASE.postcode}."></div>
       <div class="lmap-g lmap-sum nocap" id="lmapSum">${raw(summary(P))}</div>
-      <div class="lmap-g lmap-tools"><button class="lmb" ${raw(onClick('svcMapFit'))} title="Zoom to show every call"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>All Calls</button><button class="lmb" ${raw(onClick('svcMapYard'))} title="Centre on the yard"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7v9H3z"/></svg>The Yard</button><button class="lmb ${uiState.svc.noRing ? '' : 'on'}" ${raw(onClick('svcMapRing'))} aria-pressed="${uiState.svc.noRing ? 'false' : 'true'}" title="Show or hide the area we fit in"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8" stroke-dasharray="3 3"/><circle cx="12" cy="12" r="1.5"/></svg>${FIT_MILES}-Mile Area</button></div>
-      <details class="lmap-g lmap-key" open><summary>Key</summary><div>${KINDS.map(([k, t]) => html`<span><i class="lk ${k}"></i>${t}</span>`)}<span><i class="lk o apx"></i>Rough spot</span><span><i class="yk"></i>The yard</span></div></details>
+      <div class="lmap-g lmap-tools"><button class="lmb" ${raw(onClick('svcMapFit'))} title="Zoom to show every call"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>All Calls</button><button class="lmb" ${raw(onClick('svcMapYard'))} title="Centre on the yard"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="3.5" width="16" height="17" rx="1.5"/><path d="M12 3.5v17M4 12h16"/></svg>The Yard</button><button class="lmb ${uiState.svc.noRing ? '' : 'on'}" ${raw(onClick('svcMapRing'))} aria-pressed="${uiState.svc.noRing ? 'false' : 'true'}" title="Show or hide the area we fit in"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8" stroke-dasharray="3 3"/><circle cx="12" cy="12" r="1.5"/></svg>${FIT_MILES}-Mile Area</button></div>
+      ${raw(keyH(P))}
       <p class="lmap-g lmap-note" id="lmapNote" hidden>The map pictures need an internet connection. Pins are still placed by postcode or town.</p>
     </div></div>
     <div class="panel smap-l lmap-l"><h2><span>Nearest First</span><small class="muted nocap">from the yard, ${BASE.postcode}</small></h2><div id="lmapList">${raw(listH(P))}</div></div>
   </div>`);
+}
+/* the key: a small button on the map (the colours in use and "Key") that opens a card above it with what each pin
+   colour means and how many calls are that colour. Closed to start with so it does not cover the map. */
+function keyH(P) {
+  const on = P.filter((x) => x.at),
+    n = (k) => on.filter((x) => x.kind == k).length,
+    used = KINDS.filter(([k]) => n(k)),
+    dots = (used.length ? used : KINDS).slice(0, 4),
+    open = !!uiState.svc.key;
+  return String(html`<div class="lmap-key${open ? ' open' : ''}" id="lmapKey">
+    <div class="lmap-g lmap-kc nocap" id="lmapKc" ${raw(open ? '' : 'hidden')}>${KINDS.map(([k, t]) => html`<span class="lmap-kr${n(k) ? '' : ' none'}"><i class="lk ${k}"></i>${t}<em>${n(k)}</em></span>`)}<hr><span class="lmap-kr"><i class="lk o apx"></i>Rough spot</span><span class="lmap-kr"><i class="yk"><svg viewBox="0 0 24 24" aria-hidden="true">${raw(WIN)}</svg></i>The yard</span></div>
+    <button type="button" class="lmap-g lmap-kb" aria-expanded="${open ? 'true' : 'false'}" aria-controls="lmapKc" ${raw(onClick('svcMapKey'))}><span class="lmap-kd">${dots.map(([k]) => html`<i class="${k}"></i>`)}</span>Key<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 15l6-6 6 6"/></svg></button>
+  </div>`);
+}
+/** open or close the key (remembered while the app is open) */
+export function svcMapKey() {
+  const open = (uiState.svc.key = !uiState.svc.key),
+    w = document.getElementById('lmapKey'),
+    c = document.getElementById('lmapKc');
+  if (!w || !c) return;
+  c.hidden = !open;
+  w.classList.toggle('open', open);
+  const b = w.querySelector('.lmap-kb');
+  if (b) b.setAttribute('aria-expanded', String(open));
 }
 function summary(P) {
   const on = P.filter((x) => x.at),
@@ -99,7 +125,7 @@ let M = null,
 const yardIcon = () =>
   L.divIcon({
     className: 'lyd-w',
-    html: '<div class="lyd" title="The yard"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7v9a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1z"/></svg></div>',
+    html: '<div class="lyd" title="The yard"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="3.5" width="16" height="17" rx="1.5"/><path d="M12 3.5v17M4 12h16"/></svg></div>',
     iconSize: [38, 38],
     iconAnchor: [19, 19],
   });

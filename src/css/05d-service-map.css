@@ -3,7 +3,7 @@
    A calm map so the pins stand out: the map pictures are softened, the summary, buttons and key float on it as
    frosted glass cards, pins drop in and settle (docs/UX-PRINCIPLES.md).
    ========================================================================== */
-.lmap{grid-template-columns:minmax(0,2.2fr) minmax(18rem,1fr)}
+.lmap{grid-template-columns:minmax(0,1.5fr) minmax(18rem,1fr)}
 .lmap-m{padding:0!important;overflow:hidden}
 .lmap-stage{position:relative}
 .lmap-c{height:clamp(26rem,calc(100vh - 23rem),820px);background:#e9eef2;z-index:0}
@@ -22,12 +22,23 @@
 .lmb svg{width:1rem;height:1rem;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .lmb:hover{background:rgba(3,78,162,.08);color:#034ea2}
 .lmb.on{background:#034ea2;color:#fff}.lmb.on:hover{background:#0a5cba;color:#fff}
-.lmap-key{left:14px;bottom:30px;padding:.45rem .75rem;font-size:.74rem;max-width:min(30rem,calc(100% - 7rem))}
-.lmap-key summary{cursor:pointer;font-weight:700;font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:#4a5870;list-style:none}
-.lmap-key summary::-webkit-details-marker{display:none}
-.lmap-key summary::after{content:" ▾";font-size:.65rem}.lmap-key:not([open]) summary::after{content:" ▸"}
-.lmap-key div{display:flex;flex-wrap:wrap;gap:.3rem .9rem;margin-top:.35rem}
-.lmap-key span{display:inline-flex;align-items:center;gap:.4rem}
+/* the key: a small glass button bottom left; its card rises from it (anticipation, follow-through) */
+.lmap-key{position:absolute;z-index:500;left:14px;bottom:30px;display:flex;flex-direction:column;align-items:flex-start;gap:8px}
+.lmap-key .lmap-g{position:relative}
+.lmap-kb{display:inline-flex;align-items:center;gap:.5rem;height:2.4rem;padding:0 .75rem 0 .7rem;font:700 .8rem var(--body);cursor:pointer;transition:transform .32s var(--e-spring),background-color .15s var(--e-out)}
+.lmap-kb:hover{background:rgba(255,255,255,.95)}.lmap-kb:active{transform:scale(.95);transition-duration:.08s}
+.lmap-kb>svg{width:.9rem;height:.9rem;fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round;transition:transform .3s var(--e-spring)}
+.lmap-key.open .lmap-kb>svg{transform:rotate(180deg)}
+.lmap-kd{display:flex;padding-left:4px}
+.lmap-kd i{width:.75rem;height:.75rem;border-radius:50%;border:1.5px solid #fff;margin-left:-4px;box-shadow:0 1px 2px rgba(1,20,45,.25)}
+.lmap-kd .u{background:#d43c3c}.lmap-kd .od{background:#a3216b}.lmap-kd .o{background:#e08a00}.lmap-kd .p{background:#7a4fd0}.lmap-kd .b{background:#2b8fe0}.lmap-kd .d{background:#8a97a8}
+.lmap-kc{display:flex;flex-direction:column;min-width:12.5rem;padding:.6rem .85rem;font-size:.8rem;transform-origin:0 100%;animation:keyIn .3s var(--e-out)}
+.lmap-kc[hidden]{display:none}
+@keyframes keyIn{0%{opacity:0;transform:translateY(8px) scale(.94)}60%{opacity:1;transform:translateY(-1px) scale(1.01)}100%{opacity:1;transform:none}}
+.lmap-kr{display:flex;align-items:center;gap:.55rem;padding:.2rem 0}
+.lmap-kr em{margin-left:auto;padding-left:1rem;font-style:normal;font-weight:700;color:#4a5870;font-variant-numeric:tabular-nums}
+.lmap-kr.none{opacity:.55}
+.lmap-kc hr{border:0;border-top:1px solid rgba(1,43,89,.12);margin:.35rem 0}
 .lmap-note{left:50%;bottom:30px;transform:translateX(-50%);margin:0;padding:.5rem .9rem;font-size:.8rem}
 
 /* zoom buttons and the credit line, in the same quiet glass */
@@ -58,7 +69,7 @@
 /* the yard: navy tile with a yellow house and a soft glow */
 .lyd-w{background:none;border:0}
 .lyd{width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,#034ea2,#012b59);border:2.5px solid #fff;display:grid;place-items:center;box-shadow:0 0 0 6px rgba(255,208,2,.35),0 6px 14px -4px rgba(1,20,45,.5)}
-.lyd svg{width:19px;height:19px;fill:#ffd002}
+.lyd svg{width:20px;height:20px;fill:none;stroke:#ffd002;stroke-width:2.4;stroke-linejoin:round}
 /* our area: a fine dashed ring with a whisper of blue inside, and its name on the edge */
 .lring{stroke:#034ea2;stroke-width:2;stroke-dasharray:2 7;stroke-linecap:round;fill:#2f7fdb;fill-opacity:.045}
 .lmap .leaflet-overlay-pane svg{width:auto;height:auto;max-width:none;max-height:none}
@@ -97,20 +108,22 @@
 .lmap-key .lk{width:.8rem;height:.8rem;border-radius:50% 50% 50% 2px;transform:rotate(-45deg);border:1.5px solid #fff;box-shadow:0 1px 3px rgba(1,20,45,.35)}
 .lmap-key .lk.u{background:#d43c3c}.lmap-key .lk.od{background:#a3216b}.lmap-key .lk.o{background:#e08a00}.lmap-key .lk.p{background:#7a4fd0}.lmap-key .lk.b{background:#2b8fe0}.lmap-key .lk.d{background:#8a97a8}
 .lmap-key .lk.apx{border-style:dashed}
-.lmap-key .yk{width:.85rem;height:.85rem;border-radius:3px;background:#034ea2;box-shadow:0 0 0 2px rgba(255,208,2,.6)}
+.lmap-key .yk{display:grid;place-items:center;width:.95rem;height:.95rem;border-radius:4px;background:#034ea2;box-shadow:0 0 0 2px rgba(255,208,2,.6)}
+.lmap-key .yk svg{width:.62rem;height:.62rem;fill:none;stroke:#ffd002;stroke-width:3}
 
 /* dark mode: the map turns to dark tones (pins keep their colours), the glass goes dark */
 body[data-theme=dark] .lmap .leaflet-tile-pane{filter:invert(1) hue-rotate(180deg) brightness(.9) contrast(.88) saturate(.5)}
 body[data-theme=dark] .lmap-c,body[data-theme=dark] .lmap .leaflet-container{background:#1b222d}
 body[data-theme=dark] .lmap-g{background:rgba(24,29,38,.82);border-color:rgba(255,255,255,.08);color:#e9ebef}
-body[data-theme=dark] .lmap-sum small,body[data-theme=dark] .lmap-key summary{color:#a7b0bf}
+body[data-theme=dark] .lmap-sum small,body[data-theme=dark] .lmap-kr em{color:#a7b0bf}
+body[data-theme=dark] .lmap-kb:hover{background:rgba(34,41,53,.95)}body[data-theme=dark] .lmap-kc hr{border-top-color:rgba(255,255,255,.1)}body[data-theme=dark] .lmap-kd i{border-color:#1f2530}
 body[data-theme=dark] .lmb{color:#e9ebef}body[data-theme=dark] .lmb:hover{background:rgba(142,197,255,.12);color:#8ec5ff}
 body[data-theme=dark] .lmap .leaflet-bar a{background:rgba(24,29,38,.88);color:#e9ebef;border-color:rgba(255,255,255,.08)}
 body[data-theme=dark] .lmap .leaflet-control-attribution{background:rgba(24,29,38,.7);color:#a7b0bf}
 body[data-theme=dark] .lmap-out{color:#ff8a8a}
 
-@media(prefers-reduced-motion:reduce){.lpin,.lpin-s{animation:none}.lpin.u::after{animation:none}}
-@media(max-width:1100px){.lmap-sum{max-width:calc(100% - 2rem)}.lmap-tools{top:auto;bottom:30px;right:auto;left:14px}.lmap-key{display:none}}
+@media(prefers-reduced-motion:reduce){.lpin,.lpin-s,.lmap-kc{animation:none}.lpin.u::after{animation:none}}
+@media(max-width:1100px){.lmap-sum{max-width:calc(100% - 2rem)}.lmap-tools{top:auto;bottom:30px;right:auto;left:14px}.lmap-key{bottom:84px}}
 @media(max-width:900px){.lmap{grid-template-columns:1fr}.lmap-c{height:62vh}}
 /* dark mode: the details card goes dark too */
 body[data-theme=dark] .lmap .lmp .leaflet-popup-content-wrapper,body[data-theme=dark] .lmap .lmp .leaflet-popup-tip{background:#1f2530;color:#e9ebef}

@@ -91,6 +91,14 @@ test('service calls on a real map: pinned by postcode, nearest first, details on
   await expect(app.page.locator('#main path.lring')).toHaveCount(0);
   await app.page.click('#main .lmap-tools >> text=45-Mile Area');
   await expect(app.page.locator('#main path.lring')).toHaveCount(1);
+  // the key starts closed (a small button), opens to show each colour with how many calls, and closes again
+  await expect(app.page.locator('#main #lmapKc')).toBeHidden();
+  await app.page.click('#main .lmap-kb');
+  await expect(app.page.locator('#main #lmapKc')).toBeVisible();
+  await expect(app.page.locator('#main .lmap-kr', { hasText: 'Urgent' }).locator('em')).toHaveText(/^\d+$/);
+  await expect(app.page.locator('#main #lmapKc')).toContainText('The yard');
+  await app.page.click('#main .lmap-kb');
+  await expect(app.page.locator('#main #lmapKc')).toBeHidden();
   // a call with no postcode still goes on the map at its town
   expect(await app.run(() => state.calls.some((c) => !c.pc && c.town))).toBe(true);
   // standard users have the map too
