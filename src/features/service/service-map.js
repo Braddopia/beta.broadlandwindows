@@ -62,13 +62,14 @@ export function svcLiveMap(list) {
   CUR = list;
   const P = place(list, geoKnown(pcsOf(list)));
   return String(html`<div class="smap lmap">
-    <div class="panel smap-m lmap-m">
-      <div class="lmap-bar"><span class="lmap-sum" id="lmapSum">${raw(summary(P))}</span><span class="lmap-tools"><button class="mini" ${raw(onClick('svcMapFit'))} title="Zoom to show every call">Show All Calls</button><button class="mini" ${raw(onClick('svcMapYard'))} title="Centre on the yard">The Yard</button><button class="mini ${uiState.svc.noRing ? '' : 'on'}" ${raw(onClick('svcMapRing'))} aria-pressed="${uiState.svc.noRing ? 'false' : 'true'}">${FIT_MILES}-Mile Area</button></span></div>
+    <div class="panel smap-m lmap-m"><div class="lmap-stage">
       <div id="svcLeaf" class="lmap-c" data-keep role="region" aria-label="Map of service calls. Pins are placed by postcode; the dashed ring is the ${FIT_MILES}-mile area we fit in, from ${BASE.postcode}."></div>
-      <p class="lmap-note" id="lmapNote" hidden>The map pictures need an internet connection. Pins are still placed by postcode or town.</p>
-      <div class="smap-key lmap-key">${KINDS.map(([k, t]) => html`<span><i class="lk ${k}"></i>${t}</span>`)}<span><i class="lk o apx"></i>Rough spot (postcode area or town)</span><span><i class="yk"></i>The yard, ${BASE.postcode}</span><span><i class="zk"></i>Our ${FIT_MILES}-mile area</span></div>
-    </div>
-    <div class="panel smap-l lmap-l"><h2><span>Nearest First</span></h2><div id="lmapList">${raw(listH(P))}</div></div>
+      <div class="lmap-g lmap-sum nocap" id="lmapSum">${raw(summary(P))}</div>
+      <div class="lmap-g lmap-tools"><button class="lmb" ${raw(onClick('svcMapFit'))} title="Zoom to show every call"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>All Calls</button><button class="lmb" ${raw(onClick('svcMapYard'))} title="Centre on the yard"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7v9H3z"/></svg>The Yard</button><button class="lmb ${uiState.svc.noRing ? '' : 'on'}" ${raw(onClick('svcMapRing'))} aria-pressed="${uiState.svc.noRing ? 'false' : 'true'}" title="Show or hide the area we fit in"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8" stroke-dasharray="3 3"/><circle cx="12" cy="12" r="1.5"/></svg>${FIT_MILES}-Mile Area</button></div>
+      <details class="lmap-g lmap-key" open><summary>Key</summary><div>${KINDS.map(([k, t]) => html`<span><i class="lk ${k}"></i>${t}</span>`)}<span><i class="lk o apx"></i>Rough spot</span><span><i class="yk"></i>The yard</span></div></details>
+      <p class="lmap-g lmap-note" id="lmapNote" hidden>The map pictures need an internet connection. Pins are still placed by postcode or town.</p>
+    </div></div>
+    <div class="panel smap-l lmap-l"><h2><span>Nearest First</span><small class="muted nocap">from the yard, ${BASE.postcode}</small></h2><div id="lmapList">${raw(listH(P))}</div></div>
   </div>`);
 }
 function summary(P) {
@@ -77,14 +78,14 @@ function summary(P) {
     far = on.reduce((m, x) => Math.max(m, x.miles), 0);
   if (!P.length) return 'No calls to show';
   return String(
-    html`<b>${P.length} call${P.length == 1 ? '' : 's'}</b>${on.length ? html` · furthest ${far.toFixed(1)} miles` : ''}${out ? html` · <b class="lmap-out">${out} outside our ${FIT_MILES}-mile area</b>` : ''}${P.length - on.length ? html` · ${P.length - on.length} not on the map` : ''}`
+    html`<b class="lmap-n">${P.length}</b><span><b>call${P.length == 1 ? '' : 's'} on the map</b><small>${on.length ? html`furthest ${far.toFixed(1)} miles` : ''}${out ? html` · <b class="lmap-out">${out} outside our ${FIT_MILES}-mile area</b>` : ''}${P.length - on.length ? html` · ${P.length - on.length} not on the map` : ''}</small></span>`
   );
 }
 function listH(P) {
   const on = P.filter((x) => x.at).sort((a, b) => a.miles - b.miles),
     off = P.filter((x) => !x.at);
   const row = (x) =>
-    html`<button type="button" class="row lmap-r nocap" ${raw(onClick('svcMapFocus', x.c.id))}><span class="lmap-rn"><i class="dot ${x.kind}"></i><span><b>${x.c.id}</b> ${x.c.name}<small>${[x.c.town || (x.k && x.k.town), x.pc || 'no postcode'].filter(Boolean).join(' · ')}${x.q && x.q != 'pc' ? ' · rough spot' : ''}</small></span></span><span class="lmap-d"><b>${x.miles.toFixed(1)} mi</b><small>${driveText(x.miles)}</small>${x.out ? html`<span class="tag r">Outside area</span>` : ''}</span></button>`;
+    html`<button type="button" class="row lmap-r nocap k-${x.kind}" data-id="${x.c.id}" ${raw(onClick('svcMapFocus', x.c.id))}><span class="lmap-rn"><i class="dot ${x.kind}"></i><span><b>${x.c.id}</b> ${x.c.name}<small>${[x.c.town || (x.k && x.k.town), x.pc || 'no postcode'].filter(Boolean).join(' · ')}${x.q && x.q != 'pc' ? ' · rough spot' : ''}</small></span></span><span class="lmap-d"><b>${x.miles.toFixed(1)} mi</b><small>${driveText(x.miles)}</small>${x.out ? html`<span class="tag r">Outside area</span>` : ''}</span></button>`;
   return String(
     html`${on.length ? on.map(row) : html`<p class="empty">No calls to show.</p>`}${off.length ? html`<details class="smap-off" open><summary class="nocap">${off.length} not on the map (add a postcode or town)</summary>${off.map((x) => html`<button type="button" class="row lmap-r" ${raw(onClick('editCall', x.c.id))}><span><b>${x.c.id}</b> ${x.c.name}</span></button>`)}</details>` : ''}`
   );
@@ -99,17 +100,18 @@ const yardIcon = () =>
   L.divIcon({
     className: 'lyd-w',
     html: '<div class="lyd" title="The yard"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7v9a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1z"/></svg></div>',
-    iconSize: [34, 34],
-    iconAnchor: [17, 17],
+    iconSize: [38, 38],
+    iconAnchor: [19, 19],
   });
-const pinIcon = (kind, n, apx) =>
+/* a pin drops in (staggered a little, i) and settles with a squash; several calls at one spot show their number */
+const pinIcon = (kind, n, apx, i) =>
   L.divIcon({
     className: 'lpin-w',
-    html: `<div class="lpin ${kind} ${apx ? 'apx' : ''}"><span>${n > 1 ? n : ''}</span></div>`,
-    iconSize: [30, 40],
-    iconAnchor: [15, 38],
-    popupAnchor: [0, -34],
-    tooltipAnchor: [12, -24],
+    html: `<div class="lpin ${kind} ${apx ? 'apx' : ''}" style="--d:${Math.min(i, 12) * 45}ms"><span>${n > 1 ? n : ''}</span></div><i class="lpin-s"></i>`,
+    iconSize: [32, 42],
+    iconAnchor: [16, 40],
+    popupAnchor: [0, -36],
+    tooltipAnchor: [14, -26],
   });
 function popupH(x) {
   const c = x.c,
@@ -120,8 +122,8 @@ function popupH(x) {
       encodeURIComponent(BASE.postcode) +
       '&destination=' +
       encodeURIComponent(dest);
-  return html`<div class="lmp-c">
-    <div class="lmp-h"><b>${c.id}</b><span>${c.name}</span></div>
+  return html`<div class="lmp-c k-${x.kind}">
+    <div class="lmp-h"><b>${c.id}</b><span>${c.name}</span><em>${(KINDS.find((k) => k[0] == x.kind) || [])[1]}</em></div>
     <div class="lmp-t">${raw(prTag(c.priority || 'Normal'))}${raw(svcTag(c.status || 'Open'))}${x.out ? html`<span class="tag r">Outside our ${FIT_MILES}-mile area</span>` : ''}</div>
     ${addr ? html`<div class="lmp-a">${addr}${x.pc && !addr.includes(x.pc) ? ', ' + x.pc : ''}</div>` : ''}
     ${c.issue ? html`<p class="lmp-i">${c.issue}</p>` : ''}
@@ -140,14 +142,15 @@ function drawPins(P) {
     const key = x.at[0].toFixed(4) + ',' + x.at[1].toFixed(4);
     (spots[key] = spots[key] || []).push(x);
   });
-  Object.values(spots).forEach((S) => {
+  Object.values(spots).forEach((S, i) => {
     S.sort((a, b) => rank(a.kind) - rank(b.kind));
     const top = S[0],
       m = L.marker(top.at, {
         icon: pinIcon(
           top.kind,
           S.length,
-          S.every((x) => x.q != 'pc')
+          S.every((x) => x.q != 'pc'),
+          i
         ),
         keyboard: true,
         riseOnHover: true,
@@ -158,16 +161,34 @@ function drawPins(P) {
       String(html`<b>${S.length > 1 ? S.length + ' calls' : top.c.name}</b><br>${top.c.town || top.pc || ''}`),
       { direction: 'top', opacity: 0.95 }
     );
-    m.bindPopup(String(html`${S.map(popupH)}`), { maxWidth: 340, minWidth: 260, autoPanPadding: [30, 30] });
+    m.bindPopup(String(html`${S.map(popupH)}`), {
+      maxWidth: 340,
+      minWidth: 270,
+      autoPanPaddingTopLeft: [20, 90],
+      autoPanPaddingBottomRight: [20, 20],
+      className: 'lmp',
+    });
     m.addTo(PINS);
     S.forEach((x) => (BYID[x.c.id] = m));
   });
 }
+/* the space the floating cards take, so pins are not hidden under them */
+const PAD = { paddingTopLeft: [24, 84], paddingBottomRight: [24, 24] };
+/** every call, wherever it is (the All Calls button) */
 function fitAll(P, animate) {
   if (!M) return;
   const pts = P.filter((x) => x.at).map((x) => x.at);
-  if (!pts.length) return M.setView(YARD, 9, { animate });
-  M.fitBounds(L.latLngBounds([...pts, YARD]).pad(0.12), { maxZoom: 13, animate });
+  if (!pts.length) return M.setView(YARD, 10, { animate });
+  M.fitBounds(L.latLngBounds([...pts, YARD]), { ...PAD, maxZoom: 13, animate });
+}
+/** opening view: the yard and the calls inside our area, close enough to read (about the county at most);
+    calls further away are one click away with All Calls */
+function fitHome(P, animate) {
+  if (!M) return;
+  const pts = P.filter((x) => x.at && !x.out).map((x) => x.at);
+  if (!pts.length) return M.setView(YARD, 10, { animate });
+  M.fitBounds(L.latLngBounds([...pts, YARD]), { ...PAD, maxZoom: 12, animate });
+  if (M.getZoom() < 9) M.setView(M.getCenter(), 9, { animate });
 }
 function refresh(P) {
   drawPins(P);
@@ -188,7 +209,8 @@ export function svcMapMount() {
   const fresh = !M || M.getContainer() !== el;
   if (fresh) {
     if (M) M.remove();
-    M = L.map(el, { zoomControl: true, scrollWheelZoom: true, worldCopyJump: false, minZoom: 6 });
+    M = L.map(el, { zoomControl: false, scrollWheelZoom: true, worldCopyJump: false, minZoom: 6 });
+    L.control.zoom({ position: 'bottomright' }).addTo(M);
     let loaded = 0,
       failed = 0;
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -213,12 +235,31 @@ export function svcMapMount() {
     /* the credit line, without the flag picture Leaflet adds (the app's own styles would stretch it) */
     M.attributionControl.setPrefix('<a href="https://leafletjs.com" target="_blank" rel="noopener">Leaflet</a>');
     L.control.scale({ imperial: true, metric: false, position: 'bottomleft' }).addTo(M);
-    RING = L.circle(YARD, { radius: AREA_M, className: 'lring', interactive: false });
+    RING = L.featureGroup([
+      L.circle(YARD, { radius: AREA_M, className: 'lring', interactive: false }),
+      /* its name, on the ring's south-west edge */
+      L.tooltip({ permanent: true, direction: 'center', className: 'lring-t', interactive: false })
+        .setLatLng([
+          YARD[0] - (AREA_M / 111320) * 0.7071,
+          YARD[1] - (AREA_M / (111320 * Math.cos((YARD[0] * Math.PI) / 180))) * 0.7071,
+        ])
+        .setContent(`${FIT_MILES}-mile area`),
+    ]);
     if (!uiState.svc.noRing) RING.addTo(M);
     L.marker(YARD, { icon: yardIcon(), keyboard: false, zIndexOffset: -100 })
       .bindTooltip(`${BASE.name} yard, ${BASE.postcode}`, { direction: 'top' })
       .addTo(M);
     PINS = L.layerGroup().addTo(M);
+    /* pointing at a call in the list lifts its pin on the map */
+    const lst = document.getElementById('lmapList');
+    if (lst)
+      lst.addEventListener('pointerover', (e) => {
+        const r = e.target.closest && e.target.closest('.lmap-r[data-id]');
+        document.querySelectorAll('.lpin-w.hl').forEach((p) => p.classList.remove('hl'));
+        const m = r && BYID[r.dataset.id],
+          ic = m && m.getElement && m.getElement();
+        if (ic) ic.classList.add('hl');
+      });
     M.on('moveend', () => {
       const c = M.getCenter();
       uiState.svc.mv = [c.lat, c.lng, M.getZoom()];
@@ -232,7 +273,7 @@ export function svcMapMount() {
   if (fresh) {
     const v = uiState.svc.mv;
     if (v) M.setView([v[0], v[1]], v[2], { animate: false });
-    else fitAll(first, false);
+    else fitHome(first, false);
     setTimeout(() => M && M.invalidateSize(), 60);
   }
   /* then look up any postcodes not known yet, and move the pins to their proper places */
@@ -240,7 +281,7 @@ export function svcMapMount() {
     if (!M || M.getContainer() !== el || !el.isConnected || CUR !== list) return;
     const P = place(list, geo);
     refresh(P);
-    if (refit) fitAll(P, true);
+    if (refit) fitHome(P, true);
   });
 }
 /** the list: fly to a call and open its details */

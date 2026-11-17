@@ -67,6 +67,16 @@ Read this first, then CLAUDE.md and docs/ARCHITECTURE.md.
   Call and Directions, nearest-first list, calls outside the 45-mile area flagged. Service calls have a Postcode
   box. Next: the route planner (several nearby calls in order from a starting point), waiting for the owner.
 
+## Added in v19.7.1 and v19.8
+
+- Service map: map pictures send the site's address only (`referrerPolicy: 'strict-origin'`); OpenStreetMap refuses
+  them without it. A file opened from the computer has no address, so OpenStreetMap still refuses there: the owner
+  wants a very detailed drawn map for that case, built from OpenStreetMap data (download.geofabrik.de or
+  overpass-api.de are allowed in the environment but were not reachable yet).
+- Service map redesign (`src/css/05d-service-map.css`): softened map pictures, floating glass summary / buttons /
+  key, pins that drop in, a coloured header on each call's details, list cards that lift their pin. Opens on the
+  yard and the calls inside the 45-mile area (never wider than about the county); All Calls shows everything.
+
 ## Open questions for the owner
 
 - Mitre re-cut waste in the Cutting Optimiser is not counted yet. Proposal: a "profile depth" (mm) on each
