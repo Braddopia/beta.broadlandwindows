@@ -8,6 +8,8 @@ import { audit } from '../../data/audit.js';
 import { state } from '../../data/state.js';
 import { LEAD_CK } from '../../domain/checklists.js';
 import { PHONES, custCompat } from '../../domain/customers.js';
+import { pcNorm } from '../../domain/postcode.js';
+import { custToBook } from '../contacts/customer-book.js';
 import { nextLeadId } from '../../domain/numbering.js';
 import { RANDOM_SP, spResolve } from '../../domain/people.js';
 import { can, canSee } from '../../domain/permissions.js';
@@ -68,6 +70,12 @@ export function defineLeadRecord() {
     check: (W, o) => {
       if (!o.name) return 'Customer name is needed (Customer step)';
       if (!PHONES.some((k) => o[k])) return 'Add at least one phone number (Customer step)';
+      if (!o.homeAddr) return 'Address line 1 is needed (Customer step)';
+      if (!o.town) return 'Town is needed (Customer step)';
+      if (!pcNorm(o.homePc))
+        return o.homePc
+          ? 'That postcode does not look right, for example NR6 5DR (Customer step)'
+          : 'Postcode is needed (Customer step)';
       if (can('manage') && o.id && o.id != W.id) {
         if (!/^L\d{4}$/.test(o.id)) return 'Lead numbers look like L0001';
         if (state.leads.some((x) => x.id == o.id)) return 'Lead number ' + o.id + ' is already used';
@@ -103,6 +111,8 @@ export function defineLeadRecord() {
         repos.leads.add(l);
       } else repos.leads.changed(l);
       custCompat(l);
+      l.homePc = pcNorm(l.homePc) || l.homePc;
+      custToBook(l);
       audit(isNew ? 'Lead added' : 'Lead edited', l.id, l.name);
       return l.id;
     },

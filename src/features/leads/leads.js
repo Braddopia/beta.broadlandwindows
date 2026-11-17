@@ -29,6 +29,8 @@ import { go, hit, render } from '../../ui/shell/router.js';
 import { toast } from '../../ui/toast.js';
 import { uiState } from '../../ui/ui-state.js';
 import * as repos from '../../data/repository.js';
+import { celebrate } from '../../ui/success.js';
+import { custPick, custToBook, wzCustomer } from '../contacts/customer-book.js';
 
 export function mvLead(id, d) {
   const l = state.leads.find((x) => x.id == id),
@@ -139,7 +141,9 @@ export function convertLead(id) {
       audit('Lead converted', l.id, 'Became contract ' + c.id);
       docsMove('lead:' + l.id, 'contract:' + c.id);
       c.phTags = (l.phTags || []).slice();
+      custToBook(c);
       setTimeout(() => {
+        celebrate('Contract Created', c.id + ' - ' + c.name);
         toast(l.id + ' is now contract ' + c.id + '. ' + l.id + ' is free for a new lead.');
         go('contracts');
         openContract(c.id);
@@ -201,7 +205,9 @@ export function leadWizard() {
       {
         t: 'Customer',
         d: 'Who is the customer?',
+        after: wzCustomer,
         f: [
+          custPick(),
           {
             k: 'title',
             l: 'Title',
@@ -278,7 +284,9 @@ export function leadWizard() {
       l.owner = spResolve(l.owner);
       custCompat(l);
       repos.leads.add(l);
+      custToBook(l);
       audit('Lead added', lid, l.name + ' · ' + l.owner);
+      celebrate('Lead Created', lid + ' - ' + l.name);
       toast(lid + ' created and given to ' + l.owner + '. Open it any time to add more.');
     },
   });

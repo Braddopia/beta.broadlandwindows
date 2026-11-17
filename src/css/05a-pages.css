@@ -209,7 +209,9 @@ body.lv .lvg{flex:1;min-height:0;grid-template-rows:repeat(2,minmax(0,1fr))}
 .menu.open{animation:pop .18s ease-out}
 .fpop.open{animation:pop .18s ease-out}
 .bar i,.bar2 i{transform-origin:left}
-.hero{animation:heroIn .6s cubic-bezier(.2,.7,.2,1) backwards}
+/* the greeting slides in once as the page appears (only while the page is entering: a rule on .hero itself
+   restarted the animation when the entrance finished, which made it flicker on coming back to the Overview) */
+.main.enter .hero{animation-name:heroIn;animation-duration:.6s}
 @keyframes heroIn{from{opacity:0;transform:translateY(-8px) scale(.99)}to{opacity:1;transform:none}}
 .live{will-change:box-shadow}
 

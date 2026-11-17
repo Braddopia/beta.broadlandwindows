@@ -1,9 +1,13 @@
 /* features/calendar/calendar: The Calendar: fittings, service visits, deliveries and holidays. */
-import { onClick, onEvent } from '../../core/actions.js';
+import { onClick, onEvent, rowClick } from '../../core/actions.js';
 import { jobTitle } from '../../domain/job-title.js';
-import { html } from '../../core/html.js';
+import { html, raw } from '../../core/html.js';
 import { siteOf } from '../../domain/customers.js';
-import { openModal } from '../../ui/modal.js';
+import { askIn, closeModal, openModal } from '../../ui/modal.js';
+import { fieldControl } from '../../ui/forms/fields.js';
+import { SAFE } from '../../data/sanitize.js';
+import { store } from '../../data/persistence.js';
+import { toast } from '../../ui/toast.js';
 import { openContract } from '../contracts/contracts.js';
 import { BH, fd, isWk, iso, isoWeek, today } from '../../core/dates.js';
 import { esc } from '../../core/dom.js';
@@ -13,7 +17,7 @@ import { can, canSee } from '../../domain/permissions.js';
 import { holBody } from '../home/home.js';
 import { emptyArt } from '../../ui/components/art.js';
 import { setUI, uiState } from '../../ui/ui-state.js';
-import { render } from '../../ui/shell/router.js';
+import { go, render } from '../../ui/shell/router.js';
 
 /* ---------------- calendar ---------------- */
 /* what can be shown, each with its colour; a layer only shows to accounts that may open what it lists */
@@ -93,7 +97,7 @@ export function evs(k) {
             c: 'del',
             t: 'Delivery in: ' + d.supplier,
             s: d.items,
-            f: ['go', 'deliveries'],
+            f: ['calDel', d.id],
             k: 'Delivery',
             p: '',
           })
@@ -189,6 +193,27 @@ export function calFit(id) {
     'sm'
   );
 }
+/** a delivery on the calendar: its details in a pop-up, with the way on to the Deliveries page (never straight there) */
+export function calDel(id) {
+  const d = state.deliveries.find((x) => x.id == id);
+  if (!d) return;
+  openModal(
+    html`<h2>Delivery: ${d.supplier}</h2>
+      <dl class="cal-job">
+        <dt>Due</dt><dd>${fd(d.due)}</dd>
+        <dt>What Is Coming</dt><dd>${d.items || '-'}</dd>
+        ${d.contract ? html`<dt>Job</dt><dd>${d.contract}</dd>` : ''}
+        <dt>Status</dt><dd>${d.status || 'Due'}</dd>
+      </dl>
+      <div class="mact"><button class="btn ghost" data-act="closeModal">Close</button>${canSee('deliveries') ? html`<button class="btn" ${raw(onClick('calToPage', 'deliveries'))}>Continue To Deliveries</button>` : ''}</div>`,
+    'sm'
+  );
+}
+/** from a calendar pop-up, on to the page it belongs to */
+export function calToPage(v) {
+  closeModal();
+  go(v);
+}
 export function calCells(days, full) {
   const td = today();
   return days
@@ -218,7 +243,7 @@ export function calMine() {
       .filter((c) => c.fit && c.fit >= td && c.stage != 'Complete' && forPerson(m, c.fitter))
       .sort((a, b) => a.fit.localeCompare(b.fit));
   return `<div class="two" style="margin-top:1rem"><div class="panel"><h2><span>My Holiday</span><span class="acts"><button class="btn sm" data-act="bookMine">Book Holiday</button></span></h2>${holBody(m)}</div>
-  <div class="panel"><h2>My Jobs</h2>${J.map((c) => `<div class="row"><span><b>${fd(c.fit)}</b> ${esc(jobTitle(c.id, c.name))}<br><span class="muted">${esc(c.product)}, ${esc(c.town || '')}</span></span></div>`).join('') || emptyArt('done', 'No fittings booked for you.')}</div></div>`;
+  <div class="panel"><h2>My Jobs</h2>${J.map((c) => `<div class="row clk-r" ${rowClick('calFit', c.id)}><span><b>${fd(c.fit)}</b> ${esc(jobTitle(c.id, c.name))}<br><span class="muted">${esc(c.product)}, ${esc(c.town || '')}</span></span></div>`).join('') || emptyArt('done', 'No fittings booked for you.')}</div></div>`;
 }
 export function vCalendar() {
   const n = new Date(),
@@ -304,7 +329,66 @@ export function vCalendar() {
       ? `<div class="two" style="margin-top:1rem"><div class="panel"><h2>Upcoming Fittings</h2>${fits.map((c) => `<div class="row"><span><b>${fd(c.fit)}</b> ${esc(jobTitle(c.id, c.name))}<br><span class="muted">${esc(c.product)}, ${esc(c.town)} (${esc(c.fitter || 'no fitter')})</span></span><button class="mini pri" ${onClick('markFit', c.id)}>Mark fitted</button></div>`).join('') || '<p class="empty">No fittings booked.</p>'}</div>
   <div class="panel"><h2>Needs A Fit Date</h2>${un.map((c) => `<div class="row"><span><b>${esc(jobTitle(c.id, c.name))}</b><br><span class="muted">${esc(c.product)}</span></span><button class="mini" ${onClick('editContract', c.id)}>Set date</button></div>`).join('') || '<p class="empty">Everything has a date.</p>'}</div></div>`
       : calMine()
-  }`;
+  }
+  ${calNotesH()}`;
+}
+/* ---- My Notes: a note pad at the bottom of the calendar, private to whoever is signed in. It saves as you type
+   (a "Saved" tick shows straight away) and stays until it is cleared or changed. ---- */
+const noteOf = () => (state.calNotes || {})[USER] || { t: '', at: 0 };
+function calNotesH() {
+  const n = noteOf(),
+    when = n.at
+      ? 'Saved ' +
+        new Date(n.at).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
+      : 'Only you can see these';
+  return String(html`<div class="panel cal-notes"><h2><span>My Notes</span><span class="acts"><span class="cn-st nocap" id="calNoteSt">${when}</span><button class="mini" ${raw(onClick('calNoteClear'))} ${raw(n.t ? '' : 'disabled')}>Clear</button></span></h2>
+    <div class="cn-box" data-oninput="calNoteType" data-args-input="[{&quot;$&quot;:&quot;event&quot;}]">${raw(fieldControl({ k: 'calnote', t: 'area', max: 4000 }, n.t, { id: 'calNote', rows: 4 }))}</div></div>`);
+}
+let noteT = 0;
+/** typing in My Notes: saved half a second after the last key, with the time shown beside the heading */
+export function calNoteType(e) {
+  const el = e && e.target;
+  if (!el || el.id != 'calNote') return;
+  const st = document.getElementById('calNoteSt');
+  if (st) {
+    st.textContent = 'Saving...';
+    st.classList.remove('ok');
+  }
+  clearTimeout(noteT);
+  noteT = setTimeout(() => {
+    state.calNotes = state.calNotes || {};
+    const t = SAFE.text(el.value, 4000);
+    state.calNotes[USER] = { t, at: Date.now() };
+    store();
+    const s2 = document.getElementById('calNoteSt');
+    if (s2) {
+      s2.textContent = 'Saved';
+      s2.classList.add('ok');
+    }
+    const c = document.querySelector('.cal-notes .mini');
+    if (c) c.disabled = !t;
+  }, 500);
+}
+/** empty My Notes (after asking), with Undo on the banner */
+export function calNoteClear() {
+  const was = noteOf();
+  if (!was.t) return;
+  askIn('Clear your notes?', 'Everything in My Notes is removed.', 'Clear Notes', () => {
+    state.calNotes = state.calNotes || {};
+    state.calNotes[USER] = { t: '', at: Date.now() };
+    store();
+    render();
+    toast('Notes cleared', {
+      action: {
+        label: 'Undo',
+        run: () => {
+          state.calNotes[USER] = was;
+          store();
+          render();
+        },
+      },
+    });
+  });
 }
 /* the layers in the order of the menu on the left: Leads (surveys, appointments, follow-ups), Contracts
    (fittings), Deliveries, Service Calls, Holiday Planner */
@@ -332,14 +416,17 @@ export function calLayer(k) {
       dx = a.left - r.left,
       dy = a.top - r.top;
     if (!dx && !dy) return;
-    /* a gentle arc: lift a little half-way, then settle with a small overshoot */
+    /* a smooth glide to its new place (slow in, slow out), the moved button a touch lifted on the way */
+    const moved = b.dataset.ly == k;
     b.animate(
       [
-        { transform: `translate(${dx}px,${dy}px)` },
-        { transform: `translate(${dx / 2}px,${dy / 2 - 10}px)`, offset: 0.5 },
-        { transform: 'translate(0,0)' },
+        { transform: `translate(${dx}px,${dy}px)`, zIndex: moved ? 2 : 0 },
+        moved
+          ? { transform: `translate(${dx * 0.5}px,${dy * 0.5 - 3}px) scale(1.04)`, offset: 0.55, zIndex: 2 }
+          : { transform: `translate(${dx * 0.45}px,${dy * 0.45}px)`, offset: 0.55 },
+        { transform: 'none', zIndex: moved ? 2 : 0 },
       ],
-      { duration: 380, easing: 'cubic-bezier(.34,1.56,.64,1)' }
+      { duration: moved ? 340 : 280, easing: 'cubic-bezier(.25,.8,.25,1)' }
     );
   });
 }

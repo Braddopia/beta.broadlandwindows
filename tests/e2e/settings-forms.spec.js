@@ -50,9 +50,21 @@ test('contact form: required boxes depend on the type', async ({ app }) => {
         .map((s) => s.dataset.rq)
         .join(',')
     );
-  expect(await req()).toBe('type,co,name,role');
+  /* a supplier needs its company, what it supplies, email and address (they show on orders and reports) */
+  expect(await req()).toBe('type,co,name,role,cat,email,addr,town,pc');
+  await expect(app.page.locator('#c_cat')).toBeVisible();
+  await expect(app.page.locator('#c_trade')).toBeHidden();
+  /* a customer: no company, job title or website; their email and home address are needed */
   await app.page.selectOption('#c_type', 'Customer');
   expect(await req()).toBe('type,name,email,addr,town,pc');
+  await expect(app.page.locator('#c_co')).toBeHidden();
+  await expect(app.page.locator('#c_role')).toBeHidden();
+  await expect(app.page.locator('#c_web')).toBeHidden();
+  await expect(app.page.locator('#mbox label[for="c_name"]')).toContainText('Customer name');
+  /* a sub-contractor picks their trade */
+  await app.page.selectOption('#c_type', 'Sub-contractor');
+  await expect(app.page.locator('#c_trade')).toBeVisible();
+  expect(await req()).toContain('trade');
   expect(await app.run(() => [...document.querySelectorAll('#cphs select option')].map((o) => o.value))).not.toContain(
     'Fax'
   );

@@ -16,6 +16,7 @@ import { hit } from '../../ui/shell/router.js';
 import { uiState } from '../../ui/ui-state.js';
 import * as repos from '../../data/repository.js';
 import { holWaiting } from '../../ui/components/tags.js';
+import { celebrate } from '../../ui/success.js';
 
 /* ---------------- staff ---------------- */
 export function vStaff() {
@@ -72,7 +73,10 @@ export function editStaff(id) {
     (o) => {
       const old = x && x.name;
       if (x) repos.staff.changed(Object.assign(x, o));
-      else repos.staff.add({ id: shortId('U'), ...o });
+      else {
+        repos.staff.add({ id: shortId('U'), ...o });
+        celebrate('Staff Member Added', o.name);
+      }
       if (old && old != o.name) renamePerson(old, o.name);
       audit(x ? 'Staff edited' : 'Staff added', o.name, old && old != o.name ? 'Renamed from ' + old : '');
     }

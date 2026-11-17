@@ -433,9 +433,9 @@ body[data-view=messages] #rpb{bottom:calc(5.2rem + var(--safe-b,0px))}
 .ptb td.ac{width:1%;white-space:nowrap}
 .ie-pick{display:flex;flex-wrap:wrap;gap:.35rem;align-items:center;margin-top:.45rem;max-width:52rem}.ie-pick>b{font-size:.8rem;margin-right:.2rem}
 .wz-rev .si b,.wz-rev .si span{text-align:left!important;align-self:stretch}
-/* while a popup is open: the report button is just the flag,lifted above the popup's button row */
-body:has(#modal.open) #rpb{width:2.4rem;padding:0;justify-content:center;bottom:calc(5.4rem + var(--safe-b,0px))}
-body:has(#modal.open) #rpb span{display:none}
+/* while a popup is open the report button stays the same size and words as everywhere else; on narrower screens,
+   where a popup reaches the corner, it lifts above the popup's button row */
+@media(max-width:1180px){body:has(#modal.open) #rpb{bottom:calc(5.4rem + var(--safe-b,0px))}}
 /* "Work In Progress" notice over the lead and contract windows: solid,centred,must be closed */
 #pvn{position:fixed;inset:0;z-index:1100;display:grid;place-items:center;padding:1rem;background:rgba(1,20,45,.55);opacity:0;transition:opacity .18s}
 #pvn.on{opacity:1}
@@ -1102,10 +1102,10 @@ body[data-theme=dark] .smap .rd{stroke:#5a6578}body[data-theme=dark] .smap .rd.m
 
 /* Calendar layers: each button says plainly whether it is showing. On: tinted in its colour with a tick.
    Off: plain, dashed edge, an empty circle and lighter text. A press squashes slightly (feedback). */
-.lays-bar{display:flex;align-items:center;flex-wrap:wrap;gap:.45rem .5rem;margin:0 0 .8rem;padding:.45rem .55rem;border:1px solid var(--line);border-radius:10px;background:var(--card2)}
+.lays-bar{display:flex;align-items:center;flex-wrap:wrap;gap:.35rem .4rem;margin:0 0 .8rem;padding:.3rem .45rem;border:1px solid var(--line);border-radius:10px;background:var(--card2)}
 .lays{display:flex;flex-wrap:wrap;align-items:center;gap:.4rem}.lays-l{font-size:.7rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
 .lays-r{margin-left:auto}
-.lay{display:inline-flex;align-items:center;gap:.4rem;min-height:2.1rem;padding:.3rem .8rem .3rem .45rem;border-radius:6px;border:1.5px dashed color-mix(in srgb,var(--lc) 55%,transparent);background:transparent;color:var(--muted);font:600 .8rem var(--body);cursor:pointer;transition:background .18s ease,border-color .18s ease,color .18s ease,transform .12s cubic-bezier(.3,1.6,.5,1)}
+.lay{display:inline-flex;align-items:center;gap:.35rem;min-height:1.75rem;padding:.15rem .7rem .15rem .35rem;border-radius:6px;border:1.5px dashed color-mix(in srgb,var(--lc) 55%,transparent);background:transparent;color:var(--muted);font:600 .8rem var(--body);cursor:pointer;transition:background .18s ease,border-color .18s ease,color .18s ease,transform .12s cubic-bezier(.3,1.6,.5,1)}
 .lay:hover{border-color:var(--lc);color:var(--ink)}.lay:active{transform:scale(.94)}
 .lay .lck{display:grid;place-items:center;width:1.15rem;height:1.15rem;border-radius:50%;border:2px solid var(--lc);background:transparent;transition:background .18s ease,transform .25s cubic-bezier(.3,1.6,.5,1)}
 .lay.on{border-style:solid;border-color:var(--lc);background:color-mix(in srgb,var(--lc) 13%,var(--card,#fff));color:var(--ink)}
@@ -1136,3 +1136,11 @@ body.tv .fs-key,body.tv .fs-wrap,body.tv .fs-miss{max-width:none}
 .fs-wrap .fs-hd.fs-add:hover{opacity:1;color:var(--blue);background:var(--blue-bg)}
 
 
+
+/* Calendar: My Notes at the bottom, a private note pad that saves as you type */
+.cal-notes{margin-top:1rem}
+.cal-notes h2 .acts{display:flex;align-items:center;gap:.6rem}
+.cn-st{font-size:.74rem;font-weight:500;color:var(--muted);transition:color .2s var(--e-out)}
+.cn-st.ok{color:var(--green)}.cn-st.ok::before{content:"";display:inline-block;width:.28rem;height:.52rem;margin:0 .4rem .05rem .1rem;border:solid currentColor;border-width:0 2px 2px 0;transform:rotate(45deg);animation:okIn .4s var(--e-spring)}
+.cn-box textarea{display:block;width:100%;min-height:7.5rem;resize:vertical;padding:.55rem .9rem;border:1px solid var(--line);border-radius:12px;font:inherit;font-size:.92rem;line-height:1.6;color:var(--ink);background-color:var(--card);background-image:repeating-linear-gradient(transparent 0 calc(1.6em - 1px),rgba(3,78,162,.1) calc(1.6em - 1px) 1.6em);background-position:0 .55rem;background-attachment:local;text-transform:none;transition:border-color .15s var(--e-out),box-shadow .2s var(--e-out)}
+.cn-box textarea:hover{border-color:#8fa3be}.cn-box textarea:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(3,78,162,.12)}

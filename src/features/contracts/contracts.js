@@ -25,6 +25,8 @@ import { hit, render } from '../../ui/shell/router.js';
 import { toast } from '../../ui/toast.js';
 import { uiState } from '../../ui/ui-state.js';
 import * as repos from '../../data/repository.js';
+import { celebrate } from '../../ui/success.js';
+import { custPick, custToBook, wzCustomer } from '../contacts/customer-book.js';
 
 export function ckpi(L) {
   const v = sum(L, (c) => c.value),
@@ -81,7 +83,9 @@ export function contractWizard() {
       {
         t: 'Customer',
         d: 'Who is the customer?',
+        after: wzCustomer,
         f: [
+          custPick(),
           { k: 'title', l: 'Title', t: 'select', o: ['', 'Mr', 'Mrs', 'Miss', 'Ms', 'Mr & Mrs', 'Dr', 'Company'] },
           { k: 'name', l: 'Name', req: 1 },
           { k: 'mob1', l: 'Mobile', t: 'tel', max: 30, hint: 'Fill in at least one: a mobile or a home phone' },
@@ -135,7 +139,9 @@ export function contractWizard() {
       fitSync(c);
       custCompat(c);
       repos.contracts.add(c, { first: true });
+      custToBook(c);
       audit('Contract added', c.id, c.name + ' · ' + c.soldBy);
+      celebrate('Contract Created', c.id + ' - ' + c.name);
       setTimeout(() => openContract(c.id), 80);
     },
   });

@@ -86,11 +86,43 @@ export function vMessages() {
           mine = n.by == me2;
         return (
           sep +
-          `<div class="bw ${mine ? 'me' : ''}"><div class="bub ${mine ? 'me' : ''}">${!mine && cur == 'Everyone' ? `<small class="bub-n">${esc(n.by)}</small>` : ''}<p>${esc(n.t)}</p></div><span class="bub-t">${new Date(n.at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}${mine ? `<button class="bub-x" title="Delete" aria-label="Delete message" ${onClick('msgDel', n.id)}>&times;</button>` : ''}</span></div>`
+          `<div class="bw ${mine ? 'me' : ''} ${n.id == JUST_SENT ? 'new' : ''}"><div class="bub ${mine ? 'me' : ''}">${!mine && cur == 'Everyone' ? `<small class="bub-n">${esc(n.by)}</small>` : ''}<p>${esc(n.t)}</p></div><span class="bub-t">${n.id == JUST_SENT ? '<span class="bub-ok">Sent</span> ' : ''}${new Date(n.at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}${mine ? `<button class="bub-x" title="Delete" aria-label="Delete message" ${onClick('msgDel', n.id)}>&times;</button>` : ''}</span></div>`
         );
       }).join('') || `<div class="msn-empty">${emptyArt('team', '')}</div>`
     }</div>
-    ${cur == SYSTEM ? '<div class="msn-in msn-sys"><span class="muted">These are automatic messages. Replies are not read.</span></div>' : `<div class="msn-in"><textarea id="m_t" rows="1" maxlength="1000" placeholder="Aa" aria-label="Message" data-onkeydown="msgKey" data-args-keydown="[{&quot;$&quot;:&quot;event&quot;}]"></textarea><button class="msn-send" data-act="msgSend" aria-label="Send">${svg('M4 12l16-8-6 16-3-7z')}</button></div>`}</section></div>`;
+    ${cur == SYSTEM ? '<div class="msn-in msn-sys"><span class="muted">These are automatic messages. Replies are not read.</span></div>' : `<div class="msn-in"><textarea id="m_t" rows="1" maxlength="1000" placeholder="Aa" aria-label="Message" data-onkeydown="msgKey" data-args-keydown="[{&quot;$&quot;:&quot;event&quot;}]" data-oninput="msgTyping" data-args-input="[{&quot;$&quot;:&quot;this&quot;}]"></textarea><button class="msn-send ${JUST_SENT ? 'flew' : ''}" data-act="msgSend" aria-label="Send" title="Send (Enter)">${svg('M4 12l16-8-6 16-3-7z')}</button></div>`}</section>${peopleH(cur, me2)}</div>`;
+}
+/* the message just sent: its bubble pops in with "Sent", and the send button's arrow flies off once */
+let JUST_SENT = '';
+/** the people panel on the right: who is in the chat that is open (the whole team for Everyone), each with their
+    job and whether they are on holiday today; click someone to message them on their own */
+function peopleH(cur, me2) {
+  const td = new Date().toISOString().slice(0, 10),
+    off = (s) => state.hols.some((h) => h.sid == s.id && h.status == 'Approved' && h.from <= td && h.to >= td),
+    S = state.staff.filter((s) => s.name),
+    who =
+      cur == 'Everyone'
+        ? S.slice().sort((a, b) => (a.name == me2 ? -1 : b.name == me2 ? 1 : a.name.localeCompare(b.name)))
+        : cur == SYSTEM
+          ? S.filter((s) => s.name == me2)
+          : S.filter((s) => s.name == cur || s.name == me2).sort((a) => (a.name == me2 ? 1 : -1)),
+    one = cur != 'Everyone' && cur != SYSTEM ? S.find((s) => s.name == cur) : null;
+  const row = (s) => {
+    const you = s.name == me2,
+      away = off(s);
+    return `<button type="button" class="msn-pp ${you ? 'you' : ''}" ${you || s.name == cur ? 'disabled' : onClick('setUI', 'msg.to', s.name)} title="${you ? 'You' : s.name == cur ? 'This chat' : 'Message ' + esc(s.name)}"><span class="mav sm">${esc(initials(s.name))}${away ? '<i class="away" title="On holiday today"></i>' : ''}</span><span class="msn-ct"><b>${esc(s.name)}${you ? ' <small>(You)</small>' : ''}</b><small>${away ? 'On holiday today' : esc(s.role || s.cat || '')}</small></span></button>`;
+  };
+  return `<aside class="msn-p" aria-label="People in this chat"><h2>${cur == 'Everyone' ? 'Everyone In This Chat' : cur == SYSTEM ? 'Automatic Messages' : 'In This Chat'} <span class="msn-pn">${who.length}</span></h2>
+    <div class="msn-pl">${who.map(row).join('')}</div>
+    ${one && (one.phone || one.email) ? `<div class="msn-pc"><h3>Contact ${esc(one.name.split(' ')[0])}</h3>${one.phone ? `<a href="tel:${esc(one.phone)}">${svg('M22 16.9v3a2 2 0 01-2.2 2 19.8 19.8 0 01-8.6-3.1 19.5 19.5 0 01-6-6A19.8 19.8 0 012.1 4.2 2 2 0 014.1 2h3a2 2 0 012 1.7c.1.9.4 1.8.7 2.7a2 2 0 01-.5 2.1L8 9.8a16 16 0 006 6l1.3-1.3a2 2 0 012.1-.4c.9.3 1.8.6 2.7.7a2 2 0 011.7 2z')}${esc(one.phone)}</a>` : ''}${one.email ? `<a href="mailto:${esc(one.email)}">${svg('M4 4h16v16H4zM4 6l8 7 8-7')}${esc(one.email)}</a>` : ''}</div>` : ''}
+  </aside>`;
+}
+/** while typing: the send button lights up when there is something to send, and the box grows with the text */
+export function msgTyping(el) {
+  const b = $('.msn-send');
+  if (b) b.classList.toggle('ready', !!el.value.trim());
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 128) + 'px';
 }
 export function msnAfter() {
   const t = $('#msnT');
@@ -110,11 +142,17 @@ export function msgSend() {
     return;
   }
   state.notes = state.notes || [];
-  state.notes.push({ id: shortId('N'), to, by: USER, t, at: Date.now(), read: false, readBy: [] });
+  const id = shortId('N');
+  state.notes.push({ id, to, by: USER, t, at: Date.now(), read: false, readBy: [] });
   if (state.notes.length > 800) state.notes.splice(0, state.notes.length - 800);
   audit('Message sent', to, '');
   store();
+  JUST_SENT = id;
   render();
+  /* the "Sent" mark and the flying arrow show once; the next drawing of the page is back to normal */
+  setTimeout(() => {
+    if (JUST_SENT == id) JUST_SENT = '';
+  }, 50);
 }
 export function msgDel(id) {
   const n = (state.notes || []).find((x) => x.id == id);

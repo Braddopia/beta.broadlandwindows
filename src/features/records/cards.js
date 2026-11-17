@@ -17,6 +17,11 @@ export function rfH(f, v) {
   const hid = (f.dep && (v[f.dep] || 'Same as home') != 'Different') || nxHid(f, v);
   if (['invSame', 'siteSame'].includes(f.k))
     c = c.replace('<select ', '<select data-onchange="recDep" data-args-change="[{&quot;$&quot;:&quot;this&quot;}]" ');
+  if (f.k == 'contact')
+    c = c.replace(
+      '<select ',
+      '<select data-onchange="custFill" data-args-change="[{&quot;$&quot;:&quot;value&quot;}]" '
+    );
   return `<label class="rf ${f.t == 'area' ? 'ta' : ''}" ${f.dep ? `data-dep="${f.dep}"` : ''} ${f.nx ? `data-nx="${f.nx}"` : ''} ${hid ? 'hidden' : ''}><span>${esc(f.l)}${MARK(f.req, f.adm)}</span>${c}</label>`;
 }
 /* each group reads as a plain question; fields marked adv fold away under "More details" */

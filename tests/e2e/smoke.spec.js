@@ -69,7 +69,13 @@ test('phone: record window never scrolls sideways', async ({ app }) => {
 test('Overview: every card links to its page, and each line opens its own record', async ({ app }) => {
   await app.role('beta');
   await app.go('home');
+  /* going to another page asks first: Stay keeps the Overview, Go To opens the page */
   await app.page.click('#main .pan-go:has-text("Next Fittings")');
+  await expect(app.page.locator('.aski')).toContainText('Go to Calendar?');
+  await app.page.click('.aski [data-a="0"]');
+  expect(await app.run(() => document.body.dataset.view)).toBe('home');
+  await app.page.click('#main .pan-go:has-text("Next Fittings")');
+  await app.page.click('.aski [data-a="1"]');
   expect(await app.run(() => document.body.dataset.view)).toBe('fitting');
   await app.go('home');
   await app.page.click('#main .hpan:has-text("Next Fittings") .row.clk-r >> nth=0');

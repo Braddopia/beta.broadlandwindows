@@ -49,6 +49,7 @@ import * as featuresAuthPins from './features/auth/pins.js';
 import * as featuresAuthSession from './features/auth/session.js';
 import * as featuresCalendarCalendar from './features/calendar/calendar.js';
 import * as featuresContactsContacts from './features/contacts/contacts.js';
+import * as featuresContactsCustomerBook from './features/contacts/customer-book.js';
 import * as featuresContractsContractRecord from './features/contracts/contract-record.js';
 import * as featuresContractsContracts from './features/contracts/contracts.js';
 import * as featuresContractsDocuments from './features/contracts/documents.js';
@@ -176,6 +177,7 @@ const modules = {
   featuresAuthSession,
   featuresCalendarCalendar,
   featuresContactsContacts,
+  featuresContactsCustomerBook,
   featuresContractsContractRecord,
   featuresContractsContracts,
   featuresContractsDocuments,

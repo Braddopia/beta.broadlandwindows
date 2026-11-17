@@ -34,6 +34,7 @@ import { render } from '../../ui/shell/router.js';
 import { toast } from '../../ui/toast.js';
 import { uiState } from '../../ui/ui-state.js';
 import * as repos from '../../data/repository.js';
+import { celebrate } from '../../ui/success.js';
 
 /* typing a code into a day on the holiday chart */
 export function hcSet(sid, k, raw) {
@@ -498,6 +499,10 @@ export function holSave() {
   store();
   closeModal();
   render();
+  celebrate(
+    can('manage') ? 'Holiday Booked' : 'Request Sent',
+    fd(f) + (t != f ? ' to ' + fd(t) : '') + ' · ' + n + ' day' + (n == 1 ? '' : 's')
+  );
   toast(can('manage') ? 'Holiday booked' : 'Request sent for approval', {
     action: { label: 'Undo', run: () => holTakeBack(id, 'Holiday undone') },
   });

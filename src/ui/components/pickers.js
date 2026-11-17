@@ -19,7 +19,10 @@ let pop = null,
   rows = [],
   at = 0,
   month = null,
-  firing = false;
+  firing = false,
+  /* where the pointer last went down, so a list grows out of the exact spot that was clicked */
+  lastPt = null,
+  fresh = false;
 
 function box() {
   if (!pop) {
@@ -54,6 +57,21 @@ function place() {
   pop.style.width = Math.min(w, innerWidth - 16) + 'px';
   pop.style.left = Math.max(8, Math.min(r.left, innerWidth - Math.min(w, innerWidth - 16) - 8)) + 'px';
   pop.style.top = (below ? r.bottom + 6 : r.top - h - 6) + 'px';
+  if (!fresh) return;
+  fresh = false;
+  /* grow from where the click landed (or from the box itself when opened from the keyboard) */
+  const L = parseFloat(pop.style.left),
+    T = parseFloat(pop.style.top),
+    pt =
+      lastPt && Date.now() - lastPt.t < 800
+        ? lastPt
+        : { x: r.left + Math.min(r.width, 200) / 2, y: below ? r.bottom : r.top },
+    ox = Math.max(0, Math.min(pop.offsetWidth, pt.x - L)),
+    oy = Math.max(0, Math.min(h, pt.y - T));
+  pop.style.transformOrigin = ox + 'px ' + oy + 'px';
+  pop.classList.remove('grow');
+  void pop.offsetWidth;
+  pop.classList.add('grow');
 }
 export function pickClose() {
   if (pop) pop.classList.remove('open');
@@ -131,6 +149,7 @@ function drawSelect() {
   if (on) on.scrollIntoView({ block: 'nearest' });
 }
 function openSelect(el) {
+  fresh = true;
   forEl = el;
   kind = 'select';
   at = Math.max(0, el.selectedIndex);
@@ -191,6 +210,7 @@ function setDate(k) {
   el.focus({ preventScroll: true });
 }
 function openCal(el) {
+  fresh = true;
   forEl = el;
   kind = 'date';
   const v = /^\d{4}-\d{2}-\d{2}$/.test(el.value) ? el.value : today();
@@ -200,6 +220,7 @@ function openCal(el) {
 
 /* start-up step (run once by main.js) */
 export function listenForPickers() {
+  document.addEventListener('pointerdown', (e) => (lastPt = { x: e.clientX, y: e.clientY, t: Date.now() }), true);
   const isCombo = (t) => t && t.matches && t.matches('input[data-combo]:not([readonly]):not([disabled])');
   const isDate = (t) => t && t.matches && t.matches('input[type=date]:not([readonly]):not([disabled])');
   document.addEventListener('focusin', (e) => {

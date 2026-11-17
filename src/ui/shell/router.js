@@ -44,6 +44,7 @@ import { countUp } from '../components/kpi.js';
 import { closeFpop } from '../components/popover.js';
 import { morph } from '../morph.js';
 import { holWaiting } from '../components/tags.js';
+import { askIn } from '../modal.js';
 
 /* the search text typed in the top bar */
 export function setQuery(v) {
@@ -169,6 +170,18 @@ export function navHtml(b) {
             .join('')
       : '';
   }).join('');
+}
+/** go to another page, asking first ("Go to Deliveries?"): used wherever a click would otherwise take the person
+    off the page they are on without warning (the Overview's tiles and panels, calendar events) */
+export function goAsk(v) {
+  if (!VIEWS[v] || v == view) return go(v);
+  const t = VIEWS[v].t;
+  askIn(
+    'Go to ' + t + '?',
+    'This leaves ' + ((VIEWS[view] || {}).t || 'this page') + ' and opens the ' + t + ' page.',
+    'Go To ' + t,
+    () => go(v)
+  );
 }
 export function go(v) {
   document.body.classList.remove('sopen');

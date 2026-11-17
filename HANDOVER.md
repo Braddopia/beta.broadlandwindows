@@ -79,6 +79,33 @@ Read this first, then CLAUDE.md and docs/ARCHITECTURE.md.
 - v19.8.1: map narrower (60% map, 40% list); the yard is a window icon (our trade); the key is a small "Key" button
   bottom left that opens a card with each colour and how many calls it has (closed to start, `uiState.svc.key`).
 
+## Added in v19.9 (the top half: Overview, Messages, Calendar, Contact Book, Leads, Contracts)
+
+- Overview: the greeting no longer flickers on coming back (its slide-in only runs while the page enters:
+  `.main.enter .hero`). Every tile, panel heading and line leads somewhere; going to another page asks first
+  (`goAsk(view)` in `ui/shell/router.js`, used by the Overview and calendar pop-ups). The holiday ring opens the
+  holidays pop-up.
+- Report A Problem keeps its full size and words while a pop-up is open (it only lifts on narrow screens).
+- Buttons: every control answers the pointer (an audit hovered every button on every page; fixes and a low-weight
+  safety net are in `src/css/08-motion.css`).
+- Messages: people in the open chat on the right (the whole team for Everyone, with "On holiday today"; click to
+  message someone), a narrower conversation, a send button that lights up while typing, flies off on sending, and
+  "Sent" with a tick under the new bubble (`src/css/05e-messages.css`).
+- Drop-down lists and the date calendar grow out of the exact spot that was clicked (`ui/components/pickers.js`).
+- Calendar: the Showing bar is shorter and its buttons glide smoothly; a delivery opens a pop-up (Continue To
+  Deliveries) instead of leaving the calendar; My Jobs lines open the job; "My Notes" at the bottom is a private
+  note pad per person (`state.calNotes[USER]`), saved as you type, cleared with Undo.
+- Contact Book: the boxes change with the type (a customer has no company or job title; a supplier picks what it
+  supplies and can keep our account number; sub-contractors and trades pick their trade) and customers and
+  suppliers must have email and address. Postcodes are checked and tidied.
+- Customers: every lead and contract's customer is saved into the Contact Book as a Customer contact
+  (`features/contacts/customer-book.js`, matching by name with postcode or phone, `domain/customers.js`, unit
+  tested). New Lead, New Contract and the lead/contract windows have a "Customer" drop-down that fills every box
+  from someone already there. Leads and contracts now need address line 1, town and a real postcode.
+- Success: making anything new (lead, contract, contact, service call, delivery, holiday, staff, bill, supplier) shows
+  a tick that draws itself in a ring with what was made (`ui/success.js`, `celebrate(title, sub)`); clicks pass
+  through it and it goes on its own.
+
 ## Open questions for the owner
 
 - Mitre re-cut waste in the Cutting Optimiser is not counted yet. Proposal: a "profile depth" (mm) on each

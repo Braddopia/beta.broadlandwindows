@@ -48,6 +48,7 @@ import { uiState } from '../../ui/ui-state.js';
 import * as repos from '../../data/repository.js';
 import { svcLiveMap } from './service-map.js';
 import { callPostcode, pcNorm } from '../../domain/postcode.js';
+import { celebrate } from '../../ui/success.js';
 
 /* at a glance: does the customer still owe money on their contract? */
 export const svcBal = (c) => {
@@ -505,6 +506,7 @@ export function callWizard(cid, id) {
       }
       const n = { id: nid('S', state.calls), ...v, status: v.visit ? 'Booked' : 'Open', photos };
       repos.calls.add(n, { first: true });
+      celebrate('Service Call Created', [n.id, n.name].filter(Boolean).join(' - '));
       audit('Service call added', n.id, n.name);
     },
   });

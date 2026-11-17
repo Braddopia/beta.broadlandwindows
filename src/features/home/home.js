@@ -63,7 +63,7 @@ export function vHome() {
       `<div class="row ${open ? 'clk-r' : ''}" ${open ? rowClick(...open) : ''}><span>${a}</span><span>${b || ''}</span></div>`,
     goH = (t, view) =>
       canSee(view)
-        ? `<button type="button" class="pan-go" ${onClick('go', view)}>${t}<span class="pan-ar" aria-hidden="true">${svg(ICONS.chevron)}</span></button>`
+        ? `<button type="button" class="pan-go" ${onClick('goAsk', view)}>${t}<span class="pan-ar" aria-hidden="true">${svg(ICONS.chevron)}</span></button>`
         : t,
     pan = (t, h, e, view) =>
       `<div class="panel hpan"><h2>${goH(t, view)}</h2>${h || `<p class="empty">${e}</p>`}</div>`;
@@ -187,9 +187,9 @@ export function vHome() {
   );
   const resP = pan(
     'Lead Results',
-    row('Won', won, ['go', 'leads']) +
-      row('Lost', lost, ['go', 'leads']) +
-      row('Conversion', pc(won, won + lost), ['go', 'leads']),
+    row('Won', won, ['goAsk', 'leads']) +
+      row('Lost', lost, ['goAsk', 'leads']) +
+      row('Conversion', pc(won, won + lost), ['goAsk', 'leads']),
     '',
     'leads'
   );
@@ -219,7 +219,7 @@ export function vHome() {
   };
   cfg.beta = cfg.admin;
   const C = cfg[R] || cfg.staff;
-  const holP = `<div class="panel hpan hol-p"><h2>${goH('My Holiday', canSee('holidays') ? 'holidays' : 'fitting')}<span class="acts"><button class="btn sm" data-act="bookMine">Book Holiday</button>${canSee('holidays') ? `<button class="mini" ${onClick('go', 'holidays')}>Holiday Planner</button>` : canSee('fitting') ? `<button class="mini" ${onClick('go', 'fitting')}>My Calendar</button>` : ''}</span></h2>${holBody(m)}</div>`;
+  const holP = `<div class="panel hpan hol-p"><h2>${goH('My Holiday', canSee('holidays') ? 'holidays' : 'fitting')}<span class="acts"><button class="btn sm" data-act="bookMine">Book Holiday</button>${canSee('holidays') ? `<button class="mini" ${onClick('goAsk', 'holidays')}>Holiday Planner</button>` : canSee('fitting') ? `<button class="mini" ${onClick('goAsk', 'fitting')}>My Calendar</button>` : ''}</span></h2>${holBody(m)}</div>`;
   /* widgets: every tile and panel the person may see; they choose which show and in what order */
   const KP = {
     pipe: ['Pipeline Value', m0(pipe), '', 'leads'],
@@ -287,7 +287,7 @@ export function vHome() {
           .filter(okK)
           .map((x) => {
             const k = KP[x];
-            return `<button class="kpi ${k[2]}" ${onClick('go', k[3])}><small>${k[0]}</small><b class="${String(k[1]).length > 5 ? 'lg' : ''}">${k[1]}</b></button>`;
+            return `<button class="kpi ${k[2]}" ${onClick('goAsk', k[3])}><small>${k[0]}</small><b class="${String(k[1]).length > 5 ? 'lg' : ''}">${k[1]}</b></button>`;
           })
           .join('')}</div>`
       : ''
@@ -466,7 +466,7 @@ export function holBody(m) {
     R = 52,
     C = 2 * Math.PI * R,
     part = (n) => (allow ? Math.max(0, Math.min(1, n / allow)) : 0) * C;
-  return String(html`<div class="hol2">
+  return String(html`<div class="hol2 clk-r" title="See your holidays" ${raw(rowClick('myHolidays', m.id, 'all'))}>
     <div class="hring" role="img" aria-label="${left} of ${allow} days left">
       <svg viewBox="0 0 120 120" aria-hidden="true"><circle class="t" cx="60" cy="60" r="${R}"/><circle class="p" cx="60" cy="60" r="${R}" stroke-dasharray="${part(left).toFixed(1)} ${C.toFixed(1)}"/>${pend > 0 && left > 0 ? raw(`<circle class="w" cx="60" cy="60" r="${R}" stroke-dasharray="${part(Math.min(pend, left)).toFixed(1)} ${C.toFixed(1)}" stroke-dashoffset="${(-part(left - Math.min(pend, left))).toFixed(1)}"/>`) : ''}</svg>
       <div><b>${left}</b><small>Days Left</small></div>

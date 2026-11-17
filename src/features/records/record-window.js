@@ -23,6 +23,7 @@ import { drawThumbs, setPhotoList, tmp } from '../../ui/forms/photos.js';
 import { closeModal, openModal, plugInRecordWindow } from '../../ui/modal.js';
 import { render } from '../../ui/shell/router.js';
 import { busyBtn, toast } from '../../ui/toast.js';
+import { celebrate } from '../../ui/success.js';
 
 /* ==========================================================================
    15 · Full-screen records for Leads and Contracts (tabbed, AdminBase-style)
@@ -391,7 +392,8 @@ export function recSave(close) {
     }
     return false;
   }
-  const id = D.save(recordWin, o);
+  const wasNew = recordWin.isNew,
+    id = D.save(recordWin, o);
   if (id == null) {
     toast('This record no longer exists. It may have been deleted on another screen.');
     return false;
@@ -404,7 +406,11 @@ export function recSave(close) {
     render();
     recOpen(recordWin.kind, id);
   }
-  toast('Saved');
+  if (wasNew) {
+    const r = D.get(id);
+    celebrate(D.label + ' Created', r ? [id, r.name].filter(Boolean).join(' - ') : id);
+    toast(D.label + ' created');
+  } else toast('Saved');
   return true;
 }
 export function recNav(d) {

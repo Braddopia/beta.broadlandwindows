@@ -1,0 +1,69 @@
+/* ==========================================================================
+   05e · Messages: chats on the left, the conversation in the middle (narrower, easier to read), and the people in
+   the chat on the right. Every button answers the pointer, and sending shows it worked straight away
+   (docs/UX-PRINCIPLES.md: exaggerated feedback, follow-through, the Doherty threshold).
+   ========================================================================== */
+.msn{grid-template-columns:19rem minmax(0,1fr) 16.5rem}
+@media(max-width:1250px){.msn{grid-template-columns:17rem minmax(0,1fr) 14.5rem}}
+@media(max-width:1050px){.msn-p{display:none}}
+@media(max-width:1050px) and (min-width:801px){.msn{grid-template-columns:17rem minmax(0,1fr)}}
+
+/* chats list: a row lifts on hover and squashes when pressed; the open chat has a blue bar */
+.msn-c{position:relative;transition:background-color .15s var(--e-out),transform .3s var(--e-spring)}
+.msn-c:hover{transform:translateX(2px)}
+.msn-c:active{transform:scale(.97);transition-duration:.08s}
+.msn-c.on::before{content:"";position:absolute;left:0;top:22%;bottom:22%;width:3px;border-radius:3px;background:var(--blue)}
+.msn-c .mav{transition:transform .3s var(--e-spring)}.msn-c:hover .mav{transform:scale(1.06)}
+.msn-lh select{cursor:pointer;transition:background-color .15s var(--e-out),border-color .15s var(--e-out),transform .3s var(--e-spring)}
+.msn-lh select:hover{background:var(--blue-bg);border-color:var(--blue)}
+.msn-lh select:active{transform:scale(.96)}
+
+/* the box: a soft glow while typing; it grows with the message */
+.msn-in textarea{transition:box-shadow .2s var(--e-out),background-color .2s var(--e-out);min-height:2.5rem}
+.msn-in textarea:hover{background:#e7ebf2}
+body[data-theme=dark] .msn-in textarea:hover{background:#28303e}
+
+/* send: grey until there is something to send, then blue and a little bigger (anticipation); hover lifts, press
+   squashes, and on sending the arrow flies off and comes back (follow-through) */
+.msn-send{background:#b9c3d1;transition:background-color .2s var(--e-out),transform .32s var(--e-spring),box-shadow .2s var(--e-out)}
+.msn-send.ready{background:#034ea2;transform:scale(1.06);box-shadow:0 6px 14px -6px rgba(3,78,162,.7)}
+.msn-send:hover{background:#0a5cba;transform:translateY(-2px) scale(1.08);box-shadow:0 8px 18px -6px rgba(3,78,162,.7)}
+.msn-send:active{transform:scale(.88);transition-duration:.08s}
+.msn-send svg{transition:transform .3s var(--e-spring)}
+.msn-send.ready svg,.msn-send:hover svg{transform:rotate(-12deg)}
+.msn-send.flew svg{animation:sendFly .6s var(--e-out)}
+@keyframes sendFly{0%{transform:none}35%{transform:translate(22px,-22px) rotate(-20deg);opacity:0}36%{transform:translate(-16px,16px);opacity:0}100%{transform:none;opacity:1}}
+body[data-theme=dark] .msn-send{background:#3a4456}body[data-theme=dark] .msn-send.ready,body[data-theme=dark] .msn-send:hover{background:#2f7fdb}
+
+/* a message just sent pops up from the box and settles; "Sent" with a tick shows under it */
+.bw.new{animation:bubIn .42s var(--e-spring) both;transform-origin:100% 100%}
+@keyframes bubIn{0%{opacity:0;transform:translateY(18px) scale(.7)}100%{opacity:1;transform:none}}
+.bub-ok{display:inline-flex;align-items:center;gap:.2rem;color:#12794c;font-weight:700;animation:okIn .5s var(--e-spring) .2s both}
+.bub-ok::before{content:"";width:.3rem;height:.55rem;margin:-.15rem .15rem 0 .1rem;border:solid currentColor;border-width:0 2px 2px 0;transform:rotate(45deg)}
+@keyframes okIn{0%{opacity:0;transform:scale(.4)}100%{opacity:1;transform:none}}
+body[data-theme=dark] .bub-ok{color:#5fd39a}
+.bub{transition:transform .25s var(--e-spring)}
+.bw:hover .bub{transform:scale(1.01)}
+.bub-x{transition:opacity .15s var(--e-out),transform .3s var(--e-spring),color .15s var(--e-out)}
+.bub-x:hover{color:var(--red);transform:scale(1.25)}
+
+/* people in the chat */
+.msn-p{display:flex;flex-direction:column;min-height:0;border-left:1px solid var(--line);background:linear-gradient(180deg,transparent,rgba(3,78,162,.025))}
+.msn-p h2{display:flex;align-items:center;gap:.5rem;margin:0;padding:1.05rem 1rem .7rem;font-size:.95rem}
+.msn-pn{display:inline-grid;place-items:center;min-width:1.4rem;height:1.4rem;padding:0 .35rem;border-radius:1rem;background:var(--blue-bg);color:var(--blue);font-size:.72rem}
+.msn-pl{flex:1;min-height:0;overflow:auto;padding:0 .5rem .6rem}
+.msn-pp{display:flex;align-items:center;gap:.6rem;width:100%;padding:.45rem .5rem;border:0;border-radius:11px;background:none;color:var(--ink);text-align:left;cursor:pointer;transition:background-color .15s var(--e-out),transform .3s var(--e-spring)}
+.msn-pp:hover:not(:disabled){background:var(--blue-bg);transform:translateX(-2px)}
+.msn-pp:active:not(:disabled){transform:scale(.97);transition-duration:.08s}
+.msn-pp:disabled{cursor:default;opacity:1}
+.msn-pp .msn-ct b{font-size:.85rem}.msn-pp .msn-ct b small{font-weight:500;color:var(--muted)}
+.mav.sm{position:relative;width:2.15rem;height:2.15rem;font-size:.72rem}
+.mav.sm i{position:absolute;right:-1px;bottom:-1px;width:.7rem;height:.7rem;border-radius:50%;border:2px solid var(--card);background:#2fbf71}
+.mav.sm i.away{background:#e08a00}
+.msn-pc{margin:.2rem .8rem .9rem;padding:.7rem .8rem;border-radius:12px;background:var(--blue-bg);display:flex;flex-direction:column;gap:.35rem}
+.msn-pc h3{margin:0 0 .1rem;font-size:.78rem;color:var(--muted);font-weight:700}
+.msn-pc a{display:flex;align-items:center;gap:.45rem;color:var(--blue);font-size:.82rem;text-decoration:none;text-transform:none;border-radius:6px;transition:transform .3s var(--e-spring)}
+.msn-pc a:hover{text-decoration:underline;transform:translateX(2px)}
+.msn-pc svg{width:.95rem;height:.95rem;flex:0 0 auto;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+@media(prefers-reduced-motion:reduce){.bw.new,.bub-ok,.msn-send.flew svg{animation:none}}

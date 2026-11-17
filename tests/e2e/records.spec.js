@@ -11,6 +11,7 @@ test('new lead: "Pick at random" appoints a salesperson on save', async ({ app }
     const before = document.querySelector('#f_owner').value;
     document.querySelector('#f_name').value = 'Sample Test';
     document.querySelector('#f_mob1').value = '07700 900 444';
+    document.querySelector('#f_homePc').value = 'NR6 5DR';
     RECORDS.lead
       .fields(recordWin)
       .filter((f) => f.req)

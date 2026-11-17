@@ -15,9 +15,20 @@ import {
 } from '../../config/constants.js';
 import { FITL, OWNERS, RANDOM_SP, staffNames } from '../../domain/people.js';
 import { can } from '../../domain/permissions.js';
+import { customerChoices } from '../contacts/customer-book.js';
 
 /* ---- customer information: same fields on leads and contracts ---- */
 export const CUSTF = [
+  /* pick someone already in the Contact Book to fill in the boxes below; a new customer is added to it on saving */
+  {
+    k: 'contact',
+    l: 'Customer',
+    t: 'select',
+    get o() {
+      return customerChoices();
+    },
+    g: 'Customer',
+  },
   {
     k: 'title',
     l: 'Title',
@@ -48,11 +59,11 @@ export const CUSTF = [
   { k: 'email2', nx: 'email1', l: 'Email 2', t: 'email', g: 'Email' },
   { k: 'email3', nx: 'email2', l: 'Email 3', t: 'email', g: 'Email' },
   { k: 'addrType', l: 'Address type', t: 'select', o: ['', 'Home', 'Business'], g: 'Home Address' },
-  { k: 'homeAddr', l: 'Address line 1', max: 120, g: 'Home Address' },
+  { k: 'homeAddr', l: 'Address line 1', max: 120, g: 'Home Address', req: 1 },
   { k: 'homeAddr2', l: 'Address line 2', max: 120, g: 'Home Address' },
-  { k: 'town', l: 'Town / city', max: 60, g: 'Home Address' },
+  { k: 'town', l: 'Town / city', max: 60, g: 'Home Address', req: 1 },
   { k: 'county', adv: 1, l: 'County', max: 60, g: 'Home Address' },
-  { k: 'homePc', l: 'Postcode', max: 10, g: 'Home Address' },
+  { k: 'homePc', l: 'Postcode', max: 10, g: 'Home Address', req: 1 },
   { k: 'invSame', l: 'Send the invoice to', t: 'select', o: ['Same as home', 'Different'], g: 'Invoice Address' },
   { k: 'invAddr', dep: 'invSame', l: 'Address line 1', max: 120, g: 'Invoice Address' },
   { k: 'invAddr2', dep: 'invSame', l: 'Address line 2', max: 120, g: 'Invoice Address' },

@@ -21,6 +21,7 @@ import { toast } from '../../ui/toast.js';
 import { uiState } from '../../ui/ui-state.js';
 import * as repos from '../../data/repository.js';
 import { plugInForms } from '../../ui/forms/form.js';
+import { celebrate } from '../../ui/success.js';
 
 export const sups = () => state.suppliers;
 export const SUPN = (cur) => ['', ...new Set([...sups().map((x) => x.name), cur || ''].filter(Boolean))];
@@ -481,6 +482,7 @@ export function editSup(i, pre) {
       });
       if (i == null) {
         repos.suppliers.add(o);
+        celebrate('Supplier Added', o.name);
         contactFromSup(o.name, o);
         audit('Supplier added', o.name, '');
         toast(o.name + ' added');

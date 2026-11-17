@@ -20,6 +20,7 @@ import { hit, render } from '../../ui/shell/router.js';
 import { toast } from '../../ui/toast.js';
 import { uiState } from '../../ui/ui-state.js';
 import * as repos from '../../data/repository.js';
+import { celebrate } from '../../ui/success.js';
 
 export function vDeliveries() {
   const F = uiState.del,
@@ -154,7 +155,10 @@ export function editDel(id, supName, con) {
         }
       }
       if (x) repos.deliveries.changed(Object.assign(x, o));
-      else repos.deliveries.add({ id: shortId('D'), ...o });
+      else {
+        repos.deliveries.add({ id: shortId('D'), ...o });
+        celebrate('Delivery Added', o.supplier);
+      }
       audit(
         x ? 'Delivery edited' : 'Delivery added',
         o.supplier,

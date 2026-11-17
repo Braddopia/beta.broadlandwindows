@@ -11,6 +11,8 @@ import { audit } from '../../data/audit.js';
 import { state } from '../../data/state.js';
 import { CK } from '../../domain/checklists.js';
 import { PHONES, custCompat } from '../../domain/customers.js';
+import { pcNorm } from '../../domain/postcode.js';
+import { custToBook } from '../contacts/customer-book.js';
 import { nid } from '../../domain/numbering.js';
 import { RANDOM_SP, spResolve } from '../../domain/people.js';
 import { can } from '../../domain/permissions.js';
@@ -106,6 +108,12 @@ export function defineContractRecord() {
     check: (W, o) => {
       if (!o.name) return 'Customer name is needed (Customer step)';
       if (!PHONES.some((k) => o[k])) return 'Add at least one phone number (Customer step)';
+      if (!o.homeAddr) return 'Address line 1 is needed (Customer step)';
+      if (!o.town) return 'Town is needed (Customer step)';
+      if (!pcNorm(o.homePc))
+        return o.homePc
+          ? 'That postcode does not look right, for example NR6 5DR (Customer step)'
+          : 'Postcode is needed (Customer step)';
       if (o.paid > o.value && o.value > 0 && !W.okOver) {
         askIn('Paid is more than the contract value', 'Save it anyway?', 'Save Anyway', () => {
           W.okOver = 1;
@@ -148,6 +156,8 @@ export function defineContractRecord() {
         repos.contracts.add(c, { first: true });
       } else repos.contracts.changed(c);
       custCompat(c);
+      c.homePc = pcNorm(c.homePc) || c.homePc;
+      custToBook(c);
       audit(isNew ? 'Contract added' : 'Contract edited', c.id, c.name);
       return c.id;
     },
