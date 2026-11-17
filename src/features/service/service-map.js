@@ -193,6 +193,9 @@ export function svcMapMount() {
       failed = 0;
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
+      /* OpenStreetMap's servers need to know which website is asking (their usage policy). The page as a whole
+         sends no referrer, so the map pictures alone send the site's address (never the page or anything else). */
+      referrerPolicy: 'strict-origin',
       attribution:
         '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors',
     })
