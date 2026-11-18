@@ -106,6 +106,25 @@ Read this first, then CLAUDE.md and docs/ARCHITECTURE.md.
   a tick that draws itself in a ring with what was made (`ui/success.js`, `celebrate(title, sub)`); clicks pass
   through it and it goes on its own.
 
+## Added in v19.10
+
+- "Go to a page?" (`goAsk`) counts down from 5 on its Go button and goes by itself; pointing at the box pauses it,
+  Stay Here or Esc stops it (`askIn(..., { count, no, icon })` in `ui/modal.js`).
+- One success banner: `celebrate(title, sub, action)` is now the bottom banner with a drawn tick, a second line and
+  Undo (no more centre pop-up plus banner). A plain "Saved" straight after it is not shown over it (`ui/toast.js`).
+- Messages: the People list uses the same rows as the chat list; a one-to-one chat shows the person's card with Call
+  and Email. Deleting a message has Undo; pressing Send with nothing typed shakes the box.
+- Calendar: no ticks on the Showing buttons (a solid dot when shown, an empty ring when hidden); My Notes is a tall
+  note pad.
+- Holidays: half days (morning H1, afternoon H2, `h.half` 'am' / 'pm', 0.5 days; both halves of one day show H); a
+  booking cannot cover days already booked or waiting (`holClash`), and a standard user cannot request days in the
+  past. The form shows the days and the allowance before and after, with anything stopping it in red. Unpaid leave
+  waiting for approval no longer shows on the ring as using the allowance. Asking to cancel an approved paid holiday
+  is tested end to end.
+- Contact Book: customers already in leads and contracts were added once at start-up (`custBook` migration); Import
+  Customers runs the same matching again. Cards show what a supplier supplies or a tradesperson's trade.
+- Overview: Reset layout says so ("Default layout restored").
+
 ## Open questions for the owner
 
 - Mitre re-cut waste in the Cutting Optimiser is not counted yet. Proposal: a "profile depth" (mm) on each

@@ -47,23 +47,30 @@ body[data-theme=dark] .bub-ok{color:#5fd39a}
 .bub-x{transition:opacity .15s var(--e-out),transform .3s var(--e-spring),color .15s var(--e-out)}
 .bub-x:hover{color:var(--red);transform:scale(1.25)}
 
-/* people in the chat */
-.msn-p{display:flex;flex-direction:column;min-height:0;border-left:1px solid var(--line);background:linear-gradient(180deg,transparent,rgba(3,78,162,.025))}
-.msn-p h2{display:flex;align-items:center;gap:.5rem;margin:0;padding:1.05rem 1rem .7rem;font-size:.95rem}
-.msn-pn{display:inline-grid;place-items:center;min-width:1.4rem;height:1.4rem;padding:0 .35rem;border-radius:1rem;background:var(--blue-bg);color:var(--blue);font-size:.72rem}
-.msn-pl{flex:1;min-height:0;overflow:auto;padding:0 .5rem .6rem}
-.msn-pp{display:flex;align-items:center;gap:.6rem;width:100%;padding:.45rem .5rem;border:0;border-radius:11px;background:none;color:var(--ink);text-align:left;cursor:pointer;transition:background-color .15s var(--e-out),transform .3s var(--e-spring)}
-.msn-pp:hover:not(:disabled){background:var(--blue-bg);transform:translateX(-2px)}
-.msn-pp:active:not(:disabled){transform:scale(.97);transition-duration:.08s}
-.msn-pp:disabled{cursor:default;opacity:1}
-.msn-pp .msn-ct b{font-size:.85rem}.msn-pp .msn-ct b small{font-weight:500;color:var(--muted)}
-.mav.sm{position:relative;width:2.15rem;height:2.15rem;font-size:.72rem}
-.mav.sm i{position:absolute;right:-1px;bottom:-1px;width:.7rem;height:.7rem;border-radius:50%;border:2px solid var(--card);background:#2fbf71}
-.mav.sm i.away{background:#e08a00}
-.msn-pc{margin:.2rem .8rem .9rem;padding:.7rem .8rem;border-radius:12px;background:var(--blue-bg);display:flex;flex-direction:column;gap:.35rem}
-.msn-pc h3{margin:0 0 .1rem;font-size:.78rem;color:var(--muted);font-weight:700}
-.msn-pc a{display:flex;align-items:center;gap:.45rem;color:var(--blue);font-size:.82rem;text-decoration:none;text-transform:none;border-radius:6px;transition:transform .3s var(--e-spring)}
-.msn-pc a:hover{text-decoration:underline;transform:translateX(2px)}
-.msn-pc svg{width:.95rem;height:.95rem;flex:0 0 auto;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+/* people in the chat: the same header and the same rows as the chats on the left, so the two sides match */
+.msn-p{display:flex;flex-direction:column;min-height:0;border-left:1px solid var(--line)}
+.msn-pn{display:inline-grid;place-items:center;min-width:1.7rem;height:1.7rem;padding:0 .45rem;border-radius:1rem;background:var(--blue-bg);color:var(--blue);font:700 .8rem var(--body)}
+.msn-ph{margin:.5rem 1.1rem .3rem;font-size:.7rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.msn-pnote{margin:0 1rem .5rem;font-size:.8rem;color:var(--muted);line-height:1.45}
+.msn-pl{flex:1;min-height:0;overflow:auto;padding:.1rem .5rem .8rem}
+.msn-pp:disabled{cursor:default;opacity:1;transform:none}
+.msn-pp.here{background:var(--blue-bg)}
+.msn-you{display:inline-block;margin-left:.3rem;padding:.05rem .4rem;border-radius:1rem;background:var(--blue-bg);color:var(--blue);font:700 .66rem var(--body);font-style:normal;vertical-align:.1em}
+.msn-pp small.away{color:#a06200;font-weight:600}
+.msn-go{display:grid;place-items:center;width:1.8rem;height:1.8rem;border-radius:50%;color:var(--blue);opacity:0;transform:translateX(-4px);transition:opacity .15s var(--e-out),transform .3s var(--e-spring)}
+.msn-go svg{width:1rem;height:1rem;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.msn-pp:hover:not(:disabled) .msn-go{opacity:1;transform:none}
+/* the person's card in a one-to-one chat */
+.msn-pc{display:flex;flex-direction:column;align-items:center;gap:.2rem;margin:.2rem .8rem .4rem;padding:1rem .8rem .9rem;border-radius:14px;background:linear-gradient(180deg,var(--blue-bg),transparent);text-align:center}
+.msn-pc .mav{width:3.6rem;height:3.6rem;font-size:1.1rem;margin-bottom:.3rem}
+.msn-pc>b{font-size:1rem}.msn-pc>small{color:var(--muted);font-size:.8rem}
+.msn-pc .tag{margin-top:.25rem}
+.msn-pa{display:flex;gap:.4rem;margin-top:.6rem}
+.msn-pa .mini{height:2rem;padding:0 .8rem;text-decoration:none;gap:.35rem}
+.msn-pa svg{width:.9rem;height:.9rem;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.msn-pc p{margin:.5rem 0 0;font-size:.74rem;color:var(--muted);word-break:break-word}
 
-@media(prefers-reduced-motion:reduce){.bw.new,.bub-ok,.msn-send.flew svg{animation:none}}
+/* an empty message: the box shakes side to side once */
+.msn-in textarea.shake{animation:shake .4s var(--e-out)}
+@keyframes shake{0%,100%{transform:none}20%{transform:translateX(-6px)}40%{transform:translateX(5px)}60%{transform:translateX(-3px)}80%{transform:translateX(2px)}}
+@media(prefers-reduced-motion:reduce){.msn-in textarea.shake,.bw.new,.bub-ok,.msn-send.flew svg{animation:none}}

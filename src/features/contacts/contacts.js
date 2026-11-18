@@ -20,6 +20,8 @@ import { hit, render } from '../../ui/shell/router.js';
 import { toast } from '../../ui/toast.js';
 import { uiState } from '../../ui/ui-state.js';
 import * as repos from '../../data/repository.js';
+import { custToBook } from './customer-book.js';
+import { need } from '../auth/session.js';
 import { celebrate } from '../../ui/success.js';
 
 /* ---------------- contact book ---------------- */
@@ -37,7 +39,7 @@ export function vContacts() {
   let last = '';
   const card = (
     c
-  ) => `<div class="cc2 clk-r" ${rowClick('editContact', c.id)}><div class="cc2-h"><span class="cav" style="--h:${[...(c.co || c.name || '?')].reduce((a, x) => a + x.charCodeAt(0), 0) % 360}">${esc(initials(c.co || c.name))}</span><div><b>${esc(c.co || c.name)}</b><small>${esc([c.name && c.name != c.co ? c.name : '', c.role].filter(Boolean).join(' · ') || ' ')}</small></div><span class="tag">${esc(c.type || '')}</span></div>
+  ) => `<div class="cc2 clk-r" ${rowClick('editContact', c.id)}><div class="cc2-h"><span class="cav" style="--h:${[...(c.co || c.name || '?')].reduce((a, x) => a + x.charCodeAt(0), 0) % 360}">${esc(initials(c.co || c.name))}</span><div><b>${esc(c.co || c.name)}</b><small>${esc([c.name && c.name != c.co ? c.name : '', c.role, c.cat, c.trade].filter(Boolean).join(' · ') || ' ')}</small></div><span class="tag">${esc(c.type || '')}</span></div>
     <div class="cc2-b">${conLines(c)
       .map(
         (p) =>
@@ -319,25 +321,14 @@ export function editContact(id, draft, after) {
     done();
   };
 }
+/** bring every lead and contract's customer into the Contact Book (the same matching as when they are saved) */
 export function impCust() {
-  let n = 0;
-  state.contracts.forEach((c) => {
-    if (!state.contacts.some((k) => k.co == c.name)) {
-      n++;
-      repos.contacts.add({
-        id: shortId('K'),
-        co: c.name,
-        name: c.name,
-        role: 'Contract ' + c.id,
-        type: 'Customer',
-        phone: c.phone || '',
-        email: c.email || '',
-        addr: c.address || c.town,
-      });
-    }
-  });
+  if (!need('manage', 'Importing customers')) return;
+  const before = state.contacts.length;
+  [...state.contracts, ...state.leads].forEach((r) => custToBook(r));
+  const n = state.contacts.length - before;
   audit('Customers imported', 'Contact book', n + ' added');
   store();
   render();
-  toast(n + ' customer' + (n == 1 ? '' : 's') + ' added');
+  toast(n ? n + ' customer' + (n == 1 ? '' : 's') + ' added' : 'Customers updated: everyone was already in the book');
 }

@@ -176,11 +176,14 @@ export function navHtml(b) {
 export function goAsk(v) {
   if (!VIEWS[v] || v == view) return go(v);
   const t = VIEWS[v].t;
+  /* the page's own icon, a plain question, and a 5 second countdown on the Go button: Stay Here or Esc stops it */
   askIn(
     'Go to ' + t + '?',
-    'This leaves ' + ((VIEWS[view] || {}).t || 'this page') + ' and opens the ' + t + ' page.',
+    'You are leaving ' + ((VIEWS[view] || {}).t || 'this page') + '.',
     'Go To ' + t,
-    () => go(v)
+    () => go(v),
+    false,
+    { count: 5, no: 'Stay Here', icon: svg(ICONS[v] || ICONS.chevron) }
   );
 }
 export function go(v) {

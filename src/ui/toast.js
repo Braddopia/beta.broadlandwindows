@@ -25,8 +25,14 @@ export const toastKind = (t) =>
 /* plain icons, no drawing animation */
 const TICK = '<svg viewBox="0 0 24 24" class="tp-i" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
 const WARN = '<svg viewBox="0 0 24 24" class="tp-i" aria-hidden="true"><path d="M12 7v6.5M12 17v.5"/></svg>';
-let undoFn = null;
-/** show a message. opts.action = { label: 'Undo', run: fn } adds a button on the banner */
+let undoFn = null,
+  /* a success banner is not replaced by the plain "Saved" that some forms say straight after it */
+  bigUntil = 0;
+/* the success banner: a tick that draws itself in a ring (see ui/success.js) */
+const RING =
+  '<svg viewBox="0 0 40 40" class="tp-ring" aria-hidden="true"><circle cx="20" cy="20" r="17"/><path d="M12 20.5l5.5 5.5L28.5 14"/></svg>';
+/** show a message. opts.action = { label: 'Undo', run: fn } adds a button on the banner; opts.big with opts.sub
+    is the success banner: a drawn tick, the message and a second line under it */
 export function toast(t, opts) {
   if (document.body.classList.contains('tv')) return;
   t = String(t ?? '');
@@ -35,9 +41,18 @@ export function toast(t, opts) {
   const e = $('#toast'),
     act = opts && opts.action;
   undoFn = act ? act.run : null;
-  e.className = 'toast tpop ' + kind;
-  e.innerHTML = (kind == 'ok' ? TICK : WARN) + '<span class="tp-t"></span>';
+  const big = !!(opts && opts.big && kind == 'ok');
+  if (!big && kind == 'ok' && !act && Date.now() < bigUntil) return;
+  bigUntil = big ? Date.now() + 700 : 0;
+  e.className = 'toast tpop ' + kind + (big ? ' big' : '');
+  e.innerHTML = (big ? RING : kind == 'ok' ? TICK : WARN) + '<span class="tp-t"></span>';
   e.querySelector('.tp-t').textContent = t;
+  if (big && opts.sub) {
+    const s2 = document.createElement('small');
+    s2.className = 'tp-s';
+    s2.textContent = opts.sub;
+    e.querySelector('.tp-t').appendChild(s2);
+  }
   if (act) {
     const b = document.createElement('button');
     b.type = 'button';
@@ -75,7 +90,7 @@ export function toast(t, opts) {
         undoFn = null;
       }, 200);
     },
-    act ? 6000 : kind == 'ok' ? 3000 : 4500
+    act ? 6000 : big ? 4000 : kind == 'ok' ? 3000 : 4500
   );
 }
 /* close the banner early */

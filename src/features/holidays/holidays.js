@@ -16,7 +16,10 @@ import {
   absCode,
   allowTot,
   holDays,
+  holClash,
   holLeft,
+  holLen,
+  holSpan,
   hu,
   shutDays,
   svcExtra,
@@ -329,7 +332,7 @@ export function vHolidays() {
       .sort((a, c) => holWaiting(c) - holWaiting(a) || c.from.localeCompare(a.from))
       .map(
         (h) =>
-          `<div class="row"><span><b>${esc(staffName(h.sid))}</b> <span class="muted">${fd(h.from)} to ${fd(h.to)}, ${h.days} day${h.days == 1 ? '' : 's'}${h.note ? ' | ' + esc(h.note) : ''}</span></span><span class="acts">${holTag(h)}${Ad && holWaiting(h) ? holDecideBtns(h) : ''}</span></div>`
+          `<div class="row"><span><b>${esc(staffName(h.sid))}</b> <span class="muted">${esc(holSpan(h, fd))}${h.note ? ' | ' + esc(h.note) : ''}</span></span><span class="acts">${holTag(h)}${Ad && holWaiting(h) ? holDecideBtns(h) : ''}</span></div>`
       )
       .join('') || '<p class="empty">No holiday booked.</p>'
   }${Ad ? '' : '<p class="muted" style="font-size:.82rem;margin-top:.6rem">Requests are approved by an administrator.</p>'}</div></div>`;
@@ -339,8 +342,7 @@ export function holSetClose(id, st) {
   closeModal();
 }
 /* "17 Aug to 21 Aug (5 days)", for System messages */
-const holWhen = (h) =>
-  fd(h.from) + (h.to != h.from ? ' to ' + fd(h.to) : '') + ' (' + h.days + ' day' + (h.days == 1 ? '' : 's') + ')';
+const holWhen = (h) => fd(h.from) + (h.to != h.from ? ' to ' + fd(h.to) : '') + ' (' + holLen(h).toLowerCase() + ')';
 /* an administrator's two buttons for something waiting: a new request, or a request to cancel */
 const holDecideBtns = (h) =>
   `<button class="mini pri" ${onClick('holSet', h.id, 'Approved')}>${h.cancelReq ? 'Approve Cancel' : 'Approve'}</button><button class="mini del" ${onClick('holSet', h.id, 'Rejected')}>${h.cancelReq ? 'Keep Holiday' : 'Reject'}</button>`;
@@ -403,19 +405,21 @@ export function holBook(sid, day) {
     const m = me();
     if (m) sid = m.id;
   }
-  const choice = (v, t, sub) =>
-    html`<label class="chc"><input type="radio" name="hpaid" value="${v}" data-onchange="holChk"><span><b>${t}</b><small>${sub}</small></span></label>`;
+  const choice = (name, v, t, sub, on) =>
+    html`<label class="chc"><input type="radio" name="${name}" value="${v}" data-onchange="holChk"${raw(on ? ' checked' : '')}><span><b>${t}</b><small>${sub}</small></span></label>`;
   openModal(
     String(html`<button class="mx" data-act="closeModal" aria-label="Close">&times;</button><h2>Book Holiday</h2>
-    <div class="grid">
+    <div class="grid hbk">
       <div class="ff full"><label for="hs">Staff member</label><select id="hs" data-onchange="holChk">${state.staff.map((s) => html`<option value="${s.id}"${raw(s.id == sid ? ' selected' : '')}>${s.name}</option>`)}</select></div>
-      <div class="ff"><label for="hf">First day off</label><input type="date" id="hf" value="${d}" data-weekdays="1" data-onchange="holChk"></div>
-      <div class="ff"><label for="ht">Last day off</label><input type="date" id="ht" value="${d}" data-weekdays="1" data-onchange="holChk"></div>
-      <fieldset class="ff full paidq"><legend>Paid or unpaid${raw(MARK(1))}</legend><div class="chq">${choice('paid', 'Paid holiday', 'Uses your allowance')}${choice('unpaid', 'Unpaid leave', 'Does not use your allowance')}</div></fieldset>
+      <fieldset class="ff full"><legend>How long?</legend><div class="chq">${choice('hlen', 'full', 'Full days', 'One day or more', 1)}${choice('hlen', 'half', 'Half day', 'A morning or an afternoon', 0)}</div></fieldset>
+      <div class="ff" id="hfW"><label for="hf">First day off</label><input type="date" id="hf" value="${d}" data-weekdays="1" data-onchange="holChk"></div>
+      <div class="ff" id="htW"><label for="ht">Last day off</label><input type="date" id="ht" value="${d}" data-weekdays="1" data-onchange="holChk"></div>
+      <fieldset class="ff" id="hhW" hidden><legend>Which half?</legend><div class="chq">${choice('hhalf', 'am', 'Morning', 'H1 on the chart', 1)}${choice('hhalf', 'pm', 'Afternoon', 'H2 on the chart', 0)}</div></fieldset>
+      <fieldset class="ff full paidq"><legend>Paid or unpaid${raw(MARK(1))}</legend><div class="chq">${choice('hpaid', 'paid', 'Paid holiday', 'Uses your allowance', 0)}${choice('hpaid', 'unpaid', 'Unpaid leave', 'Does not use your allowance', 0)}</div></fieldset>
       <div class="ff full"><label for="hn">Note <span class="muted">(optional)</span></label><input id="hn" maxlength="120" placeholder="For example: family wedding"></div>
     </div>
     <div id="hi" class="hol-sum" aria-live="polite"></div>
-    <div class="mact"><button class="btn ghost" data-act="closeModal">Cancel</button><button class="btn" data-act="holSave">${can('manage') ? 'Book holiday' : 'Send request'}</button></div>`),
+    <div class="mact"><button class="btn ghost" data-act="closeModal">Cancel</button><button class="btn" id="hGo" data-act="holSave">${can('manage') ? 'Book Holiday' : 'Send Request'}</button></div>`),
     'md'
   );
   holChk();
@@ -425,86 +429,111 @@ function paidChoice() {
   const c = document.querySelector('input[name=hpaid]:checked');
   return c ? c.value == 'paid' : null;
 }
-export function holChk() {
+/** what the booking form says: who, the days, half or full, paid or not; and what is wrong with it, if anything */
+function holRead() {
   const s = state.staff.find((x) => x.id == $('#hs').value),
-    f = $('#hf').value;
-  let t = $('#ht').value;
-  if (!s || !f) return;
-  if (t < f) {
-    $('#ht').value = t = f;
+    half = (document.querySelector('input[name=hlen]:checked') || {}).value == 'half',
+    side = half ? (document.querySelector('input[name=hhalf]:checked') || {}).value || 'am' : '',
+    f = SAFE.date($('#hf').value),
+    t = half ? f : SAFE.date($('#ht').value);
+  const r = { s, half, side, f, t, paid: paidChoice(), stop: [], warn: [] };
+  if (!s || !f || !t) {
+    r.stop.push('Pick the dates');
+    return r;
   }
-  const n = holDays(f, t),
-    left = holLeft(s, +f.slice(0, 4)),
-    unpaid = paidChoice() === false,
-    w = [];
-  if (!isWk(f) || !isWk(t)) w.push('Holidays start and end on a weekday, Monday to Friday');
-  if (n > left && !unpaid) w.push('Only ' + left + ' days left');
+  r.n = half ? (holDays(f, f) ? 0.5 : 0) : holDays(f, t);
+  r.left = holLeft(s, +f.slice(0, 4));
+  if (!isWk(f) || !isWk(t)) r.stop.push('Holidays start and end on a weekday, Monday to Friday');
+  else if (!r.n) r.stop.push('Those days are weekends, bank holidays or the Christmas shutdown');
+  if (f < today() && !can('manage')) r.stop.push('Pick a day from today onwards');
+  const c = holClash(s.id, f, t, side);
+  if (c)
+    r.stop.push(
+      (me() && me().id == s.id ? 'You already have ' : s.name.split(' ')[0] + ' already has ') +
+        holSpan(c, fd) +
+        ' ' +
+        (c.status == 'Pending' ? 'waiting for approval' : 'booked') +
+        ' on these days'
+    );
+  if (r.paid !== false && r.n > r.left) r.stop.push('Only ' + r.left + ' days left');
   state.contracts
-    .filter((c) => c.fit && c.stage != 'Complete' && c.fit >= f && c.fit <= t && forPerson(s, c.fitter))
-    .forEach((c) => w.push('Fitting #' + c.id + ' is booked on ' + fd(c.fit)));
+    .filter((c2) => c2.fit && c2.stage != 'Complete' && c2.fit >= f && c2.fit <= t && forPerson(s, c2.fitter))
+    .forEach((c2) => r.warn.push('Fitting #' + c2.id + ' is booked on ' + fd(c2.fit)));
   const mates = state.staff.filter(
     (x) => x.id != s.id && state.hols.some((h) => h.sid == x.id && h.status != 'Rejected' && h.from <= t && h.to >= f)
   );
-  if (mates.length) w.push('Also off in this period: ' + mates.map((x) => x.name.split(' ')[0]).join(', '));
-  $('#hi').innerHTML =
-    `<p class="hol-n"><b>${n} working day${n == 1 ? '' : 's'}</b> <span class="muted">${unpaid ? 'unpaid' : left + ' left this year'}</span></p>` +
-    w.map((x) => `<div class="warn">${esc(x)}</div>`).join('');
+  if (mates.length) r.warn.push('Also off: ' + mates.map((x) => x.name.split(' ')[0]).join(', '));
+  return r;
+}
+const dayWord = (n) => (n == 0.5 ? 'Half a day' : n + ' working day' + (n == 1 ? '' : 's'));
+export function holChk() {
+  if (!$('#hs')) return;
+  const half = (document.querySelector('input[name=hlen]:checked') || {}).value == 'half';
+  /* a half day is one day: the last day and its box go, and Morning / Afternoon shows in their place */
+  $('#htW').hidden = half;
+  $('#hhW').hidden = !half;
+  $('#hfW').querySelector('label').textContent = half ? 'Day off' : 'First day off';
+  const f = $('#hf').value;
+  if (!half && $('#ht').value < f) $('#ht').value = f;
+  const r = holRead();
+  if (!r.s || !r.f) return;
+  const unpaid = r.paid === false,
+    after = Math.max(0, r.left - (unpaid ? 0 : r.n || 0)),
+    pct = (x) => (r.left > 0 ? Math.max(0, Math.min(100, (x / Math.max(r.left, 1)) * 100)) : 0);
+  /* the summary: how many days, and the allowance now and after this booking, with anything in the way */
+  $('#hi').innerHTML = String(html`<div class="hsum ${r.stop.length ? 'no' : 'ok'}">
+      <div class="hsum-n"><b>${r.n == 0.5 ? '½' : r.n || 0}</b><small>${r.n == 0.5 ? (r.side == 'pm' ? 'afternoon' : 'morning') : r.n == 1 ? 'day' : 'days'}</small></div>
+      <div class="hsum-t"><p><b>${dayWord(r.n || 0)}</b> ${unpaid ? 'unpaid, your allowance stays the same' : r.paid == null ? 'paid or unpaid?' : 'paid holiday'}</p>
+        ${unpaid ? '' : html`<div class="hsum-bar" title="Allowance left"><i style="width:${pct(after).toFixed(0)}%"></i><i class="use" style="width:${(pct(r.left) - pct(after)).toFixed(0)}%"></i></div><small>${r.left} days left now, ${after} after this</small>`}
+      </div></div>
+    ${r.stop.map((x) => html`<div class="warn bad">${x}</div>`)}${r.warn.map((x) => html`<div class="warn">${x}</div>`)}`);
+  const go = $('#hGo');
+  if (go) {
+    go.classList.toggle('dim', !!r.stop.length);
+    go.title = r.stop[0] || '';
+  }
 }
 export function holSave() {
-  const sid = $('#hs').value,
-    s = state.staff.find((x) => x.id == sid),
-    f = SAFE.date($('#hf').value),
-    t = SAFE.date($('#ht').value);
-  if (!s || !f || !t) {
-    toast('Pick valid dates');
-    return;
-  }
-  if (!isWk(f) || !isWk(t)) {
-    toast('Holidays start and end on a weekday, Monday to Friday');
-    return;
-  }
-  const n = holDays(f, t),
-    left = holLeft(s, +f.slice(0, 4)),
-    paid = paidChoice();
-  if (paid == null) {
+  const r = holRead();
+  if (r.paid == null) {
     toast('Choose paid holiday or unpaid leave');
     const q = $('.paidq');
     if (q) q.classList.add('bad');
     return;
   }
-  if (!n) {
-    toast('Those days are weekends, bank holidays or the Christmas shutdown');
+  if (r.stop.length) {
+    toast(r.stop[0]);
     return;
   }
-  if (paid && n > left) {
-    toast('Only ' + left + ' days left');
-    return;
-  }
-  if (!can('manage') && me() && sid != me().id) {
+  const { s, f, t, n } = r;
+  if (!can('manage') && me() && s.id != me().id) {
     toast('You can only request your own holiday');
     return;
   }
-  const id = shortId('H');
-  repos.holidays.add({
-    id,
-    sid,
-    from: f,
-    to: t,
-    days: n,
-    status: can('manage') ? 'Approved' : 'Pending',
-    paid,
-    note: SAFE.text($('#hn').value, 120),
-  });
-  audit(can('manage') ? 'Holiday booked' : 'Holiday requested', s.name, f + ' to ' + t);
+  const id = shortId('H'),
+    rec = {
+      id,
+      sid: s.id,
+      from: f,
+      to: t,
+      days: n,
+      status: can('manage') ? 'Approved' : 'Pending',
+      paid: r.paid,
+      note: SAFE.text($('#hn').value, 120),
+    };
+  if (r.half) rec.half = r.side;
+  repos.holidays.add(rec);
+  audit(
+    can('manage') ? 'Holiday booked' : 'Holiday requested',
+    s.name,
+    f + (t != f ? ' to ' + t : '') + (r.half ? ' (' + (r.side == 'pm' ? 'afternoon' : 'morning') + ')' : '')
+  );
   store();
   closeModal();
   render();
-  celebrate(
-    can('manage') ? 'Holiday Booked' : 'Request Sent',
-    fd(f) + (t != f ? ' to ' + fd(t) : '') + ' · ' + n + ' day' + (n == 1 ? '' : 's')
-  );
-  toast(can('manage') ? 'Holiday booked' : 'Request sent for approval', {
-    action: { label: 'Undo', run: () => holTakeBack(id, 'Holiday undone') },
+  celebrate(can('manage') ? 'Holiday Booked' : 'Request Sent For Approval', holSpan(rec, fd), {
+    label: 'Undo',
+    run: () => holTakeBack(id, 'Holiday undone'),
   });
 }
 /* what the cancel button says: withdraw a request, ask to cancel, or cancel outright */
@@ -549,7 +578,7 @@ export function holEdit(id) {
   if (!h) return;
   const Ad = can('manage');
   openModal(
-    `<h2>${esc(staffName(h.sid))}</h2><p>${fd(h.from)} to ${fd(h.to)}, ${h.days} working day${h.days == 1 ? '' : 's'}<br>${holTag(h)} ${paidTag(h)}</p>${h.note ? `<p class="muted">${esc(h.note)}</p>` : ''}<div class="mact"><button class="btn ghost" data-act="closeModal">Close</button>${Ad && h.cancelReq ? `<button class="btn green" ${onClick('holSetClose', id, 'Approved')}>Approve Cancel</button><button class="btn red" ${onClick('holSetClose', id, 'Rejected')}>Keep Holiday</button>` : ''}${Ad && !h.cancelReq && h.status != 'Approved' ? `<button class="btn green" ${onClick('holSetClose', id, 'Approved')}>Approve</button>` : ''}${Ad && !h.cancelReq && h.status == 'Pending' ? `<button class="btn red" ${onClick('holSetClose', id, 'Rejected')}>Reject</button>` : ''}${canCancelHol(h) && !(h.cancelReq && !Ad) ? `<button class="btn ghost red-t" ${onClick('holDel', id)}>${cancelLabel(h)}</button>` : ''}</div>`
+    `<h2>${esc(staffName(h.sid))}</h2><p>${esc(holSpan(h, fd))}<br>${holTag(h)} ${paidTag(h)}</p>${h.note ? `<p class="muted">${esc(h.note)}</p>` : ''}<div class="mact"><button class="btn ghost" data-act="closeModal">Close</button>${Ad && h.cancelReq ? `<button class="btn green" ${onClick('holSetClose', id, 'Approved')}>Approve Cancel</button><button class="btn red" ${onClick('holSetClose', id, 'Rejected')}>Keep Holiday</button>` : ''}${Ad && !h.cancelReq && h.status != 'Approved' ? `<button class="btn green" ${onClick('holSetClose', id, 'Approved')}>Approve</button>` : ''}${Ad && !h.cancelReq && h.status == 'Pending' ? `<button class="btn red" ${onClick('holSetClose', id, 'Rejected')}>Reject</button>` : ''}${canCancelHol(h) && !(h.cancelReq && !Ad) ? `<button class="btn ghost red-t" ${onClick('holDel', id)}>${cancelLabel(h)}</button>` : ''}</div>`
   );
 }
 export function holDel(id) {
@@ -705,7 +734,7 @@ export function myHolidays(sid, which = 'all') {
     none =
       which == 'next' ? 'Nothing booked yet.' : which == 'prev' ? 'No holidays taken yet.' : 'No holidays booked yet.',
     row = (h) =>
-      `<div class="row"><span>${fd(h.from)} to ${fd(h.to)} · ${h.days} day${h.days == 1 ? '' : 's'}${h.note ? `<br><span class="muted">${esc(h.note)}</span>` : ''}</span><span class="acts">${paidTag(h)}${holTag(h)}${h.to >= td && canCancelHol(h) && !(h.cancelReq && !can('manage')) ? `<button class="mini del" ${onClick('holDelList', h.id, sid, which)}>${cancelLabel(h)}</button>` : ''}</span></div>`;
+      `<div class="row"><span>${esc(holSpan(h, fd))}${h.note ? `<br><span class="muted">${esc(h.note)}</span>` : ''}</span><span class="acts">${paidTag(h)}${holTag(h)}${h.to >= td && canCancelHol(h) && !(h.cancelReq && !can('manage')) ? `<button class="mini del" ${onClick('holDelList', h.id, sid, which)}>${cancelLabel(h)}</button>` : ''}</span></div>`;
   const tabs = ['next', 'prev', 'all']
     .map(
       (k) =>

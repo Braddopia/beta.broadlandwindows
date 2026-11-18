@@ -409,7 +409,6 @@ export function recSave(close) {
   if (wasNew) {
     const r = D.get(id);
     celebrate(D.label + ' Created', r ? [id, r.name].filter(Boolean).join(' - ') : id);
-    toast(D.label + ' created');
   } else toast('Saved');
   return true;
 }

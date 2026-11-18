@@ -45,16 +45,20 @@ export function askYes(title, msg, okLabel, cb, danger, noCb) {
     'sm'
   );
 }
-/* askIn: our own confirm box, layered above any open window. Esc or Cancel closes it. */
+/* askIn: our own confirm box, layered above any open window. Esc or Cancel closes it.
+   opts.count = seconds: the yes button fills up and says it for you when the time runs out (paused while the pointer
+   is on the box); opts.no = the cancel button's words; opts.icon = markup for the round icon at the top. */
 export let ASKI = null;
-export function askIn(title, msg, okLabel, cb, danger) {
+export function askIn(title, msg, okLabel, cb, danger, opts = {}) {
   if (ASKI) ASKI.remove();
   const o = document.createElement('div');
   o.className = 'aski';
   o.setAttribute('role', 'alertdialog');
   o.setAttribute('aria-modal', 'true');
   o.setAttribute('aria-label', title);
-  o.innerHTML = `<div class="aski-b"><div class="ask-ic ${danger ? 'r' : ''}">${danger ? '!' : '?'}</div><h3>${esc(title)}</h3>${msg ? `<p>${esc(msg)}</p>` : ''}<div class="aski-a"><button type="button" class="btn ghost" data-a="0">Cancel</button><button type="button" class="btn ${danger ? 'red' : 'green'}" data-a="1">${esc(okLabel || 'Yes')}</button></div></div>`;
+  const N = +opts.count || 0;
+  if (N) o.classList.add('cnt');
+  o.innerHTML = `<div class="aski-b"><div class="ask-ic ${danger ? 'r' : ''} ${opts.icon ? 'go' : ''}">${opts.icon || (danger ? '!' : '?')}</div><h3>${esc(title)}</h3>${msg ? `<p>${esc(msg)}</p>` : ''}<div class="aski-a"><button type="button" class="btn ghost" data-a="0">${esc(opts.no || 'Cancel')}</button><button type="button" class="btn ${danger ? 'red' : N ? '' : 'green'}" data-a="1">${N ? '<i class="cd-f" aria-hidden="true"></i>' : ''}<span>${esc(okLabel || 'Yes')}</span>${N ? `<b class="cd-n" aria-hidden="true">${N}</b>` : ''}</button></div>${N ? '<p class="cd-h" aria-live="polite">Point at this box to pause</p>' : ''}</div>`;
   const key = (e) => {
       if (e.key == 'Escape') {
         e.stopPropagation();
@@ -63,6 +67,7 @@ export function askIn(title, msg, okLabel, cb, danger) {
       }
     },
     done = (ok) => {
+      clearInterval(tick);
       o.remove();
       document.removeEventListener('keydown', key, true);
       if (ASKI === o) ASKI = null;
@@ -77,6 +82,37 @@ export function askIn(title, msg, okLabel, cb, danger) {
   ASKI = o;
   document.body.appendChild(o);
   o.querySelector('[data-a="1"]').focus();
+  /* the countdown: the button fills from left to right, the number counts down, and it goes by itself at the end */
+  let tick = 0;
+  if (N) {
+    const box = o.querySelector('.aski-b'),
+      fill = o.querySelector('.cd-f'),
+      num = o.querySelector('.cd-n'),
+      hint = o.querySelector('.cd-h');
+    let left = N * 1000,
+      paused = false,
+      last = performance.now();
+    box.addEventListener('pointerenter', () => {
+      paused = true;
+      o.classList.add('paused');
+      hint.textContent = 'Paused';
+    });
+    box.addEventListener('pointerleave', () => {
+      paused = false;
+      o.classList.remove('paused');
+      hint.textContent = 'Point at this box to pause';
+    });
+    const step = () => {
+      const now = performance.now();
+      if (!paused) left -= now - last;
+      last = now;
+      fill.style.transform = 'scaleX(' + Math.min(1, 1 - left / (N * 1000)).toFixed(3) + ')';
+      num.textContent = Math.max(0, Math.ceil(left / 1000));
+      if (left <= 0) done(true);
+    };
+    tick = setInterval(step, 50);
+    step();
+  }
 }
 /* a save inside a window: the window closes and the banner at the bottom says it worked (same as everywhere) */
 export function doneIn(msg) {

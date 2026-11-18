@@ -1,5 +1,6 @@
 /* features/messages/messages: Messages between staff. */
 import { onClick } from '../../core/actions.js';
+import { today } from '../../core/dates.js';
 import { $, esc } from '../../core/dom.js';
 import { initials } from '../../core/format.js';
 import { svg } from '../../core/icons.js';
@@ -90,31 +91,35 @@ export function vMessages() {
         );
       }).join('') || `<div class="msn-empty">${emptyArt('team', '')}</div>`
     }</div>
-    ${cur == SYSTEM ? '<div class="msn-in msn-sys"><span class="muted">These are automatic messages. Replies are not read.</span></div>' : `<div class="msn-in"><textarea id="m_t" rows="1" maxlength="1000" placeholder="Aa" aria-label="Message" data-onkeydown="msgKey" data-args-keydown="[{&quot;$&quot;:&quot;event&quot;}]" data-oninput="msgTyping" data-args-input="[{&quot;$&quot;:&quot;this&quot;}]"></textarea><button class="msn-send ${JUST_SENT ? 'flew' : ''}" data-act="msgSend" aria-label="Send" title="Send (Enter)">${svg('M4 12l16-8-6 16-3-7z')}</button></div>`}</section>${peopleH(cur, me2)}</div>`;
+    ${cur == SYSTEM ? '<div class="msn-in msn-sys"><span class="muted">These are automatic messages. Replies are not read.</span></div>' : `<div class="msn-in"><textarea id="m_t" rows="1" maxlength="1000" placeholder="Aa" aria-label="Message" data-onkeydown="msgKey" data-args-keydown="[{&quot;$&quot;:&quot;event&quot;}]" data-oninput="msgTyping" data-args-input="[{&quot;$&quot;:&quot;this&quot;}]"></textarea><button class="msn-send ${JUST_SENT ? 'flew' : ''}" data-act="msgSend" aria-label="Send" title="Send (Enter)">${svg('M4 12l16-8-6 16-3-7z')}</button></div>`}</section>${peopleH(cur, me2, av)}</div>`;
 }
 /* the message just sent: its bubble pops in with "Sent", and the send button's arrow flies off once */
 let JUST_SENT = '';
 /** the people panel on the right: who is in the chat that is open (the whole team for Everyone), each with their
     job and whether they are on holiday today; click someone to message them on their own */
-function peopleH(cur, me2) {
-  const td = new Date().toISOString().slice(0, 10),
+function peopleH(cur, me2, av) {
+  const td = today(),
     off = (s) => state.hols.some((h) => h.sid == s.id && h.status == 'Approved' && h.from <= td && h.to >= td),
     S = state.staff.filter((s) => s.name),
+    one = cur != 'Everyone' && cur != SYSTEM ? S.find((s) => s.name == cur) : null,
     who =
       cur == 'Everyone'
         ? S.slice().sort((a, b) => (a.name == me2 ? -1 : b.name == me2 ? 1 : a.name.localeCompare(b.name)))
-        : cur == SYSTEM
-          ? S.filter((s) => s.name == me2)
-          : S.filter((s) => s.name == cur || s.name == me2).sort((a) => (a.name == me2 ? 1 : -1)),
-    one = cur != 'Everyone' && cur != SYSTEM ? S.find((s) => s.name == cur) : null;
+        : S.filter((s) => s.name == me2 || (one && s.id == one.id)).sort((a) => (a.name == me2 ? 1 : -1));
+  /* each person: the same row as the chats on the left (avatar, name, job), You marked with a small tag */
   const row = (s) => {
     const you = s.name == me2,
-      away = off(s);
-    return `<button type="button" class="msn-pp ${you ? 'you' : ''}" ${you || s.name == cur ? 'disabled' : onClick('setUI', 'msg.to', s.name)} title="${you ? 'You' : s.name == cur ? 'This chat' : 'Message ' + esc(s.name)}"><span class="mav sm">${esc(initials(s.name))}${away ? '<i class="away" title="On holiday today"></i>' : ''}</span><span class="msn-ct"><b>${esc(s.name)}${you ? ' <small>(You)</small>' : ''}</b><small>${away ? 'On holiday today' : esc(s.role || s.cat || '')}</small></span></button>`;
+      away = off(s),
+      here = s.name == cur;
+    return `<button type="button" class="msn-c msn-pp ${you ? 'you' : ''} ${here ? 'here' : ''}" ${you || here ? 'disabled' : onClick('setUI', 'msg.to', s.name)} title="${you ? 'You' : here ? 'This chat' : 'Message ' + esc(s.name) + ' on their own'}">${av(s.name)}<span class="msn-ct"><b>${esc(s.name)}${you ? ' <i class="msn-you">You</i>' : ''}</b><small class="${away ? 'away' : ''}">${away ? 'On holiday today' : esc(s.role || s.cat || '')}</small></span>${you || here ? '' : `<span class="msn-go" aria-hidden="true">${svg('M4 12h12M12 6l6 6-6 6')}</span>`}</button>`;
   };
-  return `<aside class="msn-p" aria-label="People in this chat"><h2>${cur == 'Everyone' ? 'Everyone In This Chat' : cur == SYSTEM ? 'Automatic Messages' : 'In This Chat'} <span class="msn-pn">${who.length}</span></h2>
-    <div class="msn-pl">${who.map(row).join('')}</div>
-    ${one && (one.phone || one.email) ? `<div class="msn-pc"><h3>Contact ${esc(one.name.split(' ')[0])}</h3>${one.phone ? `<a href="tel:${esc(one.phone)}">${svg('M22 16.9v3a2 2 0 01-2.2 2 19.8 19.8 0 01-8.6-3.1 19.5 19.5 0 01-6-6A19.8 19.8 0 012.1 4.2 2 2 0 014.1 2h3a2 2 0 012 1.7c.1.9.4 1.8.7 2.7a2 2 0 01-.5 2.1L8 9.8a16 16 0 006 6l1.3-1.3a2 2 0 012.1-.4c.9.3 1.8.6 2.7.7a2 2 0 011.7 2z')}${esc(one.phone)}</a>` : ''}${one.email ? `<a href="mailto:${esc(one.email)}">${svg('M4 4h16v16H4zM4 6l8 7 8-7')}${esc(one.email)}</a>` : ''}</div>` : ''}
+  /* a chat with one person: their card first (job, team, how to reach them), then who is in the chat */
+  const card = one
+    ? `<div class="msn-pc">${av(one.name)}<b>${esc(one.name)}</b><small>${esc([one.role, one.team].filter(Boolean).join(' · ') || one.cat || '')}</small>${off(one) ? '<span class="tag y">On holiday today</span>' : ''}<div class="msn-pa">${one.phone ? `<a class="mini" href="tel:${esc(one.phone.replace(/[^\d+]/g, ''))}">${svg('M5 4h4l2 5-2.5 1.5a11 11 0 005 5L15 13l5 2v4a2 2 0 01-2 2A16 16 0 013 6a2 2 0 012-2')}Call</a>` : ''}${one.email ? `<a class="mini" href="mailto:${esc(one.email)}">${svg('M4 6h16v12H4zM4 7l8 6 8-6')}Email</a>` : ''}</div>${one.phone || one.email ? `<p class="nocap">${[one.phone, one.email].filter(Boolean).map(esc).join('<br>')}</p>` : ''}</div>`
+    : '';
+  return `<aside class="msn-p" aria-label="People in this chat"><div class="msn-lh"><h1>${cur == SYSTEM ? 'Automatic' : 'People'}</h1><span class="msn-pn" title="People in this chat">${who.length}</span></div>
+    ${cur == SYSTEM ? '<p class="msn-pnote">Messages from the CRM itself, such as a holiday being approved. Only you see these.</p>' : ''}
+    ${card}<p class="msn-ph">${cur == 'Everyone' ? 'Everyone In The Team Chat' : 'In This Chat'}</p><div class="msn-pl">${who.map(row).join('')}</div>
   </aside>`;
 }
 /** while typing: the send button lights up when there is something to send, and the box grows with the text */
@@ -134,6 +139,14 @@ export function msgSend() {
   const to = uiState.msg.to || 'Everyone',
     t = SAFE.text($('#m_t').value, 1000);
   if (!t) {
+    /* nothing to send: the box gives a little shake and keeps the cursor, so a press is never ignored */
+    const box = $('#m_t');
+    if (box) {
+      box.classList.remove('shake');
+      void box.offsetWidth;
+      box.classList.add('shake');
+      box.focus();
+    }
     return;
   }
   if (to == SYSTEM) return;
@@ -162,9 +175,21 @@ export function msgDel(id) {
     'It is removed for good.',
     'Delete',
     () => {
+      const at = state.notes.indexOf(n);
       state.notes = state.notes.filter((x) => x.id != id);
       store();
       render();
+      toast('Message deleted', {
+        action: {
+          label: 'Undo',
+          run: () => {
+            if (state.notes.some((x) => x.id == n.id)) return;
+            state.notes.splice(Math.max(0, at), 0, n);
+            store();
+            render();
+          },
+        },
+      });
     },
     true
   );

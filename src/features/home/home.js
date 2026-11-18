@@ -426,7 +426,7 @@ export function dashReset() {
   store();
   closeModal();
   render();
-  toast('Back to the default layout');
+  toast('Default layout restored');
 }
 export function bookMine() {
   const m = me();
@@ -454,7 +454,7 @@ export function holBody(m) {
     used = hu(m),
     left = allow - used,
     pend = sum(
-      state.hols.filter((h) => h.sid == m.id && h.status == 'Pending'),
+      state.hols.filter((h) => h.sid == m.id && h.status == 'Pending' && h.paid !== false),
       (h) => h.days
     ),
     /* Next and Previous count approved holidays only: a request waiting for approval shows as Pending */

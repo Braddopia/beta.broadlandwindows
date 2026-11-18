@@ -15,9 +15,7 @@ test('Overview: the greeting does not play again after the page settles, and eve
   const dead = await app.run(() =>
     [...document.querySelectorAll('#main .kpi, #main .hpan')].flatMap((w) =>
       [...w.querySelectorAll('*')]
-        .filter(
-          (e) => !e.children.length && e.textContent.trim() && !e.closest('button,a,[data-row],[data-act],h2')
-        )
+        .filter((e) => !e.children.length && e.textContent.trim() && !e.closest('button,a,[data-row],[data-act],h2'))
         .map((e) => e.textContent.trim())
     )
   );
@@ -48,7 +46,7 @@ test('Messages: people in the chat on the right; the send button lights up and a
   await app.go('messages');
   const n = await app.run(() => state.staff.filter((s) => s.name).length);
   await expect(app.page.locator('#main .msn-p .msn-pp')).toHaveCount(n);
-  await expect(app.page.locator('#main .msn-p .msn-pp.you')).toContainText('(You)');
+  await expect(app.page.locator('#main .msn-p .msn-pp.you .msn-you')).toHaveText('You');
   await expect(app.page.locator('#main .msn-send')).not.toHaveClass(/ready/);
   await app.page.fill('#m_t', 'Morning all');
   await expect(app.page.locator('#main .msn-send')).toHaveClass(/ready/);
@@ -119,7 +117,7 @@ test('a new lead puts its customer in the Contact Book, a success tick shows, an
   await app.call('wzStep', 1);
   await app.call('wzStep', 1);
   await app.call('wzSave');
-  await expect(app.page.locator('#yay')).toContainText('Lead Created');
+  await expect(app.page.locator('#toast.big')).toContainText('Lead Created');
   const k = await app.run(() => {
     const l = state.leads.find((x) => x.name == 'Sample Customer Z');
     return state.contacts.find((c) => c.id == l.contact);

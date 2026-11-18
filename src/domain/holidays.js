@@ -55,10 +55,16 @@ export function absCode(s, k) {
   if (m !== undefined) return m;
   if (!isWk(k)) return '';
   if (BH[k]) return 'B';
-  const h = state.hols.find((h) => h.sid == s.id && h.status != 'Rejected' && h.from <= k && h.to >= k);
-  /* unpaid leave does not use the allowance: it shows as U (voluntary unpaid) */
-  if (h) return h.status == 'Approved' ? (h.paid === false ? 'U' : 'H') : 'P';
-  return shutDays(+k.slice(0, 4)).includes(k) ? 'H' : '';
+  const on = state.hols.filter((h) => h.sid == s.id && h.status != 'Rejected' && h.from <= k && h.to >= k),
+    h = on.find((x) => !x.half) || on[0];
+  /* unpaid leave does not use the allowance: it shows as U (voluntary unpaid). A half day is H1 (morning) or H2
+     (afternoon); both halves of the same day booked and approved make a whole day, H. */
+  if (!h) return shutDays(+k.slice(0, 4)).includes(k) ? 'H' : '';
+  if (h.status != 'Approved') return 'P';
+  if (h.paid === false) return 'U';
+  if (!h.half) return 'H';
+  const both = on.filter((x) => x.half && x.status == 'Approved' && x.paid !== false).map((x) => x.half);
+  return both.includes('am') && both.includes('pm') ? 'H' : h.half == 'pm' ? 'H2' : 'H1';
 }
 export function yearCounts(s, y) {
   const c = {},
@@ -75,3 +81,27 @@ export const bookedDays = (s, y) => {
   return sum(HCODES, (h) => (c[h[0]] || 0) * h[2]);
 };
 export const HGRP = ['Factory', 'Fitters', 'Office', 'Salespeople'];
+
+/* ---- half days and clashes ---- */
+/** how long a booking is, in words: "2 days", or "Half day (morning)" for a half day (chart code H1 or H2) */
+export const holLen = (h) =>
+  h.half
+    ? 'Half day (' + (h.half == 'pm' ? 'afternoon' : 'morning') + ')'
+    : +h.days + ' day' + (+h.days == 1 ? '' : 's');
+/** "1 Dec to 2 Dec · 2 days", or "1 Dec · Half day (morning)" */
+export const holSpan = (h, fd) => fd(h.from) + (h.to != h.from ? ' to ' + fd(h.to) : '') + ' · ' + holLen(h);
+/** a booking of this person's that already covers any of these days (not counting turned-down ones, or the one
+    being changed). A morning and an afternoon on the same day do not clash. */
+export function holClash(sid, f, t, half, exceptId) {
+  return (
+    state.hols.find(
+      (h) =>
+        h.sid == sid &&
+        h.id != exceptId &&
+        h.status != 'Rejected' &&
+        h.from <= t &&
+        h.to >= f &&
+        !(half && h.half && h.from == f && h.to == t && h.half != half)
+    ) || null
+  );
+}

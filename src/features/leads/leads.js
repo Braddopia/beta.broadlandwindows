@@ -143,8 +143,7 @@ export function convertLead(id) {
       c.phTags = (l.phTags || []).slice();
       custToBook(c);
       setTimeout(() => {
-        celebrate('Contract Created', c.id + ' - ' + c.name);
-        toast(l.id + ' is now contract ' + c.id + '. ' + l.id + ' is free for a new lead.');
+        celebrate('Contract Created', l.id + ' is now contract ' + c.id + ' - ' + c.name);
         go('contracts');
         openContract(c.id);
       }, 60);

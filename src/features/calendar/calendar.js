@@ -136,8 +136,8 @@ export function evs(k) {
         const n = staffName(h.sid);
         e.push({
           c: 'hol' + (h.status == 'Pending' ? ' pd' : ''),
-          t: n.split(' ')[0] + ' off',
-          s: n + ' on holiday' + (h.status == 'Pending' ? ' (pending)' : ''),
+          t: n.split(' ')[0] + (h.half ? (h.half == 'pm' ? ' off (pm)' : ' off (am)') : ' off'),
+          s: n + (h.half ? ' half day off' : ' on holiday') + (h.status == 'Pending' ? ' (pending)' : ''),
           f: ['holEdit', h.id],
           k: 'Holiday',
           p: n,
@@ -342,7 +342,7 @@ function calNotesH() {
         new Date(n.at).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
       : 'Only you can see these';
   return String(html`<div class="panel cal-notes"><h2><span>My Notes</span><span class="acts"><span class="cn-st nocap" id="calNoteSt">${when}</span><button class="mini" ${raw(onClick('calNoteClear'))} ${raw(n.t ? '' : 'disabled')}>Clear</button></span></h2>
-    <div class="cn-box" data-oninput="calNoteType" data-args-input="[{&quot;$&quot;:&quot;event&quot;}]">${raw(fieldControl({ k: 'calnote', t: 'area', max: 4000 }, n.t, { id: 'calNote', rows: 4 }))}</div></div>`);
+    <div class="cn-box" data-oninput="calNoteType" data-args-input="[{&quot;$&quot;:&quot;event&quot;}]">${raw(fieldControl({ k: 'calnote', t: 'area', max: 4000 }, n.t, { id: 'calNote', rows: 12 }))}</div></div>`);
 }
 let noteT = 0;
 /** typing in My Notes: saved half a second after the last key, with the time shown beside the heading */

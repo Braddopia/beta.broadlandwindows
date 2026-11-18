@@ -1110,7 +1110,8 @@ body[data-theme=dark] .smap .rd{stroke:#5a6578}body[data-theme=dark] .smap .rd.m
 .lay .lck{display:grid;place-items:center;width:1.15rem;height:1.15rem;border-radius:50%;border:2px solid var(--lc);background:transparent;transition:background .18s ease,transform .25s cubic-bezier(.3,1.6,.5,1)}
 .lay.on{border-style:solid;border-color:var(--lc);background:color-mix(in srgb,var(--lc) 13%,var(--card,#fff));color:var(--ink)}
 .lay.on .lck{background:var(--lc);transform:scale(1.05)}
-.lay.on .lck::after{content:"";width:.32rem;height:.58rem;margin-top:-.12rem;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg)}
+/* no tick: a shown kind has a solid dot in its colour, a hidden one an empty ring */
+.lay .lck{width:.7rem;height:.7rem}
 
 /* Fitting Schedule on screen: a portrait sheet (narrower and taller, centred), drawn like the Calendar:
    soft header row, the date in a circle (filled for today) with the day under it, centred in its row */
@@ -1142,5 +1143,36 @@ body.tv .fs-key,body.tv .fs-wrap,body.tv .fs-miss{max-width:none}
 .cal-notes h2 .acts{display:flex;align-items:center;gap:.6rem}
 .cn-st{font-size:.74rem;font-weight:500;color:var(--muted);transition:color .2s var(--e-out)}
 .cn-st.ok{color:var(--green)}.cn-st.ok::before{content:"";display:inline-block;width:.28rem;height:.52rem;margin:0 .4rem .05rem .1rem;border:solid currentColor;border-width:0 2px 2px 0;transform:rotate(45deg);animation:okIn .4s var(--e-spring)}
-.cn-box textarea{display:block;width:100%;min-height:7.5rem;resize:vertical;padding:.55rem .9rem;border:1px solid var(--line);border-radius:12px;font:inherit;font-size:.92rem;line-height:1.6;color:var(--ink);background-color:var(--card);background-image:repeating-linear-gradient(transparent 0 calc(1.6em - 1px),rgba(3,78,162,.1) calc(1.6em - 1px) 1.6em);background-position:0 .55rem;background-attachment:local;text-transform:none;transition:border-color .15s var(--e-out),box-shadow .2s var(--e-out)}
+.cn-box textarea{display:block;width:100%;min-height:clamp(16rem,34vh,26rem);resize:vertical;padding:.55rem .9rem;border:1px solid var(--line);border-radius:12px;font:inherit;font-size:.92rem;line-height:1.6;color:var(--ink);background-color:var(--card);background-image:repeating-linear-gradient(transparent 0 calc(1.6em - 1px),rgba(3,78,162,.1) calc(1.6em - 1px) 1.6em);background-position:0 .55rem;background-attachment:local;text-transform:none;transition:border-color .15s var(--e-out),box-shadow .2s var(--e-out)}
 .cn-box textarea:hover{border-color:#8fa3be}.cn-box textarea:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(3,78,162,.12)}
+
+/* "Go to a page?" with a countdown: the page's own icon on top, and the Go button fills up from left to right over
+   5 seconds with the seconds left in a badge; pointing at the box pauses it (docs/UX-PRINCIPLES.md: anticipation,
+   staging, Doherty threshold) */
+.ask-ic.go{background:var(--blue-bg);color:var(--blue);border-color:transparent}
+.ask-ic.go svg{width:1.45rem;height:1.45rem;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.aski.cnt .aski-a .btn[data-a="1"]{position:relative;overflow:hidden;gap:.55rem;isolation:isolate}
+.aski.cnt .cd-f{position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,rgba(255,255,255,.08),rgba(255,255,255,.26));transform:scaleX(0);transform-origin:0 50%}
+.aski.cnt .cd-n{display:inline-grid;place-items:center;min-width:1.55rem;height:1.55rem;padding:0 .3rem;border-radius:1rem;background:#fff;color:var(--blue);font:700 .85rem var(--body);font-variant-numeric:tabular-nums;transition:transform .3s var(--e-spring)}
+.aski.cnt .cd-h{margin:.8rem 0 0;font-size:.78rem;color:var(--muted);transition:color .2s}
+.aski.cnt.paused .cd-h{color:var(--blue);font-weight:600}
+.aski.cnt.paused .cd-n{transform:scale(.85);opacity:.7}
+body[data-theme=dark] .aski.cnt .cd-n{background:#e9eef6;color:#034ea2}
+
+/* Book Holiday: the summary under the form. The days in a big number, and a bar of the allowance left now and after
+   this booking (the part this one uses in amber). Anything stopping it shows in red, anything to know in amber. */
+.hbk fieldset[hidden],.hbk .ff[hidden]{display:none}
+.hsum{display:flex;align-items:center;gap:1rem;margin:.9rem 0 .5rem;padding:.75rem 1rem;border-radius:14px;background:var(--blue-bg);transition:background-color .2s var(--e-out)}
+.hsum.no{background:rgba(214,58,58,.08)}
+.hsum-n{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:4rem;height:4rem;border-radius:12px;background:var(--card);box-shadow:0 2px 8px -4px rgba(1,30,70,.3)}
+.hsum-n b{font:700 1.7rem/1 var(--head);color:var(--navy)}.hsum-n small{font-size:.72rem;color:var(--muted)}
+.hsum-t{flex:1;min-width:0}.hsum-t p{margin:0 0 .4rem;font-size:.92rem}
+.hsum-t small{font-size:.78rem;color:var(--muted)}
+.hsum-bar{display:flex;height:.55rem;border-radius:1rem;overflow:hidden;background:rgba(1,43,89,.1);margin-bottom:.3rem}
+.hsum-bar i{display:block;height:100%;background:#2b8fe0;transition:width .35s var(--e-out)}.hsum-bar i.use{background:#e0a400}
+.hol-sum .warn{margin:.35rem 0 0;padding:.45rem .7rem;border-radius:9px;background:var(--amber-bg,#fff4d6);color:#7a5200;font-size:.85rem}
+.hol-sum .warn.bad{background:rgba(214,58,58,.1);color:var(--red);font-weight:600}
+.btn.dim{opacity:.55}
+body[data-theme=dark] .hol-sum .warn{color:#ffd27a}
+.hbk fieldset{border:0;padding:0;margin:0;min-width:0}
+.hbk fieldset legend{padding:0;margin:0 0 .35rem;font:600 .92rem var(--body);color:var(--ink)}

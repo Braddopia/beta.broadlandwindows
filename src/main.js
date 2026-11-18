@@ -298,6 +298,7 @@ featuresHolidaysHolidays.listenForHolidayChart();
 startMigrations.migratePhotos();
 featuresStockPhoneMode.watchPhoneSize();
 startMigrations.migrateCustomers();
+startMigrations.custBook();
 featuresLeadsLeadRecord.defineLeadRecord();
 featuresContractsContractRecord.defineContractRecord();
 featuresTourTour.listenForTourKeys();

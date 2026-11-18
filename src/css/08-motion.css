@@ -69,27 +69,26 @@ button.kpi:active{transform:scale(.98);transition-duration:.08s}
 :where(select:not(:disabled)):hover{border-color:var(--blue)}
 :where(button:not(:disabled)):active{transform:scale(.96)}
 
-/* Success: when something new is made, a tick draws itself in a ring that pops in, then everything fades away */
-#yay{position:fixed;inset:0;z-index:4000;display:none;place-items:center;pointer-events:none}
-#yay.on{display:grid}
-#yay .yay-b{display:flex;flex-direction:column;align-items:center;gap:.35rem;min-width:15rem;max-width:min(26rem,calc(100vw - 2rem));padding:1.4rem 1.8rem 1.2rem;border-radius:22px;background:var(--card);color:var(--ink);text-align:center;box-shadow:0 30px 70px -20px rgba(1,20,45,.45),0 0 0 1px rgba(1,43,89,.06);animation:yayIn .5s var(--e-spring) both}
-#yay.off .yay-b{animation:yayOut .26s var(--e-out) both}
-#yay svg{width:4.2rem;height:4.2rem;margin-bottom:.2rem;fill:none;stroke-linecap:round;stroke-linejoin:round}
-#yay .yay-r{stroke:#2fbf71;stroke-width:4;stroke-dasharray:176;stroke-dashoffset:176;animation:yayDraw .45s var(--e-out) .08s forwards;fill:rgba(47,191,113,.1)}
-#yay .yay-t{stroke:#12794c;stroke-width:5;stroke-dasharray:44;stroke-dashoffset:44;animation:yayDraw .32s var(--e-out) .4s forwards}
-#yay b{font:700 1.15rem var(--head);color:var(--navy)}
-#yay small{font-size:.85rem;color:var(--muted)}
-@keyframes yayIn{0%{opacity:0;transform:translateY(16px) scale(.8)}100%{opacity:1;transform:none}}
-@keyframes yayOut{to{opacity:0;transform:translateY(-10px) scale(.96)}}
-@keyframes yayDraw{to{stroke-dashoffset:0}}
-body[data-theme=dark] #yay b{color:#e9ebef}body[data-theme=dark] #yay .yay-t{stroke:#5fd39a}
+/* Success: when something new is made, the banner at the bottom rises a little taller, with a tick that draws
+   itself in a ring (follow-through: the ring pops past full size and settles) and a second line saying which one */
+.toast.tpop.big{gap:.75rem;padding:.55rem .7rem .55rem .65rem;min-width:min(21rem,calc(100vw - 2rem))}
+.toast.tpop.big.in{animation:bigIn .5s var(--e-spring) both}
+@keyframes bigIn{0%{opacity:0;transform:translate(-50%,26px) scale(.9)}100%{opacity:1;transform:translate(-50%,0)}}
+.toast.tpop .tp-ring{flex:0 0 auto;width:2.3rem;height:2.3rem;fill:none;stroke-linecap:round;stroke-linejoin:round;animation:ringPop .5s var(--e-spring) .1s both}
+.toast.tpop .tp-ring circle{stroke:#2fbf71;stroke-width:3;fill:rgba(47,191,113,.16);stroke-dasharray:107;stroke-dashoffset:107;animation:ringDraw .45s var(--e-out) .1s forwards}
+.toast.tpop .tp-ring path{stroke:#7fe0aa;stroke-width:3.4;stroke-dasharray:30;stroke-dashoffset:30;animation:ringDraw .3s var(--e-out) .45s forwards}
+@keyframes ringDraw{to{stroke-dashoffset:0}}
+@keyframes ringPop{0%{transform:scale(.4)}100%{transform:none}}
+.toast.tpop.big .tp-t{display:flex;flex-direction:column;font-weight:700;line-height:1.25}
+.toast.tpop.big .tp-s{font-weight:500;font-size:.8rem;opacity:.75}
+body[data-theme=dark] .toast.tpop .tp-ring path{stroke:#0f6b42}
 
 /* Drop-down lists and the date calendar grow out of the spot that was clicked, overshoot a touch and settle */
 #pkpop.open.grow{animation:pkGrow .3s var(--e-spring)}
 @keyframes pkGrow{0%{opacity:0;transform:scale(.5)}45%{opacity:1}100%{opacity:1;transform:none}}
 
 @media(prefers-reduced-motion:reduce){
-  #yay .yay-r,#yay .yay-t{animation:none;stroke-dashoffset:0}
-  #yay .yay-b,#yay.off .yay-b,#pkpop.open.grow,.mb,.toast.tpop.in{animation:none}
+  .toast.tpop .tp-ring,.toast.tpop .tp-ring *{animation:none;stroke-dashoffset:0}
+  #pkpop.open.grow,.mb,.toast.tpop.in,.toast.tpop.big.in{animation:none}
   .btn:hover svg,.mini:hover svg,.rb1:hover svg{transform:none}
 }

@@ -11,6 +11,7 @@ import { ikey, stkId } from '../domain/stock.js';
 import { pinMake } from '../features/auth/pins.js';
 import { fitSync } from '../features/contracts/finance-step.js';
 import { conOf } from '../features/suppliers/suppliers.js';
+import { custToBook } from '../features/contacts/customer-book.js';
 
 export function migrate() {
   const s0 = seed();
@@ -363,5 +364,13 @@ export function migrateCustomers() {
     r.siteSame = r.siteSame || 'Same as home';
   });
   state.custV1 = 1;
+  store();
+}
+/* every customer already in a lead or contract goes into the Contact Book once, so the Customer drop-down on new
+   leads and contracts has them (new ones are added as they are saved: features/contacts/customer-book.js) */
+export function custBook() {
+  if (state.custBook) return;
+  [...state.contracts, ...state.leads].forEach((r) => custToBook(r));
+  state.custBook = 1;
   store();
 }
