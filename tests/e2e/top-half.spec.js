@@ -60,14 +60,21 @@ test('Messages: people in the chat on the right; the send button lights up and a
   expect(app.errors).toEqual([]);
 });
 
-test('drop-down lists grow out of the spot that was clicked', async ({ app }) => {
+test('drop-down lists open right where the pointer clicks, wherever on the box that is', async ({ app }) => {
   await app.call('editContact');
   const b = await app.page.locator('#c_type').boundingBox();
-  await app.page.mouse.click(b.x + b.width - 20, b.y + b.height / 2);
-  await expect(app.page.locator('#pkpop')).toHaveClass(/open/);
-  await expect(app.page.locator('#pkpop')).toHaveClass(/grow/);
-  const [ox] = await app.run(() => document.querySelector('#pkpop').style.transformOrigin.split(' ').map(parseFloat));
-  expect(ox).toBeGreaterThan(b.width / 2);
+  for (const fx of [0.15, 0.85]) {
+    const x = b.x + b.width * fx,
+      y = b.y + b.height / 2;
+    await app.page.mouse.click(x, y);
+    await expect(app.page.locator('#pkpop')).toHaveClass(/open/);
+    await expect(app.page.locator('#pkpop')).toHaveClass(/grow/);
+    const p = await app.page.locator('#pkpop').boundingBox();
+    /* the list's corner sits by the pointer, not under the start of the box */
+    expect(Math.abs(p.x - x)).toBeLessThan(20);
+    expect(Math.abs(p.y - y)).toBeLessThan(20);
+    await app.page.keyboard.press('Escape');
+  }
 });
 
 test('Calendar: My Notes saves as you type, stays after a reload, and can be cleared with Undo', async ({ app }) => {

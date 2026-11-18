@@ -22,7 +22,8 @@ let pop = null,
   firing = false,
   /* where the pointer last went down, so a list grows out of the exact spot that was clicked */
   lastPt = null,
-  fresh = false;
+  fresh = false,
+  anchor = null;
 
 function box() {
   if (!pop) {
@@ -51,29 +52,42 @@ function box() {
 function place() {
   if (!pop || !forEl) return;
   const r = forEl.getBoundingClientRect(),
-    w = kind == 'date' ? 280 : kind == 'select' ? Math.max(r.width, 180) : Math.max(r.width, 300),
-    h = pop.offsetHeight,
-    below = r.bottom + 6 + h < innerHeight - 8 || r.top < h + 14;
-  pop.style.width = Math.min(w, innerWidth - 16) + 'px';
-  pop.style.left = Math.max(8, Math.min(r.left, innerWidth - Math.min(w, innerWidth - 16) - 8)) + 'px';
-  pop.style.top = (below ? r.bottom + 6 : r.top - h - 6) + 'px';
+    w = Math.min(
+      kind == 'date' ? 280 : kind == 'select' ? Math.max(Math.min(r.width, 320), 200) : Math.max(r.width, 300),
+      innerWidth - 16
+    );
+  pop.style.width = w + 'px';
+  const h = pop.offsetHeight,
+    clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+  /* a drop-down or calendar opened with the mouse opens right where the pointer clicked (and stays there while it is
+     open, e.g. going to the next month); a list that follows typing, or one opened from the keyboard, sits under its box */
+  if (fresh) anchor = kind != 'combo' && lastPt && Date.now() - lastPt.t < 800 ? { x: lastPt.x, y: lastPt.y } : null;
+  let L, T;
+  if (anchor) {
+    const right = anchor.x - 12 + w <= innerWidth - 8,
+      down = anchor.y + 6 + h <= innerHeight - 8;
+    L = clamp(right ? anchor.x - 12 : anchor.x - w + 12, 8, innerWidth - w - 8);
+    T = clamp(down ? anchor.y + 6 : anchor.y - h - 6, 8, Math.max(8, innerHeight - h - 8));
+  } else {
+    const below = r.bottom + 6 + h < innerHeight - 8 || r.top < h + 14;
+    L = clamp(r.left, 8, innerWidth - w - 8);
+    T = below ? r.bottom + 6 : r.top - h - 6;
+  }
+  pop.style.left = L + 'px';
+  pop.style.top = T + 'px';
   if (!fresh) return;
   fresh = false;
-  /* grow from where the click landed (or from the box itself when opened from the keyboard) */
-  const L = parseFloat(pop.style.left),
-    T = parseFloat(pop.style.top),
-    pt =
-      lastPt && Date.now() - lastPt.t < 800
-        ? lastPt
-        : { x: r.left + Math.min(r.width, 200) / 2, y: below ? r.bottom : r.top },
-    ox = Math.max(0, Math.min(pop.offsetWidth, pt.x - L)),
-    oy = Math.max(0, Math.min(h, pt.y - T));
+  /* it grows out of the click (or out of its box when opened from the keyboard) */
+  const pt = anchor || { x: r.left + Math.min(r.width, 200) / 2, y: T > r.top ? r.bottom : r.top },
+    ox = clamp(pt.x - L, 0, w),
+    oy = clamp(pt.y - T, 0, h);
   pop.style.transformOrigin = ox + 'px ' + oy + 'px';
   pop.classList.remove('grow');
   void pop.offsetWidth;
   pop.classList.add('grow');
 }
 export function pickClose() {
+  anchor = null;
   if (pop) pop.classList.remove('open');
   if (forEl && kind == 'select') forEl.removeAttribute('aria-expanded');
   forEl = null;

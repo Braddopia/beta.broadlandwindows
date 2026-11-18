@@ -69,19 +69,21 @@ button.kpi:active{transform:scale(.98);transition-duration:.08s}
 :where(select:not(:disabled)):hover{border-color:var(--blue)}
 :where(button:not(:disabled)):active{transform:scale(.96)}
 
-/* Success: when something new is made, the banner at the bottom rises a little taller, with a tick that draws
-   itself in a ring (follow-through: the ring pops past full size and settles) and a second line saying which one */
-.toast.tpop.big{gap:.75rem;padding:.55rem .7rem .55rem .65rem;min-width:min(21rem,calc(100vw - 2rem))}
+/* Success: when something new is made, the banner at the bottom turns green: a white circle pops in (past full
+   size and back), the tick draws itself in it, and a second line says which one. Undo stays on it. */
+.toast.tpop.big{gap:.75rem;padding:.6rem .7rem .6rem .75rem;min-width:min(21rem,calc(100vw - 2rem));background:#12794c!important;color:#fff!important;box-shadow:0 10px 28px -10px rgba(10,60,35,.55)!important}
 .toast.tpop.big.in{animation:bigIn .5s var(--e-spring) both}
 @keyframes bigIn{0%{opacity:0;transform:translate(-50%,26px) scale(.9)}100%{opacity:1;transform:translate(-50%,0)}}
-.toast.tpop .tp-ring{flex:0 0 auto;width:2.3rem;height:2.3rem;fill:none;stroke-linecap:round;stroke-linejoin:round;animation:ringPop .5s var(--e-spring) .1s both}
-.toast.tpop .tp-ring circle{stroke:#2fbf71;stroke-width:3;fill:rgba(47,191,113,.16);stroke-dasharray:107;stroke-dashoffset:107;animation:ringDraw .45s var(--e-out) .1s forwards}
-.toast.tpop .tp-ring path{stroke:#7fe0aa;stroke-width:3.4;stroke-dasharray:30;stroke-dashoffset:30;animation:ringDraw .3s var(--e-out) .45s forwards}
+.toast.tpop .tp-ring{flex:0 0 auto;width:1.75rem;height:1.75rem;fill:none;stroke-linecap:round;stroke-linejoin:round;animation:ringPop .5s var(--e-spring) .1s both}
+.toast.tpop .tp-ring circle{stroke:none;fill:#fff}
+.toast.tpop .tp-ring path{stroke:#12794c;stroke-width:4;stroke-dasharray:30;stroke-dashoffset:30;animation:ringDraw .3s var(--e-out) .35s forwards}
 @keyframes ringDraw{to{stroke-dashoffset:0}}
 @keyframes ringPop{0%{transform:scale(.4)}100%{transform:none}}
 .toast.tpop.big .tp-t{display:flex;flex-direction:column;font-weight:700;line-height:1.25}
-.toast.tpop.big .tp-s{font-weight:500;font-size:.8rem;opacity:.75}
-body[data-theme=dark] .toast.tpop .tp-ring path{stroke:#0f6b42}
+.toast.tpop.big .tp-s{font-weight:500;font-size:.8rem;opacity:.85}
+.toast.tpop.big .tp-a{color:#fff!important;text-decoration:underline;text-underline-offset:3px}.toast.tpop.big .tp-a:hover{background:rgba(255,255,255,.14)!important}
+.toast.tpop.big .tp-x{color:rgba(255,255,255,.85)!important}.toast.tpop.big .tp-x:hover{background:rgba(255,255,255,.14)!important;color:#fff!important}
+body[data-theme=dark] .toast.tpop.big{background:#0f6b42!important;color:#fff!important}body[data-theme=dark] .toast.tpop .tp-ring path{stroke:#0f6b42}
 
 /* Drop-down lists and the date calendar grow out of the spot that was clicked, overshoot a touch and settle */
 #pkpop.open.grow{animation:pkGrow .3s var(--e-spring)}

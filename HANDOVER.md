@@ -125,6 +125,17 @@ Read this first, then CLAUDE.md and docs/ARCHITECTURE.md.
   Customers runs the same matching again. Cards show what a supplier supplies or a tradesperson's trade.
 - Overview: Reset layout says so ("Default layout restored").
 
+## Added in v19.10.1 and v19.10.2
+
+- The go-to-page Go button only fills (no number). The System chat says there is no one to reply to. The My Notes
+  "Saved" tick no longer flips (its pop-in keeps the rotation: `tickIn`).
+- Drop-down lists and the date calendar open at the pointer: the list's corner sits by the click and turns the other
+  way near the edge of the screen; opened from the keyboard, or a list that follows typing, it sits under its box
+  (`place()` in `ui/components/pickers.js`). "+ New Chat" is no longer a choice inside its own list.
+- The success banner is solid green with a white circle and a tick that draws itself (option B the owner chose).
+- A redesign was mocked up twice (four layouts, then three skins on the real pages); the owner keeps the current
+  look.
+
 ## Open questions for the owner
 
 - Mitre re-cut waste in the Cutting Optimiser is not counted yet. Proposal: a "profile depth" (mm) on each
