@@ -88,7 +88,7 @@ function place() {
 }
 export function pickClose() {
   anchor = null;
-  if (pop) pop.classList.remove('open');
+  if (pop) pop.classList.remove('open', 'grow');
   if (forEl && kind == 'select') forEl.removeAttribute('aria-expanded');
   forEl = null;
   kind = '';
