@@ -109,10 +109,12 @@ test('a new lead puts its customer in the Contact Book, a success tick shows, an
   await app.page.fill('#f_mob1', '07700 900 777');
   await app.page.fill('#f_email1', 'z@example.com');
   await app.call('wzStep', 1);
+  await expect(app.page.locator('#f_homeAddr')).toBeVisible();
   await app.page.fill('#f_homeAddr', '7 Sample Lane');
   await app.page.fill('#f_town', 'Norwich');
   await app.page.fill('#f_homePc', 'nr6 5dr');
   await app.call('wzStep', 1);
+  await expect(app.page.locator('#f_productType')).toBeVisible();
   await app.page.selectOption('#f_productType', { index: 1 });
   await app.call('wzStep', 1);
   await app.call('wzStep', 1);

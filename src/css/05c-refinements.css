@@ -1142,7 +1142,8 @@ body.tv .fs-key,body.tv .fs-wrap,body.tv .fs-miss{max-width:none}
 .cal-notes{margin-top:1rem}
 .cal-notes h2 .acts{display:flex;align-items:center;gap:.6rem}
 .cn-st{font-size:.74rem;font-weight:500;color:var(--muted);transition:color .2s var(--e-out)}
-.cn-st.ok{color:var(--green)}.cn-st.ok::before{content:"";display:inline-block;width:.28rem;height:.52rem;margin:0 .4rem .05rem .1rem;border:solid currentColor;border-width:0 2px 2px 0;transform:rotate(45deg);animation:okIn .4s var(--e-spring)}
+.cn-st.ok{color:var(--green)}.cn-st.ok::before{content:"";display:inline-block;width:.28rem;height:.52rem;margin:0 .4rem .05rem .1rem;border:solid currentColor;border-width:0 2px 2px 0;transform:rotate(45deg);animation:tickIn .4s var(--e-spring)}
+@keyframes tickIn{0%{opacity:0;transform:rotate(45deg) scale(.3)}100%{opacity:1;transform:rotate(45deg)}}
 .cn-box textarea{display:block;width:100%;min-height:clamp(16rem,34vh,26rem);resize:vertical;padding:.55rem .9rem;border:1px solid var(--line);border-radius:12px;font:inherit;font-size:.92rem;line-height:1.6;color:var(--ink);background-color:var(--card);background-image:repeating-linear-gradient(transparent 0 calc(1.6em - 1px),rgba(3,78,162,.1) calc(1.6em - 1px) 1.6em);background-position:0 .55rem;background-attachment:local;text-transform:none;transition:border-color .15s var(--e-out),box-shadow .2s var(--e-out)}
 .cn-box textarea:hover{border-color:#8fa3be}.cn-box textarea:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(3,78,162,.12)}
 
@@ -1152,13 +1153,11 @@ body.tv .fs-key,body.tv .fs-wrap,body.tv .fs-miss{max-width:none}
 .ask-ic.go{background:var(--blue-bg);color:var(--blue);border-color:transparent}
 .ask-ic.go svg{width:1.45rem;height:1.45rem;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
 .aski.cnt .aski-a .btn[data-a="1"]{position:relative;overflow:hidden;gap:.55rem;isolation:isolate}
-.aski.cnt .cd-f{position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,rgba(255,255,255,.08),rgba(255,255,255,.26));transform:scaleX(0);transform-origin:0 50%}
-.aski.cnt .cd-n{display:inline-grid;place-items:center;min-width:1.55rem;height:1.55rem;padding:0 .3rem;border-radius:1rem;background:#fff;color:var(--blue);font:700 .85rem var(--body);font-variant-numeric:tabular-nums;transition:transform .3s var(--e-spring)}
+.aski.cnt .cd-f{position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,rgba(255,255,255,.1),rgba(255,255,255,.3));transform:scaleX(0);transform-origin:0 50%}
 .aski.cnt .cd-h{margin:.8rem 0 0;font-size:.78rem;color:var(--muted);transition:color .2s}
 .aski.cnt.paused .cd-h{color:var(--blue);font-weight:600}
-.aski.cnt.paused .cd-n{transform:scale(.85);opacity:.7}
-body[data-theme=dark] .aski.cnt .cd-n{background:#e9eef6;color:#034ea2}
-
+.aski.cnt.paused .cd-f{opacity:.6}
+body[data-theme=dark] 
 /* Book Holiday: the summary under the form. The days in a big number, and a bar of the allowance left now and after
    this booking (the part this one uses in amber). Anything stopping it shows in red, anything to know in amber. */
 .hbk fieldset[hidden],.hbk .ff[hidden]{display:none}

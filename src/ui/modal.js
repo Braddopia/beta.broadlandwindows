@@ -46,7 +46,7 @@ export function askYes(title, msg, okLabel, cb, danger, noCb) {
   );
 }
 /* askIn: our own confirm box, layered above any open window. Esc or Cancel closes it.
-   opts.count = seconds: the yes button fills up and says it for you when the time runs out (paused while the pointer
+   opts.count = seconds: the yes button's background fills up and it says yes for you when the time runs out (paused while the pointer
    is on the box); opts.no = the cancel button's words; opts.icon = markup for the round icon at the top. */
 export let ASKI = null;
 export function askIn(title, msg, okLabel, cb, danger, opts = {}) {
@@ -58,7 +58,7 @@ export function askIn(title, msg, okLabel, cb, danger, opts = {}) {
   o.setAttribute('aria-label', title);
   const N = +opts.count || 0;
   if (N) o.classList.add('cnt');
-  o.innerHTML = `<div class="aski-b"><div class="ask-ic ${danger ? 'r' : ''} ${opts.icon ? 'go' : ''}">${opts.icon || (danger ? '!' : '?')}</div><h3>${esc(title)}</h3>${msg ? `<p>${esc(msg)}</p>` : ''}<div class="aski-a"><button type="button" class="btn ghost" data-a="0">${esc(opts.no || 'Cancel')}</button><button type="button" class="btn ${danger ? 'red' : N ? '' : 'green'}" data-a="1">${N ? '<i class="cd-f" aria-hidden="true"></i>' : ''}<span>${esc(okLabel || 'Yes')}</span>${N ? `<b class="cd-n" aria-hidden="true">${N}</b>` : ''}</button></div>${N ? '<p class="cd-h" aria-live="polite">Point at this box to pause</p>' : ''}</div>`;
+  o.innerHTML = `<div class="aski-b"><div class="ask-ic ${danger ? 'r' : ''} ${opts.icon ? 'go' : ''}">${opts.icon || (danger ? '!' : '?')}</div><h3>${esc(title)}</h3>${msg ? `<p>${esc(msg)}</p>` : ''}<div class="aski-a"><button type="button" class="btn ghost" data-a="0">${esc(opts.no || 'Cancel')}</button><button type="button" class="btn ${danger ? 'red' : N ? '' : 'green'}" data-a="1">${N ? '<i class="cd-f" aria-hidden="true"></i>' : ''}<span>${esc(okLabel || 'Yes')}</span></button></div>${N ? '<p class="cd-h" aria-live="polite">Point at this box to pause</p>' : ''}</div>`;
   const key = (e) => {
       if (e.key == 'Escape') {
         e.stopPropagation();
@@ -87,7 +87,6 @@ export function askIn(title, msg, okLabel, cb, danger, opts = {}) {
   if (N) {
     const box = o.querySelector('.aski-b'),
       fill = o.querySelector('.cd-f'),
-      num = o.querySelector('.cd-n'),
       hint = o.querySelector('.cd-h');
     let left = N * 1000,
       paused = false,
@@ -107,7 +106,7 @@ export function askIn(title, msg, okLabel, cb, danger, opts = {}) {
       if (!paused) left -= now - last;
       last = now;
       fill.style.transform = 'scaleX(' + Math.min(1, 1 - left / (N * 1000)).toFixed(3) + ')';
-      num.textContent = Math.max(0, Math.ceil(left / 1000));
+      o.dataset.left = Math.max(0, Math.ceil(left / 1000));
       if (left <= 0) done(true);
     };
     tick = setInterval(step, 50);

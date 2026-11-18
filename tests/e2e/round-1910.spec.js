@@ -2,19 +2,24 @@
 // checks, the calendar Showing bar and notes, and customers already in leads and contracts in the Contact Book.
 const { test, expect } = require('../helpers');
 
-test('going to another page counts down from 5 and goes by itself; pointing at the box pauses it', async ({ app }) => {
+test('going to another page fills the Go button over 5 seconds and goes by itself; pointing at the box pauses it', async ({
+  app,
+}) => {
   await app.role('staff');
   await app.go('home');
   await app.page.mouse.move(5, 5);
   await app.page.click('#main button.kpi >> nth=0');
-  await expect(app.page.locator('.aski.cnt .cd-n')).toHaveText(/^[45]$/);
+  /* the Go button's background fills up; there is no number on it */
+  await expect(app.page.locator('.aski.cnt .cd-f')).toHaveCount(1);
+  await expect(app.page.locator('.aski [data-a="1"]')).toHaveText('Go To Service Calls');
   await expect(app.page.locator('.aski [data-a="0"]')).toHaveText('Stay Here');
   /* paused while the pointer is on it */
   await app.page.hover('.aski-b');
   await app.page.waitForTimeout(1500);
-  const n = await app.page.locator('.aski .cd-n').innerText();
+  const fill = () => app.run(() => document.querySelector('.aski .cd-f').style.transform);
+  const n = await fill();
   await app.page.waitForTimeout(1200);
-  expect(await app.page.locator('.aski .cd-n').innerText()).toBe(n);
+  expect(await fill()).toBe(n);
   await expect(app.page.locator('.aski .cd-h')).toHaveText('Paused');
   /* moving away lets it finish, and it opens the page */
   await app.page.mouse.move(5, 5);
