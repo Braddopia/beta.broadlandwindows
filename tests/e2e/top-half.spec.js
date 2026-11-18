@@ -70,9 +70,9 @@ test('drop-down lists open right where the pointer clicks, wherever on the box t
     await expect(app.page.locator('#pkpop')).toHaveClass(/open/);
     await expect(app.page.locator('#pkpop')).toHaveClass(/grow/);
     const p = await app.page.locator('#pkpop').boundingBox();
-    /* the list's corner sits by the pointer, not under the start of the box */
+    /* the list's corner sits by the pointer (opening upwards instead when there is no room below) */
     expect(Math.abs(p.x - x)).toBeLessThan(20);
-    expect(Math.abs(p.y - y)).toBeLessThan(20);
+    expect(Math.min(Math.abs(p.y - y), Math.abs(p.y + p.height - y))).toBeLessThan(20);
     await app.page.keyboard.press('Escape');
   }
 });
