@@ -3236,6 +3236,38 @@ body.tv .main::after,body.vmsg .main::after,body.lv .main::after{display:none}
   .ptb.fx.t-inv th[data-col=pid]{width:4.2rem}
   .ptb.fx.t-inv th[data-col=status]{width:6.2rem}
 }
+/* v19.11.2 Inventory columns: every column sized for what it holds, so the spare room is shared out evenly instead of
+   opening big gaps beside the item names; the tick-box cell is never cut (that made a stray "." beside the box) */
+.t-inv td:first-child{overflow:visible!important;text-overflow:clip!important}
+@media(min-width:1101px){
+  .ptb.fx.t-inv th[data-col=sel]{width:2.8rem}
+  .ptb.fx.t-inv th[data-col=pid]{width:4.8rem}
+  .ptb.fx.t-inv th[data-col=item]{width:11%}
+  .ptb.fx.t-inv th[data-col=stock]{width:5.5%}
+  .ptb.fx.t-inv th[data-col=location]{width:10%}
+  .ptb.fx.t-inv th[data-col=unit]{width:5%}
+  .ptb.fx.t-inv th[data-col=colours]{width:9%}
+  .ptb.fx.t-inv th[data-col=cost]{width:5.5%}
+  .ptb.fx.t-inv th[data-col=value]{width:7%}
+  .ptb.fx.t-inv th[data-col=supplier]{width:13.5%}
+  .ptb.fx.t-inv th[data-col=status]{width:7%}
+  .ptb.fx.t-inv th[data-col=act]{width:12.6rem}
+  /* stock counts sit in the middle of their column, next to the item they belong to */
+  .t-inv td.i-stock,.t-inv th[data-col=stock]{text-align:center!important;padding-left:.4rem!important;padding-right:.4rem!important}
+  .t-inv th[data-col=stock] .thb,.t-inv th[data-col=stock]>*{justify-content:center}
+  .t-inv td.i-sup,.t-inv th.i-sup{padding-left:1.2rem!important}
+  .t-inv td.c-u,.t-inv th.c-u{padding-left:1rem}
+}
+@media(min-width:1101px) and (max-width:1320px){.ptb.fx.t-inv th[data-col=act]{width:8.8rem}}
+/* small laptops and tablets on their side: location, colours and value are hidden, so the rest share the room */
+@media(min-width:900px) and (max-width:1100px){
+  .ptb.fx.t-inv th[data-col=sel]{width:2.8rem}.ptb.fx.t-inv th[data-col=pid]{width:4.8rem}
+  .ptb.fx.t-inv th[data-col=item]{width:19%}.ptb.fx.t-inv th[data-col=stock]{width:8%}.ptb.fx.t-inv th[data-col=unit]{width:7%}
+  .ptb.fx.t-inv th[data-col=cost]{width:8%}.ptb.fx.t-inv th[data-col=supplier]{width:22%}.ptb.fx.t-inv th[data-col=status]{width:11%}
+  .ptb.fx.t-inv th[data-col=act]{width:8.8rem}
+  .t-inv td.i-stock,.t-inv th[data-col=stock]{text-align:center!important;padding-left:.4rem!important;padding-right:.4rem!important}
+  .t-inv td.i-sup,.t-inv th.i-sup{padding-left:1.2rem!important}
+}
 
 /* ==========================================================================
    05d · Service calls: the live map (OpenStreetMap through Leaflet, features/service/service-map.js)

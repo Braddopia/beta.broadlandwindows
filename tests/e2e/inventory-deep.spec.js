@@ -127,3 +127,13 @@ test('importing a stock sheet with no colours does not double up products that s
   expect(await app.run(() => products().filter((r) => r.item == 'ACET848').length)).toBe(3);
   fs.unlinkSync(f);
 });
+
+test('the tick-box cell is never cut short (that drew a stray dot beside the box)', async ({ app }) => {
+  await app.role('beta');
+  await app.go('stock');
+  const cut = await app.run(() =>
+    [...document.querySelectorAll('#main .t-inv tbody td:first-child')].map((td) => getComputedStyle(td).textOverflow)
+  );
+  expect(cut.length).toBeGreaterThan(0);
+  expect(cut.every((x) => x == 'clip')).toBe(true);
+});
