@@ -184,3 +184,8 @@ Read this first, then CLAUDE.md and docs/ARCHITECTURE.md.
 
 - Inventory list: a stray "." showed beside each tick-box (the "cut long text with ..." rule caught the tick-box cell). The first cell is now never cut.
 - Inventory columns re-spaced: each column is sized for what it holds (percentages above 1100px, a separate set for 900-1100px where Location, Colours and Value hide), stock counts are centred, ID never cuts off. Rules at the end of `src/css/05c-refinements.css`.
+
+## v19.11.3
+
+- Inventory columns regrouped: tick, ID, Item, Stock (centred), Location, Unit, Colours together on the left; Supplier, Cost, Total Value, Status on the right by the row buttons. Spare width goes to Colours (to Unit at 900-1100px). Row buttons stay where they were (right edge, measured against v19.11.1).
+- Inventory sorts by ID, low to high, by default (and the Products tile resets to that).

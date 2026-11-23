@@ -96,7 +96,7 @@ test('Overview on a phone: the greeting shows the stars per platform, not the re
   await expect(app.page.locator('.hero .rate')).toContainText('Google');
 });
 
-test('Inventory columns: ID, Item, Stock, Location, Unit (PCS or the length), Colours, Cost, Total Value, Supplier, Status', async ({
+test('Inventory columns: ID, Item, Stock, Location, Unit (PCS or the length), Colours, then Supplier, Cost, Total Value, Status by the buttons', async ({
   app,
 }) => {
   await app.role('beta');
@@ -111,9 +111,9 @@ test('Inventory columns: ID, Item, Stock, Location, Unit (PCS or the length), Co
     'Location',
     'Unit',
     'Colours',
+    'Supplier',
     'Cost',
     'Total Value',
-    'Supplier',
     'Status',
   ]);
   await expect(app.page.locator('#main .t-inv td.c-u').first()).toHaveText(/^(PCS|Pairs|M|[\d.]+M)$/);

@@ -15,7 +15,7 @@ test('the first tiles do something: Products shows everything, Units and Value s
   expect(await app.run(() => [uiState.inv.sort, uiState.inv.dir])).toEqual(['value', -1]);
   await app.page.click('#main .chip:has-text("Low")');
   await app.page.click('#main .kpi:has-text("Products")');
-  expect(await app.run(() => [uiState.inv.f, uiState.inv.sort, uiState.inv.dir])).toEqual(['all', 'item', 1]);
+  expect(await app.run(() => [uiState.inv.f, uiState.inv.sort, uiState.inv.dir])).toEqual(['all', 'pid', 1]);
   await expect(app.page.locator('#toast')).toContainText('Showing all');
 });
 
