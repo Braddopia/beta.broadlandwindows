@@ -114,12 +114,18 @@ test('a new lead puts its customer in the Contact Book, a success tick shows, an
   await app.role('beta');
   const before = await app.run(() => state.contacts.filter((c) => c.type == 'Customer').length);
   await app.call('leadWizard');
+  await expect(app.page.locator('#f_title')).toBeVisible();
   await app.page.selectOption('#f_title', 'Mr');
   await app.page.fill('#f_name', 'Sample Customer Z');
   await app.page.fill('#f_mob1', '07700 900 777');
   await app.page.fill('#f_email1', 'z@example.com');
-  await app.call('wzStep', 1);
-  await expect(app.page.locator('#f_homeAddr')).toBeVisible();
+  await expect(app.page.locator('#f_email1')).toHaveValue('z@example.com');
+  /* Next: if the step does not move on, the banner says why (shown in the failure) */
+  await app.page.click('#mbox [data-act=wzStep]:not(.ghost)');
+  await expect(
+    app.page.locator('#f_homeAddr'),
+    await app.run(() => document.querySelector('#toast').innerText)
+  ).toBeVisible();
   await app.page.fill('#f_homeAddr', '7 Sample Lane');
   await app.page.fill('#f_town', 'Norwich');
   await app.page.fill('#f_homePc', 'nr6 5dr');
