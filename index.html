@@ -3251,14 +3251,16 @@ body.tv .main::after,body.vmsg .main::after,body.lv .main::after{display:none}
   .ptb.fx.t-inv th[data-col=value]{width:7%}
   .ptb.fx.t-inv th[data-col=supplier]{width:13.5%}
   .ptb.fx.t-inv th[data-col=status]{width:7%}
-  .ptb.fx.t-inv th[data-col=act]{width:12.6rem}
+  .ptb.fx.t-inv th[data-col=act]{width:13.5rem}
+  /* the row buttons stay exactly where they always were, against the right-hand edge */
+  .t-inv td.ac .acts{justify-content:flex-end!important;padding-right:var(--acgap,.8rem)}
   /* stock counts sit in the middle of their column, next to the item they belong to */
   .t-inv td.i-stock,.t-inv th[data-col=stock]{text-align:center!important;padding-left:.4rem!important;padding-right:.4rem!important}
   .t-inv th[data-col=stock] .thb,.t-inv th[data-col=stock]>*{justify-content:center}
   .t-inv td.i-sup,.t-inv th.i-sup{padding-left:1.2rem!important}
   .t-inv td.c-u,.t-inv th.c-u{padding-left:1rem}
 }
-@media(min-width:1101px) and (max-width:1320px){.ptb.fx.t-inv th[data-col=act]{width:8.8rem}}
+@media(min-width:1101px) and (max-width:1320px){.ptb.fx.t-inv th[data-col=act]{width:8.8rem}.t-inv td.ac .acts{--acgap:.38rem}}
 /* small laptops and tablets on their side: location, colours and value are hidden, so the rest share the room */
 @media(min-width:900px) and (max-width:1100px){
   .ptb.fx.t-inv th[data-col=sel]{width:2.8rem}.ptb.fx.t-inv th[data-col=pid]{width:4.8rem}
