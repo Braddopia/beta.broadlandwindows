@@ -205,7 +205,21 @@ export function go(v) {
   /* the first visit to a tab plays its own short tour */
   tabTour(v);
 }
+let drawing = false;
 export function render(soft) {
+  /* a redraw asked for while one is under way (a change event fired by it) waits until it has finished */
+  if (drawing) {
+    setTimeout(() => render(soft), 0);
+    return;
+  }
+  drawing = true;
+  try {
+    draw(soft);
+  } finally {
+    drawing = false;
+  }
+}
+function draw(soft) {
   hitFn = null;
   if (!canSee(view) || (view == 'admin' && !can('manage'))) view = HOME();
   const V = VIEWS[view];

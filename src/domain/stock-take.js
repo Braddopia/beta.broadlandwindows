@@ -112,14 +112,24 @@ export function matchLine(line, P) {
       col(r.cInName) == col(line.cIn);
   /* one code can name several products: prefer the one with the same description */
   const pick = (L) => L.find((r) => normCode(r.desc) == normCode(line.desc)) || L[0] || null;
-  return pick(P.filter((r) => same(r) && normCode(r.area) == a)) || pick(P.filter((r) => same(r) && !r.area));
+  const hit = pick(P.filter((r) => same(r) && normCode(r.area) == a)) || pick(P.filter((r) => same(r) && !r.area));
+  if (hit || !line.code || line.cIn || line.cOut) return hit;
+  /* a sheet with no colours: the product with that code, if there is only one (or one with the same description) */
+  const L = P.filter((r) => normCode(r.item) == normCode(line.code) && (normCode(r.area) == a || !r.area));
+  return L.length == 1 ? L[0] : L.find((r) => line.desc && normCode(r.desc) == normCode(line.desc)) || null;
+}
+/** the products a line could be when it cannot be told apart (same code, no colours on the sheet) */
+export function lineCandidates(line, P) {
+  if (!line.code || line.cIn || line.cOut) return [];
+  return P.filter((r) => normCode(r.item) == normCode(line.code));
 }
 
 /** what an import would do: new lines, updated lines, and lines that carry a quantity */
 export function planImport(lines, P) {
   const used = new Set(),
     create = [],
-    update = [];
+    update = [],
+    unsure = [];
   lines.forEach((l) => {
     let r = matchLine(
       l,
@@ -128,9 +138,10 @@ export function planImport(lines, P) {
     if (r) {
       used.add(r.pid);
       update.push({ line: l, r });
-    } else create.push({ line: l });
+    } else if (lineCandidates(l, P).length > 1) unsure.push({ line: l, n: lineCandidates(l, P).length });
+    else create.push({ line: l });
   });
-  return { create, update, withQty: lines.filter((l) => l.qty != null).length };
+  return { create, update, unsure, withQty: lines.filter((l) => l.qty != null).length };
 }
 
 /* ---- counting ---- */

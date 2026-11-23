@@ -76,6 +76,12 @@ export function moveRow(b, kind, qty, stock, extra) {
     ord: undefined,
     pref: undefined,
     note: undefined,
+    undone: undefined,
+    undoOf: undefined,
+    stake: undefined,
+    approvedBy: undefined,
+    approvedAt: undefined,
+    receivedAt: undefined,
     ...(extra || {}),
   };
 }

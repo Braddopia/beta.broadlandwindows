@@ -17,7 +17,7 @@ export function busyBtn(b, ms) {
    Plain information ("Signed in as ...", "Opened ...") is not shown at all. */
 const INFO = /^(signed in as|opened |getting the |picked at random|the tour will|back to (the default|automatic))/i;
 const OK =
-  /\b(saved|added|deleted|removed|created|booked|sent|updated|copied|approved|recorded|restored|imported|exported|undone|marked|moved|applied|uploaded|brought back|downloaded|filled in|given to|now contract|now order|paid|counts set|cancelled|completed|withdrawn)\b/i;
+  /\b(saved|added|deleted|removed|created|booked|sent|updated|copied|approved|recorded|restored|imported|exported|undone|marked|moved|applied|uploaded|brought back|downloaded|filled in|given to|now contract|now order|paid|counts set|cancelled|completed|withdrawn|sorted|showing|rejected|cleared)\b/i;
 const BAD =
   /\b(not|no|cannot|can't|could not|only|first|already|must|needs?|pick|choose|enter|type a|use \d|fill|at least|allow|too|limit|invalid|harder|please|up to|no longer|still uses|nothing|signed out|split)\b/i;
 export const toastKind = (t) =>
@@ -36,7 +36,7 @@ const RING =
 export function toast(t, opts) {
   if (document.body.classList.contains('tv')) return;
   t = String(t ?? '');
-  const kind = toastKind(t);
+  const kind = opts && opts.big ? 'ok' : toastKind(t);
   if (kind == 'info') return;
   const e = $('#toast'),
     act = opts && opts.action;

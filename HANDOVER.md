@@ -152,6 +152,25 @@ Read this first, then CLAUDE.md and docs/ARCHITECTURE.md.
 - Not taken from the sheet (the owner said the CRM's scanning is fine): the sheet's Barcode Count tab, where each
   scan adds 1 and the totals refresh every 7 seconds.
 
+## Fixed in v19.11.1 (Inventory tested hard: every button clicked as administrator and standard user)
+
+- Deleting a history entry changed stock and could make a product vanish (a product is its newest row). The row
+  before now takes over the product's details, or a lone row stays as a hidden starting record (`moveDel`).
+- New movements no longer inherit "undone" and approval details from the row before (`moveRow`).
+- Batch Add: an existing product kept only some details (description, group, area, QC were lost); now it builds on
+  the product. A row pasted from Excel splits on tabs only, so "Bay 2, Shelf A" stays one location. Locations match
+  the Stock Lists in any case and a new one is added to the list.
+- Batch Remove never takes away more than is in stock, and says how many products were short.
+- Stock take: typing a count threw an error (the page redraw swapped the box being left). `morph` now updates form
+  boxes in place and `render` never runs inside itself. Starting a stock take shows the green success banner.
+- Importing a stock sheet without colour columns doubled up products that share a code. A line now matches the one
+  product with its code; lines that could be several products are listed and left out unless ticked.
+- Reject a request and Clear an alert now say so, with Undo; deleting an entry has Undo.
+- The first Inventory tiles do something (Products shows all, Units On Shelf and Stock Value sort, biggest first).
+- Table: QC Check sits under the stock status instead of beside it; long text ends in "..." with the full text on
+  hover; on narrower screens the row's Report button goes so the columns keep room. Every page has room at the
+  bottom so Report A Problem never covers the last buttons (it covered Finish And Apply Counts).
+
 ## Open questions for the owner
 
 - Mitre re-cut waste in the Cutting Optimiser is not counted yet. Proposal: a "profile depth" (mm) on each

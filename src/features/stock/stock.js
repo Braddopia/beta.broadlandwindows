@@ -1,12 +1,11 @@
 /* features/stock/stock: The Inventory page and stock movements. */
 import { UNITS } from '../../config/constants.js';
 import { onClick, onEvent, rowClick } from '../../core/actions.js';
-import { nowT, today } from '../../core/dates.js';
+import { today } from '../../core/dates.js';
 import { $, esc } from '../../core/dom.js';
 import { csvDownload } from '../../ui/download.js';
 import { m0, money, sum } from '../../core/format.js';
 import { ICONS, svg } from '../../core/icons.js';
-import { uuid } from '../../core/ids.js';
 import { SAFE } from '../../data/sanitize.js';
 import { audit } from '../../data/audit.js';
 import { store } from '../../data/persistence.js';
@@ -33,6 +32,7 @@ import {
   stt,
   unitLabel,
   unitOf,
+  prodRows,
 } from '../../domain/stock.js';
 import { can } from '../../domain/permissions.js';
 import { need } from '../auth/session.js';
@@ -152,9 +152,9 @@ export function vProducts(tog) {
   const pend = state.items.filter((r) => r.type == 'request' && r.reqStatus == 'Pending').length,
     alerts = state.items.filter((r) => r.flag && !r.cleared).length;
   const K = [
-    ['Products', P.length, '', ['inv.f', 'all']],
-    ['Units On Shelf', sum(P, (r) => r.stock), '', null],
-    ...(Ad ? [['Stock Value', m0(sum(P, (r) => r.stock * r.cost)), '', null]] : []),
+    ['Products', P.length, '', ['tile', 'all']],
+    ['Units On Shelf', sum(P, (r) => r.stock), '', ['tile', 'stock']],
+    ...(Ad ? [['Stock Value', m0(sum(P, (r) => r.stock * r.cost)), '', ['tile', 'value']]] : []),
     [
       'Low Stock',
       cnt((r) => isLow(r) && r.stock > 0),
@@ -167,7 +167,7 @@ export function vProducts(tog) {
   ];
   const kpi = (k) =>
     k[3]
-      ? `<button class="kpi ${k[2]} ${k[3][0] == 'inv.f' && I.f == k[3][1] && k[3][1] != 'all' ? 'on' : ''}" ${k[3][0] == 'moves' ? onClick('invMoves', k[3][1]) : onClick('setUI', k[3][0], k[3][1])}><small>${k[0]}</small><b>${k[1]}</b></button>`
+      ? `<button class="kpi ${k[2]} ${(k[3][0] == 'inv.f' && I.f == k[3][1]) || (k[3][0] == 'tile' && k[3][1] != 'all' && I.sort == k[3][1] && I.dir == -1) ? 'on' : ''}" title="${{ all: 'Show every product (clears the filters)', stock: 'Most stock first', value: 'Highest value first' }[k[3][1]] || ''}" ${k[3][0] == 'moves' ? onClick('invMoves', k[3][1]) : k[3][0] == 'tile' ? onClick('invTile', k[3][1]) : onClick('setUI', k[3][0], k[3][1])}><small>${k[0]}</small><b>${k[1]}</b></button>`
       : `<div class="kpi"><small>${k[0]}</small><b>${k[1]}</b></div>`;
   const ch = (v, t) => `<button class="chip ${I.f == v ? 'on' : ''}" ${onClick('setUI', 'inv.f', v)}>${t}</button>`;
   const filtersOn = I.sup != 'all' || I.loc != 'all' || I.area != 'all' || I.unit != 'all' || I.grp != 'all';
@@ -179,7 +179,7 @@ export function vProducts(tog) {
         on = SEL.has(k),
         xh = ex && ex.pid == k,
         qi = qcIssue(r, td);
-      return `<tr class="clk-r ${on ? 'sel' : ''} ${xh ? 'xhit' : ''}" ${rowClick('viewItem', k)}><td><input type="checkbox" aria-label="Select ${esc(r.item)}" ${on ? 'checked' : ''} ${onEvent('onchange', 'invSel', k, 'this.checked')}></td><td><code>${esc(r.pid)}</code>${xh ? '<span class="xtag">Exact Match</span>' : ''}</td><td><b>${esc(r.item)}</b>${r.desc || sizeNote(r) ? `<small class="idesc">${esc([r.desc, sizeNote(r)].filter(Boolean).join(' · '))}</small>` : ''}</td><td class="n i-stock"><b>${r.stock}</b></td><td class="c-md">${hasLoc(r) ? esc(r.location) : '<span class="muted">Not Set</span>'}${r.area ? `<small class="idesc">${esc(r.area)}</small>` : ''}</td><td class="c-u">${esc(unitLabel(r))}</td><td class="c-md">${esc(colTxt(r))}</td><td class="n c-sm">${money(r.cost)}</td>${Ad ? `<td class="n c-md">${money(r.stock * r.cost)}</td>` : ''}<td class="c-sm i-sup">${esc(r.supplier || '-')}</td><td class="c i-st">${qi ? '<span class="tag r" title="Quality check needs attention">QC</span> ' : ''}<span class="tag fw ${s[1]}">${s[0] == 'OK' ? 'In Stock' : s[0] == 'Low' ? 'Low' : 'Out'}</span></td><td class="ac"><div class="acts r"><button class="mini" ${onClick('viewItem', k)}>View</button><button class="mini pri" ${onClick('editItem', k)}>${svg(ICONS.edit)}Edit</button><button class="mini c-sm" ${onClick('reportProd', k)}>Report</button></div></td></tr>`;
+      return `<tr class="clk-r ${on ? 'sel' : ''} ${xh ? 'xhit' : ''}" ${rowClick('viewItem', k)}><td><input type="checkbox" aria-label="Select ${esc(r.item)}" ${on ? 'checked' : ''} ${onEvent('onchange', 'invSel', k, 'this.checked')}></td><td><code>${esc(r.pid)}</code>${xh ? '<span class="xtag">Exact Match</span>' : ''}</td><td><b>${esc(r.item)}</b>${r.desc || sizeNote(r) ? `<small class="idesc">${esc([r.desc, sizeNote(r)].filter(Boolean).join(' · '))}</small>` : ''}</td><td class="n i-stock"><b>${r.stock}</b></td><td class="c-md" title="${esc(hasLoc(r) ? r.location : '')}">${hasLoc(r) ? esc(r.location) : '<span class="muted">Not Set</span>'}${r.area ? `<small class="idesc">${esc(r.area)}</small>` : ''}</td><td class="c-u">${esc(unitLabel(r))}</td><td class="c-md" title="${esc(colTxt(r))}">${esc(colTxt(r))}</td><td class="n c-sm">${money(r.cost)}</td>${Ad ? `<td class="n c-md">${money(r.stock * r.cost)}</td>` : ''}<td class="c-sm i-sup" title="${esc(r.supplier || '')}">${esc(r.supplier || '-')}</td><td class="c i-st"><span class="st2"><span class="tag fw ${s[1]}">${s[0] == 'OK' ? 'In Stock' : s[0] == 'Low' ? 'Low' : 'Out'}</span>${qi ? '<span class="tag r fw" title="Quality check needs attention">QC Check</span>' : ''}</span></td><td class="ac"><div class="acts r"><button class="mini" ${onClick('viewItem', k)}>View</button><button class="mini pri" ${onClick('editItem', k)}>${svg(ICONS.edit)}Edit</button><button class="mini c-sm" ${onClick('reportProd', k)}>Report</button></div></td></tr>`;
     })
     .join('');
 
@@ -197,6 +197,36 @@ export function invMoves(f) {
   uiState.mov.f = f;
   uiState.mov.page = 1;
   render();
+}
+/** the first tiles: Products shows everything (filters cleared), Units On Shelf and Stock Value sort the list by
+    that, biggest first; the table comes into view so the change can be seen */
+export function invTile(k) {
+  Object.assign(uiState.inv, {
+    sup: 'all',
+    loc: 'all',
+    area: 'all',
+    unit: 'all',
+    grp: 'all',
+    f: 'all',
+    q: '',
+    page: 1,
+  });
+  if (k == 'all') Object.assign(uiState.inv, { sort: 'item', dir: 1 });
+  else Object.assign(uiState.inv, { sort: k, dir: -1 });
+  render();
+  const t = $('#main .t-inv');
+  if (t && t.scrollIntoView)
+    t.scrollIntoView({
+      block: 'start',
+      behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+    });
+  toast(
+    k == 'all'
+      ? 'Showing all ' + products().length + ' products'
+      : k == 'stock'
+        ? 'Sorted: most stock first'
+        : 'Sorted: highest value first'
+  );
 }
 export function invReset() {
   Object.assign(uiState.inv, {
@@ -237,7 +267,7 @@ export function invFilter(btn) {
   ];
   openFpop(
     btn,
-    `<h3>Sort By</h3><select ${onEvent('onchange', 'invPop', 'sort', 'this.value')}>${sorts.map(([k, t]) => `<option value="${k}" ${I.sort == k ? 'selected' : ''}>${t}</option>`).join('')}</select><select ${onEvent('onchange', 'invPop', 'dir', 'this.value')}><option value="1" ${I.dir > 0 ? 'selected' : ''}>Ascending (A to Z, low to high)</option><option value="-1" ${I.dir < 0 ? 'selected' : ''}>Descending (Z to A, high to low)</option></select>
+    `<h3>Sort By</h3><select ${onEvent('onchange', 'invPop', 'sort', 'this.value')}>${sorts.map(([k, t]) => `<option value="${k}" ${I.sort == k ? 'selected' : ''}>${t}</option>`).join('')}</select><select ${onEvent('onchange', 'invPop', 'dir', 'this.value')}><option value="1" ${I.dir > 0 ? 'selected' : ''}>A to Z, low to high</option><option value="-1" ${I.dir < 0 ? 'selected' : ''}>Z to A, high to low</option></select>
    <h3>Filter</h3><select aria-label="Status" ${onEvent('onchange', 'invPop', 'f', 'this.value')}>${[
      ['all', 'All statuses'],
      ['low', 'Low stock'],
@@ -281,13 +311,30 @@ export function invBatch(kind) {
     [{ k: 'qty', l: 'Quantity for each item', t: 'number', req: 1, pos: 1, w: 'full', max: 1e6 }],
     { qty: 1 },
     (o) => {
+      let n = 0,
+        short = 0;
       SEL.forEach((k) => {
         const b = prod(k);
         if (!b) return;
-        const st = kind == 'add' ? b.stock + o.qty : Math.max(0, b.stock - o.qty);
-        state.items.unshift(moveRow(b, kind, o.qty, st));
+        const have = +b.stock || 0,
+          q = kind == 'add' ? o.qty : Math.min(have, o.qty);
+        if (kind == 'remove' && q < o.qty) short++;
+        if (!q) return;
+        state.items.unshift(moveRow(b, kind, q, kind == 'add' ? have + q : have - q));
+        n++;
       });
-      audit('Batch ' + kind, SEL.size + ' products', 'Qty ' + o.qty + ' each');
+      audit('Batch ' + kind, n + ' products', 'Qty ' + o.qty + ' each');
+      setTimeout(
+        () =>
+          toast(
+            (kind == 'add' ? 'Added ' + o.qty + ' to ' : 'Removed stock from ') +
+              n +
+              ' product' +
+              (n == 1 ? '' : 's') +
+              (short ? '. ' + short + ' had less than ' + o.qty + ', so all of theirs was removed' : '')
+          ),
+        30
+      );
     }
   );
 }
@@ -348,7 +395,9 @@ export function invNewRun() {
     ok = [],
     bad = [];
   lines.forEach((l, i) => {
-    const c = l.split(/\t|,/).map((x) => SAFE.text(x, 60));
+    /* pasted from Excel the columns are split by tabs (a location like "Bay 2, Shelf A" keeps its comma); typed
+       by hand they are split by commas */
+    const c = l.split(l.includes('\t') ? /\t/ : /,/).map((x) => SAFE.text(x, 60).trim());
     if (i == 0 && /^item/i.test(c[0])) return;
     const [item, q, cost, sup, loc, len, ci, co, un] = c,
       qty = SAFE.num(q, { max: 1e6 }),
@@ -383,41 +432,53 @@ export function invNewRun() {
     toast('Nothing to add');
     return;
   }
+  const L = (state.stockLists = state.stockLists || stockLists()),
+    added = [];
   ok.forEach((o) => {
-    const ex = state.items.find((x) => ikey(x) == ikey(o)),
+    /* a location typed in any case matches the list ("DOOR LOCKS" is Door Locks); a new one joins the list */
+    if (o.location) {
+      const m = L.locs.find((x) => x.toLowerCase() == o.location.toLowerCase());
+      if (m) o.location = m;
+      else {
+        L.locs.push(o.location);
+        added.push(o.location);
+      }
+    }
+    const ex = products().find((x) => ikey(x) == ikey(o)),
       pid = ex ? ex.pid : stkId(),
-      st = (ex ? ex.stock : 0) + o.qty;
+      st = (ex ? +ex.stock || 0 : 0) + o.qty;
     if (!state.suppliers.some((s) => s.name == o.supplier)) state.suppliers.push({ name: o.supplier });
-    state.items.unshift({
-      at: Date.now(),
-      time: nowT(),
-      type: 'add',
-      flag: false,
-      uid: uuid(),
-      pid,
-      user: USER,
-      qty: o.qty,
-      unit: o.unit,
-      item: o.item,
-      length: o.length,
-      cInName: o.cInName,
-      cIn: hex(o.cInName),
-      cOutName: o.cOutName,
-      cOut: hex(o.cOutName),
-      stock: st,
-      cost: o.cost,
-      location: o.location || (ex ? ex.location : '-'),
-      barcode: ex ? ex.barcode : '',
-      supplier: o.supplier,
-      reorder: ex ? ex.reorder : undefined,
-      lead: ex && ex.lead,
-    });
+    const base = ex
+      ? { ...ex, cost: o.cost, supplier: o.supplier, unit: o.unit, location: o.location || ex.location }
+      : {
+          pid,
+          item: o.item,
+          unit: o.unit,
+          length: o.length,
+          cInName: o.cInName,
+          cIn: hex(o.cInName),
+          cOutName: o.cOutName,
+          cOut: hex(o.cOutName),
+          cost: o.cost,
+          location: o.location || '-',
+          barcode: '',
+          supplier: o.supplier,
+        };
+    state.items.unshift(moveRow(base, 'add', o.qty, st));
   });
-  audit('Batch add', ok.length + ' products', '');
+  audit('Batch add', ok.length + ' products', added.length ? 'New locations: ' + added.join(', ') : '');
   store();
   closeModal();
   render();
-  toast(ok.length + ' product' + (ok.length > 1 ? 's' : '') + ' added');
+  toast(
+    ok.length +
+      ' product' +
+      (ok.length > 1 ? 's' : '') +
+      ' added' +
+      (added.length
+        ? '. New location' + (added.length > 1 ? 's' : '') + ' added to Stock Lists: ' + added.join(', ')
+        : '')
+  );
 }
 export function invCsv(onlySel) {
   const Ad = can('money'),
@@ -496,17 +557,29 @@ export function reqApprove(u) {
   audit('Request approved', r.item, r.pref + ' became order ' + r.ord);
   store();
   render();
-  toast('Approved: ' + r.pref + ' is now order ' + r.ord);
+  toast('Approved: ' + r.pref + ' is now order ' + r.ord + '. Use Receive when it arrives.');
 }
 export function reqReject(u) {
   if (!need('money', 'Rejecting requests')) return;
   const r = byUid(u);
   if (!r) return;
+  const was = { reqStatus: r.reqStatus, flag: r.flag };
   r.reqStatus = 'Rejected';
   r.flag = false;
   audit('Request rejected', r.item, r.ord);
   store();
   render();
+  toast('Request ' + (r.ord || '') + ' rejected', {
+    action: {
+      label: 'Undo',
+      run: () => {
+        Object.assign(r, was);
+        audit('Request rejection undone', r.item, r.ord);
+        store();
+        render();
+      },
+    },
+  });
 }
 export function reqReceive(u) {
   const r = byUid(u);
@@ -516,13 +589,56 @@ export function reqReceive(u) {
 export function moveClear(u) {
   const r = byUid(u);
   if (!r) return;
+  const was = { cleared: r.cleared, flag: r.flag, reqStatus: r.reqStatus };
   r.cleared = true;
   r.flag = false;
   if (r.type == 'request' && r.reqStatus != 'Pending') r.reqStatus = 'Cleared';
   audit('Movement cleared', r.item, r.ord || r.type);
   store();
   render();
+  toast(was.flag ? 'Alert cleared' : 'Cleared', {
+    action: {
+      label: 'Undo',
+      run: () => {
+        Object.assign(r, was);
+        store();
+        render();
+      },
+    },
+  });
 }
+/* what belongs to the product rather than to one movement (carried over when the newest movement is deleted) */
+const PRODUCT_KEYS = [
+  'item',
+  'desc',
+  'stock',
+  'unit',
+  'length',
+  'cInName',
+  'cIn',
+  'cOutName',
+  'cOut',
+  'cost',
+  'location',
+  'group',
+  'area',
+  'barcode',
+  'supplier',
+  'reorder',
+  'reorderQty',
+  'lead',
+  'notes',
+  'qc',
+  'cond',
+  'damaged',
+  'batch',
+  'expiry',
+  'coshh',
+  'qcNote',
+  'lastCount',
+  'countedAt',
+  'countedBy',
+];
 export function moveDel(u) {
   if (!need('manage', 'Deleting history')) return;
   const r = byUid(u);
@@ -532,10 +648,44 @@ export function moveDel(u) {
     'Stock levels are not changed.',
     'Delete entry',
     () => {
-      state.items = state.items.filter((x) => x !== r);
-      audit('Movement deleted', r.item, r.type + ' ' + r.qty + (r.ord ? ' ' + r.ord : ''));
+      /* a product is its newest history row, so deleting that row must not take the product (or its stock) with
+         it: the row before it takes over the product's details, or, if it was the only row, it stays as the
+         product's starting record (hidden from the history) */
+      const rows = prodRows(r.pid),
+        at = state.items.indexOf(r),
+        keep = { ...r },
+        nx = rows[0] === r && rows.length > 1 ? rows[1] : null,
+        nxWas = nx ? { ...nx } : null;
+      if (rows.length == 1) {
+        Object.assign(r, { type: 'import', qty: 0, flag: false, cleared: true, note: 'History entry deleted' });
+        ['ord', 'pref', 'reqStatus'].forEach((k) => delete r[k]);
+      } else {
+        if (nx) PRODUCT_KEYS.forEach((k) => (k in r ? (nx[k] = r[k]) : delete nx[k]));
+        state.items = state.items.filter((x) => x !== r);
+      }
+      audit('Movement deleted', r.item, keep.type + ' ' + keep.qty + (keep.ord ? ' ' + keep.ord : ''));
       store();
       render();
+      toast('Entry deleted', {
+        action: {
+          label: 'Undo',
+          run: () => {
+            if (rows.length == 1) {
+              Object.keys(r).forEach((k) => delete r[k]);
+              Object.assign(r, keep);
+            } else {
+              if (nx) {
+                Object.keys(nx).forEach((k) => delete nx[k]);
+                Object.assign(nx, nxWas);
+              }
+              if (!state.items.includes(r)) state.items.splice(Math.max(0, at), 0, r);
+            }
+            audit('Movement put back', keep.item, keep.type + ' ' + keep.qty);
+            store();
+            render();
+          },
+        },
+      });
     },
     true
   );

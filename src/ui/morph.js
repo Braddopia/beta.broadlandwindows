@@ -20,6 +20,12 @@ export function morphKids(a, b) {
       a.appendChild(bn);
       continue;
     }
+    /* a form box that is still the same box (same kind, same id) is updated, not swapped: swapping one throws the
+       cursor out of it, which fires its change event in the middle of the redraw */
+    if (sameBox(an, bn)) {
+      syncBox(an, bn);
+      continue;
+    }
     if (
       an.nodeType != bn.nodeType ||
       an.nodeName != bn.nodeName ||
@@ -43,4 +49,32 @@ export function morphKids(a, b) {
     });
     morphKids(an, bn);
   }
+}
+const BOX = /^(INPUT|SELECT|TEXTAREA)$/;
+const sameBox = (an, bn) =>
+  an.nodeType == 1 &&
+  bn.nodeType == 1 &&
+  BOX.test(an.nodeName) &&
+  an.nodeName == bn.nodeName &&
+  (an.getAttribute('type') || '') == (bn.getAttribute('type') || '') &&
+  (an.id || '') == (bn.id || '') &&
+  (an.getAttribute('name') || '') == (bn.getAttribute('name') || '');
+/* bring a form box up to date: its attributes and options always; its value too, unless someone is typing in it */
+function syncBox(an, bn) {
+  [...an.attributes].forEach((x) => {
+    if (!bn.hasAttribute(x.name)) an.removeAttribute(x.name);
+  });
+  [...bn.attributes].forEach((x) => {
+    if (an.getAttribute(x.name) !== x.value) an.setAttribute(x.name, x.value);
+  });
+  if (an.nodeName == 'SELECT') {
+    if (an.innerHTML != bn.innerHTML) an.innerHTML = bn.innerHTML;
+    const i = [...bn.options].findIndex((o) => o.hasAttribute('selected'));
+    if (document.activeElement !== an) an.selectedIndex = Math.max(0, i);
+    return;
+  }
+  if (document.activeElement === an) return;
+  if (an.type == 'checkbox' || an.type == 'radio') an.checked = bn.hasAttribute('checked');
+  else if (an.nodeName == 'TEXTAREA') an.value = bn.textContent;
+  else an.value = bn.getAttribute('value') ?? '';
 }

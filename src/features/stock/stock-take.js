@@ -42,6 +42,7 @@ import { company } from '../../data/company.js';
 import { render } from '../../ui/shell/router.js';
 import { toast } from '../../ui/toast.js';
 import { uiState } from '../../ui/ui-state.js';
+import { celebrate } from '../../ui/success.js';
 
 const UPLOAD = 'M12 16V4M6 10l6-6 6 6M4 20h16',
   PRINT = 'M6 9V3h12v6M6 18H4v-7h16v7h-2M8 14h8v7H8z';
@@ -188,6 +189,7 @@ export function takeStart() {
       });
       uiState.take = { ...uiState.take, area: '', f: 'all', page: 1, q: '' };
       audit('Stock take started', o.name, products().length + ' lines');
+      celebrate('Stock Take Started', SAFE.text(o.name, 60) + ' · ' + products().length + ' lines to count');
     }
   );
 }
@@ -347,7 +349,16 @@ export async function takeFile(inp) {
           : `<p class="muted">${plan.withQty} quantities in the file are ignored: start a stock take to record them as counts.</p>`
       : '';
     openModal(
-      `<h2>Import ${esc(f.name)}</h2><div class="kpis"><div class="kpi"><small>Lines</small><b>${lines.length}</b></div><div class="kpi"><small>New Products</small><b>${plan.create.length}</b></div><div class="kpi"><small>Updated</small><b>${plan.update.length}</b></div><div class="kpi"><small>Areas</small><b>${areas.length}</b></div></div><p class="muted">Areas: ${areas.map(esc).join(', ')}.${dups ? ' ' + dups + ' repeated lines in the same area were merged.' : ''}</p><div class="ff"><label class="cbl"><input type="checkbox" id="tkU" checked> Update descriptions and locations of existing products from the file</label>${qtyOpt}</div><div class="mact"><button class="btn ghost" data-act="closeModal">Cancel</button><button class="btn" data-act="takeImportRun">Import ${lines.length} Lines</button></div>`,
+      `<h2>Import ${esc(f.name)}</h2><div class="kpis"><div class="kpi"><small>Lines</small><b>${lines.length}</b></div><div class="kpi"><small>New Products</small><b>${plan.create.length}</b></div><div class="kpi"><small>Updated</small><b>${plan.update.length}</b></div><div class="kpi"><small>Areas</small><b>${areas.length}</b></div></div>${
+        plan.unsure.length
+          ? `<div class="warn tk-uns"><b>${plan.unsure.length} line${plan.unsure.length == 1 ? '' : 's'} could be more than one product</b> (same code, different length or colours, and the file has no colours): ${plan.unsure
+              .slice(0, 6)
+              .map((u) => esc(u.line.code) + ' (' + u.n + ' products)')
+              .join(
+                ', '
+              )}${plan.unsure.length > 6 ? '...' : ''}. They are left out so nothing is doubled up. Add colour columns to the file, or count them on screen.<label class="cbl"><input type="checkbox" id="tkN"> Add them as new products anyway</label></div>`
+          : ''
+      }<p class="muted">Areas: ${areas.map(esc).join(', ')}.${dups ? ' ' + dups + ' repeated lines in the same area were merged.' : ''}</p><div class="ff"><label class="cbl"><input type="checkbox" id="tkU" checked> Update descriptions and locations of existing products from the file</label>${qtyOpt}</div><div class="mact"><button class="btn ghost" data-act="closeModal">Cancel</button><button class="btn" data-act="takeImportRun">Import ${lines.length} Lines</button></div>`,
       'md'
     );
   } catch (e) {
@@ -359,6 +370,7 @@ export function takeImportRun() {
   if (!pending) return;
   const { plan, areas, file } = pending,
     upd = $('#tkU') && $('#tkU').checked,
+    addUnsure = $('#tkN') && $('#tkN').checked,
     useQty = $('#tkQ') && $('#tkQ').checked,
     T = openTake(),
     setNow = useQty && !T && can('manage');
@@ -395,8 +407,9 @@ export function takeImportRun() {
     prodRows(r.pid).forEach((x) => Object.assign(x, patch));
     count(prodRows(r.pid)[0], l.qty);
   });
-  const fresh = [];
-  plan.create.forEach(({ line: l }) => {
+  const fresh = [],
+    toMake = addUnsure ? [...plan.create, ...plan.unsure] : plan.create;
+  toMake.forEach(({ line: l }) => {
     const code = SAFE.code(l.code),
       row = {
         at: now,
@@ -433,13 +446,13 @@ export function takeImportRun() {
   audit(
     'Stock sheet imported',
     file,
-    `${plan.create.length} new, ${plan.update.length} updated${counts ? ', ' + counts + ' counts' : ''}${changed ? ', ' + changed + ' stock levels set' : ''}`
+    `${toMake.length} new, ${plan.update.length} updated${counts ? ', ' + counts + ' counts' : ''}${changed ? ', ' + changed + ' stock levels set' : ''}${plan.unsure.length && !addUnsure ? ', ' + plan.unsure.length + ' unclear lines left out' : ''}`
   );
   store();
   closeModal();
   render();
   toast(
-    `${plan.create.length} new and ${plan.update.length} updated${counts ? ', ' + counts + ' counts recorded' : ''}`
+    `Imported: ${toMake.length} new and ${plan.update.length} updated${counts ? ', ' + counts + ' counts recorded' : ''}${plan.unsure.length && !addUnsure ? '. ' + plan.unsure.length + ' unclear line' + (plan.unsure.length == 1 ? ' was' : 's were') + ' left out' : ''}`
   );
 }
 

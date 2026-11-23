@@ -1186,3 +1186,25 @@ body[data-theme=dark] .hol-sum .warn{color:#ffd27a}
 .sl-t{font-size:.78rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cp-codes{max-height:7.2rem;overflow:auto}
 @media(max-width:640px){.sl-r.sl-c{grid-template-columns:1.2rem 1fr 4rem auto}.sl-r.sl-c select,.sl-r.sl-c .sl-t,.sl-h{display:none}}
+
+/* the page always ends with room under it, so the floating Report A Problem button never sits on top of the last
+   buttons on a page (Finish And Apply Counts, Per Page...) */
+.main::after{content:"";display:block;height:3.2rem}
+body.tv .main::after,body.vmsg .main::after,body.lv .main::after{display:none}
+/* stock take count boxes look like every other box */
+.tk-in input{border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);padding:0 .7rem;transition:border-color .15s var(--e-out),box-shadow .2s var(--e-out)}
+.tk-in input:hover{border-color:#8fa3be}.tk-in input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(3,78,162,.12)}
+
+/* Inventory table: text that does not fit ends in "..." (the full text shows on hover) instead of running into the
+   next column, and a QC problem sits under the stock status rather than pushing into the buttons */
+.t-inv td:not(.ac):not(.i-st){overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.t-inv td .idesc{overflow:hidden;text-overflow:ellipsis}
+.t-inv td.c-md,.t-inv td.c-sm{padding-right:.8rem}
+.t-inv .st2{display:inline-flex;flex-direction:column;align-items:center;gap:.2rem}
+/* narrower screens: the row's Report button goes (it is in the product window too), so the text columns keep room */
+@media(min-width:900px) and (max-width:1320px){
+  .ptb.fx.t-inv th[data-col=act]{width:8.8rem}
+  .t-inv td.ac .acts .mini:nth-child(3){display:none}
+  .ptb.fx.t-inv th[data-col=pid]{width:4.2rem}
+  .ptb.fx.t-inv th[data-col=status]{width:6.2rem}
+}
