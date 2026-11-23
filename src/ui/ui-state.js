@@ -16,6 +16,7 @@ export const uiState = {
     loc: 'all',
     area: 'all',
     unit: 'all',
+    grp: 'all',
     sort: 'item',
     dir: 1,
     page: 1,

@@ -12,6 +12,7 @@ import { pinMake } from '../features/auth/pins.js';
 import { fitSync } from '../features/contracts/finance-step.js';
 import { conOf } from '../features/suppliers/suppliers.js';
 import { custToBook } from '../features/contacts/customer-book.js';
+import { DEF_COLOURS, DEF_GROUPS, DEF_LOCS } from '../domain/stock-lists.js';
 
 export function migrate() {
   const s0 = seed();
@@ -372,5 +373,17 @@ export function custBook() {
   if (state.custBook) return;
   [...state.contracts, ...state.leads].forEach((r) => custToBook(r));
   state.custBook = 1;
+  store();
+}
+
+/* the stock lists (locations, product groups, colour codes): the stock sheet's, plus any location already in use */
+export function stockListsInit() {
+  if (state.stockLists) return;
+  const used = [...new Set(state.items.map((r) => r.location).filter((x) => x && x != '-'))];
+  state.stockLists = {
+    locs: [...new Set([...DEF_LOCS, ...used])],
+    groups: DEF_GROUPS.slice(),
+    colours: DEF_COLOURS(),
+  };
   store();
 }

@@ -26,6 +26,7 @@ import { SEL } from './stock.js';
 import { PRINT_BAR_CSS, c39, fitPage, printBar, printDoc } from '../../print/print.js';
 import { closeModal, openModal } from '../../ui/modal.js';
 import { toast } from '../../ui/toast.js';
+import { stockLists } from '../../domain/stock-lists.js';
 
 /* ---------------- stock reports ---------------- */
 export function reportProd(k) {
@@ -337,6 +338,18 @@ const EXTRA = {
           total ? Math.round((sum(L, val) / total) * 100) + '%' : '-',
         ];
       });
+    /* the same, by product group (the stock sheet's Window Accessories, Door Locks...) */
+    const G = [...stockLists().groups, ...(P.some((r) => !r.group) ? [''] : [])],
+      grows = G.map((g) => {
+        const L = P.filter((r) => (r.group || '') == g);
+        return [
+          g || 'No group',
+          L.length,
+          sum(L, (r) => +r.stock || 0),
+          money(sum(L, val)),
+          total ? Math.round((sum(L, val) / total) * 100) + '%' : '-',
+        ];
+      }).filter((r) => r[1]);
     printDoc('Stock Valuation By Area', 'Quantity in stock × cost each', [], [], {
       kind: 'Stock Report',
       ref,
@@ -352,6 +365,11 @@ const EXTRA = {
           t: 'Value By Area',
           h: ['Area', 'Lines', 'Units', 'Value', 'Share'],
           r: [...rows, ['Total', P.length, sum(P, (r) => +r.stock || 0), money(total), '100%']],
+        },
+        {
+          t: 'Value By Product Group',
+          h: ['Group', 'Lines', 'Units', 'Value', 'Share'],
+          r: [...grows, ['Total', P.length, sum(P, (r) => +r.stock || 0), money(total), '100%']],
         },
         {
           t: 'Most Valuable Lines',

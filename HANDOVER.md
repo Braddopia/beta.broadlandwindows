@@ -136,6 +136,22 @@ Read this first, then CLAUDE.md and docs/ARCHITECTURE.md.
 - A redesign was mocked up twice (four layouts, then three skins on the real pages); the owner keeps the current
   look.
 
+## Added in v19.11 (from the office's Excel stock sheet, "Broadland Stock Control")
+
+- Inventory, Stock Lists (administrators, `features/stock/stock-lists.js`, rules in `domain/stock-lists.js`):
+  locations, product groups and colour codes, kept in `state.stockLists` (set once at start-up by
+  `stockListsInit`, keeping any location already in use).
+  - Locations: Door Locks, Solar, Window Handles, Tilt & Turn, T/V. The sheet's two locations named after people are
+    left for the office to add (no real names in the repo). The product's Location is now a drop-down from this list.
+  - Product groups: the sheet's seven. Each product has a Product group; Inventory filters by it, a batch "Set Group",
+    and the stock valuation report has "Value By Product Group".
+  - Colour codes: the sheet's 47 codes, each with a RAL number and finish (RAL codes link to themselves, KL016 is RAL
+    7032 Matt, the rest are for the office to link). A colour box turns a typed code into "KL016 (RAL 7032 Matt)";
+    the colour picker shows the linked codes first and finds a code by its RAL number.
+- Units: Bulk and Kit added.
+- Not taken from the sheet (the owner said the CRM's scanning is fine): the sheet's Barcode Count tab, where each
+  scan adds 1 and the totals refresh every 7 seconds.
+
 ## Open questions for the owner
 
 - Mitre re-cut waste in the Cutting Optimiser is not counted yet. Proposal: a "profile depth" (mm) on each

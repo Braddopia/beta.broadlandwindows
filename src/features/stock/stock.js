@@ -51,6 +51,7 @@ import { askYes, closeModal, openModal } from '../../ui/modal.js';
 import { hit, q, render } from '../../ui/shell/router.js';
 import { toast } from '../../ui/toast.js';
 import { uiState } from '../../ui/ui-state.js';
+import { stockLists } from '../../domain/stock-lists.js';
 
 export const SEL = new Set();
 /* a product's photos that can still be shown */
@@ -80,6 +81,7 @@ export function invFiltered() {
       colours: colTxt,
       unit: unitLabel,
       location: (r) => (hasLoc(r) ? r.location : '~'),
+      group: (r) => r.group || '~',
       area: (r) => (r.area ? r.area : '~'),
       desc: (r) => r.desc || '~',
       stock: (r) => +r.stock,
@@ -98,7 +100,8 @@ export function invFiltered() {
         (I.sup == 'all' || r.supplier == I.sup) &&
         (I.loc == 'all' || r.location == I.loc) &&
         (I.area == 'all' || areaOf(r) == I.area) &&
-        (I.unit == 'all' || unitOf(r) == I.unit)
+        (I.unit == 'all' || unitOf(r) == I.unit) &&
+        (I.grp == 'all' || (r.group || '') == I.grp)
     ).sort((a, b) => cmp(val(a), val(b)) * I.dir || cmp(a.item, b.item));
   /* typed an exact Stock ID, item code or barcode: that product goes first */
   const x = invExact();
@@ -167,7 +170,7 @@ export function vProducts(tog) {
       ? `<button class="kpi ${k[2]} ${k[3][0] == 'inv.f' && I.f == k[3][1] && k[3][1] != 'all' ? 'on' : ''}" ${k[3][0] == 'moves' ? onClick('invMoves', k[3][1]) : onClick('setUI', k[3][0], k[3][1])}><small>${k[0]}</small><b>${k[1]}</b></button>`
       : `<div class="kpi"><small>${k[0]}</small><b>${k[1]}</b></div>`;
   const ch = (v, t) => `<button class="chip ${I.f == v ? 'on' : ''}" ${onClick('setUI', 'inv.f', v)}>${t}</button>`;
-  const filtersOn = I.sup != 'all' || I.loc != 'all' || I.area != 'all' || I.unit != 'all';
+  const filtersOn = I.sup != 'all' || I.loc != 'all' || I.area != 'all' || I.unit != 'all' || I.grp != 'all';
   invShowExact();
   const rows = pg.rows
     .map((r) => {
@@ -180,11 +183,11 @@ export function vProducts(tog) {
     })
     .join('');
 
-  return `<div class="head"><div><h1>Inventory</h1><span class="muted">${P.length} products, ${sum(P, (r) => r.stock)} units${Ad ? ', ' + m0(sum(P, (r) => r.stock * r.cost)) : ''}</span></div><div class="tools">${tog}<span class="vs"></span><button class="btn" ${onClick('stockForm', 'add')}>${svg(ICONS.plus)}Add Stock</button><button class="btn ghost" ${onClick('stockForm', 'remove')}>Remove Stock</button><button class="btn ghost" ${onClick('stockForm', 'request')}>Request</button><button class="mini" data-act="invNew">Batch Add</button><button class="mini" data-act="invRep">Reports</button><button class="mini" data-act="invCsv">Export CSV</button></div></div>
+  return `<div class="head"><div><h1>Inventory</h1><span class="muted">${P.length} products, ${sum(P, (r) => r.stock)} units${Ad ? ', ' + m0(sum(P, (r) => r.stock * r.cost)) : ''}</span></div><div class="tools">${tog}<span class="vs"></span><button class="btn" ${onClick('stockForm', 'add')}>${svg(ICONS.plus)}Add Stock</button><button class="btn ghost" ${onClick('stockForm', 'remove')}>Remove Stock</button><button class="btn ghost" ${onClick('stockForm', 'request')}>Request</button><button class="mini" data-act="invNew">Batch Add</button><button class="mini" data-act="invRep">Reports</button><button class="mini" data-act="invCsv">Export CSV</button>${can('manage') ? '<button class="mini" data-act="invLists">Stock Lists</button>' : ''}</div></div>
   <div class="kpis">${K.map(kpi).join('')}</div>
   <div class="invbar"><label class="invq">${svg(ICONS.search)}<input id="invQ" type="search" autocomplete="off" maxlength="80" placeholder="Search stock: Stock ID, code, description, location, supplier" aria-label="Search inventory" value="${esc(I.q || '')}" ${onEvent('oninput', 'invSearch', 'this.value')} ${onEvent('onkeydown', 'invSearchKey', 'event')}></label>${ex ? `<button class="btn sm" ${onClick('viewItem', ex.pid)}>Open ${esc(ex.item)}</button>` : ''}</div>
   <div class="sg2">${ch('all', 'All (' + P.length + ')')}${ch('low', 'Low (' + cnt((r) => isLow(r) && r.stock > 0) + ')')}${ch('out', 'Out (' + cnt((r) => r.stock <= 0) + ')')}${ch('noloc', 'No Location (' + cnt((r) => !hasLoc(r)) + ')')}${ch('nosup', 'No Supplier (' + cnt((r) => !r.supplier) + ')')}${ch('qc', 'QC Issues (' + cnt((r) => qcIssue(r, td)) + ')')}${filtersOn ? `<span class="vs"></span><button class="chip on" data-act="invReset">Filters on &times;</button>` : ''}</div>
-  ${n ? `<div class="selbar"><b>${n} Selected</b><button class="mini pri" ${onClick('invBatch', 'add')}>Add Stock</button><button class="mini" ${onClick('invBatch', 'remove')}>Remove Stock</button><button class="mini" ${onClick('invSetF', 'location')}>Set Location</button><button class="mini" ${onClick('invSetF', 'supplier')}>Set Supplier</button><button class="mini" ${onClick('invSetF', 'unit')}>Set Unit</button><button class="mini" data-act="invRep">Report</button><button class="mini" data-act="invLabels">Labels</button><button class="mini" ${onClick('invCsv', 1)}>Export</button>${can('manage') ? '<button class="mini del" data-act="invDel">Delete</button>' : ''}<button class="mini" data-act="invSelClear">Clear</button></div>` : ''}
+  ${n ? `<div class="selbar"><b>${n} Selected</b><button class="mini pri" ${onClick('invBatch', 'add')}>Add Stock</button><button class="mini" ${onClick('invBatch', 'remove')}>Remove Stock</button><button class="mini" ${onClick('invSetF', 'location')}>Set Location</button><button class="mini" ${onClick('invSetF', 'group')}>Set Group</button><button class="mini" ${onClick('invSetF', 'supplier')}>Set Supplier</button><button class="mini" ${onClick('invSetF', 'unit')}>Set Unit</button><button class="mini" data-act="invRep">Report</button><button class="mini" data-act="invLabels">Labels</button><button class="mini" ${onClick('invCsv', 1)}>Export</button>${can('manage') ? '<button class="mini del" data-act="invDel">Delete</button>' : ''}<button class="mini" data-act="invSelClear">Clear</button></div>` : ''}
   <div class="tw"><table class="ptb fx t-inv"><thead><tr><th data-col="sel"><input type="checkbox" aria-label="Select all on this page" ${pg.rows.length && pg.rows.every((r) => SEL.has(key(r))) ? 'checked' : ''} ${onEvent('onchange', 'invAll', 'this.checked')}></th>${thS('inv', 'pid', 'ID')}${thS('inv', 'item', 'Item')}${thS('inv', 'stock', 'Stock', 'n')}${thS('inv', 'location', 'Location', 'c-md')}${thS('inv', 'unit', 'Unit', 'c-u')}${thS('inv', 'colours', 'Colours', 'c-md')}${thS('inv', 'cost', 'Cost', 'n c-sm')}${Ad ? thS('inv', 'value', 'Total Value', 'n c-md') : ''}${thS('inv', 'supplier', 'Supplier', 'c-sm i-sup')}${thS('inv', 'status', 'Status', 'c i-st')}<th class="ac" data-col="act"><button class="fbtn ${filtersOn ? 'on' : ''}" id="invF" title="Sort and filter" aria-label="Sort and filter" data-act="invFilter" data-args="[{&quot;$&quot;:&quot;this&quot;}]">${svg(ICONS.filter)}</button></th></tr></thead><tbody>${rows || `<tr><td colspan="14" class="empty">${emptyArt('stock', 'No products match.')}</td></tr>`}</tbody></table></div>
   ${pagerH('inv', pg, 'products')}
   <div style="margin-top:1.1rem">${suppliersPanel()}</div>`;
@@ -196,7 +199,16 @@ export function invMoves(f) {
   render();
 }
 export function invReset() {
-  Object.assign(uiState.inv, { sup: 'all', loc: 'all', area: 'all', unit: 'all', f: 'all', q: '', page: 1 });
+  Object.assign(uiState.inv, {
+    sup: 'all',
+    loc: 'all',
+    area: 'all',
+    unit: 'all',
+    grp: 'all',
+    f: 'all',
+    q: '',
+    page: 1,
+  });
   closeFpop();
   render();
 }
@@ -214,6 +226,7 @@ export function invFilter(btn) {
     ['stock', 'Stock level'],
     ['status', 'Status'],
     ['location', 'Location'],
+    ['group', 'Product group'],
     ['area', 'Stock-take area'],
     ['desc', 'Description'],
     ['supplier', 'Supplier'],
@@ -236,7 +249,8 @@ export function invFilter(btn) {
      .map(([k, t]) => `<option value="${k}" ${I.f == k ? 'selected' : ''}>${t}</option>`)
      .join('')}</select>
    <select aria-label="Supplier" ${onEvent('onchange', 'invPop', 'sup', 'this.value')}>${opts([...new Set(P.map((r) => r.supplier).filter(Boolean))].sort(), I.sup, 'All suppliers')}</select>
-   <select aria-label="Location" ${onEvent('onchange', 'invPop', 'loc', 'this.value')}>${opts([...new Set(P.filter(hasLoc).map((r) => r.location))].sort(), I.loc, 'All locations')}</select>
+   <select aria-label="Location" ${onEvent('onchange', 'invPop', 'loc', 'this.value')}>${opts([...new Set([...stockLists().locs, ...P.filter(hasLoc).map((r) => r.location)])], I.loc, 'All locations')}</select>
+   <select aria-label="Product group" ${onEvent('onchange', 'invPop', 'grp', 'this.value')}>${opts(stockLists().groups, I.grp, 'All groups')}</select>
  <select aria-label="Area" ${onEvent('onchange', 'invPop', 'area', 'this.value')}>${opts([...new Set(P.map(areaOf))].sort(), I.area, 'All areas')}</select>
    <select aria-label="Unit" ${onEvent('onchange', 'invPop', 'unit', 'this.value')}>${opts(UNITS, I.unit, 'All units')}</select>
    <div class="acts"><button class="mini" data-act="invReset">Reset</button><button class="mini pri" data-act="closeFpop">Done</button></div>`
@@ -278,13 +292,18 @@ export function invBatch(kind) {
   );
 }
 export function invSetF(f) {
-  const L = { location: 'Location (Bay, Bin, Shelf, Rack)', supplier: 'Supplier', unit: 'Unit' }[f];
+  const L = { location: 'Location', supplier: 'Supplier', unit: 'Unit', group: 'Product Group' }[f];
   form(
     'Set ' + L.replace(/ \(.*/, '') + ' For ' + SEL.size + ' Items',
     [
-      f == 'location'
-        ? { k: 'v', l: L, w: 'full', req: 1, list: 'locs', max: 60 }
-        : { k: 'v', l: L, t: 'select', o: f == 'unit' ? UNITS : SUPN(), w: 'full', req: 1 },
+      {
+        k: 'v',
+        l: L,
+        t: 'select',
+        o: f == 'location' ? stockLists().locs : f == 'group' ? stockLists().groups : f == 'unit' ? UNITS : SUPN(),
+        w: 'full',
+        req: 1,
+      },
     ],
     {},
     (o) => {

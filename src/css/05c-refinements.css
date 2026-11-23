@@ -1175,3 +1175,14 @@ body[data-theme=dark]
 body[data-theme=dark] .hol-sum .warn{color:#ffd27a}
 .hbk fieldset{border:0;padding:0;margin:0;min-width:0}
 .hbk fieldset legend{padding:0;margin:0 0 .35rem;font:600 .92rem var(--body);color:var(--ink)}
+
+/* Inventory, Stock Lists: one row per location / group, or code + RAL + finish + how it reads */
+.sl-tabs{margin:.2rem 0 .6rem}.sl-tabs i{font-style:normal;font-size:.72rem;opacity:.7;margin-left:.2rem}
+.sl-list{display:flex;flex-direction:column;gap:.35rem;max-height:min(52vh,30rem);overflow:auto;margin:.4rem 0 .7rem;padding-right:.2rem}
+.sl-r{display:grid;grid-template-columns:1fr auto;gap:.5rem;align-items:center}
+.sl-r.sl-c{grid-template-columns:1.4rem 7rem 4.5rem 7.5rem 1fr auto}
+.sl-h{display:grid;grid-template-columns:1.4rem 7rem 4.5rem 7.5rem 1fr auto;gap:.5rem;font-size:.75rem;font-weight:600;color:var(--muted);padding-right:2.6rem}
+.sl-sw{width:1.2rem;height:1.2rem;border-radius:50%;box-shadow:inset 0 0 0 1px rgba(0,0,0,.15)}
+.sl-t{font-size:.78rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cp-codes{max-height:7.2rem;overflow:auto}
+@media(max-width:640px){.sl-r.sl-c{grid-template-columns:1.2rem 1fr 4rem auto}.sl-r.sl-c select,.sl-r.sl-c .sl-t,.sl-h{display:none}}

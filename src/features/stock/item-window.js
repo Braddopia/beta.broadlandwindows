@@ -38,6 +38,7 @@ import { gallery, setPhotoList, tmp } from '../../ui/forms/photos.js';
 import { askIn, askYes, closeModal, openModal } from '../../ui/modal.js';
 import { go, render, view } from '../../ui/shell/router.js';
 import { toast } from '../../ui/toast.js';
+import { listChoices, stockLists } from '../../domain/stock-lists.js';
 
 /* ---------------- one wide item window for Edit, Add, Remove and Request ---------------- */
 export let ieIdx = 0,
@@ -87,6 +88,7 @@ export function ieFields() {
       ro: ieMode == 'remove',
     },
     { k: 'unit', l: 'Unit', t: 'select', o: UNITS, sec: 's', ro: ieMode == 'remove' },
+    { k: 'group', l: 'Product group', t: 'select', o: listChoices(stockLists().groups, r.group), sec: 's' },
     { k: 'length', l: lenBox(unitOf(r)).l, max: 30, sec: 's', ph: lenBox(unitOf(r)).ph },
     ed
       ? { k: 'stock', l: 'Current stock', t: 'number', max: 1e7, sec: 's', hint: 'Changing this logs an adjustment' }
@@ -121,7 +123,14 @@ export function ieFields() {
           },
         ]
       : []),
-    { k: 'location', l: 'Location (Bay, Bin, Shelf, Rack)', list: 'locs', max: 60, sec: 'l', ro: ieMode == 'remove' },
+    {
+      k: 'location',
+      l: 'Location',
+      t: 'select',
+      o: listChoices(stockLists().locs, r.location),
+      sec: 'l',
+      ro: ieMode == 'remove',
+    },
     { k: 'area', l: 'Stock-take area', list: 'areas', max: 40, sec: 'l', hint: 'The count sheet it is on' },
     ...(ieMode == 'remove'
       ? [{ k: 'supplier', l: 'Supplier', ro: 1, sec: 'l' }]
@@ -352,6 +361,10 @@ export function ieSave() {
     o = readFields(ieFields());
   if (!o) return;
   o.item = SAFE.code(o.item);
+  /* the group and location come from the stock lists (or are what the product already had) */
+  const was0 = ieKey && prod(ieKey);
+  if (o.group && !stockLists().groups.includes(o.group) && !(was0 && was0.group == o.group)) o.group = '';
+  if (o.location && !stockLists().locs.includes(o.location) && !(was0 && was0.location == o.location)) o.location = '';
   if (mode != 'remove' && mode != 'request') {
     const lb = lenBox(o.unit);
     const was = ieKey && prod(ieKey) ? String(prod(ieKey).length || '') : '';
@@ -410,6 +423,7 @@ export function ieSave() {
       reorderQty: o.reorderQty || undefined,
       lead: o.lead || undefined,
       location: o.location || '-',
+      group: o.group || '',
       supplier: o.supplier,
       barcode: bc,
       notes: o.notes,
@@ -476,6 +490,7 @@ export function ieSave() {
     cOut: o.cOutNameHex,
     cost: o.cost || (ex ? ex.cost : 0),
     location: o.location || (ex ? ex.location : '-'),
+    group: o.group || (ex ? ex.group || '' : ''),
     barcode: bc || (ex ? ex.barcode : ''),
     supplier: o.supplier || (ex ? ex.supplier : ''),
     reorder: o.reorder != null && kind != 'remove' ? o.reorder : ex ? ex.reorder : 0,
@@ -487,7 +502,7 @@ export function ieSave() {
   if (kind == 'add')
     prodRows(pid).forEach((x) => {
       if (kind == 'add') Object.assign(x, mergeQc(o, x));
-      ['supplier', 'location', 'unit', 'lead', 'reorderQty', 'notes'].forEach((f) => {
+      ['supplier', 'location', 'group', 'unit', 'lead', 'reorderQty', 'notes'].forEach((f) => {
         if (o[f]) x[f] = o[f];
       });
       if (kind == 'add') {

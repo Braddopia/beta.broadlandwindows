@@ -3,11 +3,21 @@ import { onClick } from '../../core/actions.js';
 import { $, esc } from '../../core/dom.js';
 import { PRE } from '../../config/colours.js';
 import { SAFE } from '../../data/sanitize.js';
+import { codeFind, codeOf, codeText, stockLists } from '../../domain/stock-lists.js';
 
 export function colourField(f, v) {
   const base = f.k.slice(0, -4),
     hx = SAFE.hex(v[base] || '#8a8a8a');
-  return `<div class="inl"><input id="f_${f.k}" placeholder="Colour name (optional)" maxlength="30" value="${esc(v[f.k] ?? '')}"><input type="hidden" id="f_${f.k}_hex" value="${hx}"><button type="button" class="cbtn" id="cb_${f.k}" style="background:${hx}" title="Pick a colour" aria-label="Pick a colour" ${onClick('cpOpen', f.k)}></button></div><div class="sws"><button type="button" class="mini" ${onClick('pickC', f.k, '', '#8a8a8a')}>No Colour</button>${PRE.map(([n, h]) => `<button type="button" class="sw" title="${n}" aria-label="${n}" style="background:${h}" ${onClick('pickC', f.k, n, h)}></button>`).join('')}</div>`;
+  return `<div class="inl"><input id="f_${f.k}" placeholder="Colour name or code (optional)" maxlength="40" data-onchange="colCodeIn" data-args-change="[${esc(JSON.stringify(f.k))}]" value="${esc(v[f.k] ?? '')}"><input type="hidden" id="f_${f.k}_hex" value="${hx}"><button type="button" class="cbtn" id="cb_${f.k}" style="background:${hx}" title="Pick a colour" aria-label="Pick a colour" ${onClick('cpOpen', f.k)}></button></div><div class="sws"><button type="button" class="mini" ${onClick('pickC', f.k, '', '#8a8a8a')}>No Colour</button>${PRE.map(([n, h]) => `<button type="button" class="sw" title="${n}" aria-label="${n}" style="background:${h}" ${onClick('pickC', f.k, n, h)}></button>`).join('')}</div>`;
+}
+/* the screen colour of a colour code: its RAL colour, or grey until it is linked */
+const codeHex = (c) => (c && c.ral && (RAL.find((r) => r[0] == c.ral) || [])[2]) || '#8a8a8a';
+/** a colour code typed into a colour box ("kl016") becomes "KL016 (RAL 7032 Matt)" with its colour */
+export function colCodeIn(k) {
+  const el = $('#f_' + k);
+  if (!el) return;
+  const c = codeOf(el.value);
+  if (c && c.ral) pickC(k, codeText(c), codeHex(c));
 }
 export function pickC(k, n, h) {
   $('#f_' + k).value = n;
@@ -125,7 +135,7 @@ export function cpOpen(k) {
   CP = { k, ...hex2hsv(hx), ral: null };
   const cur = ($('#f_' + k).value || '').toLowerCase();
   p.innerHTML = `<div class="cp-h"><b>Pick a colour</b><button type="button" class="cp-x" aria-label="Close" data-act="cpClose">&times;</button></div>
-   <small class="cp-l">Window and door finishes</small><div class="cp-g">${FINISH.map(([n, h]) => `<button type="button" class="cp-s ${cur == n.toLowerCase() ? 'on' : ''}" title="${esc(n)}" ${onClick('cpPick', n, h)}><i style="background:${h}"></i><span>${esc((/RAL \d+/.exec(n) || [n])[0])}</span></button>`).join('')}</div>
+   ${codesH(cur)}<small class="cp-l">Window and door finishes</small><div class="cp-g">${FINISH.map(([n, h]) => `<button type="button" class="cp-s ${cur == n.toLowerCase() ? 'on' : ''}" title="${esc(n)}" ${onClick('cpPick', n, h)}><i style="background:${h}"></i><span>${esc((/RAL \d+/.exec(n) || [n])[0])}</span></button>`).join('')}</div>
    <small class="cp-l">Any colour</small><div class="cp-sv" id="cpSv"><i id="cpKnob"></i></div><input type="range" class="cp-hue" id="cpHue" min="0" max="359" value="${Math.round(CP.h)}" data-oninput="cpHue" data-args-input="[{&quot;$&quot;:&quot;value&quot;}]" aria-label="Hue">
    <div class="cp-row"><span class="cp-pv" id="cpPv"></span><label class="cp-hx">RAL<input id="cpRal" maxlength="30" aria-label="RAL number or name" data-oninput="cpRalIn" data-args-input="[{&quot;$&quot;:&quot;value&quot;}]" autocomplete="off"></label><button type="button" class="btn sm" data-act="cpUse">Use colour</button></div>
    <div class="cp-nm" id="cpNm"></div><div class="cp-sug" id="cpSug"></div>
@@ -158,6 +168,12 @@ export function cpOpen(k) {
     cpShow(true);
     $('#cpPv').style.background = hx;
   }
+}
+/* the office's colour codes that are linked to a RAL colour, as swatches with the code under each */
+function codesH(cur) {
+  const C = stockLists().colours.filter((c) => c.ral);
+  if (!C.length) return '';
+  return `<small class="cp-l">Our colour codes</small><div class="cp-g cp-codes">${C.map((c) => `<button type="button" class="cp-s ${cur.startsWith(c.code.toLowerCase()) ? 'on' : ''}" title="${esc(codeText(c))}" ${onClick('cpPick', codeText(c), codeHex(c))}><i style="background:${codeHex(c)}"></i><span>${esc(c.code)}</span></button>`).join('')}</div>`;
 }
 export function cpDraw(setHex) {
   const hx = hsv2hex(CP.h, CP.s, CP.v),
@@ -199,16 +215,25 @@ export function cpRalIn(v) {
           .trim()
           .replace(/^ral\s*/i, '')
     );
+  const codes = codeFind(v).slice(0, 4),
+    codeBtns = codes
+      .map(
+        (c) =>
+          `<button type="button" ${onClick('cpPick', codeText(c), codeHex(c))}><i style="background:${codeHex(c)}"></i>${esc(codeText(c))}</button>`
+      )
+      .join('');
+  /* an exact RAL number picks it, and still shows any of our codes that are that colour */
   if (ex) {
     cpSet(ex);
-    $('#cpSug').innerHTML = '';
+    $('#cpSug').innerHTML = codeBtns;
     return;
   }
   $('#cpSug').innerHTML =
-    L.map(
-      (r) =>
-        `<button type="button" ${onClick('cpSugPick', r[0])}><i style="background:${r[2]}"></i>${esc(r[0])} ${esc(r[1])}</button>`
-    ).join('') || (v.trim() ? '<span class="muted">No RAL colour matches</span>' : '');
+    codeBtns +
+      L.map(
+        (r) =>
+          `<button type="button" ${onClick('cpSugPick', r[0])}><i style="background:${r[2]}"></i>${esc(r[0])} ${esc(r[1])}</button>`
+      ).join('') || (v.trim() && !codes.length ? '<span class="muted">No RAL colour or code matches</span>' : '');
 }
 export function cpSugPick(n) {
   const r = RAL.find((x) => x[0] == n);

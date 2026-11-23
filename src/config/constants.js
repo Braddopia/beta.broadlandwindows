@@ -40,7 +40,7 @@ export const guessCat = (r) =>
       : /operative|production|factory|stock|warehouse|driver/i.test(r)
         ? 'Factory'
         : 'Office';
-export const UNITS = ['Each', 'Units', 'Pair', 'Single', 'PCS', 'Meters (M)'];
+export const UNITS = ['Each', 'Units', 'Pair', 'Single', 'Bulk', 'Kit', 'PCS', 'Meters (M)'];
 export const CT = ['Supplier', 'Customer', 'Sub-contractor', 'Trade', 'Other'];
 export const SUPCAT = [
   'Sealed units and glass',

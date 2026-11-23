@@ -102,6 +102,7 @@ import * as featuresStockPhoneMode from './features/stock/phone-mode.js';
 import * as featuresStockReports from './features/stock/reports.js';
 import * as featuresStockStockTake from './features/stock/stock-take.js';
 import * as featuresStockStock from './features/stock/stock.js';
+import * as featuresStockStockLists from './features/stock/stock-lists.js';
 import * as featuresSuppliersSuppliers from './features/suppliers/suppliers.js';
 import * as featuresTourTour from './features/tour/tour.js';
 import * as integrationsHallmark from './integrations/hallmark.js';
@@ -229,6 +230,7 @@ const modules = {
   featuresStockPhoneMode,
   featuresStockReports,
   featuresStockStock,
+  featuresStockStockLists,
   featuresStockStockTake,
   featuresSuppliersSuppliers,
   featuresTourTour,
@@ -299,6 +301,7 @@ startMigrations.migratePhotos();
 featuresStockPhoneMode.watchPhoneSize();
 startMigrations.migrateCustomers();
 startMigrations.custBook();
+startMigrations.stockListsInit();
 featuresLeadsLeadRecord.defineLeadRecord();
 featuresContractsContractRecord.defineContractRecord();
 featuresTourTour.listenForTourKeys();
