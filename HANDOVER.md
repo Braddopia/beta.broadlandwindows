@@ -244,6 +244,8 @@ title position, number-card rows, table alignment) at 1000 and 1440 wide. The sh
 - Settings: website and email addresses take the whole line instead of breaking mid-word.
 - Tables 900 to 1100px wide: the button column no longer has its own white block in the heading row (it was pinned
   with a solid background for sideways scrolling, which tables that fit the page never do).
+- Pop-over menus (Service Calls More, Inventory filter) close only when their button has really moved (more than
+  12px) or the window width changes: a tap that nudges the table, or a phone address bar, no longer shuts them at once.
 
 Left as they are, for the owner to decide: filter buttons sit in a "SHOW" bar on Leads, Contracts, Service Calls and
 Contact Book but loose on Deliveries, Staff, Finance, Reports, Files and Inventory; Contracts shows customer names in

@@ -15,7 +15,10 @@ export function openFpop(btn, html) {
     w = p.offsetWidth;
   p.style.top = Math.min(innerHeight - p.offsetHeight - 8, r.bottom + 6) + 'px';
   p.style.left = Math.max(8, Math.min(innerWidth - w - 8, r.right - w)) + 'px';
+  at = { x: r.left, y: r.top };
 }
+/* where the pop-over's button was when it opened */
+let at = null;
 export function closeFpop() {
   const p = $('#fpop');
   if (p) p.classList.remove('open');
@@ -28,16 +31,23 @@ export function listenForOutsideClicks() {
     if (!e.target.closest(OWNERS)) closeFpop();
   });
   /* the pop-over is pinned to the screen, so when its button scrolls away (the page, or a table scrolled sideways
-     on a phone) it closes instead of floating over other rows */
+     on a phone) it closes instead of floating over other rows. A nudge of a few pixels (the browser bringing a
+     tapped button into view) does not count. */
   document.addEventListener(
     'scroll',
-    (e) => {
+    () => {
       const p = $('#fpop'),
         btn = p && p.classList.contains('open') && document.getElementById(p.dataset.for);
-      const box = e.target === document ? document.documentElement : e.target;
-      if (btn && box.contains && box.contains(btn)) closeFpop();
+      if (!btn || !at) return;
+      const r = btn.getBoundingClientRect();
+      if (Math.abs(r.left - at.x) > 12 || Math.abs(r.top - at.y) > 12) closeFpop();
     },
     true
   );
-  addEventListener('resize', closeFpop);
+  /* a new window width closes it; a phone's address bar showing or hiding (height only) does not */
+  let wide = innerWidth;
+  addEventListener('resize', () => {
+    if (innerWidth != wide) closeFpop();
+    wide = innerWidth;
+  });
 }
