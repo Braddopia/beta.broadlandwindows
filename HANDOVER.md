@@ -242,6 +242,8 @@ title position, number-card rows, table alignment) at 1000 and 1440 wide. The sh
   and Service Calls starts .7rem in, like every other table.
 - Suppliers: the five small boxes stay on one row (Requests used to drop to a second line).
 - Settings: website and email addresses take the whole line instead of breaking mid-word.
+- Tables 900 to 1100px wide: the button column no longer has its own white block in the heading row (it was pinned
+  with a solid background for sideways scrolling, which tables that fit the page never do).
 
 Left as they are, for the owner to decide: filter buttons sit in a "SHOW" bar on Leads, Contracts, Service Calls and
 Contact Book but loose on Deliveries, Staff, Finance, Reports, Files and Inventory; Contracts shows customer names in

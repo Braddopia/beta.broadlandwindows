@@ -3823,6 +3823,14 @@ body:not(.lv):not(.vmsg) .main>.tw+.pager,body:not(.lv):not(.vmsg) .main>style+*
 /* phones: when cards sit two to a row, an odd one at the end stretches across instead of sitting alone */
 @media(max-width:600px){.kpis:not(.big)>:last-child:nth-child(odd){grid-column:1/-1}}
 @media(max-width:640px){.pipe>:last-child:nth-child(odd){grid-column:1/-1}}
+
+/* the button column only needs a solid background (pinned at the right) when a table scrolls sideways; tables that
+   fit the page (900px and wider) show the same heading row and row colours right across */
+@media(min-width:900px){
+  .ptb.fx th.ac{position:static;background:transparent!important}
+  .ptb.fx tbody tr:not(:hover) td.ac{position:static;background:transparent!important}
+  .ptb.fx tbody tr:hover td.ac{position:static}
+}
 </style>
 </head>
 <body>
