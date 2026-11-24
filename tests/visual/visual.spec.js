@@ -116,6 +116,19 @@ test.describe('windows and popups', () => {
     await app.call('askIn', 'Mark this lead as won?', 'It is saved straight away.', 'Yes, Won', null, false);
     await shot(app, 'popup-confirm');
   });
+  test('service call More menu', async ({ app }) => {
+    await app.go('service');
+    await app.page.locator('#main .svc-more').first().click();
+    await shot(app, 'popup-service-more');
+  });
+  test('service call More menu, phone', async ({ app }) => {
+    await app.page.setViewportSize({ width: 390, height: 844 });
+    await app.go('service');
+    const more = app.page.locator('#main .svc-more').first();
+    await more.scrollIntoViewIfNeeded();
+    await more.click();
+    await shot(app, 'phone-service-more');
+  });
   test('search box', async ({ app }) => {
     await app.call('cmdk', true);
     await app.call('cmdkRun', 'fittings this week');

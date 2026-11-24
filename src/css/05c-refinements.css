@@ -1246,3 +1246,37 @@ body.tv .main::after,body.vmsg .main::after,body.lv .main::after{display:none}
 .t-inv td:not(:first-child):not(.ac){text-align:center!important;padding-left:.45rem!important;padding-right:.45rem!important}
 .t-inv td .idesc{text-align:center}
 .t-inv td .xtag{margin-left:auto;margin-right:auto}
+/* v19.11.6 Inventory: Item, Location and Supplier read from the left (heading and contents), the rest stay centred.
+   Only the text moves: column positions, widths and the row buttons are exactly as v19.11.5. */
+.ptb.fx.t-inv th[data-col=item],.ptb.fx.t-inv th[data-col=location],.ptb.fx.t-inv th[data-col=supplier],
+.ptb.fx.t-inv td.i-item,.ptb.fx.t-inv td.i-loc,.ptb.fx.t-inv td.i-sup{text-align:left!important;padding-left:.6rem!important;padding-right:.45rem!important}
+.t-inv td.i-item .idesc,.t-inv td.i-loc .idesc{text-align:left}
+
+/* v19.11.6 Service calls: columns set out like Inventory. Short values (priority, status, visit, open for) sit in the
+   middle of a column sized for them; names and the problem read from the left and share the spare room, ending in
+   "..." with the full text on hover. The Ref is never cut. */
+@media(min-width:900px){
+  .ptb.fx.t-svc th[data-col=id]{width:6.2rem}
+  .ptb.fx.t-svc th[data-col=name]{width:auto}
+  .ptb.fx.t-svc th[data-col=issue]{width:auto}
+  .ptb.fx.t-svc th[data-col=pr]{width:6.2rem}
+  .ptb.fx.t-svc th[data-col=st]{width:7.6rem}
+  .ptb.fx.t-svc th[data-col=visit]{width:6.4rem}
+  .ptb.fx.t-svc th[data-col=fitter]{width:7.6rem}
+  .ptb.fx.t-svc th[data-col=age]{width:5.8rem}
+  .ptb.fx.t-svc th[data-col=act]{width:10.4rem}
+}
+.t-svc th:not([data-col=act]),.t-svc td:not(.ac){padding-left:.6rem!important;padding-right:.45rem!important}
+.t-svc th[data-col=id],.t-svc th[data-col=name],.t-svc th[data-col=issue],.t-svc th[data-col=fitter],
+.t-svc td.s-id,.t-svc td.s-name,.t-svc td.s-issue,.t-svc td.s-fit{text-align:left}
+.t-svc th[data-col=pr],.t-svc th[data-col=st],.t-svc th[data-col=visit],.t-svc th[data-col=age],
+.t-svc td.c,.t-svc td.s-visit,.t-svc td.svc-age{text-align:center!important;padding-left:.45rem!important}
+.t-svc td.s-name,.t-svc td.s-issue,.t-svc td.s-fit{overflow:hidden}
+.t-svc td.s-name small.sub,.t-svc td.s-issue small.sub,.t-svc td.s-fit{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.t-svc td.s-issue .cl2{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.t-svc td.s-id{overflow:visible;white-space:nowrap}
+/* the row buttons: the next step and More are ordinary small buttons side by side, never squashed */
+.t-svc td.ac{overflow:visible}
+.t-svc td.ac .acts{justify-content:flex-end;flex-wrap:nowrap;gap:.35rem}
+.t-svc td.ac .mini{flex:0 0 auto;white-space:nowrap}
+.t-svc .svc-more{width:auto;display:inline-flex;align-items:center;gap:.25rem;padding:0 .55rem 0 .65rem}

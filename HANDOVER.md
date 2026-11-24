@@ -201,3 +201,21 @@ Read this first, then CLAUDE.md and docs/ARCHITECTURE.md.
 ## v19.11.5
 
 - Inventory: column positions put back exactly as v19.11.3 (checked edge-for-edge at 1000/1280/1366/1600/1920, admin and standard user); only the text inside each column is centred. The user does not want column positions or the row buttons moved unless they ask.
+
+## v19.11.6
+
+- Inventory: Item, Location and Supplier read from the left (heading and contents, classes `i-item`, `i-loc`,
+  `i-sup`); every other column stays centred. Column positions and row buttons are unchanged: their edges are
+  checked against v19.11.5 at 1280 and 1920, administrator and standard user (`tests/e2e/inventory-columns.spec.js`),
+  and were compared edge-for-edge at 1000/1280/1366/1600/1920 this round.
+- Service calls More button: it carried the `fbtn` class (the square filter-icon button, fixed 1.75rem wide), so
+  "More ▾" spilled out of a tiny box beside the next-step button. It is now an ordinary small button the same height
+  as the one beside it. The outside-click closer treats any `[aria-haspopup]` button as the pop-over's owner (so
+  More still toggles its menu), and the pop-over closes when its button scrolls away or the window resizes
+  (`ui/components/popover.js`), so on a phone the menu never floats over other rows.
+- Service calls columns, set out like Inventory (rules at the end of `src/css/05c-refinements.css`): Ref, Customer,
+  Problem and Engineer from the left; Priority, Status, Visit and Open For centred in columns sized for them;
+  Customer and Problem share the spare room and end in "..." with the full text on hover; Ref is never cut; the
+  button column is sized for its two buttons. The page layout is the same.
+- Tests: `tests/e2e/service-more.spec.js` (button and menu at 390 to 1920, every menu item clicked, column
+  alignment); visual baselines `popup-service-more` and `phone-service-more`.
