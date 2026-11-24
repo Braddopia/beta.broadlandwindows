@@ -189,3 +189,7 @@ Read this first, then CLAUDE.md and docs/ARCHITECTURE.md.
 
 - Inventory columns regrouped: tick, ID, Item, Stock (centred), Location, Unit, Colours together on the left; Supplier, Cost, Total Value, Status on the right by the row buttons. Spare width goes to Colours (to Unit at 900-1100px). Row buttons stay where they were (right edge, measured against v19.11.1).
 - Inventory sorts by ID, low to high, by default (and the Products tile resets to that).
+
+## v19.11.4
+
+- Inventory: every column's heading and contents are centred (not the tick box or the row buttons), and the spare room is shared across all columns so centring stays even. Row buttons unchanged.

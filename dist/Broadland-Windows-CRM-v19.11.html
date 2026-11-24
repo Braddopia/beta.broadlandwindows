@@ -3268,6 +3268,14 @@ body.tv .main::after,body.vmsg .main::after,body.lv .main::after{display:none}
   .ptb.fx.t-inv th[data-col=unit]{width:auto}
   .ptb.fx.t-inv th[data-col=supplier]{width:11rem}
 }
+/* v19.11.4 Inventory: every column's heading and contents sit in the middle of the column, and the spare room is shared
+   by all of them (Colours no longer takes it all), so centred columns stay evenly spaced. Row buttons do not move. */
+.t-inv th:not([data-col=sel]):not([data-col=act]),
+.t-inv td:not(:first-child):not(.ac){text-align:center!important;padding-left:.45rem!important;padding-right:.45rem!important}
+.t-inv td .idesc{text-align:center}
+.t-inv td .xtag{margin-left:auto;margin-right:auto}
+@media(min-width:900px){.ptb.fx.t-inv th[data-col=colours]{width:8.5rem}}
+@media(min-width:900px) and (max-width:1100px){.ptb.fx.t-inv th[data-col=unit]{width:4.4rem}}
 
 /* ==========================================================================
    05d · Service calls: the live map (OpenStreetMap through Leaflet, features/service/service-map.js)
