@@ -246,6 +246,8 @@ title position, number-card rows, table alignment) at 1000 and 1440 wide. The sh
   with a solid background for sideways scrolling, which tables that fit the page never do).
 - Pop-over menus (Service Calls More, Inventory filter) close only when their button has really moved (more than
   12px) or the window width changes: a tap that nudges the table, or a phone address bar, no longer shuts them at once.
+- Deliveries, Received: the form's Status and Received date are filled the moment it opens (they were filled 40ms
+  later, so a slow computer briefly showed "Not yet"; this was an occasional test failure on GitHub).
 
 Left as they are, for the owner to decide: filter buttons sit in a "SHOW" bar on Leads, Contracts, Service Calls and
 Contact Book but loose on Deliveries, Staff, Finance, Reports, Files and Inventory; Contracts shows customer names in

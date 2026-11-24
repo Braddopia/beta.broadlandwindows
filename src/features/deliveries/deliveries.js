@@ -93,11 +93,16 @@ export function recvD(id) {
   const x = state.deliveries.find((d) => d.id == id);
   if (!x) return;
   editDel(id);
-  setTimeout(() => {
+  /* fill the boxes as soon as the form is there (not after a delay, or a slow computer shows "Not yet" first) */
+  const fill = () => {
     const s = $('#f_status'),
       r = $('#f_recvDate');
     if (s) s.value = 'Received';
     if (r && !r.value) r.value = today();
+  };
+  fill();
+  setTimeout(() => {
+    fill();
     const c = $('#f_checkedBy');
     if (c) {
       c.scrollIntoView({ block: 'center' });
