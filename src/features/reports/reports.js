@@ -655,7 +655,7 @@ export function vReports() {
         )
         .join('');
   }
-  return `<div class="head"><div><h1>Reports</h1><span class="muted">${new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</span></div><div class="tools"><button class="btn ghost" ${onClick('repPrint', false)}>Print this report</button><button class="btn ghost" data-act="repCsv">Export CSV</button><button class="btn" ${onClick('repPrint', true)}>Full management report</button></div></div><div class="chips">${TABS()
+  return `<div class="head"><div><h1>Reports</h1><span class="muted">${new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</span></div><div class="tools"><button class="mini" ${onClick('repPrint', false)}>Print this report</button><button class="mini" data-act="repCsv">Export CSV</button><button class="btn" ${onClick('repPrint', true)}>Full management report</button></div></div><div class="chips">${TABS()
     .map(([k, n]) => `<button class="chip ${k == T ? 'on' : ''}" ${onClick('setUI', 'rep.t', k)}>${n}</button>`)
     .join('')}</div>${body}`;
 }

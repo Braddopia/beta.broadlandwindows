@@ -44,7 +44,7 @@ export function vAdmin() {
       .map(([k]) => ROLES[k].n);
   const AU = uiState.audit,
     pg = paginate(AU, state.audit.filter(hit));
-  return `<div class="head"><h1>Admin Console</h1><div class="tools"><button class="btn ghost" data-act="chPin">Account PINs</button><button class="btn" ${onClick('go', 'finance')}>Open finance</button></div></div>
+  return `<div class="head"><h1>Admin Console</h1><div class="tools"><button class="mini" data-act="chPin">Account PINs</button><button class="btn" ${onClick('go', 'finance')}>Open finance</button></div></div>
   <div class="kpis">${[
     ['Contract value', m0(rev)],
     ['Collected', m0(paid)],

@@ -1,0 +1,70 @@
+/* v19.12 site-wide tidy-up: the same spacing, title position, number cards and table habits on every page.
+   Loaded last so these settle differences left by older page rules. The live boards (body.lv) and Messages
+   (body.vmsg) lay themselves out and are left alone. */
+
+/* every block on a page sits the same distance from the one above it */
+body:not(.lv):not(.vmsg) .main>*{margin-top:0;margin-bottom:0}
+body:not(.lv):not(.vmsg) .main>*+*{margin-top:1rem}
+body:not(.lv):not(.vmsg) .main>.tw+.pager,body:not(.lv):not(.vmsg) .main>style+*{margin-top:0}
+
+/* page titles sit at the same height on every page, whatever is beside them */
+.main>.head{align-items:flex-start}
+.main>.head>.tools{align-self:center}
+
+/* number cards share their row evenly: no card left alone on a row of its own */
+.main{container:main/inline-size}
+@media(min-width:601px){
+  @container main (max-width:89rem){
+    .kpis:not(.big):has(>:nth-child(8):last-child){grid-template-columns:repeat(4,minmax(0,1fr))}
+  }
+  @container main (max-width:78rem){
+    .kpis:not(.big):has(>:nth-child(7):last-child){grid-template-columns:repeat(4,minmax(0,1fr))}
+  }
+  @container main (max-width:67rem){
+    .kpis:not(.big):has(>:nth-child(6):last-child){grid-template-columns:repeat(3,minmax(0,1fr))}
+  }
+  @container main (max-width:56rem){
+    .kpis:not(.big):has(>:nth-child(5):last-child){grid-template-columns:repeat(3,minmax(0,1fr))}
+  }
+  @container main (max-width:45rem){
+    .kpis:not(.big):has(>:nth-child(4):last-child){grid-template-columns:repeat(2,minmax(0,1fr))}
+  }
+}
+
+/* tables: links read as blue text (underlined only when pointed at), like the rest of the site */
+.main table a{text-decoration:none}
+.main table a:hover{text-decoration:underline}
+
+/* Staff: short counts sit in the middle of their column, as on Inventory and Service Calls */
+.main table th.st-n,.main table td.st-n{text-align:center!important}
+
+/* Settings: web and email addresses get the whole line instead of breaking in the middle of a word */
+.set-dl>div:has(>dd.nocap){grid-column:1/-1}
+
+/* Suppliers: the five small boxes (lines, units, value, next due, requests) stay on one row */
+@media(min-width:701px){
+  .supw-st{grid-template-columns:repeat(5,minmax(0,1fr))}
+  .supw-st>span{padding:.4rem .5rem;min-width:0}
+  .supw-st small{white-space:nowrap}
+}
+@media(min-width:1351px){
+  .supw{grid-template-columns:3.2rem minmax(12rem,1.2fr) minmax(11rem,1fr) minmax(11rem,1fr) minmax(21rem,2fr) auto}
+}
+
+/* Floor Boards: five cards on a narrower screen share two rows (3 + 2) instead of leaving one alone */
+@media(max-width:1099px) and (min-width:601px){
+  .fl .kpis:has(>:nth-child(5):last-child){grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+
+/* Contracts: room for "Contract No" and its sort arrow */
+@media(min-width:900px){.ptb.fx.t-ctr th[data-col=id]{width:7.8rem}}
+
+/* Inventory and Service Calls: text that reads from the left starts the same distance in as in every other table */
+.ptb.fx.t-inv th[data-col=item],.ptb.fx.t-inv th[data-col=location],.ptb.fx.t-inv th[data-col=supplier],
+.ptb.fx.t-inv td.i-item,.ptb.fx.t-inv td.i-loc,.ptb.fx.t-inv td.i-sup{padding-left:.7rem!important}
+.t-svc th[data-col=id],.t-svc th[data-col=name],.t-svc th[data-col=issue],.t-svc th[data-col=fitter],
+.t-svc td.s-id,.t-svc td.s-name,.t-svc td.s-issue,.t-svc td.s-fit{padding-left:.7rem!important}
+
+/* phones: when cards sit two to a row, an odd one at the end stretches across instead of sitting alone */
+@media(max-width:600px){.kpis:not(.big)>:last-child:nth-child(odd){grid-column:1/-1}}
+@media(max-width:640px){.pipe>:last-child:nth-child(odd){grid-column:1/-1}}

@@ -221,3 +221,29 @@ Read this first, then CLAUDE.md and docs/ARCHITECTURE.md.
   button column is sized for its two buttons. The page layout is the same.
 - Tests: `tests/e2e/service-more.spec.js` (button and menu at 390 to 1920, every menu item clicked, column
   alignment); visual baselines `popup-service-more` and `phone-service-more`.
+
+## v19.12 (site-wide tidy-up)
+
+The owner asked for everything that looked mismatched to be cleaned up. Every page was measured (gaps between blocks,
+title position, number-card rows, table alignment) at 1000 and 1440 wide. The shared rules are in
+`src/css/09-consistency.css` (loaded last); `tests/e2e/consistency.spec.js` checks them on every page.
+
+- One gap between the blocks of every page (it was 10 to 16px depending on the page). Inline `margin-top` styles on
+  Files panels and the Inventory suppliers box were removed so the shared rule applies.
+- Page titles sit at the same height on every page (Staff, Admin, Calendar and Holidays were 4 to 6px lower).
+- Number cards share their rows evenly: 8 cards go 4 + 4 (Reports was 7 + 1), and 5 or 6 cards go to 3 per row when
+  they do not fit on one row (Leads, Service Calls and Deliveries had 5 + 1). On phones an odd last card (and the
+  last Leads/Contracts stage card) stretches across. Floor Boards: 3 + 2 below 1100px.
+- Header buttons follow one rule: the page's main action is a full button, other tools are small buttons (Reports
+  Print/Export, Admin Account PINs, Contact Book Import Customers and Files Copy All Links were big outline buttons;
+  Suppliers' Add Supplier was smaller than every other main button).
+- Tables: links are blue text without an underline (Staff underlined them); Staff Jobs and Open Calls counts are
+  centred; Contracts' ID column is a little wider so "Contract No ▲" is not squashed; left-reading text in Inventory
+  and Service Calls starts .7rem in, like every other table.
+- Suppliers: the five small boxes stay on one row (Requests used to drop to a second line).
+- Settings: website and email addresses take the whole line instead of breaking mid-word.
+
+Left as they are, for the owner to decide: filter buttons sit in a "SHOW" bar on Leads, Contracts, Service Calls and
+Contact Book but loose on Deliveries, Staff, Finance, Reports, Files and Inventory; Contracts shows customer names in
+capitals under "Cust Name" (Leads says "Customer"); the Holiday Planner's "Week 1" / "Week 6" labels wrap when the
+week has only a day or two in the month.

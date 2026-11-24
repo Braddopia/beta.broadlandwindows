@@ -103,7 +103,7 @@ export function vSuppliers() {
       <span class="supw-go">Open ${svg('M9 6l6 6-6 6')}</span></button>`;
     })
     .join('');
-  return `<div class="head"><div><h1>Suppliers</h1><span class="muted">${all.length} suppliers linked to ${tot.lines} stock lines</span></div><div class="tools"><button class="btn sm" data-act="editSup">Add Supplier</button></div></div>
+  return `<div class="head"><div><h1>Suppliers</h1><span class="muted">${all.length} suppliers linked to ${tot.lines} stock lines</span></div><div class="tools"><button class="btn" data-act="editSup">Add Supplier</button></div></div>
   <div class="kpis"><div class="kpi"><small>Suppliers</small><b>${all.length}</b></div><div class="kpi"><small>Lines Linked</small><b>${tot.lines}</b></div><button class="kpi ${tot.none ? 'warn' : ''}" data-act="stockNoSupplier"><small>Lines Without Supplier</small><b>${tot.none}</b></button><div class="kpi ${tot.re ? 'bad' : ''}"><small>Lines To Reorder</small><b>${tot.re}</b></div><button class="kpi" ${onClick('go', 'deliveries')}><small>Deliveries Due</small><b>${tot.del}</b></button></div>
   <div class="sups">${cards || emptyArt('van', 'No suppliers match.')}</div>`;
 }

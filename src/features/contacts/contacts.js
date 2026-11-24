@@ -49,7 +49,7 @@ export function vContacts() {
         ''
       )}${c.addr || c.town || c.pc ? `<span>${svg('M12 21s-7-6-7-11a7 7 0 0114 0c0 5-7 11-7 11zM12 12a2 2 0 100-4 2 2 0 000 4z')}${esc([c.addr, c.town, c.pc].filter(Boolean).join(', '))}</span>` : ''}${!conLines(c).length && !c.addr ? '<span class="muted">No details yet</span>' : ''}</div>
     <div class="cc2-f"><button class="mini" ${onClick('editContact', c.id)}>Edit</button>${can('manage') ? `<button class="mini del" ${onClick('del', 'contacts', c.id)}>Delete</button>` : ''}</div></div>`;
-  return `<div class="head"><div><h1>Contact Book</h1><span class="muted">${L.length} of ${state.contacts.length} contacts</span></div><div class="tools">${can('manage') ? '<button class="btn ghost" data-act="impCust">Import customers</button>' : ''}<button class="btn" data-act="editContact">New contact</button></div></div>
+  return `<div class="head"><div><h1>Contact Book</h1><span class="muted">${L.length} of ${state.contacts.length} contacts</span></div><div class="tools">${can('manage') ? '<button class="mini" data-act="impCust">Import customers</button>' : ''}<button class="btn" data-act="editContact">New contact</button></div></div>
   <div class="subbar"><span class="sb-l">Show</span><div class="views">${['all', ...CT].map((k) => `<button class="chip ${F == k ? 'on' : ''}" ${onClick('setUI', 'con.f', k)}>${k == 'all' ? 'All' : esc(k)} <i>${k == 'all' ? state.contacts.length : state.contacts.filter((c) => c.type == k).length}</i></button>`).join('')}</div></div>
   <div class="azbar">${AZ.map((x) => (have.has(x) ? `<button ${onClick('azGo', x)}>${x}</button>` : `<span>${x}</span>`)).join('')}</div>
   <div class="cbook">${
