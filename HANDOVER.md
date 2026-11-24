@@ -8,6 +8,8 @@ Read this first, then CLAUDE.md and docs/ARCHITECTURE.md.
 - Every round: build, `npm run check` and `npm run test:visual` (make baselines first with
   `npm run test:visual:update` on a fresh container, before changing anything), commit, push, wait for both GitHub
   workflows (Tests, and the GitHub Pages deploy) to pass, then send the dist HTML file and a plain-English summary.
+- Always publish: the owner's standing instruction is that every finished round goes live. Push the round to
+  `main` (GitHub Pages deploys from `main` only), then wait for the Pages deploy to pass.
 - Tours stay switched off until go-live (`TOURS_AUTO = false` in `src/features/tour/tour.js`).
 
 ## Where things are (v19.3)
