@@ -197,3 +197,7 @@ Read this first, then CLAUDE.md and docs/ARCHITECTURE.md.
   (`ui/modal.js`, `ui/forms/wizard.js`, `features/records/cards.js`). It made typing land in the wrong box
   ("4" then "10" became "410" in Saw Settings; a phone number typed quickly could go into Name). This was the cause of
   the intermittent Cutting Optimiser and New Lead test failures.
+
+## v19.11.5
+
+- Inventory: column positions put back exactly as v19.11.3 (checked edge-for-edge at 1000/1280/1366/1600/1920, admin and standard user); only the text inside each column is centred. The user does not want column positions or the row buttons moved unless they ask.
