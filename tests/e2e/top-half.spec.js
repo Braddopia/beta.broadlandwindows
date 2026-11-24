@@ -116,10 +116,12 @@ test('a new lead puts its customer in the Contact Book, a success tick shows, an
   await app.call('leadWizard');
   await expect(app.page.locator('#f_title')).toBeVisible();
   await app.page.selectOption('#f_title', 'Mr');
+  /* typing straight away: the form must not move the cursor out of the box being typed in */
   await app.page.fill('#f_name', 'Sample Customer Z');
   await app.page.fill('#f_mob1', '07700 900 777');
   await app.page.fill('#f_email1', 'z@example.com');
-  await expect(app.page.locator('#f_email1')).toHaveValue('z@example.com');
+  await expect(app.page.locator('#f_mob1')).toHaveValue('07700 900 777');
+  await expect(app.page.locator('#f_name')).toHaveValue('Sample Customer Z');
   /* Next: if the step does not move on, the banner says why (shown in the failure) */
   await app.page.click('#mbox [data-act=wzStep]:not(.ghost)');
   await expect(
@@ -158,4 +160,17 @@ test('a new lead puts its customer in the Contact Book, a success tick shows, an
   await app.call('wzStep', 1);
   await expect(app.page.locator('#f_homePc')).toHaveValue('NR6 5DR');
   expect(app.errors).toEqual([]);
+});
+
+test('a pop-up never moves the cursor out of a box you have already started typing in', async ({ app }) => {
+  await app.role('beta');
+  await app.go('bars');
+  await app.page.click('#main .tools >> text=Saw Settings');
+  /* straight into the second box before the window has settled */
+  await app.page.click('#f_trim');
+  await app.page.keyboard.type('12');
+  await app.page.waitForTimeout(200);
+  await app.page.keyboard.type('3');
+  await expect(app.page.locator('#f_trim')).toHaveValue(/123$/);
+  await expect(app.page.locator('#f_kerf')).toHaveValue('10');
 });

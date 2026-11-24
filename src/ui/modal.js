@@ -31,7 +31,10 @@ export function openModal(h, size) {
   if (size != 'full')
     setTimeout(() => {
       const f = b.querySelector('input:not([readonly]):not([type=hidden]):not([type=checkbox]),select,textarea');
-      if (f && matchMedia('(pointer:fine)').matches) f.focus({ preventScroll: true });
+      /* never pull the cursor out of a box the person has already clicked into and started typing in */
+      const a = document.activeElement;
+      if (a && a != f && b.contains(a) && a.matches('input,select,textarea')) return;
+      if (f && f.isConnected && matchMedia('(pointer:fine)').matches) f.focus({ preventScroll: true });
     }, 60);
 }
 /* styled confirmation instead of the browser's own box */

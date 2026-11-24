@@ -156,7 +156,11 @@ export function grpOpen(g) {
   const f = g.querySelector(
     '.rf:not([hidden]) input:not([readonly]),.rf:not([hidden]) select,.rf:not([hidden]) textarea'
   );
-  if (f && matchMedia('(pointer:fine)').matches) setTimeout(() => f.focus(), 30);
+  if (f && matchMedia('(pointer:fine)').matches)
+    setTimeout(() => {
+      const a = document.activeElement;
+      if (f.isConnected && !(a && a != f && a.closest('#mbox') && a.matches('input,select,textarea'))) f.focus();
+    }, 30);
   setTimeout(() => g.scrollIntoView({ block: 'nearest', behavior: 'smooth' }), 40);
 }
 /* Next skips cards that are already finished; when none are left in this step, go to the next step */

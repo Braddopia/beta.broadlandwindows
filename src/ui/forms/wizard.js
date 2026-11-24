@@ -53,7 +53,12 @@ export function wzDraw() {
   );
   if (st.after) st.after(W.v);
   const f = $('#mbox .wz-b input:not([readonly]),#mbox .wz-b textarea');
-  if (f && matchMedia('(pointer:fine)').matches) setTimeout(() => f.focus(), 80);
+  /* put the cursor in the first box, unless the person has already clicked into a box themselves */
+  if (f && matchMedia('(pointer:fine)').matches)
+    setTimeout(() => {
+      const a = document.activeElement;
+      if (f.isConnected && !(a && a != f && a.closest('#mbox') && a.matches('input,select,textarea'))) f.focus();
+    }, 80);
 }
 export function wzRead() {
   const st = WZ.steps[WZ.st];

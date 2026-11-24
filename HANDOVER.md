@@ -193,3 +193,7 @@ Read this first, then CLAUDE.md and docs/ARCHITECTURE.md.
 ## v19.11.4
 
 - Inventory: every column's heading and contents are centred (not the tick box or the row buttons), and the spare room is shared across all columns so centring stays even. Row buttons unchanged.
+- Pop-ups no longer pull the cursor back to their first box when the person has already clicked into another box
+  (`ui/modal.js`, `ui/forms/wizard.js`, `features/records/cards.js`). It made typing land in the wrong box
+  ("4" then "10" became "410" in Saw Settings; a phone number typed quickly could go into Name). This was the cause of
+  the intermittent Cutting Optimiser and New Lead test failures.
