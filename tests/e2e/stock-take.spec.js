@@ -246,17 +246,18 @@ test('a product is marked as a profile bar in its own window (Cutting), and the 
     'Quality Check',
     'Notes',
   ]);
-  // the bar length is only asked for once it is a profile: 6.5M, 7M, 5M or another length
+  // the bar length is only asked for once it is a profile: 6M, 6.5M (picked to start with), 7M or another length
   await expect(app.page.locator('#f_barLen')).toBeHidden();
   await app.page.selectOption('#f_isBar', 'Yes');
   await expect(app.page.locator('#f_barLen')).toHaveValue('6500');
   await app.page.selectOption('#f_barLen', 'other');
-  await app.page.fill('#f_barLenX', '6000');
+  await app.page.fill('#f_barLenX', '5500');
   await app.page.click('#mbox [data-act=ieSave]');
-  expect(await app.run((p) => state.cutProf[p], pid)).toEqual({ bar: 6000 });
+  expect(await app.run((p) => state.cutProf[p], pid)).toEqual({ bar: 5500 });
   await app.call('stockForm', 'edit', pid);
   await expect(app.page.locator('#f_barLen')).toHaveValue('other');
-  await expect(app.page.locator('#f_barLenX')).toHaveValue('6000');
+  await expect(app.page.locator('#f_barLenX')).toHaveValue('5500');
+  await expect(app.page.locator('#f_barLen option')).toHaveText(['6M', '6.5M (most bars)', '7M', 'Other length']);
   await app.page.selectOption('#f_barLen', '7000');
   await app.page.click('#mbox [data-act=ieSave]');
   expect(await app.run((p) => state.cutProf[p], pid)).toEqual({ bar: 7000 });

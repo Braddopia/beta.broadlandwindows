@@ -56,8 +56,21 @@ export function unitLabel(r) {
   const u = unitOf(r);
   return u == 'Meters (M)' ? 'M' : u == 'Pair' ? 'Pairs' : 'PCS';
 }
+/** a bar product's full bar length in mm: the length set in its Cutting settings, else its Length (3M, 6500) */
+export const barMm = (r) => +((state.cutProf || {})[r.pid] || {}).bar || barLenOf(r.length);
+/** metres for a bar length: 6500 -> 6.5M */
+export const mLabel = (mm) => +(mm / 1000).toFixed(3) + 'M';
+const UNIT_SHORT = { 'Meters (M)': 'M', Pair: 'Pairs', Kit: 'Kits', Bulk: 'Bulk' };
+/** the unit stock is counted in, short: PCS, Pairs, M, Kits, Bulk */
+export const unitShort = (r) => UNIT_SHORT[unitOf(r)] || 'PCS';
+/** stock with its unit: full bars as "2 × 6.5M", otherwise "62 PCS", "4 Pairs", "12 M". [number, unit text] */
+export function stockParts(r) {
+  const mm = barMm(r);
+  return mm ? [r.stock, '× ' + mLabel(mm)] : [r.stock, unitShort(r)];
+}
+export const stockText = (r) => stockParts(r).join(' ');
 /** the size to show under the item when it is not already the Unit (e.g. 4MM packers) */
-export const sizeNote = (r) => (r.length && r.length != '-' && !barLenOf(r.length) ? String(r.length) : '');
+export const sizeNote = (r) => (r.length && r.length != '-' && !barMm(r) ? String(r.length) : '');
 export const colTxt = (r) => [r.cInName, r.cOutName].filter((x) => x && x != '-').join(' / ') || '-';
 export const stt = (r) => (r.stock <= 0 ? ['Out', 'r'] : isLow(r) ? ['Low', 'y'] : ['OK', 'g']);
 export function moveRow(b, kind, qty, stock, extra) {

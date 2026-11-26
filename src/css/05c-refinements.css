@@ -552,12 +552,9 @@ body[data-theme=dark] .smap .land{fill:rgba(120,170,255,.08);stroke:#6ea3e8}
   .ptb.fx.t-lead th[data-col=owner]{width:8.5rem}.ptb.fx.t-lead th[data-col=source]{width:7.5rem}.ptb.fx.t-lead th[data-col=appt]{width:7rem}.ptb.fx.t-lead th[data-col=value]{width:6.5rem}
   .ptb.fx.t-ctr th[data-col=id]{width:7rem}.ptb.fx.t-ctr th[data-col=stage]{width:9.5rem}.ptb.fx.t-ctr th[data-col=sold]{width:8rem}.ptb.fx.t-ctr th[data-col=office]{width:8rem}
   .ptb.fx.t-ctr th[data-col=fit]{width:6.5rem}.ptb.fx.t-ctr th[data-col=value],.ptb.fx.t-ctr th[data-col=bal]{width:6.5rem}
-  .ptb.fx.t-inv th[data-col=sel]{width:2.6rem}.ptb.fx.t-inv th[data-col=pid]{width:5rem}.ptb.fx.t-inv th[data-col=length]{width:5.5rem}.ptb.fx.t-inv th[data-col=unit]{width:4.5rem}
-  .ptb.fx.t-inv th[data-col=stock]{width:5rem}.ptb.fx.t-inv th[data-col=cost]{width:5.5rem}.ptb.fx.t-inv th[data-col=value]{width:6rem}.ptb.fx.t-inv th[data-col=act]{width:20.5rem}
   .ptb.fx.t-svc th[data-col=id]{width:7rem}.ptb.fx.t-svc th[data-col=pr]{width:6.5rem}.ptb.fx.t-svc th[data-col=st]{width:7rem}.ptb.fx.t-svc th[data-col=visit]{width:6.5rem}
   .ptb.fx.t-svc th[data-col=fitter]{width:7.5rem}.ptb.fx.t-svc th[data-col=act]{width:12.5rem}.ptb.fx.t-svc th[data-col=age]{width:6rem}.ptb.fx.t-svc th[data-col=name]{width:15.5rem}
 }
-@media(min-width:900px){.ptb.fx.t-inv td.ac .acts{justify-content:flex-end}}
 
 /* first-ever tour: a thin bar fills before Next unlocks */
 #tour .ttime{height:4px;margin:1rem 0 1rem;border-radius:4px;background:var(--line);overflow:hidden}
@@ -781,11 +778,6 @@ body[data-theme=dark] .smap .tl{fill:#f1f5fb;stroke:#17263c}
 body[data-theme=dark] .smap .scale path{stroke:#8fa3bd}body[data-theme=dark] .smap .scale text{fill:#8fa3bd}
 body.rm .pin.u .halo{animation:none}
 
-/* inventory list: buttons hard right on every row,and the filter at the far right of the heading row */
-.t-inv td.ac .acts{justify-content:flex-start!important;flex-wrap:nowrap}
-.t-inv td.ac .acts .tag.fw+.mini{margin-left:auto}
-.t-inv th[data-col=act]{text-align:left}
-.t-inv th #invF{float:right}
 /* product window: each stage is its own numbered card */
 .ie-f{counter-reset:ies}
 .ie-f fieldset{border:1px solid var(--line);border-radius:14px;padding:.9rem 1rem 1rem;margin:0 0 .9rem;background:var(--card2,rgba(127,140,160,.05));min-width:0}
@@ -918,7 +910,6 @@ body[data-theme=dark] .smap-key .zk{background:#2a3444;border-color:#8cbcff}
 .rp-ph:has(input:checked){border-color:var(--blue);background:var(--blue-bg);color:var(--ink)}
 .fsec .rp-all{margin-left:auto;font-size:.72rem}
 h3.fsec:has(.rp-all){display:flex;align-items:center;gap:.5rem}
-.t-inv .c-u{white-space:nowrap;font-weight:600}.ptb.fx.t-inv th[data-col=value]{width:6.8rem}
 .chc:has(input:disabled){opacity:.55;cursor:default}.chc:has(input:disabled):hover{border-color:#7f8ea6}
 
 /* ==== v19.3 settings: cards in a row are the same height; company details in two even columns, only what is filled in ==== */
@@ -1087,13 +1078,7 @@ body[data-theme=dark] .smap .rd{stroke:#5a6578}body[data-theme=dark] .smap .rd.m
 .tk-card:hover{border-color:var(--blue)}.tk-card.on{border-color:var(--blue);background:var(--blue-bg)}
 @media(max-width:900px){.tk-steps{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:520px){.tk-steps{grid-template-columns:1fr}}
-/* ==== v19.4 Inventory table: Stock and Location straight after the item; numbers to the right with room to
-   breathe, Supplier set apart from Cost; Status in its own centred column ==== */
-.t-inv th.i-st,.t-inv td.i-st{text-align:center;white-space:nowrap}
-.t-inv td.i-stock{padding-right:1.4rem!important}.t-inv th[data-col=stock]{padding-right:1.4rem!important}
-.t-inv td.i-sup,.t-inv th.i-sup{padding-left:1.6rem!important}
-.ptb.fx.t-inv th[data-col=status]{width:7rem}
-@media(min-width:900px){.ptb.fx.t-inv th[data-col=act]{width:13.5rem}}
+
 /* both optimisers: the same room between the last row and its "+ Add" button */
 .cut-in .cut-add,.bar-in .cut-add{margin-top:.9rem}
 
@@ -1135,8 +1120,6 @@ body.tv .fs-key,body.tv .fs-wrap,body.tv .fs-miss{max-width:none}
 .fs-wrap .fs-sp{background:repeating-linear-gradient(135deg,transparent 0 7px,rgba(127,142,166,.07) 7px 8px)}
 .fs-wrap .fs-hd.fs-add{border:0;border-right:1px solid var(--line);border-bottom:1px solid var(--line);color:var(--muted);font:600 .74rem var(--body);cursor:pointer;opacity:.75}
 .fs-wrap .fs-hd.fs-add:hover{opacity:1;color:var(--blue);background:var(--blue-bg)}
-
-
 
 /* Calendar: My Notes at the bottom, a private note pad that saves as you type */
 .cal-notes{margin-top:1rem}
@@ -1195,62 +1178,9 @@ body.tv .main::after,body.vmsg .main::after,body.lv .main::after{display:none}
 .tk-in input{border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);padding:0 .7rem;transition:border-color .15s var(--e-out),box-shadow .2s var(--e-out)}
 .tk-in input:hover{border-color:#8fa3be}.tk-in input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(3,78,162,.12)}
 
-/* Inventory table: text that does not fit ends in "..." (the full text shows on hover) instead of running into the
-   next column, and a QC problem sits under the stock status rather than pushing into the buttons */
-.t-inv td:not(.ac):not(.i-st){overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.t-inv td .idesc{overflow:hidden;text-overflow:ellipsis}
-.t-inv td.c-md,.t-inv td.c-sm{padding-right:.8rem}
-.t-inv .st2{display:inline-flex;flex-direction:column;align-items:center;gap:.2rem}
 /* narrower screens: the row's Report button goes (it is in the product window too), so the text columns keep room */
-@media(min-width:900px) and (max-width:1320px){
-  .ptb.fx.t-inv th[data-col=act]{width:8.8rem}
-  .t-inv td.ac .acts .mini:nth-child(3){display:none}
-  .ptb.fx.t-inv th[data-col=pid]{width:4.2rem}
-  .ptb.fx.t-inv th[data-col=status]{width:6.2rem}
-}
-/* v19.11.3 Inventory columns: what a product is sits together on the left (tick, ID, item, stock, location, unit,
-   colours), who it comes from and what it is worth sits on the right by the buttons (supplier, cost, value, status).
-   The spare room goes after Colours, so nothing on the left drifts apart. The tick-box cell is never cut short. */
-.t-inv td:first-child{overflow:visible!important;text-overflow:clip!important}
-.t-inv td.i-stock,.t-inv th[data-col=stock]{text-align:center!important;padding-left:.3rem!important;padding-right:.3rem!important}
-.t-inv th[data-col=stock]>*{justify-content:center}
-.t-inv td.i-sup,.t-inv th.i-sup{padding-left:.7rem!important}
-.t-inv td.ac .acts{justify-content:flex-end!important;padding-right:var(--acgap,.8rem)}
-@media(min-width:900px){
-  .ptb.fx.t-inv th[data-col=sel]{width:2.4rem}
-  .ptb.fx.t-inv th[data-col=pid]{width:4.4rem}
-  .ptb.fx.t-inv th[data-col=item]{width:9rem}
-  .ptb.fx.t-inv th[data-col=stock]{width:4.2rem}
-  .ptb.fx.t-inv th[data-col=location]{width:8rem}
-  .ptb.fx.t-inv th[data-col=unit]{width:3.8rem}
-  .ptb.fx.t-inv th[data-col=colours]{width:auto}
-  .ptb.fx.t-inv th[data-col=supplier]{width:10.5rem}
-  .ptb.fx.t-inv th[data-col=cost]{width:4.4rem}
-  .ptb.fx.t-inv th[data-col=value]{width:5.8rem}
-  .ptb.fx.t-inv th[data-col=status]{width:6.4rem}
-  .ptb.fx.t-inv th[data-col=act]{width:13.5rem}
-  .t-inv th.c-u,.t-inv td.c-u{padding-left:.6rem}
-}
-@media(min-width:900px) and (max-width:1320px){
-  .ptb.fx.t-inv th[data-col=act]{width:8.8rem}.t-inv td.ac .acts{--acgap:.38rem}
-  .ptb.fx.t-inv th[data-col=location]{width:7.4rem}
-}
+
 /* small laptops: Location, Colours and Value hide, so Unit takes the spare room instead */
-@media(min-width:900px) and (max-width:1100px){
-  .ptb.fx.t-inv th[data-col=unit]{width:auto}
-  .ptb.fx.t-inv th[data-col=supplier]{width:11rem}
-}
-/* v19.11.4 Inventory: every column's heading and contents sit in the middle of the column, and nothing else changes:
-   every column stays exactly where it was in v19.11.3, and the row buttons do not move. */
-.t-inv th:not([data-col=sel]):not([data-col=act]),
-.t-inv td:not(:first-child):not(.ac){text-align:center!important;padding-left:.45rem!important;padding-right:.45rem!important}
-.t-inv td .idesc{text-align:center}
-.t-inv td .xtag{margin-left:auto;margin-right:auto}
-/* v19.11.6 Inventory: Item, Location and Supplier read from the left (heading and contents), the rest stay centred.
-   Only the text moves: column positions, widths and the row buttons are exactly as v19.11.5. */
-.ptb.fx.t-inv th[data-col=item],.ptb.fx.t-inv th[data-col=location],.ptb.fx.t-inv th[data-col=supplier],
-.ptb.fx.t-inv td.i-item,.ptb.fx.t-inv td.i-loc,.ptb.fx.t-inv td.i-sup{text-align:left!important;padding-left:.6rem!important;padding-right:.45rem!important}
-.t-inv td.i-item .idesc,.t-inv td.i-loc .idesc{text-align:left}
 
 /* v19.11.6 Service calls: columns set out like Inventory. Short values (priority, status, visit, open for) sit in the
    middle of a column sized for them; names and the problem read from the left and share the spare room, ending in

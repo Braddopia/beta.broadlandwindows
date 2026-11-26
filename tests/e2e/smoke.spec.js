@@ -96,7 +96,7 @@ test('Overview on a phone: the greeting shows the stars per platform, not the re
   await expect(app.page.locator('.hero .rate')).toContainText('Google');
 });
 
-test('Inventory columns: ID, Item, Stock, Location, Unit (PCS or the length), Colours, then Supplier, Cost, Total Value, Status by the buttons', async ({
+test('Inventory columns (v19.13): ID, Item, Stock with its unit, Location, Colours, Cost, Value, Status; no Unit or Supplier column', async ({
   app,
 }) => {
   await app.role('beta');
@@ -104,19 +104,16 @@ test('Inventory columns: ID, Item, Stock, Location, Unit (PCS or the length), Co
   const th = await app.run(() =>
     [...document.querySelectorAll('#main .t-inv thead th')].map((t) => t.innerText.replace(/[▲▼]/g, '').trim())
   );
-  expect(th.slice(1, 11)).toEqual([
-    'ID',
-    'Item',
-    'Stock',
-    'Location',
-    'Unit',
-    'Colours',
-    'Supplier',
-    'Cost',
-    'Total Value',
-    'Status',
-  ]);
-  await expect(app.page.locator('#main .t-inv td.c-u').first()).toHaveText(/^(PCS|Pairs|M|[\d.]+M)$/);
+  expect(th.slice(1, 9)).toEqual(['ID', 'Item', 'Stock', 'Location', 'Colours', 'Cost', 'Value', 'Status']);
+  // stock carries its unit: full bars as "118 × 6.5M", others "62 PCS"
+  const stock = await app.run(() =>
+    [...document.querySelectorAll('#main .t-inv td.i-stock')].map((t) => t.innerText.replace(/\s+/g, ' ').trim())
+  );
+  expect(stock).toContain('118 × 6.5M');
+  expect(stock).toContain('62 PCS');
+  // Sort & Filter sits in the toolbar beside the search, not inside the table
+  await expect(app.page.locator('#main .invbar #invF')).toBeVisible();
+  await expect(app.page.locator('#main .t-inv #invF')).toHaveCount(0);
   await expect(app.page.locator('#main .tools')).not.toContainText('Cutting Data');
 });
 

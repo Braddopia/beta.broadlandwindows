@@ -189,6 +189,11 @@ export const TAB_TOURS = {
       'Type or scan a Stock ID or item code. An exact match jumps to the top with a rainbow edge.'
     ),
     T(
+      '#invF',
+      'Sort And Filter',
+      'Sort the list, or show only one supplier, location, product group, area or unit. The quick buttons beside it show low, out of stock and more.'
+    ),
+    T(
       '#main .seg2',
       'Products, Movements, Stock Take',
       'What you hold, every movement in and out, and the stock take count sheets.'
@@ -201,7 +206,12 @@ export const TAB_TOURS = {
       'Remove Stock'
     ),
     T(TOOL, 'Request Stock', 'Ask for something to be ordered. An administrator approves or rejects it.', 'Request'),
-    T(TOOL, 'Reports', 'Cost by supplier, by area, dead stock, QC and more, ready to print.', 'Reports'),
+    T(
+      '#main .inv-nav-tools > *',
+      'Reports',
+      'Cost by supplier, by area, dead stock, QC and more, ready to print.',
+      'Reports'
+    ),
     T('#main .tw', 'The Stock List', 'Click a row to see a product, print its label or check its history.'),
   ],
   suppliers: [

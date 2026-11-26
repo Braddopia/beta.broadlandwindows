@@ -546,11 +546,11 @@ export function ieSave() {
   );
 }
 /* Cutting section: keep the product's bar length for the Cutting Optimiser (state.cutProf, by Stock ID).
-   Most bars are 6.5 m; some are 7 m or 5 m; anything else goes in the "other" box. */
+   Bars come in 6 m, 6.5 m (most) or 7 m; "Other length" is kept for anything unusual already in stock. */
 export const BAR_LENGTHS = [
+  ['6000', '6M'],
   ['6500', '6.5M (most bars)'],
   ['7000', '7M'],
-  ['5000', '5M'],
   ['other', 'Other length'],
 ];
 /** the two boxes for a bar length in mm: one of the usual lengths, or Other with the length typed */

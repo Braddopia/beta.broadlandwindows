@@ -59,9 +59,6 @@ body:not(.lv):not(.vmsg) .main>.tw+.pager,body:not(.lv):not(.vmsg) .main>style+*
 /* Contracts: room for "Contract No" and its sort arrow */
 @media(min-width:900px){.ptb.fx.t-ctr th[data-col=id]{width:7.8rem}}
 
-/* Inventory and Service Calls: text that reads from the left starts the same distance in as in every other table */
-.ptb.fx.t-inv th[data-col=item],.ptb.fx.t-inv th[data-col=location],.ptb.fx.t-inv th[data-col=supplier],
-.ptb.fx.t-inv td.i-item,.ptb.fx.t-inv td.i-loc,.ptb.fx.t-inv td.i-sup{padding-left:.7rem!important}
 .t-svc th[data-col=id],.t-svc th[data-col=name],.t-svc th[data-col=issue],.t-svc th[data-col=fitter],
 .t-svc td.s-id,.t-svc td.s-name,.t-svc td.s-issue,.t-svc td.s-fit{padding-left:.7rem!important}
 

@@ -184,7 +184,7 @@ export function vBars() {
     <div class="panel cut-job"><h2><span>Job</span><small class="muted nocap" id="barJobHint">${k ? 'Contract ' + k.id + ' found: Save To Contract keeps the list with its documents' : 'Type the contract number to link the list to it'}</small></h2><div class="cut-og cut-eq">
       <div class="ff"><label for="bar_job_no">Job Number</label><input id="bar_job_no" maxlength="30" data-combo="jobs" value="${D.jobNo || ''}" autocomplete="off"></div>
       <div class="ff"><label for="bar_job_name">Job Name</label><input id="bar_job_name" maxlength="80" value="${D.jobName || ''}" autocomplete="off"></div>
-    </div><datalist id="barAngles"><option value="90"></option><option value="45"></option><option value="67.5"></option><option value="60"></option><option value="30"></option><option value="22.5"></option></datalist><datalist id="barCols">${PRE.map(([n]) => html`<option value="${n}"></option>`)}</datalist><datalist id="barLens"><option value="6500">6.5M (most bars)</option><option value="7000">7M</option><option value="5000">5M</option></datalist></div>
+    </div><datalist id="barAngles"><option value="90"></option><option value="45"></option><option value="67.5"></option><option value="60"></option><option value="30"></option><option value="22.5"></option></datalist><datalist id="barCols">${PRE.map(([n]) => html`<option value="${n}"></option>`)}</datalist><datalist id="barLens"><option value="6000">6M</option><option value="6500">6.5M (most bars)</option><option value="7000">7M</option></datalist></div>
     ${D.profiles.map(
       (p, pi) => html`<div class="panel bar-p">
         <div class="bar-ph"><span class="bar-pn">Profile ${pi + 1}</span>

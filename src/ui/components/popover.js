@@ -14,7 +14,8 @@ export function openFpop(btn, html) {
   const r = btn.getBoundingClientRect(),
     w = p.offsetWidth;
   p.style.top = Math.min(innerHeight - p.offsetHeight - 8, r.bottom + 6) + 'px';
-  p.style.left = Math.max(8, Math.min(innerWidth - w - 8, r.right - w)) + 'px';
+  /* drop straight down from the button (its left edges lined up) when there is room, else line up the right edges */
+  p.style.left = (r.left + w <= innerWidth - 8 ? r.left : Math.max(8, r.right - w)) + 'px';
   at = { x: r.left, y: r.top };
 }
 /* where the pop-over's button was when it opened */

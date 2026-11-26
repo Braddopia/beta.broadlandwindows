@@ -53,12 +53,13 @@ export const openTake = () => takes().find((t) => t.status == 'open') || null;
 const areasNow = () => areaList(products(), state.stockAreas);
 
 /* ---------------- the tab ---------------- */
+/** tog: the Inventory tab bar, already drawn */
 export function vTake(tog) {
   const T = openTake(),
     Ad = can('money'),
     Own = can('manage');
   const tools = `<button class="btn ghost sm" data-act="takeImport">${svg(UPLOAD)}Import Stock Sheet</button><button class="btn ghost sm" data-act="takePrint">${svg(PRINT)}Count Sheets</button><button class="btn ghost sm" data-act="takeExport">Export To Excel</button>`;
-  const head = `<div class="head"><div><h1>Inventory</h1><span class="muted">${T ? esc(T.name) + ' · started ' + fd(T.date) + ' by ' + esc(T.by) : 'Stock take'}</span></div><div class="tools">${tog}<span class="vs"></span>${tools}</div></div>`;
+  const head = `<div class="head"><div><h1>Inventory</h1><span class="muted">${T ? esc(T.name) + ' · started ' + fd(T.date) + ' by ' + esc(T.by) : 'Stock take'}</span></div><div class="tools">${tools}</div></div>${tog}`;
   const past = takes().filter((t) => t.status == 'done');
   const pastH = past.length
     ? `<div class="panel" style="margin-top:1rem"><h2>Previous Stock Takes</h2><div class="tw"><table><thead><tr><th>Stock Take</th><th>Date</th><th class="n">Lines Counted</th>${Ad ? '<th class="n">Difference</th>' : ''}<th>Applied By</th><th class="ac"></th></tr></thead><tbody>${past

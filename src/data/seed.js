@@ -36,13 +36,13 @@ export function seed() {
   const data = {
     items: [
       it('09:41', 'request', true, 'Operative 1', 7, 'ACET848', '4-5MM', 'Black', 'Gold', 62, 1.85, 'Bay 3, Shelf B'),
-      it('09:22', 'add', false, 'Fitter B', 3, 'VG920 KL010', '3M', 'Grey', 'Grey', 118, 0.92, 'Bay 1, Shelf A'),
-      it('09:22', 'add', false, 'Fitter B', 3, 'KL005', '3M', 'Grey', 'Grey', 74, 0.78, 'Bay 1, Shelf C'),
+      it('09:22', 'add', false, 'Fitter B', 3, 'VG920 KL010', '6.5M', 'Grey', 'Grey', 118, 0.92, 'Bay 1, Shelf A'),
+      it('09:22', 'add', false, 'Fitter B', 3, 'KL005', '6.5M', 'Grey', 'Grey', 74, 0.78, 'Bay 1, Shelf C'),
       it('08:58', 'request', false, 'Operative 2', 3, 'KL005', '5MM', 'Gold', 'Black', 74, 0.78, 'Bay 1, Shelf C'),
       it('08:40', 'add', false, 'Stock Controller', 12, 'ACET848', '4MM', 'Black', 'Black', 62, 1.85, 'Bay 3, Shelf B'),
-      it('08:15', 'remove', true, 'Fitter B', 2, 'VG920', '3M', 'Grey', 'Grey', 9, 0.92, 'Bay 1, Shelf A'),
+      it('08:15', 'remove', true, 'Fitter B', 2, 'VG920', '6.5M', 'Grey', 'Grey', 9, 0.92, 'Bay 1, Shelf A'),
       it('07:50', 'request', false, 'Operative 3', 5, 'KL010', '5MM', 'Gold', 'Gold', 41, 1.1, 'Bay 2, Shelf A'),
-      it('07:32', 'add', false, 'Fitter A', 8, 'KL005', '3M', 'Grey', 'Grey', 74, 0.78, 'Bay 1, Shelf C'),
+      it('07:32', 'add', false, 'Fitter A', 8, 'KL005', '6.5M', 'Grey', 'Grey', 74, 0.78, 'Bay 1, Shelf C'),
       it('Yesterday', 'request', true, 'Operative 4', 2, 'ACET848', '4MM', 'Black', 'Gold', 62, 1.85, 'Bay 3, Shelf B'),
     ],
     leads: [

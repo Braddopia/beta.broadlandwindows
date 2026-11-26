@@ -253,3 +253,29 @@ Left as they are, for the owner to decide: filter buttons sit in a "SHOW" bar on
 Contact Book but loose on Deliveries, Staff, Finance, Reports, Files and Inventory; Contracts shows customer names in
 capitals under "Cust Name" (Leads says "Customer"); the Holiday Planner's "Week 1" / "Week 6" labels wrap when the
 week has only a day or two in the month.
+
+## v19.13 (Inventory page reworked, for use from February)
+
+The owner disliked the Inventory layout (filter button not lined up with anything, "3M" in a Unit column far from the
+stock number). Decided with the owner:
+
+- Stock shows its unit beside the number: full bars as "2 × 6.5M" (count of bars × bar length), otherwise "62 PCS",
+  "4 Pairs", "12 M" (metres), "3 Kits". Rules in `domain/stock.js` (`barMm`, `stockParts`, `stockText`, unit-tested in
+  `tests/unit/stock-units.test.mjs`). A product counts as bars when it has a bar length in its Cutting settings
+  (`state.cutProf[pid].bar`) or its Length reads as one (6.5M). Movements show quantities the same way.
+- Bar lengths offered for a product: 6M, 6.5M (picked to start with) or 7M; "Other length" stays for anything unusual
+  already in stock. The Cutting Optimiser's list matches. Sample data bars are 6.5M.
+- Layout: title and the three main buttons (Add Stock, Remove Stock, Request); a bar under it on every Inventory tab
+  with Products / Movements / Stock Take on the left and that tab's small tools on the right (`invNav`); the number
+  cards; one toolbar row with the search box, "Sort & Filter" (was a small icon in the table's top corner) and the
+  quick filters, all the same height; the table.
+- Columns: tick, ID, Item (description and size underneath), Stock (with unit; numbers line up down the column),
+  Location (area underneath), Colours, Cost, Value (administrators), Status, View / Edit / Report. The Unit and Supplier
+  columns are gone (the supplier shows in the product window; the owner asked for that). Text columns read from the
+  left, short values are centred, Item gets the most room. 900 to 1100px: Colours and Value step aside and Report moves
+  into the product window, as before.
+- All Inventory table styles are in `src/css/05f-inventory.css`; the ~50 older layered rules in `05c-refinements.css`
+  were removed. Tests: `tests/e2e/inventory-layout.spec.js` (alignment, numbers lining up, toolbar level, buttons fit)
+  replaces the old column-position test.
+- Pop-over menus drop straight down from their button when there is room (left edges lined up), otherwise they line up
+  with the button's right edge (Service Calls More, at the right of the screen).

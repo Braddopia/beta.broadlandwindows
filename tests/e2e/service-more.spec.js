@@ -21,7 +21,7 @@ const look = (app) =>
     return {
       textFits: more.scrollWidth <= more.clientWidth + 1,
       inCell: m.left >= cell.left - 1 && m.right <= cell.right + 1,
-      sameHeight: Math.abs(m.height - n.height) < 1,
+      sameHeight: more.offsetHeight == next.offsetHeight, // real size, not mid-press (the press animation shrinks a button)
       noOverlap: n.right <= m.left,
       menuOnScreen: !!p && p.left >= 0 && p.top >= 0 && p.right <= innerWidth && p.bottom <= innerHeight,
       itemsOnTop: items.length > 0 && items.every(Boolean),

@@ -1,0 +1,65 @@
+/* Inventory list (v19.13). One toolbar row (search, Sort & Filter, quick filters), then a table where every
+   heading lines up with its column: text reads from the left (Item, Location, Colours), short values sit in the
+   middle (ID, Stock with its unit, Cost, Value, Status), the buttons sit at the right. Everything for this table is
+   in this file. */
+
+/* ---- toolbar ---- */
+.invbar{display:flex;flex-wrap:wrap;align-items:center;gap:.6rem}
+.invbar .invq{flex:1 1 18rem;min-width:0;height:2.5rem}
+.inv-fb{display:inline-flex;align-items:center;gap:.45rem;height:2.5rem;padding:0 .9rem;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);font:500 .85rem var(--body);cursor:pointer;white-space:nowrap}
+.inv-fb svg{width:1rem;height:1rem;color:var(--muted)}
+.inv-fb:hover{border-color:var(--blue);color:var(--blue)}.inv-fb:hover svg{color:var(--blue)}
+.inv-fb.on{border-color:var(--blue);background:var(--blue-bg);color:var(--blue)}.inv-fb.on svg{color:var(--blue)}
+.inv-fb i{font-style:normal;font-size:.7rem;font-weight:600;padding:.05rem .4rem;border-radius:99px;background:var(--blue);color:#fff}
+.inv-chips{display:flex;flex-wrap:wrap;align-items:center;gap:.4rem}
+.inv-chips .chip{height:2.5rem;padding:0 .8rem;border-radius:10px}
+.inv-chips .chip i{font-style:normal;margin-left:.3rem;padding:0 .35rem;border-radius:6px;background:var(--card2);color:var(--muted);font-size:.72rem}
+.inv-chips .chip.on i{background:rgba(255,255,255,.2);color:inherit}
+
+/* ---- table: one alignment per column, heading and cells the same ---- */
+.t-inv th,.t-inv td{padding-left:.7rem;padding-right:.7rem}
+.t-inv .i-item,.t-inv .i-loc,.t-inv .i-col{text-align:left}
+.t-inv .i-id,.t-inv .i-stock,.t-inv .i-cost,.t-inv .i-val,.t-inv .i-st{text-align:center}
+.t-inv th.srt{white-space:nowrap}
+.t-inv .i-sel{width:2.6rem;padding-left:.9rem;padding-right:0}
+.t-inv td small{display:block;margin-top:.1rem;font-size:.74rem;color:var(--muted);font-weight:400}
+/* long text ends in "..." with the full text on hover; the tick box and the buttons are never cut */
+.t-inv td.i-item,.t-inv td.i-loc,.t-inv td.i-col{overflow:hidden}
+.t-inv td.i-item>*,.t-inv td.i-loc,.t-inv td.i-loc>*,.t-inv td.i-col{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.t-inv td.i-item b{display:block}
+.t-inv td.i-id code{font-size:.8rem}
+.t-inv td .xtag{display:block;width:max-content;margin:.2rem auto 0}
+/* stock: the number, then its unit (PCS, Pairs, M, or × 6.5M for full bars) */
+/* the number is right-aligned and the unit left-aligned around the middle of the column, so the numbers line up
+   down the column whatever their unit */
+.t-inv td.i-stock{white-space:nowrap}
+.t-inv .i-qty{display:inline-grid;grid-template-columns:3.2em 4.2em;align-items:baseline;column-gap:.35em}
+.t-inv .i-qty b{text-align:right;font-size:.95rem}
+.t-inv .i-unit{text-align:left;color:var(--muted);font-size:.78rem;font-weight:600}
+.t-inv .st2{display:inline-flex;flex-direction:column;align-items:center;gap:.2rem}
+.t-inv td.ac .acts{justify-content:flex-end;flex-wrap:nowrap;gap:.35rem}
+
+/* fixed column widths on a computer: Item gets the spare room, Location and Colours a share of it */
+@media(min-width:900px){
+  .ptb.fx.t-inv th.i-sel{width:2.6rem}
+  .ptb.fx.t-inv th.i-id{width:5.2rem}
+  .ptb.fx.t-inv th.i-item{width:auto}
+  .ptb.fx.t-inv th.i-stock{width:7.6rem}
+  .ptb.fx.t-inv th.i-loc{width:13.5%}
+  .ptb.fx.t-inv th.i-col{width:11%}
+  .ptb.fx.t-inv th.i-cost{width:5.4rem}
+  .ptb.fx.t-inv th.i-val{width:6.6rem}
+  .ptb.fx.t-inv th.i-st{width:7rem}
+  .ptb.fx.t-inv th.ac{width:14.2rem}
+}
+/* 900 to 1100: Colours and Value step aside (as on the other lists) and Report sits in the product window */
+@media(min-width:900px) and (max-width:1100px){
+  .ptb.fx.t-inv th.i-loc{width:18%}
+  .ptb.fx.t-inv th.ac{width:9.6rem}
+  .t-inv td.ac .i-rep{display:none}
+}
+
+/* ---- the bar under the title on every Inventory tab ---- */
+.inv-nav{position:static;padding:.45rem .55rem}
+.inv-nav .inv-nav-gap{flex:1}
+.inv-nav-tools{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:.4rem}

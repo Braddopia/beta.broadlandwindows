@@ -43,7 +43,7 @@ test('each tab plays its own tour once, the first time it opens; Esc three times
   await app.go('stock');
   const card = app.page.locator('#tour .tcard');
   await expect(card).toContainText('Find Stock');
-  await expect(card).toContainText('1 of 7');
+  await expect(card).toContainText('1 of 8');
   await expect(card.locator('text=Skip Tour')).toHaveCount(0);
   await expect(card.locator('.tbtn .btn:last-child')).toBeDisabled();
   // the spotlight is on the stock search box
