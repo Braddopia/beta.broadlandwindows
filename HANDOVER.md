@@ -286,3 +286,5 @@ stock number). Decided with the owner:
   left and are evenly spaced (Item, Stock and Location the same width); Cost, Value and Status sit right beside the
   View / Edit / Report buttons; the spare room falls between the two groups. Stock numbers still line up down the
   column. `tests/e2e/inventory-layout.spec.js` checks the even spacing and that the right-hand group touches the buttons.
+- v19.13.2: stock values start flush with the Stock heading (number then unit), like Item and Location; the numbers
+  were right-aligned in a small box, which made "9" and "118" start at different places.

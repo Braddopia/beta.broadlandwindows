@@ -1,5 +1,5 @@
 // v19.13 Inventory layout: one toolbar row (search, Sort & Filter, quick filters), every heading lined up with its
-// column, stock numbers lined up down the column with their unit beside them, Item, Stock and Location evenly spaced on
+// column, stock values starting flush with the Stock heading with their unit beside them, Item, Stock and Location evenly spaced on
 // the left with Cost and Status by the buttons (v19.13.1), and the row buttons inside their cell, for an administrator and a standard user at the usual screen widths.
 const { test, expect } = require('../helpers');
 
@@ -25,7 +25,10 @@ for (const role of ['beta', 'staff'])
             return rows.some((tr) => getComputedStyle(tr.children[i]).textAlign != getComputedStyle(th).textAlign);
           })
           .map((th) => th.dataset.col);
-        const numRights = new Set(rows.map((tr) => Math.round(box(tr.querySelector('.i-qty b')).right)));
+        // every stock value starts flush with the Stock heading's text (v19.13.2)
+        const stockTh = t.querySelector('thead th[data-col=stock]'),
+          headLeft = box(stockTh).left + parseFloat(getComputedStyle(stockTh).paddingLeft);
+        const numLefts = rows.map((tr) => box(tr.querySelector('.i-qty b')).left);
         const w = (c) => (t.querySelector(`thead th[data-col=${c}]`) || {}).offsetWidth || 0;
         const buttonsFit = rows.every((tr) => {
           const c = box(tr.querySelector('td.ac'));
@@ -35,7 +38,7 @@ for (const role of ['beta', 'staff'])
         });
         return {
           misaligned,
-          numbersLineUp: numRights.size == 1,
+          numbersLineUp: numLefts.every((x) => Math.abs(x - headLeft) < 1),
           filterLevelWithSearch: Math.abs(q.top - f.top) < 1 && Math.abs(q.height - f.height) < 1,
           evenlySpaced: w('item') == w('stock') && (!w('colours') || w('stock') == w('location')),
           // the right group: Cost, (Value,) Status, buttons side by side with nothing between them
