@@ -18,8 +18,8 @@
 
 /* ---- table: one alignment per column, heading and cells the same ---- */
 .t-inv th,.t-inv td{padding-left:.7rem;padding-right:.7rem}
-.t-inv .i-item,.t-inv .i-loc,.t-inv .i-col{text-align:left}
-.t-inv .i-id,.t-inv .i-stock,.t-inv .i-cost,.t-inv .i-val,.t-inv .i-st{text-align:center}
+.t-inv .i-item,.t-inv .i-stock,.t-inv .i-loc,.t-inv .i-col{text-align:left}
+.t-inv .i-id,.t-inv .i-cost,.t-inv .i-val,.t-inv .i-st{text-align:center}
 .t-inv th.srt{white-space:nowrap}
 .t-inv .i-sel{width:2.6rem;padding-left:.9rem;padding-right:0}
 .t-inv td small{display:block;margin-top:.1rem;font-size:.74rem;color:var(--muted);font-weight:400}
@@ -30,32 +30,31 @@
 .t-inv td.i-id code{font-size:.8rem}
 .t-inv td .xtag{display:block;width:max-content;margin:.2rem auto 0}
 /* stock: the number, then its unit (PCS, Pairs, M, or × 6.5M for full bars) */
-/* the number is right-aligned and the unit left-aligned around the middle of the column, so the numbers line up
-   down the column whatever their unit */
+/* the number sits in a small right-aligned box, so the numbers line up down the column whatever their unit */
 .t-inv td.i-stock{white-space:nowrap}
-.t-inv .i-qty{display:inline-grid;grid-template-columns:3.2em 4.2em;align-items:baseline;column-gap:.35em}
+.t-inv .i-qty{display:inline-grid;grid-template-columns:2.3em auto;align-items:baseline;column-gap:.35em}
 .t-inv .i-qty b{text-align:right;font-size:.95rem}
 .t-inv .i-unit{text-align:left;color:var(--muted);font-size:.78rem;font-weight:600}
 .t-inv .st2{display:inline-flex;flex-direction:column;align-items:center;gap:.2rem}
 .t-inv td.ac .acts{justify-content:flex-end;flex-wrap:nowrap;gap:.35rem}
 
-/* fixed column widths on a computer: Item gets the spare room, Location and Colours a share of it */
+/* fixed column widths on a computer (owner's choice, v19.13.1): what the product is sits together on the left in
+   evenly spaced columns (Item, Stock, Location the same width, Colours starting the same step on); Cost, Value and
+   Status sit by the buttons on the right; the spare room falls after Colours, between the two groups */
 @media(min-width:900px){
   .ptb.fx.t-inv th.i-sel{width:2.6rem}
   .ptb.fx.t-inv th.i-id{width:5.2rem}
-  .ptb.fx.t-inv th.i-item{width:auto}
-  .ptb.fx.t-inv th.i-stock{width:7.6rem}
-  .ptb.fx.t-inv th.i-loc{width:13.5%}
-  .ptb.fx.t-inv th.i-col{width:11%}
+  .ptb.fx.t-inv th.i-item,.ptb.fx.t-inv th.i-stock,.ptb.fx.t-inv th.i-loc{width:10.5rem}
+  .ptb.fx.t-inv th.i-col{width:auto}
   .ptb.fx.t-inv th.i-cost{width:5.4rem}
-  .ptb.fx.t-inv th.i-val{width:6.6rem}
+  .ptb.fx.t-inv th.i-val{width:6.4rem}
   .ptb.fx.t-inv th.i-st{width:7rem}
-  .ptb.fx.t-inv th.ac{width:14.2rem}
+  .ptb.fx.t-inv th.ac{width:12.8rem}
 }
 /* 900 to 1100: Colours and Value step aside (as on the other lists) and Report sits in the product window */
 @media(min-width:900px) and (max-width:1100px){
-  .ptb.fx.t-inv th.i-loc{width:18%}
-  .ptb.fx.t-inv th.ac{width:9.6rem}
+  .ptb.fx.t-inv th.i-loc{width:auto}
+  .ptb.fx.t-inv th.ac{width:9rem}
   .t-inv td.ac .i-rep{display:none}
 }
 

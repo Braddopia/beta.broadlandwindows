@@ -1,6 +1,6 @@
 // v19.13 Inventory layout: one toolbar row (search, Sort & Filter, quick filters), every heading lined up with its
-// column, stock numbers lined up down the column with their unit beside them, Item the widest text column, and the
-// row buttons inside their cell, for an administrator and a standard user at the usual screen widths.
+// column, stock numbers lined up down the column with their unit beside them, Item, Stock and Location evenly spaced on
+// the left with Cost and Status by the buttons (v19.13.1), and the row buttons inside their cell, for an administrator and a standard user at the usual screen widths.
 const { test, expect } = require('../helpers');
 
 for (const role of ['beta', 'staff'])
@@ -37,7 +37,17 @@ for (const role of ['beta', 'staff'])
           misaligned,
           numbersLineUp: numRights.size == 1,
           filterLevelWithSearch: Math.abs(q.top - f.top) < 1 && Math.abs(q.height - f.height) < 1,
-          itemWidest: w('item') >= w('location') && w('item') >= w('colours'),
+          evenlySpaced: w('item') == w('stock') && (!w('colours') || w('stock') == w('location')),
+          // the right group: Cost, (Value,) Status, buttons side by side with nothing between them
+          rightGroupTogether: (() => {
+            const cols = ['cost', 'value', 'status', 'act']
+              .map((c) => t.querySelector(`thead th[data-col=${c}]`))
+              .filter((x) => x && x.offsetWidth);
+            return (
+              cols.every((c, i) => !i || Math.abs(box(c).left - box(cols[i - 1]).right) < 1) &&
+              Math.abs(box(cols.at(-1)).right - box(t).right) < 2
+            );
+          })(),
           buttonsFit,
           stockCellsFit: rows.every((tr) => {
             const c = tr.querySelector('td.i-stock');
@@ -49,7 +59,8 @@ for (const role of ['beta', 'staff'])
         misaligned: [],
         numbersLineUp: true,
         filterLevelWithSearch: true,
-        itemWidest: true,
+        evenlySpaced: true,
+        rightGroupTogether: true,
         buttonsFit: true,
         stockCellsFit: true,
       });

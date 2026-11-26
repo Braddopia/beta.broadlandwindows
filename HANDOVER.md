@@ -279,3 +279,10 @@ stock number). Decided with the owner:
   replaces the old column-position test.
 - Pop-over menus drop straight down from their button when there is room (left edges lined up), otherwise they line up
   with the button's right edge (Service Calls More, at the right of the screen).
+
+## v19.13.1
+
+- Inventory columns, the owner's choice: Item, Stock, Location and Colours sit together on the left, read from the
+  left and are evenly spaced (Item, Stock and Location the same width); Cost, Value and Status sit right beside the
+  View / Edit / Report buttons; the spare room falls between the two groups. Stock numbers still line up down the
+  column. `tests/e2e/inventory-layout.spec.js` checks the even spacing and that the right-hand group touches the buttons.
