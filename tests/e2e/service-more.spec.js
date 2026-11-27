@@ -120,7 +120,7 @@ test('every item in the More menu works', async ({ app }) => {
   expect(app.errors).toEqual([]);
 });
 
-test('service call columns: text from the left, short values centred, Ref never cut', async ({ app }) => {
+test('service call columns: text from the left, short values and the engineers centred, Ref never cut', async ({ app }) => {
   await app.page.setViewportSize({ width: 1280, height: 900 });
   await app.role('beta');
   await app.go('service');
@@ -132,16 +132,16 @@ test('service call columns: text from the left, short values centred, Ref never 
         'th[data-col=id]',
         'th[data-col=name]',
         'th[data-col=issue]',
-        'th[data-col=fitter]',
         'td.s-name',
         'td.s-issue',
-        'td.s-fit',
       ].map(al),
       centre: [
         'th[data-col=pr]',
         'th[data-col=st]',
         'th[data-col=visit]',
         'th[data-col=age]',
+        'th[data-col=fitter]',
+        'td.s-fit',
         'td.c',
         'td.s-visit',
         'td.svc-age',

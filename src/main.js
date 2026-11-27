@@ -129,6 +129,7 @@ import * as uiShellLooks from './ui/shell/looks.js';
 import * as uiShellRouter from './ui/shell/router.js';
 import * as uiShellShell from './ui/shell/shell.js';
 import * as uiShellTheme from './ui/shell/theme.js';
+import * as uiShellUpdateCard from './ui/shell/update-card.js';
 import * as uiToast from './ui/toast.js';
 import * as uiUiState from './ui/ui-state.js';
 import { ACTIONS } from './core/actions.js';
@@ -262,6 +263,7 @@ const modules = {
   uiShellRouter,
   uiShellShell,
   uiShellTheme,
+  uiShellUpdateCard,
   uiToast,
   uiUiState,
 };

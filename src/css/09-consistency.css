@@ -121,18 +121,18 @@ body[data-theme=dark] .rv-feed.off{background:#3a3220;color:#ffd98a}
 .set-r:has(.sv-set) .set-a{flex:1 1 100%}
 .set-r .sv-set{width:100%;flex-wrap:nowrap}
 .set-r .sv-set .seg2{flex:1}.set-r .sv-set .seg2 button{flex:1}
-/* Files lists (manuals, forms, other content, brand assets), set out like Inventory: each column as wide as what it
-   holds with the same gap between them, Category and Size centred, the spare room before the buttons. One shared grid
-   for the list (subgrid), so the heading and every row line up. */
+/* Files lists (manuals, forms, other content, brand assets), set out like Inventory: the name on the left takes the
+   spare room; Category, Size and the buttons sit together on the right (v19.17.3, the owner's choice), each as wide as
+   what it holds with the same gap between them, so the buttons never cover the size. One shared grid for the list
+   (subgrid), so the heading and every row line up. */
 @media(min-width:701px){
-  .flist{display:grid;grid-template-columns:minmax(8rem,max-content) max-content max-content minmax(0,1fr) max-content;column-gap:1.6rem}
+  .flist{display:grid;grid-template-columns:minmax(8rem,1fr) max-content max-content max-content;column-gap:1.6rem}
   .flist>.frow{grid-column:1/-1;display:grid;grid-template-columns:subgrid;column-gap:1.6rem}
   .flist>.frow>b{max-width:32rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .flist>.frow>.tag,.flist>.fhead>span:nth-child(2){justify-self:center;text-align:center}
   .flist>.frow>.sz,.flist>.fhead>span:nth-child(3){justify-self:center;text-align:center}
-  .flist>.frow>.acts{grid-column:5}
+  .flist>.frow>.acts{grid-column:4}
   .flist>.fhead{position:sticky;top:0;z-index:1;background:color-mix(in srgb,var(--card) 88%,transparent);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
-  .flist>.fhead>i{display:block}
 }
 /* Service Calls, set out like Inventory: every column as wide as what it holds with the same gap; Ref, Customer and
    Problem together on the left, Priority, Status, Visit, Engineer and Open For by the buttons, the spare room between.
@@ -145,6 +145,11 @@ body[data-theme=dark] .rv-feed.off{background:#3a3220;color:#ffd98a}
   .ptb.fx.t-svc td.s-name>*,.ptb.fx.t-svc td.s-issue>*{display:block;max-width:18rem;overflow:hidden;text-overflow:ellipsis}
   .ptb.fx.t-svc td.s-name .svn{display:flex}
 }
+/* the engineers on a call, centred like the columns beside them: the first two one under the other, "+1 more" after */
+.t-svc th[data-col=fitter],.t-svc td.s-fit{text-align:center!important}
+.t-svc td.s-fit{overflow:visible}
+.t-svc .s-eng{display:inline-flex;flex-direction:column;align-items:center;line-height:1.25}
+.t-svc .s-eng small{margin-top:.1rem}
 /* Files: a brochure first seen on the website in the last 30 days */
 .bc .cvw{position:relative}
 .bc-new{position:absolute;top:.6rem;left:.6rem;z-index:2;padding:.15rem .55rem;border-radius:99px;background:#ffd002;color:#012b59;font:700 .7rem var(--body);letter-spacing:.04em;box-shadow:0 4px 12px rgba(0,0,0,.2)}
@@ -190,6 +195,12 @@ body[data-theme=dark] .rv-feed.off{background:#3a3220;color:#ffd98a}
 .jt-studio{display:grid;grid-template-columns:minmax(19rem,25rem) minmax(0,1fr);gap:1.4rem;align-items:stretch;padding:1.1rem}
 .jt-edit{display:flex;flex-direction:column;gap:.9rem;min-width:0}
 .jt-edit h2{display:flex;align-items:center;gap:.6rem;margin:0}.jt-edit h2 small{flex:1}
+/* v19.17.3 (the owner's choice): job number, job name and each colour on a line of their own, full width, so the
+   boxes line up and fill the card; copies is a short box underneath. The wording every tag carries is in capitals. */
+.jt-studio .jt-g{grid-template-columns:minmax(0,1fr);grid-template-areas:none;gap:.75rem}
+.jt-studio .jt-g>.ff{grid-area:auto;grid-column:1}
+.jt-studio .jt-g .jt-f-cp input{max-width:7rem}
+.jt-caps input{text-transform:uppercase}
 .jt-shared{padding-top:.9rem;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:.6rem}
 .jt-shared h3{margin:0;font-size:.8rem;color:var(--muted);font-weight:600}
 .jt-stage{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.6rem;min-width:0;padding:1.2rem;border-radius:14px;background:repeating-linear-gradient(45deg,rgba(127,142,166,.06) 0 10px,transparent 10px 20px),var(--card2)}
@@ -199,3 +210,29 @@ body[data-theme=dark] .rv-feed.off{background:#3a3220;color:#ffd98a}
 .jt-rl .row{display:grid;grid-template-columns:max-content minmax(0,1fr) max-content max-content max-content;gap:1.2rem;align-items:center}
 .jt-rl .row>span:nth-child(2){white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 @media(max-width:1000px){.jt-studio{grid-template-columns:1fr}.jt-rl .row{grid-template-columns:max-content minmax(0,1fr) max-content}.jt-rl .row>span.muted{display:none}}
+
+/* Update Ready pop-up (ui/shell/update-card.js, v19.17.3): the same dark bar as the bottom messages, a little larger,
+   with what is new and a yellow Restart Now. It stays until Restart Now or Later. */
+.upd{position:fixed;left:50%;bottom:calc(1.25rem + var(--safe-b,0px));z-index:4100;display:flex;align-items:center;gap:.9rem;width:min(38rem,calc(100vw - 2rem));padding:.85rem .85rem .85rem 1rem;border-radius:14px;background:#13233a;color:#fff;box-shadow:0 14px 40px rgba(1,20,45,.38),0 0 0 1px rgba(255,255,255,.06) inset;transform:translate(-50%,0);font:500 .9rem/1.35 var(--body)}
+.upd.in{animation:tpArc .42s var(--e-out) both}
+.upd.out{animation:tpOut .2s ease-in both}
+.upd.going{opacity:.6;transition:opacity .12s}
+.upd-i{flex:0 0 auto;display:grid;place-items:center;width:2.6rem;height:2.6rem;border-radius:50%;background:#ffd002;color:#012b59;box-shadow:0 0 0 4px rgba(255,208,2,.18)}
+.upd-i svg{width:1.35rem;height:1.35rem;fill:none;stroke:currentColor;stroke-width:2.3;stroke-linecap:round;stroke-linejoin:round}
+.upd.in .upd-i svg{animation:updTurn .9s .25s var(--e-out) both}
+@keyframes updTurn{from{transform:rotate(-200deg)}to{transform:none}}
+.upd-t{flex:1;min-width:0;display:flex;flex-direction:column;gap:.15rem}
+.upd-t b{display:flex;align-items:center;gap:.5rem;font-size:.98rem;font-weight:700}
+.upd-v{padding:.05rem .45rem;border-radius:99px;background:rgba(255,255,255,.12);color:#ffd84d;font-size:.72rem;font-weight:700;letter-spacing:.02em}
+.upd-t small{color:#b9c6d8;font-size:.8rem}
+.upd-n{margin:.35rem 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:.15rem}
+.upd-n li{position:relative;padding-left:.85rem;color:#e4ebf4;font-size:.8rem}
+.upd-n li::before{content:"";position:absolute;left:0;top:.5em;width:.35rem;height:.35rem;border-radius:50%;background:#ffd002}
+.upd-a{flex:0 0 auto;display:flex;flex-direction:column;gap:.4rem;align-self:stretch;justify-content:center}
+.upd-a button{min-width:7.4rem;height:2.25rem;padding:0 .9rem;border-radius:9px;font:700 .84rem var(--body);cursor:pointer;transition:transform .32s var(--e-spring),background-color .15s var(--e-out)}
+.upd-a button:active{transform:scale(.95);transition-duration:.08s}
+.upd-go{border:0;background:#ffd002;color:#012b59}
+.upd-go:hover,.upd-go:focus-visible{background:#ffdc3d}
+.upd-l{border:1px solid rgba(255,255,255,.22);background:transparent;color:#fff}
+.upd-l:hover,.upd-l:focus-visible{background:rgba(255,255,255,.1)}
+@media(max-width:560px){.upd{flex-wrap:wrap}.upd-a{flex:1 1 100%;flex-direction:row-reverse}.upd-a button{flex:1}}

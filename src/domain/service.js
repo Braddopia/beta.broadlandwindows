@@ -1,11 +1,11 @@
 /* domain/service: Service call rules: open or past, and the list views. */
 import { today } from '../core/dates.js';
-import { forPerson, me } from './people.js';
+import { callTeam, forPerson, me } from './people.js';
 
 export const svcOpen = (c) => c.status != 'Complete',
   svcMine = (c) => {
     const m = me();
-    return !!m && forPerson(m, c.fitter);
+    return !!m && forPerson(m, callTeam(c).join(', '));
   };
 export const SVCV = () => [
   ['open', 'Open', svcOpen],

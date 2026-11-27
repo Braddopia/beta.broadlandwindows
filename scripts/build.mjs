@@ -160,5 +160,12 @@ for (const f of readdirSync(join(SRC, 'app'))) {
   if (f == 'sw.js') writeFileSync(join(ROOT, f), read(from).replace('@@VERSION@@', pkg.version));
   else writeFileSync(join(ROOT, f), readFileSync(from));
 }
-writeFileSync(join(ROOT, 'version.json'), JSON.stringify({ version: pkg.version }) + '\n');
+/* what is new in this version, shown in the "Update ready" pop-up (src/whats-new.json, three short lines at most) */
+let notes = [];
+try {
+  notes = (JSON.parse(read(join(SRC, 'whats-new.json'))).notes || []).slice(0, 3).map(String);
+} catch {
+  /* no notes this time */
+}
+writeFileSync(join(ROOT, 'version.json'), JSON.stringify({ version: pkg.version, notes }) + '\n');
 console.log(`Built ${relative(ROOT, out)} and index.html (${Math.round(statSync(out).size / 1024)} KB)`);

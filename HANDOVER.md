@@ -479,3 +479,32 @@ stock number). Decided with the owner:
 - The brochure check now reads links written as `/wp-content/...` (no domain). The first daily runs found 0 on the page
   because of that and took 27 from the website's file list instead; from now on the page's own list (with its section
   headings) is used, and the file list stays the fallback.
+
+## v19.17.3 (round 3, the owner's follow-ups)
+
+- Screen saver: the round-tower church and the second mill now stand on the near bank, down to the water like the big
+  mill (in front of the near tree line, base at 68vh). The water's dusk and night colours are plain layers (`.sv-wd`,
+  `.sv-wn`) instead of `::before`/`::after`, which started out of step with the sky and flashed pink.
+- Files lists: the name takes the spare room on the left; Category, Size and the buttons sit together on the right
+  (grid `minmax(8rem,1fr) max-content max-content max-content`, the old spacer `<i>` removed from `fhead`).
+- Service calls: up to four engineers. `fitter` stays the lead (everything that read it still works); `fitter2` to
+  `fitter4` are extra. Forms show Lead and Second engineer; Third and Fourth appear once the box before is filled
+  (`ENGF`, `engReveal`, `engTidy` in service.js). `callTeam(c)` (domain/people.js) lists them and is used by My Calls,
+  `callsOf`, the reports, the map pop-up and the Engineer Day Sheet (a visit is on each engineer's sheet). The
+  Engineer column is centred: two names one under the other and "+1 more".
+- Update Ready pop-up (`ui/shell/update-card.js`): desktop-app.js now checks version.json on every page change
+  (`emit('view-changed')` in router.go), on coming back to the window, on focus, when the internet comes back and
+  every 2 minutes (at most every 3 seconds, timed with `performance.now()` so a frozen test clock does not stop it).
+  The card shows the version and up to three lines from `src/whats-new.json` (the build copies them into
+  version.json: update that file each release), Restart Now and Later (10 minutes). It waits while a pop-up window,
+  a tour or the screen saver is open.
+- Mac app icon: `app-sun-180.png` (Safari's Add to Dock) has a white background now, and the manifest adds white
+  `maskable` icons (`app-sun-mask-192/512.png`) that Chrome on a Mac uses for its rounded icon; Windows keeps the
+  see-through "any" icons.
+- Job Stock Tags: job number, job name and both colours each have a full-width line. Warning and Small Print are
+  labelled without "(in red)" and kept in capitals as they are typed (old saved wording is turned to capitals). A
+  contract number fills in the job name and now its colour too (`jobColour(c)`: the colour most of its openings have).
+- Inventory colours: a colour box shows the saved colour when a product is opened again (`fieldControl` takes
+  `{ rec }`, the whole record, so `colourField` can read `cIn` for `cInName`), and a colour typed rather than picked
+  gets its colour (`nameHex`: preset names, our colour codes, RAL numbers and names) both on screen and when saved.
+- Tests: `tests/e2e/round-1917-3.spec.js`; desktop-app.spec.js now checks the Update Ready card.

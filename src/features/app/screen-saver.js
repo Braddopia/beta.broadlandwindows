@@ -64,16 +64,17 @@ function build() {
         return `<svg class="sv-cloud" style="top:${top.toFixed(1)}%;width:${w.toFixed(1)}vw;opacity:${(0.6 + Math.random() * 0.4).toFixed(2)};animation-duration:${dur.toFixed(0)}s,60s;animation-delay:-${(Math.random() * dur).toFixed(0)}s,0s" viewBox="0 -40 320 170">${cloud(i * 17 + Math.floor(Math.random() * 50))}</svg>`;
       })
       .join('') +
-    /* the Broads, back to front: a far tree line with a round-tower church and a distant mill, a near tree line, the
-       mill, water with its reflection, ripples, the sun's glint and evening mist, a wherry and a yacht, reeds */
+    /* the Broads, back to front: a far tree line, a near tree line with a round-tower church and a second mill, the
+       big mill, water with its reflection, ripples, the sun's glint and evening mist, a wherry and a yacht, reeds */
     `<svg class="sv-trees far" viewBox="0 0 1440 120" preserveAspectRatio="none"><path d="${treeLine(1, 34)}"/></svg>` +
-    /* a Norfolk round-tower church: round flint tower with a battlemented top and slit windows, a long nave with a
+    `<svg class="sv-trees" viewBox="0 0 1440 120" preserveAspectRatio="none"><path d="${treeLine(7, 46)}"/></svg>` +
+    /* (v19.17.3) the church and the distant mill stand on the near bank, down to the water like the big mill.
+       A Norfolk round-tower church: round flint tower with a battlemented top and slit windows, a long nave with a
        steep roof, a lower chancel at the east end and a south porch */
     '<svg class="sv-church" viewBox="0 0 220 130"><path class="rf" d="M60 70L108 40L156 70Z"/><path class="rf" d="M150 80L176 60L202 80Z"/><path d="M62 70H156V130H62ZM150 80H202V130H150ZM96 98h16l-8-10zM96 98h16v32H96Z"/><path d="M18 130V30a20 4 0 0 1 40 0V130Z"/><path d="M16 30V20h6v5h5v-5h6v5h5v-5h6v5h5v-5h6V30Z"/><path class="win" d="M35 46h6v12h-6zM35 78h6v10h-6zM76 82h8v16h-8zM124 82h8v16h-8zM176 92h8v14h-8z"/></svg>' +
     `<svg class="sv-mill far" viewBox="0 0 140 220">${MILL}</svg>` +
-    `<svg class="sv-trees" viewBox="0 0 1440 120" preserveAspectRatio="none"><path d="${treeLine(7, 46)}"/></svg>` +
     `<svg class="sv-mill" viewBox="0 0 140 220">${MILL}</svg>` +
-    `<div class="sv-water"><svg class="sv-mill refl" viewBox="0 0 140 220">${MILL}</svg><div class="sv-mist"></div><svg class="sv-shim" viewBox="0 0 1600 320" preserveAspectRatio="none">${ripples(3)}</svg><svg class="sv-shim s2" viewBox="0 0 1600 320" preserveAspectRatio="none">${ripples(11)}</svg><svg class="sv-glint" viewBox="0 0 1600 320" preserveAspectRatio="none">${glint(5)}</svg><div class="sv-fog"></div></div>` +
+    `<div class="sv-water"><div class="sv-wd"></div><div class="sv-wn"></div><svg class="sv-mill refl" viewBox="0 0 140 220">${MILL}</svg><div class="sv-mist"></div><svg class="sv-shim" viewBox="0 0 1600 320" preserveAspectRatio="none">${ripples(3)}</svg><svg class="sv-shim s2" viewBox="0 0 1600 320" preserveAspectRatio="none">${ripples(11)}</svg><svg class="sv-glint" viewBox="0 0 1600 320" preserveAspectRatio="none">${glint(5)}</svg><div class="sv-fog"></div></div>` +
     '<svg class="sv-boat wherry" viewBox="0 0 120 90"><path class="sail" d="M58 6L60 70H28C34 46 44 22 58 6Z"/><path class="mast" d="M59 2V72"/><path class="hull" d="M6 72H112L102 84H20Z"/></svg>' +
     '<svg class="sv-boat yacht" viewBox="0 0 80 70"><path class="sail" d="M42 4L42 52H14Z"/><path class="sail2" d="M45 12L45 52H64Z"/><path class="hull" d="M8 54H72L64 64H16Z"/></svg>' +
     `<svg class="sv-reeds l" viewBox="0 0 210 200" preserveAspectRatio="xMinYMax meet">${reeds}</svg>` +

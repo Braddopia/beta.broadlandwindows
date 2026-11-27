@@ -1,4 +1,5 @@
 /* ui/shell/router: The pages, the side menu and drawing the current page. */
+import { emit } from '../../core/events.js';
 import { nlq } from '../../features/search/questions.js';
 import { factsFor } from '../../features/search/facts.js';
 import { siteKnows } from '../../features/search/site-index.js';
@@ -201,6 +202,7 @@ export function go(v) {
   $('#q').value = '';
   sbSync();
   render();
+  emit('view-changed', v);
   /* the Work In Progress notice, as soon as the Leads or Contracts tab opens */
   if (v == 'leads' || v == 'contracts') previewNotice(v == 'leads' ? 'lead' : 'contract');
   /* the first visit to a tab plays its own short tour */

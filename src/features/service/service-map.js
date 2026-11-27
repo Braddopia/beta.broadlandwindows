@@ -13,6 +13,7 @@ import { state } from '../../data/state.js';
 import { addrOf, siteOf } from '../../domain/customers.js';
 import { BASE, FIT_MILES, TOWNS, townKey } from '../../domain/places.js';
 import { callPostcode, driveText, milesApart } from '../../domain/postcode.js';
+import { callTeam } from '../../domain/people.js';
 import { svcOpen } from '../../domain/service.js';
 import { geoKnown, geoLookup } from '../../integrations/postcodes.js';
 import { prTag, svcTag } from '../../ui/components/tags.js';
@@ -153,7 +154,7 @@ function popupH(x) {
     <div class="lmp-t">${raw(prTag(c.priority || 'Normal'))}${raw(svcTag(c.status || 'Open'))}${x.out ? html`<span class="tag r">Outside our ${FIT_MILES}-mile area</span>` : ''}</div>
     ${addr ? html`<div class="lmp-a">${addr}${x.pc && !addr.includes(x.pc) ? ', ' + x.pc : ''}</div>` : ''}
     ${c.issue ? html`<p class="lmp-i">${c.issue}</p>` : ''}
-    <div class="lmp-m">${c.visit ? html`<b>Visit:</b> ${fd(c.visit)}${c.visitTime ? ' at ' + c.visitTime : ''}${c.fitter ? ' · ' + c.fitter : ''}` : html`<b>Not booked yet</b>`}</div>
+    <div class="lmp-m">${c.visit ? html`<b>Visit:</b> ${fd(c.visit)}${c.visitTime ? ' at ' + c.visitTime : ''}${callTeam(c).length ? ' · ' + callTeam(c).join(', ') : ''}` : html`<b>Not booked yet</b>`}</div>
     ${x.miles != null ? html`<div class="lmp-m">${x.miles.toFixed(1)} miles from the yard · ${driveText(x.miles)}${x.q && x.q != 'pc' ? html` · <i>rough spot (${x.q == 'out' ? 'postcode area' : 'town'})</i>` : ''}</div>` : ''}
     <div class="lmp-b"><button class="mini pri" ${raw(onClick('editCall', c.id))}>Open Call</button><a class="mini" href="${dir}" target="_blank" rel="noopener noreferrer">Directions</a></div>
   </div>`;

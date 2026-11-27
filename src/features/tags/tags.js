@@ -16,8 +16,10 @@ import { render } from '../../ui/shell/router.js';
 import { toast } from '../../ui/toast.js';
 import { PRINT_BAR_CSS, printBar, wirePrintBar } from '../../print/print.js';
 
-export const TAG_WARN = 'Do not damage, stock metal used for a job upcoming!';
-export const TAG_NOTE = 'Please keep the clear sleeves if reusable';
+export const TAG_WARN = 'DO NOT DAMAGE, STOCK METAL USED FOR A JOB UPCOMING!';
+export const TAG_NOTE = 'PLEASE KEEP THE CLEAR SLEEVES IF REUSABLE';
+/* the tag prints in capitals, so the wording is typed and kept in capitals too (v19.17.3) */
+const caps = (s) => String(s || '').toLocaleUpperCase('en-GB');
 const RECENT_MAX = 20,
   MAX_TAGS = 30;
 const blank = () => ({ jobNo: '', jobName: '', cIn: '', cOut: '', copies: 1 });
@@ -34,10 +36,19 @@ export function tagData() {
   }
   delete T.cur;
   T.list = Array.isArray(T.list) && T.list.length ? T.list.map((t) => ({ ...blank(), ...t })) : [blank()];
-  T.warn = T.warn ?? TAG_WARN;
-  T.note = T.note ?? TAG_NOTE;
+  T.warn = caps(T.warn ?? TAG_WARN);
+  T.note = caps(T.note ?? TAG_NOTE);
   T.recent = Array.isArray(T.recent) ? T.recent : [];
   return T;
+}
+/** the colour most of a contract's openings have, in capitals ('' when none is set) */
+export function jobColour(c) {
+  const n = {};
+  for (const o of (c && c.openings) || []) {
+    const v = caps(String(o.col || '').trim());
+    if (v) n[v] = (n[v] || 0) + 1;
+  }
+  return Object.keys(n).sort((a, b) => n[b] - n[a])[0] || '';
 }
 const contractOf = (no) => {
   const n = String(no || '').trim();
@@ -118,8 +129,8 @@ export function vTags() {
         <div class="ff jt-f-cp"><label for="tag_${i}_copies">Copies</label>${box('tag_' + i + '_copies', { t: 'number', min: 1, max: 10 }, t.copies)}</div>
       </div>
       <div class="jt-shared"><h3>Wording On Every Tag</h3>
-        <div class="ff"><label for="tag_warn">Warning (in red)</label>${box('tag_warn', { max: 90 }, T.warn)}</div>
-        <div class="ff"><label for="tag_note">Small print (in red)</label>${box('tag_note', { max: 90 }, T.note)}</div>
+        <div class="ff jt-caps"><label for="tag_warn">Warning</label>${box('tag_warn', { max: 90 }, T.warn)}</div>
+        <div class="ff jt-caps"><label for="tag_note">Small Print</label>${box('tag_note', { max: 90 }, T.note)}</div>
       </div>
       <datalist id="tagCols">${PRE.map(([n]) => html`<option value="${n}"></option>`)}</datalist>
     </div>
@@ -150,7 +161,16 @@ export function tagEdit(e) {
     k = m[2];
   if (m[1] == null) {
     /* the wording every tag carries */
-    if (k == 'warn' || k == 'note') T[k] = SAFE.text(el.value, 90);
+    if (k == 'warn' || k == 'note') {
+      /* capitals as you type, keeping the cursor where it was */
+      const up = caps(el.value);
+      if (up != el.value) {
+        const at = el.selectionStart;
+        el.value = up;
+        if (at != null) el.setSelectionRange(at, at);
+      }
+      T[k] = SAFE.text(up, 90);
+    }
     redrawAll(T);
   } else {
     const i = +m[1],
@@ -167,6 +187,15 @@ export function tagEdit(e) {
         t.jobName = t.autoName = String(c.name || '').toLocaleUpperCase('en-GB');
         if (nm) nm.value = t.jobName;
       }
+      /* and its colour (the one most of its openings have), unless a colour was typed (v19.17.3) */
+      const col = c && jobColour(c);
+      if (col)
+        for (const f of ['cIn', 'cOut'])
+          if (!t[f] || t[f] == t['auto' + f]) {
+            t[f] = t['auto' + f] = col;
+            const b = $('#tag_' + i + '_' + f);
+            if (b) b.value = col;
+          }
       if (h) h.textContent = c ? 'Contract ' + c.id + ' found' : '';
     }
     const pv = $('#tagPv_' + i);

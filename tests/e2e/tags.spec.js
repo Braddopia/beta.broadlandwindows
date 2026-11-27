@@ -27,7 +27,7 @@ test('job stock tags: several at once, one A4 landscape page per tag and copy, t
   await expect(w.locator('.jt-sheet')).toHaveCount(3);
   await expect(w.locator('.jt-sheet').nth(0)).toContainText('1023421');
   await expect(w.locator('.jt-sheet').nth(2)).toContainText('Kings Ely – Kings House');
-  await expect(w.locator('.jt-sheet').first()).toContainText('Do not damage, stock metal used for a job upcoming!');
+  await expect(w.locator('.jt-sheet').first()).toContainText('DO NOT DAMAGE, STOCK METAL USED FOR A JOB UPCOMING!');
   // A4 landscape, and the name stays on one line
   expect(await w.content()).toContain('size:A4 landscape');
   const nameH = await w.evaluate(() => {

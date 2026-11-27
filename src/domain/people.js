@@ -25,7 +25,10 @@ export const forPerson = (s, f) =>
     .split(/,\s*/)
     .some((x) => x && (x == s.name || (s.team && x == s.team)));
 export const jobsOf = (s) => state.contracts.filter((c) => c.stage != 'Complete' && forPerson(s, c.fitter));
-export const callsOf = (s) => state.calls.filter((c) => c.status != 'Complete' && forPerson(s, c.fitter));
+/** everyone going to a service call: the lead engineer (fitter) then up to three more (fitter2 to fitter4) */
+export const callTeam = (c) => [...new Set([c.fitter, c.fitter2, c.fitter3, c.fitter4].filter(Boolean))];
+export const callsOf = (s) =>
+  state.calls.filter((c) => c.status != 'Complete' && forPerson(s, callTeam(c).join(', ')));
 export const holOn = (sid, k) =>
   state.hols.find((h) => h.sid == sid && h.status != 'Rejected' && h.from <= k && h.to >= k && isWk(k));
 export const staffName = (id) => (state.staff.find((s) => s.id == id) || { name: 'Unknown' }).name;
@@ -59,7 +62,7 @@ export function renamePerson(o, n) {
     if (c.installMgr == o) c.installMgr = n;
   });
   state.calls.forEach((c) => {
-    if (c.fitter == o) c.fitter = n;
+    for (const k of ['fitter', 'fitter2', 'fitter3', 'fitter4']) if (c[k] == o) c[k] = n;
     if (c.takenBy == o) c.takenBy = n;
   });
 }

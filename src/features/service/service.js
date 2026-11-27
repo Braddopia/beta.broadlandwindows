@@ -11,7 +11,7 @@ import { store } from '../../data/persistence.js';
 import { state } from '../../data/state.js';
 import { addrOf, mailOf, telOf } from '../../domain/customers.js';
 import { nid } from '../../domain/numbering.js';
-import { FITL, staffNames } from '../../domain/people.js';
+import { FITL, callTeam, staffNames } from '../../domain/people.js';
 import { SVCV, svcOpen } from '../../domain/service.js';
 import {
   BASE,
@@ -85,8 +85,8 @@ export function vService() {
       ? navigator.onLine === false
         ? svcMap(L0)
         : svcLiveMap(L0)
-      : `<div class="tw"><table class="ptb abt fx t-svc"><thead><tr><th data-col="id">Ref</th><th data-col="name">Customer</th><th data-col="issue">Problem</th><th class="s-gap" aria-hidden="true"></th><th class="c" data-col="pr">Priority</th><th class="c" data-col="st">Status</th><th class="c-sm c" data-col="visit">Visit</th><th class="c-md" data-col="fitter">Engineer</th><th class="c-md c" data-col="age">Open For</th><th class="ac" data-col="act"></th></tr></thead><tbody>
-  ${pg.rows.map((c) => `<tr class="clk-r" ${rowClick('editCall', c.id)}><td class="s-id"><b class="lref">${esc(c.id)}</b>${c.contract ? `<small class="sub">${esc(c.contract)}</small>` : ''}</td><td class="s-name" title="${esc([c.name, c.town, c.phone].filter(Boolean).join(' · '))}"><span class="svn"><b>${esc(c.name)}</b>${svcBal(c)}</span><small class="sub">${esc([c.town, c.phone].filter(Boolean).join(' · '))}</small></td><td class="s-issue" title="${esc(c.issue || '')}"><span class="cl2">${esc(c.issue)}</span><small class="sub">${esc(c.cat || '')}${c.cat && c.photos && c.photos.length ? ' · ' : ''}${phCount(c.photos)}</small></td><td class="s-gap"></td><td class="c">${prTag(c.priority)}</td><td class="c">${svcTag(c.status)}</td><td class="c-sm s-visit">${c.visit ? `<b class="${svcOpen(c) && c.visit < td ? 'od' : ''}">${fd(c.visit)}</b>${c.visitTime ? `<small class="sub">${esc(c.visitTime)}</small>` : ''}` : '<span class="muted">Not booked</span>'}</td><td class="c-md s-fit" title="${esc(c.fitter || '')}">${esc(c.fitter || '-')}</td><td class="c-md svc-age">${svcAge(c)}</td><td class="ac"><div class="acts r">${svcRowActs(c)}</div></td></tr>`).join('') || '<tr><td colspan="10" class="empty">No service calls here.</td></tr>'}
+      : `<div class="tw"><table class="ptb abt fx t-svc"><thead><tr><th data-col="id">Ref</th><th data-col="name">Customer</th><th data-col="issue">Problem</th><th class="s-gap" aria-hidden="true"></th><th class="c" data-col="pr">Priority</th><th class="c" data-col="st">Status</th><th class="c-sm c" data-col="visit">Visit</th><th class="c-md c" data-col="fitter">Engineer</th><th class="c-md c" data-col="age">Open For</th><th class="ac" data-col="act"></th></tr></thead><tbody>
+  ${pg.rows.map((c) => `<tr class="clk-r" ${rowClick('editCall', c.id)}><td class="s-id"><b class="lref">${esc(c.id)}</b>${c.contract ? `<small class="sub">${esc(c.contract)}</small>` : ''}</td><td class="s-name" title="${esc([c.name, c.town, c.phone].filter(Boolean).join(' · '))}"><span class="svn"><b>${esc(c.name)}</b>${svcBal(c)}</span><small class="sub">${esc([c.town, c.phone].filter(Boolean).join(' · '))}</small></td><td class="s-issue" title="${esc(c.issue || '')}"><span class="cl2">${esc(c.issue)}</span><small class="sub">${esc(c.cat || '')}${c.cat && c.photos && c.photos.length ? ' · ' : ''}${phCount(c.photos)}</small></td><td class="s-gap"></td><td class="c">${prTag(c.priority)}</td><td class="c">${svcTag(c.status)}</td><td class="c-sm s-visit">${c.visit ? `<b class="${svcOpen(c) && c.visit < td ? 'od' : ''}">${fd(c.visit)}</b>${c.visitTime ? `<small class="sub">${esc(c.visitTime)}</small>` : ''}` : '<span class="muted">Not booked</span>'}</td><td class="c-md c s-fit" title="${esc(callTeam(c).join(', '))}">${engCell(c)}</td><td class="c-md svc-age">${svcAge(c)}</td><td class="ac"><div class="acts r">${svcRowActs(c)}</div></td></tr>`).join('') || '<tr><td colspan="10" class="empty">No service calls here.</td></tr>'}
   </tbody></table></div>${pagerH('svc', pg, 'calls')}`
   }`;
 }
@@ -124,6 +124,43 @@ export function svcDelete(id) {
   del('calls', id);
 }
 /* a small form for one step; F = fields, v = values now, go(o) saves */
+/* ---- engineers on a call (v19.17.3): a lead engineer and a second box always; a third and fourth appear once the
+   box before is filled in. The list shows the first two names, one under the other, and "+1" for any more. */
+const ENG_KEYS = ['fitter', 'fitter2', 'fitter3', 'fitter4'];
+export const ENGF = (req) =>
+  ENG_KEYS.map((k, i) => ({
+    k,
+    l: ['Lead engineer', 'Second engineer', 'Third engineer', 'Fourth engineer'][i],
+    t: 'select',
+    o: ['', ...FITL()],
+    ...(i == 0 && req ? { req: 1 } : {}),
+    ...(i == 1 ? { hint: 'If two are going' } : {}),
+  }));
+/** the engineers in the order picked, with gaps and repeats taken out (a form can leave the second box empty) */
+function engTidy(o) {
+  const L = [...new Set(ENG_KEYS.map((k) => o[k]).filter(Boolean))];
+  ENG_KEYS.forEach((k, i) => (o[k] = L[i] || ''));
+  return o;
+}
+/** show the third and fourth engineer boxes only once the one before has a name */
+export function engReveal() {
+  const sync = () =>
+    [3, 4].forEach((i) => {
+      const e = $('#f_fitter' + i),
+        pv = $('#f_fitter' + (i - 1)),
+        w = e && (e.closest('.ff') || e);
+      if (w) w.hidden = !e.value && !(pv && pv.value && !(pv.closest('.ff') || pv).hidden);
+    });
+  ['#f_fitter2', '#f_fitter3'].forEach((q) => $(q) && $(q).addEventListener('change', sync));
+  sync();
+}
+function engCell(c) {
+  const L = callTeam(c);
+  if (!L.length) return '<span class="muted">-</span>';
+  return `<span class="s-eng">${L.slice(0, 2)
+    .map((x) => `<span>${esc(x)}</span>`)
+    .join('')}${L.length > 2 ? `<small class="sub">+${L.length - 2} more</small>` : ''}</span>`;
+}
 function stepForm(title, sub, F, v, okLabel, go, after) {
   openModal(
     `<button class="mx" data-act="closeModal" aria-label="Close">&times;</button><h2>${esc(title)}</h2><p class="muted">${esc(sub)}</p><div class="grid">${F.map((f) => fieldH(f, v)).join('')}</div><div class="mact"><button class="btn ghost" data-act="closeModal">Cancel</button><button class="btn" id="svcGo">${esc(okLabel)}</button></div>`,
@@ -147,20 +184,28 @@ export function svcBook(id, title) {
   stepForm(
     title || (c.visit ? 'Change The Visit' : 'Book A Visit'),
     who(c),
-    [
-      { k: 'fitter', l: 'Service engineer', t: 'select', o: ['', ...FITL()], req: 1 },
-      { k: 'visit', l: 'Visit date', t: 'date', req: 1 },
-      { k: 'visitTime', l: 'Time', t: 'time' },
-    ],
-    { fitter: c.fitter, visit: c.visit || today(), visitTime: c.visitTime },
+    [...ENGF(1), { k: 'visit', l: 'Visit date', t: 'date', req: 1 }, { k: 'visitTime', l: 'Time', t: 'time' }],
+    {
+      fitter: c.fitter,
+      fitter2: c.fitter2,
+      fitter3: c.fitter3,
+      fitter4: c.fitter4,
+      visit: c.visit || today(),
+      visitTime: c.visitTime,
+    },
     c.visit ? 'Save visit' : 'Book visit',
     (o) => {
-      Object.assign(c, o);
+      Object.assign(c, engTidy(o));
       if (c.status == 'Open' || (c.status == 'Awaiting parts' && !c.parts)) c.status = 'Booked';
       repos.calls.changed(c);
-      audit('Service visit booked', c.id, fd(o.visit) + (o.visitTime ? ' ' + o.visitTime : '') + ', ' + o.fitter);
+      audit(
+        'Service visit booked',
+        c.id,
+        fd(o.visit) + (o.visitTime ? ' ' + o.visitTime : '') + ', ' + callTeam(c).join(', ')
+      );
       toast('Visit booked for ' + fd(o.visit));
-    }
+    },
+    engReveal
   );
 }
 /** waiting for parts: what is needed and when it should arrive */
@@ -310,7 +355,7 @@ export const SVCF = () => [
   { k: 'issue', l: 'What is wrong (in their words)', t: 'area', w: 'full', req: 1 },
   { k: 'guarantee', l: 'Under guarantee?', t: 'select', o: ['', 'Yes', 'No', 'Not sure'] },
   { t: 'h', l: 'The Visit' },
-  { k: 'fitter', l: 'Service engineer attending', t: 'select', o: ['', ...FITL()] },
+  ...ENGF(),
   { k: 'status', l: 'Status', t: 'select', o: SVC_ST },
   { k: 'visit', l: 'Visit date', t: 'date' },
   { k: 'visitTime', l: 'Visit time', t: 'time' },
@@ -421,7 +466,13 @@ export function callWizard(cid, id) {
     {
       t: 'Visit',
       d: c ? 'Who is going, when, and the status of the call.' : 'Book the visit now, or leave it for later.',
-      f: pick(F, c ? ['fitter', 'status', 'visit', 'visitTime', 'arrived', 'left'] : ['fitter', 'visit', 'visitTime']),
+      f: pick(
+        F,
+        c
+          ? ['fitter', 'fitter2', 'fitter3', 'fitter4', 'status', 'visit', 'visitTime', 'arrived', 'left']
+          : ['fitter', 'fitter2', 'fitter3', 'fitter4', 'visit', 'visitTime']
+      ),
+      after: engReveal,
     },
     ...(c
       ? [
@@ -496,6 +547,7 @@ export function callWizard(cid, id) {
       return '';
     },
     save: (v) => {
+      engTidy(v);
       const photos = tmp.slice();
       if (c) {
         if (v.status != 'Complete') v.doneAt = '';
@@ -592,7 +644,7 @@ export function reportCall(id, mode, photos) {
         ['Problem reported', c.issue],
         ['Type of problem', c.cat],
         ['Visit', when],
-        ['Engineer', c.fitter || 'To be confirmed'],
+        [callTeam(c).length > 1 ? 'Engineers' : 'Engineer', callTeam(c).join(', ') || 'To be confirmed'],
         ['Work carried out', c.notes || 'To be completed on the visit'],
         ['Parts', c.parts],
         ['Another visit', c.followUp == 'Yes' ? c.followNote || 'Yes, we will be in touch to book it' : ''],
@@ -625,7 +677,7 @@ export function reportCall(id, mode, photos) {
       ['Problem', c.issue],
       ['Under guarantee', c.guarantee],
       ['Visit', when],
-      ['Engineer', c.fitter],
+      [callTeam(c).length > 1 ? 'Engineers' : 'Engineer', callTeam(c).join(', ')],
       ['On site', onsite],
       ['Work done', c.notes],
       ['Parts', c.parts],
@@ -641,7 +693,7 @@ export function reportCall(id, mode, photos) {
       kpis: [
         ['Priority', c.priority],
         ['Status', c.status],
-        ['Engineer', c.fitter || '-'],
+        ['Engineer', callTeam(c).join(', ') || '-'],
       ],
       sign: true,
       barcode: c.id,
@@ -660,7 +712,8 @@ export function svcDaySheet(d) {
   }
   const G = {};
   V.forEach((c) => {
-    (G[c.fitter || 'No engineer yet'] = G[c.fitter || 'No engineer yet'] || []).push(c);
+    /* a visit with two or more engineers is on each one's sheet */
+    (callTeam(c).length ? callTeam(c) : ['No engineer yet']).forEach((e) => (G[e] = G[e] || []).push(c));
   });
   printDoc('Engineer Day Sheet', fdl(d), [], [], {
     kind: 'Day sheet',

@@ -1,5 +1,6 @@
 /* ui/forms/form: Plain forms: fields, required star and admin lock, reading and checking what was typed. */
 import { fieldControl } from './fields.js';
+import { nameHex } from './colour-picker.js';
 import { MAX_PHOTOS } from '../../config/constants.js';
 import { onClick } from '../../core/actions.js';
 import { $, $$, esc } from '../../core/dom.js';
@@ -24,7 +25,7 @@ export const nxHid = (f, v) => !!f.nx && !String(v[f.nx] ?? '').trim() && !Strin
 export function form(title, fields, v, cb, photos, size) {
   v = v || {};
   setPhotoList(photos ? (v.photos || []).filter(SAFE.img).slice() : null, drawThumbs);
-  const inp = (f) => fieldControl(f, v[f.k]);
+  const inp = (f) => fieldControl(f, v[f.k], { rec: v });
   openModal(
     `<h2>${esc(title)}</h2><div class="grid">${fields.map((f) => (f.t == 'h' ? `<h3 class="fsec full">${esc(f.l)}</h3>` : `<div class="ff ${f.w || ''}"><label for="f_${f.k}">${esc(f.l)}${MARK(f.req, f.adm)}</label>${f.scan ? `<div class="inl">${inp(f)}<button type="button" class="btn scan sm" ${onClick('scanInto', 'f_' + f.k)}>Scan</button></div>` : inp(f)}${f.hint ? `<span class="hint ${/https?:|@/.test(f.hint) ? 'nocap' : ''}">${esc(f.hint)}</span>` : ''}</div>`)).join('')}
    ${photos ? `<div class="ff full"><label>Photos <span class="muted">(up to ${MAX_PHOTOS})</span></label>${typeof photos == 'string' ? `<span class="hint">${esc(photos)}</span>` : ''}<div class="thumbs phg" id="thumbs"></div><div class="prow"><label class="btn ghost sm">Take photo<input type="file" accept="image/*" capture="environment" hidden data-onchange="addPh" data-args-change="[{&quot;$&quot;:&quot;this&quot;}]"></label><label class="btn ghost sm">Choose from gallery<input type="file" accept="image/*" multiple hidden data-onchange="addPh" data-args-change="[{&quot;$&quot;:&quot;this&quot;}]"></label></div></div>` : ''}</div>
@@ -117,7 +118,11 @@ export function readFields(fields) {
       }
       o[f.k] = raw;
     } else o[f.k] = SAFE.text(raw, f.t == 'area' ? f.max || 2000 : f.max || 120);
-    if (f.t == 'colour') o[f.k + 'Hex'] = raw ? SAFE.hex($('#f_' + f.k + '_hex').value) : '';
+    if (f.t == 'colour') {
+      /* the colour picked, or (when it was typed and never picked) the colour its name stands for */
+      const picked = SAFE.hex($('#f_' + f.k + '_hex').value);
+      o[f.k + 'Hex'] = raw ? (picked && picked.toLowerCase() != '#8a8a8a' ? picked : nameHex(raw) || picked) : '';
+    }
   }
   return o;
 }
@@ -139,7 +144,7 @@ export function plugInForms(h) {
 }
 export function fieldH(f, v) {
   const val = v[f.k] ?? '';
-  let inp = fieldControl(f, val);
+  let inp = fieldControl(f, val, { rec: v });
   /* a scan icon inside the box (like the search bar) when the scanner is plugged in */
   if (f.scan && HOOKS.scan && !f.ro)
     inp = `<div class="fscan">${inp}<button type="button" class="fscan-b" title="Scan a barcode" aria-label="Scan a barcode into ${esc(f.l)}" ${onClick('scanInto', 'f_' + f.k)}>${svg(ICONS.scan)}</button></div>`;

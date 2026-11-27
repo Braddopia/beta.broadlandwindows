@@ -5,9 +5,27 @@ import { PRE } from '../../config/colours.js';
 import { SAFE } from '../../data/sanitize.js';
 import { codeFind, codeOf, codeText, stockLists } from '../../domain/stock-lists.js';
 
+/** the screen colour for a colour as typed: a preset name (Blue), one of our colour codes linked to a RAL colour
+    (KL016), or a RAL number or name ("RAL 7016", "Anthracite grey"); '' when it is not known */
+export function nameHex(n) {
+  const t = String(n || '').trim();
+  if (!t || t == '-') return '';
+  const p = PRE.find(([a]) => a.toLowerCase() == t.toLowerCase());
+  if (p) return p[1];
+  const c = codeOf(t);
+  if (c && c.ral) return codeHex(c);
+  const m = /\b(\d{4})\b/.exec(t),
+    r = RAL.find((x) => (m && x[0] == m[1]) || x[1].toLowerCase() == t.toLowerCase());
+  return r ? r[2] : '';
+}
+const GREY = '#8a8a8a';
+/** the colour box: a name, a button showing its colour, and the presets. v is the whole record: a colour box
+    "cInName" keeps its screen colour in "cIn" (v19.17.3: the button used to show grey when the product was opened
+    again, and a colour typed instead of clicked was saved as grey) */
 export function colourField(f, v) {
   const base = f.k.slice(0, -4),
-    hx = SAFE.hex(v[base] || '#8a8a8a');
+    saved = v[base] && String(v[base]).toLowerCase() != GREY ? v[base] : '',
+    hx = SAFE.hex(saved || nameHex(v[f.k]) || GREY);
   return `<div class="inl"><input id="f_${f.k}" placeholder="Colour name or code (optional)" maxlength="40" data-onchange="colCodeIn" data-args-change="[${esc(JSON.stringify(f.k))}]" value="${esc(v[f.k] ?? '')}"><input type="hidden" id="f_${f.k}_hex" value="${hx}"><button type="button" class="cbtn" id="cb_${f.k}" style="background:${hx}" title="Pick a colour" aria-label="Pick a colour" ${onClick('cpOpen', f.k)}></button></div><div class="sws"><button type="button" class="mini" ${onClick('pickC', f.k, '', '#8a8a8a')}>No Colour</button>${PRE.map(([n, h]) => `<button type="button" class="sw" title="${n}" aria-label="${n}" style="background:${h}" ${onClick('pickC', f.k, n, h)}></button>`).join('')}</div>`;
 }
 /* the screen colour of a colour code: its RAL colour, or grey until it is linked */
@@ -17,7 +35,9 @@ export function colCodeIn(k) {
   const el = $('#f_' + k);
   if (!el) return;
   const c = codeOf(el.value);
-  if (c && c.ral) pickC(k, codeText(c), codeHex(c));
+  if (c && c.ral) return pickC(k, codeText(c), codeHex(c));
+  /* any other colour typed in: its colour when it is known, grey when not (or when the box is cleared) */
+  pickC(k, el.value, nameHex(el.value) || GREY);
 }
 export function pickC(k, n, h) {
   $('#f_' + k).value = n;

@@ -215,7 +215,7 @@ export function vFiles() {
     ML = SSM.filter((m) => !HID[m.u] && (m.t + ' ' + m.f).toLowerCase().includes(ssq) && hit(m)),
     pg = paginate(F, ML);
   const fhead = (a, b, c) =>
-    `<div class="frow fhead"><span>${a}</span><span>${b}</span><span>${c}</span><i></i><span></span></div>`;
+    `<div class="frow fhead"><span>${a}</span><span>${b}</span><span>${c}</span><span></span></div>`;
   return `<div class="head"><div><h1>Broadland Brochures</h1><span class="muted">${L.length} of ${brochures().length} brochures from <span class="nocap">broadlandwindows.co.uk</span>${LIVE ? ' · checked ' + (liveAt ? esc(fdl(liveAt.slice(0, 10))) : 'today') : ''}</span></div><div class="tools"><button class="mini" data-act="copyAllBrochures">Copy all links</button><a class="btn" href="https://www.broadlandwindows.co.uk/brochures/" target="_blank" rel="noopener noreferrer">Brochure Website</a></div></div>
   <div class="chips">${cats.map((c) => `<button class="chip ${F.cat == c ? 'on' : ''}" ${onClick('setUI', 'files.cat', c)}>${c == 'all' ? 'All brochures' : esc(c)}</button>`).join('')}<span class="vs"></span><button class="chip ${F.az ? 'on' : ''}" ${onClick('togUI', 'files.az')}>Sort A to Z</button><button class="chip ${F.list ? 'on' : ''}" ${onClick('togUI', 'files.list')}>List view</button></div>
   ${rc.length ? `<div class="panel" style="margin-bottom:1rem"><h2>Recently Opened</h2>${rc.map((x) => `<div class="row"><span>${esc(x.t)}</span><a class="mini pri" href="${esc(SAFE.url(x.u))}" target="_blank" rel="noopener noreferrer">Open</a></div>`).join('')}</div>` : ''}

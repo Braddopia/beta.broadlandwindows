@@ -12,12 +12,13 @@ import { colourField } from './colour-picker.js';
 const keepsCase = (f) => f.t == 'email' || /url|web|portal|feed|link/i.test(f.k);
 const when = (test, markup) => raw(test ? String(markup) : '');
 
-/** options: id (default f_<key>), rows (text areas, default 3), lockedAsText (admin-only/read-only shown as plain text box) */
-export function fieldControl(f, value, { id = 'f_' + f.k, rows = 3, lockedAsText = false } = {}) {
+/** options: id (default f_<key>), rows (text areas, default 3), lockedAsText (admin-only/read-only shown as plain text
+    box), rec (the whole record, for boxes that need more than their own value: a colour box's saved colour) */
+export function fieldControl(f, value, { id = 'f_' + f.k, rows = 3, lockedAsText = false, rec = null } = {}) {
   const val = value ?? '';
   if (lockedAsText && (f.ro || (f.adm && !can('money'))))
     return String(html`<input id="${id}" value="${val}" readonly tabindex="-1">`);
-  if (f.t == 'colour') return colourField(f, { [f.k]: val });
+  if (f.t == 'colour') return colourField(f, { ...(rec || {}), [f.k]: val });
   if (f.t == 'select') {
     const has = f.o.some((o) => String(Array.isArray(o) ? o[0] : o) == String(val));
     const opts = (val !== '' && !has ? [val, ...f.o] : f.o).map((o) => {

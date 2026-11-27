@@ -3,9 +3,11 @@
    its own window from the Start menu, taskbar or Dock. It always loads the live website, so every update reaches the
    app and the website together, and it shares the website's saved data on that computer.
    - sw.js (src/app/sw.js) keeps a copy of the page for when the internet drops, but always fetches the newest first.
-   - version.json (written by the build) says which version is live; an open app or tab checks it every 15 minutes
-     and when it comes back into view, and offers Reload when a newer one has been published. */
-import { emit } from '../../core/events.js';
+   - version.json (written by the build) says which version is live and what is new. An open app or tab checks it
+     (v19.17.3) on every page change, whenever the window comes back into view or the internet comes back, and every
+     2 minutes (at most once every 3 seconds). When a newer version has been published it asks for a restart with the
+     Update Ready pop-up (ui/shell/update-card.js), again at every check until restarted. */
+import { emit, on } from '../../core/events.js';
 
 let promptEvent = null;
 /** 'installed' (running as the app), 'ready' (the browser can install it now), 'browser' (use the browser's menu),
@@ -30,15 +32,23 @@ export async function installApp() {
   emit('data-replaced');
 }
 
-let seen = '';
-async function checkVersion() {
+let seen = '',
+  lastCheck = 0;
+export async function checkVersion(force) {
+  if (!force && performance.now() - lastCheck < 3e3) return;
+  lastCheck = performance.now();
   try {
     const r = await fetch('version.json?t=' + Date.now(), { cache: 'no-store' });
     if (!r.ok) return;
-    const v = String((await r.json()).version || '');
+    const j = await r.json(),
+      v = String(j.version || '');
     if (!seen) seen = typeof APP_BUILD == 'string' ? APP_BUILD : v;
-    /* reminds at each check (every 15 minutes, or on coming back to the window) until reloaded */
-    if (v && v != seen) emit('update-ready', v);
+    if (v && v != seen)
+      emit('update-ready', {
+        version: v,
+        notes: (Array.isArray(j.notes) ? j.notes : []).slice(0, 3).map(String),
+        app: appState() == 'installed',
+      });
   } catch (e) {
     /* offline: try again later */
   }
@@ -57,7 +67,10 @@ export function startDesktopApp() {
   });
   if ('serviceWorker' in navigator && location.protocol == 'https:')
     navigator.serviceWorker.register('sw.js').catch(() => {});
-  checkVersion();
-  setInterval(checkVersion, 15 * 60 * 1000);
+  checkVersion(true);
+  setInterval(() => checkVersion(), 2 * 60 * 1000);
   document.addEventListener('visibilitychange', () => document.visibilityState == 'visible' && checkVersion());
+  addEventListener('focus', () => checkVersion());
+  addEventListener('online', () => checkVersion(true));
+  on('view-changed', () => checkVersion());
 }
