@@ -1,0 +1,24 @@
+/* ===== Performance (v19.18.6) =====
+   Measured with Playwright (frame times while scrolling, and style work while the page sits still):
+   - Frosted-glass blur (backdrop-filter) on every panel, card, table and both menu bars was the main cost: scrolling
+     Inventory took about 66ms a frame with it and 18ms without (60 frames a second needs 16ms). Behind these surfaces
+     there is only the page's still colour wash, and blurring a smooth gradient changes almost nothing you can see, so
+     in-page surfaces keep their see-through colour without the blur. Pop-up windows and menus, which sit over real
+     content, keep theirs.
+   - The rainbow glow round the search box slid a blurred gradient on every frame, all the time (about 50 style
+     recalculations a second on a still page). It now moves only while the box is pointed at or being typed in; the
+     rest of the time it shows the same colours, still.
+   Change here, not in the older files, so the trade-off stays in one place. */
+.side,.top,.panel,.kpi,.tw,.cc,.bc,.dlane,.supw,.col,.lc,.dcard,
+.top .ib,.top #thb,.top #bell,.top .sb,.seg2,.views .chip,.pager select,
+.subbar,.azbar,.cc2,.nav.on,.ck-b,.phb,.pda-b,.flist>.fhead,.mact,.lmap-g,
+.mb.full .rw-rail,.mb.full .rg.fg.gc,.mb.full .fin-sum,.mb.full .rw-foot{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+
+/* the side menu and top bar were blurred and very see-through; without the blur they get a little more white (or
+   dark) so they read the same */
+.side,.top{background:linear-gradient(180deg,rgba(255,255,255,.8),rgba(255,255,255,.62))!important}
+body[data-theme=dark] .side,body[data-theme=dark] .top{background:linear-gradient(180deg,rgba(34,41,56,.92),rgba(20,26,38,.88))!important}
+
+/* the search box's rainbow glow: still unless the box is in use */
+.top .sb:not(:hover):not(:focus-within)::before,.top .sb:not(:hover):not(:focus-within)::after{animation-play-state:paused!important}
+

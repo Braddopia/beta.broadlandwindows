@@ -110,3 +110,29 @@ test('v19.18.5: a long drop-down has a search box that narrows the list as you t
   await expect(app.page.locator('#pkpop .pk-s')).toHaveCount(0);
   expect(app.errors).toEqual([]);
 });
+
+test('v19.18.6 performance: a still page runs no animations and page surfaces are not blurred', async ({ app }) => {
+  await app.page.emulateMedia({ reducedMotion: 'no-preference' });
+  for (const v of ['home', 'stock', 'contracts']) {
+    await app.go(v);
+    await app.page.mouse.move(5, 890);
+    await app.page.waitForTimeout(200);
+    const r = await app.run(() => ({
+      running: document
+        .getAnimations()
+        .filter((a) => a.playState == 'running' && a.effect.getTiming().iterations == Infinity).length,
+      blurred: [...document.querySelectorAll('.panel,.kpi,.tw,.side,.top')].filter(
+        (e) => getComputedStyle(e).backdropFilter != 'none'
+      ).length,
+    }));
+    expect(r, v).toEqual({ running: 0, blurred: 0 });
+  }
+  // dates shown the same as before
+  expect(await app.run(() => [fd('2026-11-08'), fdl('2026-11-08'), fd(''), isWk('2026-11-08')])).toEqual([
+    '8 Nov',
+    '8 November 2026',
+    'Not set',
+    false,
+  ]);
+  expect(app.errors).toEqual([]);
+});

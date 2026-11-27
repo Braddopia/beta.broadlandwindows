@@ -719,3 +719,26 @@ The owner asked for the record windows to work like their old system, AdminBase,
   the top, ready to type; only the choices containing the typed words show; arrows and Enter pick; Esc goes back to
   the box. Short lists are unchanged. Phones keep their own picker.
 - Tests: tests/e2e/round-1918.spec.js (v19.18.5), cutting-map.spec.js.
+
+## v19.18.6: performance pass, Cutting step corrected
+
+Measured with Playwright scripts (frame times while scrolling with effects switched on and off, style work on a still
+page, page build times and a CPU profile). Findings and fixes:
+- Frosted-glass blur (`backdrop-filter`) on every panel, card, table and both bars was the main cost (scrolling
+  Inventory about 66ms a frame; 18ms without). Behind them is only the still colour wash, so the blur showed almost
+  nothing. `src/css/10-performance.css` (loaded last) removes it from in-page surfaces; pop-up windows and menus keep
+  theirs. Side menu and top bar get a slightly less see-through background to read the same.
+- The search box's rainbow glow animated a blurred gradient every frame (about 50 style updates a second on a still
+  page). It now moves only while the box is pointed at or in use (`animation-play-state: paused` otherwise).
+- The screen saver listened to wheel, touch, scroll and mouse movement with non-passive listeners, which makes the
+  browser wait for script before scrolling. They are passive now (only clicks and keys can still be stopped).
+- Search: the "On The Pages" index (drawing every page) was rebuilt on a keystroke once a minute (about 0.2s here).
+  It is built when the computer is idle (`warmSiteIndex`, `requestIdleCallback`) and a search uses the last copy.
+- Dates: `fd`, `fdl`, `isWk` (core/dates.js) use one shared `Intl.DateTimeFormat` each and remember each date's text;
+  a new formatter per date was most of the time spent drawing Holiday Planner (73ms to 26ms).
+- Test: tests/e2e/round-1918.spec.js (v19.18.6 performance): no endless animations on a still page, no blur on page
+  surfaces, dates read the same.
+- Cutting step (item-window.js): Material is Aluminium or Timber only (`MATERIALS`; an older saved value stays as a
+  choice). "Cut from full bars?" shows only for Aluminium counted in Meters (M) (`BAR_UNIT`); the bar length is the
+  Length (m) box, which is never relabelled (a PCS item keeps "Pieces per pack"). Aluminium in another unit shows a
+  note to set Meters (M); a link it already had is kept.

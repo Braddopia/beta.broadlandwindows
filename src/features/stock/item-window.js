@@ -154,7 +154,14 @@ export function ieFields() {
       ? [
           /* (v19.18.4, the owner's rule) only aluminium profiles are cut in the Cutting Optimiser, not timber; the
              bar length comes from the Length box (6.5M) */
-          { k: 'material', l: 'Material', t: 'select', o: MATERIALS, sec: 'k' },
+          {
+            k: 'material',
+            l: 'Material',
+            t: 'select',
+            o: listChoices(MATERIALS, matOf(r.pid || '')).slice(1),
+            sec: 'k',
+            hint: ' ',
+          },
           {
             k: 'isBar',
             l: 'Cut from full bars?',
@@ -377,14 +384,14 @@ export function ieSave() {
   if (mode != 'remove' && mode != 'request') {
     const lb = lenBox(o.unit);
     const was = ieKey && prod(ieKey) ? String(prod(ieKey).length || '') : '';
-    if (o.length && o.length != was && lb.re && !lb.re.test(o.length.trim()) && !barProfile(o)) {
+    if (o.length && o.length != was && lb.re && !lb.re.test(o.length.trim())) {
       fieldErr($('#f_length'), lb.err);
       return;
     }
   }
-  if (o.isBar == 'Yes' && o.material != 'Aluminium') o.isBar = 'No';
+  if (o.isBar == 'Yes' && (o.material != 'Aluminium' || o.unit != BAR_UNIT)) o.isBar = 'No';
   if (o.isBar == 'Yes' && !barLenOf(o.length)) {
-    fieldErr($('#f_length'), 'Type the full bar length here, for example 6.5M');
+    fieldErr($('#f_length'), 'Type the full bar length here in metres, for example 6.5');
     return;
   }
   if (!o.item) {
@@ -558,44 +565,50 @@ export function ieSave() {
 /* Cutting section (v19.18.4): the product's material, and for an aluminium profile whether it is cut from full bars
    in the Cutting Optimiser. Its bar length is read from the Length box ("6.5M", "6500MM"); kept in state.cutProf by
    Stock ID. The material is kept in state.prodMat by Stock ID. */
-export const MATERIALS = ['', 'Aluminium', 'Timber', 'PVCu', 'Steel', 'Composite', 'Other'];
+/* (v19.18.6, the owner's rules) the materials are Aluminium and Timber only. Only aluminium counted in Meters (M) can
+   be cut from full bars: its Length (m) box already holds the bar length (6.5), so nothing is relabelled and a PCS or
+   Each item is never asked for metres. */
+export const MATERIALS = ['', 'Aluminium', 'Timber'];
+export const BAR_UNIT = 'Meters (M)';
 /** a product's material: what was picked, or Aluminium for a profile linked before materials were asked */
 export const matOf = (pid) => (state.prodMat || {})[pid] || ((state.cutProf || {})[pid] ? 'Aluminium' : '');
-/** an aluminium profile cut from full bars: its Length box holds the full bar length ("6.5M") */
-const barProfile = (o) => o.isBar == 'Yes' && o.material == 'Aluminium';
 function barBoxes() {
   const alu = ($('#f_material') || {}).value == 'Aluminium',
+    metres = ($('#f_unit') || {}).value == BAR_UNIT,
     yes = ($('#f_isBar') || {}).value == 'Yes',
     e = $('#f_isBar'),
-    ff = e && e.closest('.ff');
+    ff = e && e.closest('.ff'),
+    mat = $('#f_material'),
+    mh = mat && mat.closest('.ff') && mat.closest('.ff').querySelector('.hint');
   if (!ff) return;
-  ff.hidden = !alu;
-  const lab = $('label[for=f_length]'),
-    len = $('#f_length');
-  if (alu && yes && lab && len) {
-    lab.textContent = 'Full bar length';
-    len.placeholder = 'e.g. 6.5M';
-    len.inputMode = 'text';
-  } else if (lab && lab.textContent == 'Full bar length') lenSync();
+  ff.hidden = !(alu && metres);
+  if (mh)
+    mh.textContent =
+      alu && !metres
+        ? 'To cut it in the Cutting Optimiser, set its Unit to Meters (M) and its length in Length (m)'
+        : '';
   const h = ff.querySelector('.hint'),
     mm = barLenOf(($('#f_length') || {}).value);
   if (h)
     h.textContent = !yes
       ? 'Yes lists it in the Cutting Optimiser by its code'
       : mm
-        ? 'Full bar length ' + mm.toLocaleString('en-GB') + 'mm, from the Length box'
-        : 'Type the full bar length in the Length box, for example 6.5M';
+        ? 'Full bar length ' + mm.toLocaleString('en-GB') + 'mm, from Length (m)'
+        : 'Type the full bar length in Length (m), for example 6.5';
 }
 function linkBar(pid, o, old) {
   if (o.isBar === undefined) return;
   const L = (state.cutProf = state.cutProf && typeof state.cutProf == 'object' ? state.cutProf : {}),
     M = (state.prodMat = state.prodMat && typeof state.prodMat == 'object' ? state.prodMat : {});
   if (old && old != pid) {
+    if (L[old]) L[pid] = L[old];
     delete L[old];
     delete M[old];
   }
   if (MATERIALS.includes(o.material) && o.material) M[pid] = o.material;
   else delete M[pid];
+  /* a product not counted in metres keeps any link it already had (its bar length was set before) */
+  if (o.unit && o.unit != BAR_UNIT && o.material == 'Aluminium') return;
   const mm = barLenOf(o.length);
   if (o.isBar == 'Yes' && o.material == 'Aluminium' && mm) L[pid] = { bar: mm };
   else delete L[pid];

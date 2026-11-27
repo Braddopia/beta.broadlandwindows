@@ -300,8 +300,9 @@ test('Cutting Optimiser: cuts with angles plan into bars as you type, print as a
   const item = await app.run(() => products().find((r) => r.stock >= 5).item);
   await app.call('stockForm', 'edit', pid);
   await app.page.selectOption('#f_material', 'Aluminium');
+  await app.page.selectOption('#f_unit', 'Meters (M)');
   await app.page.selectOption('#f_isBar', 'Yes');
-  await app.page.fill('#f_length', '6.5M');
+  await app.page.fill('#f_length', '6.5');
   await app.page.click('#mbox [data-act=ieSave]');
   expect(await app.run((p) => state.cutProf[p].bar, pid)).toBe(6500);
 

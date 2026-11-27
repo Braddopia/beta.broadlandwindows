@@ -219,7 +219,7 @@ export function startScreenSaver() {
       hide();
       /* the touch or click that wakes it does nothing else */
       if (e.type == 'pointerdown' || e.type == 'mousedown' || e.type == 'touchstart' || e.type == 'keydown') {
-        e.preventDefault();
+        if (e.cancelable && e.type != 'touchstart') e.preventDefault();
         e.stopPropagation();
         swallow = true;
       }
@@ -234,7 +234,12 @@ export function startScreenSaver() {
     e.stopPropagation();
     if (e.type == 'click') swallow = false;
   };
-  ['mousemove', 'pointerdown', 'mousedown', 'keydown', 'wheel', 'touchstart', 'scroll'].forEach((t) =>
+  /* (v19.18.6) scrolling, the wheel, touches and mouse movement are only noted, never stopped, so they are passive: a
+     listener that could stop them makes the browser wait for it before every scroll, which felt like lag */
+  ['mousemove', 'wheel', 'touchstart', 'scroll'].forEach((t) =>
+    addEventListener(t, activity, { capture: true, passive: true })
+  );
+  ['pointerdown', 'mousedown', 'keydown'].forEach((t) =>
     addEventListener(t, activity, { capture: true, passive: false })
   );
   ['mouseup', 'pointerup', 'click'].forEach((t) => addEventListener(t, eat, true));

@@ -9,18 +9,38 @@ export const addDays = (n) => {
   x.setDate(x.getDate() + n);
   return iso(x);
 };
-export const fd = (d) =>
-  d ? new Date(d + 'T00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : 'Not set';
-export const fdl = (d) => {
-  const x = new Date(d + 'T00:00');
-  return isNaN(x) ? '' : x.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+/* (v19.18.6) dates are shown with one shared formatter each, and each date's text is remembered: making a new
+   formatter for every date shown was the slowest part of drawing pages full of dates (Holiday Planner) */
+const FD = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short' }),
+  FDL = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+const memo = (fn) => {
+  const M = new Map();
+  return (k) => {
+    let v = M.get(k);
+    if (v === undefined) {
+      if (M.size > 5000) M.clear();
+      M.set(k, (v = fn(k)));
+    }
+    return v;
+  };
 };
+const fdOf = memo((d) => {
+  const x = new Date(d + 'T00:00');
+  return isNaN(x) ? 'Invalid Date' : FD.format(x);
+});
+const fdlOf = memo((d) => {
+  const x = new Date(d + 'T00:00');
+  return isNaN(x) ? '' : FDL.format(x);
+});
+export const fd = (d) => (d ? fdOf(String(d)) : 'Not set');
+export const fdl = (d) => fdlOf(String(d));
 export const dslash = (v) => (v ? v.split('-').reverse().join('/') : '');
 export const nowT = () => new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-export const isWk = (k) => {
+const wkOf = memo((k) => {
   const g = new Date(k + 'T00:00').getDay();
   return g > 0 && g < 6;
-};
+});
+export const isWk = (k) => wkOf(String(k));
 export const wd = (a, b) => {
   let n = 0;
   const d = new Date(a + 'T00:00'),

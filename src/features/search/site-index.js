@@ -24,8 +24,31 @@ const clean = (t) =>
     .trim();
 
 /** what is on each page: [{ t: label, s: value shown with it, v: page }] */
+/* (v19.18.6) drawing every page takes a moment (a fifth of a second on a fast computer), so it is never done while
+   someone types: a search uses the last index, and an older one is refreshed when the computer is next idle */
+const idle = (fn) => (window.requestIdleCallback ? requestIdleCallback(fn, { timeout: 4000 }) : setTimeout(fn, 1500));
+let pending = false;
+function refreshSoon() {
+  if (pending) return;
+  pending = true;
+  idle(() => {
+    pending = false;
+    AT = 0;
+    buildIndex();
+  });
+}
 export function siteIndex() {
-  if (IDX && FOR == ROLE && Date.now() - AT < 60000) return IDX;
+  if (IDX && FOR == ROLE) {
+    if (Date.now() - AT >= 60000) refreshSoon();
+    return IDX;
+  }
+  return buildIndex();
+}
+/* start-up step (run once by main.js): the index is made while the computer is idle, before the first search */
+export function warmSiteIndex() {
+  refreshSoon();
+}
+function buildIndex() {
   const out = [],
     seen = new Set(),
     tpl = document.createElement('template'),

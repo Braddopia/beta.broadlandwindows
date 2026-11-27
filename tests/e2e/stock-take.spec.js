@@ -249,23 +249,31 @@ test('a product is marked as a profile bar in its own window (Cutting), and the 
     'Quality Check',
     'Notes',
   ]);
-  // (v19.18.4) only an aluminium profile can be cut from full bars; its bar length comes from the Length box
+  // (v19.18.6) materials are Aluminium and Timber only; only aluminium counted in Meters (M) can be cut from bars, and
+  // its bar length is the Length (m) box (a PCS item is never asked for metres)
+  await expect(app.page.locator('#f_material option')).toHaveText(['-', 'Aluminium', 'Timber']);
   await expect(app.page.locator('#f_isBar')).toBeHidden();
   await app.page.selectOption('#f_material', 'Timber');
   await expect(app.page.locator('#f_isBar')).toBeHidden();
   await app.page.selectOption('#f_material', 'Aluminium');
+  await app.page.selectOption('#f_unit', 'PCS');
+  await expect(app.page.locator('#f_isBar')).toBeHidden();
+  await expect(app.page.locator('label[for=f_length]')).toHaveText('Pieces per pack');
+  await expect(app.page.locator('#f_material').locator('xpath=..').locator('.hint')).toContainText('Meters (M)');
+  await app.page.selectOption('#f_unit', 'Meters (M)');
+  await expect(app.page.locator('label[for=f_length]')).toHaveText('Length (m)');
   await expect(app.page.locator('#f_isBar')).toBeVisible();
   await app.page.selectOption('#f_isBar', 'Yes');
   await app.page.fill('#f_length', '');
   await app.page.click('#mbox [data-act=ieSave]');
   await expect(app.page.locator('#mbox .ferr')).toContainText('full bar length');
-  await app.page.fill('#f_length', '5.5M');
+  await app.page.fill('#f_length', '5.5');
   await expect(app.page.locator('#f_isBar').locator('xpath=..').locator('.hint')).toContainText('5,500mm');
   await app.page.click('#mbox [data-act=ieSave]');
   expect(await app.run((p) => [state.cutProf[p], state.prodMat[p]], pid)).toEqual([{ bar: 5500 }, 'Aluminium']);
   await app.call('stockForm', 'edit', pid);
   await expect(app.page.locator('#f_material')).toHaveValue('Aluminium');
-  await app.page.fill('#f_length', '7M');
+  await app.page.fill('#f_length', '7');
   await app.page.click('#mbox [data-act=ieSave]');
   expect(await app.run((p) => state.cutProf[p], pid)).toEqual({ bar: 7000 });
   // and it can be switched off again
