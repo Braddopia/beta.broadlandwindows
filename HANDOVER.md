@@ -416,3 +416,8 @@ stock number). Decided with the owner:
   wing beats at a different height each pass (72s for three passes), and a small flock crosses far off every 36s.
   The crane is one SVG symbol taken from the opening screen's outline. The "move the mouse" line is gone. Fewer
   Animations shows it still.
+- v19.16.4: screen saver: the crane is now drawn in parts (far wing, body with beak, red crown and trailing legs, near
+  wing) and beats its wings about the shoulder, the body lifting on each down-stroke; the flock uses the same crane.
+  The bottom half is a Norfolk Broads scene: two tree lines of rounded copses (seeded, `treeLine`), a drainage mill
+  with lattice sails turning, water with scattered drifting ripple strokes (`ripples`), a mist line, a gold glint
+  under the setting sun, a sailing boat crossing every 110s, swaying reeds with seed heads, and a moon after dark.

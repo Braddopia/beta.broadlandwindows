@@ -1,6 +1,7 @@
 /* Screen saver (features/app/screen-saver.js), v19.16.3: a living scene. The sky turns slowly from day blue to a gold
-   sunset to a starry night and back (60s); clouds drift; low hills sit along the bottom; the crane glides across with
-   gentle wing beats, coming back at a different height each pass; now and then a small flock follows far off.
+   sunset to a starry night and back (60s); clouds drift; below, a Norfolk Broads scene (tree line, a drainage mill with
+   turning sails, rippling water that catches the sunset, a sailing boat, swaying reeds); the crane flies across
+   beating its wings, coming back at a different height each pass; now and then a small flock follows far off.
    The clock sits in the middle. No text asks to move the mouse. */
 #saver{position:fixed;inset:0;z-index:6000;overflow:hidden;display:flex;align-items:center;justify-content:center;background:#012b59;color:#fff;opacity:0;visibility:hidden;transition:opacity .9s ease,visibility 0s .9s;cursor:none}
 #saver.on{opacity:1;visibility:visible;transition:opacity .9s ease}
@@ -14,6 +15,10 @@
 #saver .sv-stars{position:absolute;inset:0 0 35% 0;opacity:0;background-image:radial-gradient(1.5px 1.5px at 10% 20%,#fff,transparent),radial-gradient(1px 1px at 25% 60%,#fff,transparent),radial-gradient(1.5px 1.5px at 40% 30%,#fff,transparent),radial-gradient(1px 1px at 55% 75%,#fff,transparent),radial-gradient(2px 2px at 70% 15%,#fff,transparent),radial-gradient(1px 1px at 82% 45%,#fff,transparent),radial-gradient(1.5px 1.5px at 92% 70%,#fff,transparent),radial-gradient(1px 1px at 5% 85%,#fff,transparent),radial-gradient(1px 1px at 63% 50%,#fff,transparent),radial-gradient(1.5px 1.5px at 33% 8%,#fff,transparent);background-size:340px 260px;animation:svStars 60s ease-in-out infinite,svTwinkle 3.2s ease-in-out infinite alternate}
 #saver .sv-sun{position:absolute;left:68%;top:22%;width:clamp(90px,12vw,170px);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,#fff6d6 0%,#ffd86b 45%,rgba(255,200,80,0) 72%);filter:blur(1px);animation:svSun 60s ease-in-out infinite}
 
+/* the moon rises after dark: a pale disc with a soft glow, a shadow giving it a crescent */
+#saver .sv-moon{position:absolute;left:24%;top:16%;width:clamp(50px,6vw,80px);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 38% 40%,#fffdf2,#e9e6d6 60%,#d6d2bd);box-shadow:0 0 40px 10px rgba(255,250,225,.25),inset -14px -6px 0 0 rgba(4,16,40,.55);opacity:0;animation:svMoon 60s ease-in-out infinite}
+@keyframes svMoon{0%,48%{opacity:0;transform:translateY(14vh)}62%,80%{opacity:1;transform:translateY(0)}94%,100%{opacity:0;transform:translateY(-4vh)}}
+
 /* clouds drift right to left at different speeds */
 #saver .sv-cloud{position:absolute;height:clamp(40px,6vw,80px);border-radius:999px;background:rgba(255,255,255,.55);filter:blur(14px);animation:svCloud linear infinite}
 #saver .c1{top:14%;width:32vw;animation-duration:70s;animation-delay:-10s}
@@ -21,25 +26,55 @@
 #saver .c3{top:8%;width:18vw;opacity:.5;animation-duration:120s;animation-delay:-80s}
 #saver .c4{top:42%;width:26vw;opacity:.4;animation-duration:85s;animation-delay:-30s}
 
-/* hills */
-#saver .sv-hills{position:absolute;left:-5%;width:110%;bottom:0;height:24vh;animation:svHillDrift 40s ease-in-out infinite alternate}
-#saver .h2{bottom:3vh;height:26vh}#saver .h2 path{fill:#0b3a74;opacity:.75}
-#saver .h1 path{fill:#06264f}
-#saver .h2{animation-duration:55s}
+/* the Broads, from the back: tree line, mill, water, boat, reeds. Silhouettes stay dark navy at every time of day */
+#saver .sv-trees{position:absolute;left:0;width:100%;top:58.5vh;height:10vh}
+#saver .sv-trees path{fill:#08284f}
+#saver .sv-trees.far{top:56.5vh;height:12vh}#saver .sv-trees.far path{fill:#1d4a85;opacity:.75}
+#saver .sv-mill{position:absolute;left:14%;top:calc(68vh - 26vh);height:26vh;width:auto;aspect-ratio:140/220}
+#saver .sv-mill .tw,#saver .sv-mill .cap,#saver .sv-mill .sails path,#saver .sv-mill .hub{fill:#06213f}
+#saver .sv-mill .sails .lat{fill:none;stroke:#06213f;stroke-width:2.4}
+#saver .sv-mill .sails{transform-box:view-box;transform-origin:70px 72px;animation:svSails 16s linear infinite}
+#saver .sv-water{position:absolute;left:0;right:0;top:68vh;bottom:0;overflow:hidden;background:linear-gradient(180deg,#6aa6e4 0%,#2f6fb8 18%,#1a4c8a 55%,#0a2a55 100%)}
+/* a soft mist where the water meets the land */
+#saver .sv-water>.sv-mist{position:absolute;left:0;right:0;top:0;height:3vh;z-index:2;background:linear-gradient(180deg,rgba(255,255,255,.35),rgba(255,255,255,0))}
+#saver .sv-water::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,#d57a5a 0%,#5b2f5e 50%,#1a1840 100%);opacity:0;animation:svDusk 60s ease-in-out infinite}
+#saver .sv-water::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,#0c2650 0%,#040f26 100%);opacity:0;animation:svNight 60s ease-in-out infinite}
+/* ripples: short broken lines that drift sideways, longer and further apart nearer the front */
+#saver .sv-shim{position:absolute;left:-12%;top:0;width:124%;height:100%;z-index:1;animation:svShim 14s ease-in-out infinite alternate}
+#saver .sv-shim path{stroke:#fff;stroke-width:1.4;stroke-linecap:round;vector-effect:non-scaling-stroke}
+#saver .sv-shim.s2{animation-duration:9s;animation-direction:alternate-reverse}#saver .sv-shim.s2 path{stroke:#cfe3ff;stroke-width:1}
+#saver .sv-glint{position:absolute;z-index:1;left:68%;top:0;width:clamp(60px,9vw,130px);height:100%;transform:translateX(-25%);background:repeating-linear-gradient(180deg,rgba(255,214,120,0) 0 6px,rgba(255,222,140,.75) 6px 8px,rgba(255,214,120,0) 8px 15px);mask-image:linear-gradient(180deg,#000,transparent 85%),radial-gradient(closest-side,#000,transparent);filter:blur(.5px);opacity:0;animation:svGlint 60s ease-in-out infinite}
+#saver .sv-boat{position:absolute;top:calc(68vh - 6vh);height:9vh;width:auto;aspect-ratio:80/70;animation:svBoat 110s linear infinite;animation-delay:-35s}
+#saver .sv-boat .sail{fill:#f2f6fb}#saver .sv-boat .sail2{fill:#d9e4f2}#saver .sv-boat .hull{fill:#06213f}
+#saver .sv-reeds{position:absolute;bottom:0;height:24vh;width:auto;aspect-ratio:210/200;z-index:1}
+#saver .sv-reeds.l{left:-1%}#saver .sv-reeds.r{right:-1%;transform:scaleX(-1)}
+#saver .sv-reeds g{transform-box:fill-box;transform-origin:50% 100%;animation:svReed 5s ease-in-out infinite alternate}
+#saver .sv-reeds path{fill:none;stroke:#041a33;stroke-width:3.2;stroke-linecap:round}
+#saver .sv-reeds .hd{fill:#3a2a1a}
+#saver .sv-reeds g:nth-child(3n){animation-duration:6.4s}#saver .sv-reeds g:nth-child(3n) path{stroke-width:2.4}
+#saver .sv-reeds g:nth-child(3n+1){animation-duration:4.2s;animation-delay:-1.2s}
 
-/* the lead crane: one pass every 24s, a different height each time (three passes in the 72s cycle) */
-#saver .sv-lead{position:absolute;left:0;top:0;width:clamp(170px,20vw,300px);animation:svPath 72s linear infinite}
+/* the lead crane: three passes in 72s at different heights. Its wings beat about the shoulder: up above the body,
+   then down below it, and the body lifts a little on each down-stroke */
+#saver .sv-lead{position:absolute;z-index:2;left:0;top:0;width:clamp(200px,22vw,320px);animation:svPath 72s linear infinite}
 #saver .sv-bob{animation:svBob 4s ease-in-out infinite}
-#saver .sv-crane{display:block;width:100%;height:auto;overflow:visible;filter:drop-shadow(0 14px 22px rgba(0,0,0,.28));transform-origin:55% 60%;animation:svFlap 1.6s ease-in-out infinite}
-/* the flock: three small cranes in a line, far off, once every 36s */
-#saver .sv-flock{position:absolute;left:0;top:0;width:clamp(170px,18vw,260px);height:120px;animation:svFlock 36s linear infinite;animation-delay:-14s;opacity:.55}
+#saver .sv-crane{display:block;width:100%;height:auto;overflow:visible;filter:drop-shadow(0 14px 18px rgba(0,0,0,.25));animation:svLift 1.1s ease-in-out infinite}
+#saver .sv-body{fill:url(#sv-bg2)}
+#saver .sv-crown{fill:#c8323a}
+#saver .sv-legs{fill:none;stroke:#2a3550;stroke-width:3.2;stroke-linecap:round}
+#saver .sv-wing{fill:url(#sv-wg);transform-box:view-box;transform-origin:180px 97px;animation:svFlapW 1.1s ease-in-out infinite}
+#saver .sv-wing.far{fill:#8ea6c6;translate:-14px -3px;animation-delay:-.05s}
+/* the flock: three small cranes, far off, once every 36s */
+#saver .sv-flock{position:absolute;z-index:2;left:0;top:0;width:clamp(170px,18vw,260px);height:120px;animation:svFlock 36s linear infinite;animation-delay:-14s;opacity:.6}
 #saver .sv-flock>div{position:absolute;width:34%}
 #saver .sv-flock .f1{left:0;top:30px}#saver .sv-flock .f2{left:36%;top:6px}#saver .sv-flock .f3{left:68%;top:44px}
-#saver .sv-flock .sv-crane{filter:none;animation-duration:1.3s}
-#saver .sv-flock .f2 .sv-crane{animation-delay:-.4s}#saver .sv-flock .f3 .sv-crane{animation-delay:-.8s}
+#saver .sv-flock .sv-crane{filter:none}
+#saver .sv-flock .sv-crane,#saver .sv-flock .sv-wing{animation-duration:.9s}
+#saver .sv-flock .f2 .sv-crane,#saver .sv-flock .f2 .sv-wing{animation-delay:-.3s}
+#saver .sv-flock .f3 .sv-crane,#saver .sv-flock .f3 .sv-wing{animation-delay:-.6s}
 
 /* clock */
-#saver .sv-clock{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:.4rem;text-align:center;margin-top:18vh}
+#saver .sv-clock{position:absolute;z-index:3;left:0;right:0;top:36vh;display:flex;flex-direction:column;align-items:center;gap:.4rem;text-align:center}
 #saver .sv-time{font:600 clamp(3.4rem,8vw,6.5rem)/1 var(--head);letter-spacing:.02em;text-shadow:0 8px 34px rgba(0,0,0,.35)}
 #saver .sv-date{font-size:clamp(1rem,1.7vw,1.35rem);color:#e3f0ff;text-shadow:0 2px 12px rgba(0,0,0,.35)}
 
@@ -47,9 +82,8 @@
 @keyframes svNight{0%,40%{opacity:0}55%,80%{opacity:1}95%,100%{opacity:0}}
 @keyframes svStars{0%,45%{opacity:0}58%,78%{opacity:1}92%,100%{opacity:0}}
 @keyframes svTwinkle{to{filter:brightness(1.6)}}
-@keyframes svSun{0%{transform:translateY(0);opacity:1}40%{transform:translateY(38vh);opacity:.9}50%{transform:translateY(60vh);opacity:0}85%{transform:translateY(-10vh);opacity:0}100%{transform:translateY(0);opacity:1}}
+@keyframes svSun{0%{transform:translateY(0);opacity:1}38%{transform:translateY(32vh);opacity:1}48%{transform:translateY(44vh);opacity:.6}52%{transform:translateY(50vh);opacity:0}85%{transform:translateY(-10vh);opacity:0}100%{transform:translateY(0);opacity:1}}
 @keyframes svCloud{from{transform:translateX(110vw)}to{transform:translateX(-45vw)}}
-@keyframes svHillDrift{from{transform:translateX(0)}to{transform:translateX(-3%)}}
 /* the crane faces left, so it flies from the right edge to the left: three passes at different heights */
 @keyframes svPath{
   0%{transform:translate(105vw,22vh) rotate(-3deg)}
@@ -64,12 +98,19 @@
 }
 @keyframes svFlock{0%{transform:translate(110vw,6vh) scale(.6)}60%{transform:translate(-30vw,2vh) scale(.6)}100%{transform:translate(-30vw,2vh) scale(.6)}}
 @keyframes svBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-16px)}}
-@keyframes svFlap{0%,100%{transform:scaleY(1)}50%{transform:scaleY(.9) skewX(-2deg)}}
+@keyframes svFlapW{0%{transform:scaleY(1) rotate(0)}45%{transform:scaleY(-.75) rotate(6deg)}55%{transform:scaleY(-.75) rotate(6deg)}100%{transform:scaleY(1) rotate(0)}}
+@keyframes svLift{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+@keyframes svSails{to{transform:rotate(360deg)}}
+@keyframes svShim{from{transform:translateX(-3%);opacity:.55}to{transform:translateX(3%);opacity:.95}}
+@keyframes svGlint{0%,12%{opacity:0}28%,42%{opacity:.9}50%,100%{opacity:0}}
+@keyframes svBoat{from{transform:translateX(105vw)}to{transform:translateX(-12vw)}}
+@keyframes svReed{from{transform:skewX(-3deg)}to{transform:skewX(4deg)}}
 
 /* Fewer Animations (or the computer's reduce-motion setting): a still evening scene, the crane resting mid-flight */
 body.rm #saver *{animation:none!important}
 body.rm #saver .sv-lead{transform:translate(55vw,14vh)}
-@media(prefers-reduced-motion:reduce){#saver *{animation:none!important}#saver .sv-lead{transform:translate(55vw,14vh)}}
+body.rm #saver .sv-boat{transform:translateX(60vw)}
+@media(prefers-reduced-motion:reduce){#saver *{animation:none!important}#saver .sv-lead{transform:translate(55vw,14vh)}#saver .sv-boat{transform:translateX(60vw)}}
 
 /* Settings row: the minutes, then Preview */
 .sv-set{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;justify-content:flex-end}
