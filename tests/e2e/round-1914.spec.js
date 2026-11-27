@@ -102,3 +102,13 @@ test('no blue fill on hover over the holiday ring or a calendar day', async ({ a
     await day.evaluate((e) => getComputedStyle(e).backgroundImage + getComputedStyle(e).backgroundColor)
   ).not.toContain('226, 237, 250');
 });
+
+test('Admin Console says whether review figures update by themselves (v19.15)', async ({ app }) => {
+  await app.role('beta');
+  await app.go('admin');
+  // the tests open the site as a file, so the daily figures are not read here, and the card says so
+  await expect(app.page.locator('#main .rv-feed')).toContainText('Opened from a file');
+  await app.run(() => reviewFeed({ updated: '2026-11-08T05:23:00Z', trustpilot: { score: 4.6, count: 26 } }));
+  await app.go('admin');
+  await expect(app.page.locator('#main .rv-feed.ok')).toContainText('update automatically each morning');
+});

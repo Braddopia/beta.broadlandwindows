@@ -30,7 +30,11 @@ body[data-theme=dark] .msn-in textarea:hover{background:#28303e}
 .msn-send:hover{background:#0a5cba;transform:translateY(-2px) scale(1.08);box-shadow:0 8px 18px -6px rgba(3,78,162,.7)}
 .msn-send:active{transform:scale(.88);transition-duration:.08s}
 .msn-send svg{transition:transform .3s var(--e-spring)}
-.msn-send.ready svg,.msn-send:hover svg{transform:rotate(-12deg)}
+/* v19.15: pointing at the send button sends the paper plane off: it flies out at the top right and pops back in
+   from the bottom left (only on hover; nothing turns while typing) */
+.msn-send{overflow:hidden}
+.msn-send:hover svg{animation:sendHover .55s var(--e-out)}
+@keyframes sendHover{0%{transform:none;opacity:1}45%{transform:translate(140%,-140%) rotate(-10deg) scale(.8);opacity:0}46%{transform:translate(-140%,140%) scale(.8);opacity:0}100%{transform:none;opacity:1}}
 .msn-send.flew svg{animation:sendFly .6s var(--e-out)}
 @keyframes sendFly{0%{transform:none}35%{transform:translate(22px,-22px) rotate(-20deg);opacity:0}36%{transform:translate(-16px,16px);opacity:0}100%{transform:none;opacity:1}}
 body[data-theme=dark] .msn-send{background:#3a4456}body[data-theme=dark] .msn-send.ready,body[data-theme=dark] .msn-send:hover{background:#2f7fdb}
@@ -73,4 +77,23 @@ body[data-theme=dark] .bub-ok{color:#5fd39a}
 /* an empty message: the box shakes side to side once */
 .msn-in textarea.shake{animation:shake .4s var(--e-out)}
 @keyframes shake{0%,100%{transform:none}20%{transform:translateX(-6px)}40%{transform:translateX(5px)}60%{transform:translateX(-3px)}80%{transform:translateX(2px)}}
-@media(prefers-reduced-motion:reduce){.msn-in textarea.shake,.bw.new,.bub-ok,.msn-send.flew svg{animation:none}}
+@media(prefers-reduced-motion:reduce){.msn-in textarea.shake,.bw.new,.bub-ok,.msn-send.flew svg,.msn-send:hover svg{animation:none}}
+
+/* ---- v19.15 group chats ---- */
+.mav.grp{background:linear-gradient(135deg,#12794c,#2fae6f);font-size:.85rem}
+.msn-ev{align-self:center;margin:.35rem auto;padding:.2rem .7rem;border-radius:99px;background:var(--card2);color:var(--muted);font-size:.74rem;text-align:center;max-width:80%}
+.grp-j{cursor:default}.grp-j .mini{flex:0 0 auto}
+.grp-card{margin:.2rem .9rem .6rem;padding:.8rem .9rem;border:1px solid var(--line);border-radius:14px;background:var(--card2);display:flex;flex-direction:column;align-items:flex-start;gap:.35rem}
+.grp-card b{font-size:.98rem;color:var(--navy)}
+.grp-card p{margin:0;font-size:.82rem;color:var(--ink);white-space:pre-wrap}
+.grp-tools{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.2rem}
+.grp-m{cursor:default}
+.grp-mb{flex:0 0 auto;width:1.9rem;height:1.9rem;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--muted);font-size:1rem;line-height:1;cursor:pointer}
+.grp-mb:hover{color:var(--blue);border-color:var(--blue)}
+.grp-t{display:inline-block;margin-right:.25rem;padding:0 .4rem;border-radius:6px;font-style:normal;font-size:.68rem;font-weight:700;background:var(--card2);color:var(--muted)}
+.grp-t.own{background:#fff1c2;color:#7a5a00}.grp-t.adm{background:var(--blue-bg);color:var(--blue)}
+.grp-t.mut,.grp-t.tmo{background:var(--red-bg);color:var(--red)}
+.pm-h{margin:.2rem .7rem .3rem;font-size:.72rem;font-weight:700;color:var(--muted)}
+.grp-add{display:flex;flex-direction:column;gap:.35rem;max-height:22rem;overflow:auto;margin:.6rem 0}
+.grp-ar{display:grid;grid-template-columns:1fr auto;align-items:center;column-gap:.6rem;padding:.45rem .6rem;border:1px solid var(--line);border-radius:10px}
+.grp-ar small{grid-column:1;color:var(--muted)}.grp-ar .mini{grid-column:2;grid-row:1/3}

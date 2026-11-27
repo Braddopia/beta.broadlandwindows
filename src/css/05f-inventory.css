@@ -44,7 +44,9 @@
 @media(min-width:900px){
   .ptb.fx.t-inv th.i-sel{width:2.6rem}
   .ptb.fx.t-inv th.i-id{width:5.2rem}
-  .ptb.fx.t-inv th.i-item,.ptb.fx.t-inv th.i-stock,.ptb.fx.t-inv th.i-loc{width:10.5rem}
+  .ptb.fx.t-inv th.i-item,.ptb.fx.t-inv th.i-loc{width:10.5rem}
+  /* v19.15: Stock is narrower, so its centred values sit close to Item as they did when they read from the left */
+  .ptb.fx.t-inv th.i-stock{width:7.4rem}
   .ptb.fx.t-inv th.i-col{width:auto}
   .ptb.fx.t-inv th.i-cost{width:5.4rem}
   .ptb.fx.t-inv th.i-val{width:6.4rem}

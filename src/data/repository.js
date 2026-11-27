@@ -74,5 +74,6 @@ export const leads = repo('leads'),
   holidays = repo('hols'),
   bills = repo('fin'),
   messages = repo('notes'),
+  groups = repo('groups'),
   problems = repo('bugs'),
   stockRows = repo('items');

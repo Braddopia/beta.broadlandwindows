@@ -320,3 +320,22 @@ stock number). Decided with the owner:
 - Inventory: the Stock heading and each row's value are centred in the column (owner's choice).
 - Review figures: the job was run by hand and works; its log says "no keys set" for Google and Trustpilot, so nothing
   updates until the owner adds the three Actions secrets (see v19.14).
+
+## v19.15
+
+- Messages, group chats (`features/messages/groups.js`, rules in `domain/groups.js`, unit-tested in
+  `tests/unit/groups.test.mjs`, browser tests in `tests/e2e/groups.spec.js`). "+ New chat", "+ New group": anyone can
+  start one and owns it (name, description, Invite only or Open). The owner and group admins add people, remove them,
+  mute them (read only until unmuted) and time them out (15 minutes, 1 hour, 1 day, 1 week; ends by itself); the owner
+  makes and unmakes group admins and deletes the group (with its messages). Admins cannot act on the owner or other
+  admins. Anyone can leave; an owner leaving hands the group to an admin, else the next person. Open groups are listed
+  under "Groups You Can Join". Every change is a small line in the chat (notes with `ev: 1`, never unread) and in the
+  audit log. Groups are `state.groups` (repository `groups`); their messages are notes with `to: 'g:' + id`. Each
+  action checks the group rules itself, not only the buttons. Note: until Microsoft 365 sign-in, "who you are" is the
+  name in My Details, so these controls are only as strong as that.
+- Send button: on hover the paper plane flies out at the top right and pops back in from the bottom left (no more
+  tilt while typing); off with Fewer Animations.
+- Overview: pointing at the holiday ring lifts the whole My Holiday card (no blue fill).
+- Inventory: the Stock column is narrower (7.4rem) so its centred values sit close to Item.
+- Admin Console, Reviews: says whether Google and Trustpilot update by themselves ("not set up yet" while the GitHub
+  keys are missing; "opened from a file" for a downloaded copy).

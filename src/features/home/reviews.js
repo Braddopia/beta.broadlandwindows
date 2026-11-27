@@ -19,17 +19,35 @@ import { applyReviewFeed } from '../../domain/review-feed.js';
    ReferenceLine have no feed and stay as typed in Admin Console. A file opened from the computer has no feed. */
 const FEED_EVERY = 3 * 3600 * 1000;
 /** read reviews.json (or use the figures given, for tests) and update the scores if they changed */
+/* how the automatic update is doing, for Admin Console: 'local' (file opened from the computer), 'none' (no
+   reviews.json yet: the keys have not been added), 'ok' (figures received) or '' (not checked yet) */
+let feedState = '';
+export const reviewFeedState = () => feedState;
+/* Admin Console shows the state, so it is drawn again once the answer is known */
+const setFeed = (st) => {
+  const was = feedState;
+  feedState = st;
+  if (was != st && document.body.dataset.view == 'admin') render(true);
+};
 export async function reviewFeed(feed) {
   if (!feed) {
-    if (!/^https?:$/.test(location.protocol)) return;
+    if (!/^https?:$/.test(location.protocol)) {
+      setFeed('local');
+      return;
+    }
     try {
       const r = await fetch('reviews.json?t=' + Date.now(), { cache: 'no-store' });
-      if (!r.ok) return;
+      if (!r.ok) {
+        setFeed('none');
+        return;
+      }
       feed = await r.json();
     } catch (e) {
+      setFeed('none');
       return;
     }
   }
+  setFeed('ok');
   const changed = applyReviewFeed(state.brand, feed);
   if (feed && feed.updated) state.brand.feedAt = SAFE.text(String(feed.updated), 40);
   if (!changed.length) return;
@@ -154,4 +172,17 @@ export function delQuote(i) {
     },
     true
   );
+}
+
+/** one line for Admin Console: whether Google and Trustpilot update by themselves */
+export function reviewFeedLine() {
+  const st = reviewFeedState(),
+    at = state.brand.feedAt;
+  return st == 'ok'
+    ? `<p class="rv-feed ok">Google and Trustpilot update automatically each morning${at ? ' (last ' + esc(fdl(String(at).slice(0, 10))) + ')' : ''}.</p>`
+    : st == 'none'
+      ? '<p class="rv-feed off">Automatic updates are not set up yet: the Google and Trustpilot keys still need adding in GitHub (see the handover notes). Until then, type the latest figures with Update scores.</p>'
+      : st == 'local'
+        ? '<p class="rv-feed off">Opened from a file on this computer, so the automatic review figures are not read here. The website reads them.</p>'
+        : '';
 }

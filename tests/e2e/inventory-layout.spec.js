@@ -42,7 +42,8 @@ for (const role of ['beta', 'staff'])
             return Math.abs((q.left + q.right) / 2 - thMid) < 1.5;
           }),
           filterLevelWithSearch: Math.abs(q.top - f.top) < 1 && Math.abs(q.height - f.height) < 1,
-          evenlySpaced: w('item') == w('stock') && (!w('colours') || w('stock') == w('location')),
+          // Item and Location the same width; Stock narrower so its values sit close to Item (v19.15)
+          evenlySpaced: (!w('colours') || w('item') == w('location')) && w('stock') < w('item'),
           // the right group: Cost, (Value,) Status, buttons side by side with nothing between them
           rightGroupTogether: (() => {
             const cols = ['cost', 'value', 'status', 'act']

@@ -14,6 +14,17 @@ import { askYes } from '../../ui/modal.js';
 import { q, render } from '../../ui/shell/router.js';
 import { toast } from '../../ui/toast.js';
 import { setUI, uiState } from '../../ui/ui-state.js';
+import {
+  groupKey,
+  groupOf,
+  isGroupKey,
+  isMember,
+  joinable,
+  myGroups,
+  sendBlock,
+  timedOutUntil,
+} from '../../domain/groups.js';
+import { groupPanelH, grpNew } from './groups.js';
 
 /* ---------------- messages: their own page, open to every account ---------------- */
 /* automatic messages (a holiday approved or turned down...) come from "System", and cannot be answered */
@@ -33,32 +44,40 @@ export function msgSystem(to, text) {
   });
   if (state.notes.length > 800) state.notes.splice(0, state.notes.length - 800);
 }
-export const msgMine = (n) => n.to == USER || n.to == 'Everyone';
-export const msgRead = (n) => (n.to == 'Everyone' ? (n.readBy || []).includes(USER) : !!n.read);
-export const msgUnread = () => (state.notes || []).filter((n) => msgMine(n) && n.by != USER && !msgRead(n)).length;
+/* group chats: their messages go to 'g:' + the group's id, for the people in the group (features/messages/groups.js) */
+const inGroup = (key) => isMember(groupOf(state.groups, key), USER);
+const shared = (to) => to == 'Everyone' || isGroupKey(to);
+export const msgMine = (n) => n.to == USER || n.to == 'Everyone' || (isGroupKey(n.to) && inGroup(n.to));
+export const msgRead = (n) => (shared(n.to) ? (n.readBy || []).includes(USER) : !!n.read);
+export const msgUnread = () =>
+  (state.notes || []).filter((n) => msgMine(n) && !n.ev && n.by != USER && !msgRead(n)).length;
 export function vMessages() {
   const N = (state.notes || []).slice().sort((a, b) => a.at - b.at),
     me2 = USER;
   const people = [...new Set(state.staff.map((s) => s.name).filter((n) => n && n != me2))];
   const conv = (w) =>
-    w == 'Everyone'
-      ? N.filter((n) => n.to == 'Everyone')
-      : N.filter((n) => (n.by == me2 && n.to == w) || (n.by == w && n.to == me2));
-  const unreadIn = (w) => conv(w).filter((n) => n.by != me2 && !msgRead(n)).length;
+    shared(w) ? N.filter((n) => n.to == w) : N.filter((n) => (n.by == me2 && n.to == w) || (n.by == w && n.to == me2));
+  const unreadIn = (w) => conv(w).filter((n) => !n.ev && n.by != me2 && !msgRead(n)).length;
+  const groups = myGroups(state.groups, me2),
+    label = (w) => (isGroupKey(w) ? (groupOf(state.groups, w) || {}).name || 'Group' : w);
   const sys = N.some((n) => n.by == SYSTEM && n.to == me2) ? [SYSTEM] : [];
-  const chats = ['Everyone', ...sys, ...people]
+  const chats = ['Everyone', ...groups.map(groupKey), ...sys, ...people]
     .map((w) => {
       const L = conv(w);
-      return { w, last: L[L.length - 1], un: unreadIn(w) };
+      return { w, name: label(w), last: L[L.length - 1], un: unreadIn(w) };
     })
-    .filter((c) => c.w == 'Everyone' || c.last || c.w == uiState.msg.to)
+    .filter((c) => c.w == 'Everyone' || isGroupKey(c.w) || c.last || c.w == uiState.msg.to)
     .sort((a, b) => (b.last ? b.last.at : 0) - (a.last ? a.last.at : 0))
-    .filter((c) => !q || c.w.toLowerCase().includes(q) || (c.last && c.last.t.toLowerCase().includes(q)));
-  const cur = uiState.msg.to || 'Everyone',
-    L = conv(cur);
+    .filter((c) => !q || c.name.toLowerCase().includes(q) || (c.last && c.last.t.toLowerCase().includes(q)));
+  /* a group someone has left, or that was deleted, falls back to the team chat */
+  let cur = uiState.msg.to || 'Everyone';
+  if (isGroupKey(cur) && !inGroup(cur)) cur = 'Everyone';
+  const g = groupOf(state.groups, cur),
+    L = conv(cur),
+    toJoin = joinable(state.groups, me2);
   const nu = L.filter((n) => n.by != me2 && !msgRead(n));
   nu.forEach((n) => {
-    if (n.to == 'Everyone') {
+    if (shared(n.to)) {
       n.readBy = n.readBy || [];
       n.readBy.push(me2);
     } else n.read = true;
@@ -75,23 +94,26 @@ export function vMessages() {
           : new Date(t).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
   };
   const av = (n) =>
-    `<span class="mav ${n == 'Everyone' ? 'all' : n == SYSTEM ? 'sys' : ''}">${n == 'Everyone' ? '★' : n == SYSTEM ? svg('M12 15a3 3 0 100-6 3 3 0 000 6zM19.4 15a1.7 1.7 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.8-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1.1-1.5 1.7 1.7 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.8 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1.1 1.7 1.7 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.8.3H9a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.8V9a1.7 1.7 0 001.5 1H21a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z') : esc(initials(n))}</span>`;
+    isGroupKey(n)
+      ? `<span class="mav grp" aria-hidden="true">${esc(initials(label(n)))}</span>`
+      : `<span class="mav ${n == 'Everyone' ? 'all' : n == SYSTEM ? 'sys' : ''}">${n == 'Everyone' ? '★' : n == SYSTEM ? svg('M12 15a3 3 0 100-6 3 3 0 000 6zM19.4 15a1.7 1.7 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.8-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1.1-1.5 1.7 1.7 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.8 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1.1 1.7 1.7 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.8.3H9a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.8V9a1.7 1.7 0 001.5 1H21a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z') : esc(initials(n))}</span>`;
   let lastDay = '';
-  return `<div class="msn"><aside class="msn-l"><div class="msn-lh"><h1>Chats</h1><select aria-label="New chat" data-onchange="msgNewChat" data-args-change="[{&quot;$&quot;:&quot;value&quot;}]"><option value="" hidden>+ New chat</option>${people.map((p) => `<option>${esc(p)}</option>`).join('')}</select></div>
-   <div class="msn-list">${chats.map((c) => `<button class="msn-c ${c.w == cur ? 'on' : ''} ${c.un ? 'un' : ''}" ${onClick('setUI', 'msg.to', c.w)}>${av(c.w)}<span class="msn-ct"><b>${esc(c.w == 'Everyone' ? 'Everyone (team chat)' : c.w)}</b><small>${c.last ? esc((c.last.by == me2 ? 'You: ' : c.w == 'Everyone' ? c.last.by.split(' ')[0] + ': ' : '') + c.last.t) : 'No messages yet'}</small></span><span class="msn-m">${c.last ? ago(c.last.at) : ''}${c.un ? `<i>${c.un}</i>` : ''}</span></button>`).join('')}</div></aside>
-   <section class="msn-r"><header class="msn-h">${av(cur)}<div><b>${esc(cur == 'Everyone' ? 'Everyone' : cur)}</b><small>${cur == 'Everyone' ? 'Messages here go to the whole team' : cur == SYSTEM ? 'Automatic messages from the CRM' : esc((state.staff.find((s) => s.name == cur) || {}).role || '')}</small></div></header>
+  return `<div class="msn"><aside class="msn-l"><div class="msn-lh"><h1>Chats</h1><select aria-label="New chat" data-onchange="msgNewChat" data-args-change="[{&quot;$&quot;:&quot;value&quot;}]"><option value="" hidden>+ New chat</option><option value="__group">+ New group</option>${people.map((p) => `<option>${esc(p)}</option>`).join('')}</select></div>
+   <div class="msn-list">${chats.map((c) => `<button class="msn-c ${c.w == cur ? 'on' : ''} ${c.un ? 'un' : ''}" ${onClick('setUI', 'msg.to', c.w)}>${av(c.w)}<span class="msn-ct"><b>${esc(c.w == 'Everyone' ? 'Everyone (team chat)' : c.name)}</b><small>${c.last ? esc((c.last.ev ? '' : c.last.by == me2 ? 'You: ' : shared(c.w) ? c.last.by.split(' ')[0] + ': ' : '') + c.last.t) : 'No messages yet'}</small></span><span class="msn-m">${c.last ? ago(c.last.at) : ''}${c.un ? `<i>${c.un}</i>` : ''}</span></button>`).join('')}${toJoin.length ? `<p class="msn-ph">Groups You Can Join</p>${toJoin.map((x) => `<div class="msn-c grp-j">${av(groupKey(x))}<span class="msn-ct"><b>${esc(x.name)}</b><small>${esc(x.desc || x.members.length + ' people')}</small></span><button class="mini pri" ${onClick('grpJoin', x.id)}>Join</button></div>`).join('')}` : ''}</div></aside>
+   <section class="msn-r"><header class="msn-h">${av(cur)}<div><b>${esc(cur == 'Everyone' ? 'Everyone' : g ? g.name : cur)}</b><small>${cur == 'Everyone' ? 'Messages here go to the whole team' : g ? esc(g.desc || g.members.length + ' people') : cur == SYSTEM ? 'Automatic messages from the CRM' : esc((state.staff.find((s) => s.name == cur) || {}).role || '')}</small></div></header>
     <div class="msn-t" id="msnT">${
       L.map((n) => {
         const d = new Date(n.at).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' }),
           sep = d != lastDay ? ((lastDay = d), `<div class="msn-day">${d}</div>`) : '',
           mine = n.by == me2;
+        if (n.ev) return sep + `<div class="msn-ev">${esc(n.t)}</div>`;
         return (
           sep +
-          `<div class="bw ${mine ? 'me' : ''} ${n.id == JUST_SENT ? 'new' : ''}"><div class="bub ${mine ? 'me' : ''}">${!mine && cur == 'Everyone' ? `<small class="bub-n">${esc(n.by)}</small>` : ''}<p>${esc(n.t)}</p></div><span class="bub-t">${n.id == JUST_SENT ? '<span class="bub-ok">Sent</span> ' : ''}${new Date(n.at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}${mine ? `<button class="bub-x" title="Delete" aria-label="Delete message" ${onClick('msgDel', n.id)}>&times;</button>` : ''}</span></div>`
+          `<div class="bw ${mine ? 'me' : ''} ${n.id == JUST_SENT ? 'new' : ''}"><div class="bub ${mine ? 'me' : ''}">${!mine && shared(cur) ? `<small class="bub-n">${esc(n.by)}</small>` : ''}<p>${esc(n.t)}</p></div><span class="bub-t">${n.id == JUST_SENT ? '<span class="bub-ok">Sent</span> ' : ''}${new Date(n.at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}${mine ? `<button class="bub-x" title="Delete" aria-label="Delete message" ${onClick('msgDel', n.id)}>&times;</button>` : ''}</span></div>`
         );
       }).join('') || `<div class="msn-empty">${emptyArt('team', '')}</div>`
     }</div>
-    ${cur == SYSTEM ? '<div class="msn-in msn-sys"><span class="muted">Automatic messages from the CRM. There is no one to reply to here.</span></div>' : `<div class="msn-in"><textarea id="m_t" rows="1" maxlength="1000" placeholder="Aa" aria-label="Message" data-onkeydown="msgKey" data-args-keydown="[{&quot;$&quot;:&quot;event&quot;}]" data-oninput="msgTyping" data-args-input="[{&quot;$&quot;:&quot;this&quot;}]"></textarea><button class="msn-send ${JUST_SENT ? 'flew' : ''}" data-act="msgSend" aria-label="Send" title="Send (Enter)">${svg('M4 12l16-8-6 16-3-7z')}</button></div>`}</section>${peopleH(cur, me2, av)}</div>`;
+    ${cur == SYSTEM ? '<div class="msn-in msn-sys"><span class="muted">Automatic messages from the CRM. There is no one to reply to here.</span></div>' : g && sendBlock(g, me2, Date.now()) ? `<div class="msn-in msn-sys"><span class="muted">${esc(blockText(g, me2))}</span></div>` : `<div class="msn-in"><textarea id="m_t" rows="1" maxlength="1000" placeholder="Aa" aria-label="Message" data-onkeydown="msgKey" data-args-keydown="[{&quot;$&quot;:&quot;event&quot;}]" data-oninput="msgTyping" data-args-input="[{&quot;$&quot;:&quot;this&quot;}]"></textarea><button class="msn-send ${JUST_SENT ? 'flew' : ''}" data-act="msgSend" aria-label="Send" title="Send (Enter)">${svg('M4 12l16-8-6 16-3-7z')}</button></div>`}</section>${g ? groupPanelH(g, av) : peopleH(cur, me2, av)}</div>`;
 }
 /* the message just sent: its bubble pops in with "Sent", and the send button's arrow flies off once */
 let JUST_SENT = '';
@@ -151,7 +173,12 @@ export function msgSend() {
     return;
   }
   if (to == SYSTEM) return;
-  if (to != 'Everyone' && !state.staff.some((s) => s.name == to)) {
+  const g = groupOf(state.groups, to);
+  if (g && sendBlock(g, USER, Date.now())) {
+    toast(blockText(g, USER));
+    return;
+  }
+  if (to != 'Everyone' && !g && !state.staff.some((s) => s.name == to)) {
     toast('Pick who it is for');
     return;
   }
@@ -203,5 +230,20 @@ export function msgKey(e) {
   }
 }
 export function msgNewChat(v) {
-  if (v) setUI('msg.to', v);
+  if (v == '__group') grpNew();
+  else if (v) setUI('msg.to', v);
+}
+/** why someone cannot send in a group, in words */
+function blockText(g, who) {
+  const b = sendBlock(g, who, Date.now());
+  if (b == 'muted') return 'You are muted in this group. You can still read it.';
+  if (b == 'timeout')
+    return (
+      'You are timed out in this group until ' +
+      new Date(timedOutUntil(g, who, Date.now()))
+        .toLocaleString('en-GB', { weekday: 'short', hour: '2-digit', minute: '2-digit' })
+        .replace(',', '') +
+      '. You can still read it.'
+    );
+  return b == 'out' ? 'You are not in this group.' : '';
 }
