@@ -1,4 +1,5 @@
 /* features/settings/settings: The Settings page. */
+import { appState } from '../app/desktop-app.js';
 import { docCard } from './doc-builder.js';
 import { company } from '../../data/company.js';
 import { ROLES } from '../../config/roles.js';
@@ -107,6 +108,22 @@ export function vSettings() {
     ${row('Light Or Dark', 'How the site looks for you', `<span class="seg"><button class="${dark ? '' : 'on'}" ${onClick('setThR', 'light')}>Light</button><button class="${dark ? 'on' : ''}" ${onClick('setThR', 'dark')}>Dark</button></span>`)}
     ${row('Page Background And Greeting Box', 'Patterns and colours', '<button class="btn ghost sm" data-act="lookOpen" data-stop="1">Change</button>')}
     ${row('Fewer Animations', 'Turns off movement and glow effects', `<label class="tsw"><input type="checkbox" ${rm ? 'checked' : ''} ${onEvent('onchange', 'motionSet', 'this.checked')}><span></span></label>`)}
+    ${row(
+      'Desktop App',
+      {
+        installed: 'You are using the desktop app. It updates itself with the website.',
+        ready:
+          'Open the CRM in its own window from the Start menu, taskbar or Dock. It updates itself with the website.',
+        browser:
+          'Install from the browser menu: Edge, Apps, Install this site as an app; Chrome, Cast save and share, Install page as app.',
+        file: 'Open the website (not a downloaded file) in Edge or Chrome to install the desktop app.',
+      }[appState()],
+      appState() == 'ready'
+        ? '<button class="btn ghost sm" data-act="installApp">Install</button>'
+        : appState() == 'installed'
+          ? '<span class="tag g">Installed</span>'
+          : ''
+    )}
     ${row('Help Tour', 'A short guide to the site', '<button class="btn ghost sm" data-act="startTour">Start</button>')}
     ${row('Report A Problem', 'Something not working or looking wrong? Tell us here', '<button class="btn sm" data-act="bugReport">Report</button>')}
     ${row('Account', 'Signed in as ' + esc(ROLES[ROLE].n), '<button class="btn ghost sm" data-act="swRole">Switch</button>')}

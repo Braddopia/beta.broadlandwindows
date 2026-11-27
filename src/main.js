@@ -109,6 +109,7 @@ import * as featuresTourTour from './features/tour/tour.js';
 import * as integrationsHallmark from './integrations/hallmark.js';
 import * as integrationsSmartOrders from './integrations/smart-orders.js';
 import * as startBoot from './start/boot.js';
+import * as featuresAppDesktopApp from './features/app/desktop-app.js';
 import * as printPrint from './print/print.js';
 import * as uiComponentsArt from './ui/components/art.js';
 import * as uiComponentsKpi from './ui/components/kpi.js';
@@ -153,6 +154,7 @@ const modules = {
   featuresAdminBackup,
   featuresRecordsDelete,
   startMigrations,
+  featuresAppDesktopApp,
   dataPersistence,
   dataPhotos,
   dataLoad,
@@ -317,4 +319,5 @@ featuresSearchSearch.search();
 featuresSettingsSettings.restoreMotionSetting();
 startBoot.boot();
 featuresHomeReviews.startReviewFeed();
+featuresAppDesktopApp.startDesktopApp();
 coreHaptics.listenForTaps();

@@ -28,7 +28,6 @@ for (const role of ['beta', 'staff'])
         // the Stock heading and each row's value are centred in the column (v19.14.1)
         const stockTh = t.querySelector('thead th[data-col=stock]'),
           thMid = (box(stockTh).left + box(stockTh).right) / 2;
-        const w = (c) => (t.querySelector(`thead th[data-col=${c}]`) || {}).offsetWidth || 0;
         const buttonsFit = rows.every((tr) => {
           const c = box(tr.querySelector('td.ac'));
           return [...tr.querySelectorAll('td.ac button')]
@@ -42,8 +41,30 @@ for (const role of ['beta', 'staff'])
             return Math.abs((q.left + q.right) / 2 - thMid) < 1.5;
           }),
           filterLevelWithSearch: Math.abs(q.top - f.top) < 1 && Math.abs(q.height - f.height) < 1,
-          // Item and Location the same width; Stock narrower so its values sit close to Item (v19.15)
-          evenlySpaced: (!w('colours') || w('item') == w('location')) && w('stock') < w('item'),
+          // v19.15.1: the same gap between every column on the left: each column is its contents plus the same
+          // padding, so (column width - widest contents) is equal for ID, Item, Stock, Location and Colours
+          evenlySpaced: (() => {
+            const spare = ['pid', 'item', 'stock', 'location', 'colours']
+              .map((c) => t.querySelector(`thead th[data-col=${c}]`))
+              .filter((th) => th && th.offsetWidth)
+              .map((th) => {
+                const i = all.indexOf(th);
+                const widest = Math.max(
+                  ...[th, ...rows.map((tr) => tr.children[i])].map((cell) =>
+                    Math.max(
+                      ...[...cell.children, cell].map((e) => (e === cell ? 0 : e.getBoundingClientRect().width)),
+                      (() => {
+                        const r = document.createRange();
+                        r.selectNodeContents(cell);
+                        return r.getBoundingClientRect().width;
+                      })()
+                    )
+                  )
+                );
+                return box(th).width - widest;
+              });
+            return Math.max(...spare) - Math.min(...spare) < 2.5;
+          })(),
           // the right group: Cost, (Value,) Status, buttons side by side with nothing between them
           rightGroupTogether: (() => {
             const cols = ['cost', 'value', 'status', 'act']

@@ -339,3 +339,18 @@ stock number). Decided with the owner:
 - Inventory: the Stock column is narrower (7.4rem) so its centred values sit close to Item.
 - Admin Console, Reviews: says whether Google and Trustpilot update by themselves ("not set up yet" while the GitHub
   keys are missing; "opened from a file" for a downloaded copy).
+
+## v19.15.1
+
+- Inventory columns: every column is as wide as what it holds with the same gap between each; all the spare room is
+  one empty column (`th.i-gap`) between the left group (ID, Item, Stock, Location, Colours) and the right group (Cost,
+  Value, Status, buttons). Long item, location and colour text stops at 16rem with "..." (11rem at 900-1100px). The
+  table uses automatic layout on a computer (`05f-inventory.css`); `inventory-layout.spec.js` checks the gaps are equal.
+- Desktop app (installable web app, `features/app/desktop-app.js`, files in `src/app/`): Edge or Chrome install it
+  (Settings, Desktop App, Install, or the browser's install icon). It opens in its own window, always loads the live
+  website (so it updates with every publish) and shares the website's saved data on that computer. The build copies
+  `manifest.webmanifest`, `sw.js` (network first, keeps a copy for when the internet drops), the `app-*.png` icons
+  (the crane emblem on navy) beside index.html and writes `version.json`; an open app or tab checks it every 15
+  minutes and on coming back into view, and offers Reload when a newer version is live. Not for a downloaded file.
+  Test: `tests/e2e/desktop-app.spec.js` (serves the site from https://crm.test/).
+- Removed an `undefined/` folder of test screenshots that had been committed by mistake.

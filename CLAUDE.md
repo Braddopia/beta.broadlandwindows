@@ -1,6 +1,6 @@
 # Broadland Windows CRM
 
-Single-file HTML CRM. Edit `src/` (css, js, assets), then run `npm run build` to write `dist/Broadland-Windows-CRM-<version>.html` and the root `index.html`. Never hand-edit `index.html` or `dist/`. Run `npm run check` (lint, unit tests, build, behaviour tests) before pushing; `npm run test:visual` compares screenshots with local baselines (`npm run test:visual:update` to create them).
+Single-file HTML CRM. Edit `src/` (css, js, assets, `src/app/` for the desktop app), then run `npm run build` to write `dist/Broadland-Windows-CRM-<version>.html`, the root `index.html`, and the desktop-app files beside it (`manifest.webmanifest`, `sw.js`, `app-*.png`, `version.json`). Never hand-edit those generated files or `dist/`. Run `npm run check` (lint, unit tests, build, behaviour tests) before pushing; `npm run test:visual` compares screenshots with local baselines (`npm run test:visual:update` to create them).
 
 Code layout (ES modules, bundled by esbuild into the one HTML file; imports only point down the layers, and `npm run lint` enforces it for every layer below features/; ui/shell is the one exception):
 - `src/core/` generic helpers (DOM, escaping, `html```, dates, formatting, actions, `events` on/emit) · `src/config/` fixed lists, colours, roles and permissions

@@ -4,10 +4,10 @@ const js = require('@eslint/js');
 const globals = require('globals');
 
 module.exports = [
-  { ignores: ['dist/**', 'index.html', 'node_modules/**', 'test-results/**'] },
+  { ignores: ['dist/**', 'index.html', 'sw.js', 'node_modules/**', 'test-results/**'] },
   {
     files: ['src/**/*.js'],
-    ignores: ['src/boot-loader.js'],
+    ignores: ['src/boot-loader.js', 'src/app/sw.js'],
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: 'module',
@@ -16,6 +16,7 @@ module.exports = [
       globals: {
         ...globals.browser,
         ASSETS: 'readonly',
+        APP_BUILD: 'readonly',
         USER: 'readonly',
         SSO: 'readonly',
         ZXing: 'readonly',

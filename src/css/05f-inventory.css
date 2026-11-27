@@ -38,26 +38,23 @@
 .t-inv .st2{display:inline-flex;flex-direction:column;align-items:center;gap:.2rem}
 .t-inv td.ac .acts{justify-content:flex-end;flex-wrap:nowrap;gap:.35rem}
 
-/* fixed column widths on a computer (owner's choice, v19.13.1): what the product is sits together on the left in
-   evenly spaced columns (Item, Stock, Location the same width, Colours starting the same step on); Cost, Value and
-   Status sit by the buttons on the right; the spare room falls after Colours, between the two groups */
+/* column widths on a computer (v19.15.1, the owner's choice): every column is as wide as what it holds, with the same
+   gap between each (ID, Item, Stock, Location, Colours on the left; Cost, Value, Status and the buttons on the right),
+   and all the spare room goes in one empty column between the two groups. Long item, location and colour text stops
+   at 16rem and ends in "..." with the full text on hover. */
 @media(min-width:900px){
-  .ptb.fx.t-inv th.i-sel{width:2.6rem}
-  .ptb.fx.t-inv th.i-id{width:5.2rem}
-  .ptb.fx.t-inv th.i-item,.ptb.fx.t-inv th.i-loc{width:10.5rem}
-  /* v19.15: Stock is narrower, so its centred values sit close to Item as they did when they read from the left */
-  .ptb.fx.t-inv th.i-stock{width:7.4rem}
-  .ptb.fx.t-inv th.i-col{width:auto}
-  .ptb.fx.t-inv th.i-cost{width:5.4rem}
-  .ptb.fx.t-inv th.i-val{width:6.4rem}
-  .ptb.fx.t-inv th.i-st{width:7rem}
-  .ptb.fx.t-inv th.ac{width:12.8rem}
+  .ptb.fx.t-inv{table-layout:auto}
+  .ptb.fx.t-inv th,.ptb.fx.t-inv td{width:1%;white-space:nowrap;padding-left:var(--inv-gap);padding-right:var(--inv-gap)}
+  .ptb.fx.t-inv{--inv-gap:.85rem}
+  .ptb.fx.t-inv th.i-gap,.ptb.fx.t-inv td.i-gap{width:auto;padding:0}
+  .ptb.fx.t-inv th.i-sel,.ptb.fx.t-inv td.i-sel{padding-left:.9rem}
+  .ptb.fx.t-inv td.i-item>*,.ptb.fx.t-inv td.i-loc>*,.ptb.fx.t-inv td.i-col>*{display:block;max-width:16rem;overflow:hidden;text-overflow:ellipsis}
+  .ptb.fx.t-inv td.i-item,.ptb.fx.t-inv td.i-loc,.ptb.fx.t-inv td.i-col{overflow:visible}
 }
 /* 900 to 1100: Colours and Value step aside (as on the other lists) and Report sits in the product window */
 @media(min-width:900px) and (max-width:1100px){
-  .ptb.fx.t-inv th.i-loc{width:auto}
-  .ptb.fx.t-inv th.ac{width:9rem}
   .t-inv td.ac .i-rep{display:none}
+  .ptb.fx.t-inv td.i-item>*,.ptb.fx.t-inv td.i-loc>*{max-width:11rem}
 }
 
 /* ---- the bar under the title on every Inventory tab ---- */

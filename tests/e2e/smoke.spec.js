@@ -102,7 +102,9 @@ test('Inventory columns (v19.13): ID, Item, Stock with its unit, Location, Colou
   await app.role('beta');
   await app.go('stock');
   const th = await app.run(() =>
-    [...document.querySelectorAll('#main .t-inv thead th')].map((t) => t.innerText.replace(/[▲▼]/g, '').trim())
+    [...document.querySelectorAll('#main .t-inv thead th:not(.i-gap)')].map((t) =>
+      t.innerText.replace(/[▲▼]/g, '').trim()
+    )
   );
   expect(th.slice(1, 9)).toEqual(['ID', 'Item', 'Stock', 'Location', 'Colours', 'Cost', 'Value', 'Status']);
   // stock carries its unit: full bars as "118 × 6.5M", others "62 PCS"
