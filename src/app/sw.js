@@ -17,7 +17,7 @@ self.addEventListener('fetch', (e) => {
   if (r.method != 'GET' || url.origin != location.origin) return;
   /* the page itself and the app's icons are kept for offline use; everything else just goes to the network */
   const keep =
-    r.mode == 'navigate' || /\/(app-icon-\d+|app-maskable-\d+)\.png$|manifest\.webmanifest$/.test(url.pathname);
+    r.mode == 'navigate' || /\/app-icon-\d+\.png$|manifest\.webmanifest$/.test(url.pathname);
   if (!keep) return;
   e.respondWith(
     fetch(r)

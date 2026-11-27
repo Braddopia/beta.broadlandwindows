@@ -39,8 +39,8 @@ test('the website describes itself as an app, with its icons', async ({ app }) =
     name: 'Broadland Windows CRM',
     display: 'standalone',
     start: './',
-    sizes: ['192x192', '512x512', '512x512'],
-    icons: [200, 200, 200],
+    sizes: ['192x192', '512x512'],
+    icons: [200, 200],
   });
   // the service worker file is published with this version's name in its cache
   const sw = await app.page.evaluate(async () => (await fetch('sw.js')).text());

@@ -354,3 +354,5 @@ stock number). Decided with the owner:
   minutes and on coming back into view, and offers Reload when a newer version is live. Not for a downloaded file.
   Test: `tests/e2e/desktop-app.spec.js` (serves the site from https://crm.test/).
 - Removed an `undefined/` folder of test screenshots that had been committed by mistake.
+- v19.15.2: the desktop app icon is the same emblem as the browser tab (the sun with the crane), on a see-through
+  background with nothing added (the navy tile and the "maskable" icon were removed, at the owner's request).
