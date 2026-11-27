@@ -100,7 +100,7 @@ export function migrate() {
   };
   state.brand.g = state.brand.g || { score: 4.5, count: '', url: '' };
   /* review sites figures as published (Nov 2026); admins update them in Admin Console > Reviews */
-  if (!state.brand.tp.count) state.brand.tp.count = '21';
+  if (!state.brand.tp.count) state.brand.tp.count = '26';
   state.brand.tt = state.brand.tt || {
     score: 4.9,
     count: '613',
@@ -385,5 +385,23 @@ export function stockListsInit() {
     groups: DEF_GROUPS.slice(),
     colours: DEF_COLOURS(),
   };
+  store();
+}
+
+/* v19.15.6: bring sample data saved by older versions in line with today's (once). Only records that are exactly the
+   sample ones change: the sample profile bars (VG920 KL010, KL005, VG920) were 3M and are 6.5M, the length the office
+   uses; the Trustpilot count shown by default was 21 and is 26 (Nov 2026, as the owner reported). */
+export function sampleRefresh() {
+  if (state.sample1915) return;
+  const bars = new Set(['VG920 KL010', 'KL005', 'VG920']);
+  state.items.forEach((r) => {
+    if (bars.has(r.item) && /^3\s*m$/i.test(String(r.length || '').trim())) r.length = '6.5M';
+  });
+  Object.values(state.cutProf || {}).forEach((p) => {
+    if (p && +p.bar == 3000) p.bar = 6500;
+  });
+  const tp = state.brand && state.brand.tp;
+  if (tp && String(tp.count) == '21') tp.count = '26';
+  state.sample1915 = 1;
   store();
 }

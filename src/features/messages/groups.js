@@ -34,7 +34,7 @@ const hhmm = (t) =>
   new Date(t).toLocaleString('en-GB', { weekday: 'short', hour: '2-digit', minute: '2-digit' }).replace(',', '');
 
 /** a small line in the group's chat ("Ann added Bob"); not counted as unread */
-function event(g, text) {
+export function grpNote(g, text) {
   state.notes = state.notes || [];
   state.notes.push({
     id: shortId('N'),
@@ -92,7 +92,7 @@ export function grpNew() {
       muted: [],
       timeouts: {},
     });
-    event(g, USER + ' started the group');
+    grpNote(g, USER + ' started the group');
     audit('Group started', 'Group ' + g.name, g.open ? 'Open' : 'Invite only');
     setUI('msg.to', groupKey(g));
     setTimeout(() => {
@@ -107,7 +107,7 @@ export function grpEdit(id) {
   if (!g || !canManage(g, USER)) return refuse('Only the owner or a group admin can change the group');
   form('Edit Group', FIELDS, { name: g.name, desc: g.desc, access: g.open ? 'Open' : 'Invite only' }, (o) => {
     Object.assign(g, { name: SAFE.text(o.name, 40), desc: SAFE.text(o.desc, 240), open: o.access == 'Open' });
-    event(g, USER + ' changed the group details');
+    grpNote(g, USER + ' changed the group details');
     repos.groups.changed(g);
     audit('Group changed', 'Group ' + g.name, '');
   });
@@ -129,22 +129,23 @@ export function grpAdd(id) {
     'sm'
   );
 }
-export function grpAddOne(id, name) {
+export function grpAddOne(id, name, quiet) {
   const g = grp(id);
   if (!g || !canManage(g, USER)) return refuse('Only the owner or a group admin can add people');
-  if (!state.staff.some((s) => s.name == name) || isMember(g, name)) return;
+  if (!state.staff.some((s) => s.name == name)) return;
+  if (isMember(g, name)) return refuse(name + ' is already in the group');
   g.members.push(name);
-  event(g, USER + ' added ' + name);
+  grpNote(g, USER + ' added ' + name);
   save(g, 'Added to group', name);
   toast(name + ' added');
-  grpAdd(id);
+  if (!quiet) grpAdd(id);
 }
 /** join an open group */
 export function grpJoin(id) {
   const g = grp(id);
   if (!g || !g.open || isMember(g, USER)) return;
   g.members.push(USER);
-  event(g, USER + ' joined');
+  grpNote(g, USER + ' joined');
   setUI('msg.to', groupKey(g));
   save(g, 'Joined group', USER);
 }
@@ -163,7 +164,10 @@ export function grpLeave(id) {
         grpGone(g);
         return;
       }
-      event(g, USER + ' left' + (g.owner != USER && roleIn(g, g.owner) ? ', ' + g.owner + ' now owns the group' : ''));
+      grpNote(
+        g,
+        USER + ' left' + (g.owner != USER && roleIn(g, g.owner) ? ', ' + g.owner + ' now owns the group' : '')
+      );
       setUI('msg.to', 'Everyone');
       save(g, 'Left group', USER);
     }
@@ -209,7 +213,7 @@ export function grpDo(id, name, act, arg) {
   const g = grp(id);
   if (!g || !canActOn(g, USER, name)) return refuse('You cannot change this for ' + name);
   const done = (line) => {
-    event(g, line);
+    grpNote(g, line);
     save(g, 'Group: ' + act, name);
   };
   if (act == 'admin' || act == 'unadmin') {
@@ -263,7 +267,7 @@ export function groupPanelH(g, av) {
     row = (n) =>
       `<div class="msn-c msn-pp grp-m ${n == me ? 'you' : ''}">${av(n)}<span class="msn-ct"><b>${esc(n)}${n == me ? ' <i class="msn-you">You</i>' : ''}</b><small>${tag(n) || esc((state.staff.find((s) => s.name == n) || {}).role || '')}</small></span>${canActOn(g, me, n) ? `<button type="button" class="grp-mb" id="gm_${esc(g.id)}_${esc(n.replace(/\W/g, ''))}" aria-haspopup="true" aria-label="Options for ${esc(n)}" data-act="grpMenu" data-args="${actJson([g.id, n, 'this'], 2)}">⋯</button>` : ''}</div>`;
   return `<aside class="msn-p" aria-label="This group"><div class="msn-lh"><h1>Group</h1><span class="msn-pn" title="People in this group">${g.members.length}</span></div>
-    <div class="grp-card"><b>${esc(g.name)}</b><span class="tag ${g.open ? 'g' : ''}">${g.open ? 'Open group' : 'Invite only'}</span>${g.desc ? `<p>${esc(g.desc)}</p>` : '<p class="muted">No description yet.</p>'}<div class="grp-tools">${mgr ? `<button class="mini pri" ${onClick('grpAdd', g.id)}>Add people</button><button class="mini" ${onClick('grpEdit', g.id)}>Edit</button>` : ''}${isMember(g, me) ? `<button class="mini" ${onClick('grpLeave', g.id)}>Leave</button>` : ''}${g.owner == me ? `<button class="mini del" ${onClick('grpDelete', g.id)}>Delete</button>` : ''}</div></div>
+    <div class="grp-card"><b>${esc(g.name)}</b><span class="tag ${g.open ? 'g' : ''}">${g.open ? 'Open group' : 'Invite only'}</span>${g.desc ? `<p>${esc(g.desc)}</p>` : '<p class="muted">No description yet.</p>'}<div class="grp-tools">${mgr ? `<button class="mini pri" ${onClick('grpAdd', g.id)}>Add people</button><button class="mini" ${onClick('grpEdit', g.id)}>Edit Group</button>` : ''}${isMember(g, me) ? `<button class="mini" ${onClick('grpLeave', g.id)}>Leave</button>` : ''}${g.owner == me ? `<button class="mini del" ${onClick('grpDelete', g.id)}>Delete</button>` : ''}</div></div>
     <p class="msn-ph">In This Group</p><div class="msn-pl">${g.members.slice().sort(order).map(row).join('')}</div>
     <div class="msn-rp"><button type="button" class="btn ghost sm" data-act="bugHere"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 21V4M5 4h11l-2 4 2 4H5"/></svg>Report A Problem</button></div>
   </aside>`;

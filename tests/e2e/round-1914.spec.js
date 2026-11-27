@@ -5,7 +5,7 @@ const { test, expect } = require('../helpers');
 test('new review figures from the daily file reach the Overview and the Office floor board', async ({ app }) => {
   await app.role('beta');
   await app.go('home');
-  await expect(app.page.locator('#main .rate')).toContainText('(21 reviews)');
+  await expect(app.page.locator('#main .rate')).toContainText('(26 reviews)');
   await app.run(() =>
     reviewFeed({
       updated: '2026-11-08T05:23:00Z',
@@ -111,4 +111,23 @@ test('Admin Console says whether review figures update by themselves (v19.15)', 
   await app.run(() => reviewFeed({ updated: '2026-11-08T05:23:00Z', trustpilot: { score: 4.6, count: 26 } }));
   await app.go('admin');
   await expect(app.page.locator('#main .rv-feed.ok')).toContainText('update automatically each morning');
+});
+
+test('older sample data is brought up to date once: sample bars 3M become 6.5M, Trustpilot 21 becomes 26', async ({
+  app,
+}) => {
+  const r = await app.run(() => {
+    const it = state.items.find((x) => x.item == 'KL005' && x.length == '6.5M'),
+      other = state.items.find((x) => x.item == 'ACET848');
+    it.length = '3M';
+    other.length = '3M'; // not a sample bar: left alone
+    state.brand.tp.count = '21';
+    delete state.sample1915;
+    sampleRefresh();
+    const out = [it.length, other.length, state.brand.tp.count];
+    state.brand.tp.count = '40'; // a real figure typed later is never changed again
+    sampleRefresh();
+    return [...out, state.brand.tp.count];
+  });
+  expect(r).toEqual(['6.5M', '3M', '26', '40']);
 });

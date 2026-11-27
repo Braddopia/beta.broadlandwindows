@@ -66,6 +66,7 @@ import * as featuresLeadsLeads from './features/leads/leads.js';
 import * as featuresLiveBoardsLiveBoards from './features/live-boards/live-boards.js';
 import * as featuresMessagesMessages from './features/messages/messages.js';
 import * as featuresMessagesGroups from './features/messages/groups.js';
+import * as featuresMessagesCommands from './features/messages/commands.js';
 import * as featuresNotificationsNotifications from './features/notifications/notifications.js';
 import * as featuresProblemsProblems from './features/problems/problems.js';
 import * as featuresProfileProfile from './features/profile/profile.js';
@@ -198,6 +199,7 @@ const modules = {
   featuresLiveBoardsLiveBoards,
   featuresMessagesMessages,
   featuresMessagesGroups,
+  featuresMessagesCommands,
   featuresNotificationsNotifications,
   featuresProblemsProblems,
   featuresProfileProfile,
@@ -306,6 +308,7 @@ featuresStockPhoneMode.watchPhoneSize();
 startMigrations.migrateCustomers();
 startMigrations.custBook();
 startMigrations.stockListsInit();
+startMigrations.sampleRefresh();
 featuresLeadsLeadRecord.defineLeadRecord();
 featuresContractsContractRecord.defineContractRecord();
 featuresTourTour.listenForTourKeys();

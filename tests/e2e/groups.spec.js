@@ -127,3 +127,82 @@ test('an open group is listed for others to join; an invite-only one is not', as
   expect(await app.run(() => state.groups[0].members.includes(USER))).toBe(true);
   await expect(app.page.locator('.msn-ev').last()).toContainText('joined');
 });
+
+test('chat commands: typing / lists them; /nickname, /me, /shrug, and group commands with the same permissions', async ({
+  app,
+}) => {
+  await app.page.setViewportSize({ width: 1440, height: 900 });
+  await app.go('messages');
+  const me = await app.run(() => USER);
+  await app.run((m) => {
+    state.groups = [
+      {
+        id: 'G5',
+        name: 'Yard',
+        desc: '',
+        owner: m,
+        admins: [],
+        members: [m, 'Fitter A', 'Fitter B'],
+        open: false,
+        muted: [],
+        timeouts: {},
+      },
+    ];
+    setUI('msg.to', 'g:G5');
+  }, me);
+  const box = app.page.locator('#m_t');
+  const send = async (t) => {
+    await box.fill(t);
+    await box.press('Enter');
+  };
+  // typing "/" shows the commands; "/ti" narrows to /timeout; picking fills it in
+  await box.pressSequentially('/ti');
+  await expect(app.page.locator('#msnCmds .msn-cmd')).toHaveText([/\/timeout/]);
+  await app.page.click('#msnCmds .msn-cmd');
+  await expect(box).toHaveValue('/timeout ');
+  // nickname in this group, shown on the group's lines
+  await send('/nickname Gaffer');
+  expect(await app.run(() => state.groups[0].nicks[USER])).toBe('Gaffer');
+  await expect(app.page.locator('.msn-ev').last()).toContainText('is now known as Gaffer');
+  // /me and /shrug send messages
+  await send('/me is loading van 2');
+  await expect(app.page.locator('.msn-me').last()).toContainText('* Gaffer is loading van 2');
+  await send('/shrug no idea');
+  await expect(app.page.locator('.bub.me').last()).toContainText('no idea ¯\\_(ツ)_/¯');
+  // group commands: a short name is enough when only one person matches
+  await send('/timeout fitter b 1h');
+  expect(await app.run(() => state.groups[0].timeouts['Fitter B'] > Date.now())).toBe(true);
+  await send('/mute Fitter A');
+  expect(await app.run(() => state.groups[0].muted)).toEqual(['Fitter A']);
+  await send('/rename Yard Crew');
+  await expect(app.page.locator('.msn-h')).toContainText('Yard Crew');
+  // a name that matches two people is refused and says why
+  await send('/admin Fitter');
+  await expect(app.page.locator('#toast')).toContainText('Nobody (or more than one person) matches');
+  // /help lists what this person can use
+  await send('/help');
+  await expect(app.page.locator('#mbox .msn-help')).toContainText('/timeout');
+  await app.call('closeModal');
+  // a member who does not run the group cannot use the group commands
+  await app.run(() => {
+    state.groups[0].owner = 'Fitter B';
+    state.groups[0].admins = [];
+    render();
+  });
+  await send('/mute Fitter A');
+  await expect(app.page.locator('#toast')).toContainText('only works in a group you run');
+  expect(app.errors).toEqual([]);
+});
+
+test('each person has their own picture colour, the same every time', async ({ app }) => {
+  await app.go('messages');
+  const c = await app.run(() =>
+    [...document.querySelectorAll('.msn-p .mav')].map((e) => [...e.classList].find((x) => /^c\d$/.test(x)))
+  );
+  expect(c.every(Boolean)).toBe(true);
+  expect(new Set(c).size).toBeGreaterThan(3);
+  // the colour comes from the name: the same person always gets the same one
+  expect(await app.run(() => avColour('Fitter A') == avColour('Fitter A') && /^c\d$/.test(avColour('Fitter A')))).toBe(
+    true
+  );
+});

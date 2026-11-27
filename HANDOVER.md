@@ -365,3 +365,19 @@ stock number). Decided with the owner:
   "2 × 6.5M" for full bars. A unit word typed in a product's Length or Size box (EA, Each, PCS, Pair, M, Kit, Set, Box,
   Pack, Roll, Bulk) is treated as its unit ("9 × EA") instead of showing under the item name (`lengthUnit` in
   `domain/stock.js`, unit-tested). Movements use the same wording.
+
+## v19.16
+
+- Sample data saved by older versions is brought up to date once (`sampleRefresh` in `start/migrations.js`): the sample
+  profile bars (VG920 KL010, KL005, VG920) go from 3M to 6.5M and a Cutting length of 3000 to 6500; the Trustpilot
+  count shown by default goes from 21 to 26 (the owner's figure). Only exact sample values change; a figure typed later
+  is never touched. New installs start with 26.
+- Messages: each person's picture has their own colour (ten colours, chosen from the name: `avColour`); group pictures
+  are rounded squares. The group buttons are a 2 × 2 grid of equal buttons (Add People, Edit Group, Leave, Delete).
+- Chat commands (rules `domain/chat-commands.js`, unit-tested; carried out by `features/messages/commands.js`): typing
+  "/" lists the commands this person can use in this chat. Everyone: /nickname (per group in a group, else team-wide),
+  /me (action line), /shrug, /help. Anyone in a group: /leave. Group owner and admins: /add, /remove, /mute, /unmute,
+  /timeout Name 15m|1h|1d|1w, /admin, /unadmin (owner only), /rename, /desc. Group commands use the same actions as
+  the buttons, so the same permission checks apply; a name can be shortened when only one person matches.
+- Review counts: still need the Google and Trustpilot keys in GitHub (see v19.14); without them nothing can fetch the
+  live figures.
