@@ -66,7 +66,7 @@ test('the Fitting Schedule board and the Stock Take page use the full width', as
 });
 
 test('on a short screen the side menu keeps its group names and scrolls', async ({ app }) => {
-  await app.page.setViewportSize({ width: 1440, height: 600 });
+  await app.page.setViewportSize({ width: 1440, height: 480 }); // short enough that the menu cannot fit with any font
   await app.role('beta');
   await app.go('home');
   const r = await app.run(() => {
