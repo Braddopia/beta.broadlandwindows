@@ -22,6 +22,11 @@ export function saverMinutes() {
   const n = parseFloat(v == null ? '5' : v);
   return isFinite(n) && n >= 0 ? n : 5;
 }
+/** Settings, Screen Saver: the drop-down */
+export function saverPick(e) {
+  const v = e && e.target && e.target.value;
+  if (SAVER_CHOICES.some(([k]) => k == v)) saverSet(v);
+}
 export function saverSet(v) {
   try {
     localStorage.setItem(KEY, String(v));
@@ -51,7 +56,7 @@ function build() {
   }).join('');
   /* a Norfolk drainage mill: tapered brick tower, boat-shaped cap, four lattice sails turning about the hub */
   const MILL =
-    '<g class="sails"><path d="M68 74V4h4v70zM72 72h66v-4H72zM72 70v70h-4V70zM68 72H2v4h66z"/><path class="lat" d="M72 10h14v56H72zM78 72v14h56V72zM68 80H54v56h14zM62 72v-14H6v14z"/></g><path class="tw" d="M50 220l7-142h26l7 142z"/><path class="cap" d="M52 82c2-16 10-24 18-24s16 8 18 24z"/><path class="fan" d="M70 60l26-14v6z"/><circle class="hub" cx="70" cy="72" r="5"/>';
+    '<g class="sails"><path d="M68 2h4v140h-4zM0 70h140v4H0z"/><path class="lat" d="M72 8h14v58H72zM76 74h58v14H76zM54 78h14v58H54zM6 56h58v14H6z"/></g><path class="tw" d="M50 220l7-142h26l7 142z"/><path class="cap" d="M52 82c2-16 10-24 18-24s16 8 18 24z"/><path class="fan" d="M70 60l26-14v6z"/><circle class="hub" cx="70" cy="72" r="5"/>';
   el.innerHTML =
     '<div class="sv-sky sv-day"></div><div class="sv-sky sv-dusk"></div><div class="sv-sky sv-night"></div>' +
     '<div class="sv-stars"></div><div class="sv-moon"></div><div class="sv-sun"></div>' +
@@ -67,12 +72,17 @@ function build() {
     /* the Broads, back to front: a far tree line, a near tree line with a round-tower church and a second mill, the
        big mill, water with its reflection, ripples, the sun's glint and evening mist, a wherry and a yacht, reeds */
     `<svg class="sv-trees far" viewBox="0 0 1440 120" preserveAspectRatio="none"><path d="${treeLine(1, 34)}"/></svg>` +
-    `<svg class="sv-trees" viewBox="0 0 1440 120" preserveAspectRatio="none"><path d="${treeLine(7, 46)}"/></svg>` +
-    /* (v19.17.3) the church and the distant mill stand on the near bank, down to the water like the big mill.
-       A Norfolk round-tower church: round flint tower with a battlemented top and slit windows, a long nave with a
-       steep roof, a lower chancel at the east end and a south porch */
-    '<svg class="sv-church" viewBox="0 0 220 130"><path class="rf" d="M60 70L108 40L156 70Z"/><path class="rf" d="M150 80L176 60L202 80Z"/><path d="M62 70H156V130H62ZM150 80H202V130H150ZM96 98h16l-8-10zM96 98h16v32H96Z"/><path d="M18 130V30a20 4 0 0 1 40 0V130Z"/><path d="M16 30V20h6v5h5v-5h6v5h5v-5h6v5h5v-5h6V30Z"/><path class="win" d="M35 46h6v12h-6zM35 78h6v10h-6zM76 82h8v16h-8zM124 82h8v16h-8zM176 92h8v14h-8z"/></svg>' +
+    /* (v19.17.6, the owner's choice) the second mill stands behind the near tree line, its foot hidden by the trees;
+       the church stands in front on the bank: a Norfolk round-tower church with a flint tower and battlements, a long
+       thatched nave, a lower chancel, a south porch, arched windows that light up after dark, and a yew beside it */
     `<svg class="sv-mill far" viewBox="0 0 140 220">${MILL}</svg>` +
+    `<svg class="sv-trees" viewBox="0 0 1440 120" preserveAspectRatio="none"><path d="${treeLine(7, 46)}"/></svg>` +
+    '<svg class="sv-church" viewBox="0 0 280 150"><path class="yew" d="M0 150c0-30 6-58 16-70 4-10 10-16 14-16s10 6 14 16c10 12 16 40 16 70z"/>' +
+    '<path d="M66 150V40c0-5 9-7 19-7s19 2 19 7V150z"/><path d="M63 40V28h6v5h6v-5h6v5h6v-5h6v5h6v-5h6v12z"/>' +
+    '<path class="th" d="M100 96c14-20 30-38 50-46 20 8 36 26 50 46z"/><path d="M104 96h92v54h-92z"/>' +
+    '<path class="th" d="M196 108c8-10 18-18 26-21 8 3 18 11 26 21z"/><path d="M198 108h48v42h-48z"/>' +
+    '<path d="M134 118l12-12 12 12v32h-24z"/><path class="fl" d="M66 70h38M66 100h38M66 128h38"/>' +
+    '<path class="win" d="M82 52a3 3 0 0 1 6 0v12h-6zM82 86a3 3 0 0 1 6 0v10h-6zM116 112a4 4 0 0 1 8 0v18h-8zM176 112a4 4 0 0 1 8 0v18h-8zM216 120a4 4 0 0 1 8 0v14h-8zM142 136a4 4 0 0 1 8 0v14h-8z"/></svg>' +
     `<svg class="sv-mill" viewBox="0 0 140 220">${MILL}</svg>` +
     `<div class="sv-water"><div class="sv-wd"></div><div class="sv-wn"></div><svg class="sv-mill refl" viewBox="0 0 140 220">${MILL}</svg><div class="sv-mist"></div><svg class="sv-shim" viewBox="0 0 1600 320" preserveAspectRatio="none">${ripples(3)}</svg><svg class="sv-shim s2" viewBox="0 0 1600 320" preserveAspectRatio="none">${ripples(11)}</svg><svg class="sv-glint" viewBox="0 0 1600 320" preserveAspectRatio="none">${glint(5)}</svg><div class="sv-fog"></div></div>` +
     '<svg class="sv-boat wherry" viewBox="0 0 120 90"><path class="sail" d="M58 6L60 70H28C34 46 44 22 58 6Z"/><path class="mast" d="M59 2V72"/><path class="hull" d="M6 72H112L102 84H20Z"/></svg>' +
@@ -206,7 +216,10 @@ export function startScreenSaver() {
   let shownAt = 0;
   const activity = (e) => {
     if (on()) {
-      /* ignore the tiny movements and the click that opened a preview in its first moment */
+      /* (v19.17.6, the owner's choice) moving the mouse alone does not close it: only a click, a tap, a key or the
+         wheel does. Movement still counts as activity while it is not showing, so it never starts while in use. */
+      if (e.type == 'mousemove') return;
+      /* ignore the click that opened a preview in its first moment */
       if (performance.now() - shownAt < 600) return;
       hide();
       /* the touch or click that wakes it does nothing else */

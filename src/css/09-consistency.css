@@ -110,17 +110,16 @@ body[data-theme=dark] .rv-feed.off{background:#3a3220;color:#ffd98a}
 /* ---- v19.17 ---- */
 /* Settings: every button in a settings row is the same size; switches (Light/Dark, Screen Saver) are the same height */
 .set-r .set-a{display:flex;align-items:center;justify-content:flex-end;gap:.5rem;flex-wrap:wrap}
-.set-r .set-a>.btn,.set-r .set-a>label.btn,.set-r .set-a .sv-set>.btn{width:6.8rem;height:2.3rem;padding:0 .6rem;justify-content:center;font-size:.82rem}
+.set-r .set-a>.btn,.set-r .set-a>label.btn{width:6.8rem;height:2.3rem;padding:0 .6rem;justify-content:center;font-size:.82rem}
 .set-r .set-a .seg2{height:2.3rem}.set-r .set-a .seg2 button{height:100%;padding:0 .8rem}
 .set-r .set-a>.tag{min-width:6.8rem;height:2.3rem;display:inline-flex;align-items:center;justify-content:center}
 .set-r .set-a>.tsw{width:6.8rem;display:flex;justify-content:center}
+/* Screen Saver: a drop-down the size of the buttons, Preview as a link after the description (v19.17.6) */
+.set-r .sv-sel select{width:6.8rem;height:2.3rem;padding:0 .6rem;border:1px solid var(--line);border-radius:10px;background-color:var(--card);color:var(--blue);font-size:.82rem;font-weight:600}
+.set-r .sv-pv{display:inline;padding:0;border:0;background:none;color:var(--blue);font:inherit;font-weight:600;cursor:pointer}
+.set-r .sv-pv:hover{text-decoration:underline}
 .set-r>span:first-child{min-width:0}
 /* the Screen Saver row: its four choices and Preview sit on their own line under the title */
-.set-r:has(.sv-set){flex-wrap:wrap}
-.set-r:has(.sv-set)>span:first-child{flex:1 1 100%}
-.set-r:has(.sv-set) .set-a{flex:1 1 100%}
-.set-r .sv-set{width:100%;flex-wrap:nowrap}
-.set-r .sv-set .seg2{flex:1}.set-r .sv-set .seg2 button{flex:1}
 /* Files lists (manuals, forms, other content, brand assets), set out like Inventory: the name on the left takes the
    spare room; Category, Size and the buttons sit together on the right (v19.17.3, the owner's choice), each as wide as
    what it holds with the same gap between them, so the buttons never cover the size. One shared grid for the list

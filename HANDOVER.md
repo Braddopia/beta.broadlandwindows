@@ -541,3 +541,20 @@ stock number). Decided with the owner:
   Hardwood), one of each file is kept (`oneEach`, newest first; "-1.pdf" re-uploads count once), and PDFs that are not
   brochures are left out (`NOT_BROCHURE`). The app also uses its own checked name and range for any brochure it
   already knows, and drops duplicates itself. brochures.json was cleaned to 22.
+
+## v19.17.6
+
+- Screen saver: the windmill sails are a straight cross through the hub (the left and right arms were drawn a few
+  pixels above and below the centre line), and the second mill's lattice frames are outlines again (a stronger rule
+  filled them in). The second mill stands behind the near tree line; the church is redrawn as a Norfolk round-tower
+  church on the bank (flint tower with battlements and flint courses, thatched nave, lower chancel, porch, arched
+  windows lit after dark, a yew beside it), a shade lighter than the trees so it reads.
+- Moving the mouse no longer closes the screen saver; a click, tap, key or the wheel does. Movement still counts as
+  activity, so it never starts while the mouse is being used.
+- Settings, Screen Saver: one drop-down (`#saverSel`, drawn by fieldControl, `saverPick`) the size of the other
+  buttons, with Preview as a link after the description, so the row is no taller than the others.
+- Files: "New" needs the file to have been uploaded to the website in the last two months as well as first seen in
+  the last 30 days (`isNew`, using the uploads/YYYY/MM in its address), so an old file the check only noticed today is
+  not marked New. A file taken off the website still drops out at the next morning check.
+- Mac app icon: the sun is back at its full size; only the see-through corners are white (app-sun-180 and the
+  maskable icons).

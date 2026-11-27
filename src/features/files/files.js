@@ -102,8 +102,17 @@ export function startBrochureFeed() {
   brochureFeed();
   setInterval(brochureFeed, 3 * 3600 * 1000);
 }
-/** a brochure first seen on the website in the last 30 days */
-const isNew = (d) => !!d.seen && Date.now() - Date.parse(d.seen) < 30 * 864e5;
+/* the month a file was uploaded to the website, from its address (".../uploads/2025/06/...") */
+const upMonth = (u) => {
+  const m = /\/uploads\/(\d{4})\/(\d{2})\//.exec(u || '');
+  return m ? Date.UTC(+m[1], +m[2] - 1, 1) : 0;
+};
+/** a brochure first seen on the website in the last 30 days, and uploaded there in the last two months (v19.17.6:
+    an old file the check only noticed today is not new) */
+export const isNew = (d) =>
+  !!d.seen &&
+  Date.now() - Date.parse(d.seen) < 30 * 864e5 &&
+  (!upMonth(d.url) || Date.now() - upMonth(d.url) < 62 * 864e5);
 export const SSM = `Alitherm 300 ETC v092019|1003|12 MB
 Alitherm 400 Casement v012026|1296|32.7 MB
 Alitherm 400 ETD Door v062023|1101|77.1 MB

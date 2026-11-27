@@ -34,15 +34,15 @@
 #saver .sv-trees.far{top:56.5vh;height:12vh}#saver .sv-trees.far path{fill:#1d4a85;opacity:.75}
 #saver .sv-mill{position:absolute;z-index:0;left:14%;top:calc(68vh - 26vh);height:26vh;width:auto;aspect-ratio:140/220}
 #saver .sv-mill .tw,#saver .sv-mill .cap,#saver .sv-mill .sails path,#saver .sv-mill .hub,#saver .sv-mill .fan{fill:#06213f}
-#saver .sv-mill.far{left:58%;top:calc(68vh - 17vh);height:17vh}
+#saver .sv-mill.far{left:58%;top:calc(68vh - 19vh);height:19vh}
 #saver .sv-mill.far .tw,#saver .sv-mill.far .cap,#saver .sv-mill.far .sails path,#saver .sv-mill.far .hub,#saver .sv-mill.far .fan{fill:#0d3363}
-#saver .sv-mill.far .sails .lat{stroke:#0d3363}
+#saver .sv-mill.far .sails .lat{fill:none;stroke:#0d3363}
 #saver .sv-mill.far .sails{animation-duration:22s}
 /* the near mill's reflection in the water, upside down, faint and wavering */
 #saver .sv-mill.refl{left:14%;top:0;height:26vh;transform:scaleY(-1);transform-origin:50% 0;opacity:.28;filter:blur(1.2px);animation:svWaver 4s ease-in-out infinite alternate}
 @keyframes svWaver{from{transform:scaleY(-1) skewX(-1.5deg)}to{transform:scaleY(-1) skewX(1.5deg)}}
-#saver .sv-church{position:absolute;left:79%;top:calc(68vh - 12vh);height:12vh;width:auto;aspect-ratio:220/130}
-#saver .sv-church path{fill:#0d3363}#saver .sv-church .win{fill:#ffd98a;opacity:0;animation:svNight 60s ease-in-out infinite}
+#saver .sv-church{position:absolute;left:76%;top:calc(68vh - 13vh);height:13vh;width:auto;aspect-ratio:280/150}
+#saver .sv-church path{fill:#17447c}#saver .sv-church .th{fill:#215494}#saver .sv-church .yew{fill:#0f3768}#saver .sv-church .fl{fill:none;stroke:#2a5d9c;stroke-width:1.2;stroke-dasharray:3 4}#saver .sv-church .win{fill:#ffd98a;opacity:0;animation:svNight 60s ease-in-out infinite}
 #saver .sv-mill .sails .lat{fill:none;stroke:#06213f;stroke-width:2.4}
 #saver .sv-mill .sails{transform-box:view-box;transform-origin:70px 72px;animation:svSails 16s linear infinite}
 #saver .sv-water{position:absolute;left:0;right:0;top:68vh;bottom:0;overflow:hidden;background:linear-gradient(180deg,#6aa6e4 0%,#2f6fb8 18%,#1a4c8a 55%,#0a2a55 100%)}
@@ -98,4 +98,3 @@
 @media(prefers-reduced-motion:reduce){#saver *{animation:none!important}#saver .sv-boat.wherry{transform:translateX(60vw)}#saver .sv-boat.yacht{transform:translateX(30vw)}}
 
 /* Settings row: the minutes, then Preview */
-.sv-set{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;justify-content:flex-end}

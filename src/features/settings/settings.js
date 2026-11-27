@@ -1,6 +1,7 @@
 /* features/settings/settings: The Settings page. */
 import { appState } from '../app/desktop-app.js';
 import { SAVER_CHOICES, saverMinutes } from '../app/screen-saver.js';
+import { fieldControl } from '../../ui/forms/fields.js';
 import { docCard } from './doc-builder.js';
 import { company } from '../../data/company.js';
 import { ROLES } from '../../config/roles.js';
@@ -127,8 +128,9 @@ export function vSettings() {
     )}
     ${row(
       'Screen Saver',
-      'Starts when this computer is left idle',
-      `<span class="sv-set"><span class="seg2">${SAVER_CHOICES.map(([v, t]) => `<button class="${String(saverMinutes()) == v ? 'on' : ''}" ${onClick('saverSet', v)}>${t}</button>`).join('')}</span><button class="btn ghost sm" data-act="saverTry">Preview</button></span>`
+      /* (v19.17.6) one drop-down the size of the other buttons, so the row is no taller than the rest */
+      'Starts when this computer is left idle · <button type="button" class="sv-pv" data-act="saverTry">Preview</button>',
+      `<span class="sv-sel" ${onEvent('onchange', 'saverPick', 'event')}>${fieldControl({ k: 'saver', t: 'select', o: SAVER_CHOICES }, String(saverMinutes()), { id: 'saverSel' })}</span>`
     )}
     ${row('Help Tour', 'A short guide to the site', '<button class="btn ghost sm" data-act="startTour">Start</button>')}
     ${row('Report A Problem', 'Something not working or looking wrong? Tell us here', '<button class="btn sm" data-act="bugReport">Report</button>')}

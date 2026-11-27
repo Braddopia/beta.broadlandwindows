@@ -1,8 +1,9 @@
 // v19.16.2 screen saver: after a while with no activity the opening animation plays on a loop with a clock; any
-// movement closes it, and the click that wakes it does not press anything beneath.
+// a click, tap or key closes it (moving the mouse alone does not, v19.17.6), and the click that wakes it does not
+// press anything beneath.
 const { test, expect } = require('../helpers');
 
-test('starts after the chosen time without activity, and any movement closes it', async ({ app }) => {
+test('starts after the chosen time without activity; moving the mouse leaves it, a key closes it', async ({ app }) => {
   await app.role('beta');
   await app.go('leads');
   await app.page.evaluate(() => localStorage.setItem('bb_saver', '0.05')); // 3 seconds, for the test
@@ -22,6 +23,9 @@ test('starts after the chosen time without activity, and any movement closes it'
   await app.page.waitForTimeout(800);
   await app.page.mouse.move(400, 300);
   await app.page.mouse.move(420, 320);
+  await app.page.waitForTimeout(300);
+  await expect(saver).toHaveClass(/on/);
+  await app.page.keyboard.press('Shift');
   await expect(saver).not.toHaveClass(/on/);
   expect(app.errors).toEqual([]);
 });
@@ -41,12 +45,14 @@ test('the click that wakes it does not press the button beneath', async ({ app }
 test('Settings chooses when it starts (Off, 2, 5, 10 minutes), on this computer', async ({ app }) => {
   await app.go('settings');
   const row = app.page.locator('#main .set-r', { hasText: 'Screen Saver' });
-  await expect(row.locator('.seg2 button.on')).toHaveText('5 min');
-  await row.locator('.seg2 button:text-is("Off")').click();
+  await expect(row.locator('#saverSel')).toHaveValue('5');
+  await row.locator('#saverSel').selectOption('0');
   expect(await app.page.evaluate(() => localStorage.getItem('bb_saver'))).toBe('0');
-  await expect(app.page.locator('#main .set-r', { hasText: 'Screen Saver' }).locator('.seg2 button.on')).toHaveText(
-    'Off'
-  );
+  await expect(app.page.locator('#saverSel')).toHaveValue('0');
+  // the row is no taller than the others (a drop-down, not a row of buttons)
+  const h = await app.page.locator('#main .set-r').evaluateAll((L) => L.map((e) => e.offsetHeight));
+  const mine = await app.page.locator('#main .set-r', { hasText: 'Screen Saver' }).evaluate((e) => e.offsetHeight);
+  expect(mine).toBeLessThanOrEqual(Math.max(...h.filter((x) => x != mine)));
 });
 
 test('it never covers the Floor Boards TV display', async ({ app }) => {
