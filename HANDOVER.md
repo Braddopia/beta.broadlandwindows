@@ -381,3 +381,23 @@ stock number). Decided with the owner:
   the buttons, so the same permission checks apply; a name can be shortened when only one person matches.
 - Review counts: still need the Google and Trustpilot keys in GitHub (see v19.14); without them nothing can fetch the
   live figures.
+
+## v19.16.1
+
+- Sample Inventory rewritten as a working example to show the CRM (`src/data/sample-stock.js`): 22 products a window
+  and door company holds (KL005/KL010/KL240 profiles and a KL150 cill in 6M / 6.5M / 7M bars, gasket by the metre,
+  espag handles, tilt and turn hinge sets, friction hinges in pairs, restrictors, a multipoint lock, euro cylinders,
+  lever/lever handles, flag hinges, trickle vents, packers, silicone, frame screws), with descriptions, product groups,
+  colours, locations, a Warehouse and a Van Stock area, reorder levels (3 low, 1 out), and a morning of movements
+  with 4 requests to approve and 3 alerts. A browser still holding only the very first sample (ACET848, VG920...)
+  gets the new sample once (`sampleStockRefresh`); any real stock is never touched. The Product Groups list gains
+  "Profiles".
+- Batch Add: a pasted line with no area now adds to the one product with the same code, size and colours in any area
+  (it used to make a duplicate line once products had areas).
+- Movements: the Length column shows only a real size (4MM), not the unit or bar length already in the quantity.
+- Messages: the "/" list works from the keyboard (Up/Down move, Enter or Tab fill in, Esc closes; Enter on a command
+  typed in full runs it). The owner and group admins set or clear other people's nicknames in the group: "Set
+  nickname" in the menu beside a person, or `/setnick Name Nickname` (same permission checks; nobody else can change
+  the owner's).
+- Settings: Company Details (VAT number, emails, phone...) shows for every account to refer to; only administrators
+  see Edit and the Money And Invoices card.

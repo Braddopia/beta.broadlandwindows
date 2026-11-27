@@ -206,3 +206,65 @@ test('each person has their own picture colour, the same every time', async ({ a
     true
   );
 });
+
+test("the command list works from the keyboard; the owner and admins set other people's nicknames", async ({ app }) => {
+  await app.go('messages');
+  const me = await app.run(() => USER);
+  await app.run((m) => {
+    state.groups = [
+      {
+        id: 'G7',
+        name: 'Yard',
+        desc: '',
+        owner: m,
+        admins: ['Fitter A'],
+        members: [m, 'Fitter A', 'Fitter B'],
+        open: false,
+        muted: [],
+        timeouts: {},
+      },
+    ];
+    setUI('msg.to', 'g:G7');
+  }, me);
+  const box = app.page.locator('#m_t');
+  // "/" lists the commands, the first highlighted; Down moves on, Up wraps round to the last; Enter picks
+  await box.pressSequentially('/');
+  const on = app.page.locator('#msnCmds .msn-cmd.on');
+  await expect(on).toContainText('/nickname');
+  await box.press('ArrowDown');
+  await expect(on).toContainText('/me');
+  await box.press('ArrowUp');
+  await box.press('ArrowUp');
+  await expect(on).toContainText('/desc');
+  await box.press('ArrowDown');
+  await box.press('Enter');
+  await expect(box).toHaveValue('/nickname ');
+  // Esc closes the list without sending anything
+  await box.fill('');
+  await box.pressSequentially('/se');
+  await expect(app.page.locator('#msnCmds')).toBeVisible();
+  await box.press('Escape');
+  await expect(app.page.locator('#msnCmds')).toBeHidden();
+  // /setnick: a name (as short as is clear), then the nickname
+  await box.fill('/setnick fitter b Big Al');
+  await box.press('Enter');
+  expect(await app.run(() => state.groups[0].nicks['Fitter B'])).toBe('Big Al');
+  await expect(app.page.locator('.msn-ev').last()).toContainText("set Fitter B's nickname to Big Al");
+  // the menu beside a person has Set nickname too
+  await app.page.locator('.grp-m', { hasText: 'Fitter A' }).locator('.grp-mb').click();
+  await app.page.click('#fpop .pm-i:text-is("Set nickname")');
+  await app.page.fill('#f_nick', 'Al Senior');
+  await app.page.click('#saveBtn');
+  expect(await app.run(() => state.groups[0].nicks['Fitter A'])).toBe('Al Senior');
+  // an admin cannot set the owner's nickname
+  const n = await app.run(() => Object.keys(state.groups[0].nicks).length);
+  await app.run((m) => grpSetNick('G7', m, 'Boss'), me);
+  await app.run(() => {
+    state.groups[0].owner = 'Fitter A';
+    state.groups[0].admins = [USER];
+  });
+  await app.run(() => grpSetNick('G7', 'Fitter A', 'Nope'));
+  expect(await app.run(() => state.groups[0].nicks['Fitter A'])).toBe('Al Senior');
+  expect(n).toBe(2);
+  expect(app.errors).toEqual([]);
+});

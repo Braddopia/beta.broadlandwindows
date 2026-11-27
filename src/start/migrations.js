@@ -2,6 +2,7 @@
 import { coLoad } from '../data/company.js';
 import { LOW, MAX_PHOTOS, SCATS, UNITS, guessCat } from '../config/constants.js';
 import { shortId, uuid } from '../core/ids.js';
+import { OLD_SAMPLE_CODES, sampleStock } from '../data/sample-stock.js';
 import { SAFE } from '../data/sanitize.js';
 import { store } from '../data/persistence.js';
 import { seed } from '../data/seed.js';
@@ -382,7 +383,7 @@ export function stockListsInit() {
   const used = [...new Set(state.items.map((r) => r.location).filter((x) => x && x != '-'))];
   state.stockLists = {
     locs: [...new Set([...DEF_LOCS, ...used])],
-    groups: DEF_GROUPS.slice(),
+    groups: [...new Set([...DEF_GROUPS, ...state.items.map((r) => r.group).filter(Boolean)])],
     colours: DEF_COLOURS(),
   };
   store();
@@ -403,5 +404,39 @@ export function sampleRefresh() {
   const tp = state.brand && state.brand.tp;
   if (tp && String(tp.count) == '21') tp.count = '26';
   state.sample1915 = 1;
+  store();
+}
+
+/* v19.16.1: the very first sample stock (eight lines of ACET848, KL005, VG920...) was not a convincing example. When the
+   stock still holds only those sample codes (nothing real has been added), it is replaced once by the full sample
+   (data/sample-stock.js): profile bars, handles, locks, hinges, gasket, sealant, fixings, packers; a warehouse and a
+   fitter's van; a morning of movements and requests. Any other stock is left exactly as it is. */
+export function sampleStockRefresh() {
+  if (state.sample1916) return;
+  state.sample1916 = 1;
+  const codes = new Set(state.items.map((r) => r.item));
+  if (!state.items.length || ![...codes].every((c) => OLD_SAMPLE_CODES.includes(c))) return store();
+  const S = sampleStock();
+  let ord = 0;
+  state.items = S.items
+    .slice()
+    .reverse()
+    .map((r) => ({
+      ...r,
+      photos: [],
+      uid: uuid(),
+      ...(r.type == 'request' ? { reqStatus: 'Pending', ord: 'P' + String(++ord).padStart(4, '0') } : {}),
+    }))
+    .reverse();
+  state.seq = state.seq || {};
+  state.seq.pend = Math.max(+state.seq.pend || 0, ord);
+  state.cutProf = { ...S.cutProf };
+  state.stakes = [];
+  /* the new locations and groups join the Stock Lists */
+  if (state.stockLists) {
+    const L = state.stockLists;
+    L.locs = [...new Set([...(L.locs || []), ...state.items.map((r) => r.location).filter((x) => x && x != '-')])];
+    L.groups = [...new Set([...(L.groups || []), ...state.items.map((r) => r.group).filter(Boolean)])];
+  }
   store();
 }

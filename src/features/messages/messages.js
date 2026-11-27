@@ -25,7 +25,7 @@ import {
   timedOutUntil,
 } from '../../domain/groups.js';
 import { groupPanelH, grpNew } from './groups.js';
-import { cmdHints, nickOf, runCommand } from './commands.js';
+import { cmdHints, cmdKey, nickOf, runCommand } from './commands.js';
 
 /* ---------------- messages: their own page, open to every account ---------------- */
 /** each person's picture colour: one of ten, picked from their name, so it is the same everywhere and every visit */
@@ -250,6 +250,7 @@ export function msgDel(id) {
 }
 /* Enter sends, Shift+Enter makes a new line */
 export function msgKey(e) {
+  if (cmdKey(e)) return;
   if (e.key == 'Enter' && !e.shiftKey) {
     e.preventDefault();
     msgSend();

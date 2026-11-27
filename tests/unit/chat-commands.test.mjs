@@ -1,7 +1,7 @@
 // Messages "/" commands: reading them, who may use which, and finding the person meant (v19.15.6).
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { parseCommand, commandsFor, findPerson, splitTimeout } from '../../src/domain/chat-commands.js';
+import { parseCommand, commandsFor, findPerson, splitTimeout, splitPerson } from '../../src/domain/chat-commands.js';
 
 test('reading a command', () => {
   assert.deepEqual(parseCommand('/nickname Boss'), { cmd: 'nickname', rest: 'Boss' });
@@ -31,4 +31,12 @@ test('a time out: who and how long', () => {
   assert.deepEqual(splitTimeout('Fitter B 1h'), { who: 'Fitter B', len: '1h' });
   assert.deepEqual(splitTimeout('fitter b 1W'), { who: 'fitter b', len: '1w' });
   assert.deepEqual(splitTimeout('Fitter B'), { who: 'Fitter B', len: '' });
+});
+
+test('setting a nickname for someone: their name first, then the nickname', () => {
+  const people = ['Fitter A', 'Fitter B', 'Office A'];
+  assert.deepEqual(splitPerson('Fitter B Big Al', people), { who: 'Fitter B', rest: 'Big Al' });
+  assert.deepEqual(splitPerson('office the boss', people), { who: 'Office A', rest: 'the boss' });
+  assert.deepEqual(splitPerson('Fitter A', people), { who: 'Fitter A', rest: '' });
+  assert.equal(splitPerson('Nobody here', people).who, '');
 });

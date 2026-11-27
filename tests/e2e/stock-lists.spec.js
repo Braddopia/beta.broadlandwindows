@@ -13,7 +13,8 @@ test('Stock Lists: an administrator adds a location and links a colour code; pro
   await app.page.click('#mbox button:has-text("+ Add Location")');
   await app.page.locator('#mbox .sl-r input').last().fill('Bench 2');
   await app.page.click('#mbox .sl-tabs button:has-text("Product Groups")');
-  await expect(app.page.locator('#mbox .sl-list input')).toHaveCount(7);
+  // the sheet's seven, plus Profiles from the sample stock
+  await expect(app.page.locator('#mbox .sl-list input')).toHaveCount(8);
   /* colour codes: KL016 is already RAL 7032 Matt; link SEN012 to RAL 7016 Satin */
   await app.page.click('#mbox .sl-tabs button:has-text("Colour Codes")');
   await expect(app.page.locator('#mbox .sl-c:has(input[value="KL016"]) .sl-t')).toHaveText('KL016 (RAL 7032 Matt)');
@@ -64,7 +65,9 @@ test('Stock Lists: an administrator adds a location and links a colour code; pro
     uiState.inv.grp = 'Door Cylinders';
     render();
   });
-  await expect(app.page.locator('#main .t-inv tbody tr')).toHaveCount(1);
+  // the product set to Door Cylinders above, plus the sample's two euro cylinders
+  await expect(app.page.locator('#main .t-inv tbody tr')).toHaveCount(3);
+  await expect(app.page.locator('#main .t-inv tbody')).toContainText('CYL-4040');
   expect(app.errors).toEqual([]);
 });
 

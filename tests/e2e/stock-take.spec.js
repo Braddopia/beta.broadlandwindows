@@ -152,7 +152,7 @@ test('every inventory report opens', async ({ app }) => {
 test('a standard user can undo a stock movement for 15 minutes, and the audit log says who', async ({ app }) => {
   await app.role('staff');
   await app.go('stock');
-  const pid = await app.run(() => products()[0].pid);
+  const pid = await app.run(() => products().find((r) => r.stock >= 5).pid); // a product with stock to take
   const before = await app.run((k) => prod(k).stock, pid);
   await app.call('stockForm', 'add', pid);
   await app.page.fill('#f_qty', '3');
@@ -178,7 +178,10 @@ test('Remove Stock never makes a new product: it offers the products with that c
   const before = await app.run(() => products().length);
   await app.call('stockForm', 'remove');
   await expect(app.page.locator('#f_pid')).toHaveValue('');
-  const code = await app.run(() => products()[0].item);
+  // a code two products share (white and anthracite KL005), so the form offers both
+  const code = await app.run(
+    () => products().find((r) => r.stock >= 5 && products().filter((x) => x.item == r.item).length > 1).item
+  );
   await app.page.fill('#f_item', code);
   await app.page.locator('#iePick button').first().click();
   const pid = await app.page.inputValue('#f_pid');

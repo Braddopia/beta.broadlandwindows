@@ -309,6 +309,7 @@ startMigrations.migrateCustomers();
 startMigrations.custBook();
 startMigrations.stockListsInit();
 startMigrations.sampleRefresh();
+startMigrations.sampleStockRefresh();
 featuresLeadsLeadRecord.defineLeadRecord();
 featuresContractsContractRecord.defineContractRecord();
 featuresTourTour.listenForTourKeys();

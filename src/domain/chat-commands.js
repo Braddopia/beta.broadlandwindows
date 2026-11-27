@@ -14,6 +14,7 @@ export const COMMANDS = [
   ['mute', 'name', 'Mute someone (they can read but not send)', 'manage'],
   ['unmute', 'name', 'Let a muted person send again', 'manage'],
   ['timeout', 'name 15m | 1h | 1d | 1w', 'Time someone out for a while', 'manage'],
+  ['setnick', 'name nickname', "Set someone's nickname in this group; just the name clears it", 'manage'],
   ['admin', 'name', 'Make someone a group admin (owner only)', 'manage'],
   ['unadmin', 'name', 'Stop someone being a group admin (owner only)', 'manage'],
   ['rename', 'new name', 'Rename the group', 'manage'],
@@ -50,4 +51,18 @@ export function findPerson(typed, names) {
 export function splitTimeout(rest) {
   const m = /^(.*?)\s+(15m|1h|1d|1w)$/i.exec(String(rest || '').trim());
   return m ? { who: m[1].trim(), len: m[2].toLowerCase() } : { who: String(rest || '').trim(), len: '' };
+}
+
+/** '/setnick Fitter B Big Al' -> { who: 'Fitter B', rest: 'Big Al' }: the longest run of words at the start that
+    names one person; who is '' when no start of it names anyone */
+export function splitPerson(text, names) {
+  const words = String(text || '')
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
+  for (let n = words.length; n > 0; n--) {
+    const who = findPerson(words.slice(0, n).join(' '), names);
+    if (who) return { who, rest: words.slice(n).join(' ') };
+  }
+  return { who: '', rest: '' };
 }

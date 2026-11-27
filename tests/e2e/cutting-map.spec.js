@@ -294,8 +294,9 @@ test('Cutting Optimiser: cuts with angles plan into bars as you type, print as a
   // mark a stock item as a profile with its bar length, in its own window (there is no separate Cutting Data list)
   await app.go('stock');
   await expect(app.page.locator('#main .tools')).not.toContainText('Cutting Data');
-  const pid = await app.run(() => products()[0].pid);
-  const item = await app.run(() => products()[0].item);
+  // a product with stock to take bars from
+  const pid = await app.run(() => products().find((r) => r.stock >= 5).pid);
+  const item = await app.run(() => products().find((r) => r.stock >= 5).item);
   await app.call('stockForm', 'edit', pid);
   await app.page.selectOption('#f_isBar', 'Yes');
   await app.page.selectOption('#f_barLen', '6500');

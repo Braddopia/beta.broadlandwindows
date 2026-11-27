@@ -19,7 +19,7 @@ for (const role of ['beta', 'staff'])
           f = box(document.querySelector('#invF'));
         const all = [...t.querySelectorAll('thead th')];
         const misaligned = ths
-          .filter((th) => th.dataset.col != 'sel' && th.dataset.col != 'act')
+          .filter((th) => th.dataset.col && th.dataset.col != 'sel' && th.dataset.col != 'act')
           .filter((th) => {
             const i = all.indexOf(th);
             return rows.some((tr) => getComputedStyle(tr.children[i]).textAlign != getComputedStyle(th).textAlign);
@@ -50,16 +50,14 @@ for (const role of ['beta', 'staff'])
               .map((th) => {
                 const i = all.indexOf(th);
                 const widest = Math.max(
-                  ...[th, ...rows.map((tr) => tr.children[i])].map((cell) =>
-                    Math.max(
-                      ...[...cell.children, cell].map((e) => (e === cell ? 0 : e.getBoundingClientRect().width)),
-                      (() => {
-                        const r = document.createRange();
-                        r.selectNodeContents(cell);
-                        return r.getBoundingClientRect().width;
-                      })()
-                    )
-                  )
+                  ...[th, ...rows.map((tr) => tr.children[i])].map((cell) => {
+                    // what is shown: each line's own box (long text is cut with "..." at its limit), or the text itself
+                    const kids = [...cell.children].filter((e) => e.offsetWidth);
+                    if (kids.length) return Math.max(...kids.map((e) => e.getBoundingClientRect().width));
+                    const r = document.createRange();
+                    r.selectNodeContents(cell);
+                    return r.getBoundingClientRect().width;
+                  })
                 );
                 return box(th).width - widest;
               });

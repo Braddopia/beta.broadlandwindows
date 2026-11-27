@@ -12,7 +12,7 @@ test('plain-English questions find the right records', async ({ app }) => {
     'leads from website': 'Leads from Website = 2',
     'urgent service calls': 'urgent service calls = 1',
     'deliveries overdue': 'overdue deliveries = 1',
-    'stock running low': 'Stock running low = 1',
+    'stock running low': 'Stock running low = 4',
     'contracts in Norwich': 'Contracts in Norwich = 1',
     'won leads': 'won leads = 1',
   };
@@ -131,7 +131,10 @@ test('Mark All Read clears the number on the bell and dims the rows; a new alert
   expect(await app.page.locator('#nc .nrow').count()).toBeGreaterThan(0);
   // a low-stock alert whose stock level changes is new again
   await app.run(() => {
-    const a = ncData().alr.find((x) => x.k == 'Low Stock');
+    // a low line that still has some stock, so its level can drop
+    const a = ncData().alr.find(
+      (x) => x.k == 'Low Stock' && state.items.find((r) => 'low:' + r.pid == x.key).stock > 0
+    );
     const r = state.items.find((x) => 'low:' + x.pid == a.key);
     r.stock = Math.max(0, r.stock - 1);
     render();

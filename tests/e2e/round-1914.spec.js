@@ -117,10 +117,9 @@ test('older sample data is brought up to date once: sample bars 3M become 6.5M, 
   app,
 }) => {
   const r = await app.run(() => {
-    const it = state.items.find((x) => x.item == 'KL005' && x.length == '6.5M'),
-      other = state.items.find((x) => x.item == 'ACET848');
-    it.length = '3M';
-    other.length = '3M'; // not a sample bar: left alone
+    const it = { pid: '0003', item: 'KL005', length: '3M', stock: 74 },
+      other = { pid: '0009', item: 'REAL-1', length: '3M', stock: 5 };
+    state.items = [it, other];
     state.brand.tp.count = '21';
     delete state.sample1915;
     sampleRefresh();
@@ -130,4 +129,38 @@ test('older sample data is brought up to date once: sample bars 3M become 6.5M, 
     return [...out, state.brand.tp.count];
   });
   expect(r).toEqual(['6.5M', '3M', '26', '40']);
+});
+
+test('the very first sample stock is replaced once by the full sample; real stock is never touched', async ({
+  app,
+}) => {
+  const r = await app.run(() => {
+    const old = (pid, item) => ({ pid, item, length: '4MM', stock: 62, type: 'add' });
+    state.items = [old('0001', 'ACET848'), old('0002', 'VG920 KL010'), old('0003', 'KL005')];
+    delete state.sample1916;
+    sampleStockRefresh();
+    const replaced = [products().length, products().some((p) => p.item == 'MPL-35'), state.items.every((x) => x.uid)];
+    // stock with anything real in it stays exactly as it is
+    state.items = [old('0001', 'ACET848'), old('0002', 'MY-OWN-CODE')];
+    delete state.sample1916;
+    sampleStockRefresh();
+    return [...replaced, state.items.length];
+  });
+  expect(r).toEqual([22, true, true, 2]);
+});
+
+test('every account sees the Company Details (VAT number, emails) to refer to; only administrators edit them', async ({
+  app,
+}) => {
+  await app.go('settings');
+  const card = app.page.locator('#main .set-c:has(h2 span:text-is("Company Details"))');
+  await expect(card).toBeVisible();
+  await expect(card).toContainText('Business name');
+  await expect(card.locator('button:text-is("Edit")')).toHaveCount(0);
+  await expect(app.page.locator('#main .set-c:has(h2 span:text-is("Money And Invoices"))')).toHaveCount(0);
+  await app.role('beta');
+  await app.go('settings');
+  await expect(
+    app.page.locator('#main .set-c:has(h2 span:text-is("Company Details"))').locator('button:text-is("Edit")')
+  ).toHaveCount(1);
 });

@@ -205,7 +205,7 @@ export function grpMenu(id, name, btn) {
     to = timedOutUntil(g, name, Date.now());
   openFpop(
     btn,
-    `<div class="pm" role="menu"><p class="pm-h">${esc(name)}</p>${g.owner == USER ? it(adm ? 'unadmin' : 'admin', adm ? 'Remove group admin' : 'Make group admin') : ''}${it(isMuted(g, name) ? 'unmute' : 'mute', isMuted(g, name) ? 'Unmute' : 'Mute')}${to ? it('untime', 'End time out') : TIMEOUTS.map(([k, , l]) => it('time', 'Time out for ' + l, '', k)).join('')}<hr>${it('remove', 'Remove from group', 'del')}</div>`
+    `<div class="pm" role="menu"><p class="pm-h">${esc(name)}</p>${g.owner == USER ? it(adm ? 'unadmin' : 'admin', adm ? 'Remove group admin' : 'Make group admin') : ''}${it('nick', 'Set nickname')}${it(isMuted(g, name) ? 'unmute' : 'mute', isMuted(g, name) ? 'Unmute' : 'Mute')}${to ? it('untime', 'End time out') : TIMEOUTS.map(([k, , l]) => it('time', 'Time out for ' + l, '', k)).join('')}<hr>${it('remove', 'Remove from group', 'del')}</div>`
   );
 }
 export function grpDo(id, name, act, arg) {
@@ -216,6 +216,7 @@ export function grpDo(id, name, act, arg) {
     grpNote(g, line);
     save(g, 'Group: ' + act, name);
   };
+  if (act == 'nick') return grpNickAsk(id, name);
   if (act == 'admin' || act == 'unadmin') {
     if (g.owner != USER) return refuse('Only the owner can make group admins');
     g.admins = (g.admins || []).filter((x) => x != name);
@@ -271,4 +272,36 @@ export function groupPanelH(g, av) {
     <p class="msn-ph">In This Group</p><div class="msn-pl">${g.members.slice().sort(order).map(row).join('')}</div>
     <div class="msn-rp"><button type="button" class="btn ghost sm" data-act="bugHere"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 21V4M5 4h11l-2 4 2 4H5"/></svg>Report A Problem</button></div>
   </aside>`;
+}
+
+/** the owner or a group admin sets (or clears) someone's nickname in the group */
+export function grpNickAsk(id, name) {
+  const g = grp(id);
+  if (!g || !canActOn(g, USER, name)) return refuse('You cannot change the nickname of ' + name);
+  form(
+    'Nickname For ' + name,
+    [{ k: 'nick', l: 'Nickname in ' + g.name, max: 30, hint: 'Leave empty to clear it' }],
+    { nick: (g.nicks || {})[name] || '' },
+    (o) => {
+      setNickFor(g, name, o.nick);
+    }
+  );
+}
+/** set someone else's nickname (owner and group admins; checked here, not only in the menu) */
+export function grpSetNick(id, name, nick) {
+  const g = grp(id);
+  if (!g || !canActOn(g, USER, name)) return refuse('You cannot change the nickname of ' + name);
+  setNickFor(g, name, nick);
+  store();
+  render();
+}
+function setNickFor(g, name, nick) {
+  nick = SAFE.text(nick, 30);
+  g.nicks = { ...(g.nicks || {}) };
+  if (nick) g.nicks[name] = nick;
+  else delete g.nicks[name];
+  grpNote(g, nick ? USER + ' set ' + name + "'s nickname to " + nick : USER + ' cleared ' + name + "'s nickname");
+  repos.groups.changed(g);
+  audit('Group nickname set', 'Group ' + g.name, name + ': ' + (nick || '(cleared)'));
+  toast(nick ? name + ' is now ' + nick + ' in ' + g.name : name + "'s nickname cleared");
 }

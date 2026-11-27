@@ -1,6 +1,6 @@
 {
   "name": "broadland-crm",
-  "version": "19.16.0",
+  "version": "19.16.1",
   "private": true,
   "description": "Broadland Windows CRM: single-file web app built from src/",
   "scripts": {

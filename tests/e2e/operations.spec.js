@@ -122,7 +122,10 @@ test('stock movements keep their own "stock after" figure', async ({ app }) => {
       products().find((x) => x.pid === k).stock,
     ];
   });
-  expect(r).toEqual(['62', '67,62', 67]);
+  // the new row says the stock after it; the rows before keep theirs
+  const was = +r[0].split(',')[0];
+  expect(r[1]).toBe([was + 5, r[0]].join(','));
+  expect(r[2]).toBe(was + 5);
 });
 
 test('phone: stock page becomes big handheld buttons', async ({ app }) => {

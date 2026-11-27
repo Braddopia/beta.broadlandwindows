@@ -9,12 +9,12 @@ import { store } from '../../data/persistence.js';
 import { state } from '../../data/state.js';
 import * as repos from '../../data/repository.js';
 import { canManage, groupOf, isMember } from '../../domain/groups.js';
-import { commandsFor, findPerson, parseCommand, splitTimeout } from '../../domain/chat-commands.js';
+import { commandsFor, findPerson, parseCommand, splitPerson, splitTimeout } from '../../domain/chat-commands.js';
 import { openModal } from '../../ui/modal.js';
 import { render } from '../../ui/shell/router.js';
 import { uiState } from '../../ui/ui-state.js';
 import { toast } from '../../ui/toast.js';
-import { grpAddOne, grpDo, grpLeave, grpNote } from './groups.js';
+import { grpAddOne, grpDo, grpLeave, grpNote, grpSetNick } from './groups.js';
 
 const here = () => uiState.msg.to || 'Everyone';
 
@@ -70,6 +70,15 @@ export function runCommand(text) {
       if (p) grpDo(g.id, p, 'time', len);
       return null;
     }
+    case 'setnick': {
+      const { who, rest } = splitPerson(c.rest, g.members);
+      if (!who)
+        return (
+          toast(c.rest ? 'Nobody in the group matches "' + c.rest + '"' : 'Type a name, then the nickname'),
+          null
+        );
+      return (grpSetNick(g.id, who, rest), null);
+    }
     case 'rename':
     case 'desc': {
       const v = SAFE.text(c.rest, c.cmd == 'rename' ? 40 : 240);
@@ -119,7 +128,9 @@ function showHelp() {
   );
 }
 
-/** while typing "/...": the commands that fit what has been typed, above the box */
+/** while typing "/...": the commands that fit what has been typed, above the box. The first is highlighted; the
+    arrow keys move the highlight (cmdKey) */
+let hi = 0;
 export function cmdHints(value) {
   const box = $('#msnCmds');
   if (!box) return;
@@ -128,11 +139,47 @@ export function cmdHints(value) {
   const L = m
     ? commandsFor(!!g && isMember(g, USER), !!g && canManage(g, USER)).filter(([n]) => n.startsWith(m[1].toLowerCase()))
     : [];
+  hi = 0;
   box.hidden = !L.length;
   box.innerHTML = L.map(
-    ([n, a, d]) =>
-      `<button type="button" class="msn-cmd" ${onClick('msgCmdPick', n)}><b>/${esc(n)}</b>${a ? ` <i>${esc(a)}</i>` : ''}<small>${esc(d)}</small></button>`
+    ([n, a, d], i) =>
+      `<button type="button" class="msn-cmd ${i == hi ? 'on' : ''}" role="option" aria-selected="${i == hi}" data-cmd="${esc(n)}" ${onClick('msgCmdPick', n)}><b>/${esc(n)}</b>${a ? ` <i>${esc(a)}</i>` : ''}<small>${esc(d)}</small></button>`
   ).join('');
+}
+/** keys while the list is open: Up and Down move the highlight, Enter or Tab picks it, Esc closes the list.
+    Returns true when the key was used here (so Enter does not send) */
+export function cmdKey(e) {
+  const box = $('#msnCmds');
+  if (!box || box.hidden) return false;
+  const items = [...box.querySelectorAll('.msn-cmd')];
+  if (!items.length) return false;
+  if (e.key == 'ArrowDown' || e.key == 'ArrowUp') {
+    e.preventDefault();
+    hi = (hi + (e.key == 'ArrowDown' ? 1 : -1) + items.length) % items.length;
+    items.forEach((b, i) => {
+      b.classList.toggle('on', i == hi);
+      b.setAttribute('aria-selected', i == hi);
+    });
+    items[hi].scrollIntoView({ block: 'nearest' });
+    return true;
+  }
+  if (e.key == 'Enter' || e.key == 'Tab') {
+    /* Enter on a command already typed out in full (/help) runs it; otherwise Enter or Tab fills in the highlighted one */
+    const i = $('#m_t');
+    if (e.key == 'Enter' && i && i.value.trim().toLowerCase() == '/' + items[hi].dataset.cmd) {
+      box.hidden = true;
+      return false;
+    }
+    e.preventDefault();
+    msgCmdPick(items[hi].dataset.cmd);
+    return true;
+  }
+  if (e.key == 'Escape') {
+    e.preventDefault();
+    box.hidden = true;
+    return true;
+  }
+  return false;
 }
 /** pick a command from the list: it is filled in, ready for the rest */
 export function msgCmdPick(n) {

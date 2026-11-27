@@ -72,15 +72,15 @@ test('Batch Add: an existing product keeps its description and group; locations 
   await app.role('beta');
   await app.go('stock');
   await app.run(() => {
-    const p = products().find((r) => r.item == 'KL010');
+    const p = products().find((r) => r.item == 'WR-01');
     prodRows(p.pid).forEach((x) => Object.assign(x, { desc: 'Packer 10mm', group: 'Window Accessories' }));
   });
-  const p0 = await app.run(() => products().find((r) => r.item == 'KL010'));
+  const p0 = await app.run(() => products().find((r) => r.item == 'WR-01'));
   await app.call('invNew');
   await app.page.fill(
     '#bn',
     [
-      ['KL010', 3, '1.10', p0.supplier, p0.location, p0.length, p0.cInName, p0.cOutName, 'PCS'].join('\t'),
+      ['WR-01', 3, '1.10', p0.supplier, p0.location, p0.length, p0.cInName, p0.cOutName, 'PCS'].join('\t'),
       ['NEWLINE1', 2, '1.00', p0.supplier, 'door locks'].join('\t'),
     ].join('\n')
   );
@@ -114,17 +114,17 @@ test('importing a stock sheet with no colours does not double up products that s
   const f = path.join(os.tmpdir(), 'bb-take-' + Date.now() + '.csv');
   fs.writeFileSync(
     f,
-    'Area,Stock Code,Description,Quantity In Stock\nMain,ACET848,,61\nMain,VG920,,9\nMain,NEWONE,New thing,2\n'
+    'Area,Stock Code,Description,Quantity In Stock\nWarehouse,ESP-H,,40\nWarehouse,GP-3,,20\nWarehouse,NEWONE,New thing,2\n'
   );
   const n0 = await app.run(() => products().length);
   await app.run(() => setUI('inv.v', 'take'));
   await app.page.click('#main button:has-text("Import Stock Sheet") >> nth=0');
   await app.page.setInputFiles('#mbox input[type=file]', f);
-  await expect(app.page.locator('#mbox .tk-uns')).toContainText('ACET848');
+  await expect(app.page.locator('#mbox .tk-uns')).toContainText('ESP-H');
   await app.page.click('#mbox [data-act=takeImportRun]');
-  /* VG920 (one product) is matched, NEWONE is new, the three ACET848 products are left alone */
+  /* GP-3 (one product) is matched, NEWONE is new, the two ESP-H products (white and black) are left alone */
   expect(await app.run(() => products().length)).toBe(n0 + 1);
-  expect(await app.run(() => products().filter((r) => r.item == 'ACET848').length)).toBe(3);
+  expect(await app.run(() => products().filter((r) => r.item == 'ESP-H').length)).toBe(2);
   fs.unlinkSync(f);
 });
 

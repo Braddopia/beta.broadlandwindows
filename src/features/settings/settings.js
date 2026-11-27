@@ -128,10 +128,10 @@ export function vSettings() {
     ${row('Report A Problem', 'Something not working or looking wrong? Tell us here', '<button class="btn sm" data-act="bugReport">Report</button>')}
     ${row('Account', 'Signed in as ' + esc(ROLES[ROLE].n), '<button class="btn ghost sm" data-act="swRole">Switch</button>')}
    </section>
+   <section class="panel set-c"><h2><span class="set-ic">${svg(ICONS.contacts)}</span><span>Company Details</span>${own ? `<button class="btn sm" ${onClick('coEditK', 'co')}>Edit</button>` : ''}</h2>${dl(SET_CO)}<p class="muted set-n">${own ? 'Used on printed contracts, invoices and guarantees.' : 'For reference: the VAT number, emails and other company details. An administrator keeps them up to date.'}</p></section>
    ${
      own
-       ? `<section class="panel set-c"><h2><span class="set-ic">${svg(ICONS.contacts)}</span><span>Company Details</span><button class="btn sm" ${onClick('coEditK', 'co')}>Edit</button></h2>${dl(SET_CO)}<p class="muted set-n">Used on printed contracts, invoices and guarantees.</p></section>
-   <section class="panel set-c"><h2><span class="set-ic">${svg(ICONS.finance)}</span><span>Money And Invoices</span><button class="btn sm" ${onClick('coEditK', 'money')}>Edit</button></h2>${dl(SET_MONEY)}</section>
+       ? `<section class="panel set-c"><h2><span class="set-ic">${svg(ICONS.finance)}</span><span>Money And Invoices</span><button class="btn sm" ${onClick('coEditK', 'money')}>Edit</button></h2>${dl(SET_MONEY)}</section>
    <section class="panel set-c"><h2><span class="set-ic">${svg(ICONS.admin)}</span><span>Security And Data</span></h2>
     ${row('Account PINs', 'Change the PIN for each account', '<button class="btn ghost sm" data-act="chPin">Change</button>')}
     ${row('Backup', 'Download everything as one file', '<button class="btn ghost sm" data-act="backupDl">Download</button>')}
@@ -166,7 +166,7 @@ export function vSettings() {
    <section class="panel set-c set-w"><h2><span class="set-ic">${svg(ICONS.service)}</span><span>Reported Problems</span>${state.bugs.length ? `<button class="btn ghost sm" ${onClick('csvAll', 'bugs')}>Export</button>` : ''}</h2>
     ${state.bugs.map((b) => `<div class="set-r"><span><b>${esc(b.what.length > 90 ? b.what.slice(0, 90) + '…' : b.what)}</b><small>${esc([b.id, b.where, b.sev, b.by, new Date(b.at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })].filter(Boolean).join(' · '))}${(b.photos || []).length ? ' · ' + (b.photos || []).length + ' photo' + ((b.photos || []).length > 1 ? 's' : '') : ''}</small></span><span class="set-a"><span class="tag ${b.status == 'Fixed' ? 'g' : b.status == 'Open' ? 'y' : 'n'}">${esc(b.status)}</span><button class="btn ghost sm" ${onClick('bugView', b.id)}>Open</button></span></div>`).join('') || '<p class="muted">Nothing reported. Everyone can report a problem from My Settings.</p>'}
    </section>`
-       : `<section class="panel set-c"><h2><span class="set-ic">${svg(ICONS.lock)}</span><span>Company Settings</span></h2><p class="muted">Company details, VAT and invoice settings are for administrators.</p><button class="btn ghost sm" data-act="swRole">Switch Account</button></section>`
+       : `<section class="panel set-c"><h2><span class="set-ic">${svg(ICONS.lock)}</span><span>Company Settings</span></h2><p class="muted">Changing the company details, VAT and invoice settings is for administrators.</p><button class="btn ghost sm" data-act="swRole">Switch Account</button></section>`
    }
   </div>`;
 }
