@@ -1,100 +1,86 @@
-/* Screen saver (features/app/screen-saver.js), v19.16.5: a Norfolk Broads scene. The sky turns slowly from day blue
-   to a gold sunset to a starry night with a moon and back (60s); puffy clouds drift and take the sky's colour; below,
-   two tree lines with a round-tower church and a distant mill, a drainage mill with turning sails reflected in the
-   water, drifting ripples, the sun's glint lined up under it, evening mist, a black-sailed wherry and a white yacht,
-   swaying reeds. The clock sits in the middle. No birds, and no text asks to move the mouse. */
-#saver{position:fixed;inset:0;z-index:6000;overflow:hidden;display:flex;align-items:center;justify-content:center;background:#012b59;color:#fff;opacity:0;visibility:hidden;transition:opacity .9s ease,visibility 0s .9s;cursor:none}
+/* Screen saver (features/app/screen-saver.js for the scene, saver-scene.js for its motion and light), v19.17.8:
+   a Norfolk Broads scene over a day of about four minutes. Every colour comes from CSS variables that saver-scene.js
+   sets for the moment of the day (--sky1..3, --land, --far, --w1/--w2 water, --cloud/--cshade, --stars, --lights,
+   --fog, --sx/--sy/--halo for the glow round the sun, --glintc), so the sky, water, land, buildings and clouds all take
+   the same light. The sun and moon travel on arcs; clouds and boats are placed and moved by the script, so nothing
+   here animates them. Only the mill sails, the reeds, the ripples and the mist move by CSS. */
+#saver{position:fixed;inset:0;z-index:6000;overflow:hidden;background:#0a3a7a;color:#fff;opacity:0;visibility:hidden;transition:opacity .9s ease,visibility 0s .9s;cursor:none;
+  --sky1:#0a4dac;--sky2:#3a89df;--sky3:#acd5f8;--land:#0b2d57;--far:#3f6fab;--w1:#9cc7ef;--w2:#0f3a74;--cloud:#fff;--cshade:#8ea8cc;--stars:0;--lights:0;--fog:.1;--sx:50%;--sy:20%;--halo:.3;--glintc:#ffd98a}
 #saver.on{opacity:1;visibility:visible;transition:opacity .9s ease}
 #saver *{pointer-events:none}
+#saver>*{position:absolute;left:0;top:0}
 
-/* sky: three layers cross-fade */
-#saver .sv-sky{position:absolute;inset:0}
-#saver .sv-day{background:linear-gradient(180deg,#034ea2 0%,#2f7fdb 55%,#8cc3f5 100%)}
-#saver .sv-dusk{background:linear-gradient(180deg,#1b2a6b 0%,#a2466a 50%,#f4a24b 85%,#ffd27a 100%);opacity:0;animation:svDusk 60s ease-in-out infinite}
-#saver .sv-night{background:linear-gradient(180deg,#020b24 0%,#06204a 60%,#0d3266 100%);opacity:0;animation:svNight 60s ease-in-out infinite}
-#saver .sv-stars{position:absolute;inset:0 0 35% 0;opacity:0;background-image:radial-gradient(1.5px 1.5px at 10% 20%,#fff,transparent),radial-gradient(1px 1px at 25% 60%,#fff,transparent),radial-gradient(1.5px 1.5px at 40% 30%,#fff,transparent),radial-gradient(1px 1px at 55% 75%,#fff,transparent),radial-gradient(2px 2px at 70% 15%,#fff,transparent),radial-gradient(1px 1px at 82% 45%,#fff,transparent),radial-gradient(1.5px 1.5px at 92% 70%,#fff,transparent),radial-gradient(1px 1px at 5% 85%,#fff,transparent),radial-gradient(1px 1px at 63% 50%,#fff,transparent),radial-gradient(1.5px 1.5px at 33% 8%,#fff,transparent);background-size:340px 260px;animation:svStars 60s ease-in-out infinite,svTwinkle 3.2s ease-in-out infinite alternate}
-#saver .sv-sun{position:absolute;left:calc(74vw - clamp(90px,12vw,170px) / 2);top:22%;width:clamp(90px,12vw,170px);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,#fff6d6 0%,#ffd86b 45%,rgba(255,200,80,0) 72%);filter:blur(1px);animation:svSun 60s ease-in-out infinite}
+/* sky: three stops from the moment of the day, with a warm glow round the sun */
+#saver .sv-sky{inset:0;background:radial-gradient(circle at var(--sx) var(--sy),rgba(255,222,160,var(--halo)) 0,rgba(255,200,130,calc(var(--halo) * .45)) 12%,transparent 38%),linear-gradient(180deg,var(--sky1) 0%,var(--sky2) 52%,var(--sky3) 68%)}
+#saver .sv-stars{right:0;height:62vh;width:100%;opacity:var(--stars);background-image:radial-gradient(1.5px 1.5px at 10% 20%,#fff,transparent),radial-gradient(1px 1px at 25% 60%,#fff,transparent),radial-gradient(1.5px 1.5px at 40% 30%,#fff,transparent),radial-gradient(1px 1px at 55% 75%,#fff,transparent),radial-gradient(2px 2px at 70% 15%,#fff,transparent),radial-gradient(1px 1px at 82% 45%,#fff,transparent),radial-gradient(1.5px 1.5px at 92% 70%,#fff,transparent),radial-gradient(1px 1px at 5% 85%,#fff,transparent),radial-gradient(1px 1px at 63% 50%,#fff,transparent),radial-gradient(1.5px 1.5px at 33% 8%,#fff,transparent);background-size:340px 260px;background-size:340px 260px;animation:svTwinkle 3.2s ease-in-out infinite alternate}
+@keyframes svTwinkle{to{filter:brightness(1.6)}}
+/* the sun: its middle stays bright, the glow turns orange and wider as it gets low */
+#saver .sv-sun{--low:0;width:clamp(70px,8vw,130px);aspect-ratio:1;margin:calc(clamp(70px,8vw,130px) / -2) 0 0 calc(clamp(70px,8vw,130px) / -2);border-radius:50%;background:radial-gradient(circle,#fffaf0 0%,#fff0c2 30%,rgb(255,calc(214 - var(--low) * 70),calc(120 - var(--low) * 70)) 52%,rgba(255,160,70,0) 72%);filter:blur(.6px);box-shadow:0 0 calc(40px + var(--low) * 60px) calc(10px + var(--low) * 26px) rgba(255,190,110,calc(.25 + var(--low) * .3));transform:translate3d(-50vw,0,0);will-change:transform}
+#saver .sv-moon{width:clamp(44px,5vw,72px);aspect-ratio:1;margin:calc(clamp(44px,5vw,72px) / -2) 0 0 calc(clamp(44px,5vw,72px) / -2);border-radius:50%;background:radial-gradient(circle at 38% 40%,#fffdf2,#e9e6d6 60%,#d6d2bd);box-shadow:0 0 40px 10px rgba(255,250,225,.22),inset -12px -5px 0 0 rgba(4,16,40,.5);opacity:0;will-change:transform}
 
-/* the moon rises after dark: a pale disc with a soft glow, a shadow giving it a crescent */
-#saver .sv-moon{position:absolute;left:24%;top:16%;width:clamp(50px,6vw,80px);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 38% 40%,#fffdf2,#e9e6d6 60%,#d6d2bd);box-shadow:0 0 40px 10px rgba(255,250,225,.25),inset -14px -6px 0 0 rgba(4,16,40,.55);opacity:0;animation:svMoon 60s ease-in-out infinite}
-@keyframes svMoon{0%,48%{opacity:0;transform:translateY(14vh)}62%,80%{opacity:1;transform:translateY(0)}94%,100%{opacity:0;transform:translateY(-4vh)}}
-
-/* clouds: puffy, shaded underneath and lit on top, drifting right to left; their colour follows the sky (white by
-   day, peach at sunset, slate at night) */
-#saver .sv-cloud{position:absolute;width:24vw;height:auto;color:#fff;animation:svCloud linear infinite,svCloudCol 60s ease-in-out infinite;filter:drop-shadow(0 6px 14px rgba(1,43,89,.18))}
+/* clouds: placed, sized and moved by saver-scene.js; coloured by the sky */
+#saver .sv-cloud{height:auto;color:var(--cloud);filter:drop-shadow(0 6px 14px rgba(1,30,70,.16));will-change:transform}
 #saver .sv-cloud .body,#saver .sv-cloud .body *{fill:currentColor}
-#saver .sv-cloud .shade{filter:blur(5px)}#saver .sv-cloud .shade *{fill:rgba(30,60,110,.32)}
-#saver .sv-cloud .body{filter:blur(.6px)}
-#saver .sv-cloud .hi{filter:blur(6px)}#saver .sv-cloud .hi *{fill:#fff;opacity:.7}
-@keyframes svCloudCol{0%,20%{color:#ffffff}35%,45%{color:#f7c4ae}58%,80%{color:#56658a}95%,100%{color:#ffffff}}
+#saver .sv-cloud .shade{filter:blur(5px)}#saver .sv-cloud .shade *{fill:var(--cshade);opacity:.45}
+#saver .sv-cloud .body{filter:blur(.5px)}
+#saver .sv-cloud .hi{filter:blur(9px)}#saver .sv-cloud .hi *{fill:#fff;opacity:.32}
 
-/* the Broads, from the back: tree line, mill, water, boat, reeds. Silhouettes stay dark navy at every time of day */
-#saver .sv-trees{position:absolute;left:0;width:100%;top:58.5vh;height:10vh}
-#saver .sv-trees path{fill:#08284f}
-#saver .sv-trees.far{top:56.5vh;height:12vh}#saver .sv-trees.far path{fill:#1d4a85;opacity:.75}
-#saver .sv-mill{position:absolute;z-index:0;left:14%;top:calc(68vh - 26vh);height:26vh;width:auto;aspect-ratio:140/220}
-#saver .sv-mill .tw,#saver .sv-mill .cap,#saver .sv-mill .sails path,#saver .sv-mill .hub,#saver .sv-mill .fan{fill:#06213f}
+/* the land: two tree lines, the mills and the church, all in the light of the moment (far things paler) */
+#saver .sv-trees{width:100%;top:58.5vh;height:10vh}
+#saver .sv-trees path{fill:var(--land)}
+#saver .sv-trees.far{top:56.5vh;height:12vh}#saver .sv-trees.far path{fill:var(--far)}
+#saver .sv-mill{left:14%;top:calc(68vh - 26vh);height:26vh;width:auto;aspect-ratio:140/220}
+#saver .sv-mill .tw,#saver .sv-mill .cap,#saver .sv-mill .sails path,#saver .sv-mill .hub,#saver .sv-mill .fan{fill:color-mix(in srgb,var(--land) 88%,#000)}
+#saver .sv-mill .sails .lat{fill:none;stroke:color-mix(in srgb,var(--land) 88%,#000);stroke-width:2.4}
+#saver .sv-mill .sails{transform-box:view-box;transform-origin:70px 72px;animation:svSails 16s linear infinite}
 #saver .sv-mill.far{left:58%;top:calc(68vh - 19vh);height:19vh}
-#saver .sv-mill.far .tw,#saver .sv-mill.far .cap,#saver .sv-mill.far .sails path,#saver .sv-mill.far .hub,#saver .sv-mill.far .fan{fill:#0d3363}
-#saver .sv-mill.far .sails .lat{fill:none;stroke:#0d3363}
+#saver .sv-mill.far .tw,#saver .sv-mill.far .cap,#saver .sv-mill.far .sails path,#saver .sv-mill.far .hub,#saver .sv-mill.far .fan{fill:color-mix(in srgb,var(--land) 70%,var(--far))}
+#saver .sv-mill.far .sails .lat{fill:none;stroke:color-mix(in srgb,var(--land) 70%,var(--far))}
 #saver .sv-mill.far .sails{animation-duration:22s}
-/* the near mill's reflection in the water, upside down, faint and wavering */
+#saver .sv-church{left:76%;top:calc(68vh - 13vh);height:13vh;width:auto;aspect-ratio:280/150}
+#saver .sv-church path{fill:color-mix(in srgb,var(--land) 62%,var(--far))}
+#saver .sv-church .th{fill:color-mix(in srgb,var(--land) 48%,var(--far))}
+#saver .sv-church .yew{fill:color-mix(in srgb,var(--land) 85%,var(--far))}
+#saver .sv-church .fl{fill:none;stroke:color-mix(in srgb,var(--land) 35%,var(--far));stroke-width:1.2;stroke-dasharray:3 4}
+#saver .sv-church .win{fill:#ffd98a;opacity:var(--lights);filter:drop-shadow(0 0 3px rgba(255,210,120,.9))}
+
+/* the water: the sky's colours from the bank down, the near mill's reflection, ripples, the glint and the mist */
+#saver .sv-water{right:0;top:68vh;bottom:0;overflow:hidden;background:linear-gradient(180deg,var(--w1) 0%,color-mix(in srgb,var(--w1) 40%,var(--w2)) 22%,var(--w2) 100%)}
+#saver .sv-water>*{position:absolute}
 #saver .sv-mill.refl{left:14%;top:0;height:26vh;transform:scaleY(-1);transform-origin:50% 0;opacity:.28;filter:blur(1.2px);animation:svWaver 4s ease-in-out infinite alternate}
 @keyframes svWaver{from{transform:scaleY(-1) skewX(-1.5deg)}to{transform:scaleY(-1) skewX(1.5deg)}}
-#saver .sv-church{position:absolute;left:76%;top:calc(68vh - 13vh);height:13vh;width:auto;aspect-ratio:280/150}
-#saver .sv-church path{fill:#17447c}#saver .sv-church .th{fill:#215494}#saver .sv-church .yew{fill:#0f3768}#saver .sv-church .fl{fill:none;stroke:#2a5d9c;stroke-width:1.2;stroke-dasharray:3 4}#saver .sv-church .win{fill:#ffd98a;opacity:0;animation:svNight 60s ease-in-out infinite}
-#saver .sv-mill .sails .lat{fill:none;stroke:#06213f;stroke-width:2.4}
-#saver .sv-mill .sails{transform-box:view-box;transform-origin:70px 72px;animation:svSails 16s linear infinite}
-#saver .sv-water{position:absolute;left:0;right:0;top:68vh;bottom:0;overflow:hidden;background:linear-gradient(180deg,#6aa6e4 0%,#2f6fb8 18%,#1a4c8a 55%,#0a2a55 100%)}
-/* a soft mist where the water meets the land */
-#saver .sv-water>.sv-mist{position:absolute;left:0;right:0;top:0;height:3vh;z-index:2;background:linear-gradient(180deg,rgba(255,255,255,.35),rgba(255,255,255,0))}
-#saver .sv-water>.sv-wd{position:absolute;inset:0;background:linear-gradient(180deg,#d57a5a 0%,#5b2f5e 50%,#1a1840 100%);opacity:0;animation:svDusk 60s ease-in-out infinite}
-#saver .sv-water>.sv-wn{position:absolute;inset:0;background:linear-gradient(180deg,#0c2650 0%,#040f26 100%);opacity:0;animation:svNight 60s ease-in-out infinite}
-/* ripples: short broken lines that drift sideways, longer and further apart nearer the front */
-#saver .sv-shim{position:absolute;left:-12%;top:0;width:124%;height:100%;z-index:1;animation:svShim 14s ease-in-out infinite alternate}
-#saver .sv-shim path{stroke:#fff;stroke-width:1.4;stroke-linecap:round;vector-effect:non-scaling-stroke}
-#saver .sv-shim.s2{animation-duration:9s;animation-direction:alternate-reverse}#saver .sv-shim.s2 path{stroke:#cfe3ff;stroke-width:1}
-#saver .sv-glint{position:absolute;inset:0;width:100%;height:100%;z-index:1;opacity:0;animation:svGlint 60s ease-in-out infinite,svGlintMove 3s ease-in-out infinite alternate}
-#saver .sv-glint path{stroke:#ffd98a;stroke-width:2;stroke-linecap:round;vector-effect:non-scaling-stroke}
-@keyframes svGlintMove{from{transform:translateX(-.3%)}to{transform:translateX(.3%)}}
-#saver .sv-boat{position:absolute;z-index:1;width:auto}
-/* a Norfolk wherry: black gaff sail, heading left */
-#saver .sv-boat.wherry{top:calc(68vh - 8vh);height:11vh;aspect-ratio:120/90;animation:svBoat 150s linear infinite;animation-delay:-40s}
-#saver .wherry .sail{fill:#111a28}#saver .wherry .mast{stroke:#111a28;stroke-width:2}#saver .wherry .hull{fill:#3a2414}
-/* a small white yacht further off, heading right */
-#saver .sv-boat.yacht{top:calc(68vh - 4.5vh);height:6vh;aspect-ratio:80/70;animation:svBoatR 120s linear infinite;animation-delay:-90s}
-#saver .yacht .sail{fill:#f2f6fb}#saver .yacht .sail2{fill:#d9e4f2}#saver .yacht .hull{fill:#06213f}
-@keyframes svBoatR{from{transform:translateX(-12vw)}to{transform:translateX(105vw)}}
-/* evening and night mist drifting low over the water */
-#saver .sv-fog{position:absolute;left:-20%;right:-20%;top:0;height:9vh;z-index:2;background:radial-gradient(ellipse 30% 60% at 20% 40%,rgba(230,238,255,.5),transparent 70%),radial-gradient(ellipse 25% 50% at 60% 30%,rgba(230,238,255,.4),transparent 70%),radial-gradient(ellipse 30% 55% at 90% 45%,rgba(230,238,255,.45),transparent 70%);filter:blur(6px);opacity:0;animation:svFog 60s ease-in-out infinite,svFogDrift 40s ease-in-out infinite alternate}
-@keyframes svFog{0%,38%{opacity:0}52%,82%{opacity:.75}96%,100%{opacity:0}}
+#saver .sv-water>.sv-mist{left:0;right:0;top:0;height:3vh;z-index:2;background:linear-gradient(180deg,color-mix(in srgb,var(--sky3) 70%,transparent),transparent)}
+#saver .sv-shim{left:-12%;top:0;width:124%;height:100%;z-index:1;animation:svShim 14s ease-in-out infinite alternate}
+#saver .sv-shim path{stroke:color-mix(in srgb,var(--sky3) 60%,#fff);stroke-width:1.4;stroke-linecap:round;vector-effect:non-scaling-stroke}
+#saver .sv-shim.s2{animation-duration:9s;animation-direction:alternate-reverse}#saver .sv-shim.s2 path{stroke-width:1;opacity:.7}
+@keyframes svShim{from{transform:translateX(-3%);opacity:.45}to{transform:translateX(3%);opacity:.8}}
+#saver .sv-glint{left:0;top:0;width:100%;height:100%;z-index:1;opacity:0;will-change:transform}
+#saver .sv-glint path{stroke:var(--glintc);stroke-width:2;stroke-linecap:round;vector-effect:non-scaling-stroke}
+#saver .sv-fog{left:-20%;right:-20%;top:0;height:9vh;z-index:2;background:radial-gradient(ellipse 30% 60% at 20% 40%,rgba(230,238,255,.5),transparent 70%),radial-gradient(ellipse 25% 50% at 60% 30%,rgba(230,238,255,.4),transparent 70%),radial-gradient(ellipse 30% 55% at 90% 45%,rgba(230,238,255,.45),transparent 70%);filter:blur(6px);opacity:var(--fog);animation:svFogDrift 40s ease-in-out infinite alternate}
 @keyframes svFogDrift{from{transform:translateX(-4%)}to{transform:translateX(4%)}}
-#saver .sv-reeds{position:absolute;bottom:0;height:24vh;width:auto;aspect-ratio:210/200;z-index:1}
-#saver .sv-reeds.l{left:-1%}#saver .sv-reeds.r{right:-1%;transform:scaleX(-1)}
+
+/* boats: moved by saver-scene.js, with a faint reflection below */
+#saver .sv-boat{z-index:2;width:auto;transform:translate3d(-60vw,0,0);will-change:transform;-webkit-box-reflect:below -1px linear-gradient(transparent 45%,rgba(255,255,255,.22))}
+#saver .sv-boat.wherry{top:calc(68vh - 8vh);height:11vh;aspect-ratio:120/90}
+#saver .wherry .sail{fill:#111a28}#saver .wherry .mast{stroke:#111a28;stroke-width:2}#saver .wherry .hull{fill:#3a2414}
+#saver .sv-boat.yacht{top:calc(68vh - 4.5vh);height:6vh;aspect-ratio:80/70}
+#saver .yacht .sail{fill:#f2f6fb}#saver .yacht .sail2{fill:#d9e4f2}#saver .yacht .hull{fill:#06213f}
+
+/* reeds in front, swaying */
+#saver .sv-reeds{top:auto;bottom:0;height:24vh;width:auto;aspect-ratio:210/200;z-index:3}
+#saver .sv-reeds.l{left:-1%}#saver .sv-reeds.r{left:auto;right:-1%;transform:scaleX(-1)}
 #saver .sv-reeds g{transform-box:fill-box;transform-origin:50% 100%;animation:svReed 5s ease-in-out infinite alternate}
-#saver .sv-reeds path{fill:none;stroke:#041a33;stroke-width:3.2;stroke-linecap:round}
+#saver .sv-reeds path{fill:none;stroke:color-mix(in srgb,var(--land) 70%,#000);stroke-width:3.2;stroke-linecap:round}
 #saver .sv-reeds .hd{fill:#3a2a1a}
 #saver .sv-reeds g:nth-child(3n){animation-duration:6.4s}#saver .sv-reeds g:nth-child(3n) path{stroke-width:2.4}
 #saver .sv-reeds g:nth-child(3n+1){animation-duration:4.2s;animation-delay:-1.2s}
+@keyframes svReed{from{transform:skewX(-3deg)}to{transform:skewX(4deg)}}
+@keyframes svSails{to{transform:rotate(360deg)}}
 
 /* clock */
-#saver .sv-clock{position:absolute;z-index:3;left:0;right:0;top:36vh;display:flex;flex-direction:column;align-items:center;gap:.4rem;text-align:center}
+#saver .sv-clock{z-index:4;right:0;top:36vh;display:flex;flex-direction:column;align-items:center;gap:.4rem;text-align:center}
 #saver .sv-time{font:600 clamp(3.4rem,8vw,6.5rem)/1 var(--head);letter-spacing:.02em;text-shadow:0 8px 34px rgba(0,0,0,.35)}
 #saver .sv-date{font-size:clamp(1rem,1.7vw,1.35rem);color:#e3f0ff;text-shadow:0 2px 12px rgba(0,0,0,.35)}
 
-@keyframes svDusk{0%,20%{opacity:0}35%,45%{opacity:1}60%,100%{opacity:0}}
-@keyframes svNight{0%,40%{opacity:0}55%,80%{opacity:1}95%,100%{opacity:0}}
-@keyframes svStars{0%,45%{opacity:0}58%,78%{opacity:1}92%,100%{opacity:0}}
-@keyframes svTwinkle{to{filter:brightness(1.6)}}
-@keyframes svSun{0%{transform:translateY(0);opacity:1}38%{transform:translateY(32vh);opacity:1}48%{transform:translateY(44vh);opacity:.6}52%{transform:translateY(50vh);opacity:0}85%{transform:translateY(-10vh);opacity:0}100%{transform:translateY(0);opacity:1}}
-@keyframes svCloud{from{transform:translateX(105vw)}to{transform:translateX(-30vw)}}
-@keyframes svSails{to{transform:rotate(360deg)}}
-@keyframes svShim{from{transform:translateX(-3%);opacity:.55}to{transform:translateX(3%);opacity:.95}}
-@keyframes svGlint{0%,12%{opacity:0}28%,42%{opacity:.9}50%,100%{opacity:0}}
-@keyframes svBoat{from{transform:translateX(105vw)}to{transform:translateX(-12vw)}}
-@keyframes svReed{from{transform:skewX(-3deg)}to{transform:skewX(4deg)}}
-
-/* the computer's own reduce-motion setting: a still daytime scene (Fewer Animations in Settings does not stop it) */
-@media(prefers-reduced-motion:reduce){#saver *{animation:none!important}#saver .sv-boat.wherry{transform:translateX(60vw)}#saver .sv-boat.yacht{transform:translateX(30vw)}}
-
-/* Settings row: the minutes, then Preview */
+/* the computer's own reduce-motion setting: one still daytime picture (Fewer Animations in Settings does not stop it) */
+@media(prefers-reduced-motion:reduce){#saver *{animation:none!important}}

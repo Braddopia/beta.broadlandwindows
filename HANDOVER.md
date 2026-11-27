@@ -567,3 +567,24 @@ stock number). Decided with the owner:
   Dock like Chrome, Steam and Settings. Windows keeps the plain sun (`manifest.webmanifest`). Safari's Add to Dock
   (`app-sun-180.png`) and the maskable icons are a white square with the sun at about 75%, since those are rounded by
   the system. An app already installed on a Mac keeps its old icon until it is removed and installed again.
+
+## v19.17.8: screen saver rebuilt
+
+- Why: the owner found it "cheap": the clouds bunched in the middle, the sun only slid down, clouds and boats vanished
+  half way across. Cause: the clouds and boats had no left position, so they sat in the middle of the flex container
+  and their animations started and ended relative to the middle of the screen.
+- Now `src/features/app/saver-scene.js` runs the scene with one requestAnimationFrame loop (plus a 50ms back-up beat
+  in case frames stop, as under Playwright's fake clock):
+  - a day of 240 seconds (`CYCLE`) with keyframes (`KEYS`: dawn, morning, midday, golden hour, sunset, dusk, night,
+    late night). `lookAt(p)` blends them and sets CSS variables on #saver: `--sky1..3`, `--land`, `--far`, `--w1/--w2`
+    (water), `--cloud`, `--cshade`, `--stars`, `--lights` (church windows), `--fog`, `--sx/--sy/--halo` (sun glow),
+    `--glintc`. Every colour in 05g-screen-saver.css comes from them (land and buildings use color-mix);
+  - the sun rises left, arcs and sets right (`arc()`); the moon at night; the glint column slides under whichever is up;
+  - 7 clouds at random depths (far = smaller, lower, slower, fainter), spread across the sky at the start, drifting
+    right; one that leaves comes back on the left with a new shape, size and height;
+  - two boats: sail fully across, rest 12 to 40 seconds out of sight, come back from either side, bob and tilt, with a
+    reflection (`-webkit-box-reflect`);
+  - starts at a random time of the morning (`p0`). `sceneAt(p)` jumps to a moment (used by tests).
+- The computer's reduce-motion setting shows one still daytime picture. Note: Playwright runs with reducedMotion
+  'reduce' (playwright.config.js), so a test of the moving scene calls `page.emulateMedia({ reducedMotion:
+  'no-preference' })` (tests/e2e/screen-saver.spec.js).

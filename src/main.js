@@ -112,6 +112,7 @@ import * as integrationsSmartOrders from './integrations/smart-orders.js';
 import * as startBoot from './start/boot.js';
 import * as featuresAppDesktopApp from './features/app/desktop-app.js';
 import * as featuresAppScreenSaver from './features/app/screen-saver.js';
+import * as featuresAppSaverScene from './features/app/saver-scene.js';
 import * as printPrint from './print/print.js';
 import * as uiComponentsArt from './ui/components/art.js';
 import * as uiComponentsKpi from './ui/components/kpi.js';
@@ -159,6 +160,7 @@ const modules = {
   startMigrations,
   featuresAppDesktopApp,
   featuresAppScreenSaver,
+  featuresAppSaverScene,
   dataPersistence,
   dataPhotos,
   dataLoad,

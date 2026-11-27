@@ -1,10 +1,11 @@
-/* features/app/screen-saver: after a while with no mouse, keyboard or touch, the opening animation plays on a loop
-   (the crane draws itself in light, fills in, floats while the glow breathes, fades, and starts again) with a large
-   clock and the date. Any movement, key or touch closes it; the touch that wakes it does not click anything beneath.
+/* features/app/screen-saver: after a while with no mouse, keyboard or touch, a Norfolk Broads scene plays (its motion
+   and light are in saver-scene.js) with a large clock and the date. A click, key, tap or the wheel closes it (moving
+   the mouse alone does not); the touch that wakes it does not click anything beneath.
    When it starts is a setting on this device (Settings, My Settings, Screen Saver: Off, 2, 5 or 10 minutes; 5 to
    start with), kept in localStorage 'bb_saver'. It never shows on a Floor Boards TV display, and with Fewer
    Animations it is still. */
 import { emit } from '../../core/events.js';
+import { sceneStart, sceneStop } from './saver-scene.js';
 
 const KEY = 'bb_saver';
 export const SAVER_CHOICES = [
@@ -58,17 +59,9 @@ function build() {
   const MILL =
     '<g class="sails"><path d="M68 2h4v140h-4zM0 70h140v4H0z"/><path class="lat" d="M72 8h14v58H72zM76 74h58v14H76zM54 78h14v58H54zM6 56h58v14H6z"/></g><path class="tw" d="M50 220l7-142h26l7 142z"/><path class="cap" d="M52 82c2-16 10-24 18-24s16 8 18 24z"/><path class="fan" d="M70 60l26-14v6z"/><circle class="hub" cx="70" cy="72" r="5"/>';
   el.innerHTML =
-    '<div class="sv-sky sv-day"></div><div class="sv-sky sv-dusk"></div><div class="sv-sky sv-night"></div>' +
-    '<div class="sv-stars"></div><div class="sv-moon"></div><div class="sv-sun"></div>' +
-    [1, 2, 3, 4, 5]
-      .map((i) => {
-        /* each cloud starts at a random point of its journey, so they are spread across the sky (not all from the right) */
-        const dur = 70 + Math.random() * 90,
-          top = [1, 7, 13, 19, 25][i - 1] + Math.random() * 4,
-          w = 9 + Math.random() * 16;
-        return `<svg class="sv-cloud" style="top:${top.toFixed(1)}%;width:${w.toFixed(1)}vw;opacity:${(0.6 + Math.random() * 0.4).toFixed(2)};animation-duration:${dur.toFixed(0)}s,60s;animation-delay:-${(Math.random() * dur).toFixed(0)}s,0s" viewBox="0 -40 320 170">${cloud(i * 17 + Math.floor(Math.random() * 50))}</svg>`;
-      })
-      .join('') +
+    /* (v19.17.8) one sky whose colours, sun and moon are set by saver-scene.js; seven clouds it places and moves */
+    '<div class="sv-sky"></div><div class="sv-stars"></div><div class="sv-moon"></div><div class="sv-sun"></div>' +
+    '<svg class="sv-cloud" viewBox="0 -40 320 170"></svg>'.repeat(7) +
     /* the Broads, back to front: a far tree line, a near tree line with a round-tower church and a second mill, the
        big mill, water with its reflection, ripples, the sun's glint and evening mist, a wherry and a yacht, reeds */
     `<svg class="sv-trees far" viewBox="0 0 1440 120" preserveAspectRatio="none"><path d="${treeLine(1, 34)}"/></svg>` +
@@ -84,7 +77,7 @@ function build() {
     '<path d="M134 118l12-12 12 12v32h-24z"/><path class="fl" d="M66 70h38M66 100h38M66 128h38"/>' +
     '<path class="win" d="M82 52a3 3 0 0 1 6 0v12h-6zM82 86a3 3 0 0 1 6 0v10h-6zM116 112a4 4 0 0 1 8 0v18h-8zM176 112a4 4 0 0 1 8 0v18h-8zM216 120a4 4 0 0 1 8 0v14h-8zM142 136a4 4 0 0 1 8 0v14h-8z"/></svg>' +
     `<svg class="sv-mill" viewBox="0 0 140 220">${MILL}</svg>` +
-    `<div class="sv-water"><div class="sv-wd"></div><div class="sv-wn"></div><svg class="sv-mill refl" viewBox="0 0 140 220">${MILL}</svg><div class="sv-mist"></div><svg class="sv-shim" viewBox="0 0 1600 320" preserveAspectRatio="none">${ripples(3)}</svg><svg class="sv-shim s2" viewBox="0 0 1600 320" preserveAspectRatio="none">${ripples(11)}</svg><svg class="sv-glint" viewBox="0 0 1600 320" preserveAspectRatio="none">${glint(5)}</svg><div class="sv-fog"></div></div>` +
+    `<div class="sv-water"><svg class="sv-mill refl" viewBox="0 0 140 220">${MILL}</svg><div class="sv-mist"></div><svg class="sv-shim" viewBox="0 0 1600 320" preserveAspectRatio="none">${ripples(3)}</svg><svg class="sv-shim s2" viewBox="0 0 1600 320" preserveAspectRatio="none">${ripples(11)}</svg><svg class="sv-glint" viewBox="0 0 1600 320" preserveAspectRatio="none">${glint(5)}</svg><div class="sv-fog"></div></div>` +
     '<svg class="sv-boat wherry" viewBox="0 0 120 90"><path class="sail" d="M58 6L60 70H28C34 46 44 22 58 6Z"/><path class="mast" d="M59 2V72"/><path class="hull" d="M6 72H112L102 84H20Z"/></svg>' +
     '<svg class="sv-boat yacht" viewBox="0 0 80 70"><path class="sail" d="M42 4L42 52H14Z"/><path class="sail2" d="M45 12L45 52H64Z"/><path class="hull" d="M8 54H72L64 64H16Z"/></svg>' +
     `<svg class="sv-reeds l" viewBox="0 0 210 200" preserveAspectRatio="xMinYMax meet">${reeds}</svg>` +
@@ -141,11 +134,11 @@ function cloud(seed) {
       .join('')}</g>`
   );
 }
-/** the setting sun's glint: a column of broken gold strokes under the sun (74% across), narrow at the horizon and
-    wider towards the front, in 1600 x 320 */
+/** the glint of the sun or moon on the water: a column of broken strokes down the middle of 1600 x 320, narrow at
+    the horizon and wider towards the front; saver-scene.js slides it under whichever is up */
 function glint(seed) {
   const rnd = seeded(seed),
-    cx = 1600 * 0.74;
+    cx = 1600 * 0.5;
   let out = '',
     y = 3;
   while (y < 320) {
@@ -202,11 +195,13 @@ export function saverShow() {
   clearInterval(clockT);
   clockT = setInterval(tickClock, 1000);
   el.classList.add('on');
+  sceneStart(el, cloud);
   idle = 0;
 }
 function hide() {
   if (!on()) return;
   el.classList.remove('on');
+  sceneStop();
   clearInterval(clockT);
   idle = 0;
 }
