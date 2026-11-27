@@ -20,15 +20,18 @@ import { finTab } from './finance-step.js';
 import { abList } from '../records/ab-list.js';
 import { addrTab, detailsTab } from '../records/record-parts.js';
 import { del } from '../records/delete.js';
-import { reportContract } from './documents.js';
+import { crOpen } from './contract-reports.js';
+import { commTab, costTab, costTotal, delTab, schedTable } from './contract-tabs.js';
 import { ckTab } from '../records/checklist.js';
 import { CDETF, CFINF, CFITF, CUSTF, FENSAF, GDPRF } from '../records/fields.js';
 import { logTab } from '../records/notes.js';
 import { photoTab } from '../records/photos-docs.js';
 import { linesTab } from '../records/products.js';
-import { RECORDS, recCall, recDelivery, recSave, recordWin } from '../records/record-window.js';
+import { RECORDS, recCall, recDelivery, recGo, recOpen, recSave, recordWin } from '../records/record-window.js';
+import { store } from '../../data/persistence.js';
+import { toast } from '../../ui/toast.js';
 import { opsTab } from '../records/survey.js';
-import { dTag, prTag } from '../../ui/components/tags.js';
+import { prTag } from '../../ui/components/tags.js';
 import { askIn } from '../../ui/modal.js';
 import * as repos from '../../data/repository.js';
 
@@ -61,16 +64,20 @@ export function defineContractRecord() {
       (W.v.name ? jobTitle(W.v.id, W.v.name) : W.v.id + '  New contract') + (W.v.company ? ' · ' + W.v.company : ''),
     headStats: (W) =>
       `${W.v.flash ? `<span class="flash">${esc(W.v.flash)}</span>` : ''}<span><small>Value</small><b>${m0(W.v.value)}</b></span><span><small>Paid</small><b>${m0(W.v.paid)}</b></span><span class="${(+W.v.value || 0) - (+W.v.paid || 0) > 0 ? 'hk-due' : 'hk-ok'}"><small>Outstanding</small><b>${(+W.v.value || 0) - (+W.v.paid || 0) > 0 ? m0((+W.v.value || 0) - (+W.v.paid || 0)) : 'Paid'}</b></span><span><small>Fit</small><b>${W.v.fit ? fd(W.v.fit) : '-'}</b></span>`,
-    reports: (W) => reportContract(W.id),
+    reports: () => crOpen(),
     /* the Advanced menu: [words, action, arguments, style] */
     advanced: () => [
       ['New Service Call', 'call'],
       ['New Delivery', 'delivery'],
+      ['Change Customer', 'customer'],
+      ['Duplicate This Contract', 'dup'],
       ...(can('manage') ? [['Delete This Contract', 'remove', [], 'del']] : []),
     ],
     run: {
       call: () => recCall(),
       delivery: () => recDelivery(),
+      customer: () => recGo('contact'),
+      dup: () => ctrDuplicate(),
       remove: () => del('contracts', recordWin.id),
     },
     fields: (W) => [
@@ -83,23 +90,27 @@ export function defineContractRecord() {
       { k: 'notes', l: 'Notes', t: 'area' },
     ],
     tabs: (W) => {
-      const calls = state.calls.filter((c) => c.contract == W.v.id),
-        dels = state.deliveries.filter((d) => d.contract == W.v.id);
+      const calls = state.calls.filter((c) => c.contract == W.v.id);
       return [
         { k: 'customer', t: 'Address', h: addrTab },
         { k: 'details', t: 'Details', h: (W) => detailsTab(W, CDETF(W), linesTab(W)) },
         { k: 'survey', t: 'Survey', h: opsTab },
         { k: 'check', t: 'Checklist', h: (W) => ckTab(W, CK) },
         { k: 'finance', t: 'Finance', h: finTab },
+        { k: 'deliveries', t: 'Deliveries', h: delTab },
         {
-          k: 'deliveries',
-          t: 'Deliveries',
-          h: (W) =>
-            `<div class="rg wide"><h4><span>Deliveries For This Job</span><button class="mini pri" ${onClick('recDelivery')}>New Delivery</button></h4>${dels.map((d) => `<div class="row"><span><b>${esc(d.supplier)}</b> ${esc(d.items)}<br><span class="muted">Due ${fd(d.due)}${d.stage ? ', ' + esc(d.stage) : ''}</span></span>${dTag(d)}</div>`).join('') || '<p class="empty">No deliveries linked to this contract number.</p>'}</div>`,
+          k: 'fitting',
+          t: 'Fitting',
+          h: (W) => `<div class="abh2">${abList(CFITF(), W.v)}</div>${schedTable(W)}`,
         },
-        { k: 'fitting', t: 'Fitting', h: (W) => `<div class="abh2">${abList(CFITF(), W.v)}</div>` },
         { k: 'notes', t: 'Notes etc', h: (W) => logTab(W, 'notes') },
         { k: 'docs', t: 'Documents', one: 'Document', cnt: 1, n: (W.v.photos || []).length, h: photoTab },
+        ...(can('money')
+          ? [
+              { k: 'comm', t: 'Commissions', h: commTab },
+              { k: 'costs', t: 'Job Costings', h: costTab },
+            ]
+          : []),
         {
           k: 'calls',
           t: 'Service Calls',
@@ -160,7 +171,15 @@ export function defineContractRecord() {
         );
       else if (o.paid !== undefined && dp)
         audit(dp > 0 ? 'Paid amount raised' : 'Payment removed', c.id || W.v.id, money(Math.abs(dp)));
-      if (!can('money')) delete o.cost;
+      if (!can('money')) {
+        delete o.cost;
+        delete o.comm;
+        delete o.costs;
+      } else if (o.costs || (o.lines || []).some((x) => +x.cost)) {
+        /* Job Costings: its total is the job cost */
+        const t = costTotal(o.lines, o.costs);
+        if (t != null) o.cost = t;
+      }
       Object.assign(c, o, { pay: W.v.pay || [], log: W.v.log || [], createdBy: c.createdBy || W.v.createdBy || USER });
       c.fitter = [1, 2, 3, 4, 5, 6]
         .map((i) => c['fitter' + i])
@@ -181,4 +200,47 @@ export function defineContractRecord() {
       return c.id;
     },
   };
+}
+
+/** Advanced, Duplicate: a new contract for the same customer with the same products and details. Payments, ticks,
+   photos, dates, invoices and commissions are not copied. */
+export function ctrDuplicate() {
+  if (!recordWin || recordWin.isNew) return;
+  if (recordWin.dirty && !recSave(false)) return;
+  const src = state.contracts.find((x) => x.id == recordWin.id);
+  if (!src) return;
+  askIn(
+    'Duplicate this contract?',
+    'A new contract is made for the same customer with the same products. Payments, ticks, photos, dates and invoices are not copied.',
+    'Duplicate',
+    () => {
+      const c = JSON.parse(JSON.stringify(src));
+      delete c._meta;
+      Object.assign(c, {
+        id: nid('C', state.contracts),
+        cdate: today(),
+        stage: 'Deposit due',
+        paid: 0,
+        pay: [],
+        chk: {},
+        chkAt: {},
+        photos: [],
+        phTags: [],
+        comm: [],
+        log: [{ t: 'Note', n: 'Duplicated from ' + src.id, by: USER, at: today() }],
+        createdBy: USER,
+        fitFromBoard: 0,
+        fitter: '',
+      });
+      ['survey', 'order', 'delDate', 'fit', 'invoiced', 'invoiceNo', 'invoiceDate', 'depDue', 'balDue', 'lead'].forEach(
+        (k) => (c[k] = '')
+      );
+      for (let i = 1; i <= 6; i++) c['fitter' + i] = '';
+      repos.contracts.add(c, { first: true });
+      store();
+      audit('Contract duplicated', c.id, 'from ' + src.id);
+      recOpen('contract', c.id);
+      toast('Contract ' + c.id + ' made from ' + src.id);
+    }
+  );
 }

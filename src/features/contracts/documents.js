@@ -12,7 +12,7 @@ import { can } from '../../domain/permissions.js';
 import { ctrList, ctrSteps, yn } from './contracts.js';
 import { leadList } from '../leads/leads.js';
 import { opSafe } from '../records/survey.js';
-import { blankV, docChoice, printDoc } from '../../print/print.js';
+import { blankV, capturing, docChoice, printDoc } from '../../print/print.js';
 
 export function reportContract(id, mode) {
   const c = state.contracts.find((x) => x.id == id);
@@ -385,5 +385,5 @@ export function invoicePrint(id) {
           : 'This invoice is paid in full. Thank you. ',
     }
   );
-  audit('Invoice printed', c.id, no);
+  if (!capturing()) audit('Invoice printed', c.id, no);
 }

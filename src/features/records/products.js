@@ -60,7 +60,7 @@ export function readLines() {
     const x = L[+e.dataset.i];
     if (!x) return;
     const f = e.dataset.f;
-    x[f] = f == 'qty' || f == 'rate' ? (SAFE.num(e.value, { max: 1e7 }) ?? 0) : SAFE.text(e.value, 120);
+    x[f] = f == 'qty' || f == 'rate' || f == 'cost' ? (SAFE.num(e.value, { max: 1e7 }) ?? 0) : SAFE.text(e.value, 120);
   });
   return L;
 }

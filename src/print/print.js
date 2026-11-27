@@ -168,9 +168,27 @@ export const PRINT_CUS = `.lh{display:flex;justify-content:space-between;align-i
        pre, post, sign, barcode, customer:{name,address,contact} -> customer layout, thanks} */
 export const blankV = (v) =>
   v == null || ['', '-', 'not set', 'n/a', 'none', 'unassigned'].includes(String(v).trim().toLowerCase());
+/* captureDoc(run): run a report and hand back its page instead of opening a window (the Reports window's preview,
+   v19.18). Photos not loaded yet are left out of a preview rather than opening a "Loading photos" window. */
+let CAPTURE = null;
+export function captureDoc(run) {
+  CAPTURE = { html: '' };
+  try {
+    run();
+    return CAPTURE.html;
+  } finally {
+    CAPTURE = null;
+  }
+}
+/** true while a report is being drawn for a preview (so it is not counted as printed) */
+export const capturing = () => !!CAPTURE;
 export function printDoc(t, sub, rows, ph, o) {
   o = o || {};
-  const PR = (ph || []).filter(phIsRef);
+  if (CAPTURE) {
+    o = { ...o, asHtml: true };
+    ph = (ph || []).filter((p) => !phIsRef(p) || PHC.has(p.slice(3)));
+  }
+  const PR = o.asHtml ? [] : (ph || []).filter(phIsRef);
   if (!o.__w && PR.some((r) => !PHC.has(r.slice(3)))) {
     const w0 = window.open('', '_blank');
     if (!w0) {
@@ -296,6 +314,7 @@ export function printDoc(t, sub, rows, ph, o) {
     : `<span>Broadland Windows · Internal use only</span><span>Printed ${now.toLocaleString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>`;
   const doc = `<!doctype html><html><head><meta charset="utf-8"><title>${esc(t)}</title><style>${PRINT_BASE}${cus ? PRINT_CUS : PRINT_INT}${PRINT_BAR_CSS}</style></head><body>
   ${o.asHtml ? '' : printBar(t)}<div class="pg">${page}</div>${on('footer') ? `<footer class="ft">${foot}</footer>` : ''}</body></html>`;
+  if (CAPTURE) CAPTURE.html = doc;
   if (o.asHtml) return doc;
   w.document.write(doc);
   w.document.close();

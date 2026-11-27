@@ -166,3 +166,45 @@
 .ov:has(>.mb.ab.fp){padding:0}
 .mb.full.ab.fp{flex-shrink:0;border:0}
 @media(max-width:760px){.ov:has(>.mb.ab){padding:0}}
+
+/* Contract Reports window (over the contract) */
+.mb.ab .ab-rep{position:absolute;inset:0;z-index:6;display:flex;flex-direction:column;background:var(--bg);animation:fade .18s}
+.mb.ab .cr-bar{flex-wrap:wrap;row-gap:.35rem}
+.mb.ab .cr-bar .rb1[disabled]{opacity:.45}
+.mb.ab .cr-t{color:#fff;font:600 .95rem var(--body);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:40%}
+.mb.ab .cr-x{flex:1;min-height:0;display:grid;grid-template-columns:minmax(15rem,21rem) minmax(0,1fr)}
+.mb.ab .cr-l{overflow:auto;padding:.7rem .6rem;border-right:1px solid var(--line);background:var(--card)}
+.mb.ab .cr-h{margin:.1rem .5rem .5rem;font:700 .72rem var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.mb.ab .cr-i{display:flex;align-items:center;justify-content:space-between;gap:.5rem;width:100%;text-align:left;border:0;background:none;padding:.55rem .7rem;border-radius:9px;font:500 .88rem var(--body);color:var(--ink);cursor:pointer;transition:background .15s,color .15s}
+.mb.ab .cr-i:hover{background:var(--card2)}
+.mb.ab .cr-i.on{background:var(--blue);color:#fff}
+.mb.ab .cr-i.soon{color:var(--muted)}
+.mb.ab .cr-i.soon.on{background:color-mix(in srgb,var(--blue) 14%,var(--card));color:var(--ink)}
+.mb.ab .cr-i small{flex:0 0 auto;font-size:.68rem;font-weight:600;padding:.1rem .45rem;border-radius:20px;background:var(--card2);color:var(--muted)}
+.mb.ab .cr-i.ed{justify-content:flex-start;cursor:default}.mb.ab .cr-i.ed input{width:1.05rem;height:1.05rem;accent-color:var(--blue)}
+.mb.ab .cr-p{min-width:0;min-height:0;display:flex;background:#d9dfe8}
+body[data-theme=dark] .mb.ab .cr-p{background:#0b0f15}
+.mb.ab .cr-fr{flex:1;border:0;width:100%;height:100%;background:#e9edf3}
+.mb.ab .cr-card{margin:auto;max-width:28rem;text-align:center;padding:2rem;background:var(--card);border-radius:16px;box-shadow:var(--sh-lg,0 20px 40px -20px rgba(0,0,0,.3))}
+.mb.ab .cr-card svg{width:2.6rem;height:2.6rem;color:var(--blue)}
+.mb.ab .cr-card h3{margin:.6rem 0 .4rem}.mb.ab .cr-card p{color:var(--muted);font-size:.9rem;line-height:1.5}
+.mb.ab .cr-f{margin:0;padding:.55rem 1.2rem;border-top:1px solid var(--line);background:var(--card);font-size:.8rem;color:var(--muted)}
+
+/* Job Costings, Commissions, Fitting schedule */
+.mb.ab .jc-k{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.7rem;margin-bottom:1rem}
+.mb.ab .jc-k span{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:.6rem .9rem}
+.mb.ab .jc-k small{display:block;font-size:.74rem;color:var(--muted)}.mb.ab .jc-k b{font-size:1.15rem;font-variant-numeric:tabular-nums}
+.mb.ab .jc-k .neg b{color:var(--red)}
+.mb.ab .jc-h{display:flex;align-items:center;justify-content:space-between;margin:1rem 0 .4rem;font:700 .9rem var(--body)}
+.mb.ab .abgrid.jc{border-top:1px solid var(--line);border-radius:12px}
+.mb.ab .abgrid.jc input[data-f=cost],.mb.ab .abgrid.jc input.jcx[data-f=amt]{width:7rem;text-align:right}
+.mb.ab .jc-n{font-size:.8rem;margin:.6rem 0 0}
+.mb.ab #abComm .abgrid select,.mb.ab #abComm .abgrid input{border:1px solid transparent;background:transparent;padding:.3rem .4rem;border-radius:7px;min-width:5rem;font-size:.86rem;color:var(--ink)}
+.mb.ab #abComm .abgrid select:hover,.mb.ab #abComm .abgrid input:hover{border-color:var(--line)}
+.mb.ab #abComm input[data-f=pct],.mb.ab #abComm input[data-f=amt]{width:6rem;text-align:right}
+.mb.ab .sched-t{margin-top:1.2rem}.mb.ab .sched-t h4 small{font-weight:500;margin-left:.4rem}
+.mb.ab .sched-t .abgrid{border-top:1px solid var(--line);border-radius:10px;margin-top:.4rem}
+.mb.ab .rw-p[data-t=deliveries] .abgrid tr.clk-r{cursor:pointer}
+.mb.ab .rw-p[data-t=deliveries] .abgrid tr.clk-r:hover td{background:var(--card2)}
+@media(max-width:760px){.mb.ab .cr-x{grid-template-columns:1fr;grid-template-rows:auto 1fr}.mb.ab .cr-l{max-height:30vh;border-right:0;border-bottom:1px solid var(--line)}.mb.ab .cr-t{display:none}.mb.ab .jc-k{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.mb.ab .abgrid.jc .plt input[data-f=cost],.mb.ab .abgrid.jc .plt input.jcx{border-color:var(--line);background:var(--card)}

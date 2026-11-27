@@ -23,6 +23,8 @@ test('contract window: large and centred, goes full page (remembered), tabs in t
     'Fitting',
     'Notes etc',
     'Documents',
+    'Commissions',
+    'Job Costings',
     'Service Calls',
   ]);
   await app.page.click('#mbox .rw-fp');
@@ -196,5 +198,112 @@ test('lead window: the same frame with the lead tabs; Advanced converts', async 
   await app.page.click('#rwAdvB');
   await expect(app.page.locator('#fpop.open')).toContainText('Convert To Contract');
   await expect(app.page.locator('#fpop.open')).toContainText('Mark As Lost');
+  expect(app.errors).toEqual([]);
+});
+
+// ---- round 2 (v19.18.1): Contract Reports, Commissions, Job Costings, Fitting schedule, Deliveries, Advanced ----
+
+test('Contract Reports: report names on the left, a preview on the right; Esc goes back to the contract', async ({
+  app,
+}) => {
+  await app.openContract('1023421');
+  await app.page.click('#mbox .rw-wide [data-act=recReports]');
+  await expect(app.page.locator('#crWin')).toBeVisible();
+  const names = await app.page.locator('#crWin .cr-l .cr-i span').allTextContents();
+  expect(names.slice(0, 3)).toEqual(['Customer Contract Record', 'Invoice Reminder', '10 Year Completion Documents']);
+  expect(names).toContain('Credit Control Letter 14 Days');
+  // the first report is previewed straight away
+  const frame = app.page.frameLocator('#crPrev iframe');
+  await expect(frame.locator('body')).toContainText('1023421');
+  // the invoice preview is not counted as printed
+  const before = await app.run(() => state.audit.filter((a) => /Invoice printed/.test(a.what || a.a || '')).length);
+  await app.page.click('#crWin .cr-i:has-text("Sales Invoice")');
+  await expect(frame.locator('body')).toContainText('INV-1023421');
+  expect(await app.run(() => state.audit.filter((a) => /Invoice printed/.test(a.what || a.a || '')).length)).toBe(
+    before
+  );
+  // a report not built yet says so, and Print is greyed out
+  await app.page.click('#crWin .cr-i:has-text("Quality Plan")');
+  await expect(app.page.locator('#crPrev')).toContainText('coming soon');
+  await expect(app.page.locator('#crWin [data-act=crPrint]')).toBeDisabled();
+  await expect(app.page.locator('#crWin .cr-f')).toHaveText(/Need a change to a report\? Ask an administrator\./);
+  await app.page.keyboard.press('Escape');
+  await expect(app.page.locator('#crWin')).toHaveCount(0);
+  await expect(app.page.locator('#mbox .rw')).toHaveCount(1);
+  expect(app.errors).toEqual([]);
+});
+
+test('Contract Reports: Edit List hides a report for everyone (administrators)', async ({ app }) => {
+  await app.openContract('1023421');
+  await app.call('recReports');
+  await app.page.click('#crWin [data-act=crEdit]');
+  await app.page.locator('#crWin .cr-i.ed', { hasText: 'Quality Plan' }).locator('input').uncheck();
+  await app.page.click('#crWin [data-act=crEdit]');
+  await expect(app.page.locator('#crWin .cr-i', { hasText: 'Quality Plan' })).toHaveCount(0);
+  expect(await app.run(() => state.rptHide)).toEqual(['Quality Plan']);
+  expect(app.errors).toEqual([]);
+});
+
+test('Commissions and Job Costings save with the contract; the costs become the job cost', async ({ app }) => {
+  await app.openContract('1023421');
+  await app.page.click('#mbox .ab-tabs button[data-t=comm]');
+  await app.page.click('#abComm [data-act=commDefault]');
+  await expect(app.page.locator('#abComm tbody tr')).toHaveCount(1);
+  await app.page.fill('#abComm .cml[data-f=pct]', '5');
+  await app.page.locator('#abComm .cml[data-f=pct]').dispatchEvent('change');
+  await expect(app.page.locator('#abComm tfoot')).toContainText('£392.50');
+  await app.page.click('#mbox .ab-tabs button[data-t=costs]');
+  await app.page.fill('#abCost .pl[data-i="0"][data-f=cost]', '400');
+  await app.page.locator('#abCost .pl[data-i="0"][data-f=cost]').dispatchEvent('change');
+  await app.page.click('#abCost [data-act=costAdd]');
+  await app.page.fill('#abCost .jcx[data-f=what]', 'Skip hire');
+  await app.page.fill('#abCost .jcx[data-f=amt]', '250');
+  await app.page.locator('#abCost .jcx[data-f=amt]').dispatchEvent('change');
+  await expect(app.page.locator('#abCost .jc-k')).toContainText('£650.00');
+  await app.fillRequired();
+  expect(await app.call('recSave', true)).toBe(true);
+  const c = await app.run(() => state.contracts.find((c) => c.id == '1023421'));
+  expect([c.comm.length, c.comm[0].pct, c.comm[0].role, c.lines[0].cost, c.costs[0].what, c.cost]).toEqual([
+    1,
+    5,
+    'Salesperson',
+    400,
+    'Skip hire',
+    650,
+  ]);
+  expect(app.errors).toEqual([]);
+});
+
+test('accounts that may not see money have no Commissions or Job Costings tabs', async ({ app }) => {
+  await app.role('staff');
+  await app.openContract('1023421');
+  await expect(app.page.locator('#mbox .ab-tabs button[data-t=comm]')).toHaveCount(0);
+  await expect(app.page.locator('#mbox .ab-tabs button[data-t=costs]')).toHaveCount(0);
+});
+
+test('Fitting shows the Contract Schedule; Deliveries is a table; Advanced duplicates a contract', async ({ app }) => {
+  await app.run(() => {
+    schedData().cells['2026-11-12|Team A'] = { job: '1023421', name: 'Sample Customer E', conf: 1 };
+  });
+  await app.openContract('1023421');
+  await app.page.click('#mbox .ab-tabs button[data-t=fitting]');
+  await expect(app.page.locator('#mbox .sched-t tbody tr')).toHaveCount(1);
+  await expect(app.page.locator('#mbox .sched-t')).toContainText('Confirmed');
+  await app.page.click('#mbox .ab-tabs button[data-t=deliveries]');
+  await expect(app.page.locator('#mbox .rw-p[data-t=deliveries] tbody tr')).toHaveCount(1);
+  const n = await app.run(() => state.contracts.length);
+  await app.page.click('#rwAdvB');
+  await app.page.click('#fpop.open .pm-i:has-text("Duplicate This Contract")');
+  await app.page.click('.aski [data-a="1"]');
+  expect(await app.run(() => state.contracts.length)).toBe(n + 1);
+  const d = await app.run(() => ({ id: recordWin.id, v: recordWin.v }));
+  expect(d.id).not.toBe('1023421');
+  expect([d.v.name, d.v.paid, d.v.pay.length, d.v.lines.length, d.v.stage]).toEqual([
+    'Sample Customer E',
+    0,
+    0,
+    9,
+    'Deposit due',
+  ]);
   expect(app.errors).toEqual([]);
 });

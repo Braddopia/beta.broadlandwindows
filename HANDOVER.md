@@ -632,3 +632,27 @@ The owner asked for the record windows to work like their old system, AdminBase,
 - Still to come (next rounds): the two-pane Contract Reports window, Commissions and Job Costings tabs, the Contract
   Schedule on Fitting, Deliveries and Finance tables with their own toolbars, more Advanced actions, then Suppliers.
   Ask the owner for the Address, Advanced and Documents screenshots they offered.
+
+## v19.18.1: Contract Reports window, Commissions, Job Costings (round 2 of the rework)
+
+- Contract Reports (`features/contracts/contract-reports.js`, Reports on the contract toolbar, `crOpen`): opens over
+  the contract like the old system: a blue toolbar (Back, Email, Print, Sign, Preview, Customise, Edit List), the
+  "Report Name" list on the left and a live preview on the right (an iframe filled by `captureDoc()` in
+  print/print.js, which makes `printDoc` hand back the page instead of opening a window; `capturing()` stops a preview
+  counting as printed). `CONTRACT_REPORTS` lists AdminBase's 14 reports in its order plus the CRM's own (Contract
+  Sheet, Fitting Job Sheet, Customer Details). New printouts in the CRM's style: Invoice Reminder, Contract Statement,
+  Receipt, Order Checklist. The guarantee (10 and 5 year) opens its own form. Not built yet ("Coming soon"):
+  Completion Documents Conservatory, Domestic Aluminium Checklist, Quality Plan, Order Acknowledgement Letter,
+  Standing Order Letter, Credit Control Letter 14 Days, and Sign (on-screen signing). Print prints the preview;
+  Preview opens it full size; Email starts an email to the customer (attach the PDF); Customise opens the Document
+  Builder for that report; Edit List (administrators) hides reports for everyone (`state.rptHide`). Esc goes back.
+- Commissions and Job Costings tabs (`features/contracts/contract-tabs.js`, only for `can('money')`): commission
+  lines (who, role, rate % of the value before VAT or a fixed amount, paid on, note; Default adds the salesperson,
+  manager and director from Details) saved as `c.comm`; Job Costings has a cost per product line (`lines[i].cost`)
+  and other costs (`c.costs`), with sales, costs, profit and margin; its total is saved as the Job Cost (`c.cost`).
+- Fitting shows the Contract Schedule (the days booked for this job on the Fitting Schedule); Deliveries is a table
+  with + New Delivery (rows open the delivery).
+- Advanced (contract): New Service Call, New Delivery, Change Customer (opens the Address window at Customer),
+  Duplicate This Contract (`ctrDuplicate`: same customer, products and details; no payments, ticks, photos, dates or
+  invoices), Delete. Esc closes the Reports or Address window before the record.
+- Tests: tests/e2e/adminbase-records.spec.js (round 2 section).

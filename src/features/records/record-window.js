@@ -17,6 +17,7 @@ import { recContactLine } from './record-tools.js';
 import { stgDraw } from './stages.js';
 import { readOps } from './survey.js';
 import { editCall } from '../service/service.js';
+import { commChange, costRedraw, readComm, readCosts } from '../contracts/contract-tabs.js';
 import { fieldErr, plugInForms, readFields } from '../../ui/forms/form.js';
 import { drawThumbs, setPhotoList, tmp } from '../../ui/forms/photos.js';
 import { closeModal, openModal, plugInRecordWindow } from '../../ui/modal.js';
@@ -45,7 +46,20 @@ export const RTAB = { lead: 'details', contract: 'details' };
 /** the tabs in the old system's order; the `customer` step is the Address window */
 export const RSTEPS = {
   lead: ['customer', 'details', 'appts', 'survey', 'check', 'notes', 'docs'],
-  contract: ['customer', 'details', 'survey', 'check', 'finance', 'deliveries', 'fitting', 'notes', 'docs', 'calls'],
+  contract: [
+    'customer',
+    'details',
+    'survey',
+    'check',
+    'finance',
+    'deliveries',
+    'fitting',
+    'notes',
+    'docs',
+    'comm',
+    'costs',
+    'calls',
+  ],
 };
 export function setRecordWin(v) {
   recordWin = v;
@@ -129,6 +143,8 @@ export function recOpen(kind, id) {
       if (w) w.textContent = c.checked ? 'Done today by ' + USER : '';
     }
     recRail();
+    commChange(e);
+    if (c.matches && c.matches('#abCost input[type=number]')) costRedraw();
   });
   box.addEventListener('focusin', lineFocus);
   box.addEventListener('keydown', recKeys);
@@ -136,6 +152,13 @@ export function recOpen(kind, id) {
 }
 /* Ctrl+S saves; Page Up / Page Down open the previous / next record (not while typing in a list or a text box) */
 export function recKeys(e) {
+  /* Esc closes the Reports or Address window first, not the record under it */
+  if (e.key == 'Escape' && ($('#crWin') || ($('#rwAddr') && !$('#rwAddr').hidden))) {
+    e.stopPropagation();
+    if ($('#crWin')) $('#crWin').remove();
+    else recAddrDone();
+    return;
+  }
   if ((e.ctrlKey || e.metaKey) && !e.altKey && e.key.toLowerCase() == 's') {
     e.preventDefault();
     recSave(false);
@@ -183,6 +206,7 @@ export function recTab(k) {
     p.classList.toggle('on', p.dataset.t == k);
   });
   $('#mbox .rw-b').scrollTop = 0;
+  if (k == 'costs') costRedraw();
   recRail();
   const b = $(`#mbox .ab-tabs button[data-t="${k}"]`);
   if (b && b.scrollIntoView) b.scrollIntoView({ block: 'nearest', inline: 'nearest' });
@@ -244,6 +268,8 @@ export function recRead() {
   o.chkAt = at;
   o.phTags = (recordWin.v.phTags || []).slice(0, MAX_PHOTOS);
   if ($('#mbox .pl')) o.lines = readLines();
+  if ($('#abComm')) o.comm = readComm();
+  if ($('#abCost')) o.costs = readCosts();
   if ($('#mbox .op') || recordWin.v.openings) o.openings = $('#mbox .op') ? readOps() : recordWin.v.openings;
   o.photos = tmp.slice(0, MAX_PHOTOS);
   return o;
