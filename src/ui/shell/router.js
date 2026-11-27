@@ -80,7 +80,7 @@ export const VIEWS = {
 };
 export const NG = [
   ['Workspace', ['home', 'messages', 'fitting']],
-  ['Sales', ['leads', 'contacts', 'contracts', 'service']],
+  ['Sales', ['contacts', 'leads', 'contracts', 'service']],
   ['Operations', ['live', 'deliveries']],
   ['Stock', ['stock', 'suppliers']],
   ['Processing', ['cutting', 'bars', 'tags']],

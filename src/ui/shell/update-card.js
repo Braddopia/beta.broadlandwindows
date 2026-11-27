@@ -1,50 +1,82 @@
-/* ui/shell/update-card: the Update Ready pop-up at the bottom of the screen (v19.17.3).
+/* ui/shell/update-card: the "A New Version Is Ready" window (v19.17.5, the owner's choice: in the middle of the
+   screen until restarted).
    features/app/desktop-app.js checks version.json often (every page change, coming back to the window, every 2
-   minutes) and emits 'update-ready' with the new version and up to three lines of what is new. This card stays until
-   the person restarts or picks Later; Later hides it for 10 minutes, then the next check brings it back. It waits
-   while a pop-up window is open, so nothing being typed is lost. */
+   minutes) and emits 'update-ready' with the new version and up to three lines of what is new. The window sits in the
+   middle of a dimmed screen with Restart Now. "Remind Me In 10 Minutes" (or Esc) puts it away and leaves a small
+   "Update ready" chip at the bottom, which restarts in one click; after 10 minutes the next check brings the window
+   back. It waits while another pop-up window, a tour or the screen saver is open, so nothing being typed is lost. */
 import { $ } from '../../core/dom.js';
-import { html, raw } from '../../core/html.js';
+import { html } from '../../core/html.js';
+import { LOGO_SRC } from '../../core/assets.js';
 
 const LATER_MS = 10 * 60 * 1000;
-let laterUntil = 0;
+let laterUntil = 0,
+  last = null;
 
-const ICON =
-  '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.34-5.66"/><path d="M20 4v4.5h-4.5"/><path d="M12 8v4.5l3 1.8"/></svg>';
-
-/** show (or refresh) the card for update u = { version, notes, app } */
+/** show the window for update u = { version, notes, app }; while snoozed, only the chip */
 export function showUpdate(u) {
-  if (!u || performance.now() < laterUntil || document.body.classList.contains('tv')) return;
-  if ($('.ov.open') || $('#saver')) return;
+  if (!u || document.body.classList.contains('tv')) return;
+  last = u;
+  if (performance.now() < laterUntil) return showChip(u);
+  if ($('.ov.open') || $('#saver') || $('#updWin')) return;
   const where = u.app ? 'app' : 'page',
     notes = (u.notes || []).filter(Boolean);
-  let e = $('#updCard');
-  const fresh = !e;
-  if (fresh) {
-    e = document.createElement('div');
-    e.id = 'updCard';
-    e.className = 'upd';
-    e.setAttribute('role', 'status');
-    e.setAttribute('aria-live', 'polite');
-    document.body.appendChild(e);
-  }
+  $('#updChip')?.remove();
+  const e = document.createElement('div');
+  e.id = 'updWin';
+  e.className = 'updw';
   e.innerHTML = String(
-    html`<span class="upd-i">${raw(ICON)}</span><div class="upd-t"><b>Update Ready<span class="upd-v">v${u.version}</span></b><small>Restart the ${where} to get the newest version. Your work is saved.</small>${notes.length ? html`<ul class="upd-n">${notes.map((n) => html`<li>${n}</li>`)}</ul>` : ''}</div><div class="upd-a"><button type="button" class="upd-l" data-act="updLater">Later</button><button type="button" class="upd-go" data-act="updRestart">Restart Now</button></div>`
+    html`<div class="updw-card" role="dialog" aria-modal="true" aria-labelledby="updT" aria-describedby="updS">
+      <div class="updw-ic"><img src="${LOGO_SRC.icon}" alt=""></div>
+      <span class="updw-v">Version ${u.version}</span>
+      <h2 id="updT">A New Version Is Ready</h2>
+      <p id="updS">Restart the ${where} to start using it. Everything you have done is saved.</p>
+      ${notes.length ? html`<div class="updw-n"><b>What's New</b><ul>${notes.map((n) => html`<li>${n}</li>`)}</ul></div>` : ''}
+      <button type="button" class="btn updw-go" data-act="updRestart">Restart Now</button>
+      <button type="button" class="updw-l" data-act="updLater">Remind Me In 10 Minutes</button>
+    </div>`
   );
-  if (fresh) requestAnimationFrame(() => e.classList.add('in'));
+  document.body.appendChild(e);
+  e.addEventListener('keydown', (ev) => {
+    if (ev.key == 'Escape') updLater();
+    /* keep the keyboard inside the window */
+    if (ev.key == 'Tab') {
+      const b = [...e.querySelectorAll('button')],
+        i = b.indexOf(document.activeElement);
+      ev.preventDefault();
+      b[(i + (ev.shiftKey ? b.length - 1 : 1)) % b.length].focus();
+    }
+  });
+  requestAnimationFrame(() => {
+    e.classList.add('in');
+    e.querySelector('.updw-go').focus();
+  });
+}
+/** the small reminder at the bottom while the window is put away */
+function showChip(u) {
+  if ($('#updChip')) return;
+  const c = document.createElement('div');
+  c.id = 'updChip';
+  c.className = 'updc';
+  c.setAttribute('role', 'status');
+  c.innerHTML = String(
+    html`<span class="updc-dot"></span><span>Version ${u.version} is ready</span><button type="button" data-act="updRestart">Restart</button>`
+  );
+  document.body.appendChild(c);
 }
 /** Restart Now: load the newest version */
 export function updRestart() {
-  const e = $('#updCard');
-  if (e) e.classList.add('going');
-  setTimeout(() => location.reload(), 120);
+  document.body.classList.add('upd-going');
+  setTimeout(() => location.reload(), 150);
 }
-/** Later: hide for 10 minutes */
+/** Remind Me In 10 Minutes: put the window away, keep the chip */
 export function updLater() {
   laterUntil = performance.now() + LATER_MS;
-  const e = $('#updCard');
-  if (!e) return;
-  e.classList.remove('in');
-  e.classList.add('out');
-  setTimeout(() => e.remove(), 220);
+  const e = $('#updWin');
+  if (e) {
+    e.classList.remove('in');
+    e.classList.add('out');
+    setTimeout(() => e.remove(), 220);
+  }
+  if (last) showChip(last);
 }

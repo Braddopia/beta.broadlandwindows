@@ -52,3 +52,33 @@ test('each brochure keeps the cover picture the website shows with it', () => {
   assert.equal(L[0].img, 'https://www.broadlandwindows.co.uk/wp-content/uploads/2025/06/Visofold-cover.jpg');
   assert.equal(L[1].img, 'https://www.broadlandwindows.co.uk/wp-content/uploads/2025/06/Titan.png');
 });
+
+test('hardwood files named "HW_..." are Hardwood with a readable title, whatever else the name says', async () => {
+  const { tidyTitle } = await import('../../scripts/fetch-brochures.mjs');
+  assert.equal(guessCat('HW_Door_Merge'), 'Hardwood');
+  assert.equal(guessCat('HW_Windows_Merge.pdf'), 'Hardwood');
+  assert.equal(tidyTitle('HW_Door_Merge', 'https://x/HW_Door_Merge.pdf'), 'Hardwood Doors');
+  assert.equal(tidyTitle('HW_Special_Merge'), 'Hardwood Special');
+  assert.equal(tidyTitle('Alitherm Heritage 60'), 'Alitherm Heritage 60');
+});
+
+test('a brochure uploaded twice counts once (the newest is kept); years in names are left alone', async () => {
+  const { oneEach } = await import('../../scripts/fetch-brochures.mjs');
+  const U = 'https://www.broadlandwindows.co.uk/wp-content/uploads/';
+  const L = oneEach(
+    [
+      '2025/07/Smarts-AluSpace-1.pdf',
+      '2025/07/Smarts-AluSpace.pdf',
+      '2025/06/HW_Door_Merge.pdf',
+      '2025/05/HW_Door_Merge.pdf',
+      '2025/06/SMARTS-Visofold-Series-2025.pdf',
+      '2025/06/SMARTS-Visofold-Series-2024.pdf',
+    ].map((f) => ({ url: U + f }))
+  ).map((x) => x.url.replace(U, ''));
+  assert.deepEqual(L, [
+    '2025/07/Smarts-AluSpace-1.pdf',
+    '2025/06/HW_Door_Merge.pdf',
+    '2025/06/SMARTS-Visofold-Series-2025.pdf',
+    '2025/06/SMARTS-Visofold-Series-2024.pdf',
+  ]);
+});

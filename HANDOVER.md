@@ -523,3 +523,21 @@ stock number). Decided with the owner:
   understood), or WordPress's own picture of the PDF's first page from the file list (`media_details.sizes`). The
   Files page uses it first (`coverUrl`), then the old guesses, then the drawn cover. Only pictures under
   broadlandwindows.co.uk/wp-content/uploads are accepted.
+
+## v19.17.5
+
+- The new-version prompt is a window in the middle of a dimmed, blurred screen (`#updWin`, ui/shell/update-card.js):
+  the app's sun, "Version x", "A New Version Is Ready", What's New (from src/whats-new.json), Restart Now (focused)
+  and "Remind Me In 10 Minutes" (or Esc). Put away, a small chip stays at the bottom ("Version x is ready · Restart")
+  and the window comes back at the first check after 10 minutes.
+- Side menu Sales: Contact Book, Leads, Contracts, Service Calls (indented).
+- Reviews: Trustpilot no longer needs a key. Without `TRUSTPILOT_API_KEY` the daily job reads the public review page
+  (uk.trustpilot.com/review/broadlandwindows.co.uk, `parseTrustpilot`: the page's trustScore/numberOfReviews or its
+  AggregateRating). Google still needs `GOOGLE_PLACES_KEY` and `GOOGLE_PLACE_ID`. fetch-reviews.mjs now only runs when
+  called directly (it can be imported by tests).
+- Brochures: the website's file list gave file-name titles ("HW_Door_Merge"), duplicates (re-uploads) and a non-brochure
+  ("why broadland"), and the range was guessed from the whole address (which always says "windows"). Now: titles are
+  tidied (`tidyTitle`: "HW" = Hardwood), the range is guessed from the title and file name only (HW files are
+  Hardwood), one of each file is kept (`oneEach`, newest first; "-1.pdf" re-uploads count once), and PDFs that are not
+  brochures are left out (`NOT_BROCHURE`). The app also uses its own checked name and range for any brochure it
+  already knows, and drops duplicates itself. brochures.json was cleaned to 22.

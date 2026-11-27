@@ -67,7 +67,7 @@ export async function brochureFeed(feed) {
       return;
     }
   }
-  const items = ((feed && feed.items) || [])
+  let items = ((feed && feed.items) || [])
     .map((x) => ({
       cat: SAFE.text(x.cat || 'Other', 40),
       title: SAFE.text(x.title, 120),
@@ -79,6 +79,19 @@ export async function brochureFeed(feed) {
       seen: SAFE.text(x.firstSeen || '', 10),
     }))
     .filter((x) => x.title && x.url && /^https:\/\/(www\.)?broadlandwindows\.co\.uk\//.test(x.url));
+  /* one of each: the same file uploaded again ("-1.pdf", or a later month) shows once */
+  const seenFile = new Set(),
+    fileOf = (u) =>
+      decodeURIComponent(u.split('/').pop())
+        .toLowerCase()
+        .replace(/-\d(\.pdf)$/, '$1');
+  items = items.filter((x) => !seenFile.has(fileOf(x.url)) && seenFile.add(fileOf(x.url)));
+  /* a brochure this version already knows keeps its checked name and range (the website's file list can call it
+     "HW_Door_Merge" and file it by the word "door") */
+  for (const x of items) {
+    const k = DL.find((d) => d.url == x.url);
+    if (k) Object.assign(x, { title: k.title, cat: k.cat });
+  }
   if (items.length < 5) return;
   LIVE = items;
   liveAt = SAFE.text(String(feed.updated || ''), 40);

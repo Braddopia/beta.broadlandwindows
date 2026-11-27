@@ -36,9 +36,36 @@ const fromFile = (u) =>
     .replace(/\s+/g, ' ')
     .trim()
     .replace(/\b([A-Z])([A-Z]{3,})\b/g, (m, a, b) => a + b.toLowerCase());
+/** a title that is really a file name ("HW_Door_Merge") made readable: "Hardwood Doors" */
+export function tidyTitle(t, url) {
+  let x = String(t || '').trim();
+  if (!x || /_/.test(x) || (!/\s/.test(x) && /-/.test(x))) x = fromFile(url || x + '.pdf');
+  return x
+    .replace(/[_]+/g, ' ')
+    .replace(/^HW\b/i, 'Hardwood')
+    .replace(/\bMerge\b/gi, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .replace(/^Hardwood (Door|Window)$/i, 'Hardwood $1s');
+}
+/** PDFs on the website that are not brochures: about-us leaflets, policies, forms and job adverts */
+export const NOT_BROCHURE =
+  /why[-_ ]?broadland|about[-_ ]?us|privacy|terms|cookie|policy|gdpr|invoice|application|form\b|vacanc|career|job[-_ ]?(spec|advert)|price[-_ ]?list/i;
+/** the same brochure uploaded again ("Smarts-AluSpace-1.pdf", or the same file in a later month) counts once */
+export const fileKey = (url) =>
+  decodeURIComponent(String(url).split('/').pop())
+    .toLowerCase()
+    .replace(/-\d(\.pdf)$/, '$1');
+/** one of each brochure, keeping the first (the newest, as the website lists them) */
+export const oneEach = (L) => {
+  const seen = new Set();
+  return L.filter((x) => !seen.has(fileKey(x.url)) && seen.add(fileKey(x.url)));
+};
 /** the range a brochure belongs to, from a heading near it or its own name */
 export function guessCat(s) {
-  const t = s.toLowerCase();
+  const t = s.toLowerCase().replace(/[_-]+/g, ' ');
+  /* "HW_..." files are the hardwood range */
+  if (/(^|[^a-z])hw([^a-z]|$)/.test(t)) return 'Hardwood';
   if (/hardwood|timber|teknos|\boak\b|sash/.test(t)) return 'Hardwood';
   if (/secondary/.test(t)) return 'Secondary glazing';
   if (/lantern|roof/.test(t)) return 'Roof lanterns';
@@ -92,7 +119,7 @@ export function parseBrochures(html) {
       .pop();
     const img = coverNear(html, m.index, m[2]);
     out.set(url, {
-      cat: sect || guessCat(title + ' ' + url),
+      cat: sect || guessCat(title + ' ' + url.split('/').pop()),
       title: title.slice(0, 120),
       url,
       ...(img ? { img } : {}),
@@ -113,7 +140,7 @@ async function fromMedia() {
     const L = await r.json();
     for (const m of L) {
       const url = String(m.source_url || '').replace(/^http:/, 'https:'),
-        title = text((m.title && m.title.rendered) || '') || fromFile(url);
+        title = tidyTitle(text((m.title && m.title.rendered) || ''), url);
       /* WordPress makes a picture of each PDF's first page: its cover */
       const sz = (m.media_details && m.media_details.sizes) || {},
         img = String((sz.medium_large || sz.large || sz.medium || sz.full || {}).source_url || '').replace(
@@ -122,12 +149,10 @@ async function fromMedia() {
         );
       if (
         /^https:\/\/(www\.)?broadlandwindows\.co\.uk\/wp-content\/uploads\//.test(url) &&
-        /brochure|collection|colour|door|window|lantern|panel|glazing|smarts|hallmark|alitherm|teknos|heritage/i.test(
-          title + url
-        )
+        !NOT_BROCHURE.test(title + ' ' + url.split('/').pop())
       )
         out.push({
-          cat: guessCat(title + ' ' + url),
+          cat: guessCat(title + ' ' + url.split('/').pop()),
           title: title.slice(0, 120),
           url,
           ...(imgSrc(` src="${img}"`) ? { img } : {}),
@@ -159,7 +184,7 @@ async function main() {
         console.log(u + ': ' + e.message);
       }
     }
-  let items = parseBrochures(html);
+  let items = oneEach(parseBrochures(html));
   console.log('Found ' + items.length + ' brochures on the page');
   if (items.length < 5) {
     /* what the page holds, so the log shows why nothing was found */
@@ -179,7 +204,7 @@ async function main() {
           .join(' | ')
     );
     try {
-      items = await fromMedia();
+      items = oneEach(await fromMedia());
       console.log('Found ' + items.length + " brochures in the website's file list");
     } catch (e) {
       console.log('File list: ' + e.message);

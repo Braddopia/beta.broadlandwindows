@@ -54,28 +54,37 @@ test('the website describes itself as an app, with its icons', async ({ app }) =
   await expect(app.page.locator('#main')).toContainText('Desktop App');
 });
 
-test('an open app shows Update Ready when a newer version is published: Later hides it, Restart Now reloads', async ({
+test('an open app shows the new-version window in the middle of the screen; Remind Me puts it away with a chip', async ({
   app,
 }) => {
   const version = {};
   await serve(app, version);
-  await expect(app.page.locator('#updCard')).toHaveCount(0);
+  await expect(app.page.locator('#updWin')).toHaveCount(0);
   version.now = '99.0.0';
   version.notes = ['Service calls can have up to four engineers'];
   // checked on every page change and on coming back to the window (at most every 3 seconds)
   await app.page.waitForTimeout(3100);
   await app.page.evaluate(() => document.dispatchEvent(new Event('visibilitychange')));
-  const card = app.page.locator('#updCard');
-  await expect(card).toContainText('Update Ready');
-  await expect(card).toContainText('v99.0.0');
-  await expect(card).toContainText('Service calls can have up to four engineers');
-  await expect(card.locator('.upd-go')).toHaveText('Restart Now');
-  // Later hides it for 10 minutes, even when the next check finds the same update
-  await card.locator('.upd-l').click();
-  await expect(card).toHaveCount(0);
+  const win = app.page.locator('#updWin');
+  await expect(win).toContainText('A New Version Is Ready');
+  await expect(win).toContainText('Version 99.0.0');
+  await expect(win).toContainText('Service calls can have up to four engineers');
+  await expect(win.locator('.updw-go')).toBeFocused();
+  // centred on the screen
+  const c = await win.locator('.updw-card').evaluate((e) => {
+    const b = e.getBoundingClientRect();
+    return [Math.round(b.left + b.width / 2 - innerWidth / 2), Math.round(b.top + b.height / 2 - innerHeight / 2)];
+  });
+  expect(Math.abs(c[0])).toBeLessThan(3);
+  expect(Math.abs(c[1])).toBeLessThan(20);
+  // Remind Me In 10 Minutes: the window goes, a chip stays to restart from; the next check does not bring it back
+  await win.locator('.updw-l').click();
+  await expect(win).toHaveCount(0);
+  await expect(app.page.locator('#updChip')).toContainText('Version 99.0.0 is ready');
   await app.page.waitForTimeout(3100);
   await app.page.evaluate(() => document.dispatchEvent(new Event('visibilitychange')));
   await app.page.waitForTimeout(400);
-  await expect(app.page.locator('#updCard')).toHaveCount(0);
+  await expect(app.page.locator('#updWin')).toHaveCount(0);
+  await expect(app.page.locator('#updChip button')).toHaveText('Restart');
   expect(app.errors).toEqual([]);
 });

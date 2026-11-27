@@ -211,31 +211,35 @@ body[data-theme=dark] .rv-feed.off{background:#3a3220;color:#ffd98a}
 .jt-rl .row>span:nth-child(2){white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 @media(max-width:1000px){.jt-studio{grid-template-columns:1fr}.jt-rl .row{grid-template-columns:max-content minmax(0,1fr) max-content}.jt-rl .row>span.muted{display:none}}
 
-/* Update Ready pop-up (ui/shell/update-card.js, v19.17.3): the same dark bar as the bottom messages, a little larger,
-   with what is new and a yellow Restart Now. It stays until Restart Now or Later. */
-.upd{position:fixed;left:50%;bottom:calc(1.25rem + var(--safe-b,0px));z-index:4100;display:flex;align-items:center;gap:.9rem;width:min(38rem,calc(100vw - 2rem));padding:.85rem .85rem .85rem 1rem;border-radius:14px;background:#13233a;color:#fff;box-shadow:0 14px 40px rgba(1,20,45,.38),0 0 0 1px rgba(255,255,255,.06) inset;transform:translate(-50%,0);font:500 .9rem/1.35 var(--body)}
-.upd.in{animation:tpArc .42s var(--e-out) both}
-.upd.out{animation:tpOut .2s ease-in both}
-.upd.going{opacity:.6;transition:opacity .12s}
-.upd-i{flex:0 0 auto;display:grid;place-items:center;width:2.6rem;height:2.6rem;border-radius:50%;background:#ffd002;color:#012b59;box-shadow:0 0 0 4px rgba(255,208,2,.18)}
-.upd-i svg{width:1.35rem;height:1.35rem;fill:none;stroke:currentColor;stroke-width:2.3;stroke-linecap:round;stroke-linejoin:round}
-.upd.in .upd-i svg{animation:updTurn .9s .25s var(--e-out) both}
-@keyframes updTurn{from{transform:rotate(-200deg)}to{transform:none}}
-.upd-t{flex:1;min-width:0;display:flex;flex-direction:column;gap:.15rem}
-.upd-t b{display:flex;align-items:center;gap:.5rem;font-size:.98rem;font-weight:700}
-.upd-v{padding:.05rem .45rem;border-radius:99px;background:rgba(255,255,255,.12);color:#ffd84d;font-size:.72rem;font-weight:700;letter-spacing:.02em}
-.upd-t small{color:#b9c6d8;font-size:.8rem}
-.upd-n{margin:.35rem 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:.15rem}
-.upd-n li{position:relative;padding-left:.85rem;color:#e4ebf4;font-size:.8rem}
-.upd-n li::before{content:"";position:absolute;left:0;top:.5em;width:.35rem;height:.35rem;border-radius:50%;background:#ffd002}
-.upd-a{flex:0 0 auto;display:flex;flex-direction:column;gap:.4rem;align-self:stretch;justify-content:center}
-.upd-a button{min-width:7.4rem;height:2.25rem;padding:0 .9rem;border-radius:9px;font:700 .84rem var(--body);cursor:pointer;transition:transform .32s var(--e-spring),background-color .15s var(--e-out)}
-.upd-a button:active{transform:scale(.95);transition-duration:.08s}
-.upd-go{border:0;background:#ffd002;color:#012b59}
-.upd-go:hover,.upd-go:focus-visible{background:#ffdc3d}
-.upd-l{border:1px solid rgba(255,255,255,.22);background:transparent;color:#fff}
-.upd-l:hover,.upd-l:focus-visible{background:rgba(255,255,255,.1)}
-@media(max-width:560px){.upd{flex-wrap:wrap}.upd-a{flex:1 1 100%;flex-direction:row-reverse}.upd-a button{flex:1}}
+/* "A New Version Is Ready" (ui/shell/update-card.js, v19.17.5): a window in the middle of a dimmed, softly blurred
+   screen, the app's sun at the top, what is new in a tinted box, one big Restart Now and a quiet "remind me" link.
+   Put away, it leaves a small chip at the bottom of the screen. */
+.updw{position:fixed;inset:0;z-index:4200;display:grid;place-items:center;padding:1rem;background:rgba(1,20,45,.42);-webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px);opacity:0;transition:opacity .25s var(--e-out)}
+.updw.in{opacity:1}.updw.out{opacity:0;transition-duration:.2s}
+.updw-card{position:relative;width:min(25rem,100%);padding:2rem 1.75rem 1.25rem;border-radius:22px;background:var(--card);color:var(--ink);text-align:center;box-shadow:0 30px 80px -20px rgba(1,20,45,.55),0 0 0 1px rgba(255,255,255,.06) inset;transform:translateY(14px) scale(.96);transition:transform .45s var(--e-spring)}
+.updw.in .updw-card{transform:none}
+.updw-card::before{content:"";position:absolute;inset:0 0 auto;height:7rem;border-radius:22px 22px 0 0;background:radial-gradient(70% 100% at 50% 0,rgba(255,208,2,.22),transparent 70%);pointer-events:none}
+.updw-ic{position:relative;width:4.4rem;height:4.4rem;margin:0 auto 1.1rem;border-radius:50%;display:grid;place-items:center;background:#fff;box-shadow:0 0 0 6px rgba(255,208,2,.18),0 10px 24px -8px rgba(1,43,89,.45)}
+.updw-ic img{width:3.6rem;height:3.6rem;border-radius:50%}
+.updw.in .updw-ic{animation:updGlow 2.6s ease-in-out .5s infinite}
+@keyframes updGlow{0%,100%{box-shadow:0 0 0 6px rgba(255,208,2,.18),0 10px 24px -8px rgba(1,43,89,.45)}50%{box-shadow:0 0 0 11px rgba(255,208,2,.08),0 10px 24px -8px rgba(1,43,89,.45)}}
+.updw-v{display:inline-block;padding:.15rem .6rem;border-radius:99px;background:var(--blue-bg);color:var(--blue);font:700 .72rem var(--body);letter-spacing:.02em}
+.updw-card h2{margin:.55rem 0 .35rem;font-size:1.3rem;color:var(--navy)}
+body[data-theme=dark] .updw-card h2{color:var(--ink)}
+.updw-card>p{margin:0 auto;max-width:20rem;color:var(--muted);font-size:.88rem;line-height:1.45}
+.updw-n{margin:1.1rem 0 0;padding:.8rem 1rem;border-radius:14px;background:var(--card2);text-align:left}
+.updw-n b{display:block;margin-bottom:.35rem;font-size:.74rem;color:var(--muted);font-weight:600;letter-spacing:.04em;text-transform:uppercase}
+.updw-n ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:.35rem}
+.updw-n li{position:relative;padding-left:1.15rem;font-size:.86rem;line-height:1.35}
+.updw-n li::before{content:"";position:absolute;left:0;top:.28em;width:.62rem;height:.36rem;border:solid var(--blue);border-width:0 0 2px 2px;transform:rotate(-45deg)}
+.updw-go{width:100%;height:2.9rem;margin-top:1.25rem;border-radius:12px;font-size:.95rem;font-weight:600}
+.updw-l{margin-top:.55rem;padding:.4rem .6rem;border:0;border-radius:8px;background:none;color:var(--muted);font:500 .82rem var(--body);cursor:pointer}
+.updw-l:hover,.updw-l:focus-visible{color:var(--blue);background:var(--blue-bg)}
+.updc{position:fixed;left:50%;bottom:calc(1.1rem + var(--safe-b,0px));z-index:4100;display:flex;align-items:center;gap:.6rem;padding:.35rem .35rem .35rem .85rem;border-radius:99px;background:#13233a;color:#fff;font:500 .84rem var(--body);box-shadow:0 10px 28px rgba(1,20,45,.35);transform:translateX(-50%);animation:tpArc .42s var(--e-out) both}
+.updc-dot{width:.55rem;height:.55rem;border-radius:50%;background:#ffd002;box-shadow:0 0 0 3px rgba(255,208,2,.25)}
+.updc button{height:1.9rem;padding:0 .85rem;border:0;border-radius:99px;background:#ffd002;color:#012b59;font:700 .8rem var(--body);cursor:pointer}
+.updc button:hover{background:#ffdc3d}
+body.upd-going .updw-card{opacity:.7}
 
 /* side menu: a page that belongs under another (Service Calls under Contracts, v19.17.4) sits a step in, joined to it
    by a short line, and is always shown */
