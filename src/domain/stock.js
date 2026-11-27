@@ -63,14 +63,54 @@ export const mLabel = (mm) => +(mm / 1000).toFixed(3) + 'M';
 const UNIT_SHORT = { 'Meters (M)': 'M', Pair: 'Pairs', Kit: 'Kits', Bulk: 'Bulk' };
 /** the unit stock is counted in, short: PCS, Pairs, M, Kits, Bulk */
 export const unitShort = (r) => UNIT_SHORT[unitOf(r)] || 'PCS';
-/** stock with its unit: full bars as "2 × 6.5M", otherwise "62 PCS", "4 Pairs", "12 M". [number, unit text] */
+/* a unit word typed in a product's Length or Size box (EA, Each, PCS, Pair...) is its unit, not a size: it shows in
+   the Stock column ("9 × EA") instead of under the item name */
+const UNIT_WORDS = {
+  ea: 'EA',
+  each: 'EA',
+  pc: 'PCS',
+  pcs: 'PCS',
+  piece: 'PCS',
+  pieces: 'PCS',
+  pr: 'Pairs',
+  pair: 'Pairs',
+  pairs: 'Pairs',
+  m: 'M',
+  mtr: 'M',
+  mtrs: 'M',
+  metre: 'M',
+  metres: 'M',
+  meter: 'M',
+  meters: 'M',
+  kit: 'Kits',
+  kits: 'Kits',
+  set: 'Sets',
+  sets: 'Sets',
+  box: 'Boxes',
+  boxes: 'Boxes',
+  pack: 'Packs',
+  packs: 'Packs',
+  roll: 'Rolls',
+  rolls: 'Rolls',
+  bulk: 'Bulk',
+};
+/** the unit typed in the Length box ('EA'), or '' when the box holds a size or nothing */
+export const lengthUnit = (r) =>
+  UNIT_WORDS[
+    String(r.length || '')
+      .trim()
+      .toLowerCase()
+      .replace(/\.$/, '')
+  ] || '';
+/** stock with its unit, always as count × unit (v19.15.5, the owner's choice): full bars "2 × 6.5M", a unit typed in
+    the Length box "9 × EA", otherwise the product's unit "62 × PCS", "4 × Pairs", "12 × M". [number, '× unit'] */
 export function stockParts(r) {
   const mm = barMm(r);
-  return mm ? [r.stock, '× ' + mLabel(mm)] : [r.stock, unitShort(r)];
+  return [r.stock, '× ' + (mm ? mLabel(mm) : lengthUnit(r) || unitShort(r))];
 }
 export const stockText = (r) => stockParts(r).join(' ');
 /** the size to show under the item when it is not already the Unit (e.g. 4MM packers) */
-export const sizeNote = (r) => (r.length && r.length != '-' && !barMm(r) ? String(r.length) : '');
+export const sizeNote = (r) => (r.length && r.length != '-' && !barMm(r) && !lengthUnit(r) ? String(r.length) : '');
 export const colTxt = (r) => [r.cInName, r.cOutName].filter((x) => x && x != '-').join(' / ') || '-';
 export const stt = (r) => (r.stock <= 0 ? ['Out', 'r'] : isLow(r) ? ['Low', 'y'] : ['OK', 'g']);
 export function moveRow(b, kind, qty, stock, extra) {

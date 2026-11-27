@@ -361,3 +361,7 @@ stock number). Decided with the owner:
   and Chrome then ask to update the icon) or unpinning and pinning it again on the taskbar.
 - v19.15.4: My Holiday no longer lifts with a shadow on hover (it did not match the cards beside it); only the ring grows
   a little (3%).
+- v19.15.5: Inventory stock always reads count × unit (the owner's choice): "62 × PCS", "4 × Pairs", "12 × M",
+  "2 × 6.5M" for full bars. A unit word typed in a product's Length or Size box (EA, Each, PCS, Pair, M, Kit, Set, Box,
+  Pack, Roll, Bulk) is treated as its unit ("9 × EA") instead of showing under the item name (`lengthUnit` in
+  `domain/stock.js`, unit-tested). Movements use the same wording.

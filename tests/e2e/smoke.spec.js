@@ -107,12 +107,12 @@ test('Inventory columns (v19.13): ID, Item, Stock with its unit, Location, Colou
     )
   );
   expect(th.slice(1, 9)).toEqual(['ID', 'Item', 'Stock', 'Location', 'Colours', 'Cost', 'Value', 'Status']);
-  // stock carries its unit: full bars as "118 × 6.5M", others "62 PCS"
+  // stock carries its unit, always count × unit: full bars "118 × 6.5M", others "62 × PCS"
   const stock = await app.run(() =>
     [...document.querySelectorAll('#main .t-inv td.i-stock')].map((t) => t.innerText.replace(/\s+/g, ' ').trim())
   );
   expect(stock).toContain('118 × 6.5M');
-  expect(stock).toContain('62 PCS');
+  expect(stock).toContain('62 × PCS');
   // Sort & Filter sits in the toolbar beside the search, not inside the table
   await expect(app.page.locator('#main .invbar #invF')).toBeVisible();
   await expect(app.page.locator('#main .t-inv #invF')).toHaveCount(0);
