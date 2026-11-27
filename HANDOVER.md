@@ -1,6 +1,6 @@
 # Handover
 
-Read this first, then CLAUDE.md and docs/ARCHITECTURE.md.
+Read this first, then CLAUDE.md and docs/ARCHITECTURE.md. **Starting a new session? Read docs/handover/NEXT-SESSION.md first**: it has the current state, the tasks in order and the traps.
 
 ## Working with the owner
 
