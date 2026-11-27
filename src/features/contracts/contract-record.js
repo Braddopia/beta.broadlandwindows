@@ -6,7 +6,6 @@ import { onClick, rowClick } from '../../core/actions.js';
 import { fd, today } from '../../core/dates.js';
 import { esc } from '../../core/dom.js';
 import { m0, money, sum } from '../../core/format.js';
-import { ICONS, svg } from '../../core/icons.js';
 import { audit } from '../../data/audit.js';
 import { state } from '../../data/state.js';
 import { CK } from '../../domain/checklists.js';
@@ -18,13 +17,16 @@ import { RANDOM_SP, spResolve } from '../../domain/people.js';
 import { can } from '../../domain/permissions.js';
 import { ctrList } from './contracts.js';
 import { finTab } from './finance-step.js';
-import { byGroup, grpH } from '../records/cards.js';
+import { abList } from '../records/ab-list.js';
+import { addrTab, detailsTab } from '../records/record-parts.js';
+import { del } from '../records/delete.js';
+import { reportContract } from './documents.js';
 import { ckTab } from '../records/checklist.js';
-import { CDETF, CFINF, CFITF, CUSTF, GDPRF } from '../records/fields.js';
+import { CDETF, CFINF, CFITF, CUSTF, FENSAF, GDPRF } from '../records/fields.js';
 import { logTab } from '../records/notes.js';
 import { photoTab } from '../records/photos-docs.js';
 import { linesTab } from '../records/products.js';
-import { RECORDS, recSave } from '../records/record-window.js';
+import { RECORDS, recCall, recDelivery, recSave, recordWin } from '../records/record-window.js';
 import { opsTab } from '../records/survey.js';
 import { dTag, prTag } from '../../ui/components/tags.js';
 import { askIn } from '../../ui/modal.js';
@@ -59,35 +61,53 @@ export function defineContractRecord() {
       (W.v.name ? jobTitle(W.v.id, W.v.name) : W.v.id + '  New contract') + (W.v.company ? ' · ' + W.v.company : ''),
     headStats: (W) =>
       `${W.v.flash ? `<span class="flash">${esc(W.v.flash)}</span>` : ''}<span><small>Value</small><b>${m0(W.v.value)}</b></span><span><small>Paid</small><b>${m0(W.v.paid)}</b></span><span class="${(+W.v.value || 0) - (+W.v.paid || 0) > 0 ? 'hk-due' : 'hk-ok'}"><small>Outstanding</small><b>${(+W.v.value || 0) - (+W.v.paid || 0) > 0 ? m0((+W.v.value || 0) - (+W.v.paid || 0)) : 'Paid'}</b></span><span><small>Fit</small><b>${W.v.fit ? fd(W.v.fit) : '-'}</b></span>`,
-    actions: (W) =>
-      `<button class="rb1" ${onClick('reportContract', W.id)}>${svg(ICONS.reports)}Reports</button><button class="rb1" ${onClick('recCall')}>${svg(ICONS.service)}Service call</button>${can('manage') ? `<button class="rb1 dl" ${onClick('del', 'contracts', W.id)}>${svg('M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3')}Delete</button>` : ''}`,
-    fields: (W) => [...CDETF(W), ...CUSTF, ...GDPRF, ...CFINF(), ...CFITF(), { k: 'notes', l: 'Notes', t: 'area' }],
+    reports: (W) => reportContract(W.id),
+    /* the Advanced menu: [words, action, arguments, style] */
+    advanced: () => [
+      ['New Service Call', 'call'],
+      ['New Delivery', 'delivery'],
+      ...(can('manage') ? [['Delete This Contract', 'remove', [], 'del']] : []),
+    ],
+    run: {
+      call: () => recCall(),
+      delivery: () => recDelivery(),
+      remove: () => del('contracts', recordWin.id),
+    },
+    fields: (W) => [
+      ...CDETF(W).filter((f) => f.t != 'calc'),
+      ...FENSAF(),
+      ...CUSTF,
+      ...GDPRF,
+      ...CFINF(),
+      ...CFITF(),
+      { k: 'notes', l: 'Notes', t: 'area' },
+    ],
     tabs: (W) => {
       const calls = state.calls.filter((c) => c.contract == W.v.id),
         dels = state.deliveries.filter((d) => d.contract == W.v.id);
       return [
-        { k: 'details', t: 'Details', h: (W) => `<div class="rcols">${byGroup(CDETF(W), W.v)}</div>` },
-        { k: 'customer', t: 'Customer', h: (W) => `<div class="rcols">${byGroup(CUSTF, W.v)}</div>` },
-        { k: 'survey', t: 'Survey', n: (W.v.openings || []).length, h: opsTab },
-        { k: 'products', t: 'Products', n: (W.v.lines || []).length, h: linesTab },
-        { k: 'check', t: 'Job Progress', h: (W) => ckTab(W, CK) },
+        { k: 'customer', t: 'Address', h: addrTab },
+        { k: 'details', t: 'Details', h: (W) => detailsTab(W, CDETF(W), linesTab(W)) },
+        { k: 'survey', t: 'Survey', h: opsTab },
+        { k: 'check', t: 'Checklist', h: (W) => ckTab(W, CK) },
         { k: 'finance', t: 'Finance', h: finTab },
         {
           k: 'deliveries',
           t: 'Deliveries',
-          n: dels.length,
           h: (W) =>
-            `<div class="rg wide"><h4><span>Deliveries For This Job</span><button class="mini pri" ${onClick('recDelivery')}>New delivery</button></h4>${dels.map((d) => `<div class="row"><span><b>${esc(d.supplier)}</b> ${esc(d.items)}<br><span class="muted">Due ${fd(d.due)}${d.stage ? ', ' + esc(d.stage) : ''}</span></span>${dTag(d)}</div>`).join('') || '<p class="empty">No deliveries linked to this contract number.</p>'}</div>`,
+            `<div class="rg wide"><h4><span>Deliveries For This Job</span><button class="mini pri" ${onClick('recDelivery')}>New Delivery</button></h4>${dels.map((d) => `<div class="row"><span><b>${esc(d.supplier)}</b> ${esc(d.items)}<br><span class="muted">Due ${fd(d.due)}${d.stage ? ', ' + esc(d.stage) : ''}</span></span>${dTag(d)}</div>`).join('') || '<p class="empty">No deliveries linked to this contract number.</p>'}</div>`,
         },
-        { k: 'fitting', t: 'Fitting', h: (W) => `<div class="rcols">${byGroup(CFITF(), W.v)}</div>` },
-        { k: 'notes', t: 'Notes & Activity', n: W.v.log.length, h: (W) => logTab(W, 'notes') },
-        { k: 'docs', t: 'Photos & Docs', n: (W.v.photos || []).length, h: photoTab },
+        { k: 'fitting', t: 'Fitting', h: (W) => `<div class="abh2">${abList(CFITF(), W.v)}</div>` },
+        { k: 'notes', t: 'Notes etc', h: (W) => logTab(W, 'notes') },
+        { k: 'docs', t: 'Documents', one: 'Document', cnt: 1, n: (W.v.photos || []).length, h: photoTab },
         {
           k: 'calls',
           t: 'Service Calls',
+          one: 'Service Call',
+          cnt: 1,
           n: calls.length,
           h: (W) =>
-            `<div class="rg wide"><h4><span>Service Calls</span><button class="mini pri" ${onClick('recCall')}>New service call</button></h4>${
+            `<div class="rg wide"><h4><span>Service Calls</span><button class="mini pri" ${onClick('recCall')}>New Service Call</button></h4>${
               calls
                 .slice()
                 .sort(
@@ -102,7 +122,6 @@ export function defineContractRecord() {
                 .join('') || '<p class="empty">No service calls for this contract.</p>'
             }</div>`,
         },
-        { k: 'gdpr', t: 'GDPR', h: (W) => `<div class="rcols">${grpH('Marketing Consent', GDPRF, W.v)}</div>` },
       ];
     },
     check: (W, o) => {

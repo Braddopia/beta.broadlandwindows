@@ -86,7 +86,7 @@ test('search answers questions and finds labels on any page: "amount outstanding
   await app.page.fill('#sb input', 'vat');
   await expect(app.page.locator('#sres .sri-a').first()).toContainText('VAT Is 20%');
   await app.page.fill('#sb input', 'trickle vents');
-  await expect(app.page.locator('#sres')).toContainText('Column in the Survey step');
+  await expect(app.page.locator('#sres')).toContainText('Column on the Survey tab');
   // money answers stay hidden from accounts without money access
   await app.role('staff');
   await app.page.fill('#sb input', 'amount outstanding');

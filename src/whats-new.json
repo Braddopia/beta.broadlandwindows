@@ -1,6 +1,7 @@
 {
   "notes": [
-    "Files: the yellow New tag only shows on brochures that really are new to the website",
-    "Admin Console: the Reviews card explains what is needed for live review figures"
+    "Leads and Contracts open in a large window laid out like AdminBase: toolbar, tabs, and Details in two halves",
+    "Details groups fold away and stay how you left them; the products grid has Default and Create From Deliveries",
+    "New: Address window, Clipboard and Advanced menus, record arrows, Search, Full Page and Contract Colour"
   ]
 }

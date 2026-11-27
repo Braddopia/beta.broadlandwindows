@@ -30,6 +30,8 @@ export const CAL_LAYERS = [
   ['fol', 'Follow-Ups', '#a3216b', () => canSee('leads')],
   ['hol', 'Holidays', '#12794c', () => true],
 ];
+/** a contract's own colour (Contract Colour on its Details tab, v19.18) as a bar down the left of its entry */
+export const ccolStyle = (c) => (/^#[0-9a-f]{6}$/i.test(c || '') ? `style="box-shadow:inset 4px 0 0 ${c}"` : '');
 const LAYER_ON = { fit: 1, surv: 1, appt: 1, svc: 1, del: 1, fol: 0, hol: 1 };
 export const layerOn = (k) => {
   const L = uiState.cal.ly,
@@ -55,6 +57,7 @@ export function evs(k) {
           f: ['calFit', c.id],
           k: 'Fitting',
           p: c.fitter,
+          col: c.ccol,
         })
       );
   if (layerOn('surv')) {
@@ -221,7 +224,7 @@ export function calCells(days, full) {
       const e = evs(k),
         bh = BH[k],
         sh = full ? e : e.slice(0, 3);
-      return `<div class="dc2 ${out ? 'out' : ''} ${k == td ? 'today' : ''} ${k == uiState.cal.sd ? 'sel' : ''} ${isWk(k) ? '' : 'we'} ${bh ? 'bh' : ''}" ${onClick('setUI', 'cal.sd', k)}><span class="dn">${d}</span>${bh ? `<span class="more">${esc(bh)}</span>` : ''}<div class="evs">${sh.map((x) => `<span class="ce ${x.c}" title="${esc(x.s)}" ${onClick(...x.f)}>${esc(x.t)}</span>`).join('')}${!full && e.length > 3 ? `<span class="more">+${e.length - 3} more</span>` : ''}</div></div>`;
+      return `<div class="dc2 ${out ? 'out' : ''} ${k == td ? 'today' : ''} ${k == uiState.cal.sd ? 'sel' : ''} ${isWk(k) ? '' : 'we'} ${bh ? 'bh' : ''}" ${onClick('setUI', 'cal.sd', k)}><span class="dn">${d}</span>${bh ? `<span class="more">${esc(bh)}</span>` : ''}<div class="evs">${sh.map((x) => `<span class="ce ${x.c}" ${ccolStyle(x.col)} title="${esc(x.s)}" ${onClick(...x.f)}>${esc(x.t)}</span>`).join('')}${!full && e.length > 3 ? `<span class="more">+${e.length - 3} more</span>` : ''}</div></div>`;
     })
     .join('');
 }
@@ -294,7 +297,7 @@ export function vCalendar() {
             )
               .map(
                 (e) =>
-                  `<span class="ce ${e.c}" ${evA(e)}>${esc(e.t)} <span class="muted">${esc(e.s || '')}</span></span>`
+                  `<span class="ce ${e.c}" ${ccolStyle(e.col)} ${evA(e)}>${esc(e.t)} <span class="muted">${esc(e.s || '')}</span></span>`
               )
               .join('')}</div>`
         )

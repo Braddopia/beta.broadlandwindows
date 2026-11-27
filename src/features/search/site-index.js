@@ -69,14 +69,14 @@ export function siteIndex() {
   };
   const W = { v: {} };
   try {
-    box(CUSTF, 'Box in lead and contract windows', 'leads');
+    box(CUSTF, 'Box in the Address window of leads and contracts', 'leads');
     box(LEADF(W), 'Box in lead windows', 'leads');
-    box(OPF, 'Column in the Survey step', 'contracts');
+    box(OPF, 'Column on the Survey tab', 'contracts');
     box(APPTF(), 'Box in Appointments', 'leads');
-    box(GDPRF, 'Box in the GDPR step', 'leads');
+    box(GDPRF, 'Box in the Address window, Marketing Consent', 'leads');
     box(CDETF(W), 'Box in contract windows', 'contracts');
-    box(CFINF(), 'Box in the Finance step', 'contracts');
-    box(CFITF(), 'Box in the Fitting step', 'contracts');
+    box(CFINF(), 'Box on the Finance tab', 'contracts');
+    box(CFITF(), 'Box on the Fitting tab', 'contracts');
     box(SVCF(), 'Box on the service call form', 'service');
   } catch (e) {
     /* a list that cannot be read here is simply left out */

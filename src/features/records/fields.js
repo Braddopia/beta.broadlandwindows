@@ -16,6 +16,7 @@ import {
 import { FITL, OWNERS, RANDOM_SP, staffNames } from '../../domain/people.js';
 import { can } from '../../domain/permissions.js';
 import { customerChoices } from '../contacts/customer-book.js';
+import { fdl, isoWeek } from '../../core/dates.js';
 
 /* ---- customer information: same fields on leads and contracts ---- */
 export const CUSTF = [
@@ -154,26 +155,76 @@ export const APPTF = () => [
   { k: 'demoDate', l: 'Second visit date', t: 'date', g: 'Next Visit' },
 ];
 /* ======================= CONTRACT record ======================= */
+/* The Details tab follows the office's old system (AdminBase, v19.18): rows in its order, with its groups. A field with
+   no g sits on its own row; a group (g) folds away under its heading. `t: 'tick'` is a tick box (saved as Yes / No);
+   `t: 'calc'` is worked out, not typed (`calc(v)` gives the text); `head` puts a tick box on its group's heading;
+   `sum` is what a folded group shows; `half: 'r'` puts a field in the right half (Other Info). */
+export const CCOLS = [
+  ['', 'No colour'],
+  ['#034ea2', 'Blue'],
+  ['#12794c', 'Green'],
+  ['#c77700', 'Amber'],
+  ['#bf3434', 'Red'],
+  ['#7a3fb0', 'Purple'],
+  ['#0d7f8c', 'Teal'],
+  ['#c2407a', 'Pink'],
+  ['#6b7380', 'Grey'],
+];
 export const CDETF = (W) => [
-  { k: 'id', l: 'Contract number', ro: 1, g: 'Contract' },
-  { k: 'cdate', l: 'Contract date', t: 'date', g: 'Contract' },
-  { k: 'officeRef', l: 'Office ref 1', g: 'Contract' },
-  { k: 'officeRef2', l: 'Office ref 2', g: 'Contract' },
-  { k: 'contractType', l: 'Contract type', t: 'select', o: CTYPES, g: 'Contract' },
-  { k: 'supplyOnly', l: 'Supply only', t: 'select', o: YN, g: 'Contract' },
-  { k: 'stage', l: 'Stage', t: 'select', o: CSTAGES, g: 'Contract' },
-  { k: 'onHold', l: 'On hold', t: 'select', o: YN, g: 'Contract' },
-  { k: 'cancelled', l: 'Cancelled', t: 'select', o: YN, g: 'Contract' },
-  { k: 'product', l: 'Work / products summary', t: 'area', max: 300, g: 'Contract' },
-  { k: 'flash', l: 'Flash note (shows in red)', max: 160, g: 'Contract' },
+  { k: 'id', l: 'Contract no', ro: 1 },
+  { k: 'cdate', l: 'Contract date', t: 'date' },
+  {
+    k: 'weekRec',
+    l: 'Week received',
+    t: 'calc',
+    calc: (v) => (SAFE_DATE.test(v.cdate || '') ? 'Week ' + isoWeek(v.cdate) + ', ' + v.cdate.slice(0, 4) : ''),
+  },
+  { k: 'officeRef', l: 'Office ref 1', g: 'Office Refs' },
+  { k: 'officeRef2', l: 'Office ref 2', g: 'Office Refs' },
+  { k: 'supplyOnly', l: 'Supply only', t: 'tick', g: 'Supply Only', head: 1 },
+  { k: 'supplyNote', l: 'Supply only notes', max: 200, g: 'Supply Only' },
+  { k: 'contractType', l: 'Contract type', t: 'select', o: CTYPES },
+  { k: 'stage', l: 'Stage', t: 'select', o: CSTAGES },
+  { k: 'installMgr', l: 'Installation manager', t: 'select', o: staffNames() },
+  { k: 'surveyor', l: 'Assigned surveyor', t: 'select', o: staffNames() },
+  { k: 'onHold', l: 'On hold', t: 'tick', g: 'On Hold', head: 1 },
+  { k: 'holdSince', l: 'On hold since', t: 'date', g: 'On Hold' },
+  { k: 'holdWhy', l: 'Why it is on hold', max: 200, g: 'On Hold' },
+  { k: 'cancelled', l: 'Cancelled', t: 'tick', g: 'Cancelled', head: 1 },
+  { k: 'cancelDate', l: 'Cancelled on', t: 'date', g: 'Cancelled' },
+  { k: 'cancelWhy', l: 'Why it was cancelled', max: 200, g: 'Cancelled' },
   { k: 'lead', l: 'Lead number', ro: 1, g: 'Sales Information' },
   { k: 'salesArea', l: 'Sales area', t: 'select', o: ['', ...BRANCHES], g: 'Sales Information' },
-  { k: 'soldBy', l: 'Salesperson', t: 'select', o: [RANDOM_SP, ...OWNERS()], g: 'Sales Information' },
+  { k: 'salesDir', l: 'Sales director', t: 'select', o: staffNames(), g: 'Sales Information' },
+  { k: 'salesMgr', l: 'Sales manager', t: 'select', o: staffNames(), g: 'Sales Information' },
+  { k: 'soldBy', l: 'Salesperson', t: 'select', o: [RANDOM_SP, ...OWNERS()], g: 'Sales Information', sum: 1 },
   { k: 'source', l: 'Lead source', t: 'select', o: ['', ...SOURCES], g: 'Sales Information' },
   { k: 'subSource', l: 'Sub source', g: 'Sales Information' },
-  { k: 'createdBy', l: 'Created by', ro: 1, g: 'Sales Information' },
-  { k: 'approvals', l: 'Contract approvals', g: 'Sales Information' },
+  { k: 'subSubSource', l: 'Sub sub source', g: 'Sales Information' },
+  { k: 'createdBy', l: 'Created by', ro: 1, g: 'Created By', sum: 1 },
+  {
+    k: 'createdOn',
+    l: 'Created on',
+    t: 'calc',
+    g: 'Created By',
+    calc: (v) => fdl(String((v._meta || {}).created || v.cdate || '').slice(0, 10)),
+  },
+  { k: 'approvals', l: 'Contract approvals' },
+  { k: 'ccol', l: 'Contract colour', t: 'select', o: CCOLS },
+  { k: 'flash', l: 'Flash note (shows in red)', max: 160 },
+  /* right half, Other Info */
+  { k: 'product', l: 'Work / products summary', t: 'area', max: 300, half: 'r' },
 ];
+/* Info for FENSA: under the products on the Details tab */
+export const FENSAF = () => [
+  { k: 'winCount', l: 'Window count', t: 'number', dp: 0 },
+  { k: 'doorCount', l: 'Door count', t: 'number', dp: 0 },
+  { k: 'conservatory', l: 'Conservatory', t: 'tick' },
+  { k: 'roofline', l: 'Roofline', t: 'tick' },
+  { k: 'fensaExported', l: 'Exported', t: 'tick' },
+  { k: 'fensaNA', l: 'Not required', t: 'tick' },
+];
+const SAFE_DATE = /^\d{4}-\d{2}-\d{2}$/;
 export const CFINF = () => [
   { k: 'value', l: 'Contract value, including VAT (£)', t: 'number', g: 'Money' },
   { k: 'vatRate', l: 'VAT rate (%)', t: 'select', o: ['20', '5', '0'], g: 'Money' },
@@ -214,13 +265,7 @@ export const CFITF = () => [
     o: ['', ...FITL()],
     g: 'Team',
   })),
-  { k: 'installMgr', l: 'Installation manager', t: 'select', o: staffNames(), g: 'Team' },
-  { k: 'surveyor', l: 'Assigned surveyor', t: 'select', o: staffNames(), g: 'Team' },
   { k: 'fitNotes', l: 'Fitting notes', t: 'area', max: 600, g: 'Team' },
-  { k: 'winCount', l: 'Window count', t: 'number', dp: 0, g: 'Info For FENSA' },
-  { k: 'doorCount', l: 'Door count', t: 'number', dp: 0, g: 'Info For FENSA' },
-  { k: 'conservatory', l: 'Conservatory', t: 'select', o: YN, g: 'Info For FENSA' },
-  { k: 'roofline', l: 'Roofline', t: 'select', o: YN, g: 'Info For FENSA' },
-  { k: 'fensaExported', l: 'Exported to FENSA', t: 'select', o: YN, g: 'Info For FENSA' },
-  { k: 'fensaNA', l: 'FENSA not required', t: 'select', o: YN, g: 'Info For FENSA' },
+  { k: 'fensaCert', l: 'FENSA certificate number', max: 40, g: 'Info For FENSA' },
+  { k: 'fensaDate', l: 'Notified to FENSA on', t: 'date', g: 'Info For FENSA' },
 ];

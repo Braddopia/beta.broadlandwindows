@@ -18,6 +18,11 @@ export function fieldControl(f, value, { id = 'f_' + f.k, rows = 3, lockedAsText
   const val = value ?? '';
   if (lockedAsText && (f.ro || (f.adm && !can('money'))))
     return String(html`<input id="${id}" value="${val}" readonly tabindex="-1">`);
+  /* a tick box (v19.18), saved as Yes / No */
+  if (f.t == 'tick')
+    return String(
+      html`<input id="${id}" type="checkbox" class="tick" value="Yes"${when(val == 'Yes', ' checked')}${when(f.ro, ' disabled')}>`
+    );
   if (f.t == 'colour') return colourField(f, { ...(rec || {}), [f.k]: val });
   if (f.t == 'select') {
     const has = f.o.some((o) => String(Array.isArray(o) ? o[0] : o) == String(val));

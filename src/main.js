@@ -71,7 +71,10 @@ import * as featuresNotificationsNotifications from './features/notifications/no
 import * as featuresProblemsProblems from './features/problems/problems.js';
 import * as featuresProfileProfile from './features/profile/profile.js';
 import * as featuresRecordsAppointments from './features/records/appointments.js';
+import * as featuresRecordsAbList from './features/records/ab-list.js';
 import * as featuresRecordsCards from './features/records/cards.js';
+import * as featuresRecordsRecordParts from './features/records/record-parts.js';
+import * as featuresRecordsRecordTools from './features/records/record-tools.js';
 import * as featuresRecordsChecklist from './features/records/checklist.js';
 import * as featuresRecordsFields from './features/records/fields.js';
 import * as featuresRecordsListParts from './features/records/list-parts.js';
@@ -209,7 +212,10 @@ const modules = {
   featuresProblemsProblems,
   featuresProfileProfile,
   featuresRecordsAppointments,
+  featuresRecordsAbList,
   featuresRecordsCards,
+  featuresRecordsRecordParts,
+  featuresRecordsRecordTools,
   featuresRecordsChecklist,
   featuresRecordsFields,
   featuresRecordsListParts,

@@ -10,7 +10,7 @@ import { SAFE } from '../../data/sanitize.js';
 import { can } from '../../domain/permissions.js';
 import { need } from '../auth/session.js';
 import { depPct } from './contracts.js';
-import { byGroup, grpInit } from '../records/cards.js';
+import { abList } from '../records/ab-list.js';
 import { CFINF } from '../records/fields.js';
 import { recRedraw, recordWin } from '../records/record-window.js';
 import { fieldErr, readFields } from '../../ui/forms/form.js';
@@ -74,7 +74,7 @@ export function finTab(W) {
    <section class="rg fin-list"><h4><span>Payments Received</span><small class="muted">${P.length} payment${P.length == 1 ? '' : 's'}</small></h4>
     ${P.map((p, i) => `<div class="row fin-row"><span><b>${money(p.amt)}</b> <span class="tag">${esc(p.kind || p.method)}</span><br><small class="muted">${fd(p.date)} · ${esc(p.method)}${p.ref ? ' · ' + esc(p.ref) : ''}${p.by ? ' · ' + esc(p.by) : ''}</small></span>${adm ? `<button type="button" class="mini del" ${onClick('recPayDel', i)} aria-label="Remove this payment">Remove</button>` : ''}</div>`).join('') || '<p class="empty">No payments yet. Press Make A Payment when money comes in.</p>'}
    </section>
-   <div class="rcols">${byGroup(CFINF(), W.v)}</div></div>`;
+   <div class="abh2">${abList(CFINF(), W.v)}</div></div>`;
 }
 export function finSum() {
   const el = $('#finSum');
@@ -137,11 +137,6 @@ export function payOpen() {
   }, 40);
 }
 export function finRe() {
-  const P = $('#mbox .rw-p.on');
-  if (P) {
-    delete P.dataset.ginit;
-    grpInit(P);
-  }
   finSum();
 }
 export function payFill(v) {

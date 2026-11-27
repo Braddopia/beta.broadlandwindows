@@ -600,3 +600,35 @@ stock number). Decided with the owner:
   seen, so a brochure taken off and put back is not new. Today's list is the baseline (the one item dated today was
   set back). In the app, a brochure the built-in list (`DL`) already has is never New (`known`), and the upload-month
   rule stays as a second check. Tests: tests/unit/brochures.test.mjs, tests/e2e/round-1917.spec.js (v19.17.9).
+
+## v19.18.0: Lead and Contract windows like AdminBase (round 1 of the rework)
+
+The owner asked for the record windows to work like their old system, AdminBase, in the app's own look.
+
+- Frame (`features/records/record-window.js`): a large centred window (`openModal(..., 'full ab')`, CSS in
+  `src/css/05h-record-adminbase.css`, about 94vw × 92dvh) with a Full Page button (`recFull`, remembered in
+  localStorage `bb_rw_full`). The step rail, progress, "still to fill in" boxes and Next/Back footer are gone.
+- Toolbar: Save & Close, Save, Address, Reports, Clipboard ▾, Advanced ▾, « ‹ n of N › » (`recNav`), Search
+  (`recSearch`, number / name / town / postcode within the list it was opened from), Full Page, Close. Ctrl+S saves,
+  Page Up / Page Down move between records (`recKeys`). On narrow screens Address, Reports, Clipboard and Advanced fold
+  into More (`recMore`). Toolbar actions live in `features/records/record-tools.js`; each record kind gives
+  `reports(W)`, `advanced(W)` (menu rows) and `run` (what they do) in contract-record.js / lead-record.js.
+- Title line: "Contract · 5 of 5", the job title, town, phone, email and a red "1 Contract For This Customer" link
+  (`custRecs`: same Contact Book entry, or same name and postcode) that lists them.
+- Tabs (contract): Details, Survey, Checklist, Finance, Deliveries, Fitting, Notes etc, Documents (count first, like
+  "3 Documents"), Service Calls ("2 Service Calls"). Lead: Details, Appointments, Survey, Checklist, Notes etc,
+  Documents. The old Customer and GDPR steps are the Address window (`customer` step, `recTab('customer')`), which
+  opens over the tabs; Done goes back (`recAddrDone`). Survey is kept (the CRM has it; AdminBase did not show it).
+- Details: two halves (`detailsTab` in `features/records/record-parts.js`). Left: label / value rows with groups that
+  fold (`features/records/ab-list.js`: `abList`, `abGroup`; open or closed is remembered per person in localStorage
+  `bb_abg_<user>`; a folded group shows its `sum` fields). Right (contracts): Products / Other Info. Products is the
+  grid (`linesGrid` in products.js) with first / previous / next / last line, + and − (with Undo), Default
+  (`DEFAULT_LINES`) and Create From Deliveries, then Info For FENSA (`FENSAF`) with More » to the FENSA boxes on Fitting.
+- New contract boxes (fields.js `CDETF`): Week Received (worked out from the contract date), Supply Only / On Hold /
+  Cancelled as tick boxes on their group headings (with notes, dates and reasons), Sales Director, Sales Manager, Sub
+  Sub Source, Created On, Contract Colour (`ccol`, `CCOLS`: shown as a bar on the contracts list and the calendar,
+  `ccolStyle`), FENSA certificate number and date. Tick boxes are a new field type (`t: 'tick'`, saved as Yes / No).
+- Tests: tests/e2e/adminbase-records.spec.js. Visual baselines for the three record windows were updated.
+- Still to come (next rounds): the two-pane Contract Reports window, Commissions and Job Costings tabs, the Contract
+  Schedule on Fitting, Deliveries and Finance tables with their own toolbars, more Advanced actions, then Suppliers.
+  Ask the owner for the Address, Advanced and Documents screenshots they offered.

@@ -84,6 +84,10 @@ export function readFields(fields) {
     const e = $('#f_' + f.k);
     if (!e) continue;
     if (f.adm && !can('money')) continue;
+    if (f.t == 'tick') {
+      o[f.k] = e.checked ? 'Yes' : 'No';
+      continue;
+    }
     const raw = (e.value || '').trim(),
       lab = f.l.replace(/ \(.*\)/, '');
     if (f.req && !raw) {
