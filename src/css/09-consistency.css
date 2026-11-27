@@ -75,11 +75,14 @@ body:not(.lv):not(.vmsg) .main>.tw+.pager,body:not(.lv):not(.vmsg) .main>style+*
 }
 
 /* ---- v19.14 ---- */
-/* Messages: the People column is as wide as Chats; Report A Problem sits at the bottom of the People list, on the right
-   like on every other page. When People is hidden (narrow screens) the usual corner button shows instead. */
+/* Messages: the People column is as wide as Chats; Report A Problem sits at the bottom of the People list. When People is hidden (narrow screens) the usual corner button shows instead. */
 .msn{grid-template-columns:19rem minmax(0,1fr) 19rem}
 @media(max-width:1250px){.msn{grid-template-columns:17rem minmax(0,1fr) 17rem}}
-.msn-p .msn-rp{justify-content:flex-end}
+/* v19.14.1: centred in the People column, and its dividing line level with the one above the message box: both
+   footers share one height (the message box can still grow taller while typing a long message) */
+.msn{--msn-foot:4.2rem}
+.msn-in{box-sizing:border-box;min-height:var(--msn-foot);align-items:center}
+.msn-p .msn-rp{justify-content:center;align-items:center;box-sizing:border-box;height:var(--msn-foot);padding:0 .8rem}
 @media(max-width:1050px){body[data-view=messages]:not(:has(#modal.open)) #rpb{display:flex}}
 
 /* clickable blocks that are not table rows do not fill blue on hover (the owner found it heavy): the holiday ring on

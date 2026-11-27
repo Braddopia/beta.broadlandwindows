@@ -1,5 +1,5 @@
 // v19.13 Inventory layout: one toolbar row (search, Sort & Filter, quick filters), every heading lined up with its
-// column, stock values centred under their heading with every number starting at the same place, Item, Stock and Location evenly spaced on
+// column, the Stock heading and each value centred, Item, Stock and Location evenly spaced on
 // the left with Cost and Status by the buttons (v19.13.1), and the row buttons inside their cell, for an administrator and a standard user at the usual screen widths.
 const { test, expect } = require('../helpers');
 
@@ -25,10 +25,9 @@ for (const role of ['beta', 'staff'])
             return rows.some((tr) => getComputedStyle(tr.children[i]).textAlign != getComputedStyle(th).textAlign);
           })
           .map((th) => th.dataset.col);
-        // stock values are centred under the Stock heading in same-width boxes, so every number starts at the same place
+        // the Stock heading and each row's value are centred in the column (v19.14.1)
         const stockTh = t.querySelector('thead th[data-col=stock]'),
           thMid = (box(stockTh).left + box(stockTh).right) / 2;
-        const numLefts = rows.map((tr) => box(tr.querySelector('.i-qty b')).left);
         const w = (c) => (t.querySelector(`thead th[data-col=${c}]`) || {}).offsetWidth || 0;
         const buttonsFit = rows.every((tr) => {
           const c = box(tr.querySelector('td.ac'));
@@ -38,12 +37,10 @@ for (const role of ['beta', 'staff'])
         });
         return {
           misaligned,
-          numbersLineUp:
-            numLefts.every((x) => Math.abs(x - numLefts[0]) < 1) &&
-            rows.every((tr) => {
-              const q = box(tr.querySelector('.i-qty'));
-              return Math.abs((q.left + q.right) / 2 - thMid) < 1.5;
-            }),
+          numbersLineUp: rows.every((tr) => {
+            const q = box(tr.querySelector('.i-qty'));
+            return Math.abs((q.left + q.right) / 2 - thMid) < 1.5;
+          }),
           filterLevelWithSearch: Math.abs(q.top - f.top) < 1 && Math.abs(q.height - f.height) < 1,
           evenlySpaced: w('item') == w('stock') && (!w('colours') || w('stock') == w('location')),
           // the right group: Cost, (Value,) Status, buttons side by side with nothing between them

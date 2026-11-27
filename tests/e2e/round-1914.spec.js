@@ -26,7 +26,9 @@ test('new review figures from the daily file reach the Overview and the Office f
   expect(app.errors).toEqual([]);
 });
 
-test('Messages: People as wide as Chats, Report A Problem at the bottom of People on the right', async ({ app }) => {
+test('Messages: People as wide as Chats, Report A Problem centred at the foot of People, its line level with the message box', async ({
+  app,
+}) => {
   await app.page.setViewportSize({ width: 1440, height: 900 });
   await app.role('beta');
   await app.go('messages');
@@ -37,11 +39,12 @@ test('Messages: People as wide as Chats, Report A Problem at the bottom of Peopl
     return {
       sameWidth: Math.abs(b('.msn-l').width - p.width) < 1,
       inPeople: !!document.querySelector('.msn-p .msn-rp') && !document.querySelector('.msn-l .msn-rp'),
-      right: Math.abs(p.right - rp.right) < 30,
+      centred: Math.abs((p.left + p.right) / 2 - (rp.left + rp.right) / 2) < 1.5,
+      lineLevel: Math.abs(b('.msn-p .msn-rp').top - b('.msn-in').top) < 1,
       bottom: Math.abs(p.bottom - rp.bottom) < 30,
     };
   });
-  expect(r).toEqual({ sameWidth: true, inPeople: true, right: true, bottom: true });
+  expect(r).toEqual({ sameWidth: true, inPeople: true, centred: true, lineLevel: true, bottom: true });
 });
 
 test('the Fitting Schedule board and the Stock Take page use the full width', async ({ app }) => {

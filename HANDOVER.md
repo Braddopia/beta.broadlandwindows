@@ -312,3 +312,11 @@ stock number). Decided with the owner:
 - Side menu: the short-screen rules that shrank it and hid the group names are gone; it keeps its normal size and
   scrolls, with a thin scrollbar.
 - Tests: `tests/e2e/round-1914.spec.js`, `tests/unit/review-feed.test.mjs`.
+
+## v19.14.1
+
+- Messages: Report A Problem is centred at the foot of the People list, and its dividing line is level with the line
+  above the message box (both footers share one height, `--msn-foot`).
+- Inventory: the Stock heading and each row's value are centred in the column (owner's choice).
+- Review figures: the job was run by hand and works; its log says "no keys set" for Google and Trustpilot, so nothing
+  updates until the owner adds the three Actions secrets (see v19.14).
