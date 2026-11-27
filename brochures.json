@@ -76,7 +76,7 @@
       "title": "Hallmark uPVC Panels 2025",
       "url": "https://www.broadlandwindows.co.uk/wp-content/uploads/2025/06/COVER-HALLMARK-uPVC-Panels-2025-scaled.jpg",
       "img": "https://www.broadlandwindows.co.uk/wp-content/uploads/2025/06/COVER-HALLMARK-uPVC-Panels-2025-735x1024.webp",
-      "firstSeen": "2026-11-27"
+      "firstSeen": "2025-11-27"
     },
     {
       "cat": "Aluminium",
@@ -155,5 +155,51 @@
       "img": "https://www.broadlandwindows.co.uk/wp-content/uploads/2025/06/Titan-1-725x1024.webp",
       "firstSeen": "2025-11-27"
     }
-  ]
+  ],
+  "known": {
+    "f:hw_windows_merge.pdf": "2025-11-27",
+    "t:broadland windows hardwood range": "2025-11-27",
+    "f:hw_special_merge.pdf": "2025-11-27",
+    "t:hw special merge": "2025-11-27",
+    "f:hw_door_merge.pdf": "2025-11-27",
+    "t:hw door merge": "2025-11-27",
+    "f:teknos-colour-collection-2025.pdf": "2025-11-27",
+    "t:teknos colour collection 2025": "2025-11-27",
+    "f:jf-x-bw-2025.pdf": "2025-11-27",
+    "t:broadlands pvcu range": "2025-11-27",
+    "f:lr-ultimate-heritage-collection-2025-broadland.pdf": "2025-11-27",
+    "t:lr ultimate heritage collection 2025 broadland": "2025-11-27",
+    "f:rose-collection-brochure-july-2023.pdf": "2025-11-27",
+    "t:rose collection brochure july 2023": "2025-11-27",
+    "f:broadland-secondary-glazing.pdf": "2025-11-27",
+    "t:broadland secondary glazing": "2025-11-27",
+    "f:hallmark-colour-lab-2025.pdf": "2025-11-27",
+    "t:broadlands composite doors": "2025-11-27",
+    "f:hallmark-composite-door-brochure-2026.pdf": "2025-11-27",
+    "t:hallmark composite door brochure 2026": "2025-11-27",
+    "f:cover-hallmark-upvc-panels-2025-scaled.jpg": "2025-11-27",
+    "t:hallmark upvc panels 2025": "2025-11-27",
+    "f:alitherm-heritage-60.pdf": "2025-11-27",
+    "t:broadlands aluminium range": "2025-11-27",
+    "f:smarts-colour-guide-2025.pdf": "2025-11-27",
+    "t:smarts colour guide 2025": "2025-11-27",
+    "f:smarts-designer-door-2025.pdf": "2025-11-27",
+    "t:smarts designer door 2025": "2025-11-27",
+    "f:smarts-heritage-full-brochure-2020.pdf": "2025-11-27",
+    "t:smarts heritage full brochure 2020": "2025-11-27",
+    "f:smarts-alitherm-400-2025.pdf": "2025-11-27",
+    "t:smarts alitherm 400 2025": "2025-11-27",
+    "f:smarts-signature-doors-2023.pdf": "2025-11-27",
+    "t:smarts signature doors 2023": "2025-11-27",
+    "f:smarts-visofold-series-2025.pdf": "2025-11-27",
+    "t:smarts visofold series 2025": "2025-11-27",
+    "f:smarts-visoglide-series-2024.pdf": "2025-11-27",
+    "t:smarts visoglide series 2024": "2025-11-27",
+    "f:smarts-aluspace.pdf": "2025-11-27",
+    "t:smarts aluspace 1": "2025-11-27",
+    "f:hallmark-aluminium-doors-panels-2025.pdf": "2025-11-27",
+    "t:hallmark aluminium doors panels 2025": "2025-11-27",
+    "f:broadland-titan-lanterns.pdf": "2025-11-27",
+    "t:broadland roof lanterns": "2025-11-27"
+  }
 }

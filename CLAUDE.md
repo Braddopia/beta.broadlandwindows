@@ -25,6 +25,7 @@ Rules for code in `src/`:
 ## Before going live
 
 - Turn the tours back on: set `TOURS_AUTO = true` in `src/features/tour/tour.js`. The welcome tour (first ever visit) and each tab's first-visit tour are built and tested but switched off while the site is being designed; the ? button still plays them.
+- Set up the live review figures: add the GitHub Actions secrets `GOOGLE_PLACES_KEY` and `GOOGLE_PLACE_ID` (Google Cloud, Places API (New)) and `TRUSTPILOT_API_KEY` (Trustpilot Business), and optionally the variable `TRUSTPILOT_DOMAIN` (GitHub: Settings, Secrets and variables, Actions). Then run the "Daily website figures" workflow by hand and check `reviews.json` appears on `main`. Never ask for keys in chat.
 - Turn off "Show the welcome tour every time" in Admin Console, Testing Tools, and change any account PINs still set to 1234.
 
 ## Agent skills

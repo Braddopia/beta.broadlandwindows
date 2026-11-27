@@ -6,7 +6,7 @@ test('the brochure list follows the website: new ones appear (marked New), remov
   await app.role('beta');
   await app.go('downloads');
   const n0 = await app.run(() => brochures().length);
-  expect(n0).toBe(22);
+  expect(n0).toBe(23);
   const today = await app.run(() => new Date().toISOString().slice(0, 10));
   const U = 'https://www.broadlandwindows.co.uk/wp-content/uploads/2026/11/';
   await app.run(
@@ -167,4 +167,18 @@ test('Job Stock Tags: one tab per tag; the boxes and the preview are the same he
     return Math.abs(b('#main .jt-edit').height - b('#main .jt-stage').height);
   });
   expect(h).toBeLessThan(2);
+});
+
+test('v19.17.9: no current brochure shows New, even when the daily check re-dates them all to today', async ({ app }) => {
+  const B = JSON.parse(require('fs').readFileSync(require('path').join(__dirname, '../../brochures.json'), 'utf8'));
+  await app.role('beta');
+  await app.go('downloads');
+  await app.run((B) => brochureFeed(B), B);
+  await expect(app.page.locator('#main .bc')).toHaveCount(B.items.length);
+  await expect(app.page.locator('#main .bc-new')).toHaveCount(0);
+  // the worst case: every address looks new to the check and is dated today
+  const today = await app.run(() => new Date().toISOString().slice(0, 10));
+  await app.run((B) => brochureFeed(B), { ...B, items: B.items.map((x) => ({ ...x, firstSeen: today })) });
+  await expect(app.page.locator('#main .bc-new')).toHaveCount(0);
+  expect(app.errors).toEqual([]);
 });

@@ -588,3 +588,15 @@ stock number). Decided with the owner:
 - The computer's reduce-motion setting shows one still daytime picture. Note: Playwright runs with reducedMotion
   'reduce' (playwright.config.js), so a test of the moving scene calls `page.emulateMedia({ reducedMotion:
   'no-preference' })` (tests/e2e/screen-saver.spec.js).
+
+## v19.17.9: review keys noted, brochure New tag fixed
+
+- Review keys: "Before going live" in CLAUDE.md lists the GitHub secrets (`GOOGLE_PLACES_KEY`, `GOOGLE_PLACE_ID`,
+  `TRUSTPILOT_API_KEY`, optional variable `TRUSTPILOT_DOMAIN`) and the check afterwards. The Admin Console Reviews card
+  (`reviewFeedLine` in features/home/reviews.js) says the same in plain words; its button is "Update Scores".
+- Brochure "New": the daily job (`dateBrochures` in scripts/fetch-brochures.mjs) now matches "seen before" by the file
+  (`fileKey`: the file name, ignoring the month folder and a "-1" re-upload) and by the tidied title (`titleKey`), not
+  only the full address, and keeps the earliest date. brochures.json has a `known` map of every file and title ever
+  seen, so a brochure taken off and put back is not new. Today's list is the baseline (the one item dated today was
+  set back). In the app, a brochure the built-in list (`DL`) already has is never New (`known`), and the upload-month
+  rule stays as a second check. Tests: tests/unit/brochures.test.mjs, tests/e2e/round-1917.spec.js (v19.17.9).

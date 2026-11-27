@@ -56,6 +56,37 @@ export const fileKey = (url) =>
   decodeURIComponent(String(url).split('/').pop())
     .toLowerCase()
     .replace(/-\d(\.pdf)$/, '$1');
+/** a title in plain form, so "Smarts Visofold Series 2025" and "SMARTS-Visofold-Series-2025" match */
+export const titleKey = (t) =>
+  String(t || '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+const keysOf = (x) => ['f:' + fileKey(x.url), 't:' + titleKey(x.title)].filter((k) => k.length > 2);
+/** dates each brochure with when it was first seen (v19.17.9). "Seen before" is matched by the file (ignoring the
+   month folder and a "-1" re-upload) and by the tidied title, not only the full address, so a re-upload, a move to a
+   new month folder, or a switch between the page and WordPress's file list keeps the brochure's old date. `known`
+   remembers every file and title ever seen (with the earliest date), so a brochure taken off the website and put
+   back is not new either. Only a brochure whose file and title were never seen gets today's date. */
+export function dateBrochures(items, before, day, old) {
+  const known = { ...((before && before.known) || {}) },
+    prev = (before && before.items) || [];
+  const note = (x, d) => {
+    for (const k of keysOf(x)) if (d && (!known[k] || d < known[k])) known[k] = d;
+  };
+  for (const x of prev) note(x, x.firstSeen);
+  /* on the very first run nothing is "new": everything is dated a year back */
+  const first = !prev.length && !Object.keys(known).length;
+  const next = items.map((x) => {
+    const d = keysOf(x)
+      .map((k) => known[k])
+      .filter(Boolean)
+      .sort()[0];
+    return { ...x, firstSeen: d || (first ? old : day) };
+  });
+  for (const x of next) note(x, x.firstSeen);
+  return { items: next, known, added: first ? 0 : next.filter((x) => x.firstSeen == day).length };
+}
 /** one of each brochure, keeping the first (the newest, as the website lists them) */
 export const oneEach = (L) => {
   const seen = new Set();
@@ -220,18 +251,15 @@ async function main() {
   } catch {
     /* first run */
   }
-  const seen = Object.fromEntries((before.items || []).map((x) => [x.url, x.firstSeen]));
-  const first = !(before.items || []).length,
-    day = new Date().toISOString().slice(0, 10);
-  /* on the very first run nothing is "new": everything is dated a year back */
-  const old = new Date(Date.now() - 365 * 864e5).toISOString().slice(0, 10);
-  const next = items.map((x) => ({ ...x, firstSeen: seen[x.url] || (first ? old : day) }));
-  const same = JSON.stringify(next) == JSON.stringify(before.items);
-  const added = next.filter((x) => !seen[x.url]).length,
-    gone = (before.items || []).filter((x) => !items.some((y) => y.url == x.url)).length;
+  const day = new Date().toISOString().slice(0, 10),
+    old = new Date(Date.now() - 365 * 864e5).toISOString().slice(0, 10);
+  const { items: next, known, added } = dateBrochures(items, before, day, old);
+  const same =
+    JSON.stringify(next) == JSON.stringify(before.items) && JSON.stringify(known) == JSON.stringify(before.known);
+  const gone = (before.items || []).filter((x) => !items.some((y) => fileKey(y.url) == fileKey(x.url))).length;
   console.log(added + ' new, ' + gone + ' removed, ' + next.filter((x) => x.img).length + ' with a cover picture');
   if (same) return console.log('No change.');
-  writeFileSync(OUT, JSON.stringify({ updated: new Date().toISOString(), items: next }, null, 2) + '\n');
+  writeFileSync(OUT, JSON.stringify({ updated: new Date().toISOString(), items: next, known }, null, 2) + '\n');
   console.log('brochures.json updated.');
 }
 if (process.argv[1] && fileURLToPath(import.meta.url) == process.argv[1]) main();

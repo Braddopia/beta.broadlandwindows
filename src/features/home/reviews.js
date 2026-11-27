@@ -181,7 +181,7 @@ export function reviewFeedLine() {
   return st == 'ok'
     ? `<p class="rv-feed ok">Google and Trustpilot update automatically each morning${at ? ' (last ' + esc(fdl(String(at).slice(0, 10))) + ')' : ''}.</p>`
     : st == 'none'
-      ? '<p class="rv-feed off">Automatic updates are not set up yet: the Google and Trustpilot keys still need adding in GitHub (see the handover notes). Until then, type the latest figures with Update scores.</p>'
+      ? '<p class="rv-feed off"><b>Live review figures: to be set up before going live.</b> Google and Trustpilot need their own keys, added once in GitHub (Settings, Secrets and variables, Actions): GOOGLE_PLACES_KEY and GOOGLE_PLACE_ID from Google, and TRUSTPILOT_API_KEY from Trustpilot Business. After that the figures update by themselves every morning. Until then, type the latest figures with Update Scores.</p>'
       : st == 'local'
         ? '<p class="rv-feed off">Opened from a file on this computer, so the automatic review figures are not read here. The website reads them.</p>'
         : '';

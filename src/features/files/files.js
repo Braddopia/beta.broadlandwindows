@@ -38,6 +38,7 @@ export const DL = [
   ['Secondary glazing', 'Broadland Secondary Glazing', '2025/07/Broadland-Secondary-Glazing.pdf'],
   ['Composite doors', 'Hallmark Colour Lab 2025', '2025/06/HALLMARK-Colour-Lab-2025.pdf'],
   ['Composite doors', 'Hallmark Doors & Panels 2025', '2025/06/HALLMARK-Doors-Panels-2025.pdf'],
+  ['Composite doors', 'Hallmark Composite Door Brochure 2026', '2026/11/Hallmark-Composite-Door-Brochure-2026.pdf'],
   ['Composite doors', 'Hallmark uPVC Panels 2025 (image)', '2025/06/COVER-HALLMARK-uPVC-Panels-2025-scaled.jpg'],
   ['Aluminium', 'Alitherm Heritage 60', '2026/10/Alitherm-Heritage-60.pdf'],
   ['Aluminium', 'Smarts Colour Guide 2025', '2025/06/SMARTS-Colour-Guide-2025.pdf'],
@@ -89,8 +90,9 @@ export async function brochureFeed(feed) {
   /* a brochure this version already knows keeps its checked name and range (the website's file list can call it
      "HW_Door_Merge" and file it by the word "door") */
   for (const x of items) {
-    const k = DL.find((d) => d.url == x.url);
-    if (k) Object.assign(x, { title: k.title, cat: k.cat });
+    const k = DL.find((d) => d.url == x.url || fileOf(d.url) == fileOf(x.url));
+    /* one this version already lists is never New (v19.17.9), whatever date the daily check gave it */
+    if (k) Object.assign(x, { title: k.title, cat: k.cat, known: true });
   }
   if (items.length < 5) return;
   LIVE = items;
@@ -110,6 +112,7 @@ const upMonth = (u) => {
 /** a brochure first seen on the website in the last 30 days, and uploaded there in the last two months (v19.17.6:
     an old file the check only noticed today is not new) */
 export const isNew = (d) =>
+  !d.known &&
   !!d.seen &&
   Date.now() - Date.parse(d.seen) < 30 * 864e5 &&
   (!upMonth(d.url) || Date.now() - upMonth(d.url) < 62 * 864e5);
