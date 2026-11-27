@@ -85,13 +85,12 @@ body:not(.lv):not(.vmsg) .main>.tw+.pager,body:not(.lv):not(.vmsg) .main>style+*
 .msn-p .msn-rp{justify-content:center;align-items:center;box-sizing:border-box;height:var(--msn-foot);padding:0 .8rem}
 @media(max-width:1050px){body[data-view=messages]:not(:has(#modal.open)) #rpb{display:flex}}
 
-/* clickable blocks that are not table rows do not fill blue on hover (the owner found it heavy). v19.15: pointing at
-   the holiday ring lifts the whole My Holiday card instead; a Calendar day gets a thin outline */
+/* clickable blocks that are not table rows do not fill blue on hover (the owner found it heavy). v19.15.4: the My
+   Holiday card stays still like the cards beside it (the v19.15 lift and shadow were too much); only the ring grows a
+   little and the pointer shows it opens your holidays. A Calendar day gets a thin outline. */
 .hol2.clk-r:hover{background:transparent}
-.hol-p{transition:transform .3s var(--e-spring),box-shadow .25s var(--e-out)}
-.hol-p:has(.hol2:hover){transform:translateY(-4px);box-shadow:0 18px 36px -18px rgba(1,43,89,.45),var(--glass-hi,0 0 0 transparent)}
-.hol2 .hring{transition:transform .3s var(--e-spring)}.hol2:hover .hring{transform:scale(1.04)}
-@media(prefers-reduced-motion:reduce){.hol-p:has(.hol2:hover),.hol2:hover .hring{transform:none}}
+.hol2 .hring{transition:transform .3s var(--e-spring)}.hol2:hover .hring{transform:scale(1.03)}
+@media(prefers-reduced-motion:reduce){.hol2:hover .hring{transform:none}}
 .dc2:hover{background:transparent;box-shadow:inset 0 0 0 1.5px rgba(3,78,162,.35)}
 body[data-theme=dark] .dc2:hover{box-shadow:inset 0 0 0 1.5px rgba(140,180,255,.4)}
 

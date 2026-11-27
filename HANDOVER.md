@@ -359,3 +359,5 @@ stock number). Decided with the owner:
 - v19.15.3: the icon files were renamed (`app-sun-*.png`) so installed apps notice the new icon: browsers keep an
   installed app's icon until the file name in the manifest changes. Windows may still need the app opened once (Edge
   and Chrome then ask to update the icon) or unpinning and pinning it again on the taskbar.
+- v19.15.4: My Holiday no longer lifts with a shadow on hover (it did not match the cards beside it); only the ring grows
+  a little (3%).

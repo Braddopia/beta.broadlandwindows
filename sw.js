@@ -1,7 +1,7 @@
 /* sw.js: the desktop app's helper (copied from src/app by the build). Network first: the newest version of the CRM
    always loads when online; the last copy is kept so the app still opens if the internet drops. Data is not touched
    (it lives in the browser's database, shared with the website). */
-const CACHE = 'bw-crm-19.15.3';
+const CACHE = 'bw-crm-19.15.4';
 self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('activate', (e) =>
   e.waitUntil(
