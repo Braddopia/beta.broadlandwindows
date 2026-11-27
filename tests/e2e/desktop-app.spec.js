@@ -88,3 +88,19 @@ test('an open app shows the new-version window in the middle of the screen; Remi
   await expect(app.page.locator('#updChip button')).toHaveText('Restart');
   expect(app.errors).toEqual([]);
 });
+
+test('on a Mac the app uses white rounded-tile icons, like the other Dock apps (v19.17.7)', async ({ app }) => {
+  await app.page.addInitScript(() => Object.defineProperty(navigator, 'platform', { get: () => 'MacIntel' }));
+  await serve(app, {});
+  const m = await app.page.evaluate(async () => {
+    const href = document.querySelector('link[rel=manifest]').href,
+      j = await (await fetch(href)).json();
+    const icons = await Promise.all(j.icons.map(async (i) => (await fetch(new URL(i.src, href))).status));
+    return { file: href.split('/').pop(), srcs: j.icons.map((i) => i.src), icons };
+  });
+  expect(m).toEqual({
+    file: 'manifest-mac.webmanifest',
+    srcs: ['app-sun-mac-192.png', 'app-sun-mac-512.png'],
+    icons: [200, 200],
+  });
+});

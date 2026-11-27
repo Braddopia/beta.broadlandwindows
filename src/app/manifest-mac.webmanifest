@@ -1,0 +1,24 @@
+{
+  "name": "Broadland Windows CRM",
+  "short_name": "Broadland CRM",
+  "description": "Leads, contracts, fittings, service calls, stock and the team for Broadland Windows, Doors & Garden Rooms.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#012b59",
+  "icons": [
+    {
+      "src": "app-sun-mac-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "app-sun-mac-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

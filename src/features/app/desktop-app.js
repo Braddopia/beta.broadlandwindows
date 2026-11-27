@@ -54,8 +54,17 @@ export async function checkVersion(force) {
   }
 }
 /* start-up step (run once by main.js) */
+/** a Mac: its Dock icons are white rounded tiles with the picture inside, so it gets its own icon set */
+export const isMac = () =>
+  (navigator.userAgentData && navigator.userAgentData.platform == 'macOS') ||
+  /Mac/i.test(navigator.platform || '') ||
+  /Macintosh/.test(navigator.userAgent || '');
 export function startDesktopApp() {
   if (!/^https?:$/.test(location.protocol)) return;
+  /* (v19.17.7) on a Mac the app is described with the white-tile icons (manifest-mac.webmanifest); Windows keeps the
+     plain sun. Done first, before the browser offers to install it. */
+  const ml = document.querySelector('link[rel=manifest]');
+  if (ml && isMac()) ml.setAttribute('href', 'manifest-mac.webmanifest');
   addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     promptEvent = e;

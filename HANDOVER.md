@@ -558,3 +558,12 @@ stock number). Decided with the owner:
   not marked New. A file taken off the website still drops out at the next morning check.
 - Mac app icon: the sun is back at its full size; only the see-through corners are white (app-sun-180 and the
   maskable icons).
+
+## v19.17.7
+
+- Mac app icon, done properly: Macs get their own app description, `manifest-mac.webmanifest` (startDesktopApp swaps
+  the manifest link when `isMac()`), whose icons `app-sun-mac-192/512.png` are drawn to Apple's icon grid: a white
+  rounded tile (824 of 1024, corner 185) with a soft shadow and the sun inside at 78% of the tile, so it sits in the
+  Dock like Chrome, Steam and Settings. Windows keeps the plain sun (`manifest.webmanifest`). Safari's Add to Dock
+  (`app-sun-180.png`) and the maskable icons are a white square with the sun at about 75%, since those are rounded by
+  the system. An app already installed on a Mac keeps its old icon until it is removed and installed again.
