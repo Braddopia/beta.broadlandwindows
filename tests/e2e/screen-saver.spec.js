@@ -11,7 +11,14 @@ test('starts after the chosen time without activity, and any movement closes it'
   // the scene: the lead crane (the opening screen's outline), a flock, sky, clouds and hills; no 'move the mouse' text
   await expect(saver.locator('.sv-lead .sv-crane')).toHaveCount(1);
   await expect(saver.locator('.sv-flock .sv-crane')).toHaveCount(3);
-  expect(await app.run(() => document.querySelector('#sv-crane path').getAttribute('d').length)).toBeGreaterThan(1000);
+  // the crane is drawn in parts so it can beat its wings: a near and a far wing on every crane
+  await expect(saver.locator('.sv-lead .sv-wing')).toHaveCount(2);
+  await expect(saver.locator('.sv-flock .sv-wing')).toHaveCount(6);
+  // the Broads scene below: tree lines, the mill, water, boat and reeds
+  await expect(saver.locator('.sv-trees')).toHaveCount(2);
+  await expect(saver.locator('.sv-mill .sails')).toHaveCount(1);
+  await expect(saver.locator('.sv-boat')).toHaveCount(1);
+  await expect(saver.locator('.sv-reeds')).toHaveCount(2);
   await expect(saver).not.toContainText('Move the mouse');
   await expect(saver.locator('.sv-time')).toHaveText(/^\d\d:\d\d$/);
   await expect(saver.locator('.sv-date')).toContainText('November');
