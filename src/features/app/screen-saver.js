@@ -40,14 +40,27 @@ const blocked = () => document.body.classList.contains('tv') || document.body.cl
 
 function build() {
   if (el) return el;
-  const bird = $('#splash .sp-bird');
+  /* the crane's outline from the opening screen, drawn once and reused for the lead bird and the flock */
+  const d = ($('#splash .sp-fill') || { getAttribute: () => '' }).getAttribute('d') || '';
+  const crane = (cls) =>
+    `<div class="${cls}"><div class="sv-bob"><svg class="sv-crane" viewBox="0 0 953 596" focusable="false"><use href="#sv-crane"/></svg></div></div>`;
   el = document.createElement('div');
   el.id = 'saver';
   el.setAttribute('aria-hidden', 'true');
   el.innerHTML =
-    '<div class="sv-glow"></div><div class="sv-fly">' +
-    (bird ? bird.outerHTML.replace(/id="spg"/, 'id="svg-sv"').replace(/url\(#spg\)/, 'url(#svg-sv)') : '') +
-    '</div><div class="sv-clock"><b class="sv-time"></b><span class="sv-date"></span></div><p class="sv-hint">Move the mouse or press a key to carry on</p>';
+    `<svg width="0" height="0" style="position:absolute"><defs><linearGradient id="sv-cg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset=".6" stop-color="#e3f0ff"/><stop offset="1" stop-color="#a9cdf7"/></linearGradient><symbol id="sv-crane" viewBox="0 0 953 596"><path fill="url(#sv-cg)" fill-rule="evenodd" d="${d.replace(/"/g, '')}"/></symbol></defs></svg>` +
+    '<div class="sv-sky sv-day"></div><div class="sv-sky sv-dusk"></div><div class="sv-sky sv-night"></div>' +
+    '<div class="sv-stars"></div><div class="sv-sun"></div>' +
+    '<div class="sv-cloud c1"></div><div class="sv-cloud c2"></div><div class="sv-cloud c3"></div><div class="sv-cloud c4"></div>' +
+    crane('sv-lead') +
+    '<div class="sv-flock">' +
+    crane('f1') +
+    crane('f2') +
+    crane('f3') +
+    '</div>' +
+    '<svg class="sv-hills h2" viewBox="0 0 1440 220" preserveAspectRatio="none"><path d="M0 120C180 60 330 150 520 110S860 40 1040 95 1300 150 1440 80V220H0Z"/></svg>' +
+    '<svg class="sv-hills h1" viewBox="0 0 1440 220" preserveAspectRatio="none"><path d="M0 160C200 110 380 190 600 150S980 90 1180 140 1360 170 1440 130V220H0Z"/></svg>' +
+    '<div class="sv-clock"><b class="sv-time"></b><span class="sv-date"></span></div>';
   document.body.appendChild(el);
   return el;
 }

@@ -8,7 +8,11 @@ test('starts after the chosen time without activity, and any movement closes it'
   await app.page.evaluate(() => localStorage.setItem('bb_saver', '0.05')); // 3 seconds, for the test
   const saver = app.page.locator('#saver');
   await expect(saver).toHaveClass(/on/, { timeout: 8000 });
-  await expect(saver.locator('.sp-line')).toHaveCount(1); // the opening screen's crane
+  // the scene: the lead crane (the opening screen's outline), a flock, sky, clouds and hills; no 'move the mouse' text
+  await expect(saver.locator('.sv-lead .sv-crane')).toHaveCount(1);
+  await expect(saver.locator('.sv-flock .sv-crane')).toHaveCount(3);
+  expect(await app.run(() => document.querySelector('#sv-crane path').getAttribute('d').length)).toBeGreaterThan(1000);
+  await expect(saver).not.toContainText('Move the mouse');
   await expect(saver.locator('.sv-time')).toHaveText(/^\d\d:\d\d$/);
   await expect(saver.locator('.sv-date')).toContainText('November');
   await app.page.waitForTimeout(800);

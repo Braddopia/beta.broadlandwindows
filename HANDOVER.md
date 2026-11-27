@@ -411,3 +411,8 @@ stock number). Decided with the owner:
   computer (localStorage `bb_saver`), with Preview. Never over the Floor Boards TV display or sign-in; still (no
   movement) with Fewer Animations. Idle time is counted in seconds while the page is visible. Test:
   `tests/e2e/screen-saver.spec.js`.
+- v19.16.3: the screen saver is a living scene instead of the bird fading in and out: the sky turns from day blue to a
+  gold sunset to a starry night and back (60s), clouds drift, hills along the bottom, the crane glides across with
+  wing beats at a different height each pass (72s for three passes), and a small flock crosses far off every 36s.
+  The crane is one SVG symbol taken from the opening screen's outline. The "move the mouse" line is gone. Fewer
+  Animations shows it still.
