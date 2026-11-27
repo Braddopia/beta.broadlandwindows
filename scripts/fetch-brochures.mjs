@@ -48,7 +48,25 @@ export function guessCat(s) {
   return 'Other';
 }
 
-/** every brochure file linked from the page HTML: [{ cat, title, url }] */
+/** an image address from an <img> tag (lazy-loading sites keep it in data-src or srcset), or '' */
+function imgSrc(tag) {
+  const pick = (a) => (new RegExp('\\s' + a + '=["\']([^"\']+)["\']', 'i').exec(tag) || [])[1] || '';
+  let u = pick('data-lazy-src') || pick('data-src') || pick('src');
+  if (!u || /^data:/i.test(u)) u = (pick('data-srcset') || pick('srcset')).split(/\s+/)[0] || '';
+  u = u.replace(/^\/\//, 'https://').replace(/^\/wp-content\//, 'https://www.broadlandwindows.co.uk/wp-content/');
+  return /^https:\/\/(www\.)?broadlandwindows\.co\.uk\/wp-content\/uploads\/.+\.(jpe?g|png|webp)(\?|$)/i.test(u)
+    ? u
+    : '';
+}
+/** the cover picture shown with a brochure link: an image inside the link, else the last image just before it */
+function coverNear(html, at, inner) {
+  const own = /<img\b[^>]*>/i.exec(inner);
+  if (own && imgSrc(own[0])) return imgSrc(own[0]);
+  const before = [...html.slice(Math.max(0, at - 2500), at).matchAll(/<img\b[^>]*>/gi)].map((m) => imgSrc(m[0]));
+  return before.filter(Boolean).pop() || '';
+}
+
+/** every brochure file linked from the page HTML: [{ cat, title, url, img }] */
 export function parseBrochures(html) {
   const out = new Map();
   const heads = [...html.matchAll(/<h[1-4][^>]*>([\s\S]*?)<\/h[1-4]>/gi)].map((m) => ({ at: m.index, t: text(m[1]) }));
@@ -72,7 +90,13 @@ export function parseBrochures(html) {
       .map((h) => guessCat(h.t))
       .filter((c) => c != 'Other')
       .pop();
-    out.set(url, { cat: sect || guessCat(title + ' ' + url), title: title.slice(0, 120), url });
+    const img = coverNear(html, m.index, m[2]);
+    out.set(url, {
+      cat: sect || guessCat(title + ' ' + url),
+      title: title.slice(0, 120),
+      url,
+      ...(img ? { img } : {}),
+    });
   }
   return [...out.values()];
 }
@@ -90,13 +114,24 @@ async function fromMedia() {
     for (const m of L) {
       const url = String(m.source_url || '').replace(/^http:/, 'https:'),
         title = text((m.title && m.title.rendered) || '') || fromFile(url);
+      /* WordPress makes a picture of each PDF's first page: its cover */
+      const sz = (m.media_details && m.media_details.sizes) || {},
+        img = String((sz.medium_large || sz.large || sz.medium || sz.full || {}).source_url || '').replace(
+          /^http:/,
+          'https:'
+        );
       if (
         /^https:\/\/(www\.)?broadlandwindows\.co\.uk\/wp-content\/uploads\//.test(url) &&
         /brochure|collection|colour|door|window|lantern|panel|glazing|smarts|hallmark|alitherm|teknos|heritage/i.test(
           title + url
         )
       )
-        out.push({ cat: guessCat(title + ' ' + url), title: title.slice(0, 120), url });
+        out.push({
+          cat: guessCat(title + ' ' + url),
+          title: title.slice(0, 120),
+          url,
+          ...(imgSrc(` src="${img}"`) ? { img } : {}),
+        });
     }
     if (L.length < 100) break;
   }
@@ -169,7 +204,7 @@ async function main() {
   const same = JSON.stringify(next) == JSON.stringify(before.items);
   const added = next.filter((x) => !seen[x.url]).length,
     gone = (before.items || []).filter((x) => !items.some((y) => y.url == x.url)).length;
-  console.log(added + ' new, ' + gone + ' removed');
+  console.log(added + ' new, ' + gone + ' removed, ' + next.filter((x) => x.img).length + ' with a cover picture');
   if (same) return console.log('No change.');
   writeFileSync(OUT, JSON.stringify({ updated: new Date().toISOString(), items: next }, null, 2) + '\n');
   console.log('brochures.json updated.');

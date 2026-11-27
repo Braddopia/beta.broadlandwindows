@@ -43,3 +43,12 @@ test('links written as "/wp-content/..." (no domain) are read as files on our ow
   assert.equal(L[0].url, 'https://www.broadlandwindows.co.uk/wp-content/uploads/2025/07/Broadland-Secondary-Glazing.pdf');
   assert.equal(L[0].title, 'Roof lanterns');
 });
+
+test('each brochure keeps the cover picture the website shows with it', () => {
+  const L = parseBrochures(`<h2>Aluminium</h2>
+<div class="card"><img loading="lazy" src="data:image/svg+xml,x" data-src="/wp-content/uploads/2025/06/Visofold-cover.jpg">
+<a href="/wp-content/uploads/2025/06/SMARTS-Visofold-Series-2025.pdf">Visofold</a></div>
+<a href="/wp-content/uploads/2025/06/Titan.pdf"><img src="https://www.broadlandwindows.co.uk/wp-content/uploads/2025/06/Titan.png"> Titan</a>`);
+  assert.equal(L[0].img, 'https://www.broadlandwindows.co.uk/wp-content/uploads/2025/06/Visofold-cover.jpg');
+  assert.equal(L[1].img, 'https://www.broadlandwindows.co.uk/wp-content/uploads/2025/06/Titan.png');
+});

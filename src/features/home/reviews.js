@@ -66,7 +66,7 @@ export function startReviewFeed() {
 export function ratingsH() {
   const r = (x, n) => {
     const u = SAFE.url(x.url),
-      t = `${stars(x.score)} <b class="rt-n">${(+x.score).toFixed(1)}</b> <span class="rt-on">on</span> ${n}${x.count ? ' <span class="rt-c">(' + esc(x.count) + ' reviews)</span>' : ''}`;
+      t = `${stars(x.score)} <b class="rt-n">${(+x.score).toFixed(1)}/5</b> <span class="rt-on">on</span> ${n}${x.count ? ' <span class="rt-c">(' + esc(x.count) + ' reviews)</span>' : ''}`;
     return u ? `<a href="${esc(u)}" target="_blank" rel="noopener noreferrer">${t}</a>` : `<span>${t}</span>`;
   };
   const tt = state.brand.tt,

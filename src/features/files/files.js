@@ -72,6 +72,10 @@ export async function brochureFeed(feed) {
       cat: SAFE.text(x.cat || 'Other', 40),
       title: SAFE.text(x.title, 120),
       url: SAFE.url(x.url),
+      /* the cover picture the website shows (v19.17.4), only from the website's own uploads */
+      img: /^https:\/\/(www\.)?broadlandwindows\.co\.uk\/wp-content\/uploads\//.test(SAFE.url(x.img || '') || '')
+        ? SAFE.url(x.img)
+        : '',
       seen: SAFE.text(x.firstSeen || '', 10),
     }))
     .filter((x) => x.title && x.url && /^https:\/\/(www\.)?broadlandwindows\.co\.uk\//.test(x.url));
@@ -169,7 +173,9 @@ export const MC = ['Manufacturing Manual', 'Fitting Guide', 'Spec Sheet', 'Price
 /* WordPress names PDF covers in a few ways; try each before falling back to the drawn cover */
 export const coverAlt = (d) =>
   /\.pdf$/i.test(d.url) && !(state.covers && state.covers[d.url])
-    ? ['-pdf-1.jpg', '-1-pdf.jpg', '-pdf-pdf.jpg'].map((s) => d.url.replace(/\.pdf$/i, s)).join(' ')
+    ? [...(d.img ? ['-pdf.jpg'] : []), '-pdf-1.jpg', '-1-pdf.jpg', '-pdf-pdf.jpg']
+        .map((s) => d.url.replace(/\.pdf$/i, s))
+        .join(' ')
     : '';
 export function coverNext(img) {
   const a = (img.dataset.alt || '').split(' ').filter(Boolean);
@@ -182,6 +188,7 @@ export function coverNext(img) {
 }
 export const coverUrl = (d) =>
   (state.covers && SAFE.url(state.covers[d.url])) ||
+  d.img ||
   (/\.jpe?g$/i.test(d.url) ? d.url : d.url.replace(/\.pdf$/i, '-pdf.jpg'));
 export const RK = 'bb_recent';
 export const ldRecent = () => {

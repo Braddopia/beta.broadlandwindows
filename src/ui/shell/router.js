@@ -79,9 +79,9 @@ export const VIEWS = {
   settings: { t: 'Settings', fn: vSettings },
 };
 export const NG = [
-  ['Workspace', ['home', 'messages', 'fitting', 'contacts']],
-  ['Sales', ['leads', 'contracts']],
-  ['Operations', ['live', 'deliveries', 'service']],
+  ['Workspace', ['home', 'messages', 'fitting']],
+  ['Sales', ['leads', 'contacts', 'contracts', 'service']],
+  ['Operations', ['live', 'deliveries']],
   ['Stock', ['stock', 'suppliers']],
   ['Processing', ['cutting', 'bars', 'tags']],
   ['People', ['staff', 'holidays']],
@@ -157,6 +157,9 @@ export function badges() {
     holidays: can('manage') ? state.hols.filter(holWaiting).length : 0,
   };
 }
+/* pages that sit under another in the side menu, always shown, a step in (v19.17.4): a service call is nearly always
+   for a contract we fitted */
+const NAV_SUB = { service: 'contracts' };
 export function navHtml(b) {
   let n = 0;
   return NG.map(([g, keys]) => {
@@ -167,7 +170,7 @@ export function navHtml(b) {
           ks
             .map(
               (k) =>
-                `<button class="nav ${k == view ? 'on' : ''}" style="--n:${n++}" title="${esc(VIEWS[k].t)}" ${onClick('go', k)} ${k == view ? 'aria-current="page"' : ''}>${svg(ICONS[k])}<span>${esc(VIEWS[k].t)}</span>${b[k] ? `<i>${b[k]}</i>` : ''}</button>`
+                `<button class="nav ${k == view ? 'on' : ''} ${NAV_SUB[k] && ks.includes(NAV_SUB[k]) ? 'sub' : ''}" style="--n:${n++}" title="${esc(VIEWS[k].t)}" ${onClick('go', k)} ${k == view ? 'aria-current="page"' : ''}>${svg(ICONS[k])}<span>${esc(VIEWS[k].t)}</span>${b[k] ? `<i>${b[k]}</i>` : ''}</button>`
             )
             .join('')
       : '';

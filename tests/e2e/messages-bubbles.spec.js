@@ -32,9 +32,9 @@ test('team chat bubbles: runs, names, pictures, times and read ticks', async ({ 
   await expect(rows.nth(2).locator('.bub-m')).toContainText(/\d\d:\d\d/);
   await expect(rows.nth(2).locator('.bub-k')).toHaveClass(/rd/);
   await expect(rows.nth(3).locator('.bub-k')).not.toHaveClass(/rd/);
-  // my bubbles are green, the others white
+  // my bubbles are Broadland blue (v19.17.4), the others white
   const bg = (i) => rows.nth(i).locator('.bub').evaluate((e) => getComputedStyle(e).backgroundColor);
-  expect(await bg(2)).toBe('rgb(217, 253, 211)');
+  expect(await bg(2)).toBe('rgb(3, 78, 162)');
   expect(await bg(0)).toBe('rgb(255, 255, 255)');
   expect(app.errors).toEqual([]);
 });

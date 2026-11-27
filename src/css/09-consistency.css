@@ -236,3 +236,9 @@ body[data-theme=dark] .rv-feed.off{background:#3a3220;color:#ffd98a}
 .upd-l{border:1px solid rgba(255,255,255,.22);background:transparent;color:#fff}
 .upd-l:hover,.upd-l:focus-visible{background:rgba(255,255,255,.1)}
 @media(max-width:560px){.upd{flex-wrap:wrap}.upd-a{flex:1 1 100%;flex-direction:row-reverse}.upd-a button{flex:1}}
+
+/* side menu: a page that belongs under another (Service Calls under Contracts, v19.17.4) sits a step in, joined to it
+   by a short line, and is always shown */
+.nav.sub{width:calc(100% - 1.15rem);margin-left:1.15rem;height:2rem;font-size:.83rem}
+.nav.sub::after{content:"";position:absolute;left:-.55rem;top:-.35rem;width:.5rem;height:1.35rem;border-left:1.5px solid var(--line);border-bottom:1.5px solid var(--line);border-bottom-left-radius:6px;pointer-events:none}
+.nav.sub svg{width:.98rem;height:.98rem}

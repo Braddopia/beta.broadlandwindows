@@ -508,3 +508,18 @@ stock number). Decided with the owner:
   `{ rec }`, the whole record, so `colourField` can read `cIn` for `cInName`), and a colour typed rather than picked
   gets its colour (`nameHex`: preset names, our colour codes, RAL numbers and names) both on screen and when saved.
 - Tests: `tests/e2e/round-1917-3.spec.js`; desktop-app.spec.js now checks the Update Ready card.
+
+## v19.17.4
+
+- Messages keep the WhatsApp layout but use the app's colours (the owner disliked the beige wallpaper): the chat area
+  is `--card2` with a faint blue dot grid, others' bubbles are cards, mine are Broadland blue (#034ea2, dark #1d5fbf)
+  with white text, read ticks turn yellow, unread counts and the send button are the app's blue.
+- Side menu: Sales is now Leads, Contact Book, Contracts and Service Calls; Service Calls is always shown a step in
+  under Contracts (`NAV_SUB` in router.js, `.nav.sub` in 09-consistency.css), since a call is nearly always for a job
+  we fitted. Operations is Floor Boards and Deliveries.
+- Reviews on the Overview read "4.5/5" (ReferenceLine stays "/10").
+- Brochure covers: the daily job now records each brochure's cover picture in brochures.json (`img`): the picture
+  shown with the link on the brochure page (inside the link or the last one before it, lazy-load `data-src`/`srcset`
+  understood), or WordPress's own picture of the PDF's first page from the file list (`media_details.sizes`). The
+  Files page uses it first (`coverUrl`), then the old guesses, then the drawn cover. Only pictures under
+  broadlandwindows.co.uk/wp-content/uploads are accepted.
