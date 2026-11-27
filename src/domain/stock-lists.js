@@ -14,6 +14,19 @@ export const DEF_GROUPS = [
   'Door Locks',
   'Door Cylinders',
 ];
+/** (v19.18.4, the owner's list) the stock-take areas: the racks BTSS-01 to BTSS-40, BTDR-01 to BTDR-40 and
+    BTWIN-01 to BTWIN-40, the Sobinco area and the four containers */
+const rack = (p) => Array.from({ length: 40 }, (_, i) => p + '-' + String(i + 1).padStart(2, '0'));
+export const STOCK_AREAS = [
+  ...rack('BTSS'),
+  'Sobinco',
+  ...rack('BTDR'),
+  ...rack('BTWIN'),
+  'Red Container',
+  'Grey Container',
+  'Blue Container',
+  'Green Container',
+];
 export const FINISHES = ['Matt', 'Satin', 'Gloss', 'Textured', 'Woodgrain', 'Anodised', 'Other'];
 /* the colour codes on the stock sheet; a RAL code links to its own number, KL016 is RAL 7032 Matt, the rest are
    linked by the office */

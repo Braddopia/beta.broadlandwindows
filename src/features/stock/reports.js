@@ -124,6 +124,7 @@ export function invRep(k) {
       [
         'Stock Lists',
         [
+          ['find', 'Find It On The Factory Floor', 1, 'Every item A to Z with where it is kept and how many'],
           ['sel', 'Selected Items (' + n + ')', n],
           ['all', 'Full Stock List', 1],
           ['area', 'By Stock-Take Area', 1],
@@ -167,13 +168,14 @@ export function invRep(k) {
         ).join('')}</div>`
     ).join(
       ''
-    )}<div class="rep-opt"><label class="cbl"><input type="checkbox" id="rhist" checked> Include movement history</label><label class="cbl"><input type="checkbox" id="rphoto"> Include photos</label></div><div class="mact"><button class="btn ghost" data-act="closeModal">Close</button></div>`
+    )}<div class="rep-opt"><label class="cbl"><input type="checkbox" id="rdet"> Detailed (supplier, reorder level${Ad ? ' and costs' : ''})</label><label class="cbl"><input type="checkbox" id="rhist"> Include movement history</label><label class="cbl"><input type="checkbox" id="rphoto"> Include photos</label></div><div class="mact"><button class="btn ghost" data-act="closeModal">Close</button></div>`
   );
 }
 export function invRun(sc) {
   const Ad = can('money'),
     P = products().sort((a, b) => a.item.localeCompare(b.item)),
     hist = $('#rhist').checked,
+    det = !!($('#rdet') && $('#rdet').checked),
     ph = $('#rphoto').checked,
     ref = 'INV-' + today().replace(/-/g, '') + '-' + sc.toUpperCase();
   let L = P,
@@ -234,30 +236,53 @@ export function invRun(sc) {
     });
     return;
   }
-  const hd = [
-      'ID',
+  /* (v19.18.4, the owner's choice) a stock list says where each thing is and how many: location, area, item, length,
+     colours and quantity. Supplier, reorder level and money only on a Detailed report. */
+  const where = (r) => [hasLoc(r) ? r.location : '', areaOf(r) != 'No Area' ? areaOf(r) : ''].filter(Boolean),
+    hd = [
+      'Location',
+      'Area',
       'Item',
+      'Description',
       'Length',
       'Colours',
-      'Location',
-      'Stock',
-      'Unit',
-      'Reorder',
-      'Supplier',
-      ...(Ad ? ['Cost', 'Value'] : []),
+      'Qty',
+      ...(det ? ['Reorder', 'Supplier', ...(Ad ? ['Cost', 'Value'] : [])] : []),
     ],
     row = (r) => [
-      r.pid,
-      r.item,
-      r.length,
-      colTxt(r),
       hasLoc(r) ? r.location : '-',
-      r.stock,
-      unitOf(r),
-      ro(r),
-      r.supplier || '-',
-      ...(Ad ? [money(r.cost), money(r.stock * r.cost)] : []),
+      areaOf(r) != 'No Area' ? areaOf(r) : '-',
+      r.item,
+      r.desc || '',
+      r.length && r.length != '-' ? r.length : '',
+      colTxt(r),
+      r.stock + ' ' + unitOf(r),
+      ...(det ? [ro(r), r.supplier || '-', ...(Ad ? [money(r.cost), money(r.stock * r.cost)] : [])] : []),
     ];
+  if (sc == 'find') {
+    const F = P.slice().sort(
+      (a, b) => a.item.localeCompare(b.item) || String(a.length).localeCompare(String(b.length))
+    );
+    printDoc('Find It On The Factory Floor', 'Every item A to Z, where it is kept and how many', [], [], {
+      kind: 'Stock Report',
+      ref,
+      tables: [
+        {
+          t: 'Items',
+          h: ['Item', 'Description', 'Length', 'Colours', 'Where', 'Qty'],
+          r: F.map((r) => [
+            r.item,
+            r.desc || '',
+            r.length && r.length != '-' ? r.length : '',
+            colTxt(r),
+            where(r).join(' · ') || 'Not set',
+            r.stock + ' ' + unitOf(r),
+          ]),
+        },
+      ],
+    });
+    return;
+  }
   const grpT = (f) =>
     grp(L, (r) => f(r) || 'None')
       .sort((a, b) => a[0].localeCompare(b[0]))
@@ -269,7 +294,7 @@ export function invRun(sc) {
           ' lines, ' +
           sum(v, (r) => r.stock) +
           ' units' +
-          (Ad ? ', ' + money(sum(v, (r) => r.stock * r.cost)) : '') +
+          (Ad && det ? ', ' + money(sum(v, (r) => r.stock * r.cost)) : '') +
           ')',
         h: hd,
         r: v.map(row),
@@ -305,8 +330,8 @@ export function invRun(sc) {
     kpis: [
       ['Products', L.length],
       ['Units', sum(L, (r) => r.stock)],
-      ['To Reorder', L.filter(isLow).length],
-      ...(Ad ? [['Stock Value', money(sum(L, (r) => r.stock * r.cost))]] : []),
+      ...(det ? [['To Reorder', L.filter(isLow).length]] : []),
+      ...(Ad && det ? [['Stock Value', money(sum(L, (r) => r.stock * r.cost))]] : []),
     ],
     tables,
   });

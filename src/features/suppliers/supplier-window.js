@@ -15,6 +15,7 @@ import { can } from '../../domain/permissions.js';
 import { colTxt, stt, unitOf } from '../../domain/stock.js';
 import { conPhones } from '../contacts/contacts.js';
 import { abList } from '../records/ab-list.js';
+import { abPlace } from '../records/record-page.js';
 import { conOf, supOrders, supStats } from './suppliers.js';
 import { closeFpop, openFpop } from '../../ui/components/popover.js';
 import { copyText } from '../../ui/download.js';
@@ -92,6 +93,7 @@ export function supWin(n, tab) {
    </div>`),
     'full ab' + (fullPage() ? ' fp' : '')
   );
+  abPlace();
   $('#mbox .rw').addEventListener('keydown', (e) => {
     if (
       (e.key == 'PageUp' || e.key == 'PageDown') &&

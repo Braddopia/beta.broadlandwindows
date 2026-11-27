@@ -22,7 +22,7 @@ import { HOME, setPendView, swRole } from '../../features/auth/session.js';
 import { vCalendar } from '../../features/calendar/calendar.js';
 import { vContacts } from '../../features/contacts/contacts.js';
 import { vContracts } from '../../features/contracts/contracts.js';
-import { vDeliveries } from '../../features/deliveries/deliveries.js';
+import { vDeliveries, delCalFit } from '../../features/deliveries/deliveries.js';
 import { loadMan, vFiles } from '../../features/files/files.js';
 import { vFinance } from '../../features/finance/finance.js';
 import { vHolidays } from '../../features/holidays/holidays.js';
@@ -59,7 +59,7 @@ export const VIEWS = {
   home: { t: 'Overview', fn: vHome },
   messages: { t: 'Messages', fn: vMessages, after: msnAfter },
   live: { t: 'Floor Boards', fn: vLive, after: liveAfter },
-  deliveries: { t: 'Deliveries', fn: vDeliveries },
+  deliveries: { t: 'Deliveries', fn: vDeliveries, after: delCalFit },
   suppliers: { t: 'Suppliers', fn: vSuppliers },
   leads: { t: 'Leads', fn: vLeads },
   contracts: { t: 'Contracts', fn: vContracts },

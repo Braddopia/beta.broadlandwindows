@@ -38,7 +38,7 @@ import { gallery, setPhotoList, tmp } from '../../ui/forms/photos.js';
 import { askIn, askYes, closeModal, openModal } from '../../ui/modal.js';
 import { go, render, view } from '../../ui/shell/router.js';
 import { toast } from '../../ui/toast.js';
-import { listChoices, stockLists } from '../../domain/stock-lists.js';
+import { STOCK_AREAS, listChoices, stockLists } from '../../domain/stock-lists.js';
 
 /* ---------------- one wide item window for Edit, Add, Remove and Request ---------------- */
 export let ieIdx = 0,
@@ -131,13 +131,29 @@ export function ieFields() {
       sec: 'l',
       ro: ieMode == 'remove',
     },
-    { k: 'area', l: 'Stock-take area', list: 'areas', max: 40, sec: 'l', hint: 'The count sheet it is on' },
+    {
+      k: 'area',
+      l: 'Stock-take area',
+      t: 'select',
+      /* the owner's areas, then any other area already used (nothing is lost) */
+      o: listChoices(
+        [...new Set([...STOCK_AREAS, ...(state.stockAreas || []), ...products().map((p) => p.area)])].filter(
+          (a) => a && a != '-'
+        ),
+        r.area && r.area != '-' ? r.area : ''
+      ),
+      sec: 'l',
+      hint: 'The count sheet it is on',
+    },
     ...(ieMode == 'remove'
       ? [{ k: 'supplier', l: 'Supplier', ro: 1, sec: 'l' }]
       : [{ k: 'supplier', l: 'Supplier', t: 'select', o: SUPN(r.supplier), req: ieMode == 'add' && !r.pid, sec: 'l' }]),
     /* profiles cut from full bars: listed in the Cutting Optimiser with their bar length */
     ...(ieMode == 'edit' || ieMode == 'add'
       ? [
+          /* (v19.18.4, the owner's rule) only aluminium profiles are cut in the Cutting Optimiser, not timber; the
+             bar length comes from the Length box (6.5M) */
+          { k: 'material', l: 'Material', t: 'select', o: MATERIALS, sec: 'k' },
           {
             k: 'isBar',
             l: 'Cut from full bars?',
@@ -145,17 +161,6 @@ export function ieFields() {
             o: ['No', 'Yes'],
             sec: 'k',
             hint: 'Yes lists it in the Cutting Optimiser by its code',
-          },
-          { k: 'barLen', l: 'Full bar length', t: 'select', o: BAR_LENGTHS, sec: 'k' },
-          {
-            k: 'barLenX',
-            l: 'Other bar length (mm)',
-            t: 'number',
-            min: 500,
-            max: 20000,
-            dp: 0,
-            sec: 'k',
-            hint: 'Between 500 and 20,000',
           },
         ]
       : []),
@@ -202,11 +207,7 @@ export function itemWindow(mode, k, pre) {
         barcode: r.barcode || r.item,
         notes: r.notes || '',
         isBar: (state.cutProf || {})[r.pid] ? 'Yes' : 'No',
-        /* a profile keeps its bar length; otherwise its stock length if that is a usual bar length, else 6.5 m */
-        ...barLenValues(
-          ((state.cutProf || {})[r.pid] || {}).bar ||
-            (BAR_LENGTHS.some(([x]) => x == String(barLenOf(r.length))) ? barLenOf(r.length) : 6500)
-        ),
+        material: matOf(r.pid),
       }
     : {
         pid: mode == 'remove' ? '' : stkId(),
@@ -224,7 +225,7 @@ export function itemWindow(mode, k, pre) {
         supplier: '',
         barcode: '',
         isBar: 'No',
-        barLen: '6500',
+        material: '',
       };
   const F = ieFields(),
     sec = (t, s, cls) => {
@@ -255,15 +256,22 @@ export function itemWindow(mode, k, pre) {
   bcDeco({ diff: !!(r && r.barcode && r.barcode != r.item), val: r ? r.barcode || '' : '' });
   /* Cutting: the bar length shows only for a profile, and the "other" box only when Other is picked */
   barBoxes();
-  ['f_isBar', 'f_barLen'].forEach((id) => {
+  ['f_isBar', 'f_material', 'f_length'].forEach((id) => {
     const e = $('#' + id);
-    if (e) e.addEventListener('change', barBoxes);
+    if (e) {
+      e.addEventListener('change', barBoxes);
+      e.addEventListener('input', barBoxes);
+    }
   });
   /* the Length box follows the unit (metres, pieces per pack, or a size) */
   const un = $('#f_unit');
   if (un) {
-    un.addEventListener('change', lenSync);
+    un.addEventListener('change', () => {
+      lenSync();
+      barBoxes();
+    });
     lenSync();
+    barBoxes();
   }
   /* Remove Stock: a Stock ID typed or scanned picks that product */
   const pidBox = $('#f_pid');
@@ -368,13 +376,14 @@ export function ieSave() {
   if (mode != 'remove' && mode != 'request') {
     const lb = lenBox(o.unit);
     const was = ieKey && prod(ieKey) ? String(prod(ieKey).length || '') : '';
-    if (o.length && o.length != was && lb.re && !lb.re.test(o.length.trim())) {
+    if (o.length && o.length != was && lb.re && !lb.re.test(o.length.trim()) && !barProfile(o)) {
       fieldErr($('#f_length'), lb.err);
       return;
     }
   }
-  if (o.isBar == 'Yes' && o.barLen == 'other' && !(+o.barLenX >= 500 && +o.barLenX <= 20000)) {
-    fieldErr($('#f_barLenX'), 'Type the bar length in millimetres, between 500 and 20,000');
+  if (o.isBar == 'Yes' && o.material != 'Aluminium') o.isBar = 'No';
+  if (o.isBar == 'Yes' && !barLenOf(o.length)) {
+    fieldErr($('#f_length'), 'Type the full bar length here, for example 6.5M');
     return;
   }
   if (!o.item) {
@@ -545,35 +554,49 @@ export function ieSave() {
         : 'Removed ' + o.qty + ' ' + o.unit + ', now ' + st
   );
 }
-/* Cutting section: keep the product's bar length for the Cutting Optimiser (state.cutProf, by Stock ID).
-   Bars come in 6 m, 6.5 m (most) or 7 m; "Other length" is kept for anything unusual already in stock. */
-export const BAR_LENGTHS = [
-  ['6000', '6M'],
-  ['6500', '6.5M (most bars)'],
-  ['7000', '7M'],
-  ['other', 'Other length'],
-];
-/** the two boxes for a bar length in mm: one of the usual lengths, or Other with the length typed */
-export const barLenValues = (mm) =>
-  !mm || BAR_LENGTHS.some(([v]) => v == String(mm))
-    ? { barLen: String(mm || 6500), barLenX: '' }
-    : { barLen: 'other', barLenX: mm };
+/* Cutting section (v19.18.4): the product's material, and for an aluminium profile whether it is cut from full bars
+   in the Cutting Optimiser. Its bar length is read from the Length box ("6.5M", "6500MM"); kept in state.cutProf by
+   Stock ID. The material is kept in state.prodMat by Stock ID. */
+export const MATERIALS = ['', 'Aluminium', 'Timber', 'PVCu', 'Steel', 'Composite', 'Other'];
+/** a product's material: what was picked, or Aluminium for a profile linked before materials were asked */
+export const matOf = (pid) => (state.prodMat || {})[pid] || ((state.cutProf || {})[pid] ? 'Aluminium' : '');
+/** an aluminium profile cut from full bars: its Length box holds the full bar length ("6.5M") */
+const barProfile = (o) => o.isBar == 'Yes' && o.material == 'Aluminium';
 function barBoxes() {
-  const yes = ($('#f_isBar') || {}).value == 'Yes',
-    other = ($('#f_barLen') || {}).value == 'other',
-    show = (id, on) => {
-      const e = $('#' + id);
-      if (e) e.closest('.ff').hidden = !on;
-    };
-  show('f_barLen', yes);
-  show('f_barLenX', yes && other);
+  const alu = ($('#f_material') || {}).value == 'Aluminium',
+    yes = ($('#f_isBar') || {}).value == 'Yes',
+    e = $('#f_isBar'),
+    ff = e && e.closest('.ff');
+  if (!ff) return;
+  ff.hidden = !alu;
+  const lab = $('label[for=f_length]'),
+    len = $('#f_length');
+  if (alu && yes && lab && len) {
+    lab.textContent = 'Full bar length';
+    len.placeholder = 'e.g. 6.5M';
+    len.inputMode = 'text';
+  } else if (lab && lab.textContent == 'Full bar length') lenSync();
+  const h = ff.querySelector('.hint'),
+    mm = barLenOf(($('#f_length') || {}).value);
+  if (h)
+    h.textContent = !yes
+      ? 'Yes lists it in the Cutting Optimiser by its code'
+      : mm
+        ? 'Full bar length ' + mm.toLocaleString('en-GB') + 'mm, from the Length box'
+        : 'Type the full bar length in the Length box, for example 6.5M';
 }
 function linkBar(pid, o, old) {
   if (o.isBar === undefined) return;
-  const L = (state.cutProf = state.cutProf && typeof state.cutProf == 'object' ? state.cutProf : {});
-  if (old && old != pid) delete L[old];
-  const mm = o.barLen == 'other' ? Math.round(+o.barLenX) : +o.barLen;
-  if (o.isBar == 'Yes') L[pid] = { bar: (mm >= 500 && mm <= 20000 && mm) || barLenOf(o.length) || 6500 };
+  const L = (state.cutProf = state.cutProf && typeof state.cutProf == 'object' ? state.cutProf : {}),
+    M = (state.prodMat = state.prodMat && typeof state.prodMat == 'object' ? state.prodMat : {});
+  if (old && old != pid) {
+    delete L[old];
+    delete M[old];
+  }
+  if (MATERIALS.includes(o.material) && o.material) M[pid] = o.material;
+  else delete M[pid];
+  const mm = barLenOf(o.length);
+  if (o.isBar == 'Yes' && o.material == 'Aluminium' && mm) L[pid] = { bar: mm };
   else delete L[pid];
 }
 /* barcode follows the item code unless "use a different barcode" is ticked */

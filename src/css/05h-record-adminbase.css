@@ -212,3 +212,54 @@ body[data-theme=dark] .mb.ab .cr-p{background:#0b0f15}
 .mb.ab .sw-notes{padding:.9rem 1rem}.mb.ab .sw-notes .snote{white-space:pre-wrap;margin:0}
 .mb.ab .rf.calc output a{color:var(--blue)}
 .mb.ab .abgrid td:not(:has(input,select,button)){padding:.5rem .5rem}
+
+/* ===== v19.18.4: records sit in the page area, in the site's own look (the owner: "not like the site") =====
+   No floating card, dimmed page or blue band: the record takes the place of the page (side menu and top bar stay),
+   with a page heading, the usual buttons, white panels and tabs. Full Page still hides the side menu. */
+.ov:has(>.mb.ab){background:transparent!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;pointer-events:none;padding:0}
+.ov:has(>.mb.ab.fp){background:var(--bg)!important;pointer-events:auto}
+.mb.ab{pointer-events:auto}
+.mb.full.ab:not(.fp){position:fixed;left:var(--mx,0);top:var(--my,0);width:var(--mw,100vw);height:var(--mh,100dvh);max-width:none;border-radius:0;border:0!important;box-shadow:none!important;background:transparent!important;animation:none}
+.mb.full.ab.fp{background:var(--bg)!important;box-shadow:none!important}
+body:has(#modal.open .mb.ab:not(.fp)) #main{visibility:hidden}
+.mb.ab .rw{padding:var(--gap,1rem) max(0px,calc(var(--edge,1.4rem) - 2px)) 0 var(--edge,1.4rem)}
+.mb.ab.fp .rw{padding:1rem 1.4rem 0}
+
+/* the toolbar: ordinary buttons in a row, like the tools on any page */
+.mb.ab .rw-bar{order:2;background:none!important;box-shadow:none!important;padding:0 0 .8rem;gap:.4rem;border-bottom:0}
+.mb.ab .rw-h{order:1}
+.mb.ab .rw-path{order:3}.mb.ab .ab-tabs{order:4}.mb.ab .rw-b{order:5}
+.mb.ab .rb1{background:var(--card);color:var(--ink);border:1px solid var(--line);box-shadow:none;border-radius:10px;min-height:2.25rem;padding:.4rem .8rem;font-weight:600}
+.mb.ab .rb1:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-bg,#e8f0fb)}
+.mb.ab .rb1 svg{color:currentColor}
+.mb.ab .rb1.sv{background:var(--btn,#034ea2);color:#fff;border-color:transparent}
+.mb.ab .rb1.sv:hover{filter:brightness(1.08);color:#fff;background:var(--btn,#034ea2)}
+.mb.ab .rb1.go{background:#12794c;color:#fff;border-color:transparent}
+.mb.ab .rb1.on{background:var(--blue-bg,#e8f0fb);color:var(--blue);border-color:var(--blue);box-shadow:none}
+.mb.ab .rb1.cl{background:var(--card)}
+.mb.ab .rw-div{background:var(--line)}
+.mb.ab .rw-pos{color:var(--muted)}
+.mb.ab .rw-find input{background:var(--card);border-color:var(--line);color:var(--ink)}
+.mb.ab .rw-find input::placeholder{color:var(--muted)}
+.mb.ab .rw-find input:focus{border-color:var(--blue)}
+/* the heading reads like every page's */
+.mb.ab .rw-h{padding:0 0 .7rem;background:none!important;border:0}
+.mb.ab .rw-h small{font-size:.72rem}
+.mb.ab .rw-h h2{font-size:1.55rem;color:var(--ink)}
+.mb.ab .rw-path{padding:0 0 .8rem;background:none!important}
+.mb.ab .ab-tabs{padding:0;margin:0 0 .9rem}
+.mb.ab .rw-b{padding:0 0 1.4rem}
+/* the Address and Reports windows over a record in the page area */
+.mb.ab:not(.fp) .ab-addr{border-radius:16px}
+.mb.ab:not(.fp) .ab-rep{border-radius:16px;border:1px solid var(--line);overflow:hidden}
+@media(max-width:760px){
+  .mb.full.ab:not(.fp){left:0;top:0;width:100vw;height:100dvh;background:var(--bg)!important}
+  .ov:has(>.mb.ab){pointer-events:auto;background:var(--bg)!important}
+  .mb.ab .rw{padding:.7rem .8rem 0}
+}
+.mb.ab .abd{grid-template-columns:minmax(0,.9fr) minmax(0,1.5fr)}
+.mb.ab .abgrid input[data-f=guar]{width:5.4rem}
+.mb.ab .abgrid input[data-f=loc]{width:6rem}
+.mb.ab .abgrid input[data-f=rate]{width:5.2rem}
+.mb.ab .abgrid input[data-f=code]{width:4.6rem}
+@media(max-width:1000px){.mb.ab .abd{grid-template-columns:1fr}}

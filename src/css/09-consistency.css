@@ -245,3 +245,27 @@ body.upd-going .updw-card{opacity:.7}
 .nav.sub{width:calc(100% - 1.15rem);margin-left:1.15rem;height:2rem;font-size:.83rem}
 .nav.sub::after{content:"";position:absolute;left:-.55rem;top:-.35rem;width:.5rem;height:1.35rem;border-left:1.5px solid var(--line);border-bottom:1.5px solid var(--line);border-bottom-left-radius:6px;pointer-events:none}
 .nav.sub svg{width:.98rem;height:.98rem}
+
+/* Job Stock Tags (v19.18.4): the wording on every tag reads as locked until Change is pressed */
+.jt-shared h3{display:flex;align-items:center;justify-content:space-between;gap:.5rem}
+.jt-shared h3 span{display:inline-flex;align-items:center;gap:.35rem}
+.jt-shared h3 svg{width:.9rem;height:.9rem}
+.jt-shared.locked input{background:var(--card2);color:var(--muted);border-style:dashed;cursor:default;opacity:.75}
+.jt-shared.locked label{opacity:.75}
+/* Deliveries calendar (v19.18.4): the whole month fits on one screen, however many weeks it has */
+.dcal-d{min-height:min(var(--rowh,7.2rem),7.2rem)}
+/* Suppliers cards (v19.18.4): the content spaced evenly. Wide screens: one row of equal columns. Laptop widths: two
+   even rows (name, contact, Open on the first; what is owed and the figures on the second), so nothing is left on its
+   own and the figures fill to the right edge. */
+.supw{grid-template-columns:3.2rem repeat(3,minmax(0,1fr)) minmax(0,1.6fr) auto}
+.supw-st{grid-template-columns:repeat(auto-fit,minmax(0,1fr))}
+@media(max-width:1350px){
+  .supw{grid-template-columns:3.2rem minmax(0,1fr) minmax(0,1fr) auto;grid-template-rows:auto auto;row-gap:.8rem}
+  .supw-av{grid-row:1/3;align-self:start}
+  .supw-id{grid-column:2;grid-row:1}
+  .supw-ct{grid-column:3;grid-row:1}
+  .supw-go{grid-column:4;grid-row:1;justify-self:end}
+  .supw-hl{grid-column:2;grid-row:2}
+  .supw-st{grid-column:3/5;grid-row:2}
+}
+@media(max-width:700px){.supw{grid-template-columns:3rem minmax(0,1fr);grid-template-rows:none}.supw-av{grid-row:auto}.supw-id,.supw-ct,.supw-go,.supw-hl,.supw-st{grid-column:auto;grid-row:auto}.supw-ct,.supw-hl,.supw-st,.supw-go{grid-column:1/-1}.supw-go{justify-self:stretch}}

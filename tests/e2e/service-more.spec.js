@@ -120,7 +120,9 @@ test('every item in the More menu works', async ({ app }) => {
   expect(app.errors).toEqual([]);
 });
 
-test('service call columns: text from the left, short values and the engineers centred, Ref never cut', async ({ app }) => {
+test('service call columns: text from the left, short values and the engineers centred, Ref never cut', async ({
+  app,
+}) => {
   await app.page.setViewportSize({ width: 1280, height: 900 });
   await app.role('beta');
   await app.go('service');
@@ -128,13 +130,7 @@ test('service call columns: text from the left, short values and the engineers c
     const al = (s) => getComputedStyle(document.querySelector('#main .t-svc ' + s)).textAlign;
     const id = document.querySelector('#main .t-svc td.s-id');
     return {
-      left: [
-        'th[data-col=id]',
-        'th[data-col=name]',
-        'th[data-col=issue]',
-        'td.s-name',
-        'td.s-issue',
-      ].map(al),
+      left: ['th[data-col=id]', 'th[data-col=name]', 'th[data-col=issue]', 'td.s-name', 'td.s-issue'].map(al),
       centre: [
         'th[data-col=pr]',
         'th[data-col=st]',

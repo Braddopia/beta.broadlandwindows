@@ -73,9 +73,18 @@ test('Job Stock Tags: one box per line, wording in capitals, colours filled in f
   // the labels no longer say "(in red)", and the wording is kept in capitals as it is typed
   await expect(app.page.locator('.jt-shared')).not.toContainText('in red');
   await expect(app.page.locator('label[for=tag_warn]')).toHaveText('Warning');
+  // (v19.18.4) the wording is locked until Change is pressed
+  await expect(app.page.locator('#tag_note')).toHaveAttribute('readonly', '');
+  await app.page.click('.jt-shared [data-act=tagWording]');
   await app.page.fill('#tag_note', 'handle with care');
   await expect(app.page.locator('#tag_note')).toHaveValue('HANDLE WITH CARE');
   expect(await app.run(() => tagData().note)).toBe('HANDLE WITH CARE');
+  await app.page.click('.jt-shared [data-act=tagWording]');
+  await expect(app.page.locator('.jt-shared')).toHaveClass(/locked/);
+  // the colour boxes use the app's own pick list, not the browser's
+  await app.page.click('#tag_0_cIn');
+  await expect(app.page.locator('#pkpop.open')).toBeVisible();
+  await app.page.keyboard.press('Escape');
   // a contract number fills in the job name and its colour
   await app.page.fill('#tag_0_jobNo', k.id);
   const col = await app.run((c) => jobColour(c), k);

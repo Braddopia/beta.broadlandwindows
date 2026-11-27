@@ -127,7 +127,9 @@ export function vMessages() {
           grp = shared(cur) && !mine,
           time = new Date(n.at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }),
           read = shared(cur) ? (n.readBy || []).some((x) => x != me2) : !!n.read,
-          ticks = mine ? `<i class="bub-k ${read ? 'rd' : ''}" title="${read ? 'Read' : 'Sent'}" aria-label="${read ? 'Read' : 'Sent'}"></i>` : '';
+          ticks = mine
+            ? `<i class="bub-k ${read ? 'rd' : ''}" title="${read ? 'Read' : 'Sent'}" aria-label="${read ? 'Read' : 'Sent'}"></i>`
+            : '';
         return (
           sep +
           `<div class="bw ${mine ? 'me' : ''} ${first ? 'first' : 'cont'} ${last ? 'last' : ''} ${grp ? 'grp' : ''} ${n.id == JUST_SENT ? 'new' : ''}">${grp ? (last ? av(n.by) : '<span class="mav-sp"></span>') : ''}<div class="bub ${mine ? 'me' : ''}">${grp && first ? `<small class="bub-n n${avColour(n.by).slice(1)}">${who}</small>` : ''}<p>${esc(n.t)}<span class="bub-m">${n.id == JUST_SENT ? '<span class="bub-ok">Sent</span>' : ''}${time}${ticks}</span></p></div>${mine ? `<button class="bub-x" title="Delete" aria-label="Delete message" ${onClick('msgDel', n.id)}>&times;</button>` : ''}</div>`

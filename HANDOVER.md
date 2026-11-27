@@ -686,3 +686,26 @@ The owner asked for the record windows to work like their old system, AdminBase,
   the page (hidden) once it has run, so after the first screen saver the window never showed again. It now waits only
   while the saver is on (`#saver.on`), a pop-up window or a tour is open, and tries again by itself every 15 seconds.
   Test: tests/e2e/desktop-app.spec.js (v19.18.3).
+
+## v19.18.4: the owner's follow-ups
+
+- Records in the page area (`features/records/record-page.js`, CSS at the end of 05h-record-adminbase.css): the owner
+  found the floating window "weird, not like the site". Leads, contracts and suppliers still open in the same window
+  code, but it is placed over the page area (#main, `abPlace()`), with no dimmed page or blue band: a page heading,
+  ordinary buttons (Save & Close in the site's blue), white panels and tabs. The side menu and top bar stay; using the
+  side menu closes the record (asking first if a lead or contract has changes). Full Page still covers everything.
+- Supplier cards: even columns on wide screens; two even rows at laptop widths (Open on the first row).
+- Screen saver (`saver-scene.js`): the sun and moon carry on below the horizon (behind the trees and water) and fade
+  instead of vanishing; sunrise the same way (the day's wrap-round was the cause). Sky colours and the sun's glow
+  update ten times a second instead of every frame (each change repainted the whole sky).
+- Job Stock Tags: the wording on every tag shows faded and locked until Change; colour boxes use the app's own pick
+  list (`combo: 'colours'`, `plugTagsIn`) instead of the browser's.
+- Stock: Stock-Take Area is a drop-down (`STOCK_AREAS` in domain/stock-lists.js: BTSS-01 to BTSS-40, Sobinco, BTDR-01
+  to BTDR-40, BTWIN-01 to BTWIN-40, Red, Grey, Blue and Green Container, plus any area already in use). Cutting (step
+  7): a Material box (`MATERIALS`, kept in `state.prodMat`); "Cut from full bars?" only for Aluminium; the bar length
+  comes from the Length box (which reads "Full bar length", e.g. 6.5M), no separate bar-length boxes.
+- Inventory reports: lists show Location, Area, Item, Description, Length, Colours and Qty; supplier, reorder level
+  and money only when "Detailed" is ticked. New "Find It On The Factory Floor" report (item A to Z, where, how many).
+- Deliveries: the Hallmark Feed bar shows on the List view only; the calendar's weeks share the screen height
+  (`delCalFit`, the page's `after` step) so the month fits on one screen.
+- Tests: tests/e2e/round-1918.spec.js, plus updates in screen-saver, stock-take, cutting-map and round-1917-3 specs.

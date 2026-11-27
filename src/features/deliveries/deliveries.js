@@ -84,7 +84,7 @@ export function vDeliveries() {
   ]
     .map((k) => `<div class="kpi ${k[2]}"><small>${k[0]}</small><b>${k[1]}</b></div>`)
     .join('')}</div>
-  <div class="panel" style="margin-bottom:.9rem;display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;align-items:center"><span><b>Hallmark Feed</b> <span class="muted">${H.length} jobs. ${esc(msg)}</span></span><span class="acts"><span class="tag">Not Started ${c('Not Started')}</span><span class="tag">In Factory ${c('In Factory')}</span><span class="tag">QC Done ${c('QC Done')}</span><span class="tag g">Delivered ${c('Delivered')}</span><button class="mini" data-act="syncHM">Sync Now</button></span></div>
+  ${/* (v19.18.4, the owner's choice) the Hallmark Feed bar shows in the List view only, so the calendar fits on one screen; Sync Hallmark stays in the toolbar */ ''}${F.v == 'list' ? `<div class="panel" style="margin-bottom:.9rem;display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;align-items:center"><span><b>Hallmark Feed</b> <span class="muted">${H.length} jobs. ${esc(msg)}</span></span><span class="acts"><span class="tag">Not Started ${c('Not Started')}</span><span class="tag">In Factory ${c('In Factory')}</span><span class="tag">QC Done ${c('QC Done')}</span><span class="tag g">Delivered ${c('Delivered')}</span><button class="mini" data-act="syncHM">Sync Now</button></span></div>` : ''}
   <div class="sg2">${ch('f', 'out', 'Outstanding')}${ch('f', 'rec', 'Received')}${ch('f', 'all', 'All')}<span class="vs"></span>${ch('s', 'all', 'All Suppliers')}${sn.map((x) => ch('s', x, x)).join('')}</div>
   ${F.v == 'cal' ? delCal(list) : F.v == 'list' ? table : `<div class="dlanes">${board}</div>`}`;
 }
@@ -122,12 +122,23 @@ export function delCal(list) {
     return `<div class="dcal-d ${out ? 'out' : ''} ${we ? 'we' : ''} ${k == td ? 'td' : ''}" ${onClick('editDel', '', '', '', k)} title="New delivery due ${esc(fd(k))}"><span class="dcal-n">${d.getDate()}</span>${L.slice(0, 4).map(chip).join('')}${L.length > 4 ? `<span class="dcal-more">+${L.length - 4} more</span>` : ''}</div>`;
   };
   const nodate = list.filter((x) => !x.due);
-  return `<div class="panel dcal"><div class="dcal-h"><div class="dcal-nav"><button class="btn ghost sm" aria-label="Previous month" ${onClick('setUI', 'del.m', (+F.m || 0) - 1)}>&lsaquo;</button><button class="btn ghost sm" ${onClick('setUI', 'del.m', 0)}>Today</button><button class="btn ghost sm" aria-label="Next month" ${onClick('setUI', 'del.m', (+F.m || 0) + 1)}>&rsaquo;</button></div><h2>${esc(base.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }))}</h2><div class="dcal-key"><span class="od">Overdue</span><span class="td">Due today</span><span class="tr">In transit</span><span class="du">Due</span><span class="rc">Received</span></div></div><div class="dcal-g">${['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((w) => `<div class="dcal-w">${w}</div>`).join('')}${days
+  return `<div class="panel dcal"><div class="dcal-h"><div class="dcal-nav"><button class="btn ghost sm" aria-label="Previous month" ${onClick('setUI', 'del.m', (+F.m || 0) - 1)}>&lsaquo;</button><button class="btn ghost sm" ${onClick('setUI', 'del.m', 0)}>Today</button><button class="btn ghost sm" aria-label="Next month" ${onClick('setUI', 'del.m', (+F.m || 0) + 1)}>&rsaquo;</button></div><h2>${esc(base.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }))}</h2><div class="dcal-key"><span class="od">Overdue</span><span class="td">Due today</span><span class="tr">In transit</span><span class="du">Due</span><span class="rc">Received</span></div></div><div class="dcal-g" style="--wk:${weeks}">${['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((w) => `<div class="dcal-w">${w}</div>`).join('')}${days
     .slice(0, weeks * 7)
     .map(cell)
     .join(
       ''
     )}</div>${nodate.length ? `<div class="dcal-nd"><b>No due date yet</b>${nodate.map(chip).join('')}</div>` : ''}</div>`;
+}
+/** (v19.18.4) the calendar's weeks share the height left on the screen, so the whole month shows without scrolling
+    (never smaller than 4rem a week; a busy day can still grow) */
+export function delCalFit() {
+  const g = document.querySelector('#main .dcal-g');
+  if (!g) return;
+  const wk = +getComputedStyle(g).getPropertyValue('--wk') || 6,
+    head = g.querySelector('.dcal-w'),
+    top = g.getBoundingClientRect().top + scrollY + (head ? head.offsetHeight : 0),
+    h = Math.floor((innerHeight - top - 40) / wk);
+  g.style.setProperty('--rowh', Math.max(64, h) + 'px');
 }
 /* 'Received' opens the delivery on its arrival checks: who checked it, QC, anything damaged */
 export function recvD(id) {

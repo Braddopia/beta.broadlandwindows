@@ -72,6 +72,7 @@ import * as featuresProblemsProblems from './features/problems/problems.js';
 import * as featuresProfileProfile from './features/profile/profile.js';
 import * as featuresRecordsAppointments from './features/records/appointments.js';
 import * as featuresRecordsAbList from './features/records/ab-list.js';
+import * as featuresRecordsRecordPage from './features/records/record-page.js';
 import * as featuresSuppliersSupplierWindow from './features/suppliers/supplier-window.js';
 import * as featuresContractsContractReports from './features/contracts/contract-reports.js';
 import * as featuresContractsContractTabs from './features/contracts/contract-tabs.js';
@@ -216,6 +217,7 @@ const modules = {
   featuresProfileProfile,
   featuresRecordsAppointments,
   featuresRecordsAbList,
+  featuresRecordsRecordPage,
   featuresSuppliersSupplierWindow,
   featuresContractsContractReports,
   featuresContractsContractTabs,
@@ -308,6 +310,8 @@ uiFormsForm.listenForFormChanges();
 featuresRecordsRecordWindow.plugRecordWindowIn();
 featuresScannerScanner.plugScannerIn();
 featuresSuppliersSuppliers.plugSuppliersIn();
+featuresTagsTags.plugTagsIn();
+featuresRecordsRecordPage.startRecordPage();
 uiModal.listenForBackdropClicks();
 uiComponentsPopover.listenForOutsideClicks();
 uiShellShell.shell();

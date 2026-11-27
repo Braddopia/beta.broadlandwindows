@@ -169,7 +169,9 @@ test('Job Stock Tags: one tab per tag; the boxes and the preview are the same he
   expect(h).toBeLessThan(2);
 });
 
-test('v19.17.9: no current brochure shows New, even when the daily check re-dates them all to today', async ({ app }) => {
+test('v19.17.9: no current brochure shows New, even when the daily check re-dates them all to today', async ({
+  app,
+}) => {
   const B = JSON.parse(require('fs').readFileSync(require('path').join(__dirname, '../../brochures.json'), 'utf8'));
   await app.role('beta');
   await app.go('downloads');

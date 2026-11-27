@@ -249,19 +249,23 @@ test('a product is marked as a profile bar in its own window (Cutting), and the 
     'Quality Check',
     'Notes',
   ]);
-  // the bar length is only asked for once it is a profile: 6M, 6.5M (picked to start with), 7M or another length
-  await expect(app.page.locator('#f_barLen')).toBeHidden();
+  // (v19.18.4) only an aluminium profile can be cut from full bars; its bar length comes from the Length box
+  await expect(app.page.locator('#f_isBar')).toBeHidden();
+  await app.page.selectOption('#f_material', 'Timber');
+  await expect(app.page.locator('#f_isBar')).toBeHidden();
+  await app.page.selectOption('#f_material', 'Aluminium');
+  await expect(app.page.locator('#f_isBar')).toBeVisible();
   await app.page.selectOption('#f_isBar', 'Yes');
-  await expect(app.page.locator('#f_barLen')).toHaveValue('6500');
-  await app.page.selectOption('#f_barLen', 'other');
-  await app.page.fill('#f_barLenX', '5500');
+  await app.page.fill('#f_length', '');
   await app.page.click('#mbox [data-act=ieSave]');
-  expect(await app.run((p) => state.cutProf[p], pid)).toEqual({ bar: 5500 });
+  await expect(app.page.locator('#mbox .ferr')).toContainText('full bar length');
+  await app.page.fill('#f_length', '5.5M');
+  await expect(app.page.locator('#f_isBar').locator('xpath=..').locator('.hint')).toContainText('5,500mm');
+  await app.page.click('#mbox [data-act=ieSave]');
+  expect(await app.run((p) => [state.cutProf[p], state.prodMat[p]], pid)).toEqual([{ bar: 5500 }, 'Aluminium']);
   await app.call('stockForm', 'edit', pid);
-  await expect(app.page.locator('#f_barLen')).toHaveValue('other');
-  await expect(app.page.locator('#f_barLenX')).toHaveValue('5500');
-  await expect(app.page.locator('#f_barLen option')).toHaveText(['6M', '6.5M (most bars)', '7M', 'Other length']);
-  await app.page.selectOption('#f_barLen', '7000');
+  await expect(app.page.locator('#f_material')).toHaveValue('Aluminium');
+  await app.page.fill('#f_length', '7M');
   await app.page.click('#mbox [data-act=ieSave]');
   expect(await app.run((p) => state.cutProf[p], pid)).toEqual({ bar: 7000 });
   // and it can be switched off again

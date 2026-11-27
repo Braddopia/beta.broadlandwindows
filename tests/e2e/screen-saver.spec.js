@@ -71,7 +71,8 @@ test('clouds are spread across the sky and drift; the sun arcs over; a boat sail
   await app.call('saverTry');
   const box = (s) =>
     app.run(
-      (s) => [...document.querySelectorAll('#saver ' + s)].map((e) => e.getBoundingClientRect()).map((b) => [b.left, b.top]),
+      (s) =>
+        [...document.querySelectorAll('#saver ' + s)].map((e) => e.getBoundingClientRect()).map((b) => [b.left, b.top]),
       s
     );
   await app.page.waitForTimeout(300);
@@ -108,5 +109,33 @@ test('clouds are spread across the sky and drift; the sun arcs over; a boat sail
   await app.page.waitForTimeout(1200);
   const b2 = (await box('.sv-boat')).map(([x]) => x);
   expect(b1.some((x, i) => x > -200 && x < 1440 && Math.abs(x - b2[i]) > 2)).toBe(true);
+  expect(app.errors).toEqual([]);
+});
+
+test('v19.18.4: the sun sinks below the horizon and fades at sunset, and rises the same way (no vanishing)', async ({
+  app,
+}) => {
+  await app.page.setViewportSize({ width: 1440, height: 900 });
+  await app.page.emulateMedia({ reducedMotion: 'no-preference' });
+  await app.call('saverTry');
+  await app.page.waitForTimeout(200);
+  const sun = (p) =>
+    app.run((p) => {
+      sceneAt(p);
+      const e = document.querySelector('#saver .sv-sun'),
+        b = e.getBoundingClientRect();
+      return [+getComputedStyle(e).opacity, (b.top + b.height / 2) / innerHeight];
+    }, p);
+  const seen = [];
+  for (let p = 0.44; p <= 0.6; p += 0.004) seen.push(await sun(p));
+  // fades step by step: never a sudden drop
+  for (let i = 1; i < seen.length; i++) expect(seen[i - 1][0] - seen[i][0]).toBeLessThan(0.2);
+  // it is below the horizon (68% down) before it has gone completely
+  const lastShown = seen.filter(([o]) => o > 0).pop();
+  expect(lastShown[1]).toBeGreaterThan(0.68);
+  // sunrise the same way round
+  const rise = [];
+  for (let p = 0.96; p <= 1.06; p += 0.004) rise.push(await sun(p % 1));
+  for (let i = 1; i < rise.length; i++) expect(rise[i][0] - rise[i - 1][0]).toBeLessThan(0.2);
   expect(app.errors).toEqual([]);
 });

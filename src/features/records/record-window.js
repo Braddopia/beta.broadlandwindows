@@ -14,6 +14,7 @@ import { abReveal } from './ab-list.js';
 import { recDocs, recThumbs } from './photos-docs.js';
 import { lineFocus, readLines } from './products.js';
 import { recContactLine } from './record-tools.js';
+import { abPlace } from './record-page.js';
 import { stgDraw } from './stages.js';
 import { readOps } from './survey.js';
 import { editCall } from '../service/service.js';
@@ -127,6 +128,7 @@ export function recOpen(kind, id) {
    </div>`),
     'full ab' + (fullPage() ? ' fp' : '')
   );
+  abPlace();
   recThumbs();
   recDocs();
   recRail();

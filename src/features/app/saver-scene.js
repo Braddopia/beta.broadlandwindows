@@ -18,15 +18,85 @@ const HORIZON = 68; // vh, where the water starts
 /* the look of the day: [moment, sky top, sky middle, horizon, land, far land, water near the bank, deep water,
    cloud, cloud shade, stars, lit windows, mist] */
 const KEYS = [
-  [0.0, '#35558f', '#b9879d', '#f3c69c', '#1b2541', '#4b5b86', '#e3b49e', '#26386a', '#ffdacb', '#8a6f8f', 0.15, 0.5, 0.55],
+  [
+    0.0,
+    '#35558f',
+    '#b9879d',
+    '#f3c69c',
+    '#1b2541',
+    '#4b5b86',
+    '#e3b49e',
+    '#26386a',
+    '#ffdacb',
+    '#8a6f8f',
+    0.15,
+    0.5,
+    0.55,
+  ],
   [0.08, '#1d5cb6', '#5a9be2', '#cfe4fa', '#0b2d57', '#3e6ba6', '#a7cdf1', '#123f7b', '#ffffff', '#8aa3c6', 0, 0, 0.18],
   [0.28, '#0a4dac', '#3a89df', '#acd5f8', '#0b2d57', '#3f6fab', '#9cc7ef', '#0f3a74', '#ffffff', '#8ea8cc', 0, 0, 0.1],
   [0.41, '#28509c', '#d39b74', '#ffd590', '#2a2643', '#776a8c', '#f2bd8c', '#2a305c', '#ffe3c6', '#a98a8e', 0, 0, 0.15],
-  [0.5, '#232f6c', '#c2556a', '#ff9b55', '#1d1631', '#5b4a72', '#ea8c60', '#211840', '#f5aa8f', '#7a5578', 0.05, 0.3, 0.3],
-  [0.58, '#0d1a45', '#3b3b79', '#a3668a', '#0b0f25', '#2b3159', '#5c4b7b', '#0b1030', '#6b6b9b', '#3a3a64', 0.55, 1, 0.6],
+  [
+    0.5,
+    '#232f6c',
+    '#c2556a',
+    '#ff9b55',
+    '#1d1631',
+    '#5b4a72',
+    '#ea8c60',
+    '#211840',
+    '#f5aa8f',
+    '#7a5578',
+    0.05,
+    0.3,
+    0.3,
+  ],
+  [
+    0.58,
+    '#0d1a45',
+    '#3b3b79',
+    '#a3668a',
+    '#0b0f25',
+    '#2b3159',
+    '#5c4b7b',
+    '#0b1030',
+    '#6b6b9b',
+    '#3a3a64',
+    0.55,
+    1,
+    0.6,
+  ],
   [0.7, '#020a20', '#061a42', '#133563', '#040b19', '#0e2141', '#12294f', '#030915', '#3b4b6f', '#1e2944', 1, 1, 0.7],
-  [0.9, '#030c26', '#0a1f4d', '#1d3c6e', '#050d1c', '#132648', '#163056', '#040b18', '#46567a', '#222e4a', 0.9, 1, 0.65],
-  [1.0, '#35558f', '#b9879d', '#f3c69c', '#1b2541', '#4b5b86', '#e3b49e', '#26386a', '#ffdacb', '#8a6f8f', 0.15, 0.5, 0.55],
+  [
+    0.9,
+    '#030c26',
+    '#0a1f4d',
+    '#1d3c6e',
+    '#050d1c',
+    '#132648',
+    '#163056',
+    '#040b18',
+    '#46567a',
+    '#222e4a',
+    0.9,
+    1,
+    0.65,
+  ],
+  [
+    1.0,
+    '#35558f',
+    '#b9879d',
+    '#f3c69c',
+    '#1b2541',
+    '#4b5b86',
+    '#e3b49e',
+    '#26386a',
+    '#ffdacb',
+    '#8a6f8f',
+    0.15,
+    0.5,
+    0.55,
+  ],
 ];
 const VARS = ['--sky1', '--sky2', '--sky3', '--land', '--far', '--w1', '--w2', '--cloud', '--cshade'];
 const hexRgb = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
@@ -99,7 +169,7 @@ function step() {
   last = now;
   const sec = (now - t0) / 1000,
     p = (p0 + sec / CYCLE) % 1;
-  paint(p, sec);
+  paint(p);
   for (const c of clouds) {
     c.x += c.v * dt;
     if (c.x > 104) newCloud(c, -c.w - R(2, 18));
@@ -123,57 +193,82 @@ function step() {
     b.el.style.transform = `translate3d(${b.x.toFixed(2)}vw,${bob.toFixed(2)}vh,0) rotate(${tilt.toFixed(2)}deg) scaleX(${b.dir == b.face ? 1 : -1})`;
   }
 }
-/** colours, sun, moon and glint for moment p */
-function paint(p) {
-  const L = lookAt(p),
-    s = root.style;
-  for (const k of VARS) s.setProperty(k, L[k]);
-  s.setProperty('--stars', L.stars.toFixed(3));
-  s.setProperty('--lights', L.lights.toFixed(3));
-  s.setProperty('--fog', L.fog.toFixed(3));
-  /* the sun: up from just before p = 0, down just after 0.5 */
-  const ts = (p + 0.03) / 0.56,
+/** colours, sun, moon and glint for moment p.
+   (v19.18.4) The sun and moon no longer jump off the screen when they reach the horizon: they carry on along their
+   arc below it, sinking behind the trees and water (which are drawn in front) while they fade, and rise the same way.
+   The sky colours and the glow round the sun change slowly, so they are set at most ten times a second (each change
+   repaints the whole sky); the sun, moon, clouds and boats still move every frame. */
+let lastLook = -1e9,
+  els = null;
+const fadeAt = (y) => Math.min(1, Math.max(0, (HORIZON + 4 - y) / 14));
+function paint(p, force) {
+  const s = root.style,
+    now = performance.now(),
+    look = force || now - lastLook > 100;
+  if (!els)
+    els = {
+      sun: root.querySelector('.sv-sun'),
+      moon: root.querySelector('.sv-moon'),
+      glint: root.querySelector('.sv-glint'),
+    };
+  const { sun, moon, glint } = els;
+  if (look) {
+    lastLook = now;
+    const L = lookAt(p);
+    for (const k of VARS) s.setProperty(k, L[k]);
+    s.setProperty('--stars', L.stars.toFixed(3));
+    s.setProperty('--lights', L.lights.toFixed(3));
+    s.setProperty('--fog', L.fog.toFixed(3));
+  }
+  /* the sun: up from just before p = 0, down just after 0.5; ts runs a little past 0 and 1 so it rises from and sets
+     below the horizon rather than appearing or vanishing on it */
+  const ts = ((p > 0.85 ? p - 1 : p) + 0.03) / 0.56,
     tm = (p - 0.56) / 0.4;
-  const sun = root.querySelector('.sv-sun'),
-    moon = root.querySelector('.sv-moon'),
-    glint = root.querySelector('.sv-glint');
   let gx = -100,
     gop = 0,
     gcol = '#ffd98a';
-  if (ts > 0 && ts < 1) {
+  if (ts > -0.12 && ts < 1.12) {
     const [x, y] = arc(ts, 54),
-      low = Math.max(0, 1 - (HORIZON - y) / 30); // 1 at the horizon, 0 high up
+      low = Math.min(1, Math.max(0, 1 - (HORIZON - y) / 30)), // 1 at the horizon, 0 high up
+      op = fadeAt(y);
     sun.style.transform = `translate3d(${x.toFixed(2)}vw,${y.toFixed(2)}vh,0)`;
-    sun.style.setProperty('--low', low.toFixed(3));
-    s.setProperty('--sx', x.toFixed(1) + '%');
-    s.setProperty('--sy', y.toFixed(1) + '%');
-    s.setProperty('--halo', (0.25 + low * 0.55).toFixed(3));
+    sun.style.opacity = op.toFixed(3);
+    if (look) {
+      sun.style.setProperty('--low', low.toFixed(2));
+      s.setProperty('--sx', x.toFixed(1) + '%');
+      s.setProperty('--sy', y.toFixed(1) + '%');
+      s.setProperty('--halo', ((0.25 + low * 0.55) * op).toFixed(3));
+    }
     gx = x;
-    gop = 0.25 + low * 0.75;
+    gop = (0.25 + low * 0.75) * op;
   } else {
+    sun.style.opacity = '0';
     sun.style.transform = 'translate3d(-50vw,0,0)';
-    s.setProperty('--halo', '0');
+    if (look) s.setProperty('--halo', '0');
   }
-  if (tm > 0 && tm < 1) {
-    const [x, y] = arc(tm, 46);
+  if (tm > -0.12 && tm < 1.12) {
+    const [x, y] = arc(tm, 46),
+      op = fadeAt(y);
     moon.style.transform = `translate3d(${x.toFixed(2)}vw,${y.toFixed(2)}vh,0)`;
-    moon.style.opacity = Math.min(1, Math.sin(Math.PI * tm) * 3).toFixed(3);
-    if (gop == 0) {
+    moon.style.opacity = op.toFixed(3);
+    if (gop < 0.05 && op > 0) {
       gx = x;
-      gop = 0.35 * Math.min(1, Math.sin(Math.PI * tm) * 3);
+      gop = 0.35 * op;
       gcol = '#dfe8ff';
     }
   } else moon.style.opacity = '0';
   /* the glint column sits under whichever light is up */
   glint.style.transform = `translate3d(${(gx - 50).toFixed(2)}vw,0,0)`;
   glint.style.opacity = gop.toFixed(3);
-  s.setProperty('--glintc', gcol);
+  if (look) s.setProperty('--glintc', gcol);
 }
 
 /** start the scene in the #saver element; make draws one cloud's SVG markup */
 export function sceneStart(el, make) {
   sceneStop();
   root = el;
+  els = null;
+  lastLook = -1e9;
   cloudSvg = make;
   /* a random moment between early and late morning */
   p0 = R(0.06, 0.3);
@@ -199,7 +294,7 @@ export function sceneStart(el, make) {
   }
   if (boats[1]) boats[1].wait = R(6, 25);
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    paint(0.2);
+    paint(0.2, true);
     clouds.forEach((c) => (c.el.style.transform = `translate3d(${c.x.toFixed(2)}vw,0,0)`));
     if (boats[0]) boats[0].el.style.transform = `translate3d(${boats[0].x.toFixed(2)}vw,0,0)`;
     return;
@@ -218,5 +313,5 @@ export function sceneStop() {
 export function sceneAt(p) {
   p0 = ((p % 1) + 1) % 1;
   t0 = performance.now();
-  if (root) paint(p0);
+  if (root) paint(p0, true);
 }

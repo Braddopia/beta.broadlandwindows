@@ -11,6 +11,8 @@ import { SAFE } from '../../data/sanitize.js';
 import { state } from '../../data/state.js';
 import { fd } from '../../core/dates.js';
 import { fieldControl } from '../../ui/forms/fields.js';
+import { plugInCombo } from '../../ui/components/pickers.js';
+import { svg } from '../../core/icons.js';
 import { askYes } from '../../ui/modal.js';
 import { render } from '../../ui/shell/router.js';
 import { toast } from '../../ui/toast.js';
@@ -100,7 +102,20 @@ export const TAG_CSS = `.jt-sheet{position:relative;width:297em;height:210em;bac
    Tabs along the top, one per tag (with its job number), and "+ Add Another Tag". Below, one card in two halves that
    are always the same height: the chosen tag's boxes with the wording every tag carries underneath, and the tag as it
    will print, at A4 landscape shape, filling the other half. Printed Recently is a list underneath. */
-let sel = 0;
+let sel = 0,
+  unlocked = false;
+const LOCK = 'M7 11V8a5 5 0 0110 0v3M5 11h14v10H5z';
+/** (v19.18.4) the wording every tag carries is the same on all of them, so it shows faded and locked; Change
+    unlocks it, Done locks it again */
+export function tagWording() {
+  unlocked = !unlocked;
+  render(true);
+  if (unlocked) setTimeout(() => $('#tag_warn') && $('#tag_warn').focus(), 30);
+}
+/* start-up step (run once by main.js): the colour boxes offer the app's own list of colours as you type */
+export function plugTagsIn() {
+  plugInCombo('colours', () => PRE.map(([n]) => ({ v: n, t: n })));
+}
 export function tagPick(i) {
   sel = +i || 0;
   render(true);
@@ -124,15 +139,14 @@ export function vTags() {
       <div class="jt-g">
         <div class="ff jt-f-no"><label for="tag_${i}_jobNo">Job Number</label>${box('tag_' + i + '_jobNo', { max: 30, combo: 'jobs' }, t.jobNo)}</div>
         <div class="ff jt-f-name"><label for="tag_${i}_jobName">Job Name</label>${box('tag_' + i + '_jobName', { max: 80 }, t.jobName)}</div>
-        <div class="ff"><label for="tag_${i}_cIn">Colour Inside (B)</label>${box('tag_' + i + '_cIn', { max: 40, list: 'tagCols', ph: 'e.g. WP' }, t.cIn)}</div>
-        <div class="ff"><label for="tag_${i}_cOut">Colour Outside (A)</label>${box('tag_' + i + '_cOut', { max: 40, list: 'tagCols', ph: 'e.g. WP' }, t.cOut)}</div>
+        <div class="ff"><label for="tag_${i}_cIn">Colour Inside (B)</label>${box('tag_' + i + '_cIn', { max: 40, ph: 'e.g. WP', combo: 'colours' }, t.cIn)}</div>
+        <div class="ff"><label for="tag_${i}_cOut">Colour Outside (A)</label>${box('tag_' + i + '_cOut', { max: 40, ph: 'e.g. WP', combo: 'colours' }, t.cOut)}</div>
         <div class="ff jt-f-cp"><label for="tag_${i}_copies">Copies</label>${box('tag_' + i + '_copies', { t: 'number', min: 1, max: 10 }, t.copies)}</div>
       </div>
-      <div class="jt-shared"><h3>Wording On Every Tag</h3>
-        <div class="ff jt-caps"><label for="tag_warn">Warning</label>${box('tag_warn', { max: 90 }, T.warn)}</div>
-        <div class="ff jt-caps"><label for="tag_note">Small Print</label>${box('tag_note', { max: 90 }, T.note)}</div>
+      <div class="jt-shared ${unlocked ? 'open' : 'locked'}"><h3><span>${raw(unlocked ? '' : svg(LOCK))}Wording On Every Tag</span><button type="button" class="mini" ${raw(onClick('tagWording'))}>${unlocked ? 'Done' : 'Change'}</button></h3>
+        <div class="ff jt-caps"><label for="tag_warn">Warning</label>${box('tag_warn', { max: 90, ro: !unlocked }, T.warn)}</div>
+        <div class="ff jt-caps"><label for="tag_note">Small Print</label>${box('tag_note', { max: 90, ro: !unlocked }, T.note)}</div>
       </div>
-      <datalist id="tagCols">${PRE.map(([n]) => html`<option value="${n}"></option>`)}</datalist>
     </div>
     <div class="jt-stage"><div class="jt-pv" id="tagPv_${i}">${raw(tagSheet(full(T, t)))}</div><p class="muted">As it prints: A4 landscape${(+t.copies || 1) > 1 ? ', ' + t.copies + ' copies' : ''}</p></div>
   </div>
