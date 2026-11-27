@@ -107,9 +107,9 @@ export function vMessages() {
   let lastDay = '';
   return `<div class="msn"><aside class="msn-l"><div class="msn-lh"><h1>Chats</h1><select aria-label="New chat" data-onchange="msgNewChat" data-args-change="[{&quot;$&quot;:&quot;value&quot;}]"><option value="" hidden>+ New chat</option><option value="__group">+ New group</option>${people.map((p) => `<option>${esc(p)}</option>`).join('')}</select></div>
    <div class="msn-list">${chats.map((c) => `<button class="msn-c ${c.w == cur ? 'on' : ''} ${c.un ? 'un' : ''}" ${onClick('setUI', 'msg.to', c.w)}>${av(c.w)}<span class="msn-ct"><b>${esc(c.w == 'Everyone' ? 'Everyone (team chat)' : isGroupKey(c.w) || c.w == SYSTEM ? c.name : nickOf(c.w, '') || c.name)}</b><small>${c.last ? esc((c.last.ev ? '' : c.last.by == me2 ? 'You: ' : shared(c.w) ? c.last.by.split(' ')[0] + ': ' : '') + c.last.t) : 'No messages yet'}</small></span><span class="msn-m">${c.last ? ago(c.last.at) : ''}${c.un ? `<i>${c.un}</i>` : ''}</span></button>`).join('')}${toJoin.length ? `<p class="msn-ph">Groups You Can Join</p>${toJoin.map((x) => `<div class="msn-c grp-j">${av(groupKey(x))}<span class="msn-ct"><b>${esc(x.name)}</b><small>${esc(x.desc || x.members.length + ' people')}</small></span><button class="mini pri" ${onClick('grpJoin', x.id)}>Join</button></div>`).join('')}` : ''}</div></aside>
-   <section class="msn-r"><header class="msn-h">${av(cur)}<div><b>${esc(cur == 'Everyone' ? 'Everyone' : g ? g.name : nickOf(cur, '') || cur)}</b><small>${cur == 'Everyone' ? 'Messages here go to the whole team' : g ? esc(g.desc || g.members.length + ' people') : cur == SYSTEM ? 'Automatic messages from the CRM' : esc((state.staff.find((s) => s.name == cur) || {}).role || '')}</small></div></header>
+   <section class="msn-r"><header class="msn-h">${av(cur)}<div><b>${esc(cur == 'Everyone' ? 'Everyone' : g ? g.name : nickOf(cur, '') || cur)}</b><small>${cur == 'Everyone' ? 'Messages here go to the whole team' : g ? esc(g.members.map((m) => (m == me2 ? 'You' : nickOf(m, cur) || m)).join(', ')) : cur == SYSTEM ? 'Automatic messages from the CRM' : esc((state.staff.find((s) => s.name == cur) || {}).role || '')}</small></div></header>
     <div class="msn-t" id="msnT">${
-      L.map((n) => {
+      L.map((n, i) => {
         const d = new Date(n.at).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' }),
           sep = d != lastDay ? ((lastDay = d), `<div class="msn-day">${d}</div>`) : '',
           mine = n.by == me2;
@@ -117,9 +117,20 @@ export function vMessages() {
         const nick = nickOf(n.by, cur),
           who = nick ? `${esc(nick)} <i>${esc(n.by)}</i>` : esc(n.by);
         if (n.me) return sep + `<div class="msn-ev msn-me">* <b>${nick ? esc(nick) : esc(n.by)}</b> ${esc(n.t)}</div>`;
+        /* WhatsApp-style runs: messages from the same person within 5 minutes sit together; the first of a run has
+           the tail and (in a group) the name, the last has the picture beside it */
+        const prev = L[i - 1],
+          next = L[i + 1],
+          same = (x) => x && !x.ev && !x.me && x.by == n.by && Math.abs(x.at - n.at) < 5 * 6e4,
+          first = !same(prev) || !!sep,
+          last = !same(next) || (next && new Date(next.at).toDateString() != new Date(n.at).toDateString()),
+          grp = shared(cur) && !mine,
+          time = new Date(n.at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }),
+          read = shared(cur) ? (n.readBy || []).some((x) => x != me2) : !!n.read,
+          ticks = mine ? `<i class="bub-k ${read ? 'rd' : ''}" title="${read ? 'Read' : 'Sent'}" aria-label="${read ? 'Read' : 'Sent'}"></i>` : '';
         return (
           sep +
-          `<div class="bw ${mine ? 'me' : ''} ${n.id == JUST_SENT ? 'new' : ''}"><div class="bub ${mine ? 'me' : ''}">${!mine && shared(cur) ? `<small class="bub-n">${who}</small>` : ''}<p>${esc(n.t)}</p></div><span class="bub-t">${n.id == JUST_SENT ? '<span class="bub-ok">Sent</span> ' : ''}${new Date(n.at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}${mine ? `<button class="bub-x" title="Delete" aria-label="Delete message" ${onClick('msgDel', n.id)}>&times;</button>` : ''}</span></div>`
+          `<div class="bw ${mine ? 'me' : ''} ${first ? 'first' : 'cont'} ${last ? 'last' : ''} ${grp ? 'grp' : ''} ${n.id == JUST_SENT ? 'new' : ''}">${grp ? (last ? av(n.by) : '<span class="mav-sp"></span>') : ''}<div class="bub ${mine ? 'me' : ''}">${grp && first ? `<small class="bub-n n${avColour(n.by).slice(1)}">${who}</small>` : ''}<p>${esc(n.t)}<span class="bub-m">${n.id == JUST_SENT ? '<span class="bub-ok">Sent</span>' : ''}${time}${ticks}</span></p></div>${mine ? `<button class="bub-x" title="Delete" aria-label="Delete message" ${onClick('msgDel', n.id)}>&times;</button>` : ''}</div>`
         );
       }).join('') || `<div class="msn-empty">${emptyArt('team', '')}</div>`
     }</div>

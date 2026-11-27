@@ -465,3 +465,17 @@ stock number). Decided with the owner:
   builds its links with scripts), falls back to WordPress's file list (`/wp-json/wp/v2/media?mime_type=application/pdf`);
   the log prints what the page holds.
 - Tour steps updated for the Deliveries calendar and the tag studio.
+
+## v19.17.2 (round 3)
+
+- Messages look like WhatsApp: the chat sits on a soft patterned wallpaper (dark green-grey in dark mode); my
+  messages are green bubbles on the right, everyone else's white on the left, each with a small tail on the first of a
+  run. Messages from one person within 5 minutes and on the same day form a run: in shared chats (Everyone, groups)
+  the coloured name sits on the first bubble and the picture beside the last. The time sits inside the bubble with
+  ticks on my own messages (grey sent, blue once someone else has read it). Delete shows on hover. The group header
+  lists who is in it (with nicknames). Unread counts are green, the composer is a white pill with a green send button.
+  Markup in `messages.js` (`.bw first|cont last grp`, `.bub`, `.bub-n nX`, `.bub-m`, `.bub-k rd`), styles at the end
+  of `05e-messages.css`. Test: `tests/e2e/messages-bubbles.spec.js`.
+- The brochure check now reads links written as `/wp-content/...` (no domain). The first daily runs found 0 on the page
+  because of that and took 27 from the website's file list instead; from now on the page's own list (with its section
+  headings) is used, and the file list stays the fallback.

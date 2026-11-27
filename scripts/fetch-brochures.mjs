@@ -53,9 +53,14 @@ export function parseBrochures(html) {
   const out = new Map();
   const heads = [...html.matchAll(/<h[1-4][^>]*>([\s\S]*?)<\/h[1-4]>/gi)].map((m) => ({ at: m.index, t: text(m[1]) }));
   for (const m of html.matchAll(
-    /<a\b[^>]*href=["']([^"']+\/wp-content\/uploads\/[^"']+\.(?:pdf|jpe?g|png))["'][^>]*>([\s\S]*?)<\/a>/gi
+    /<a\b[^>]*href=["']([^"']*\/wp-content\/uploads\/[^"']+\.(?:pdf|jpe?g|png))["'][^>]*>([\s\S]*?)<\/a>/gi
   )) {
-    const url = m[1].replace(/^\/\//, 'https://').replace(/^http:/, 'https:');
+    /* links on the page can be full addresses, "//host/..." or just "/wp-content/..." */
+    const url = m[1]
+      .replace(/^\/\//, 'https://')
+      .replace(/^\/wp-content\//, 'https://www.broadlandwindows.co.uk/wp-content/')
+      .replace(/^http:/, 'https:');
+    if (!/^https:\/\/(www\.)?broadlandwindows\.co\.uk\//.test(url)) continue;
     if (out.has(url)) continue;
     let title = text(m[2]);
     if (!title || GENERIC.test(title) || title.length < 3) {

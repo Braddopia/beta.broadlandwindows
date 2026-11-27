@@ -34,3 +34,12 @@ test('a brochure with no heading nearby is placed by its own name', () => {
   assert.equal(guessCat('HALLMARK Colour Lab 2025'), 'Composite doors');
   assert.equal(guessCat('Rose Collection'), 'PVCu');
 });
+
+test('links written as "/wp-content/..." (no domain) are read as files on our own website', () => {
+  const L = parseBrochures(`<h2>Roof lanterns</h2>
+<a class="btn" href="/wp-content/uploads/2025/07/Broadland-Secondary-Glazing.pdf">View</a>
+<a href="https://elsewhere.example/wp-content/uploads/x.pdf">Other site</a>`);
+  assert.equal(L.length, 1);
+  assert.equal(L[0].url, 'https://www.broadlandwindows.co.uk/wp-content/uploads/2025/07/Broadland-Secondary-Glazing.pdf');
+  assert.equal(L[0].title, 'Roof lanterns');
+});

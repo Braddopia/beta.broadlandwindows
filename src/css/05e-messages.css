@@ -127,3 +127,53 @@ body[data-theme=dark] .bub-ok{color:#5fd39a}
 .msn-help span{font-size:.84rem}
 /* commands are shown exactly as they are typed (no automatic capitals) */
 .msn-cmds,.msn-cmds *,.msn-help,.msn-help *,.msn-me{text-transform:none!important}
+
+/* ==== v19.17.2 Messages, WhatsApp style ==== */
+/* the chat area: a soft patterned wallpaper */
+.msn-t{gap:.12rem;padding:1rem 4% 1.2rem;background-color:#efeae2;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cg fill='none' stroke='%23e2dbcf' stroke-width='1.4' stroke-linecap='round'%3E%3Cpath d='M14 20h14M21 13v14'/%3E%3Ccircle cx='86' cy='22' r='7'/%3E%3Cpath d='M48 60l8-8 8 8-8 8z'/%3E%3Cpath d='M98 78c6 0 10 4 10 10'/%3E%3Ccircle cx='26' cy='92' r='4'/%3E%3Cpath d='M64 102h16'/%3E%3C/g%3E%3C/svg%3E")}
+body[data-theme=dark] .msn-t{background-color:#0b141a;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cg fill='none' stroke='%231c2a33' stroke-width='1.4' stroke-linecap='round'%3E%3Cpath d='M14 20h14M21 13v14'/%3E%3Ccircle cx='86' cy='22' r='7'/%3E%3Cpath d='M48 60l8-8 8 8-8 8z'/%3E%3Cpath d='M98 78c6 0 10 4 10 10'/%3E%3Ccircle cx='26' cy='92' r='4'/%3E%3Cpath d='M64 102h16'/%3E%3C/g%3E%3C/svg%3E")}
+.msn-day{background:#fff;color:#54656f;box-shadow:0 1px 1px rgba(0,0,0,.08);font-weight:500;padding:.25rem .75rem;margin:.8rem 0 .5rem}
+body[data-theme=dark] .msn-day{background:#182229;color:#8696a0}
+.msn-ev{background:#fff7d6;color:#54656f;box-shadow:0 1px 1px rgba(0,0,0,.06)}
+body[data-theme=dark] .msn-ev{background:#182229;color:#8696a0}
+
+/* a message row: in groups, the sender's picture on the left of the last message of a run */
+.bw{flex-direction:row;align-items:flex-end;gap:.4rem;max-width:min(78%,36rem)}
+.bw.first{margin-top:.45rem}
+.bw .mav,.bw .mav-sp{width:2rem;height:2rem;font-size:.66rem;flex:0 0 2rem}
+.bw.me{flex-direction:row-reverse}
+/* bubbles: white for others, tinted for you; the first of a run has a tail */
+.bub{position:relative;background:#fff;color:#111b21;padding:.38rem .6rem .3rem .65rem;border-radius:9px;box-shadow:0 1px .5px rgba(11,20,26,.13)}
+.bub.me{background:#d9fdd3;color:#111b21;border-radius:9px}
+body[data-theme=dark] .bub{background:#202c33;color:#e9edef}
+body[data-theme=dark] .bub.me{background:#005c4b;color:#e9edef}
+.bw.first .bub{border-top-left-radius:0}
+.bw.first.me .bub{border-top-left-radius:9px;border-top-right-radius:0}
+.bw.first .bub::before{content:"";position:absolute;top:0;left:-7px;width:8px;height:13px;background:inherit;clip-path:polygon(0 0,100% 0,100% 100%)}
+.bw.first.me .bub::before{left:auto;right:-7px;clip-path:polygon(0 0,100% 0,0 100%)}
+.bub p{font-size:.9rem}
+/* the time (and ticks on yours) sit inside the bubble, bottom right */
+.bub-m{float:right;display:inline-flex;align-items:center;gap:.2rem;margin:.35rem 0 -.15rem .7rem;font-size:.66rem;color:#667781;white-space:nowrap}
+body[data-theme=dark] .bub-m{color:#8696a0}
+.bub.me .bub-m{color:#4f7b62}body[data-theme=dark] .bub.me .bub-m{color:#9fd2c3}
+.bub-k{display:inline-block;width:1.05rem;height:.7rem;background:no-repeat center/contain url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 11'%3E%3Cpath d='M1 6l3 3 6-7M7 9l1 1 6-8' fill='none' stroke='%238696a0' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")}
+.bub-k.rd{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 11'%3E%3Cpath d='M1 6l3 3 6-7M7 9l1 1 6-8' fill='none' stroke='%2353bdeb' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")}
+.bub-ok{margin-right:.25rem}
+/* the sender's name, in their own colour (matching their picture) */
+.bub-n{font-size:.74rem;margin-bottom:.12rem}
+.bub-n.n0{color:#0f9d8a}.bub-n.n1{color:#7b3fe4}.bub-n.n2{color:#e0601f}.bub-n.n3{color:#d6336c}.bub-n.n4{color:#2f6fe0}
+.bub-n.n5{color:#1f9d4c}.bub-n.n6{color:#b88400}.bub-n.n7{color:#0b8fc2}.bub-n.n8{color:#c2352d}.bub-n.n9{color:#5a4bd1}
+/* delete sits beside the bubble and shows on hover */
+.bw .bub-x{align-self:center;opacity:0;color:var(--muted)}.bw:hover .bub-x{opacity:.8}
+.bub-t{display:none}
+
+/* the chat list and header: WhatsApp-like rows; unread counts in green */
+.msn-c .msn-m i{background:#25d366;color:#fff}
+.msn-c.on{background:color-mix(in srgb,var(--blue-bg) 80%,transparent)}
+.msn-h small{display:block;max-width:44rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* the box you type in: a white pill on a light bar */
+.msn-in{background:#f0f2f5}body[data-theme=dark] .msn-in{background:#202c33}
+.msn-in textarea{background:#fff;border-radius:22px}body[data-theme=dark] .msn-in textarea{background:#2a3942}
+.msn-in textarea:hover{background:#fff}body[data-theme=dark] .msn-in textarea:hover{background:#2a3942}
+.msn-send.ready{background:#00a884;box-shadow:0 6px 14px -6px rgba(0,168,132,.7)}
+.msn-send:hover{background:#008f72;box-shadow:0 8px 18px -6px rgba(0,168,132,.7)}
