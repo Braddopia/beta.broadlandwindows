@@ -12,12 +12,6 @@
   .c-md{display:none}
   .ie{grid-template-columns:minmax(0,1fr) minmax(0,1.3fr)}
 }
-@media(max-height:760px) and (min-width:901px){
-  .nl{padding:.55rem .7rem .15rem}
-  .nav{height:2rem}
-  .brand{padding:.2rem 0 .6rem}
-}
-@media(max-height:640px) and (min-width:901px){.nl{display:none}}
 
 /* tablet & below: sidebar becomes an off-canvas drawer */
 @media(max-width:900px){

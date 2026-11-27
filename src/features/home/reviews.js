@@ -1,5 +1,5 @@
 /* features/home/reviews: Review scores and quotes shown on the overview and documents. */
-import { today } from '../../core/dates.js';
+import { fdl, today } from '../../core/dates.js';
 import { esc } from '../../core/dom.js';
 import { SAFE } from '../../data/sanitize.js';
 import { audit } from '../../data/audit.js';
@@ -11,8 +11,39 @@ import { form } from '../../ui/forms/form.js';
 import { askYes } from '../../ui/modal.js';
 import { render } from '../../ui/shell/router.js';
 import { toast } from '../../ui/toast.js';
+import { applyReviewFeed } from '../../domain/review-feed.js';
 
-/* review scores (Trustpilot / Google): figures set by an admin in Admin Console > Reviews.
+/* ---- the daily review figures ----
+   A GitHub job (.github/workflows/reviews.yml) asks Google and Trustpilot for the latest score and review count each
+   morning and writes reviews.json beside the site. The site reads it on opening and every 3 hours; Trusted Trader and
+   ReferenceLine have no feed and stay as typed in Admin Console. A file opened from the computer has no feed. */
+const FEED_EVERY = 3 * 3600 * 1000;
+/** read reviews.json (or use the figures given, for tests) and update the scores if they changed */
+export async function reviewFeed(feed) {
+  if (!feed) {
+    if (!/^https?:$/.test(location.protocol)) return;
+    try {
+      const r = await fetch('reviews.json?t=' + Date.now(), { cache: 'no-store' });
+      if (!r.ok) return;
+      feed = await r.json();
+    } catch (e) {
+      return;
+    }
+  }
+  const changed = applyReviewFeed(state.brand, feed);
+  if (feed && feed.updated) state.brand.feedAt = SAFE.text(String(feed.updated), 40);
+  if (!changed.length) return;
+  audit('Review scores updated automatically', 'Brand', changed.join(', '));
+  store();
+  render(true);
+}
+/* start-up step (run once by main.js) */
+export function startReviewFeed() {
+  reviewFeed();
+  setInterval(reviewFeed, FEED_EVERY);
+}
+/* review scores (Trustpilot / Google): updated each morning from reviews.json; Trusted Trader and ReferenceLine set by
+   an admin in Admin Console > Reviews.
    On a phone only the stars and the platform show (the score and the number of reviews are hidden in CSS). */
 export function ratingsH() {
   const r = (x, n) => {
@@ -33,15 +64,17 @@ export function editRatings() {
   if (!need('manage', 'Review scores')) return;
   const b = state.brand,
     tt = b.tt || {},
-    rl = b.rl || {};
+    rl = b.rl || {},
+    auto =
+      'Updated automatically each morning' + (b.feedAt ? ' (last ' + fdl(String(b.feedAt).slice(0, 10)) + ')' : '');
   form(
     'Review Scores',
     [
       { k: 'tps', l: 'Trustpilot score (0 to 5)', t: 'number', max: 5, dp: 1 },
-      { k: 'tpc', l: 'Trustpilot review count', max: 12 },
+      { k: 'tpc', l: 'Trustpilot review count', max: 12, hint: auto },
       { k: 'tpu', l: 'Trustpilot page link', w: 'full', max: 300 },
       { k: 'gs', l: 'Google score (0 to 5)', t: 'number', max: 5, dp: 1 },
-      { k: 'gc', l: 'Google review count', max: 12 },
+      { k: 'gc', l: 'Google review count', max: 12, hint: auto },
       { k: 'gu', l: 'Google reviews link', w: 'full', max: 300 },
       { k: 'tts', l: 'Trusted Trader score (0 to 5)', t: 'number', max: 5, dp: 1 },
       { k: 'ttc', l: 'Trusted Trader review count', max: 12 },

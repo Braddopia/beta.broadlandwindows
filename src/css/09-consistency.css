@@ -73,3 +73,25 @@ body:not(.lv):not(.vmsg) .main>.tw+.pager,body:not(.lv):not(.vmsg) .main>style+*
   .ptb.fx tbody tr:not(:hover) td.ac{position:static;background:transparent!important}
   .ptb.fx tbody tr:hover td.ac{position:static}
 }
+
+/* ---- v19.14 ---- */
+/* Messages: the People column is as wide as Chats; Report A Problem sits at the bottom of the People list, on the right
+   like on every other page. When People is hidden (narrow screens) the usual corner button shows instead. */
+.msn{grid-template-columns:19rem minmax(0,1fr) 19rem}
+@media(max-width:1250px){.msn{grid-template-columns:17rem minmax(0,1fr) 17rem}}
+.msn-p .msn-rp{justify-content:flex-end}
+@media(max-width:1050px){body[data-view=messages]:not(:has(#modal.open)) #rpb{display:flex}}
+
+/* clickable blocks that are not table rows do not fill blue on hover (the owner found it heavy): the holiday ring on
+   the Overview shows the pointer only; a Calendar day gets a thin outline */
+.hol2.clk-r:hover{background:transparent}
+.dc2:hover{background:transparent;box-shadow:inset 0 0 0 1.5px rgba(3,78,162,.35)}
+body[data-theme=dark] .dc2:hover{box-shadow:inset 0 0 0 1.5px rgba(140,180,255,.4)}
+
+/* the side menu keeps its normal spacing and group names on a short screen and scrolls instead of squashing
+   (the old short-screen rules that shrank it and hid the group names were removed); a thin scrollbar shows it scrolls */
+#nav{scrollbar-width:thin;scrollbar-color:rgba(1,43,89,.22) transparent;padding-right:.15rem}
+#nav::-webkit-scrollbar{display:block;width:6px}
+#nav::-webkit-scrollbar-thumb{background:rgba(1,43,89,.22);border-radius:6px}
+body[data-theme=dark] #nav{scrollbar-color:rgba(255,255,255,.2) transparent}
+body[data-theme=dark] #nav::-webkit-scrollbar-thumb{background:rgba(255,255,255,.2)}

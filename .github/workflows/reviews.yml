@@ -1,0 +1,40 @@
+name: Review figures
+# Each morning: fetch the Google and Trustpilot score and review count (scripts/fetch-reviews.mjs), commit
+# reviews.json if it changed, and republish the site so the Overview and the Office floor board show them.
+# Needs the Actions secrets GOOGLE_PLACES_KEY, GOOGLE_PLACE_ID and TRUSTPILOT_API_KEY (see HANDOVER.md).
+on:
+  schedule:
+    - cron: '23 5 * * *'
+  workflow_dispatch:
+permissions:
+  contents: write
+  pages: write
+jobs:
+  fetch:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+        with: { ref: main }
+      - uses: actions/setup-node@v5
+        with: { node-version: 22 }
+      - run: node scripts/fetch-reviews.mjs
+        env:
+          GOOGLE_PLACES_KEY: ${{ secrets.GOOGLE_PLACES_KEY }}
+          GOOGLE_PLACE_ID: ${{ secrets.GOOGLE_PLACE_ID }}
+          TRUSTPILOT_API_KEY: ${{ secrets.TRUSTPILOT_API_KEY }}
+          TRUSTPILOT_DOMAIN: ${{ vars.TRUSTPILOT_DOMAIN }}
+      - name: Save and republish if the figures changed
+        run: |
+          if git diff --quiet -- reviews.json && git ls-files --error-unmatch reviews.json >/dev/null 2>&1; then
+            echo "No change"; exit 0
+          fi
+          if [ ! -f reviews.json ]; then echo "No figures yet"; exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add reviews.json
+          git commit -m "Review figures for $(date -u +%F)"
+          git push
+          # pushes made by this job do not start the site's own publish, so ask for it
+          gh api -X POST "repos/${{ github.repository }}/pages/builds" || echo "Could not ask for a republish; the next push will publish it"
+        env:
+          GH_TOKEN: ${{ github.token }}

@@ -18,8 +18,8 @@
 
 /* ---- table: one alignment per column, heading and cells the same ---- */
 .t-inv th,.t-inv td{padding-left:.7rem;padding-right:.7rem}
-.t-inv .i-item,.t-inv .i-stock,.t-inv .i-loc,.t-inv .i-col{text-align:left}
-.t-inv .i-id,.t-inv .i-cost,.t-inv .i-val,.t-inv .i-st{text-align:center}
+.t-inv .i-item,.t-inv .i-loc,.t-inv .i-col{text-align:left}
+.t-inv .i-id,.t-inv .i-stock,.t-inv .i-cost,.t-inv .i-val,.t-inv .i-st{text-align:center}
 .t-inv th.srt{white-space:nowrap}
 .t-inv .i-sel{width:2.6rem;padding-left:.9rem;padding-right:0}
 .t-inv td small{display:block;margin-top:.1rem;font-size:.74rem;color:var(--muted);font-weight:400}
@@ -29,10 +29,11 @@
 .t-inv td.i-item b{display:block}
 .t-inv td.i-id code{font-size:.8rem}
 .t-inv td .xtag{display:block;width:max-content;margin:.2rem auto 0}
-/* stock: the number, then its unit (PCS, Pairs, M, or × 6.5M for full bars), starting flush with the Stock heading
-   like the other left-hand columns */
+/* stock (v19.14, the owner's choice): centred under its heading. Each value sits in a box of the same width, centred
+   in the column, with the number first and its unit after (PCS, Pairs, M, or × 6.5M for full bars), so every number
+   starts at the same place down the column */
 .t-inv td.i-stock{white-space:nowrap}
-.t-inv .i-qty{display:inline-flex;align-items:baseline;gap:.35em}
+.t-inv .i-qty{display:inline-flex;align-items:baseline;gap:.35em;width:6.4rem;text-align:left}
 .t-inv .i-qty b{font-size:.95rem}
 .t-inv .i-unit{color:var(--muted);font-size:.78rem;font-weight:600}
 .t-inv .st2{display:inline-flex;flex-direction:column;align-items:center;gap:.2rem}

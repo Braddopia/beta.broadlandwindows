@@ -314,4 +314,5 @@ uiShellLooks.looks();
 featuresSearchSearch.search();
 featuresSettingsSettings.restoreMotionSetting();
 startBoot.boot();
+featuresHomeReviews.startReviewFeed();
 coreHaptics.listenForTaps();

@@ -288,3 +288,27 @@ stock number). Decided with the owner:
   column. `tests/e2e/inventory-layout.spec.js` checks the even spacing and that the right-hand group touches the buttons.
 - v19.13.2: stock values start flush with the Stock heading (number then unit), like Item and Location; the numbers
   were right-aligned in a small box, which made "9" and "118" start at different places.
+
+## v19.14
+
+- Review counts update themselves (Google and Trustpilot). `.github/workflows/reviews.yml` runs each morning (05:23 UTC)
+  and on demand (Actions, Review figures, Run workflow): `scripts/fetch-reviews.mjs` asks the Google Places API (New)
+  and the Trustpilot Business Units API for the score and number of reviews, writes `reviews.json` beside index.html,
+  commits it if it changed and asks GitHub Pages to republish. The site reads `reviews.json` on opening and every 3
+  hours (`reviewFeed` in `features/home/reviews.js`, rules in `domain/review-feed.js`, unit-tested); the Overview
+  banner, the Office floor board and printed documents use the new figures, links typed in Admin Console are kept, and
+  the change is in the audit log. Trusted Trader and ReferenceLine have no feed: still typed in Admin Console.
+  **Setup still needed (owner):** add three repository secrets (Settings, Secrets and variables, Actions):
+  `GOOGLE_PLACES_KEY` (Google Cloud API key with "Places API (New)" switched on), `GOOGLE_PLACE_ID` (the business's
+  Place ID) and `TRUSTPILOT_API_KEY` (Trustpilot Business, Integrations, API). Optional variable `TRUSTPILOT_DOMAIN`
+  if Trustpilot lists the business under a different web address than broadlandwindows.co.uk. Without keys the job
+  does nothing and the typed figures stay.
+- Overview: the holiday ring no longer fills blue on hover; Calendar days get a thin outline instead of a blue fill.
+- Messages: People is as wide as Chats; Report A Problem sits at the bottom right of the People list (the corner
+  button comes back when People is hidden on narrow screens).
+- Floor Boards, Fitting Schedule and Inventory, Stock Take use the full page width.
+- Inventory: stock is centred under its heading again; each value sits in a same-width box so the numbers still start
+  at the same place down the column.
+- Side menu: the short-screen rules that shrank it and hid the group names are gone; it keeps its normal size and
+  scrolls, with a thin scrollbar.
+- Tests: `tests/e2e/round-1914.spec.js`, `tests/unit/review-feed.test.mjs`.
