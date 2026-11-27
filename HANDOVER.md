@@ -421,3 +421,8 @@ stock number). Decided with the owner:
   The bottom half is a Norfolk Broads scene: two tree lines of rounded copses (seeded, `treeLine`), a drainage mill
   with lattice sails turning, water with scattered drifting ripple strokes (`ripples`), a mist line, a gold glint
   under the setting sun, a sailing boat crossing every 110s, swaying reeds with seed heads, and a moon after dark.
+- v19.16.5: screen saver, at the owner's request: no birds; a detailed Norfolk Broads scene. Puffy domed clouds
+  (`cloud()`, shaded underneath, lit on top, coloured by the sky: white, peach at sunset, slate at night) kept above
+  the clock; a round-tower church and a distant mill on the far tree line; the near mill's reflection wavering in the
+  water; the sun's glint is now a column of broken gold strokes exactly under the sun (both at 74% across); evening
+  mist over the water; a black-sailed wherry heading left and a white yacht heading right.

@@ -39,17 +39,6 @@ const blocked = () => document.body.classList.contains('tv') || document.body.cl
 
 function build() {
   if (el) return el;
-  /* a crane in side view facing left, drawn in parts so its wings can beat: the far wing behind the body, the body
-     (beak, head, long neck, body, tail, trailing legs), the near wing in front. Each wing turns about the shoulder. */
-  const WING = 'M150 97C163 62 190 30 246 6C240 28 231 47 224 60C233 58 240 62 245 69C232 76 219 85 206 97Z';
-  const crane = (cls) =>
-    `<div class="${cls}"><div class="sv-bob"><svg class="sv-crane" viewBox="0 0 400 200" focusable="false">` +
-    `<path class="sv-wing far" d="${WING}"/>` +
-    '<path class="sv-legs" d="M236 108L392 121M238 112L388 128"/>' +
-    '<path class="sv-body" d="M6 93L36 88C40 85 47 85 51 88C62 95 84 96 110 95C128 94 140 88 162 86C196 83 232 90 258 97L282 104L258 110C226 116 190 116 160 112C140 109 124 102 108 101C84 101 62 101 49 97C46 99 41 99 38 96Z"/>' +
-    '<circle class="sv-crown" cx="43" cy="88" r="3"/>' +
-    `<path class="sv-wing near" d="${WING}"/>` +
-    '</svg></div></div>';
   el = document.createElement('div');
   el.id = 'saver';
   el.setAttribute('aria-hidden', 'true');
@@ -60,25 +49,25 @@ function build() {
       head = i % 3 == 0 ? `<ellipse class="hd" cx="${tx}" cy="${200 - h + 6}" rx="2.6" ry="8"/>` : '';
     return `<g><path d="M${x} 200Q${x + 4} ${200 - h / 2} ${tx} ${200 - h}"/>${head}</g>`;
   }).join('');
+  /* a Norfolk drainage mill: tapered brick tower, boat-shaped cap, four lattice sails turning about the hub */
+  const MILL =
+    '<g class="sails"><path d="M68 74V4h4v70zM72 72h66v-4H72zM72 70v70h-4V70zM68 72H2v4h66z"/><path class="lat" d="M72 10h14v56H72zM78 72v14h56V72zM68 80H54v56h14zM62 72v-14H6v14z"/></g><path class="tw" d="M50 220l7-142h26l7 142z"/><path class="cap" d="M52 82c2-16 10-24 18-24s16 8 18 24z"/><path class="fan" d="M70 60l26-14v6z"/><circle class="hub" cx="70" cy="72" r="5"/>';
   el.innerHTML =
-    '<svg width="0" height="0" style="position:absolute"><defs><linearGradient id="sv-wg" x1="0" y1="1" x2=".4" y2="0"><stop offset="0" stop-color="#ffffff"/><stop offset=".55" stop-color="#dbe9fb"/><stop offset=".8" stop-color="#4a5a78"/><stop offset="1" stop-color="#1c2436"/></linearGradient><linearGradient id="sv-bg2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#c9dcf3"/></linearGradient></defs></svg>' +
     '<div class="sv-sky sv-day"></div><div class="sv-sky sv-dusk"></div><div class="sv-sky sv-night"></div>' +
     '<div class="sv-stars"></div><div class="sv-moon"></div><div class="sv-sun"></div>' +
-    '<div class="sv-cloud c1"></div><div class="sv-cloud c2"></div><div class="sv-cloud c3"></div><div class="sv-cloud c4"></div>' +
-    /* the Broads: a tree line on the horizon, a drainage mill with turning sails, water, a sailing boat, reeds */
+    [1, 2, 3, 4, 5].map((i) => `<svg class="sv-cloud c${i}" viewBox="0 -40 320 170">${cloud(i * 17)}</svg>`).join('') +
+    /* the Broads, back to front: a far tree line with a round-tower church and a distant mill, a near tree line, the
+       mill, water with its reflection, ripples, the sun's glint and evening mist, a wherry and a yacht, reeds */
     `<svg class="sv-trees far" viewBox="0 0 1440 120" preserveAspectRatio="none"><path d="${treeLine(1, 34)}"/></svg>` +
+    '<svg class="sv-church" viewBox="0 0 120 90"><path d="M10 90V52L46 36L82 52V90Z"/><path d="M78 90V22h3v-4h4v4h3v-4h4v4h3v-4h4v4h3V90Z"/></svg>' +
+    `<svg class="sv-mill far" viewBox="0 0 140 220">${MILL}</svg>` +
     `<svg class="sv-trees" viewBox="0 0 1440 120" preserveAspectRatio="none"><path d="${treeLine(7, 46)}"/></svg>` +
-    '<svg class="sv-mill" viewBox="0 0 140 220"><g class="sails"><path d="M68 74V4h4v70zM72 72h66v-4H72zM72 70v70h-4V70zM68 72H2v4h66z"/><path class="lat" d="M72 10h14v56H72zM78 72v14h56V72zM68 80H54v56h14zM62 72v-14H6v14z"/></g><path class="tw" d="M50 220l7-142h26l7 142z"/><path class="cap" d="M52 82c2-16 10-24 18-24s16 8 18 24z"/><circle class="hub" cx="70" cy="72" r="5"/></svg>' +
-    `<div class="sv-water"><div class="sv-mist"></div><svg class="sv-shim" viewBox="0 0 1600 320" preserveAspectRatio="none">${ripples(3)}</svg><svg class="sv-shim s2" viewBox="0 0 1600 320" preserveAspectRatio="none">${ripples(11)}</svg><div class="sv-glint"></div></div>` +
-    '<svg class="sv-boat" viewBox="0 0 80 70"><path class="sail" d="M42 4L42 52H14Z"/><path class="sail2" d="M45 12L45 52H64Z"/><path class="hull" d="M8 54H72L64 64H16Z"/></svg>' +
+    `<svg class="sv-mill" viewBox="0 0 140 220">${MILL}</svg>` +
+    `<div class="sv-water"><svg class="sv-mill refl" viewBox="0 0 140 220">${MILL}</svg><div class="sv-mist"></div><svg class="sv-shim" viewBox="0 0 1600 320" preserveAspectRatio="none">${ripples(3)}</svg><svg class="sv-shim s2" viewBox="0 0 1600 320" preserveAspectRatio="none">${ripples(11)}</svg><svg class="sv-glint" viewBox="0 0 1600 320" preserveAspectRatio="none">${glint(5)}</svg><div class="sv-fog"></div></div>` +
+    '<svg class="sv-boat wherry" viewBox="0 0 120 90"><path class="sail" d="M58 6L60 70H28C34 46 44 22 58 6Z"/><path class="mast" d="M59 2V72"/><path class="hull" d="M6 72H112L102 84H20Z"/></svg>' +
+    '<svg class="sv-boat yacht" viewBox="0 0 80 70"><path class="sail" d="M42 4L42 52H14Z"/><path class="sail2" d="M45 12L45 52H64Z"/><path class="hull" d="M8 54H72L64 64H16Z"/></svg>' +
     `<svg class="sv-reeds l" viewBox="0 0 210 200" preserveAspectRatio="xMinYMax meet">${reeds}</svg>` +
     `<svg class="sv-reeds r" viewBox="0 0 210 200" preserveAspectRatio="xMaxYMax meet">${reeds}</svg>` +
-    crane('sv-lead') +
-    '<div class="sv-flock">' +
-    crane('f1') +
-    crane('f2') +
-    crane('f3') +
-    '</div>' +
     '<div class="sv-clock"><b class="sv-time"></b><span class="sv-date"></span></div>';
   document.body.appendChild(el);
   return el;
@@ -92,6 +81,62 @@ function tickClock() {
     day: 'numeric',
     month: 'long',
   });
+}
+const seeded = (seed) => {
+  let r = seed * 7919 + 104729;
+  return () => (r = (r * 9301 + 49297) % 233280) / 233280;
+};
+/** a puffy cloud in 320 x 130: a shadow underneath, the body of round puffs on a flat base, highlights on top. Its
+    colour follows the sky (currentColor, see svCloudCol) */
+function cloud(seed) {
+  const rnd = seeded(seed),
+    puffs = [];
+  /* a dome: the biggest puffs in the middle, smaller towards the ends, a second smaller row in front for depth */
+  for (let i = 0; i < 9; i++) {
+    const t = i / 8,
+      dome = Math.sin(Math.PI * (0.08 + t * 0.84)),
+      r = 16 + dome * (26 + rnd() * 16),
+      x = 34 + t * 252 + (rnd() - 0.5) * 12;
+    puffs.push([x, 96 - r * (0.75 + rnd() * 0.2), r]);
+  }
+  for (let i = 0; i < 5; i++) {
+    const x = 70 + i * 45 + (rnd() - 0.5) * 16,
+      r = 14 + rnd() * 10;
+    puffs.push([x, 96 - r * 0.6, r]);
+  }
+  const shape = (dy) =>
+    puffs
+      .map(([px, py, r]) => `<circle cx="${px.toFixed(0)}" cy="${(py + dy).toFixed(0)}" r="${r.toFixed(0)}"/>`)
+      .join('') + `<rect x="26" y="${82 + dy}" width="268" height="20" rx="10"/>`;
+  return (
+    `<g class="shade">${shape(9)}</g>` +
+    `<g class="body">${shape(0)}</g>` +
+    `<g class="hi">${puffs
+      .slice(0, 9)
+      .map(
+        ([px, py, r]) =>
+          `<circle cx="${(px - r * 0.25).toFixed(0)}" cy="${(py - r * 0.35).toFixed(0)}" r="${(r * 0.5).toFixed(0)}"/>`
+      )
+      .join('')}</g>`
+  );
+}
+/** the setting sun's glint: a column of broken gold strokes under the sun (74% across), narrow at the horizon and
+    wider towards the front, in 1600 x 320 */
+function glint(seed) {
+  const rnd = seeded(seed),
+    cx = 1600 * 0.74;
+  let out = '',
+    y = 3;
+  while (y < 320) {
+    const hw = 10 + y * 0.45;
+    for (let i = 0; i < 3; i++) {
+      const w = (0.25 + rnd() * 0.5) * hw,
+        x = cx - hw + rnd() * (2 * hw - w);
+      out += `<path d="M${x.toFixed(0)} ${y.toFixed(1)}h${w.toFixed(0)}" style="opacity:${(0.4 + rnd() * 0.6).toFixed(2)}"/>`;
+    }
+    y += 3 + (y / 320) * 9;
+  }
+  return out;
 }
 /** scattered short ripple strokes across 1600 x 320: close together and short near the horizon, longer and further
     apart towards the front (seeded) */
