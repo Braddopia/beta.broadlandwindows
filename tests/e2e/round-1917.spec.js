@@ -123,3 +123,48 @@ test('Files lists line up like Inventory: the heading and every row share one gr
   });
   expect(r).toEqual({ catLined: 1, nameLined: 1 });
 });
+
+test('Deliveries open on a month calendar: each delivery on its due day, coloured; a day starts a new delivery', async ({
+  app,
+}) => {
+  await app.page.setViewportSize({ width: 1440, height: 1000 });
+  await app.role('beta');
+  await app.go('deliveries');
+  await expect(app.page.locator('#main .seg2 button.on')).toHaveText('Calendar');
+  const td = await app.run(() => today());
+  // D-2 is due today, so it sits in today's box, amber
+  const todayBox = app.page.locator('#main .dcal-d.td');
+  await expect(todayBox).toContainText('Example Aluminium Ltd');
+  await expect(todayBox.locator('.dcal-c.td').first()).toBeVisible();
+  // the overdue one is red
+  await expect(app.page.locator('#main .dcal-c.od')).toContainText('Example Glass Ltd');
+  // a chip opens its delivery; an empty part of a day starts a new delivery due that day
+  await todayBox.locator('.dcal-c').first().click();
+  await expect(app.page.locator('#mbox h2')).toContainText('Delivery: Example Aluminium Ltd');
+  await app.call('closeModal');
+  await todayBox.locator('.dcal-n').click();
+  await expect(app.page.locator('#mbox h2')).toHaveText('New Delivery');
+  await expect(app.page.locator('#f_due')).toHaveValue(td);
+  await app.call('closeModal');
+  // next month and back to today
+  await app.page.click('#main .dcal-nav button[aria-label="Next month"]');
+  await expect(app.page.locator('#main .dcal-d.td')).toHaveCount(0);
+  await app.page.click('#main .dcal-nav button:text-is("Today")');
+  await expect(app.page.locator('#main .dcal-d.td')).toHaveCount(1);
+  expect(app.errors).toEqual([]);
+});
+
+test('Job Stock Tags: one tab per tag; the boxes and the preview are the same height', async ({ app }) => {
+  await app.page.setViewportSize({ width: 1440, height: 1000 });
+  await app.go('tags');
+  await app.page.click('#main .jt-tab.add');
+  await expect(app.page.locator('#main .jt-tab:not(.add)')).toHaveCount(2);
+  await expect(app.page.locator('#main .jt-tab.on')).toContainText('Tag 2');
+  await app.page.click('#main .jt-tab >> text=Tag 1');
+  await expect(app.page.locator('#tag_0_jobNo')).toBeVisible();
+  const h = await app.run(() => {
+    const b = (s) => document.querySelector(s).getBoundingClientRect();
+    return Math.abs(b('#main .jt-edit').height - b('#main .jt-stage').height);
+  });
+  expect(h).toBeLessThan(2);
+});

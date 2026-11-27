@@ -150,3 +150,52 @@ body[data-theme=dark] .rv-feed.off{background:#3a3220;color:#ffd98a}
 .bc-new{position:absolute;top:.6rem;left:.6rem;z-index:2;padding:.15rem .55rem;border-radius:99px;background:#ffd002;color:#012b59;font:700 .7rem var(--body);letter-spacing:.04em;box-shadow:0 4px 12px rgba(0,0,0,.2)}
 /* a list's note (loading, nothing yet) spans the whole width */
 .flist>:not(.frow){grid-column:1/-1}
+
+/* Deliveries calendar (delCal in deliveries.js) */
+.dcal{padding:1rem 1.1rem}
+.dcal-h{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:.8rem}
+.dcal-h h2{margin:0;font-size:1.15rem;flex:1}
+.dcal-nav{display:flex;gap:.35rem}
+.dcal-key{display:flex;gap:.45rem;flex-wrap:wrap}
+.dcal-key span{display:inline-flex;align-items:center;gap:.35rem;font-size:.72rem;color:var(--muted)}
+.dcal-key span::before{content:"";width:.7rem;height:.7rem;border-radius:3px;background:var(--dc)}
+.dcal-g{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.dcal-w{padding:.45rem .6rem;background:var(--card2);color:var(--muted);font:600 .72rem var(--body);text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--line)}
+.dcal-d{min-height:7.2rem;padding:.35rem .4rem .5rem;border-right:1px solid var(--line);border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:.25rem;cursor:pointer;min-width:0;transition:box-shadow .15s}
+.dcal-d:nth-child(7n){border-right:0}
+.dcal-d:hover{box-shadow:inset 0 0 0 1.5px rgba(3,78,162,.3)}
+.dcal-d.we{background:rgba(127,142,166,.06)}
+.dcal-d.out{opacity:.45}
+.dcal-n{font:600 .8rem var(--body);color:var(--muted);align-self:flex-start;min-width:1.6rem;height:1.6rem;display:grid;place-items:center;border-radius:50%}
+.dcal-d.td .dcal-n{background:var(--btn,#034ea2);color:#fff}
+.dcal-c{display:grid;grid-template-columns:auto minmax(0,1fr);column-gap:.35rem;align-items:center;width:100%;padding:.25rem .4rem;border:0;border-left:3px solid var(--dc);border-radius:6px;background:color-mix(in srgb,var(--dc) 14%,var(--card));color:var(--ink);font:inherit;text-align:left;cursor:pointer;transition:transform .15s,box-shadow .15s}
+.dcal-c:hover{transform:translateY(-1px);box-shadow:0 4px 10px -6px rgba(1,43,89,.5)}
+.dcal-c i{width:.5rem;height:.5rem;border-radius:50%}
+.dcal-c b{font-size:.72rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dcal-c span{grid-column:1/-1;font-size:.68rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dcal .od{--dc:#d63a3a}.dcal .td{--dc:#e3a008}.dcal .tr{--dc:#2f7fdb}.dcal .du{--dc:#5b7aa8}.dcal .rc{--dc:#16a061}
+.dcal-c span,.dcal-c b{text-transform:none}
+.dcal-more{font-size:.7rem;color:var(--muted);padding-left:.3rem}
+.dcal-nd{display:flex;flex-wrap:wrap;gap:.4rem;align-items:center;margin-top:.8rem}
+.dcal-nd .dcal-c{width:auto;max-width:16rem}
+@media(max-width:900px){.dcal-d{min-height:4.6rem}.dcal-c span{display:none}.dcal-c b{font-size:.66rem}}
+
+/* Job Stock Tags studio (v19.17): tabs, then one card in two halves of the same height (boxes | preview) */
+.jt-tabs{display:flex;gap:.4rem;flex-wrap:wrap;align-items:stretch}
+.jt-tab{display:flex;flex-direction:column;align-items:flex-start;gap:.1rem;min-width:8.5rem;padding:.5rem .85rem;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);font:inherit;text-align:left;cursor:pointer;transition:border-color .15s,background .15s,transform .2s var(--e-spring,ease)}
+.jt-tab b{font-size:.86rem}.jt-tab small{font-size:.74rem;color:var(--muted);text-transform:none}
+.jt-tab:hover{border-color:var(--blue)}
+.jt-tab.on{background:var(--blue-bg);border-color:var(--blue);box-shadow:inset 0 -3px 0 var(--blue)}
+.jt-tab.add{align-items:center;justify-content:center;border-style:dashed;color:var(--blue);font-weight:600;font-size:.84rem}
+.jt-studio{display:grid;grid-template-columns:minmax(19rem,25rem) minmax(0,1fr);gap:1.4rem;align-items:stretch;padding:1.1rem}
+.jt-edit{display:flex;flex-direction:column;gap:.9rem;min-width:0}
+.jt-edit h2{display:flex;align-items:center;gap:.6rem;margin:0}.jt-edit h2 small{flex:1}
+.jt-shared{padding-top:.9rem;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:.6rem}
+.jt-shared h3{margin:0;font-size:.8rem;color:var(--muted);font-weight:600}
+.jt-stage{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.6rem;min-width:0;padding:1.2rem;border-radius:14px;background:repeating-linear-gradient(45deg,rgba(127,142,166,.06) 0 10px,transparent 10px 20px),var(--card2)}
+.jt-stage .jt-pv{width:100%;max-width:40rem;container-type:inline-size;border-radius:6px;overflow:hidden;border:1px solid var(--line);box-shadow:0 14px 34px -12px rgba(1,30,70,.35)}
+.jt-stage .jt-pv .jt-sheet{font-size:calc(100cqw / 297)}
+.jt-stage p{margin:0;font-size:.78rem}
+.jt-rl .row{display:grid;grid-template-columns:max-content minmax(0,1fr) max-content max-content max-content;gap:1.2rem;align-items:center}
+.jt-rl .row>span:nth-child(2){white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media(max-width:1000px){.jt-studio{grid-template-columns:1fr}.jt-rl .row{grid-template-columns:max-content minmax(0,1fr) max-content}.jt-rl .row>span.muted{display:none}}

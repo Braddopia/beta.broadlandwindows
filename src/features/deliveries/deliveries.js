@@ -73,7 +73,7 @@ export function vDeliveries() {
         : '';
     }).join('') || '<tr><td colspan="7" class="empty">No deliveries match.</td></tr>'
   }</tbody></table></div>`;
-  return `<div class="head"><div><h1>Deliveries</h1><span class="muted">${n('od') + n('td') + n('wk') + n('mo') + n('lt')} outstanding from ${sn.length} suppliers</span></div><div class="tools"><div class="seg2"><button class="${F.v == 'list' ? 'on' : ''}" ${onClick('setUI', 'del.v', 'list')}>List</button><button class="${F.v == 'board' ? 'on' : ''}" ${onClick('setUI', 'del.v', 'board')}>Board</button></div><span class="vs"></span><button class="btn sm" data-act="editDel">New Delivery</button><button class="mini" data-act="syncHM">Sync Hallmark</button><button class="mini" data-act="expDel">Export CSV</button><button class="mini" data-act="delReports">Reports</button></div></div>
+  return `<div class="head"><div><h1>Deliveries</h1><span class="muted">${n('od') + n('td') + n('wk') + n('mo') + n('lt')} outstanding from ${sn.length} suppliers</span></div><div class="tools"><div class="seg2"><button class="${F.v == 'cal' ? 'on' : ''}" ${onClick('setUI', 'del.v', 'cal')}>Calendar</button><button class="${F.v == 'list' ? 'on' : ''}" ${onClick('setUI', 'del.v', 'list')}>List</button><button class="${F.v == 'board' ? 'on' : ''}" ${onClick('setUI', 'del.v', 'board')}>Board</button></div><span class="vs"></span><button class="btn sm" data-act="editDel">New Delivery</button><button class="mini" data-act="syncHM">Sync Hallmark</button><button class="mini" data-act="expDel">Export CSV</button><button class="mini" data-act="delReports">Reports</button></div></div>
   <div class="kpis">${[
     ['Overdue', n('od'), n('od') ? 'bad' : ''],
     ['Due Today', n('td'), n('td') ? 'warn' : ''],
@@ -86,7 +86,48 @@ export function vDeliveries() {
     .join('')}</div>
   <div class="panel" style="margin-bottom:.9rem;display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;align-items:center"><span><b>Hallmark Feed</b> <span class="muted">${H.length} jobs. ${esc(msg)}</span></span><span class="acts"><span class="tag">Not Started ${c('Not Started')}</span><span class="tag">In Factory ${c('In Factory')}</span><span class="tag">QC Done ${c('QC Done')}</span><span class="tag g">Delivered ${c('Delivered')}</span><button class="mini" data-act="syncHM">Sync Now</button></span></div>
   <div class="sg2">${ch('f', 'out', 'Outstanding')}${ch('f', 'rec', 'Received')}${ch('f', 'all', 'All')}<span class="vs"></span>${ch('s', 'all', 'All Suppliers')}${sn.map((x) => ch('s', x, x)).join('')}</div>
-  ${F.v == 'list' ? table : `<div class="dlanes">${board}</div>`}`;
+  ${F.v == 'cal' ? delCal(list) : F.v == 'list' ? table : `<div class="dlanes">${board}</div>`}`;
+}
+/* ---- v19.17 the Deliveries calendar (the page opens on it): a Monday-to-Sunday month with each delivery as a chip on
+   its due day, coloured by where it stands (overdue red, due today amber, in transit and due blue, received green).
+   A chip opens the delivery; an empty part of a day starts a new delivery due that day. Deliveries with no date are
+   listed underneath. */
+const DCOL = { Overdue: 'od', 'Due today': 'td', 'In transit': 'tr', Received: 'rc' };
+export function delCal(list) {
+  const F = uiState.del,
+    td = today(),
+    base = new Date(td + 'T12:00:00');
+  base.setDate(1);
+  base.setMonth(base.getMonth() + (+F.m || 0));
+  const month = base.getMonth(),
+    first = new Date(base);
+  first.setDate(1 - ((base.getDay() + 6) % 7));
+  const iso = (d) => d.toISOString().slice(0, 10),
+    byDay = {};
+  list.forEach((x) => x.due && (byDay[x.due] = byDay[x.due] || []).push(x));
+  const days = Array.from({ length: 42 }, (_, i) => {
+    const d = new Date(first);
+    d.setDate(first.getDate() + i);
+    return d;
+  });
+  /* only as many weeks as the month needs */
+  const weeks = days.slice(35).some((d) => d.getMonth() == month) ? 6 : 5;
+  const chip = (x) =>
+    `<button type="button" class="dcal-c ${DCOL[dAuto(x)] || 'du'}" title="${esc(x.supplier + ': ' + x.items + ' · ' + dAuto(x))}" ${onClick('editDel', x.id)}><i style="background:${supCol(x.supplier)}"></i><b>${esc(x.supplier)}</b><span>${esc(x.items)}</span></button>`;
+  const cell = (d) => {
+    const k = iso(d),
+      L = byDay[k] || [],
+      out = d.getMonth() != month,
+      we = d.getDay() == 0 || d.getDay() == 6;
+    return `<div class="dcal-d ${out ? 'out' : ''} ${we ? 'we' : ''} ${k == td ? 'td' : ''}" ${onClick('editDel', '', '', '', k)} title="New delivery due ${esc(fd(k))}"><span class="dcal-n">${d.getDate()}</span>${L.slice(0, 4).map(chip).join('')}${L.length > 4 ? `<span class="dcal-more">+${L.length - 4} more</span>` : ''}</div>`;
+  };
+  const nodate = list.filter((x) => !x.due);
+  return `<div class="panel dcal"><div class="dcal-h"><div class="dcal-nav"><button class="btn ghost sm" aria-label="Previous month" ${onClick('setUI', 'del.m', (+F.m || 0) - 1)}>&lsaquo;</button><button class="btn ghost sm" ${onClick('setUI', 'del.m', 0)}>Today</button><button class="btn ghost sm" aria-label="Next month" ${onClick('setUI', 'del.m', (+F.m || 0) + 1)}>&rsaquo;</button></div><h2>${esc(base.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }))}</h2><div class="dcal-key"><span class="od">Overdue</span><span class="td">Due today</span><span class="tr">In transit</span><span class="du">Due</span><span class="rc">Received</span></div></div><div class="dcal-g">${['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((w) => `<div class="dcal-w">${w}</div>`).join('')}${days
+    .slice(0, weeks * 7)
+    .map(cell)
+    .join(
+      ''
+    )}</div>${nodate.length ? `<div class="dcal-nd"><b>No due date yet</b>${nodate.map(chip).join('')}</div>` : ''}</div>`;
 }
 /* 'Received' opens the delivery on its arrival checks: who checked it, QC, anything damaged */
 export function recvD(id) {
@@ -110,7 +151,7 @@ export function recvD(id) {
     }
   }, 40);
 }
-export function editDel(id, supName, con) {
+export function editDel(id, supName, con, due) {
   const x = state.deliveries.find((d) => d.id == id);
   const ST = staffNames().filter(Boolean);
   form(
@@ -140,7 +181,7 @@ export function editDel(id, supName, con) {
     ],
     x
       ? { ...x, status: x.status == 'Received' ? 'Received' : 'Not yet' }
-      : { due: addDays(7), status: 'Not yet', supplier: supName || '', contract: con || '' },
+      : { due: due || addDays(7), status: 'Not yet', supplier: supName || '', contract: con || '' },
     (o) => {
       if (o.status == 'Received') {
         if (!o.recvDate) o.recvDate = today();

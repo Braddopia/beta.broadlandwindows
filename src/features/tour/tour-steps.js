@@ -162,12 +162,20 @@ export const TAB_TOURS = {
     ),
   ],
   deliveries: [
-    T('#main .seg2', 'List Or Board', 'A table, or cards grouped by when they are due.'),
+    T(
+      '#main .seg2',
+      'Calendar, List Or Board',
+      'A month calendar (the page opens on it), a table, or cards grouped by when they are due.'
+    ),
     T('#main .kpis', 'At A Glance', 'Overdue, due today, this week, later and in transit.'),
     T(TOOL, 'New Delivery', 'Book in a delivery you are expecting from a supplier.', 'New Delivery'),
     T(TOOL, 'Sync Hallmark', 'Pull the latest delivery dates from Hallmark so this list stays right.', 'Sync'),
     T(TOOL, 'Delivery Reports', 'Print what is due, what arrived damaged and who checked it.', 'Reports'),
-    T('#main .tw', 'Check It In', 'Click a delivery to mark it arrived, note any damage, add photos and sign it off.'),
+    T(
+      '#main .dcal',
+      'Check It In',
+      'Click a delivery to mark it arrived, note any damage, add photos and sign it off. Click an empty day to book one in for that day.'
+    ),
   ],
   service: [
     T('#main .seg2', 'List Or Map', 'See calls as a list, or as pins on a map of Norfolk to plan a route.'),
@@ -264,12 +272,12 @@ export const TAB_TOURS = {
   tags: [
     T('#tag_0_jobNo', 'Job Number', 'Type the contract number. The job name fills in by itself.'),
     T(
-      '#main .jt-card',
+      '#main .jt-edit',
       'One Tag Per Job',
       'Job number, name, colours inside (B) and outside (A), and how many copies.'
     ),
-    T('#main .jt-forms .cut-add', 'More Jobs', 'Add as many tags as you need and print them all in one go.'),
-    T('#main .jt-prev', 'As They Print', 'Each tag on its own A4 landscape page, exactly as it will come out.'),
+    T('#main .jt-tab.add', 'More Jobs', 'Add as many tags as you need, one tab each, and print them all in one go.'),
+    T('#main .jt-stage', 'As It Prints', 'The tag on its own A4 landscape page, exactly as it will come out.'),
     T(TOOL, 'Print', 'Prints every tag that has a job number, one page each.', 'Print'),
   ],
   staff: [

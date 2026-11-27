@@ -14,13 +14,13 @@ test('job stock tags: several at once, one A4 landscape page per tag and copy, t
   await app.page.fill('#tag_0_cOut', 'WP');
   await expect(app.page.locator('#tagPv_0')).toContainText('In – WP / Out – WP');
   // a second tag, typed by hand, two copies
-  await app.page.click('#main >> text=+ Add Another Tag');
+  await app.page.click('#main .jt-tab.add');
   await expect(app.page.locator('#tag_1_jobNo')).toBeFocused();
   await app.page.fill('#tag_1_jobNo', '1023557');
   await app.page.fill('#tag_1_jobName', 'Kings Ely – Kings House');
   await app.page.fill('#tag_1_copies', '2');
   // a third left empty is not printed
-  await app.page.click('#main >> text=+ Add Another Tag');
+  await app.page.click('#main .jt-tab.add');
   await expect(app.page.locator('#tagGo')).toHaveText('Print All (3 Pages)');
   const [w] = await Promise.all([app.nextPopup(), app.page.click('#tagGo')]);
   await w.waitForLoadState();

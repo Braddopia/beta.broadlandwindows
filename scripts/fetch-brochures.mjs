@@ -72,6 +72,32 @@ export function parseBrochures(html) {
   return [...out.values()];
 }
 
+/** WordPress's own list of uploaded PDFs (the website runs on WordPress): used when the page lists none */
+async function fromMedia() {
+  const out = [];
+  for (let page = 1; page <= 5; page++) {
+    const r = await fetch(
+      'https://www.broadlandwindows.co.uk/wp-json/wp/v2/media?mime_type=application/pdf&per_page=100&page=' + page,
+      { headers: { 'user-agent': 'BroadlandCRM brochure check' }, signal: AbortSignal.timeout(20000) }
+    );
+    if (!r.ok) break;
+    const L = await r.json();
+    for (const m of L) {
+      const url = String(m.source_url || '').replace(/^http:/, 'https:'),
+        title = text((m.title && m.title.rendered) || '') || fromFile(url);
+      if (
+        /^https:\/\/(www\.)?broadlandwindows\.co\.uk\/wp-content\/uploads\//.test(url) &&
+        /brochure|collection|colour|door|window|lantern|panel|glazing|smarts|hallmark|alitherm|teknos|heritage/i.test(
+          title + url
+        )
+      )
+        out.push({ cat: guessCat(title + ' ' + url), title: title.slice(0, 120), url });
+    }
+    if (L.length < 100) break;
+  }
+  return out;
+}
+
 async function main() {
   const fileArg = process.argv.indexOf('--file');
   let html = '';
@@ -93,8 +119,32 @@ async function main() {
         console.log(u + ': ' + e.message);
       }
     }
-  const items = parseBrochures(html);
-  console.log('Found ' + items.length + ' brochures');
+  let items = parseBrochures(html);
+  console.log('Found ' + items.length + ' brochures on the page');
+  if (items.length < 5) {
+    /* what the page holds, so the log shows why nothing was found */
+    console.log(
+      'Page size ' +
+        html.length +
+        ', links to PDFs: ' +
+        (html.match(/\.pdf/gi) || []).length +
+        ', uploads: ' +
+        (html.match(/wp-content\/uploads/gi) || []).length
+    );
+    console.log(
+      'PDF mentions: ' +
+        [...html.matchAll(/[^"'\s(]{0,120}\.pdf/gi)]
+          .slice(0, 8)
+          .map((m) => m[0])
+          .join(' | ')
+    );
+    try {
+      items = await fromMedia();
+      console.log('Found ' + items.length + " brochures in the website's file list");
+    } catch (e) {
+      console.log('File list: ' + e.message);
+    }
+  }
   if (items.length < 5) {
     console.log('Too few to trust; brochures.json left as it was.');
     return;

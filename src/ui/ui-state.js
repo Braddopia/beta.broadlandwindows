@@ -28,7 +28,7 @@ export const uiState = {
   hol: { m: 0, v: 'chart', cm: new Date().getMonth(), y: new Date().getFullYear(), brush: '' },
   rep: { t: 'summary' },
   fin: { t: 'debtors', pm: 0 },
-  del: { f: 'out', s: 'all', v: 'list' },
+  del: { f: 'out', s: 'all', v: 'cal', m: 0 },
   files: { cat: 'all', az: 0, list: 0, ssq: '', page: 1, per: 50 },
   con: { f: 'all' },
   board: 'factory',

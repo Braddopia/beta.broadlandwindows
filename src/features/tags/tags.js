@@ -85,46 +85,52 @@ export const TAG_CSS = `.jt-sheet{position:relative;width:297em;height:210em;bac
 .jt-warn{margin-top:.67em;font-size:10.5em;color:#d32f2f;line-height:1.25}
 .jt-note{margin-top:.21em;font-size:7em;color:#d32f2f;font-style:italic;text-decoration:underline}`;
 
-/* ---------------- the page ---------------- */
+/* ---------------- the page (v19.17: a tag studio) ----------------
+   Tabs along the top, one per tag (with its job number), and "+ Add Another Tag". Below, one card in two halves that
+   are always the same height: the chosen tag's boxes with the wording every tag carries underneath, and the tag as it
+   will print, at A4 landscape shape, filling the other half. Printed Recently is a list underneath. */
+let sel = 0;
+export function tagPick(i) {
+  sel = +i || 0;
+  render(true);
+}
 export function vTags() {
   const T = tagData(),
     pages = tagsToPrint(T).reduce((n, t) => n + (+t.copies || 1), 0),
     box = (id, f, val) => raw(fieldControl({ k: '', ...f }, val, { id }));
+  if (sel >= T.list.length) sel = T.list.length - 1;
+  const i = sel,
+    t = T.list[i];
   return String(html`<style>${raw(TAG_CSS)}</style><div class="head"><div><h1>Job Stock Tags</h1><span class="muted">Signs for stock kept for a job: fill in as many as you need, each prints on its own A4 page</span></div>
     <div class="tools"><button class="mini" ${raw(onClick('tagClear'))}>Start Again</button><button class="btn" id="tagGo" ${raw(onClick('tagPrint'))}>${pages > 1 ? 'Print All (' + pages + ' Pages)' : 'Print Tag'}</button></div></div>
-  <div class="jt" ${raw(onEvent('oninput', 'tagEdit', 'event'))} ${raw(onEvent('onchange', 'tagEdit', 'event'))}>
-    <div class="jt-forms">
-      <div class="panel"><h2><span>Wording On Every Tag</span></h2><div class="grid">
-        <div class="ff full"><label for="tag_warn">Warning (in red)</label>${box('tag_warn', { max: 90 }, T.warn)}</div>
-        <div class="ff full"><label for="tag_note">Small print (in red)</label>${box('tag_note', { max: 90 }, T.note)}</div>
-      </div></div>
-      ${T.list.map(
-        (
-          t,
-          i
-        ) => html`<div class="panel jt-card"><h2><span class="jt-n">Tag ${i + 1}</span><small class="muted nocap" id="tagHint_${i}">${contractOf(t.jobNo) ? 'Contract ' + t.jobNo + ' found' : ''}</small>${T.list.length > 1 ? html`<button class="cut-x" aria-label="Remove tag ${i + 1}" title="Remove" ${raw(onClick('tagDel', i))}>&times;</button>` : ''}</h2>
-        <div class="jt-g">
-          <div class="ff jt-f-no"><label for="tag_${i}_jobNo">Job Number</label>${box('tag_' + i + '_jobNo', { max: 30, combo: 'jobs' }, t.jobNo)}</div>
-          <div class="ff jt-f-name"><label for="tag_${i}_jobName">Job Name</label>${box('tag_' + i + '_jobName', { max: 80 }, t.jobName)}</div>
-          <div class="ff"><label for="tag_${i}_cIn">Colour Inside (B)</label>${box('tag_' + i + '_cIn', { max: 40, list: 'tagCols', ph: 'e.g. WP' }, t.cIn)}</div>
-          <div class="ff"><label for="tag_${i}_cOut">Colour Outside (A)</label>${box('tag_' + i + '_cOut', { max: 40, list: 'tagCols', ph: 'e.g. WP' }, t.cOut)}</div>
-          <div class="ff jt-f-cp"><label for="tag_${i}_copies">Copies</label>${box('tag_' + i + '_copies', { t: 'number', min: 1, max: 10 }, t.copies)}</div>
-        </div></div>`
-      )}
-      <div class="cut-add"><button class="btn ghost" ${raw(onClick('tagAdd'))} ${T.list.length >= MAX_TAGS ? raw('disabled') : ''}>+ Add Another Tag</button><span class="muted">Each tag prints on its own A4 landscape page</span></div>
+  <div class="jt-tabs" role="tablist">${T.list.map(
+    (x, k) =>
+      html`<button type="button" role="tab" aria-selected="${k == i ? 'true' : 'false'}" class="jt-tab ${k == i ? 'on' : ''}" ${raw(onClick('tagPick', k))}><b>Tag ${k + 1}</b><small>${x.jobNo || 'No job number yet'}</small></button>`
+  )}<button type="button" class="jt-tab add" ${raw(onClick('tagAdd'))} ${T.list.length >= MAX_TAGS ? raw('disabled') : ''}>+ Add Another Tag</button></div>
+  <div class="panel jt-studio" ${raw(onEvent('oninput', 'tagEdit', 'event'))} ${raw(onEvent('onchange', 'tagEdit', 'event'))}>
+    <div class="jt-edit">
+      <h2><span class="jt-n">Tag ${i + 1}</span><small class="muted nocap" id="tagHint_${i}">${contractOf(t.jobNo) ? 'Contract ' + t.jobNo + ' found' : ''}</small>${T.list.length > 1 ? html`<button class="mini del" ${raw(onClick('tagDel', i))}>Remove Tag</button>` : ''}</h2>
+      <div class="jt-g">
+        <div class="ff jt-f-no"><label for="tag_${i}_jobNo">Job Number</label>${box('tag_' + i + '_jobNo', { max: 30, combo: 'jobs' }, t.jobNo)}</div>
+        <div class="ff jt-f-name"><label for="tag_${i}_jobName">Job Name</label>${box('tag_' + i + '_jobName', { max: 80 }, t.jobName)}</div>
+        <div class="ff"><label for="tag_${i}_cIn">Colour Inside (B)</label>${box('tag_' + i + '_cIn', { max: 40, list: 'tagCols', ph: 'e.g. WP' }, t.cIn)}</div>
+        <div class="ff"><label for="tag_${i}_cOut">Colour Outside (A)</label>${box('tag_' + i + '_cOut', { max: 40, list: 'tagCols', ph: 'e.g. WP' }, t.cOut)}</div>
+        <div class="ff jt-f-cp"><label for="tag_${i}_copies">Copies</label>${box('tag_' + i + '_copies', { t: 'number', min: 1, max: 10 }, t.copies)}</div>
+      </div>
+      <div class="jt-shared"><h3>Wording On Every Tag</h3>
+        <div class="ff"><label for="tag_warn">Warning (in red)</label>${box('tag_warn', { max: 90 }, T.warn)}</div>
+        <div class="ff"><label for="tag_note">Small print (in red)</label>${box('tag_note', { max: 90 }, T.note)}</div>
+      </div>
       <datalist id="tagCols">${PRE.map(([n]) => html`<option value="${n}"></option>`)}</datalist>
     </div>
-    <div class="panel jt-prev"><h2><span>As They Print</span><small class="muted nocap">A4 landscape, one page each</small></h2>${T.list.map(
-      (t, i) =>
-        html`<p class="jt-pl">Tag ${i + 1}</p><div class="jt-pv" id="tagPv_${i}">${raw(tagSheet(full(T, t)))}</div>`
-    )}</div>
+    <div class="jt-stage"><div class="jt-pv" id="tagPv_${i}">${raw(tagSheet(full(T, t)))}</div><p class="muted">As it prints: A4 landscape${(+t.copies || 1) > 1 ? ', ' + t.copies + ' copies' : ''}</p></div>
   </div>
-  <div class="panel jt-recent"><h2><span>Printed Recently</span></h2>${
+  <div class="panel jt-recent"><h2><span>Printed Recently</span>${T.recent.length ? html`<small class="muted nocap">${T.recent.length} kept to print again</small>` : ''}</h2>${
     T.recent.length
-      ? T.recent.map(
-          (r, i) =>
-            html`<div class="row"><span><b>${r.jobNo}</b> ${r.jobName}<br><span class="muted">${tagColours(r) || 'No colours'} · printed ${fd(r.at)}${r.by ? ' by ' + r.by : ''}</span></span><span class="acts"><button class="mini" ${raw(onClick('tagUse', i))}>Add To List</button><button class="mini pri" ${raw(onClick('tagReprint', i))}>Print</button><button class="mini del" ${raw(onClick('tagForget', i))}>Remove</button></span></div>`
-        )
+      ? html`<div class="jt-rl">${T.recent.map(
+          (r, k) =>
+            html`<div class="row"><b>${r.jobNo}</b><span>${r.jobName}</span><span class="muted">${tagColours(r) || 'No colours'}</span><span class="muted">${fd(String(r.at || '').slice(0, 10))}${r.by ? ' · ' + r.by : ''}</span><span class="acts"><button class="mini" ${raw(onClick('tagUse', k))}>Add To List</button><button class="mini pri" ${raw(onClick('tagReprint', k))}>Print</button><button class="mini del" ${raw(onClick('tagForget', k))} aria-label="Remove">&times;</button></span></div>`
+        )}</div>`
       : html`<p class="empty">Tags you print are listed here to print again.</p>`
   }</div>`);
 }
@@ -176,6 +182,7 @@ export function tagAdd() {
   const T = tagData();
   if (T.list.length >= MAX_TAGS) return toast('Up to ' + MAX_TAGS + ' tags at a time');
   T.list.push(blank());
+  sel = T.list.length - 1;
   store();
   render(true);
   const b = $('#tag_' + (T.list.length - 1) + '_jobNo');
@@ -186,6 +193,7 @@ export function tagDel(i) {
   if (!T.list[i]) return;
   T.list.splice(i, 1);
   if (!T.list.length) T.list.push(blank());
+  sel = Math.min(sel, T.list.length - 1);
   store();
   render(true);
 }
@@ -197,6 +205,7 @@ export function tagClear() {
     'Start Again',
     () => {
       T.list = [blank()];
+      sel = 0;
       store();
       render(true);
     }
@@ -209,8 +218,8 @@ export function tagUse(i) {
   if (!r) return;
   const t = { ...blank(), jobNo: r.jobNo, jobName: r.jobName, cIn: r.cIn, cOut: r.cOut };
   const empty = T.list.findIndex((x) => !x.jobNo && !x.jobName);
-  if (empty >= 0) T.list[empty] = t;
-  else if (T.list.length < MAX_TAGS) T.list.push(t);
+  if (empty >= 0) T.list[(sel = empty)] = t;
+  else if (T.list.length < MAX_TAGS) sel = T.list.push(t) - 1;
   else return toast('Up to ' + MAX_TAGS + ' tags at a time');
   store();
   render(true);

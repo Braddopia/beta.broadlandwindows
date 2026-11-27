@@ -450,3 +450,18 @@ stock number). Decided with the owner:
 - The Overview redraws itself every minute and on coming back to the window. Sample data stays current: untouched
   sample records (no `_meta`) roll forward to today each day (`sampleRoll`, `state.sampleDay`); real records never move.
 - Review counts still need the Google and Trustpilot keys (see v19.14).
+
+## v19.17.1 (round 2)
+
+- Deliveries open on a month calendar (`delCal`, `uiState.del.v = 'cal'`, `del.m` month offset): Monday to Sunday,
+  each delivery a chip on its due day coloured by where it stands (overdue red, due today amber, in transit blue, due
+  slate, received green, with the supplier's colour dot); a chip opens the delivery, an empty part of a day starts a
+  new delivery due that day (`editDel(id, sup, con, due)`); deliveries with no date listed underneath. List and Board
+  are still there.
+- Job Stock Tags is a studio: a tab per tag (with its job number) and "+ Add Another Tag"; one card in two halves of
+  the same height, the chosen tag's boxes with the wording every tag carries underneath, and the tag as it prints on
+  a patterned stage; Printed Recently is a lined-up list. Fixed "Invalid Date" in Printed Recently.
+- The brochure check reads the page and, when it lists no brochure files (the first run found none: the page probably
+  builds its links with scripts), falls back to WordPress's file list (`/wp-json/wp/v2/media?mime_type=application/pdf`);
+  the log prints what the page holds.
+- Tour steps updated for the Deliveries calendar and the tag studio.
