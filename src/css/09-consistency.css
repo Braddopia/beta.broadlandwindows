@@ -269,3 +269,10 @@ body.upd-going .updw-card{opacity:.7}
   .supw-st{grid-column:3/5;grid-row:2}
 }
 @media(max-width:700px){.supw{grid-template-columns:3rem minmax(0,1fr);grid-template-rows:none}.supw-av{grid-row:auto}.supw-id,.supw-ct,.supw-go,.supw-hl,.supw-st{grid-column:auto;grid-row:auto}.supw-ct,.supw-hl,.supw-st,.supw-go{grid-column:1/-1}.supw-go{justify-self:stretch}}
+/* searchable drop-downs (v19.18.5): a long list has a search box that stays at the top while the list scrolls */
+#pkpop.pk-long .pk-s{position:sticky;top:-.35rem;z-index:1;margin:-.35rem -.35rem .3rem;padding:.45rem .45rem .4rem;background:var(--pop,var(--card));border-bottom:1px solid var(--line)}
+#pkpop .pk-s input{width:100%;padding:.45rem .65rem;border:1px solid var(--line);border-radius:9px;background:var(--card2);color:var(--ink);font:inherit;font-size:.88rem}
+#pkpop .pk-s input:focus{outline:none;border-color:var(--blue);background:var(--card)}
+#pkpop .pk-none{margin:.4rem .6rem;color:var(--muted);font-size:.85rem}
+/* the faint (A) / (B) note under colour boxes */
+.bar-f .hint,.cut-r .hint{display:block;margin-top:.15rem;font-size:.7rem;color:var(--muted);font-weight:400}

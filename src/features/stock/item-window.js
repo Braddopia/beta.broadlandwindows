@@ -1,4 +1,5 @@
 /* features/stock/item-window: The product window: adding, removing, requesting and editing stock. */
+import { SIDE } from '../../config/colours.js';
 import { barLenOf } from '../../domain/barcut.js';
 import { MAX_PHOTOS, UNITS } from '../../config/constants.js';
 import { today } from '../../core/dates.js';
@@ -94,8 +95,8 @@ export function ieFields() {
       ? { k: 'stock', l: 'Current stock', t: 'number', max: 1e7, sec: 's', hint: 'Changing this logs an adjustment' }
       : { k: 'qty', l: 'Quantity', t: 'number', req: 1, pos: 1, max: 1e6, sec: 's' },
     { k: 'barcode', l: 'Barcode', max: 64, sec: 'b' },
-    { k: 'cInName', l: 'Colour in (B)', t: 'colour', w: 'full', sec: 'c' },
-    { k: 'cOutName', l: 'Colour out (A)', t: 'colour', w: 'full', sec: 'c' },
+    { k: 'cInName', l: 'Colour in (B)', t: 'colour', w: 'full', sec: 'c', hint: SIDE.B },
+    { k: 'cOutName', l: 'Colour out (A)', t: 'colour', w: 'full', sec: 'c', hint: SIDE.A },
     ...(ieMode != 'remove'
       ? [
           {

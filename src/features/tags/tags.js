@@ -4,7 +4,7 @@
 import { onClick, onEvent } from '../../core/actions.js';
 import { $, esc } from '../../core/dom.js';
 import { html, raw } from '../../core/html.js';
-import { PRE } from '../../config/colours.js';
+import { PRE, SIDE } from '../../config/colours.js';
 import { audit } from '../../data/audit.js';
 import { store } from '../../data/persistence.js';
 import { SAFE } from '../../data/sanitize.js';
@@ -139,8 +139,8 @@ export function vTags() {
       <div class="jt-g">
         <div class="ff jt-f-no"><label for="tag_${i}_jobNo">Job Number</label>${box('tag_' + i + '_jobNo', { max: 30, combo: 'jobs' }, t.jobNo)}</div>
         <div class="ff jt-f-name"><label for="tag_${i}_jobName">Job Name</label>${box('tag_' + i + '_jobName', { max: 80 }, t.jobName)}</div>
-        <div class="ff"><label for="tag_${i}_cIn">Colour Inside (B)</label>${box('tag_' + i + '_cIn', { max: 40, ph: 'e.g. WP', combo: 'colours' }, t.cIn)}</div>
-        <div class="ff"><label for="tag_${i}_cOut">Colour Outside (A)</label>${box('tag_' + i + '_cOut', { max: 40, ph: 'e.g. WP', combo: 'colours' }, t.cOut)}</div>
+        <div class="ff"><label for="tag_${i}_cIn">Colour Inside (B)</label>${box('tag_' + i + '_cIn', { max: 40, ph: 'e.g. WP', combo: 'colours' }, t.cIn)}<span class="hint">${SIDE.B}</span></div>
+        <div class="ff"><label for="tag_${i}_cOut">Colour Outside (A)</label>${box('tag_' + i + '_cOut', { max: 40, ph: 'e.g. WP', combo: 'colours' }, t.cOut)}<span class="hint">${SIDE.A}</span></div>
         <div class="ff jt-f-cp"><label for="tag_${i}_copies">Copies</label>${box('tag_' + i + '_copies', { t: 'number', min: 1, max: 10 }, t.copies)}</div>
       </div>
       <div class="jt-shared ${unlocked ? 'open' : 'locked'}"><h3><span>${raw(unlocked ? '' : svg(LOCK))}Wording On Every Tag</span><button type="button" class="mini" ${raw(onClick('tagWording'))}>${unlocked ? 'Done' : 'Change'}</button></h3>

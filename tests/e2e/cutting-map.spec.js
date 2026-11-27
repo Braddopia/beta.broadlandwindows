@@ -134,8 +134,9 @@ test('Panel Optimiser: change a piece, the plan updates; save, reopen and print 
   await expect(app.page.locator('#main .cut-b text.sz', { hasText: /^720 × 560/ })).toHaveCount(2);
   await expect(app.page.locator('#main .cut-b text.sz', { hasText: /^560 × 720/ })).toHaveCount(0);
   await expect(app.page.locator('#main .cut-pre').first()).toContainText('1200 × 2400mm');
-  await expect(app.page.locator('#main label[for=cut_sheets_0_cIn]')).toHaveText('Colour Inside (B)');
-  await expect(app.page.locator('#main label[for=cut_sheets_0_cOut]')).toHaveText('Colour Outside (A)');
+  await expect(app.page.locator('#main label[for=cut_sheets_0_cIn] > span')).toHaveText('Colour Inside (B)');
+  await expect(app.page.locator('#main label[for=cut_sheets_0_cOut] > span')).toHaveText('Colour Outside (A)');
+  await expect(app.page.locator('#main label[for=cut_sheets_0_cOut] .hint')).toHaveText('A – Typically Outside');
   await app.page.fill('#cut_sheets_0_T', '4');
   await app.page.fill('#cut_sheets_0_cIn', 'White');
   await app.page.fill('#cut_sheets_0_cOut', 'Anthracite');

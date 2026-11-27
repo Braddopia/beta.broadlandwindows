@@ -33,6 +33,7 @@ function box() {
     document.body.appendChild(pop);
     /* mousedown, not click: the box must not lose focus before the choice lands */
     pop.addEventListener('mousedown', (e) => {
+      if (e.target.closest('.pk-s')) return;
       e.preventDefault();
       const b = e.target.closest('[data-i],[data-d],[data-dp],[data-o]');
       if (!b || b.disabled) return;
@@ -141,23 +142,54 @@ function choose(i) {
   fire(el);
 }
 
-/* ---- drop-down list for a <select> ---- */
+/* ---- drop-down list for a <select> ----
+   (v19.18.5) A long list (more than SEARCH_FROM choices, such as the stock-take areas) has a search box at the top:
+   it opens ready to type, and shows only the choices with the typed words anywhere in them. */
+const SEARCH_FROM = 12;
+let selQ = '';
+const selMatch = (o) => {
+  const q = selQ.trim().toLowerCase().split(/\s+/).filter(Boolean),
+    t = (o.textContent || '').toLowerCase();
+  return !q.length || q.every((w) => t.includes(w));
+};
+const showOpt = (o) => !o.hidden && selMatch(o);
 function drawSelect() {
   const el = forEl,
-    opts = [...el.options];
+    opts = [...el.options],
+    long = opts.length > SEARCH_FROM;
   let html = '',
-    grp = null;
+    grp = null,
+    n = 0;
   opts.forEach((o, i) => {
     const g = o.parentElement && o.parentElement.tagName == 'OPTGROUP' ? o.parentElement : null;
     if (g !== grp) {
       grp = g;
-      if (g) html += `<p class="pk-g">${esc(g.label)}</p>`;
+      if (g && !selQ) html += `<p class="pk-g">${esc(g.label)}</p>`;
     }
-    if (o.hidden) return;
+    if (!showOpt(o)) return;
+    n++;
     html += `<button type="button" class="pk-o ${i == at ? 'on' : ''} ${o.selected ? 'sel' : ''}" data-o="${i}" role="option" aria-selected="${o.selected}" ${o.disabled ? 'disabled' : ''}>${esc(o.textContent || '\u00a0')}</button>`;
   });
-  box().className = 'pk-list pk-sel open';
-  pop.innerHTML = html;
+  if (!n) html = '<p class="pk-none">Nothing matches</p>';
+  box().className = 'pk-list pk-sel open' + (long ? ' pk-long' : '');
+  let s = pop.querySelector(':scope>.pk-s'),
+    ol = pop.querySelector(':scope>.pk-ol');
+  if (long && !s) {
+    pop.innerHTML =
+      '<div class="pk-s"><input type="search" placeholder="Search" aria-label="Search the list" autocomplete="off"></div><div class="pk-ol"></div>';
+    s = pop.querySelector('.pk-s');
+    ol = pop.querySelector('.pk-ol');
+    const q = s.querySelector('input');
+    q.value = selQ;
+    q.addEventListener('input', () => {
+      selQ = q.value;
+      const first = [...forEl.options].findIndex((o) => showOpt(o) && !o.disabled);
+      if (first >= 0) at = first;
+      drawSelect();
+    });
+  }
+  if (long) ol.innerHTML = html;
+  else pop.innerHTML = html;
   place();
   const on = pop.querySelector('.pk-o.on');
   if (on) on.scrollIntoView({ block: 'nearest' });
@@ -166,9 +198,13 @@ function openSelect(el) {
   fresh = true;
   forEl = el;
   kind = 'select';
+  selQ = '';
+  if (pop) pop.innerHTML = '';
   at = Math.max(0, el.selectedIndex);
   el.setAttribute('aria-expanded', 'true');
   drawSelect();
+  const q = pop.querySelector('.pk-s input');
+  if (q) setTimeout(() => q.isConnected && q.focus({ preventScroll: true }), 0);
 }
 function chooseOpt(i) {
   const el = forEl,
@@ -183,7 +219,7 @@ function chooseOpt(i) {
 /* the next option that can be picked, going one way or the other */
 function stepOpt(d) {
   const L = forEl.options;
-  for (let i = at + d; i >= 0 && i < L.length; i += d) if (!L[i].disabled && !L[i].hidden) return i;
+  for (let i = at + d; i >= 0 && i < L.length; i += d) if (!L[i].disabled && showOpt(L[i])) return i;
   return at;
 }
 let typed = '',
@@ -273,7 +309,11 @@ export function listenForPickers() {
     if (kind == 'select' && pop && !pop.contains(e.target) && e.target != forEl) pickClose();
   });
   document.addEventListener('focusout', (e) => {
-    if (e.target == forEl && kind == 'select') setTimeout(() => document.activeElement != forEl && pickClose(), 120);
+    if ((e.target == forEl || (pop && pop.contains(e.target))) && kind == 'select')
+      setTimeout(() => {
+        const a = document.activeElement;
+        if (a != forEl && !(pop && pop.contains(a))) pickClose();
+      }, 120);
   });
   /* a date box: our calendar instead of the browser's (mouse only) */
   document.addEventListener('click', (e) => {
@@ -301,11 +341,15 @@ export function listenForPickers() {
       if (kind == 'select') {
         const k = e.key;
         if (k == 'Escape' || k == 'Tab') {
-          if (k == 'Escape') {
+          const was = forEl,
+            inSearch = pop.contains(e.target);
+          if (k == 'Escape' || inSearch) {
             e.preventDefault();
             e.stopPropagation();
           }
           pickClose();
+          /* back to the drop-down itself (from the search box too) */
+          if (was && (k == 'Escape' || inSearch)) was.focus({ preventScroll: true });
         } else if (k == 'ArrowDown' || k == 'ArrowUp') {
           e.preventDefault();
           at = stepOpt(k == 'ArrowDown' ? 1 : -1);
@@ -315,11 +359,11 @@ export function listenForPickers() {
           at = k == 'Home' ? -1 : forEl.options.length;
           at = stepOpt(k == 'Home' ? 1 : -1);
           drawSelect();
-        } else if (k == 'Enter' || k == ' ') {
+        } else if (k == 'Enter' || (k == ' ' && !(pop && pop.contains(e.target)))) {
           e.preventDefault();
           e.stopPropagation();
           chooseOpt(at);
-        } else if (k.length == 1 && !e.ctrlKey && !e.metaKey) {
+        } else if (k.length == 1 && !e.ctrlKey && !e.metaKey && !(pop && pop.contains(e.target))) {
           /* type the first letters to jump to an option */
           e.preventDefault();
           clearTimeout(typedT);

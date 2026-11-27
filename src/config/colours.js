@@ -1,5 +1,7 @@
 /* config/colours: the preset frame colours offered in the colour picker, and their swatch colours. */
 
+/** (v19.18.5, the owner's wording) the faint note under every colour box marked (A) or (B) */
+export const SIDE = { A: 'A – Typically Outside', B: 'B – Typically Inside' };
 export const PRE = [
   ['Black', '#3a3a3a'],
   ['Grey', '#8a8a8a'],

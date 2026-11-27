@@ -80,3 +80,33 @@ test('Deliveries: the month fits on one screen; the Hallmark Feed bar is on the 
   await expect(app.page.locator('#main')).toContainText('Hallmark Feed');
   expect(app.errors).toEqual([]);
 });
+
+test('v19.18.5: colour boxes marked (A) or (B) say which is typically inside and outside', async ({ app }) => {
+  await app.go('stock');
+  await app.call('stockForm', 'add');
+  await expect(app.page.locator('#mbox .ff:has(#f_cInName) .hint')).toHaveText('B – Typically Inside');
+  await expect(app.page.locator('#mbox .ff:has(#f_cOutName) .hint')).toHaveText('A – Typically Outside');
+  await app.closeAll();
+  await app.go('tags');
+  await expect(app.page.locator('.ff:has(#tag_0_cIn) .hint')).toHaveText('B – Typically Inside');
+  await app.go('bars');
+  await expect(app.page.locator('#main .bar-col').first()).toContainText('B – Typically Inside');
+  expect(app.errors).toEqual([]);
+});
+
+test('v19.18.5: a long drop-down has a search box that narrows the list as you type', async ({ app }) => {
+  await app.go('stock');
+  await app.call('stockForm', 'add');
+  await app.page.click('#f_area');
+  const q = app.page.locator('#pkpop.open .pk-s input');
+  await expect(q).toBeFocused();
+  await app.page.keyboard.type('green');
+  await expect(app.page.locator('#pkpop .pk-o')).toHaveText(['Green Container']);
+  await app.page.keyboard.press('Enter');
+  await expect(app.page.locator('#f_area')).toHaveValue('Green Container');
+  // a short list stays as it was, with no search box
+  await app.page.click('#f_unit');
+  await expect(app.page.locator('#pkpop.open')).toBeVisible();
+  await expect(app.page.locator('#pkpop .pk-s')).toHaveCount(0);
+  expect(app.errors).toEqual([]);
+});

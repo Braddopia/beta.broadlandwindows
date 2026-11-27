@@ -11,7 +11,7 @@ import { store } from '../../data/persistence.js';
 import { SAFE } from '../../data/sanitize.js';
 import { state } from '../../data/state.js';
 import { optimise } from '../../domain/cutlist.js';
-import { PRE } from '../../config/colours.js';
+import { SIDE } from '../../config/colours.js';
 import { jobTitle } from '../../domain/job-title.js';
 import { canSee } from '../../domain/permissions.js';
 import { uuid } from '../../core/ids.js';
@@ -132,13 +132,13 @@ function table(kind, rows) {
                   ],
                 }
               : t == 'colour'
-                ? { k: '', t: 'text', max: 40, list: 'cutCols', ph: 'e.g. White' }
+                ? { k: '', t: 'text', max: 40, combo: 'colours', ph: 'e.g. White' }
                 : { k: '', t, max: t == 'number' ? 100000 : 60 };
           const v = k == 'turn' ? (r.turn === false ? 'no' : 'yes') : r[k];
-          return html`<label class="bar-f cut-f-${k}" for="${'cut_' + kind + '_' + i + '_' + k}"><span>${l}${k == 'L' || k == 'W' || k == 'T' ? raw(' <i class="nocap">(mm)</i>') : ''}</span>${raw(fieldControl(f, v, { id: 'cut_' + kind + '_' + i + '_' + k }))}</label>`;
+          return html`<label class="bar-f cut-f-${k}" for="${'cut_' + kind + '_' + i + '_' + k}"><span>${l}${k == 'L' || k == 'W' || k == 'T' ? raw(' <i class="nocap">(mm)</i>') : ''}</span>${raw(fieldControl(f, v, { id: 'cut_' + kind + '_' + i + '_' + k }))}${k == 'cIn' || k == 'cOut' ? html`<small class="hint">${k == 'cIn' ? SIDE.B : SIDE.A}</small>` : ''}</label>`;
         }
       )}<button class="cut-x" aria-label="Remove row ${i + 1}" title="Remove" ${raw(onClick('cutDel', kind, i))}>&times;</button></div>`
-  )}${rows.length ? '' : html`<p class="muted bar-none">Nothing here yet.</p>`}${kind == 'sheets' ? html`<datalist id="cutCols">${PRE.map(([n]) => html`<option value="${n}"></option>`)}</datalist>` : ''}</div>`;
+  )}${rows.length ? '' : html`<p class="muted bar-none">Nothing here yet.</p>`}</div>`;
 }
 /** a board's thickness and colours on one line, e.g. "28mm Thickness · Inside (B) KL010 · Outside (A) KL005" */
 export const boardCols = (s) => boardSpec(s).join(' · ');

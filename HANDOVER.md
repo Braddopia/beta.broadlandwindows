@@ -709,3 +709,13 @@ The owner asked for the record windows to work like their old system, AdminBase,
 - Deliveries: the Hallmark Feed bar shows on the List view only; the calendar's weeks share the screen height
   (`delCalFit`, the page's `after` step) so the month fits on one screen.
 - Tests: tests/e2e/round-1918.spec.js, plus updates in screen-saver, stock-take, cutting-map and round-1917-3 specs.
+
+## v19.18.5: colour (A)/(B) notes, searchable drop-downs
+
+- Every colour box marked (A) or (B) has a faint note under it: "B – Typically Inside", "A – Typically Outside"
+  (`SIDE` in config/colours.js): the product window, Job Stock Tags, Panel Optimiser boards and Cutting Optimiser
+  profiles. The Panel and Cutting Optimiser colour boxes now use the app's own colour pick list too.
+- Drop-downs (ui/components/pickers.js): a list with more than 12 choices (`SEARCH_FROM`) opens with a search box at
+  the top, ready to type; only the choices containing the typed words show; arrows and Enter pick; Esc goes back to
+  the box. Short lists are unchanged. Phones keep their own picker.
+- Tests: tests/e2e/round-1918.spec.js (v19.18.5), cutting-map.spec.js.

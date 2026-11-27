@@ -18,7 +18,7 @@ import { DEFAULT_KERF, MIN_OFFCUT, barLenOf, groupBars, offcutsOf, optimiseBars 
 import { jobTitle } from '../../domain/job-title.js';
 import { canSee } from '../../domain/permissions.js';
 import { ikey, moveRow, prod, products, stkId, unitOf } from '../../domain/stock.js';
-import { PRE } from '../../config/colours.js';
+import { SIDE } from '../../config/colours.js';
 import { printDoc } from '../../print/print.js';
 import { form } from '../../ui/forms/form.js';
 import { askIn, closeModal, openModal } from '../../ui/modal.js';
@@ -184,14 +184,14 @@ export function vBars() {
     <div class="panel cut-job"><h2><span>Job</span><small class="muted nocap" id="barJobHint">${k ? 'Contract ' + k.id + ' found: Save To Contract keeps the list with its documents' : 'Type the contract number to link the list to it'}</small></h2><div class="cut-og cut-eq">
       <div class="ff"><label for="bar_job_no">Job Number</label><input id="bar_job_no" maxlength="30" data-combo="jobs" value="${D.jobNo || ''}" autocomplete="off"></div>
       <div class="ff"><label for="bar_job_name">Job Name</label><input id="bar_job_name" maxlength="80" value="${D.jobName || ''}" autocomplete="off"></div>
-    </div><datalist id="barAngles"><option value="90"></option><option value="45"></option><option value="67.5"></option><option value="60"></option><option value="30"></option><option value="22.5"></option></datalist><datalist id="barCols">${PRE.map(([n]) => html`<option value="${n}"></option>`)}</datalist><datalist id="barLens"><option value="6000">6M</option><option value="6500">6.5M (most bars)</option><option value="7000">7M</option></datalist></div>
+    </div><datalist id="barAngles"><option value="90"></option><option value="45"></option><option value="67.5"></option><option value="60"></option><option value="30"></option><option value="22.5"></option></datalist><datalist id="barLens"><option value="6000">6M</option><option value="6500">6.5M (most bars)</option><option value="7000">7M</option></datalist></div>
     ${D.profiles.map(
       (p, pi) => html`<div class="panel bar-p">
         <div class="bar-ph"><span class="bar-pn">Profile ${pi + 1}</span>
           <label class="bar-f bar-code"><span>Profile Code</span><input id="bar_p_${pi}_code" maxlength="40" data-combo="profiles" value="${p.code}" autocomplete="off"></label>
           <label class="bar-f bar-desc"><span>Description</span><input id="bar_p_${pi}_desc" maxlength="80" value="${p.desc}" autocomplete="off"></label>
-          <label class="bar-f bar-col"><span>Colour Inside (B)</span><input id="bar_p_${pi}_cIn" maxlength="40" list="barCols" value="${p.cIn || ''}" placeholder="e.g. White" autocomplete="off"></label>
-          <label class="bar-f bar-col"><span>Colour Outside (A)</span><input id="bar_p_${pi}_cOut" maxlength="40" list="barCols" value="${p.cOut || ''}" placeholder="e.g. Anthracite" autocomplete="off"></label>
+          <label class="bar-f bar-col"><span>Colour Inside (B)</span><input id="bar_p_${pi}_cIn" maxlength="40" data-combo="colours" value="${p.cIn || ''}" placeholder="e.g. White" autocomplete="off"><small class="hint">${SIDE.B}</small></label>
+          <label class="bar-f bar-col"><span>Colour Outside (A)</span><input id="bar_p_${pi}_cOut" maxlength="40" data-combo="colours" value="${p.cOut || ''}" placeholder="e.g. Anthracite" autocomplete="off"><small class="hint">${SIDE.A}</small></label>
           <label class="bar-f bar-n"><span>Bar Length <i class="nocap">(mm)</i></span><input id="bar_p_${pi}_bar" type="number" min="500" max="20000" step="1" list="barLens" value="${p.bar}"></label>
           ${D.profiles.length > 1 ? html`<button class="mini del" ${raw(onClick('barProfDel', pi))}>Remove Profile</button>` : ''}</div>
         <div class="bar-cuts">${p.cuts.map((c, ci) => cutRow(pi, c, ci))}</div>
