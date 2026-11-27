@@ -356,3 +356,6 @@ stock number). Decided with the owner:
 - Removed an `undefined/` folder of test screenshots that had been committed by mistake.
 - v19.15.2: the desktop app icon is the same emblem as the browser tab (the sun with the crane), on a see-through
   background with nothing added (the navy tile and the "maskable" icon were removed, at the owner's request).
+- v19.15.3: the icon files were renamed (`app-sun-*.png`) so installed apps notice the new icon: browsers keep an
+  installed app's icon until the file name in the manifest changes. Windows may still need the app opened once (Edge
+  and Chrome then ask to update the icon) or unpinning and pinning it again on the taskbar.
