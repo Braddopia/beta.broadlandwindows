@@ -104,3 +104,19 @@ test('on a Mac the app uses white rounded-tile icons, like the other Dock apps (
     icons: [200, 200],
   });
 });
+
+test('v19.18.3: the new-version window still shows after the screen saver has been used once', async ({ app }) => {
+  const version = {};
+  await serve(app, version);
+  // the screen saver has run once: its (hidden) scene stays on the page
+  await app.page.evaluate(() => {
+    const s = document.createElement('div');
+    s.id = 'saver';
+    document.body.appendChild(s);
+  });
+  version.now = '99.0.1';
+  await app.page.waitForTimeout(3100);
+  await app.page.evaluate(() => document.dispatchEvent(new Event('visibilitychange')));
+  await expect(app.page.locator('#updWin')).toContainText('Version 99.0.1');
+  expect(app.errors).toEqual([]);
+});

@@ -11,14 +11,23 @@ import { LOGO_SRC } from '../../core/assets.js';
 
 const LATER_MS = 10 * 60 * 1000;
 let laterUntil = 0,
-  last = null;
+  last = null,
+  retryT = 0;
 
 /** show the window for update u = { version, notes, app }; while snoozed, only the chip */
 export function showUpdate(u) {
   if (!u || document.body.classList.contains('tv')) return;
   last = u;
   if (performance.now() < laterUntil) return showChip(u);
-  if ($('.ov.open') || $('#saver') || $('#updWin')) return;
+  if ($('#updWin')) return;
+  /* (v19.18.3) wait while a pop-up window, a tour or the screen saver is showing, then try again by itself. The
+     screen saver's scene stays on the page once it has been used, so it counts only while it is on ('#saver.on');
+     before, its hidden scene stopped the window from ever showing again. */
+  if ($('.ov.open') || $('#saver.on') || $('#tour.open')) {
+    clearTimeout(retryT);
+    retryT = setTimeout(() => showUpdate(last), 15e3);
+    return;
+  }
   const where = u.app ? 'app' : 'page',
     notes = (u.notes || []).filter(Boolean);
   $('#updChip')?.remove();

@@ -679,3 +679,10 @@ The owner asked for the record windows to work like their old system, AdminBase,
   Next Step stay under the title line; Commissions and Job Costings only for accounts that see money; Default product
   lines are Labour, Trims and Removal (`DEFAULT_LINES` in features/records/products.js); contract colours are a
   short list of nine (`CCOLS` in features/records/fields.js); Edit List hides reports for everyone.
+
+## v19.18.3: the New Version window shows again
+
+- Cause: `showUpdate` (ui/shell/update-card.js) waited while `#saver` existed, but the screen saver's scene stays on
+  the page (hidden) once it has run, so after the first screen saver the window never showed again. It now waits only
+  while the saver is on (`#saver.on`), a pop-up window or a tour is open, and tries again by itself every 15 seconds.
+  Test: tests/e2e/desktop-app.spec.js (v19.18.3).
