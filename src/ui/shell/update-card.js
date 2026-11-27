@@ -18,7 +18,8 @@ let laterUntil = 0,
 export function showUpdate(u) {
   if (!u || document.body.classList.contains('tv')) return;
   last = u;
-  if (performance.now() < laterUntil) return showChip(u);
+  /* put away with Remind Me Later: only the chip, unless someone pressed Check For Updates */
+  if (!u.force && performance.now() < laterUntil) return showChip(u);
   if ($('#updWin')) return;
   /* (v19.18.3) wait while a pop-up window, a tour or the screen saver is showing, then try again by itself. The
      screen saver's scene stays on the page once it has been used, so it counts only while it is on ('#saver.on');

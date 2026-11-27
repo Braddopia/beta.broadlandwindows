@@ -120,3 +120,27 @@ test('v19.18.3: the new-version window still shows after the screen saver has be
   await expect(app.page.locator('#updWin')).toContainText('Version 99.0.1');
   expect(app.errors).toEqual([]);
 });
+
+test('v19.18.7: Settings shows the version for every account, and Check For Updates looks straight away', async ({
+  app,
+}) => {
+  const version = {};
+  await serve(app, version);
+  const v = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8')).version;
+  await app.role('staff');
+  await app.go('settings');
+  const row = app.page.locator('#main .set-r', { hasText: 'Version' });
+  await expect(row).toContainText('This is version ' + v);
+  // nothing newer: it says so
+  await row.locator('[data-act=updCheck]').click();
+  await expect(app.page.locator('#toast')).toContainText('You have the latest version (' + v + ')');
+  // a newer one: the New Version window, even after Remind Me Later
+  version.now = '99.1.0';
+  await row.locator('[data-act=updCheck]').click();
+  await expect(app.page.locator('#updWin')).toContainText('Version 99.1.0');
+  await app.page.locator('#updWin .updw-l').click();
+  await expect(app.page.locator('#updWin')).toHaveCount(0);
+  await row.locator('[data-act=updCheck]').click();
+  await expect(app.page.locator('#updWin')).toContainText('Version 99.1.0');
+  expect(app.errors).toEqual([]);
+});

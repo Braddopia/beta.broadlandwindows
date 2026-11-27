@@ -7,6 +7,7 @@
      (v19.17.3) on every page change, whenever the window comes back into view or the internet comes back, and every
      2 minutes (at most once every 3 seconds). When a newer version has been published it asks for a restart with the
      Update Ready pop-up (ui/shell/update-card.js), again at every check until restarted. */
+import { toast } from '../../ui/toast.js';
 import { emit, on } from '../../core/events.js';
 
 let promptEvent = null;
@@ -34,24 +35,42 @@ export async function installApp() {
 
 let seen = '',
   lastCheck = 0;
-export async function checkVersion(force) {
-  if (!force && performance.now() - lastCheck < 3e3) return;
+/** the version running now (the build writes it into the page) */
+export const appVersion = () => (typeof APP_BUILD == 'string' ? APP_BUILD : '');
+/** look for a newer version in version.json: 'new' (the window is shown), 'latest', or 'error' */
+export async function checkVersion(force, asked) {
+  if (!force && performance.now() - lastCheck < 3e3) return 'latest';
   lastCheck = performance.now();
   try {
     const r = await fetch('version.json?t=' + Date.now(), { cache: 'no-store' });
-    if (!r.ok) return;
+    if (!r.ok) return 'error';
     const j = await r.json(),
       v = String(j.version || '');
-    if (!seen) seen = typeof APP_BUILD == 'string' ? APP_BUILD : v;
-    if (v && v != seen)
+    if (!seen) seen = appVersion() || v;
+    if (v && v != seen) {
       emit('update-ready', {
         version: v,
         notes: (Array.isArray(j.notes) ? j.notes : []).slice(0, 3).map(String),
         app: appState() == 'installed',
+        force: !!asked,
       });
+      return 'new';
+    }
+    return 'latest';
   } catch (e) {
     /* offline: try again later */
+    return 'error';
   }
+}
+/** (v19.18.7) Settings, Check For Updates: look now and say what was found */
+export async function updCheck() {
+  if (!/^https?:$/.test(location.protocol)) {
+    toast('This copy was opened from a file, so it cannot update itself. The website always has the newest version.');
+    return;
+  }
+  const r = await checkVersion(true, true);
+  if (r == 'latest') toast('You have the latest version (' + appVersion() + ')');
+  else if (r == 'error') toast('Could not check for updates. Check the internet connection and try again.');
 }
 /* start-up step (run once by main.js) */
 /** a Mac: its Dock icons are white rounded tiles with the picture inside, so it gets its own icon set */

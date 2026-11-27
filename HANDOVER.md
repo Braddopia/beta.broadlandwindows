@@ -742,3 +742,11 @@ page, page build times and a CPU profile). Findings and fixes:
   choice). "Cut from full bars?" shows only for Aluminium counted in Meters (M) (`BAR_UNIT`); the bar length is the
   Length (m) box, which is never relabelled (a PCS item keeps "Pieces per pack"). Aluminium in another unit shows a
   note to set Meters (M); a link it already had is kept.
+
+## v19.18.7: Version and Check For Updates in Settings
+
+- Settings, Version row (every account): "This is version x" (`appVersion()`, the build's `APP_BUILD`) and Check For
+  Updates (`updCheck` in features/app/desktop-app.js). `checkVersion()` now returns 'new', 'latest' or 'error'; a
+  check someone asked for shows the New Version window even after "Remind Me In 10 Minutes" (`force` in the
+  update-ready payload, ui/shell/update-card.js). From a file on the computer it explains that the website has the
+  newest version. Test: tests/e2e/desktop-app.spec.js (v19.18.7).

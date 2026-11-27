@@ -1,5 +1,5 @@
 /* features/settings/settings: The Settings page. */
-import { appState } from '../app/desktop-app.js';
+import { appState, appVersion } from '../app/desktop-app.js';
 import { SAVER_CHOICES, saverMinutes } from '../app/screen-saver.js';
 import { fieldControl } from '../../ui/forms/fields.js';
 import { docCard } from './doc-builder.js';
@@ -135,6 +135,7 @@ export function vSettings() {
     ${row('Help Tour', 'A short guide to the site', '<button class="btn ghost sm" data-act="startTour">Start</button>')}
     ${row('Report A Problem', 'Something not working or looking wrong? Tell us here', '<button class="btn sm" data-act="bugReport">Report</button>')}
     ${row('Account', 'Signed in as ' + esc(ROLES[ROLE].n), '<button class="btn ghost sm" data-act="swRole">Switch</button>')}
+    ${row('Version', 'This is version <b class="nocap">' + esc(appVersion() || 'unknown') + '</b>', '<button class="btn ghost sm" data-act="updCheck">Check For Updates</button>')}
    </section>
    <section class="panel set-c"><h2><span class="set-ic">${svg(ICONS.contacts)}</span><span>Company Details</span>${own ? `<button class="btn sm" ${onClick('coEditK', 'co')}>Edit</button>` : ''}</h2>${dl(SET_CO)}<p class="muted set-n">${own ? 'Used on printed contracts, invoices and guarantees.' : 'Our company details, such as the VAT number and email addresses, for you to refer to. Only an administrator can change them.'}</p></section>
    ${
