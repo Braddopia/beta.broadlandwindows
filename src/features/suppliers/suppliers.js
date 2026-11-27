@@ -3,13 +3,13 @@ import { SUPCAT } from '../../config/constants.js';
 import { onClick } from '../../core/actions.js';
 import { fd, today } from '../../core/dates.js';
 import { esc } from '../../core/dom.js';
-import { initials, lines, m0, money, sum } from '../../core/format.js';
+import { initials, lines, m0, sum } from '../../core/format.js';
 import { svg } from '../../core/icons.js';
 import { SAFE } from '../../data/sanitize.js';
 import { audit } from '../../data/audit.js';
 import { store } from '../../data/persistence.js';
 import { state } from '../../data/state.js';
-import { colTxt, isLow, moveRow, nextOrd, products, reorderQty, stt, unitOf } from '../../domain/stock.js';
+import { colTxt, isLow, moveRow, nextOrd, products, reorderQty, unitOf } from '../../domain/stock.js';
 import { can } from '../../domain/permissions.js';
 import { conPhones, editContact } from '../contacts/contacts.js';
 import { emptyArt } from '../../ui/components/art.js';
@@ -22,6 +22,7 @@ import { uiState } from '../../ui/ui-state.js';
 import * as repos from '../../data/repository.js';
 import { plugInForms } from '../../ui/forms/form.js';
 import { celebrate } from '../../ui/success.js';
+import { supWin } from './supplier-window.js';
 
 export const sups = () => state.suppliers;
 export const SUPN = (cur) => ['', ...new Set([...sups().map((x) => x.name), cur || ''].filter(Boolean))];
@@ -110,46 +111,8 @@ export function vSuppliers() {
 /* full supplier details, shown in a popup */
 /* supplier popup: who they are and how to reach them first; stock kept small */
 export function supOpen(n) {
-  const x = state.suppliers.find((s) => s.name == n);
-  if (!x) return;
-  const i = state.suppliers.indexOf(x),
-    s = supStats(x),
-    url = SAFE.url(x.url),
-    Ad = can('money'),
-    need = [...s.out, ...s.low];
-  const row = (l, v) => (v ? `<div class="si"><span>${l}</span><b>${v}</b></div>` : '');
-  /* phone numbers come from the contact book, each with its label (Office, Accounts, Sales rep...) */
-  const cc = conOf(x.name),
-    phones = cc
-      ? conPhones(cc)
-      : [x.phone, ...lines(x.phones)].filter(Boolean).map((n, j) => ({ t: j ? 'Phone ' + (j + 1) : 'Phone', n })),
-    emails = [x.email, ...lines(x.emails)].filter(Boolean);
-  const box = (t, h, empty) => `<section class="rg"><h4>${t}</h4>${h || `<p class="empty">${empty}</p>`}</section>`;
-  openModal(
-    `<div class="rw sp2"><div class="rw-bar"><button class="rb1" ${onClick('editSup', i)}>Edit supplier</button><button class="rb1" ${onClick('editDel', null, x.name)}>New delivery</button>${need.length ? `<button class="rb1 go" ${onClick('supReorder', i)}>Request low items (${need.length})</button>` : ''}${url ? `<a class="rb1" href="${esc(url)}" target="_blank" rel="noopener noreferrer" style="text-decoration:none">Website</a>` : ''}${x.hm ? '<button class="rb1" data-act="syncHM">Sync feed</button>' : ''}<span class="rw-sp"></span><button class="rb1 cl" data-act="closeModal">${svg('M6 6l12 12M18 6L6 18')}Close</button></div>
-   <div class="rw-h"><div><small>Supplier${x.hm ? ' · Live Feed' : ''}</small><h2>${esc(x.name)}</h2></div><div class="rw-hk">${x.account ? `<span><small>Account</small><b>${esc(x.account)}</b></span>` : ''}${x.lead ? `<span><small>Lead Time</small><b>${esc(x.lead)} days</b></span>` : ''}</div></div>
-   <div class="rw-b"><div class="sinfo">
-    ${box('Contacts', row('Main contact', esc([x.contact, x.role].filter(Boolean).join(', '))) + phones.map((p) => row(esc(p.t), telA(p.n))).join('') + emails.map((e, j) => row(j ? 'Email ' + (j + 1) : 'Email', mailA(e))).join('') + row('Orders email', x.orderEmail ? mailA(x.orderEmail) : '') + row('Area sales rep', esc([x.rep, x.repTel].filter(Boolean).join(', '))) + row('Alternative contact', esc(x.altContact || '')), 'No contact details yet. Click Edit supplier to add them.')}
-    ${box('Account', row('Account number', esc(x.account || '')) + row('Payment terms', esc(x.terms || '')) + row('Minimum order', x.minOrder ? money(x.minOrder) : '') + row('Lead time', x.lead ? esc(x.lead) + ' days' : '') + row('Delivery days', esc(x.days || '')) + row('How we pay', esc(x.payBy || '')) + row('Credit limit', x.credit ? money(x.credit) : '') + row('Our discount', x.disc ? esc(x.disc) + '%' : '') + row('Free delivery over', x.carFree ? money(x.carFree) : '') + row('Delivery charge', x.carCost ? money(x.carCost) : '') + row('How we order', esc(x.orderBy || '')) + row('Order cut-off', esc(x.cutoff || '')) + row('Ordering portal', SAFE.url(x.portal) ? `<a href="${esc(SAFE.url(x.portal))}" target="_blank" rel="noopener noreferrer">Open</a>` : ''), 'No account details yet.')}
-    ${box('Company And Quality', row('Supplies', esc(x.cat || '')) + row('Brands', esc(x.brands || '')) + row('VAT number', esc(x.vat || '')) + row('Company number', esc(x.coNo || '')) + row('Certificates', esc(x.certs || '')) + row('Insurance expires', x.insExp ? `<span class="${x.insExp < today() ? 'warn' : ''}">${fd(x.insExp)}${x.insExp < today() ? ' (expired)' : ''}</span>` : '') + row('Our rating', esc(x.rating || '')), 'Nothing added yet.')}
-    ${box('Address And Web', (x.address ? `<p class="snote">${esc(x.address)}</p>` : '') + row('Website', url ? `<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${esc(url.replace(/^https?:\/\//, ''))}</a>` : ''), 'No address yet.')}
-    ${box('Notes', x.notes ? `<p class="snote">${esc(x.notes)}</p>` : '', 'No notes yet.')}
-   </div>
-   <div class="smini"><b>Stock</b><span>${s.L.length} lines</span><span class="sep"></span><span>${s.units} units</span>${Ad ? `<span class="sep"></span><span>${m0(s.value)}</span>` : ''}<span class="sep"></span><span class="${need.length ? 'warn' : ''}" style="font-size:inherit">${s.low.length} low, ${s.out.length} out</span><span class="sep"></span><span>${s.req.length} requests</span><span class="sep"></span><span>${s.D.length} deliveries due${s.od.length ? ` (${s.od.length} late)` : ''}</span>
-    ${
-      s.L.length
-        ? `<details><summary>Show stock lines</summary><div class="tw" style="box-shadow:none;margin-top:.4rem"><table><thead><tr><th>ID</th><th>Item</th><th class="c-sm">Length / Colours</th><th class="n">Stock</th><th class="n c-md">Cost</th><th class="ac">Status</th></tr></thead><tbody>${s.L.slice()
-            .sort((a, b) => a.stock - b.stock)
-            .map((r) => {
-              const t = stt(r);
-              return `<tr><td><code>${esc(r.pid)}</code></td><td><b>${esc(r.item)}</b></td><td class="c-sm">${esc([r.length != '-' ? r.length : '', colTxt(r) != '-' ? colTxt(r) : ''].filter(Boolean).join(', ') || '-')}</td><td class="n">${r.stock} ${esc(unitOf(r))}</td><td class="n c-md">${money(r.cost)}</td><td class="ac"><div class="acts r"><span class="tag fw ${t[1]}">${t[0] == 'OK' ? 'In Stock' : t[0]}</span>${t[0] != 'OK' ? `<button class="mini pri" ${onClick('stockForm', 'request', r.pid)}>Request</button>` : ''}</div></td></tr>`;
-            })
-            .join('')}</tbody></table></div></details>`
-        : ''
-    }</div>
-   </div></div>`,
-    'full'
-  );
+  /* v19.18: the supplier window is laid out like the lead and contract windows (supplier-window.js) */
+  supWin(n);
 }
 export function supReorder(i) {
   const x = state.suppliers[i];

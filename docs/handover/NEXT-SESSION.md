@@ -1,4 +1,8 @@
-# Next session: start here (written 27 November 2026, after v19.17.8)
+# Next session: start here (written 27 November 2026, after v19.17.8; tasks 1 to 3 done in v19.17.9 to v19.18.2)
+
+> Update: Task 1 (review keys note), Task 2 (brochure New tag) and Task 3 (Lead, Contract and Supplier windows like
+> AdminBase) were done in v19.17.9, v19.18.0, v19.18.1 and v19.18.2. See HANDOVER.md for what was built and what is
+> still open with the owner (screenshots of Address, Advanced and Documents; the "Coming soon" reports).
 
 This is the hand-over for the next working session on the Broadland Windows CRM. Read it top to bottom, then
 `HANDOVER.md` (the version-by-version history), `CLAUDE.md` (the rules for code) and `docs/ARCHITECTURE.md`.

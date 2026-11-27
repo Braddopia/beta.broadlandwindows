@@ -72,6 +72,7 @@ import * as featuresProblemsProblems from './features/problems/problems.js';
 import * as featuresProfileProfile from './features/profile/profile.js';
 import * as featuresRecordsAppointments from './features/records/appointments.js';
 import * as featuresRecordsAbList from './features/records/ab-list.js';
+import * as featuresSuppliersSupplierWindow from './features/suppliers/supplier-window.js';
 import * as featuresContractsContractReports from './features/contracts/contract-reports.js';
 import * as featuresContractsContractTabs from './features/contracts/contract-tabs.js';
 import * as featuresRecordsCards from './features/records/cards.js';
@@ -215,6 +216,7 @@ const modules = {
   featuresProfileProfile,
   featuresRecordsAppointments,
   featuresRecordsAbList,
+  featuresSuppliersSupplierWindow,
   featuresContractsContractReports,
   featuresContractsContractTabs,
   featuresRecordsCards,

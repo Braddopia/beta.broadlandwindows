@@ -307,3 +307,30 @@ test('Fitting shows the Contract Schedule; Deliveries is a table; Advanced dupli
   ]);
   expect(app.errors).toEqual([]);
 });
+
+// ---- round 3 (v19.18.2): the supplier window in the same frame ----
+
+test('supplier window: same frame, tabs with counts, supplier arrows, Search and Clipboard', async ({ app }) => {
+  const names = await app.run(() => state.suppliers.map((s) => s.name).sort((a, b) => a.localeCompare(b)));
+  await app.call('supOpen', names[0]);
+  await expect(app.page.locator('#mbox')).toHaveClass(/ab/);
+  await expect(app.page.locator('#mbox .rw-h h2')).toHaveText(names[0]);
+  await expect(app.page.locator('#mbox .ab-tabs button').first()).toHaveText('Details');
+  await expect(app.page.locator('#mbox .ab-tabs button[data-t=stock]')).toHaveText(/Stock/);
+  await app.page.click('#mbox .ab-tabs button[data-t=stock]');
+  await expect(app.page.locator('#mbox .rw-p[data-t=stock]')).toBeVisible();
+  // next supplier keeps the same tab
+  await app.page.click('#mbox .rw-nav [aria-label="Next supplier"]');
+  await expect(app.page.locator('#mbox .rw-h h2')).toHaveText(names[1]);
+  await expect(app.page.locator('#mbox .ab-tabs button.on')).toHaveAttribute('data-t', 'stock');
+  // search by name
+  await app.page.fill('#swFind', names[0]);
+  await app.page.keyboard.press('Enter');
+  await expect(app.page.locator('#mbox .rw-h h2')).toHaveText(names[0]);
+  await app.page.click('#swClipB');
+  await expect(app.page.locator('#fpop.open')).toContainText('Copy Our Account Number');
+  // folding groups work here too
+  await app.page.click('#mbox .ab-tabs button[data-t=details]');
+  await expect(app.page.locator('#mbox .abg[data-g="Account"]')).toHaveClass(/open/);
+  expect(app.errors).toEqual([]);
+});

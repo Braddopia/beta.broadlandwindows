@@ -1,7 +1,6 @@
 {
   "notes": [
-    "Contracts: Reports opens a Contract Reports window, with the report list on the left and a live preview on the right",
-    "New Commissions and Job Costings tabs; Fitting shows the Contract Schedule; Deliveries is a table",
-    "Advanced: Duplicate This Contract and Change Customer"
+    "Suppliers open in the same large window as Leads and Contracts, with Details, Stock, Deliveries, Requests and Notes tabs",
+    "Supplier arrows, Search and Clipboard on the supplier toolbar; Edit Supplier opens the supplier form"
   ]
 }

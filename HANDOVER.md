@@ -656,3 +656,26 @@ The owner asked for the record windows to work like their old system, AdminBase,
   Duplicate This Contract (`ctrDuplicate`: same customer, products and details; no payments, ticks, photos, dates or
   invoices), Delete. Esc closes the Reports or Address window before the record.
 - Tests: tests/e2e/adminbase-records.spec.js (round 2 section).
+
+## v19.18.2: Supplier window in the same family (round 3 of the rework)
+
+- `features/suppliers/supplier-window.js` (`supWin`; `supOpen` now calls it): the same frame as the lead and contract
+  windows (`'full ab'`, Full Page shared with them). Toolbar: Edit Supplier (the existing supplier form), New
+  Delivery, Request Low Items (n), Website, Sync Feed (live feeds), Clipboard (name, phone, email, orders email,
+  account number, address), « ‹ n of N › » through the suppliers A to Z (`supNav`, Page Up / Page Down), Search
+  (`supFind`), Full Page, Close. Title line: what they supply, phone, email, and a red "n Late Deliveries" link.
+  Tabs: Details (two halves of read-only rows with folding groups: contacts on the left with Stock And Deliveries
+  under them; Account, Company And Quality, Address And Web on the right), Stock Lines, Deliveries Due (with imported
+  orders), Requests, Notes. Read-only rows can be links (`t: 'calc'` with `href` in ab-list.js).
+- Tests: tests/e2e/adminbase-records.spec.js (supplier window).
+
+### Open with the owner after this session
+- Ask for the Address, Advanced and Documents screenshots from AdminBase they offered; the Address window, Advanced
+  menu and Documents tab here are sensible versions until then.
+- Reports still "Coming soon": Completion Documents Conservatory, Domestic Aluminium Checklist, Quality Plan, Order
+  Acknowledgement Letter, Standing Order Letter, Credit Control Letter 14 Days, and on-screen Sign. Ask what each
+  should say (or for a copy of the old one with names removed).
+- Choices made while they were away (easy to change): Survey kept as a contract tab after Details; the stage path and
+  Next Step stay under the title line; Commissions and Job Costings only for accounts that see money; Default product
+  lines are Labour, Trims and Removal (`DEFAULT_LINES` in features/records/products.js); contract colours are a
+  short list of nine (`CCOLS` in features/records/fields.js); Edit List hides reports for everyone.

@@ -22,6 +22,9 @@ const OPEN_FIRST = new Set([
   'Dates',
   'Team',
   'Next Visit',
+  'Account',
+  'Address And Web',
+  'Stock And Deliveries',
 ]);
 const memKey = () => 'bb_abg_' + (typeof USER == 'string' ? USER : '');
 function mem() {
@@ -60,6 +63,10 @@ export function abgSum(fs, v) {
 }
 /** one row: label on the left, the value on the right (typed into in place) */
 export function abRow(f, v) {
+  if (f.t == 'calc' && f.href)
+    return String(
+      html`<div class="rf calc"><span>${f.l}</span><output><a class="nocap" href="${f.href}" ${raw(/^https:/.test(f.href) ? 'target="_blank" rel="noopener noreferrer"' : '')}>${f.calc(v) || ''}</a></output></div>`
+    );
   if (f.t == 'calc')
     return String(html`<div class="rf calc"><span>${f.l}</span><output>${f.calc(v) || ''}</output></div>`);
   if (f.t == 'tick')

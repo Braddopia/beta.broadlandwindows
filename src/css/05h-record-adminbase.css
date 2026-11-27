@@ -208,3 +208,7 @@ body[data-theme=dark] .mb.ab .cr-p{background:#0b0f15}
 .mb.ab .rw-p[data-t=deliveries] .abgrid tr.clk-r:hover td{background:var(--card2)}
 @media(max-width:760px){.mb.ab .cr-x{grid-template-columns:1fr;grid-template-rows:auto 1fr}.mb.ab .cr-l{max-height:30vh;border-right:0;border-bottom:1px solid var(--line)}.mb.ab .cr-t{display:none}.mb.ab .jc-k{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .mb.ab .abgrid.jc .plt input[data-f=cost],.mb.ab .abgrid.jc .plt input.jcx{border-color:var(--line);background:var(--card)}
+.mb.ab .abd-st{display:flex;flex-direction:column;gap:.8rem}
+.mb.ab .sw-notes{padding:.9rem 1rem}.mb.ab .sw-notes .snote{white-space:pre-wrap;margin:0}
+.mb.ab .rf.calc output a{color:var(--blue)}
+.mb.ab .abgrid td:not(:has(input,select,button)){padding:.5rem .5rem}
