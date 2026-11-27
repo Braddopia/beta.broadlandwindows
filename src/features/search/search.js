@@ -17,7 +17,7 @@ import { setRole, swRole } from '../auth/session.js';
 import { editContact } from '../contacts/contacts.js';
 import { editContract, openContract } from '../contracts/contracts.js';
 import { editDel } from '../deliveries/deliveries.js';
-import { DL, MF, SSM, fx, manOpen, setUploadedFiles } from '../files/files.js';
+import { MF, SSM, brochures, fx, manOpen, setUploadedFiles } from '../files/files.js';
 import { bookMine } from '../home/home.js';
 import { editRatings } from '../home/reviews.js';
 import { editLead, openLead } from '../leads/leads.js';
@@ -133,7 +133,9 @@ export const SRCH = [
     () => {
       const H = state.fileHide || {};
       return [
-        ...DL.filter((d) => !H[d.url]).map((d) => ({ t: d.title, s: 'Brochure · ' + d.cat, u: d.url })),
+        ...brochures()
+          .filter((d) => !H[d.url])
+          .map((d) => ({ t: d.title, s: 'Brochure · ' + d.cat, u: d.url })),
         ...SSM.filter((m) => !H[m.u]).map((m) => ({ t: m.t, s: 'Manual · ' + m.f, u: m.u })),
         ...MF.filter((f) => !/^brand asset$/i.test(f.cat)).map((f) => ({
           t: f.name,

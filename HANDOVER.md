@@ -426,3 +426,27 @@ stock number). Decided with the owner:
   the clock; a round-tower church and a distant mill on the far tree line; the near mill's reflection wavering in the
   water; the sun's glint is now a column of broken gold strokes exactly under the sun (both at 74% across); evening
   mist over the water; a black-sailed wherry heading left and a white yacht heading right.
+
+## v19.17 (round 1 of the owner's big list)
+
+- Fewer Animations calms everyday movement only; the opening intro and the screen saver always play (`body.rm` rules
+  in `05c-refinements.css` skip `#splash` and `#saver`). The computer's own reduce-motion setting still stills them.
+- Screen saver: a proper round-tower church (flint tower, nave, chancel, porch; windows lit at night); the distant
+  mill stands up out of the trees; each cloud starts at a random point of its journey in its own height band.
+- Settings: Company Details note reworded; every button in a settings row is one size (6.8rem x 2.3rem); the Screen
+  Saver row is "Starts when this computer is left idle" with its choices on their own line.
+- Menu: a Processing group (Panel Optimiser, Cutting Optimiser, Job Stock Tags) under Stock (`NG` in router.js).
+- Files lists (manuals, forms, other content, brand assets) use one shared grid with the heading inside the list
+  (subgrid): columns as wide as their contents, equal gaps, Category and Size centred, buttons on the right.
+- Inventory: Description has its own column after Colours (hidden below 1360px; still in the product window and the
+  code's hover), so Item only needs to fit the code.
+- Service Calls set out like Inventory: content-sized columns with equal gaps; Ref, Customer, Problem on the left;
+  Priority, Status, Visit, Engineer, Open For by the buttons; spare room between (`s-gap`).
+- Messages: brighter picture colours; nicknames show in the people list, chat list, chat header and group panel.
+- Brochures follow the website: `scripts/fetch-brochures.mjs` (unit-tested) reads broadlandwindows.co.uk/brochures
+  each morning in the daily job (`reviews.yml`, now "Daily website figures") and writes `brochures.json`; the site
+  reads it (`brochureFeed`), shows new ones (marked New for 30 days) and drops removed ones, and only accepts links on
+  broadlandwindows.co.uk. Until the first run, the built-in list shows.
+- The Overview redraws itself every minute and on coming back to the window. Sample data stays current: untouched
+  sample records (no `_meta`) roll forward to today each day (`sampleRoll`, `state.sampleDay`); real records never move.
+- Review counts still need the Google and Trustpilot keys (see v19.14).

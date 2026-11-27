@@ -106,3 +106,47 @@ body[data-theme=dark] #nav::-webkit-scrollbar-thumb{background:rgba(255,255,255,
 .rv-feed.ok{background:var(--green-bg,#e7f6ee);color:#12794c}
 .rv-feed.off{background:#fff6dc;color:#7a5a00}
 body[data-theme=dark] .rv-feed.off{background:#3a3220;color:#ffd98a}
+
+/* ---- v19.17 ---- */
+/* Settings: every button in a settings row is the same size; switches (Light/Dark, Screen Saver) are the same height */
+.set-r .set-a{display:flex;align-items:center;justify-content:flex-end;gap:.5rem;flex-wrap:wrap}
+.set-r .set-a>.btn,.set-r .set-a>label.btn,.set-r .set-a .sv-set>.btn{width:6.8rem;height:2.3rem;padding:0 .6rem;justify-content:center;font-size:.82rem}
+.set-r .set-a .seg2{height:2.3rem}.set-r .set-a .seg2 button{height:100%;padding:0 .8rem}
+.set-r .set-a>.tag{min-width:6.8rem;height:2.3rem;display:inline-flex;align-items:center;justify-content:center}
+.set-r .set-a>.tsw{width:6.8rem;display:flex;justify-content:center}
+.set-r>span:first-child{min-width:0}
+/* the Screen Saver row: its four choices and Preview sit on their own line under the title */
+.set-r:has(.sv-set){flex-wrap:wrap}
+.set-r:has(.sv-set)>span:first-child{flex:1 1 100%}
+.set-r:has(.sv-set) .set-a{flex:1 1 100%}
+.set-r .sv-set{width:100%;flex-wrap:nowrap}
+.set-r .sv-set .seg2{flex:1}.set-r .sv-set .seg2 button{flex:1}
+/* Files lists (manuals, forms, other content, brand assets), set out like Inventory: each column as wide as what it
+   holds with the same gap between them, Category and Size centred, the spare room before the buttons. One shared grid
+   for the list (subgrid), so the heading and every row line up. */
+@media(min-width:701px){
+  .flist{display:grid;grid-template-columns:minmax(8rem,max-content) max-content max-content minmax(0,1fr) max-content;column-gap:1.6rem}
+  .flist>.frow{grid-column:1/-1;display:grid;grid-template-columns:subgrid;column-gap:1.6rem}
+  .flist>.frow>b{max-width:32rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .flist>.frow>.tag,.flist>.fhead>span:nth-child(2){justify-self:center;text-align:center}
+  .flist>.frow>.sz,.flist>.fhead>span:nth-child(3){justify-self:center;text-align:center}
+  .flist>.frow>.acts{grid-column:5}
+  .flist>.fhead{position:sticky;top:0;z-index:1;background:color-mix(in srgb,var(--card) 88%,transparent);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+  .flist>.fhead>i{display:block}
+}
+/* Service Calls, set out like Inventory: every column as wide as what it holds with the same gap; Ref, Customer and
+   Problem together on the left, Priority, Status, Visit, Engineer and Open For by the buttons, the spare room between.
+   Long names and problems stop at 18rem with "..." and the full text on hover. */
+@media(min-width:900px){
+  .ptb.fx.t-svc{table-layout:auto}
+  .ptb.fx.t-svc th,.ptb.fx.t-svc td{width:1%!important;white-space:nowrap;padding-left:.85rem!important;padding-right:.85rem!important}
+  .ptb.fx.t-svc th.s-gap,.ptb.fx.t-svc td.s-gap{width:auto!important;padding:0!important}
+  .ptb.fx.t-svc td.s-name,.ptb.fx.t-svc td.s-issue{overflow:visible}
+  .ptb.fx.t-svc td.s-name>*,.ptb.fx.t-svc td.s-issue>*{display:block;max-width:18rem;overflow:hidden;text-overflow:ellipsis}
+  .ptb.fx.t-svc td.s-name .svn{display:flex}
+}
+/* Files: a brochure first seen on the website in the last 30 days */
+.bc .cvw{position:relative}
+.bc-new{position:absolute;top:.6rem;left:.6rem;z-index:2;padding:.15rem .55rem;border-radius:99px;background:#ffd002;color:#012b59;font:700 .7rem var(--body);letter-spacing:.04em;box-shadow:0 4px 12px rgba(0,0,0,.2)}
+/* a list's note (loading, nothing yet) spans the whole width */
+.flist>:not(.frow){grid-column:1/-1}

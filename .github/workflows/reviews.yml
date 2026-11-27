@@ -1,6 +1,7 @@
-name: Review figures
-# Each morning: fetch the Google and Trustpilot score and review count (scripts/fetch-reviews.mjs), commit
-# reviews.json if it changed, and republish the site so the Overview and the Office floor board show them.
+name: Daily website figures
+# Each morning: fetch the Google and Trustpilot score and review count (scripts/fetch-reviews.mjs) and the brochure list
+# from broadlandwindows.co.uk (scripts/fetch-brochures.mjs), commit reviews.json / brochures.json if they changed, and
+# republish the site so the Overview, the Office floor board and Files show them.
 # Needs the Actions secrets GOOGLE_PLACES_KEY, GOOGLE_PLACE_ID and TRUSTPILOT_API_KEY (see HANDOVER.md).
 on:
   schedule:
@@ -23,16 +24,15 @@ jobs:
           GOOGLE_PLACE_ID: ${{ secrets.GOOGLE_PLACE_ID }}
           TRUSTPILOT_API_KEY: ${{ secrets.TRUSTPILOT_API_KEY }}
           TRUSTPILOT_DOMAIN: ${{ vars.TRUSTPILOT_DOMAIN }}
-      - name: Save and republish if the figures changed
+      - run: node scripts/fetch-brochures.mjs
+      - name: Save and republish if anything changed
         run: |
-          if git diff --quiet -- reviews.json && git ls-files --error-unmatch reviews.json >/dev/null 2>&1; then
-            echo "No change"; exit 0
-          fi
-          if [ ! -f reviews.json ]; then echo "No figures yet"; exit 0; fi
+          for f in reviews.json brochures.json; do if [ -f "$f" ]; then git add -N "$f"; fi; done
+          if git diff --quiet -- reviews.json brochures.json; then echo "No change"; exit 0; fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add reviews.json
-          git commit -m "Review figures for $(date -u +%F)"
+          for f in reviews.json brochures.json; do if [ -f "$f" ]; then git add "$f"; fi; done
+          git commit -m "Website figures for $(date -u +%F)"
           git push
           # pushes made by this job do not start the site's own publish, so ask for it
           gh api -X POST "repos/${{ github.repository }}/pages/builds" || echo "Could not ask for a republish; the next push will publish it"

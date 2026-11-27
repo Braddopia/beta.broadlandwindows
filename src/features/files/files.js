@@ -6,6 +6,7 @@ import { copyText, download } from '../../ui/download.js';
 import { kb, tc } from '../../core/format.js';
 import { uuid } from '../../core/ids.js';
 import { SAFE } from '../../data/sanitize.js';
+import { fdl } from '../../core/dates.js';
 import { audit } from '../../data/audit.js';
 import { store } from '../../data/persistence.js';
 import { state } from '../../data/state.js';
@@ -24,6 +25,8 @@ import { uiState } from '../../ui/ui-state.js';
         brand and print assets (uploads stored in this browser's IndexedDB)
    ========================================================================== */
 export const UP = 'https://www.broadlandwindows.co.uk/wp-content/uploads/';
+/* the brochures known when this version was built; the live list (brochures.json, checked each morning from the
+   website's brochure page by .github/workflows/reviews.yml) replaces it once it has been read */
 export const DL = [
   ['Hardwood', 'Hardwood Windows', '2025/06/HW_Windows_Merge.pdf'],
   ['Hardwood', 'Hardwood Special Products', '2025/06/HW_Special_Merge.pdf'],
@@ -48,6 +51,42 @@ export const DL = [
   ['Aluminium', 'Hallmark Aluminium Doors & Panels 2025', '2025/06/HALLMARK-Aluminium-Doors-Panels-2025.pdf'],
   ['Roof lanterns', 'Broadland Titan Lanterns', '2025/06/Broadland-Titan-Lanterns.pdf'],
 ].map(([cat, title, f]) => ({ cat, title, url: UP + f }));
+let LIVE = null,
+  liveAt = '';
+/** the brochures to show: the list read from the website today, or the built-in list until that has been read */
+export const brochures = () => LIVE || DL;
+/** read brochures.json (or use the list given, for tests); new brochures appear and removed ones go */
+export async function brochureFeed(feed) {
+  if (!feed) {
+    if (!/^https?:$/.test(location.protocol)) return;
+    try {
+      const r = await fetch('brochures.json?t=' + Date.now(), { cache: 'no-store' });
+      if (!r.ok) return;
+      feed = await r.json();
+    } catch (e) {
+      return;
+    }
+  }
+  const items = ((feed && feed.items) || [])
+    .map((x) => ({
+      cat: SAFE.text(x.cat || 'Other', 40),
+      title: SAFE.text(x.title, 120),
+      url: SAFE.url(x.url),
+      seen: SAFE.text(x.firstSeen || '', 10),
+    }))
+    .filter((x) => x.title && x.url && /^https:\/\/(www\.)?broadlandwindows\.co\.uk\//.test(x.url));
+  if (items.length < 5) return;
+  LIVE = items;
+  liveAt = SAFE.text(String(feed.updated || ''), 40);
+  if (document.body.dataset.view == 'downloads') render(true);
+}
+/* start-up step (run once by main.js) */
+export function startBrochureFeed() {
+  brochureFeed();
+  setInterval(brochureFeed, 3 * 3600 * 1000);
+}
+/** a brochure first seen on the website in the last 30 days */
+const isNew = (d) => !!d.seen && Date.now() - Date.parse(d.seen) < 30 * 864e5;
 export const SSM = `Alitherm 300 ETC v092019|1003|12 MB
 Alitherm 400 Casement v012026|1296|32.7 MB
 Alitherm 400 ETD Door v062023|1101|77.1 MB
@@ -167,26 +206,26 @@ export function cover(d) {
 }
 export function vFiles() {
   const F = uiState.files,
-    cats = ['all', ...new Set(DL.map((d) => d.cat))],
+    cats = ['all', ...new Set(brochures().map((d) => d.cat))],
     rc = ldRecent();
   const HID = state.fileHide || {};
-  let L = DL.filter((d) => !HID[d.url] && (F.cat == 'all' || d.cat == F.cat) && hit(d));
+  let L = brochures().filter((d) => !HID[d.url] && (F.cat == 'all' || d.cat == F.cat) && hit(d));
   if (F.az) L = L.slice().sort((a, b) => a.title.localeCompare(b.title));
   const ssq = F.ssq.toLowerCase(),
     ML = SSM.filter((m) => !HID[m.u] && (m.t + ' ' + m.f).toLowerCase().includes(ssq) && hit(m)),
     pg = paginate(F, ML);
   const fhead = (a, b, c) =>
-    `<div class="frow fhead"><span>${a}</span><span>${b}</span><span>${c}</span><span></span></div>`;
-  return `<div class="head"><div><h1>Broadland Brochures</h1><span class="muted">${L.length} of ${DL.length} brochures from <span class="nocap">broadlandwindows.co.uk</span></span></div><div class="tools"><button class="mini" data-act="copyAllBrochures">Copy all links</button><a class="btn" href="https://www.broadlandwindows.co.uk/brochures/" target="_blank" rel="noopener noreferrer">Brochure Website</a></div></div>
+    `<div class="frow fhead"><span>${a}</span><span>${b}</span><span>${c}</span><i></i><span></span></div>`;
+  return `<div class="head"><div><h1>Broadland Brochures</h1><span class="muted">${L.length} of ${brochures().length} brochures from <span class="nocap">broadlandwindows.co.uk</span>${LIVE ? ' · checked ' + (liveAt ? esc(fdl(liveAt.slice(0, 10))) : 'today') : ''}</span></div><div class="tools"><button class="mini" data-act="copyAllBrochures">Copy all links</button><a class="btn" href="https://www.broadlandwindows.co.uk/brochures/" target="_blank" rel="noopener noreferrer">Brochure Website</a></div></div>
   <div class="chips">${cats.map((c) => `<button class="chip ${F.cat == c ? 'on' : ''}" ${onClick('setUI', 'files.cat', c)}>${c == 'all' ? 'All brochures' : esc(c)}</button>`).join('')}<span class="vs"></span><button class="chip ${F.az ? 'on' : ''}" ${onClick('togUI', 'files.az')}>Sort A to Z</button><button class="chip ${F.list ? 'on' : ''}" ${onClick('togUI', 'files.list')}>List view</button></div>
   ${rc.length ? `<div class="panel" style="margin-bottom:1rem"><h2>Recently Opened</h2>${rc.map((x) => `<div class="row"><span>${esc(x.t)}</span><a class="mini pri" href="${esc(SAFE.url(x.u))}" target="_blank" rel="noopener noreferrer">Open</a></div>`).join('')}</div>` : ''}
-  <div class="book ${F.list ? 'lst' : ''}">${L.map((d) => `<div class="bc" style="position:relative"><div class="cvw">${cover(d)}<img src="${esc(coverUrl(d))}" alt="${esc(d.title)} cover" loading="lazy" referrerpolicy="no-referrer" data-alt="${esc(coverAlt(d))}" data-onerror="coverNext" data-args-error="[{&quot;$&quot;:&quot;this&quot;}]"></div><button class="mini covb" ${onClick('setCover', d.url)}>Set cover</button><div class="bb"><b>${esc(d.title)}</b><span class="tag n" style="align-self:flex-start">${esc(d.cat)}</span><div class="acts"><a class="mini pri" href="${esc(d.url)}" target="_blank" rel="noopener noreferrer" ${onClick('recent', d.url, d.title)}>Open</a><button class="mini" ${onClick('dlf', d.url)}>Download</button><a class="mini" href="mailto:?subject=${encodeURIComponent('Broadland brochure: ' + d.title)}&amp;body=${encodeURIComponent(d.url)}">Email</a>${can('manage') ? `<button class="mini del" ${onClick('fileHide', d.url, d.title)}>Remove</button>` : ''}</div></div></div>`).join('') || emptyArt('files', 'No brochures match.')}</div>
-  <div class="panel"><h2><span>Broadland Forms <span class="muted">(order forms, survey sheets, job sheets and checklists to print)</span></span></h2><div class="upl"><label class="btn sm" style="cursor:pointer">Upload forms<input type="file" multiple hidden ${onEvent('onchange', 'manUp', 'this', 'Broadland Form')}></label>${canSee('stock') ? '<button class="btn ghost sm" data-act="takePrint">Print stock count sheets</button>' : ''}<span class="muted">Stored on this device only</span></div>${fhead('Form', 'Category', 'Size')}<div id="forms" class="flist">Loading</div></div>
+  <div class="book ${F.list ? 'lst' : ''}">${L.map((d) => `<div class="bc" style="position:relative"><div class="cvw">${isNew(d) ? '<span class="bc-new">New</span>' : ''}${cover(d)}<img src="${esc(coverUrl(d))}" alt="${esc(d.title)} cover" loading="lazy" referrerpolicy="no-referrer" data-alt="${esc(coverAlt(d))}" data-onerror="coverNext" data-args-error="[{&quot;$&quot;:&quot;this&quot;}]"></div><button class="mini covb" ${onClick('setCover', d.url)}>Set cover</button><div class="bb"><b>${esc(d.title)}</b><span class="tag n" style="align-self:flex-start">${esc(d.cat)}</span><div class="acts"><a class="mini pri" href="${esc(d.url)}" target="_blank" rel="noopener noreferrer" ${onClick('recent', d.url, d.title)}>Open</a><button class="mini" ${onClick('dlf', d.url)}>Download</button><a class="mini" href="mailto:?subject=${encodeURIComponent('Broadland brochure: ' + d.title)}&amp;body=${encodeURIComponent(d.url)}">Email</a>${can('manage') ? `<button class="mini del" ${onClick('fileHide', d.url, d.title)}>Remove</button>` : ''}</div></div></div>`).join('') || emptyArt('files', 'No brochures match.')}</div>
+  <div class="panel"><h2><span>Broadland Forms <span class="muted">(order forms, survey sheets, job sheets and checklists to print)</span></span></h2><div class="upl"><label class="btn sm" style="cursor:pointer">Upload forms<input type="file" multiple hidden ${onEvent('onchange', 'manUp', 'this', 'Broadland Form')}></label>${canSee('stock') ? '<button class="btn ghost sm" data-act="takePrint">Print stock count sheets</button>' : ''}<span class="muted">Stored on this device only</span></div><div id="forms" class="flist">${fhead('Form', 'Category', 'Size')}<p class="muted fl-load">Loading</p></div></div>
   <div class="panel"><h2><span>Smart Systems Manuals <span class="muted">(${SSM.filter((m) => !HID[m.u]).length} technical fabrication manuals)</span></span>${can('manage') && Object.keys(HID).length ? `<button class="btn ghost sm" data-act="fileHidden">Removed (${Object.keys(HID).length})</button>` : ''}<a class="btn ghost sm" href="https://previous.smartsystems.co.uk/documentlibrary/?c=35" target="_blank" rel="noopener noreferrer">Open Smart Systems library</a></h2>
    <div class="upl"><input placeholder="Search" value="${esc(F.ssq)}" maxlength="60" ${onEvent('oninput', 'ssqSet', 'this.value')} id="ssqI" style="min-width:min(16rem,100%)"></div>
-   ${fhead('Manual', 'Category', 'Size')}<div class="flist">${pg.rows.map((m) => `<div class="frow"><b>${esc(m.t)}</b><span class="tag">${esc(m.f)}</span><span class="sz">${esc(m.s)}</span><span class="acts"><a class="mini pri" href="${esc(m.u)}" target="_blank" rel="noopener noreferrer">Open</a><button class="mini" ${onClick('dlf', m.u)}>Download</button><button class="mini" ${onClick('copyText', m.u)}>Copy link</button>${can('manage') ? `<button class="mini del" ${onClick('fileHide', m.u, m.t)}>Remove</button>` : ''}</span></div>`).join('') || '<p class="empty">No manuals match.</p>'}</div>${pagerH('files', pg, 'manuals')}</div>
-  <div class="panel"><h2>Other Content</h2><div class="upl"><select id="mcat" aria-label="Category">${MC.map((c) => `<option>${c}</option>`).join('')}</select><label class="btn sm" style="cursor:pointer">Upload files<input type="file" multiple hidden data-onchange="manUp" data-args-change="[{&quot;$&quot;:&quot;this&quot;}]"></label><span class="muted">Stored on this device only</span></div>${fhead('File', 'Category', 'Size')}<div id="mans" class="flist">Loading</div></div>
-  <div class="panel"><h2>Brand And Print Assets</h2><div class="upl"><label class="btn sm" style="cursor:pointer">Upload files<input type="file" multiple hidden ${onEvent('onchange', 'manUp', 'this', 'Brand Asset')}></label><span class="muted">Stored on this device only</span></div>${fhead('File', 'Category', 'Size')}<div id="assets" class="flist">Loading</div></div>`;
+   <div class="flist">${fhead('Manual', 'Category', 'Size')}${pg.rows.map((m) => `<div class="frow"><b>${esc(m.t)}</b><span class="tag">${esc(m.f)}</span><span class="sz">${esc(m.s)}</span><span class="acts"><a class="mini pri" href="${esc(m.u)}" target="_blank" rel="noopener noreferrer">Open</a><button class="mini" ${onClick('dlf', m.u)}>Download</button><button class="mini" ${onClick('copyText', m.u)}>Copy link</button>${can('manage') ? `<button class="mini del" ${onClick('fileHide', m.u, m.t)}>Remove</button>` : ''}</span></div>`).join('') || '<p class="empty">No manuals match.</p>'}</div>${pagerH('files', pg, 'manuals')}</div>
+  <div class="panel"><h2>Other Content</h2><div class="upl"><select id="mcat" aria-label="Category">${MC.map((c) => `<option>${c}</option>`).join('')}</select><label class="btn sm" style="cursor:pointer">Upload files<input type="file" multiple hidden data-onchange="manUp" data-args-change="[{&quot;$&quot;:&quot;this&quot;}]"></label><span class="muted">Stored on this device only</span></div><div id="mans" class="flist">${fhead('File', 'Category', 'Size')}<p class="muted fl-load">Loading</p></div></div>
+  <div class="panel"><h2>Brand And Print Assets</h2><div class="upl"><label class="btn sm" style="cursor:pointer">Upload files<input type="file" multiple hidden ${onEvent('onchange', 'manUp', 'this', 'Brand Asset')}></label><span class="muted">Stored on this device only</span></div><div id="assets" class="flist">${fhead('File', 'Category', 'Size')}<p class="muted fl-load">Loading</p></div></div>`;
 }
 export function ssqSet(v) {
   uiState.files.ssq = SAFE.text(v, 60);
@@ -318,6 +357,8 @@ export async function manRen(id) {
   await fx('readwrite', (s) => s.put(f));
   loadMan();
 }
+/** the list's heading row, kept when its rows are drawn again */
+const keepHead = (el) => (el.querySelector('.fhead') || {}).outerHTML || '';
 export async function loadMan() {
   const m = $('#mans'),
     a = $('#assets'),
@@ -330,21 +371,24 @@ export async function loadMan() {
     const fl = (f) => !q || (f.name + ' ' + f.cat).toLowerCase().includes(q);
     if (m)
       m.innerHTML =
-        MF.filter((f) => !/^(brand asset|broadland form)$/i.test(f.cat) && fl(f))
+        keepHead(m) +
+        (MF.filter((f) => !/^(brand asset|broadland form)$/i.test(f.cat) && fl(f))
           .map(row)
           .join('') ||
-        emptyArt(
-          'files',
-          'No files yet. Upload manuals, fitting guides, spec sheets and anything else the team needs.'
-        );
+          emptyArt(
+            'files',
+            'No files yet. Upload manuals, fitting guides, spec sheets and anything else the team needs.'
+          ));
     if (fm)
       fm.innerHTML =
-        MF.filter((f) => /^broadland form$/i.test(f.cat) && fl(f))
+        keepHead(fm) +
+        (MF.filter((f) => /^broadland form$/i.test(f.cat) && fl(f))
           .map(row)
           .join('') ||
-        '<p class="empty" style="margin-top:.6rem">No forms yet. Upload the forms the team prints and fills in.</p>';
+          '<p class="empty" style="margin-top:.6rem">No forms yet. Upload the forms the team prints and fills in.</p>');
     if (a)
       a.innerHTML =
+        keepHead(a) +
         BUILTIN()
           .filter((b) => !(state.fileHide || {})['asset:' + b.key])
           .filter(fl)
@@ -406,7 +450,7 @@ export function fileShow(u) {
   toast('Brought back');
 }
 export function setCover(u) {
-  const d = DL.find((x) => x.url == u);
+  const d = brochures().find((x) => x.url == u);
   if (!d) return;
   state.covers = state.covers || {};
   form(
@@ -458,5 +502,9 @@ export function builtinOpen(k) {
   w.document.close();
 }
 export function copyAllBrochures() {
-  copyText(DL.map((d) => d.title + ': ' + d.url).join('\n'));
+  copyText(
+    brochures()
+      .map((d) => d.title + ': ' + d.url)
+      .join('\n')
+  );
 }

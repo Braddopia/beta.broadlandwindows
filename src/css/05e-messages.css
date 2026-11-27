@@ -101,16 +101,16 @@ body[data-theme=dark] .bub-ok{color:#5fd39a}
 .grp-ar{display:grid;grid-template-columns:1fr auto;align-items:center;column-gap:.6rem;padding:.45rem .6rem;border:1px solid var(--line);border-radius:10px}
 .grp-ar small{grid-column:1;color:var(--muted)}.grp-ar .mini{grid-column:2;grid-row:1/3}
 /* v19.15.6: each person's picture has their own colour (avColour in messages.js); groups are rounded squares */
-.mav.c0{background:linear-gradient(135deg,#034ea2,#2b74c9)}
-.mav.c1{background:linear-gradient(135deg,#0b6b64,#128a80)}
-.mav.c2{background:linear-gradient(135deg,#106b43,#178a56)}
-.mav.c3{background:linear-gradient(135deg,#5b21b6,#7442d3)}
-.mav.c4{background:linear-gradient(135deg,#a3144f,#c22d6c)}
-.mav.c5{background:linear-gradient(135deg,#a63a0a,#c4521c)}
-.mav.c6{background:linear-gradient(135deg,#a11818,#c23431)}
-.mav.c7{background:linear-gradient(135deg,#312a91,#4a43b8)}
-.mav.c8{background:linear-gradient(135deg,#2c3a4d,#47566d)}
-.mav.c9{background:linear-gradient(135deg,#7a420f,#985a22)}
+.mav.c0{background:linear-gradient(135deg,#0f9d8a,#24c4a8)}
+.mav.c1{background:linear-gradient(135deg,#7b3fe4,#a26bff)}
+.mav.c2{background:linear-gradient(135deg,#ef6c2e,#ff9a4d)}
+.mav.c3{background:linear-gradient(135deg,#e2407e,#ff6fa3)}
+.mav.c4{background:linear-gradient(135deg,#2f6fe0,#5b95ff)}
+.mav.c5{background:linear-gradient(135deg,#1f9d4c,#3fcf72)}
+.mav.c6{background:linear-gradient(135deg,#d99a00,#f5c034);color:#3a2a00}
+.mav.c7{background:linear-gradient(135deg,#0b8fc2,#36c0ef)}
+.mav.c8{background:linear-gradient(135deg,#c2352d,#ef5f53)}
+.mav.c9{background:linear-gradient(135deg,#5a4bd1,#8a7cf5)}
 .mav.grp{border-radius:12px}
 /* v19.15.6 chat commands: the list that appears above the box when typing "/", /me lines, nicknames, /help */
 .msn-in{position:relative}

@@ -18,7 +18,7 @@
 
 /* ---- table: one alignment per column, heading and cells the same ---- */
 .t-inv th,.t-inv td{padding-left:.7rem;padding-right:.7rem}
-.t-inv .i-item,.t-inv .i-loc,.t-inv .i-col{text-align:left}
+.t-inv .i-item,.t-inv .i-loc,.t-inv .i-col,.t-inv .i-desc{text-align:left}
 .t-inv .i-id,.t-inv .i-stock,.t-inv .i-cost,.t-inv .i-val,.t-inv .i-st{text-align:center}
 .t-inv th.srt{white-space:nowrap}
 .t-inv .i-sel{width:2.6rem;padding-left:.9rem;padding-right:0}
@@ -48,9 +48,12 @@
   .ptb.fx.t-inv{--inv-gap:.85rem}
   .ptb.fx.t-inv th.i-gap,.ptb.fx.t-inv td.i-gap{width:auto;padding:0}
   .ptb.fx.t-inv th.i-sel,.ptb.fx.t-inv td.i-sel{padding-left:.9rem}
-  .ptb.fx.t-inv td.i-item>*,.ptb.fx.t-inv td.i-loc>*,.ptb.fx.t-inv td.i-col>*{display:block;max-width:16rem;overflow:hidden;text-overflow:ellipsis}
-  .ptb.fx.t-inv td.i-item,.ptb.fx.t-inv td.i-loc,.ptb.fx.t-inv td.i-col{overflow:visible}
+  .ptb.fx.t-inv td.i-item>*,.ptb.fx.t-inv td.i-loc>*,.ptb.fx.t-inv td.i-col>*,.ptb.fx.t-inv td.i-desc>*{display:block;max-width:16rem;overflow:hidden;text-overflow:ellipsis}
+  .ptb.fx.t-inv td.i-item,.ptb.fx.t-inv td.i-loc,.ptb.fx.t-inv td.i-col,.ptb.fx.t-inv td.i-desc{overflow:visible}
+  .ptb.fx.t-inv td.i-desc{color:var(--muted)}
 }
+/* 1100 to 1360: Description steps aside (it shows in the product window and on hover over the code) */
+@media(max-width:1360px){.t-inv .i-desc{display:none}}
 /* 900 to 1100: Colours and Value step aside (as on the other lists) and Report sits in the product window */
 @media(min-width:900px) and (max-width:1100px){
   .t-inv td.ac .i-rep{display:none}

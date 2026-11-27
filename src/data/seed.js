@@ -1,5 +1,5 @@
 /* data/seed: Sample data for a brand-new install (sample names only). */
-import { addDays } from '../core/dates.js';
+import { addDays, today } from '../core/dates.js';
 import { sampleStock } from './sample-stock.js';
 
 /* ---- seed data ---- */
@@ -17,6 +17,8 @@ export function seed() {
     salary,
   });
   const data = {
+    /* the day the sample dates match; start/migrations.js sampleRoll keeps them current */
+    sampleDay: today(),
     items: sampleStock().items,
     cutProf: sampleStock().cutProf,
     leads: [

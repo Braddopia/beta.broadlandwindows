@@ -484,3 +484,17 @@ export function holBody(m) {
     <button class="btn ghost sm" ${raw(onClick('myHolidays', m.id, 'all'))}>All Holidays</button>
   </div>`);
 }
+
+/* v19.17: the Overview keeps itself up to date while it is open: its figures, lists and greeting are drawn again every
+   minute and on coming back to the window (not while a window is open or something is being typed) */
+export function startOverviewRefresh() {
+  const redraw = () => {
+    if (document.visibilityState != 'visible' || document.body.dataset.view != 'home') return;
+    if (document.querySelector('#modal.open, #fpop.open, #tour.open, #saver.on')) return;
+    const a = document.activeElement;
+    if (a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)) return;
+    render(true);
+  };
+  setInterval(redraw, 60 * 1000);
+  document.addEventListener('visibilitychange', redraw);
+}

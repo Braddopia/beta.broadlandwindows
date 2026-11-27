@@ -106,7 +106,18 @@ test('Inventory columns (v19.13): ID, Item, Stock with its unit, Location, Colou
       t.innerText.replace(/[▲▼]/g, '').trim()
     )
   );
-  expect(th.slice(1, 9)).toEqual(['ID', 'Item', 'Stock', 'Location', 'Colours', 'Cost', 'Value', 'Status']);
+  // v19.17: Description has its own column beside Colours (the screen is 1440 wide here)
+  expect(th.slice(1, 10)).toEqual([
+    'ID',
+    'Item',
+    'Stock',
+    'Location',
+    'Colours',
+    'Description',
+    'Cost',
+    'Value',
+    'Status',
+  ]);
   // stock carries its unit, always count × unit: full bars "24 × 6.5M", handles "46 × EA", hinges "38 × Pairs"
   const stock = await app.run(() =>
     [...document.querySelectorAll('#main .t-inv td.i-stock')].map((t) => t.innerText.replace(/\s+/g, ' ').trim())

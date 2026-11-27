@@ -2,6 +2,7 @@
 import { coLoad } from '../data/company.js';
 import { LOW, MAX_PHOTOS, SCATS, UNITS, guessCat } from '../config/constants.js';
 import { shortId, uuid } from '../core/ids.js';
+import { today } from '../core/dates.js';
 import { OLD_SAMPLE_CODES, sampleStock } from '../data/sample-stock.js';
 import { SAFE } from '../data/sanitize.js';
 import { store } from '../data/persistence.js';
@@ -438,5 +439,48 @@ export function sampleStockRefresh() {
     L.locs = [...new Set([...(L.locs || []), ...state.items.map((r) => r.location).filter((x) => x && x != '-')])];
     L.groups = [...new Set([...(L.groups || []), ...state.items.map((r) => r.group).filter(Boolean)])];
   }
+  store();
+}
+
+/* v19.17: the sample data stays current. Sample records are written relative to the day they were created, so as days
+   pass "fittings this week", "visits today" and the Overview figures drift. Each day the CRM is opened, every sample
+   record nobody has changed (no _meta stamp from the repository) moves forward by the days that have passed, so the
+   demo always looks like today. Real records are never moved. state.sampleDay is the day the sample matches; false
+   once the data is not the sample. */
+const SHIFT_LISTS = ['leads', 'leadArchive', 'contracts', 'calls', 'deliveries', 'hols', 'fin', 'appts', 'stakes'];
+const isoAdd = (s, n) => {
+  const d = new Date(s.slice(0, 10) + 'T12:00:00Z');
+  d.setUTCDate(d.getUTCDate() + n);
+  return d.toISOString().slice(0, 10) + s.slice(10);
+};
+function shiftDates(v, n) {
+  if (typeof v == 'string') return /^\d{4}-\d{2}-\d{2}(T[\d:.]+Z?)?$/.test(v) ? isoAdd(v, n) : v;
+  if (Array.isArray(v)) return v.map((x) => shiftDates(x, n));
+  if (v && typeof v == 'object') {
+    for (const k of Object.keys(v)) if (k != '_meta' && k != 'photos') v[k] = shiftDates(v[k], n);
+    return v;
+  }
+  return v;
+}
+export function sampleRoll() {
+  if (state.sampleDay === false) return;
+  let base = state.sampleDay;
+  if (!base) {
+    /* data from before v19.17: the sample's delivery D-2 is due on the day the sample was made */
+    const d2 = (state.deliveries || []).find((x) => x.id == 'D-2' && x.supplier == 'Example Aluminium Ltd' && !x._meta);
+    if (!d2 || !/^\d{4}-\d{2}-\d{2}$/.test(d2.due || '')) {
+      state.sampleDay = false;
+      return;
+    }
+    base = d2.due;
+  }
+  const td = today(),
+    n = Math.round((Date.parse(td + 'T12:00:00Z') - Date.parse(base + 'T12:00:00Z')) / 864e5);
+  if (!(n > 0)) {
+    if (state.sampleDay != td) state.sampleDay = base > td ? td : base;
+    return;
+  }
+  SHIFT_LISTS.forEach((k) => (state[k] || []).forEach((r) => r && !r._meta && shiftDates(r, n)));
+  state.sampleDay = td;
   store();
 }

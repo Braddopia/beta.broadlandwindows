@@ -55,11 +55,21 @@ function build() {
   el.innerHTML =
     '<div class="sv-sky sv-day"></div><div class="sv-sky sv-dusk"></div><div class="sv-sky sv-night"></div>' +
     '<div class="sv-stars"></div><div class="sv-moon"></div><div class="sv-sun"></div>' +
-    [1, 2, 3, 4, 5].map((i) => `<svg class="sv-cloud c${i}" viewBox="0 -40 320 170">${cloud(i * 17)}</svg>`).join('') +
+    [1, 2, 3, 4, 5]
+      .map((i) => {
+        /* each cloud starts at a random point of its journey, so they are spread across the sky (not all from the right) */
+        const dur = 70 + Math.random() * 90,
+          top = [1, 7, 13, 19, 25][i - 1] + Math.random() * 4,
+          w = 9 + Math.random() * 16;
+        return `<svg class="sv-cloud" style="top:${top.toFixed(1)}%;width:${w.toFixed(1)}vw;opacity:${(0.6 + Math.random() * 0.4).toFixed(2)};animation-duration:${dur.toFixed(0)}s,60s;animation-delay:-${(Math.random() * dur).toFixed(0)}s,0s" viewBox="0 -40 320 170">${cloud(i * 17 + Math.floor(Math.random() * 50))}</svg>`;
+      })
+      .join('') +
     /* the Broads, back to front: a far tree line with a round-tower church and a distant mill, a near tree line, the
        mill, water with its reflection, ripples, the sun's glint and evening mist, a wherry and a yacht, reeds */
     `<svg class="sv-trees far" viewBox="0 0 1440 120" preserveAspectRatio="none"><path d="${treeLine(1, 34)}"/></svg>` +
-    '<svg class="sv-church" viewBox="0 0 120 90"><path d="M10 90V52L46 36L82 52V90Z"/><path d="M78 90V22h3v-4h4v4h3v-4h4v4h3v-4h4v4h3V90Z"/></svg>' +
+    /* a Norfolk round-tower church: round flint tower with a battlemented top and slit windows, a long nave with a
+       steep roof, a lower chancel at the east end and a south porch */
+    '<svg class="sv-church" viewBox="0 0 220 130"><path class="rf" d="M60 70L108 40L156 70Z"/><path class="rf" d="M150 80L176 60L202 80Z"/><path d="M62 70H156V130H62ZM150 80H202V130H150ZM96 98h16l-8-10zM96 98h16v32H96Z"/><path d="M18 130V30a20 4 0 0 1 40 0V130Z"/><path d="M16 30V20h6v5h5v-5h6v5h5v-5h6v5h5v-5h6V30Z"/><path class="win" d="M35 46h6v12h-6zM35 78h6v10h-6zM76 82h8v16h-8zM124 82h8v16h-8zM176 92h8v14h-8z"/></svg>' +
     `<svg class="sv-mill far" viewBox="0 0 140 220">${MILL}</svg>` +
     `<svg class="sv-trees" viewBox="0 0 1440 120" preserveAspectRatio="none"><path d="${treeLine(7, 46)}"/></svg>` +
     `<svg class="sv-mill" viewBox="0 0 140 220">${MILL}</svg>` +

@@ -127,14 +127,14 @@ export function vSettings() {
     )}
     ${row(
       'Screen Saver',
-      'After this long with no mouse, keyboard or touch, on this computer',
+      'Starts when this computer is left idle',
       `<span class="sv-set"><span class="seg2">${SAVER_CHOICES.map(([v, t]) => `<button class="${String(saverMinutes()) == v ? 'on' : ''}" ${onClick('saverSet', v)}>${t}</button>`).join('')}</span><button class="btn ghost sm" data-act="saverTry">Preview</button></span>`
     )}
     ${row('Help Tour', 'A short guide to the site', '<button class="btn ghost sm" data-act="startTour">Start</button>')}
     ${row('Report A Problem', 'Something not working or looking wrong? Tell us here', '<button class="btn sm" data-act="bugReport">Report</button>')}
     ${row('Account', 'Signed in as ' + esc(ROLES[ROLE].n), '<button class="btn ghost sm" data-act="swRole">Switch</button>')}
    </section>
-   <section class="panel set-c"><h2><span class="set-ic">${svg(ICONS.contacts)}</span><span>Company Details</span>${own ? `<button class="btn sm" ${onClick('coEditK', 'co')}>Edit</button>` : ''}</h2>${dl(SET_CO)}<p class="muted set-n">${own ? 'Used on printed contracts, invoices and guarantees.' : 'For reference: the VAT number, emails and other company details. An administrator keeps them up to date.'}</p></section>
+   <section class="panel set-c"><h2><span class="set-ic">${svg(ICONS.contacts)}</span><span>Company Details</span>${own ? `<button class="btn sm" ${onClick('coEditK', 'co')}>Edit</button>` : ''}</h2>${dl(SET_CO)}<p class="muted set-n">${own ? 'Used on printed contracts, invoices and guarantees.' : 'Our company details, such as the VAT number and email addresses, for you to refer to. Only an administrator can change them.'}</p></section>
    ${
      own
        ? `<section class="panel set-c"><h2><span class="set-ic">${svg(ICONS.finance)}</span><span>Money And Invoices</span><button class="btn sm" ${onClick('coEditK', 'money')}>Edit</button></h2>${dl(SET_MONEY)}</section>
