@@ -110,7 +110,7 @@ export function parseBrochures(html) {
     let title = text(m[2]);
     if (!title || GENERIC.test(title) || title.length < 3) {
       const near = heads.filter((h) => h.at < m.index && m.index - h.at < 1500).pop();
-      title = near && near.t && !GENERIC.test(near.t) ? near.t : fromFile(url);
+      title = near && near.t && !GENERIC.test(near.t) ? near.t : tidyTitle('', url);
     }
     const sect = heads
       .filter((h) => h.at < m.index)
