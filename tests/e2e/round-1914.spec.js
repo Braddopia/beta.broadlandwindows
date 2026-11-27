@@ -72,14 +72,19 @@ test('on a short screen the side menu keeps its group names and scrolls', async 
   await app.page.setViewportSize({ width: 1440, height: 480 }); // short enough that the menu cannot fit with any font
   await app.role('beta');
   await app.go('home');
-  const r = await app.run(() => {
-    const n = document.querySelector('#nav');
-    return {
-      groupNames: [...n.querySelectorAll('.nl')].every((x) => x.offsetHeight > 0),
-      scrolls: n.scrollHeight > n.clientHeight && getComputedStyle(n).overflowY == 'auto',
-    };
-  });
-  expect(r).toEqual({ groupNames: true, scrolls: true });
+  // wait for every menu entry to be drawn (an administrator has over 20), then check (re-checked for a few seconds)
+  await expect.poll(() => app.run(() => document.querySelectorAll('#nav .nav').length)).toBeGreaterThan(20);
+  await expect
+    .poll(() =>
+      app.run(() => {
+        const n = document.querySelector('#nav');
+        return {
+          groupNames: [...n.querySelectorAll('.nl')].every((x) => x.offsetHeight > 0),
+          scrolls: n.scrollHeight > n.clientHeight + 5 && getComputedStyle(n).overflowY == 'auto',
+        };
+      })
+    )
+    .toEqual({ groupNames: true, scrolls: true });
 });
 
 test('no blue fill on hover over the holiday ring or a calendar day', async ({ app }) => {
