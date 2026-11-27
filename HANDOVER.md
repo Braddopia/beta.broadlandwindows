@@ -401,3 +401,13 @@ stock number). Decided with the owner:
   the owner's).
 - Settings: Company Details (VAT number, emails, phone...) shows for every account to refer to; only administrators
   see Edit and the Money And Invoices card.
+
+## v19.16.2
+
+- Screen saver (`features/app/screen-saver.js`, `src/css/05g-screen-saver.css`): after a while with no mouse, keyboard
+  or touch, the opening animation plays on a 10-second loop (the crane draws itself in light, fills, floats, fades,
+  starts again) with a large clock and the date. Any movement or key closes it; the click or touch that wakes it does
+  not press anything beneath. Settings, My Settings, Screen Saver: Off, 2, 5 (to start with) or 10 minutes, per
+  computer (localStorage `bb_saver`), with Preview. Never over the Floor Boards TV display or sign-in; still (no
+  movement) with Fewer Animations. Idle time is counted in seconds while the page is visible. Test:
+  `tests/e2e/screen-saver.spec.js`.

@@ -1,5 +1,6 @@
 /* features/settings/settings: The Settings page. */
 import { appState } from '../app/desktop-app.js';
+import { SAVER_CHOICES, saverMinutes } from '../app/screen-saver.js';
 import { docCard } from './doc-builder.js';
 import { company } from '../../data/company.js';
 import { ROLES } from '../../config/roles.js';
@@ -123,6 +124,11 @@ export function vSettings() {
         : appState() == 'installed'
           ? '<span class="tag g">Installed</span>'
           : ''
+    )}
+    ${row(
+      'Screen Saver',
+      'After this long with no mouse, keyboard or touch, on this computer',
+      `<span class="sv-set"><span class="seg2">${SAVER_CHOICES.map(([v, t]) => `<button class="${String(saverMinutes()) == v ? 'on' : ''}" ${onClick('saverSet', v)}>${t}</button>`).join('')}</span><button class="btn ghost sm" data-act="saverTry">Preview</button></span>`
     )}
     ${row('Help Tour', 'A short guide to the site', '<button class="btn ghost sm" data-act="startTour">Start</button>')}
     ${row('Report A Problem', 'Something not working or looking wrong? Tell us here', '<button class="btn sm" data-act="bugReport">Report</button>')}

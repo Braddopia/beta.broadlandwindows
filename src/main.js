@@ -111,6 +111,7 @@ import * as integrationsHallmark from './integrations/hallmark.js';
 import * as integrationsSmartOrders from './integrations/smart-orders.js';
 import * as startBoot from './start/boot.js';
 import * as featuresAppDesktopApp from './features/app/desktop-app.js';
+import * as featuresAppScreenSaver from './features/app/screen-saver.js';
 import * as printPrint from './print/print.js';
 import * as uiComponentsArt from './ui/components/art.js';
 import * as uiComponentsKpi from './ui/components/kpi.js';
@@ -156,6 +157,7 @@ const modules = {
   featuresRecordsDelete,
   startMigrations,
   featuresAppDesktopApp,
+  featuresAppScreenSaver,
   dataPersistence,
   dataPhotos,
   dataLoad,
@@ -324,4 +326,5 @@ featuresSettingsSettings.restoreMotionSetting();
 startBoot.boot();
 featuresHomeReviews.startReviewFeed();
 featuresAppDesktopApp.startDesktopApp();
+featuresAppScreenSaver.startScreenSaver();
 coreHaptics.listenForTaps();

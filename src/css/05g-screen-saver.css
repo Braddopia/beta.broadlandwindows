@@ -1,0 +1,24 @@
+/* Screen saver (features/app/screen-saver.js): the opening animation on a loop. Every 10 seconds the crane draws
+   itself in light, fills in, floats while the glow breathes, then fades and starts again; the clock sits beneath. */
+#saver{position:fixed;inset:0;z-index:6000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2.2rem;background:radial-gradient(circle at 50% 42%,#034ea2,#012b59 70%);color:#fff;opacity:0;visibility:hidden;transition:opacity .8s ease,visibility 0s .8s;cursor:none}
+#saver.on{opacity:1;visibility:visible;transition:opacity .8s ease}
+#saver .sv-glow{position:absolute;left:50%;top:40%;width:min(680px,100vw);aspect-ratio:1;border-radius:50%;transform:translate(-50%,-50%);background:radial-gradient(circle,rgba(127,192,255,.3),rgba(127,192,255,0) 65%);animation:svGlow 10s ease-in-out infinite}
+#saver .sv-fly{position:relative;width:min(380px,62vw);animation:svFloat 10s ease-in-out infinite}
+#saver .sp-bird{display:block;width:100%;height:auto;overflow:visible}
+#saver .sp-line{fill:none;stroke:#e6f2ff;stroke-width:3;stroke-linejoin:round;stroke-dasharray:1;stroke-dashoffset:1;filter:drop-shadow(0 0 6px rgba(160,210,255,.9));animation:svDraw 10s cubic-bezier(.45,.1,.4,1) infinite}
+#saver .sp-fill{opacity:0;filter:drop-shadow(0 12px 30px rgba(0,0,0,.35));animation:svFill 10s ease infinite}
+#saver .sv-clock{position:relative;display:flex;flex-direction:column;align-items:center;gap:.3rem;text-align:center}
+#saver .sv-time{font:600 clamp(3rem,7vw,5.5rem)/1 var(--head);letter-spacing:.02em;text-shadow:0 6px 30px rgba(0,0,0,.3)}
+#saver .sv-date{font-size:clamp(1rem,1.6vw,1.3rem);color:#cfe6ff}
+#saver .sv-hint{position:absolute;bottom:2.2rem;margin:0;font-size:.85rem;color:rgba(207,230,255,.65);animation:svHint 10s ease-in-out infinite}
+@keyframes svDraw{0%{stroke-dashoffset:1;opacity:1}17%{stroke-dashoffset:0;opacity:1}24%{opacity:1}30%{stroke-dashoffset:0;opacity:0}88%{stroke-dashoffset:0;opacity:0}89%{stroke-dashoffset:1;opacity:0}100%{stroke-dashoffset:1;opacity:1}}
+@keyframes svFill{0%,14%{opacity:0}24%{opacity:1}80%{opacity:1}90%,100%{opacity:0}}
+@keyframes svFloat{0%{transform:scale(.96) translateY(0)}24%{transform:scale(1) translateY(0)}52%{transform:scale(1) translateY(-14px)}80%{transform:scale(1) translateY(0)}100%{transform:scale(.96) translateY(0)}}
+@keyframes svGlow{0%{opacity:.35;transform:translate(-50%,-50%) scale(.75)}30%{opacity:1;transform:translate(-50%,-50%) scale(1.05)}60%{opacity:.7;transform:translate(-50%,-50%) scale(.95)}85%{opacity:.9;transform:translate(-50%,-50%) scale(1.08)}100%{opacity:.35;transform:translate(-50%,-50%) scale(.75)}}
+@keyframes svHint{0%,100%{opacity:.4}50%{opacity:.85}}
+/* Fewer Animations (or the computer's reduce-motion setting): a still crane and the clock */
+body.rm #saver *{animation:none!important}
+body.rm #saver .sp-fill{opacity:1}body.rm #saver .sp-line{opacity:0}
+@media(prefers-reduced-motion:reduce){#saver *{animation:none!important}#saver .sp-fill{opacity:1}#saver .sp-line{opacity:0}}
+/* Settings row: the minutes, then Preview */
+.sv-set{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;justify-content:flex-end}
