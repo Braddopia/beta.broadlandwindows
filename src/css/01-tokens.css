@@ -4,7 +4,8 @@
 :root{
   --blue:#034ea2; --navy:#012b59; --yellow:#ffd002;
   --bg:#eef2f8; --card:#fff; --card2:#f6f8fc;
-  --ink:#0c1a2e; --muted:#4a5870; --line:#d9e1ee;
+  --ink:#0c1a2e; --muted:#4a5870; --line:#ccd6e4;
+  --field-line:#7f8ca0; --ph:#687386; /* (v19.18.15) box outlines and hint text that pass WCAG AA (3:1, 4.5:1) */
   --green:#12794c; --green-bg:#e0f3ea;
   --red:#bf3434;   --red-bg:#fbe7e7;
   --amber:#6b5500; --amber-bg:#fff2b8;
@@ -25,7 +26,8 @@
 body[data-theme=dark]{
   --blue:#72acf9; --navy:#d3e3fb;
   --bg:#0d1117; --card:#181d26; --card2:#1f2530;
-  --ink:#e9ebef; --muted:#a7b0bf; --line:#2b313c;
+  --ink:#e9ebef; --muted:#a7b0bf; --line:#353c49;
+  --field-line:#647086; --ph:#8d97a8;
   --green:#7fe0aa; --green-bg:#0f3a29;
   --red:#ffa3a3;   --red-bg:#4a2020;
   --amber:#ffd96b; --amber-bg:#4a3f0a;

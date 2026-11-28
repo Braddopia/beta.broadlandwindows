@@ -250,8 +250,7 @@ body.upd-going .updw-card{opacity:.7}
 .jt-shared h3{display:flex;align-items:center;justify-content:space-between;gap:.5rem}
 .jt-shared h3 span{display:inline-flex;align-items:center;gap:.35rem}
 .jt-shared h3 svg{width:.9rem;height:.9rem}
-.jt-shared.locked input{background:var(--card2);color:var(--muted);border-style:dashed;cursor:default;opacity:.75}
-.jt-shared.locked label{opacity:.75}
+.jt-shared.locked input{background:var(--card2);color:var(--muted);border-style:dashed;cursor:default}
 /* Deliveries calendar (v19.18.4): the whole month fits on one screen, however many weeks it has */
 .dcal-d{min-height:var(--rowh,7.2rem)}
 /* Suppliers cards (v19.18.4): the content spaced evenly. Wide screens: one row of equal columns. Laptop widths: two
@@ -344,3 +343,16 @@ body[data-theme=dark] .msn-t{background-color:color-mix(in srgb,var(--card) 70%,
 .set-r .set-a .seg,.set-r .set-a .seg2,.set-r .set-a>.tag,.set-r .sv-sel select{box-sizing:border-box;height:1.9rem}
 .set-r .set-a .seg button{height:100%;padding-top:0;padding-bottom:0}
 .set-r .sv-sel select{font-size:.78rem}
+/* (v19.18.15) readable in day and night: every box has an outline at least 3:1 against what is around it (WCAG AA for
+   controls) and hint text at least 4.5:1. Grid cells typed into in place (the Products and commission grids) keep their
+   outline-on-hover; a box being typed in keeps its blue focus outline. */
+:where(input:not([type=checkbox]):not([type=radio]):not([type=color]):not([type=range]):not(:focus),select:not(:focus),textarea:not(:focus)){border-color:var(--field-line)!important}
+.abgrid input:not(:focus),.abgrid select:not(:focus),.sb input,.top .sb input{border-color:transparent!important}
+.abgrid input:hover:not(:focus),.abgrid select:hover:not(:focus){border-color:var(--field-line)!important}
+::placeholder{color:var(--ph);opacity:1}
+/* locked boxes (Stock ID, Item Code, the tag wording) keep their locked look but their words stay readable (4.5:1) */
+:root{--ro-ink:#3d4a60}body[data-theme=dark]{--ro-ink:#b9c1ce}
+input[readonly],textarea[readonly],.jt-shared.locked input{color:var(--ro-ink)!important;-webkit-text-fill-color:var(--ro-ink)}
+/* on the highlighted Products row and on the window's search box the outline is a shade stronger */
+.abgrid tr.sel input:not(:focus),.abgrid tr.sel select:not(:focus),.rw-find input:not(:focus){border-color:color-mix(in srgb,var(--field-line) 70%,var(--ink))!important}
+.abgrid tr:not(.sel) input:not(:hover):not(:focus),.abgrid tr:not(.sel) select:not(:hover):not(:focus){border-color:transparent!important}

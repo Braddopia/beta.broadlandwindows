@@ -11,18 +11,38 @@ export function plugInRecordWindow(h) {
   REC = { ...REC, ...h };
 }
 /* ---- modal ---- */
-export let REC_STASH = null;
+/* (v19.18.15) a window opened on top of a lead, contract or supplier window, or a product window, sets that window
+   aside exactly as it was, and Close brings it back, one step at a time (a supplier's delivery or stock line, Edit
+   Supplier, a product's report). Before, only lead and contract windows came back, one level deep. Other pop-ups, and
+   a window drawn again (its own tabs, a product picked in it), replace what is there as they always did. */
+const STACK = [];
+export let REC_STASH = null; /* kept for older callers: true while a window is set aside */
+function setAside(b) {
+  const rw = b.querySelector(':scope>.rw'),
+    rb = rw && rw.querySelector('.rw-b');
+  STACK.push({
+    nodes: [...b.childNodes],
+    cls: b.className,
+    rw: rw ? REC.get() : null,
+    sy: rb ? rb.scrollTop : b.scrollTop,
+    photos: tmp,
+    draw: tmpDraw,
+  });
+  REC_STASH = true;
+  b.replaceChildren();
+}
 export function openModal(h, size) {
   const b = $('#mbox'),
-    isRec = /^\s*<div class="rw[ "]/.test(h);
-  if (isRec) REC_STASH = null;
-  else if (!REC_STASH && $('#modal').classList.contains('open') && REC.get()) {
-    const rw = b.querySelector(':scope>.rw');
-    if (rw) {
-      const rb = rw.querySelector('.rw-b');
-      REC_STASH = { node: rw, cls: b.className, rw: REC.get(), sy: rb ? rb.scrollTop : 0 };
-      rw.remove();
-    }
+    isRec = /^\s*<div class="rw[ "]/.test(h),
+    open = $('#modal').classList.contains('open') && b.childNodes.length,
+    curRec = open && !!b.querySelector(':scope>.rw');
+  if (open) {
+    /* set aside only a lead, contract or supplier window, or a product window, when a different window opens on top;
+       a window drawn again (its own tabs, a product picked in it) replaces itself */
+    const curItem = !!b.querySelector(':scope>.ie-h'),
+      newItem = /^\s*<div class="ie-h">/.test(h),
+      isAsk = /^\s*<div class="ask">/.test(h);
+    if (!isRec && (curRec || (curItem && !newItem && !isAsk))) setAside(b);
   }
   b.className = 'mb ' + (size || 'md');
   /* one standard width unless a window needs another */ b.innerHTML = h;
@@ -144,7 +164,7 @@ export function parkModal() {
   return true;
 }
 export function closeModal() {
-  if (PARKED && !REC_STASH) {
+  if (PARKED && !STACK.length) {
     const p = PARKED,
       b = $('#mbox');
     PARKED = null;
@@ -154,18 +174,21 @@ export function closeModal() {
     $('#modal').classList.add('open');
     return;
   }
-  if (REC_STASH) {
-    const s = REC_STASH,
+  if (STACK.length) {
+    const s = STACK.pop(),
       b = $('#mbox');
-    REC_STASH = null;
-    b.innerHTML = '';
+    REC_STASH = STACK.length ? true : null;
     b.className = s.cls;
-    b.appendChild(s.node);
-    REC.set(s.rw);
+    b.replaceChildren(...s.nodes);
+    setPhotoList(s.photos, s.draw);
     $('#modal').classList.add('open');
     const rb = b.querySelector('.rw-b');
     if (rb) rb.scrollTop = s.sy;
-    REC.back();
+    else b.scrollTop = s.sy;
+    if (s.rw) {
+      REC.set(s.rw);
+      REC.back();
+    }
     return;
   }
   $('#modal').classList.remove('open');
@@ -178,4 +201,11 @@ export function listenForBackdropClicks() {
   $('#modal').addEventListener('mousedown', (e) => {
     if (e.target.id == 'modal') closeModal();
   });
+}
+/** close every window, including any set aside underneath (used when leaving for another page) */
+export function closeAllModals() {
+  STACK.length = 0;
+  REC_STASH = null;
+  PARKED = null;
+  closeModal();
 }

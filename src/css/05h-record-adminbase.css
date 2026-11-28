@@ -385,3 +385,5 @@ body[data-theme=dark] .mb.ab .abfensa h4{color:#e8eef8}
 .mb.ab .abfensa-g .rf.tk{flex-direction:row;align-items:center;gap:.6rem;align-self:end;min-height:2.45rem}
 .mb.ab .abfensa-g .rf.tk>span{order:2;font-weight:500}
 .mb.ab .abfensa-g .rf.tk input{margin:0;width:auto}
+/* (v19.18.15) dark mode: the record search box stays dark when it has the cursor (it was plain white) */
+body[data-theme=dark] .mb.ab .rw-find input:focus{background:var(--card2);color:var(--ink);border-color:var(--blue)}

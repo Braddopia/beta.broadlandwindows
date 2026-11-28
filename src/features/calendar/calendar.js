@@ -3,7 +3,7 @@ import { onClick, onEvent, rowClick } from '../../core/actions.js';
 import { jobTitle } from '../../domain/job-title.js';
 import { html, raw } from '../../core/html.js';
 import { siteOf } from '../../domain/customers.js';
-import { askIn, closeModal, openModal } from '../../ui/modal.js';
+import { askIn, closeAllModals, openModal } from '../../ui/modal.js';
 import { fieldControl } from '../../ui/forms/fields.js';
 import { SAFE } from '../../data/sanitize.js';
 import { store } from '../../data/persistence.js';
@@ -214,7 +214,7 @@ export function calDel(id) {
 }
 /** from a calendar pop-up, on to the page it belongs to */
 export function calToPage(v) {
-  closeModal();
+  closeAllModals();
   go(v);
 }
 export function calCells(days, full) {

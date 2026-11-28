@@ -848,3 +848,25 @@ page, page build times and a CPU profile). Findings and fixes:
 - Tests: round-191814.spec.js.
 - Deliveries (`delCalFit`): a last check switches to one line per delivery if the page would still scroll by a pixel
   after fitting (a busy week at 1366×768 could leave 1px over and fail round-1918's no-scroll test).
+
+## v19.18.15: readable day and night; windows come back to the one they were opened from
+
+- Colour check (Standard User, every page and the item, contract, lead, supplier and Address windows, light and dark):
+  text already passed WCAG AA; box outlines did not (`--line` was about 1.2:1). New tokens in 01-tokens.css:
+  `--field-line` (#7f8ca0 light, #647086 dark, at least 3:1 against card and card2) and `--ph` (hint text, 4.5:1);
+  `--line` is a shade stronger (#ccd6e4, #353c49). End of 09-consistency.css: every box takes `--field-line`
+  (a `:where()` rule, so special cases win), except the Products/commission grid cells (outline on hover only) and
+  the top search; `::placeholder` uses `--ph`; read-only boxes use `--ro-ink`; the Job Stock Tags locked wording is no
+  longer faded. Dark: the record search box stays dark when focused.
+- Windows (ui/modal.js): the single `REC_STASH` became a stack. A window opened on top of a lead, contract or
+  supplier window (`.rw`), or a product window (`.ie-h`), sets it aside exactly as it was, and each Close brings the
+  one before back (the supplier window used to drop to the page: Edit Supplier, its stock lines and deliveries).
+  Other pop-ups, yes / no questions over a product window, and a window drawn again replace what is there as before.
+  `closeAllModals()` clears the lot (used by the calendar's "Continue To Deliveries").
+- Click test (scratch script, not in the repo): as a Standard User every button, tab and link on all 16 pages and in
+  7 kinds of window was pressed (402 in all): no JavaScript errors, nothing that did nothing, and no window that lost
+  its place (record « ‹ › » move the same window, so they close to the page, as they should).
+- Tests: round-191815.spec.js.
+- Deliveries (`delCalFit`): a pixel off each week while the page would scroll, and a look again 250ms later (up to 3
+  times) in case something else moved by a pixel; round-1918 / round-191812 Deliveries tests had failed now and then
+  when the whole suite ran.

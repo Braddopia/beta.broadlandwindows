@@ -152,6 +152,8 @@ function layoutBottom(el) {
     t = getComputedStyle(el).transform;
   return r.bottom - (t && t != 'none' ? new DOMMatrixReadOnly(t).m42 : 0);
 }
+let reFitT = 0,
+  reFits = 0;
 export function delCalFit() {
   const g = document.querySelector('#main .dcal-g'),
     m = document.querySelector('#main');
@@ -206,6 +208,22 @@ export function delCalFit() {
   }
   /* last check: if the page would still scroll (a busy week a pixel too tall), use one line per delivery */
   if (m.scrollHeight > m.clientHeight && !g.classList.contains('tight')) fit(true);
+  /* something else on the page can still move by a pixel just after (its scrollbar room, a late redraw): look again
+     shortly and fit once more if the page would scroll (a few times at most) */
+  clearTimeout(reFitT);
+  reFitT = setTimeout(() => {
+    const mm = document.querySelector('#main');
+    if (mm && mm.querySelector('.dcal-g') && mm.scrollHeight > mm.clientHeight && reFits < 3) {
+      reFits++;
+      delCalFit();
+    } else reFits = 0;
+  }, 250);
+  /* and never a pixel to scroll: a pixel off each week until it fits (rounding on a busy computer) */
+  for (let i = 0; i < 10 && m.scrollHeight > m.clientHeight; i++) {
+    const cur = parseFloat(g.style.getPropertyValue('--rowh')) || 0;
+    if (cur <= 44) break;
+    g.style.setProperty('--rowh', Math.max(44, cur - 1) + 'px');
+  }
 }
 /* 'Received' opens the delivery on its arrival checks: who checked it, QC, anything damaged */
 export function recvD(id) {
