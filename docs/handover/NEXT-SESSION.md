@@ -1,18 +1,110 @@
-# Next session: start here (written 27 November 2026, after v19.17.8; tasks 1 to 3 done in v19.17.9 to v19.18.2)
+# Next session: start here (written 28 November 2026, after v19.18.11)
 
-> Update: Task 1 (review keys note), Task 2 (brochure New tag) and Task 3 (Lead, Contract and Supplier windows like
-> AdminBase) were done in v19.17.9, v19.18.0, v19.18.1 and v19.18.2. See HANDOVER.md for what was built and what is
-> still open with the owner (screenshots of Address, Advanced and Documents; the "Coming soon" reports).
+This is the hand-over for a **brand-new chat** on the Broadland Windows CRM. Read it top to bottom, then
+`CLAUDE.md` (the rules for code), `HANDOVER.md` (version-by-version history; the v19.18.x sections at the end are the
+latest work) and `docs/ARCHITECTURE.md`.
 
-This is the hand-over for the next working session on the Broadland Windows CRM. Read it top to bottom, then
-`HANDOVER.md` (the version-by-version history), `CLAUDE.md` (the rules for code) and `docs/ARCHITECTURE.md`.
+## 1. The CRM in one page
 
-The owner is away from the keyboard while this session runs. Work through the tasks below in order, publish each
-finished round, and leave a clear summary (with screenshots) for when they are back.
+A single-file web app (one HTML file, no server yet) for Broadland Windows, Doors & Garden Rooms (Norfolk). Data lives
+in the browser (IndexedDB) and syncs between tabs; an `api-source.js` stub is waiting for a Microsoft 365 back end.
+It installs as a desktop app (Windows and Mac) and checks `version.json` for updates. Live at
+https://braddopia.github.io/beta.broadlandwindows/ (GitHub Pages from `main`).
+
+Pages (side menu groups):
+- **Workspace**: Overview (KPIs, reviews, greeting box), Messages (WhatsApp-style chat), Calendar (month/week/agenda
+  of surveys, appointments, fittings, deliveries, service visits, holidays).
+- **Sales**: Contact Book (cards with A–Z bar), Leads, Contracts, Service Calls (indented under Contracts).
+- **Operations**: Floor Boards (factory TV boards, Full Screen), Deliveries (Calendar / List / Board; Hallmark feed
+  bar on the List view).
+- **Stock**: Inventory (items, stock-take areas, reports incl. Detailed and "Find It" factory-floor report),
+  Suppliers.
+- **Processing**: Panel Optimiser, Cutting Optimiser (aluminium bars only), Job Stock Tags.
+- **People / Insights / Admin** (some only in the Beta / admin account): Staff, Holiday Planner, Reports, Files
+  (brochures from the website, "New" badge), Finance, Admin Console, Settings.
+
+Record windows (Lead, Contract, Supplier) were rebuilt in v19.18.0–v19.18.8 to work like the owner's old system,
+**AdminBase**, in the CRM's own look: they open in the page area (side menu stays), with a toolbar (Save & Close,
+Save, Address, Reports, Clipboard, Advanced, « ‹ › » navigation, Search, Full Page, Close), a title line with the
+stage path, tabs, and a Details tab of label/value rows in collapsible groups beside a Products grid with Info For
+FENSA. Contract Reports is a two-pane window with a live preview. Code: `src/features/records/` (record-window.js,
+ab-list.js, record-tools.js, record-parts.js, record-page.js, products.js, fields.js), `src/features/contracts/`
+(contract-record.js, contract-tabs.js, contract-reports.js), `src/features/leads/lead-record.js`,
+`src/features/suppliers/supplier-window.js`; styles in `src/css/05h-record-adminbase.css`.
+
+## 2. What to do first in the new chat
+
+1. `npm ci`, then `npm run test:visual:update` (make local screenshot baselines before changing anything), then
+   `npm run check` to see everything green.
+2. Ask the owner for the **AdminBase contract screenshots** (Details, Address, Advanced, Documents, and anything
+   else they want matched). They tried to show it live but this cloud session could not see their screen: ask them
+   to paste screenshots with real customer names and emails blurred. **Never copy real names or emails** from them.
+   Then tighten the Contract (and Lead) windows' spacing and layout to match, keeping the CRM's look.
+3. Carry on with the open list in section 6.
+
+## 3. Things the owner chose recently (keep them)
+
+- **What's New window** (update-card.js, v19.18.10): like Discord's What's New, no ticks. Header with "Version x ·
+  date", sections with coloured headings, footer "A New Version Is Ready", Restart Now, Remind Me In 10 Minutes.
+  Notes come from `src/whats-new.json`: `{ "date": "YYYY-MM-DD", "notes": [{ "t": "Heading", "d": "One or two
+  plain sentences" }] }` (up to five). The build writes `version.json` with `sections`, `date` and plain `notes`
+  (for old copies). Write these notes in plain English for staff, every release.
+- **Settings, Version row**: "Version x is ready · you have y" + Update Now when an update is waiting; otherwise
+  "This is version y, the latest" + Check Again. Settings buttons fit their words (v19.18.11), same height.
+- **Deliveries calendar**: the whole month on one screen, running to the bottom of the screen, never scrolls
+  (`delCalFit`, `watchDelCalSize`; v19.18.9 and v19.18.11).
+- **Contact Book**: sticky Show and A–Z bars fill in once the page scrolls (`watchPageScroll` puts `.scrolled` on
+  `#main`).
+- **Floor Boards**: clickable rows shade on hover; no blue line (the owner reads it as an underline).
+- **Stock**: Stock-Take Area is a searchable drop-down of `STOCK_AREAS` (TEXT-NUMBER: BTSS-01..40, Sobinco,
+  BTDR-01..40, BTWIN-01..40, Red/Grey/Blue/Green Container). Materials are Aluminium and Timber only. Only aluminium
+  counted in Meters (M) can be a Cutting Optimiser bar; its bar length is the Length (m) box. Never ask a PCS/Each
+  item for metres.
+- **Colour boxes** marked (A) or (B) show a faint hint: "A – Typically Outside", "B – Typically Inside".
+- **Long drop-downs** (12+ options) have a search box (`ui/components/pickers.js`).
+- **Screen saver**: sun and moon fade and sink at the horizon; it must stay smooth.
+- **Performance** (v19.18.6, `src/css/10-performance.css`): no `backdrop-filter` blur on page surfaces (it was the
+  main cause of lag), no endless animations on a still page. Don't add blur to in-page surfaces again; pop-ups may
+  keep theirs. A test checks this.
+
+## 4. Round routine changes since the older notes below
+
+- Version is now 19.18.x (`dist/Broadland-Windows-CRM-v19.18.html`). Bump the patch number every round.
+- Run the **whole** `npm run check` before every push (a pushed round once failed CI because only one spec was run).
+- After pushing, check both workflows with the GitHub MCP `actions_list`; a `send_later` reminder 5 minutes later
+  works well.
+- Screenshots: Playwright scripts against `file:///…/index.html` with `window.CRM.go('view')`; owner-facing ones at
+  deviceScaleFactor 2.
+
+## 5. Owner and environment notes
+
+- The owner is not a coder; plain English, screenshots, short summaries. British English, Title Case on buttons.
+- Standing instruction: **always publish** (push the branch and `main`).
+- This project runs in a cloud session: it cannot see the owner's screen or reach broadlandwindows.co.uk or the live
+  site from the container. Screenshots from the owner are the way to see AdminBase.
+- Never ask for API keys in chat (they go in GitHub Secrets; see CLAUDE.md "Before going live").
+
+## 6. Open items
+
+1. **AdminBase match for Contracts and Leads** (first job, needs the owner's screenshots): spacing and layout of the
+   Details, Address, Advanced and Documents tabs. The owner said the windows felt crowded; v19.18.8 gave them more
+   room. Wait for screenshots before big moves.
+2. **"Coming soon" reports** in Contract Reports: ask the owner what each should contain (10/5 Year Completion
+   Documents, Domestic Aluminium Checklist, Quality Plan, Standing Order Letter, Credit Control Letter, etc.).
+3. Offered, not yet asked for: highlight Leads / Contracts / Suppliers in the side menu while one of their records is
+   open.
+4. The pages only in the Beta / admin account (Staff, Holiday Planner, Reports, Finance, Admin Console): the owner
+   wants to work through them next; ask which first.
+5. Before going live (CLAUDE.md): turn tours back on (`TOURS_AUTO = true`), set the review API secrets and run "Daily
+   website figures", turn off "Show the welcome tour every time", change PINs still at 1234.
+6. Older open questions in HANDOVER.md ("Open questions for the owner"): the Units On Shelf card and an "Other
+   length" option in Inventory.
 
 ---
 
-## 1. The owner and how to work with them
+The sections below are kept from the earlier hand-over (how to work with the owner, the round routine, pitfalls).
+
+## A. The owner and how to work with them
 
 - The owner runs Broadland Windows (windows, doors and garden rooms, Norfolk). They are **not a coder**: explain in
   plain English, show screenshots, send the built HTML file. No code in summaries unless asked.
@@ -30,7 +122,7 @@ finished round, and leave a clear summary (with screenshots) for when they are b
   - Windows desktop icon: the plain sun with the bird. Mac: a white rounded tile with the sun inside.
   - Inventory: column order and widths from v19.13 to v19.15.1 (see HANDOVER.md). Do not rearrange.
 
-## 2. The round routine (every time)
+## B. The round routine (every time; see section 4 for what changed)
 
 1. `npm run build` (writes `dist/Broadland-Windows-CRM-v19.17.html`, `index.html` and the desktop-app files).
 2. `npm run check` (lint, unit tests, build, Playwright behaviour tests). All must pass.
@@ -49,7 +141,7 @@ finished round, and leave a clear summary (with screenshots) for when they are b
 Live site: https://braddopia.github.io/beta.broadlandwindows/ (the cloud container's proxy blocks it, and
 broadlandwindows.co.uk, so you cannot open either from the container; test locally with Playwright).
 
-## 3. Things that will trip you up
+## C. Things that will trip you up
 
 - **Playwright runs with `reducedMotion: 'reduce'`** (playwright.config.js) and a **fixed clock** (`page.clock.
   setFixedTime`, 2026-11-08 10:00, tests/helpers.js). Under that clock `requestAnimationFrame` never fires and
@@ -67,187 +159,3 @@ broadlandwindows.co.uk, so you cannot open either from the container; test local
   old system contain real customer and staff names and an email address: **never** copy those into code, tests or docs.
 - Generated files (`index.html`, `dist/`, `sw.js`, `manifest*.webmanifest`, `app-sun-*.png`, `version.json` in the
   root) are written by the build from `src/`. Never edit them by hand.
-
-## 4. Where things stand (v19.17.8)
-
-Everything below is live and passing.
-
-- Messages: WhatsApp-style runs, coloured names, time and ticks in the bubble, groups with admins, commands (`/`).
-- Service calls: up to four engineers (`fitter` lead, `fitter2` to `fitter4`; `callTeam(c)` in domain/people.js).
-- Files: brochures follow the website via the daily job; Category and Size sit beside the buttons.
-- Job Stock Tags: one full-width line per box, capitals in the wording, colour filled in from the contract.
-- Update prompt: `ui/shell/update-card.js`; checks `version.json` on every page change, focus, and every 2 minutes.
-- Screen saver: rebuilt in `features/app/saver-scene.js` (a 240-second day; sun and moon on arcs; clouds at depths;
-  boats sail fully across). Settings has one drop-down for it. Moving the mouse alone does not close it.
-- Desktop app: `manifest.webmanifest` (Windows, plain sun) and `manifest-mac.webmanifest` (Mac, white tile), swapped
-  by `isMac()` in features/app/desktop-app.js.
-
-### The daily website job (`.github/workflows/reviews.yml`, "Daily website figures", 05:23 UTC)
-
-- `scripts/fetch-brochures.mjs`: reads broadlandwindows.co.uk/brochures/, keeps one of each brochure (`oneEach`),
-  drops non-brochures (`NOT_BROCHURE`), tidies file-name titles (`tidyTitle`: HW = Hardwood), records each cover
-  picture (`img`), and writes `brochures.json` with `firstSeen` dates. When the page cannot be read it falls back to
-  WordPress's file list; fewer than 5 found leaves yesterday's list. The website sometimes answers automated reads
-  with a small holding page: that is handled (nothing is changed that day).
-- `scripts/fetch-reviews.mjs`: Google and Trustpilot scores. **No keys are set**, so nothing updates. Trustpilot's
-  public page answers 403 to automated reads, so the key-less fallback does not work from GitHub.
-
----
-
-## 5. Tasks for this session, in order
-
-### Task 1: note that the review API keys must be set up later
-
-The owner knows the live review counts need keys and wants it recorded, not done now.
-
-- Add a line to the **"Before going live"** list in `CLAUDE.md`: set the GitHub Actions secrets
-  `GOOGLE_PLACES_KEY` and `GOOGLE_PLACE_ID` (Google Cloud, Places API (New)) and `TRUSTPILOT_API_KEY` (Trustpilot
-  Business), optionally the variable `TRUSTPILOT_DOMAIN`; then run "Daily website figures" by hand and check
-  `reviews.json` appears on `main`.
-- Make sure the Admin Console's Reviews card says the same in plain words (it shows "no keys set" status today; check
-  the wording reads well).
-- Never ask the owner to paste keys into chat. They go in GitHub: Settings, Secrets and variables, Actions.
-
-### Task 2: the "New" tag on brochures in Files
-
-The owner says brochures that are not new show the little yellow "New" badge (some were picked up by the daily check
-recently, so the CRM thinks they are new).
-
-What is there now:
-- `isNew(d)` in `src/features/files/files.js`: New when `firstSeen` (from brochures.json) is within 30 days **and**
-  the file's upload month (from `/uploads/YYYY/MM/` in its address) is within about two months.
-- `brochures.json` today: every item has `firstSeen` 2025-11-27 (the job dates the first list a year back so nothing
-  is new) except `COVER-HALLMARK-uPVC-Panels-2025-scaled.jpg` (firstSeen 2026-11-27, uploaded 2025/06, so not New by
-  the upload-month rule). Items uploaded in 2026/10 and 2026/11 (Alitherm Heritage 60, Hallmark Composite Door
-  Brochure 2026) pass the upload-month rule, but their `firstSeen` is a year back, so they are not New either.
-- The job re-dates anything whose **address** it has not seen before. When the website re-uploads a file (a "-1"
-  copy, or a new month folder) or the job switches between reading the page and the WordPress file list, an old
-  brochure gets a new address and so a fresh `firstSeen`, which is the likely cause.
-
-What to do:
-- In `scripts/fetch-brochures.mjs`, match "seen before" by the file key (`fileKey(url)`: the file name, ignoring a
-  "-1" re-upload suffix) **and** by tidied title, not only the address; keep the earliest `firstSeen`.
-- Treat the list as it stands now as the baseline: nothing in today's brochures.json is New. Only a brochure whose
-  file key and title were never seen before gets today's date.
-- Keep the upload-month rule in the app as a second check.
-- Add unit tests (tests/unit/brochures.test.mjs) for: a re-uploaded file keeps its old date; a new file gets today.
-- Check the "New" badge does not show on any current brochure (e2e: tests/e2e/round-1917.spec.js has brochure tests).
-- A brochure removed from the website drops out at the next morning check (this already works; keep it working).
-
-### Task 3: rework the Lead and Contract windows like the old system (the big one)
-
-The owner wants the Lead and Contract record windows to work like their old system, **AdminBase**, "but with our
-current UI". Their words: "I would like to try Large Centered Window/Full Page but it needs to be like this I guess
-as this is what we are used to". They sent 8 screenshots of AdminBase over two messages. They are described below in
-words (the screenshots hold real names, so they are not in the repo).
-
-The current window is `src/features/records/record-window.js` (tabs called steps: `RSTEPS`, field lists in
-`src/features/records/fields.js`, groups with `g: '…'`, cards in `cards.js`, products in `products.js`, checklist,
-survey, photos-docs, notes, stages; contract parts in `src/features/contracts/`, lead parts in `src/features/leads/`).
-It is already a full-screen window with tabs and label/value rows. The rework changes its **layout and behaviour**
-to match AdminBase's, keeping the app's look (cards, fonts, colours, light/dark, buttons, the 20 UX principles in
-docs/UX-PRINCIPLES.md).
-
-#### What AdminBase looks like (from the owner's screenshots)
-
-**Frame**
-- Top bar of coloured sections: Home, Leads (green), Contracts (teal), Diaries (red), Stock (amber), then Search All,
-  Tools, Settings, Exit. (The CRM already has its own side menu: do not copy this bar.)
-- A record toolbar in a teal band: **Save & Close**, **Address**, **Reports**, **Clipboard ▾**, **Advanced ▾**, then
-  record navigation **« ‹ › »** (first, previous, next, last), then **Search**.
-- A title line: "Browsing Customers [Customer: (customer number and name) Contract No: (contract number)]". Under it a small row:
-  an (i) info button, first/previous/next/last arrows, a tick (save) and a cross (cancel), and a red link
-  "1 Contract for this Customer" (how many contracts this customer has; it opens them).
-
-**Tabs along the top of the record (contract)**: Details · Checklist · Finance · Deliveries · Fitting · Notes etc ·
-3 Documents (the count of documents in the tab name) · Commissions · Job Costings · Service Calls.
-
-**Details tab: two halves side by side**
-- Left half: a long label/value list, one row per field, thin lines between rows, collapsible groups with a chevron
-  (open ⌃ / closed ⌄). A closed group shows a summary on its row (e.g. Sales Information shows "[salesperson name]").
-  In order:
-  - Contract No · Contract Date · Week Received (week number)
-  - **Office Refs** (group): Office Ref 1 · Office Ref 2
-  - **Supply Only** (tick box; a group, closed)
-  - Contract Type (e.g. "Domestic Ali") · Installation Manager · Assigned Surveyor
-  - **On Hold** (tick box; group, closed) · **Cancelled** (tick box; group, closed)
-  - **Sales Information** (group, open; summary "[salesperson]"): Lead Number · Sales Area · Sales Director ·
-    Sales Manager · Salesperson · Lead Source · Sub Source · Sub Sub Source
-  - **Created By** (group, closed)
-  - Contract Approvals
-  - Contract Colour (a colour swatch and its code; the colour this contract shows in lists and the diary)
-  - Flash Note
-- Right half: two sub-tabs, **Products** and **Other Info**.
-  - Products: a small toolbar (first/previous/next/last, **+** add line, **−** remove line, tick, cross,
-    **Default** (add the default lines), **Create from Deliveries**), then a grid: Line No · Product Code · Product
-    Name · Qty · Guarantee · Location · Rate · Net Sales Value. Example lines: labour, trims, sealed units, door,
-    windows.
-  - Underneath, an **Info for FENSA** box: Window Count, Door Count (number boxes), tick boxes Conservatory,
-    Roofline, Exported, Not Required, and a **More >>** link.
-
-**Other tabs (from the first set of screenshots)**
-- Checklist: the stages from signed contract to guarantee, ticked with who and when.
-- Finance: a summary (value, deposit, paid, balance) and a table of payment lines with its own small toolbar
-  (Add, Delete, Default, Select All).
-- Deliveries: the supplier deliveries for this job in a table with a toolbar.
-- Fitting: dates and team, and a **Contract Schedule** table (the fitting days).
-- Notes etc: notes and a log.
-- Documents: the job's documents (the tab shows the count, e.g. "3 Documents").
-- Commissions: the salespeople's commission lines.
-- Job Costings: Products and Info for FENSA (as above) with costs.
-- Service Calls: the calls raised on this job.
-
-**Reports (the toolbar's Reports button)**
-- Opens "Contract Reports": a teal header with a toolbar **Back · Email · Print · Sign · Preview · Customise ·
-  Edit List**.
-- Left: a list "Report Name": Customer Contract Record · Invoice Reminder · 10 Year Completion Documents · 5 Year
-  Completion Documents · 10 Year Completion Documents Conservatory · Domestic Aluminium Checklist · Quality Plan ·
-  Contract Statement · Order Acknowledgement Letter · Order Checklist · Receipt · Sales Invoice · Standing Order
-  Letter · Credit Control Letter 14 Days. One is highlighted when picked.
-- Right: a large preview of the picked report.
-- A footer line saying who to ask for changes to the reports (do not copy the name or email; use the company's
-  general wording, e.g. "Need a change to a report? Ask an administrator").
-
-**Not sent yet**: the Address window, the Advanced menu and the Documents tab. The owner offered them ("max 5
-images"). Build a sensible version (Address: the customer's home, site and invoice addresses in one window; Advanced:
-less-used actions like Duplicate, Merge, Change Customer, Delete), then ask for those screenshots when they are back.
-
-#### How to build it (recommended)
-
-- **Shape**: a large centred window (about 94vw × 92vh, rounded, over a dimmed page) that can go full page with one
-  button. Inside: the record toolbar, the title line, the tab row, then the tab's content. The CRM's styling
-  (cards, `fieldControl()` boxes, buttons), not AdminBase's grey Windows look.
-- **Toolbar**: Save & Close (primary), Save, Address, Reports, Clipboard ▾ (copy customer details, address, job
-  number), Advanced ▾, record navigation « ‹ › » through the list the window was opened from, and Search (find
-  another record without closing). Keyboard: Ctrl+S save, Esc close (asks to save if anything changed),
-  PageUp/PageDown previous/next.
-- **Title line**: "Contract 1023421 · Sample Customer E · Aylsham" with the stage tag, and "1 Contract For This
-  Customer" (or "3 Contracts …") that opens a small list.
-- **Tabs**: the AdminBase set, in that order, for contracts. For leads the same frame with the lead's tabs (Details,
-  Appointments, Survey, Checklist, Notes etc, Documents). Counts in tab names where AdminBase has them
-  ("3 Documents", "2 Service Calls").
-- **Details**: a two-column grid; left the label/value list with collapsible groups (remember open or closed per
-  person in localStorage); right Products / Other Info with the products grid and Info for FENSA underneath. Rows are
-  edited in place (click a value to edit). Keep every field the CRM has today: group them into AdminBase's groups
-  and add the ones AdminBase has that the CRM lacks (Week Received, Office Ref 1 and 2, Supply Only, On Hold,
-  Cancelled, Contract Approvals, Contract Colour, Sub Source, Sub Sub Source) through `fields.js`, cleaned with
-  `SAFE.*`, saved with `repos.contracts.changed()`, `store()` and `audit()`.
-- **Reports**: a two-pane window as described, wired to the CRM's existing printouts (`src/print/`, the contract
-  documents in `features/contracts/documents.js`). Reports the CRM does not have yet can be listed greyed out with
-  "Coming soon", or built from the existing print style if quick.
-- **Keep** the current behaviours that tests cover (`tests/e2e/records.spec.js`, `smoke.spec.js` "lead and contract
-  windows open on every step without errors", etc.). Update tests where the layout deliberately changes; add new
-  tests for the toolbar, navigation, collapsible groups, products grid and reports.
-- **Phones**: the tabs scroll sideways, the two halves stack, the toolbar collapses into a "More" menu.
-- **Suppliers**: the owner also asked for the Supplier window to be redesigned in the same family. Do it after
-  Leads and Contracts, in the same frame.
-- Work in rounds (e.g. 1: frame, toolbar, tabs, Details; 2: Finance, Fitting, Deliveries, Products grid; 3: Reports,
-  Clipboard, Advanced; 4: Suppliers), publishing each.
-
-## 6. After these
-
-The owner's next list: "the other pages hidden in admin/beta account" (Staff, Holiday Planner, Reports, Finance,
-Admin Console are only in the Beta account's menu). Ask them what to start with.
-
-Still open with the owner: the review API keys (Task 1), the Units On Shelf card and an "Other length" option in
-Inventory (older questions in HANDOVER.md, "Open questions for the owner").
