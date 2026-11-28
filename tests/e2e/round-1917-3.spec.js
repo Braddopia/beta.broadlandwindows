@@ -76,6 +76,8 @@ test('Job Stock Tags: one box per line, wording in capitals, colours filled in f
   // (v19.18.4) the wording is locked until Change is pressed
   await expect(app.page.locator('#tag_note')).toHaveAttribute('readonly', '');
   await app.page.click('.jt-shared [data-act=tagWording]');
+  // wait for the box to unlock (the page redraws it) before typing, or a slow machine types into the old box
+  await expect(app.page.locator('#tag_note')).not.toHaveAttribute('readonly', '');
   await app.page.fill('#tag_note', 'handle with care');
   await expect(app.page.locator('#tag_note')).toHaveValue('HANDLE WITH CARE');
   expect(await app.run(() => tagData().note)).toBe('HANDLE WITH CARE');
