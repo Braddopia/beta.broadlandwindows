@@ -145,6 +145,13 @@ export function watchDelCalSize() {
 /** (v19.18.4) the calendar's weeks share the height left on the screen, so the whole month shows without scrolling
     (never smaller than 4rem a week; a busy day can still grow). (v19.18.11) it fills the screen to the bottom, like
     the Calendar page, instead of leaving a gap */
+/* where an element's bottom edge sits on screen once its slide-in entrance has finished (getBoundingClientRect includes
+   the part of the slide still to run) */
+function layoutBottom(el) {
+  const r = el.getBoundingClientRect(),
+    t = getComputedStyle(el).transform;
+  return r.bottom - (t && t != 'none' ? new DOMMatrixReadOnly(t).m42 : 0);
+}
 export function delCalFit() {
   const g = document.querySelector('#main .dcal-g'),
     m = document.querySelector('#main');
@@ -168,6 +175,35 @@ export function delCalFit() {
     return over;
   };
   if (fit(false) > 0) fit(true);
+  /* (v19.18.12) then line the calendar's bottom edge up exactly with the bottom of the side menu, at every screen
+     size: share out the room left (or take back the little that is over) across the weeks */
+  const p = g.closest('.panel'),
+    side = document.querySelector('.side'),
+    rh = parseFloat(g.style.getPropertyValue('--rowh')) || 0;
+  if (!p || !side || !rh) return;
+  /* still sliding in: measure again once it has settled */
+  const moving = p.getAnimations ? p.getAnimations().filter((a) => a.playState == 'running') : [];
+  if (moving.length) {
+    Promise.all(moving.map((a) => a.finished))
+      .then(() => delCalFit())
+      .catch(() => {});
+  }
+  const mb = m.getBoundingClientRect().bottom - (parseFloat(getComputedStyle(m).paddingBottom) || 0),
+    target = Math.min(side.getBoundingClientRect().bottom, mb);
+  /* a busy week can be taller than the others, so measure again after each change (three goes is plenty) */
+  for (let i = 0, h = rh; i < 3; i++) {
+    const diff = target - layoutBottom(p) - 0.75;
+    if (Math.abs(diff) <= 0.5) break;
+    /* only the weeks at the shared height move; a busy week already taller than that stays as it is */
+    const free = [...g.querySelectorAll('.dcal-d')].filter((d, j) => j % 7 == 0 && d.offsetHeight <= h + 1).length,
+      nh = Math.max(44, h + diff / Math.max(1, free));
+    g.style.setProperty('--rowh', nh + 'px');
+    if (m.scrollHeight - m.clientHeight > 1) {
+      g.style.setProperty('--rowh', h + 'px');
+      break;
+    }
+    h = nh;
+  }
 }
 /* 'Received' opens the delivery on its arrival checks: who checked it, QC, anything damaged */
 export function recvD(id) {

@@ -800,3 +800,20 @@ page, page build times and a CPU profile). Findings and fixes:
 - Settings buttons fit their words again (auto width, same 2.3rem height); the round-1917 test checks one height and no
   clipped words.
 - Tests: round-1918.spec.js (two v19.18.11 tests), round-1917.spec.js (Settings).
+
+## v19.18.12: Calendar dividers, Deliveries calendar level with the side menu, Messages dark mode, Processing folds
+
+- Calendar month: the week-number column (`.cm.wn`) makes 8 cells a row, but `.dc2:nth-child(7n)` (05a-pages.css)
+  still took the right divider off every 7th child, so one divider per row went missing in a diagonal and two days
+  looked merged. 09-consistency.css now counts 8n for `.cm.wn`.
+- Deliveries calendar: its bottom edge lines up with the bottom of the side menu (`.side`). `delCalFit`
+  (features/deliveries/deliveries.js) fits as before, then shares out the room left (or takes back what is over)
+  across the weeks at the shared height, measuring again up to three times (a busy week can be taller); it ignores the
+  panel's slide-in transform (`layoutBottom`) and measures again when the entrance animation finishes. The page's
+  bottom padding on the calendar is .4rem. The 7.2rem cap on `.dcal-d` is gone so weeks fill a tall screen.
+- Messages, dark mode: the chat area (`.msn-t`) was the page colour (near black); it is now 70% panel colour, 30% page.
+- Side menu: Processing folds like a drop-down (`NAV_FOLD`, `navFold` in ui/shell/router.js). The heading is a button
+  with a chevron; closed by default, remembered in `bb_nav_open_processing`, and opened by itself when one of its pages
+  is shown. Folded items take tabindex -1. CSS `.nlf` / `.nfold` at the end of 09-consistency.css (grid-rows animation,
+  .3s `--e-out`).
+- Tests: round-191812.spec.js (four tests); round-1917.spec.js reads the Processing items inside `.nfold`.

@@ -103,7 +103,13 @@ test('Panel Optimiser, Cutting Optimiser and Job Stock Tags sit under Processing
     let g = '';
     for (const e of document.querySelectorAll('#nav > *')) {
       if (e.classList.contains('nl')) g = e.textContent.trim();
-      else if (e.classList.contains('nav')) (out[g] = out[g] || []).push(e.textContent.trim().replace(/\d+$/, ''));
+      // (v19.18.12) Processing folds away: its pages sit inside .nfold under the heading
+      for (const b of e.classList.contains('nfold')
+        ? e.querySelectorAll('.nav')
+        : e.classList.contains('nav')
+          ? [e]
+          : [])
+        (out[g] = out[g] || []).push(b.textContent.trim().replace(/\d+$/, ''));
     }
     return out;
   });

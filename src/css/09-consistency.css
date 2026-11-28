@@ -253,7 +253,7 @@ body.upd-going .updw-card{opacity:.7}
 .jt-shared.locked input{background:var(--card2);color:var(--muted);border-style:dashed;cursor:default;opacity:.75}
 .jt-shared.locked label{opacity:.75}
 /* Deliveries calendar (v19.18.4): the whole month fits on one screen, however many weeks it has */
-.dcal-d{min-height:min(var(--rowh,7.2rem),7.2rem)}
+.dcal-d{min-height:var(--rowh,7.2rem)}
 /* Suppliers cards (v19.18.4): the content spaced evenly. Wide screens: one row of equal columns. Laptop widths: two
    even rows (name, contact, Open on the first; what is owed and the figures on the second), so nothing is left on its
    own and the figures fill to the right edge. */
@@ -321,3 +321,20 @@ body[data-theme=dark] .main.scrolled .subbar,body[data-theme=dark] .main.scrolle
 /* (v19.18.11) Deliveries calendar runs to the bottom of the screen: no spare room kept under it for the Report A
    Problem button (the calendar's last row has room for it) */
 body[data-view=deliveries] .main:has(.dcal-g)::after{display:none}
+/* (v19.18.12) the Calendar's week-number column makes 8 cells a row, so the last-column rule counts 8, not 7 (it
+   was dropping one divider per row, so two days looked merged) */
+.cm.wn .dc2:nth-child(7n){border-right:1px solid var(--line)}
+.cm.wn .dc2:nth-child(8n){border-right:0}
+/* (v19.18.12) the Deliveries calendar ends level with the bottom of the side menu, like Messages */
+body[data-view=deliveries] .main:has(.dcal-g){padding-bottom:.4rem}
+/* (v19.18.12) Messages in dark mode: the chat area sits just below the panels beside it instead of near black */
+body[data-theme=dark] .msn-t{background-color:color-mix(in srgb,var(--card) 70%,var(--bg))}
+/* (v19.18.12) a side-menu group that folds away (Processing): the heading is a button with a chevron */
+.nlf{display:flex;padding:.3rem .7rem;margin-top:.55rem;align-items:center;gap:.4rem;width:100%;border:0;background:none;font-family:inherit;text-align:left;cursor:pointer;border-radius:8px;transition:color .15s var(--e-out),background-color .15s var(--e-out)}
+.nlf:hover{color:var(--ink);background:var(--hover)}
+.nlf svg{width:.8rem;height:.8rem;margin-left:auto;transition:transform .25s var(--e-out)}
+.nlf.open svg{transform:rotate(90deg)}
+.nlf-dot{width:.4rem;height:.4rem;border-radius:50%;background:var(--blue)}
+.nfold{display:grid;grid-template-rows:0fr;flex-shrink:0;transition:grid-template-rows .3s var(--e-out)}
+.nfold.open{grid-template-rows:1fr}
+.nfold>div{min-height:0;overflow:hidden;display:flex;flex-direction:column;gap:1px}

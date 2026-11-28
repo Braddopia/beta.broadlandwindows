@@ -160,20 +160,59 @@ export function badges() {
 /* pages that sit under another in the side menu, always shown, a step in (v19.17.4): a service call is nearly always
    for a contract we fitted */
 const NAV_SUB = { service: 'contracts' };
+/* (v19.18.12) side-menu groups that fold away under their heading, like a drop-down: closed until opened, remembered
+   in this browser, and opened by itself when one of its pages is shown */
+const NAV_FOLD = ['Processing'];
+const foldKey = (g) => 'bb_nav_open_' + g.toLowerCase();
+function foldOpen(g) {
+  try {
+    return localStorage.getItem(foldKey(g)) == '1';
+  } catch (e) {
+    return false;
+  }
+}
+function setFoldOpen(g, on) {
+  try {
+    localStorage.setItem(foldKey(g), on ? '1' : '0');
+  } catch (e) {
+    /* private window: the group simply starts closed next time */
+  }
+}
+/** open or close a folding side-menu group (the Processing heading) */
+export function navFold(g) {
+  if (!NAV_FOLD.includes(g)) return;
+  const on = !foldOpen(g);
+  setFoldOpen(g, on);
+  const h = document.querySelector(`.nlf[data-g="${g}"]`);
+  if (!h) return;
+  h.classList.toggle('open', on);
+  h.setAttribute('aria-expanded', on ? 'true' : 'false');
+  const box = h.nextElementSibling;
+  if (box) {
+    box.classList.toggle('open', on);
+    box.querySelectorAll('.nav').forEach((b) => (b.tabIndex = on ? 0 : -1));
+  }
+}
 export function navHtml(b) {
   let n = 0;
   return NG.map(([g, keys]) => {
     const ks = keys.filter((k) => canSee(k) && (k != 'admin' || can('manage')));
     const gl = g == 'Admin' && ks.every((k) => k == 'settings') ? 'You' : g;
-    return ks.length
-      ? `<div class="nl">${esc(gl)}</div>` +
-          ks
-            .map(
-              (k) =>
-                `<button class="nav ${k == view ? 'on' : ''} ${NAV_SUB[k] && ks.includes(NAV_SUB[k]) ? 'sub' : ''}" style="--n:${n++}" title="${esc(VIEWS[k].t)}" ${onClick('go', k)} ${k == view ? 'aria-current="page"' : ''}>${svg(ICONS[k])}<span>${esc(VIEWS[k].t)}</span>${b[k] ? `<i>${b[k]}</i>` : ''}</button>`
-            )
-            .join('')
-      : '';
+    if (!ks.length) return '';
+    const items = ks
+      .map(
+        (k) =>
+          `<button class="nav ${k == view ? 'on' : ''} ${NAV_SUB[k] && ks.includes(NAV_SUB[k]) ? 'sub' : ''}" style="--n:${n++}" title="${esc(VIEWS[k].t)}" ${onClick('go', k)} ${k == view ? 'aria-current="page"' : ''}>${svg(ICONS[k])}<span>${esc(VIEWS[k].t)}</span>${b[k] ? `<i>${b[k]}</i>` : ''}</button>`
+      )
+      .join('');
+    if (!NAV_FOLD.includes(g)) return `<div class="nl">${esc(gl)}</div>` + items;
+    if (ks.includes(view) && !foldOpen(g)) setFoldOpen(g, true);
+    const on = foldOpen(g),
+      badge = ks.some((k) => b[k]) && !on ? '<i class="nlf-dot" aria-hidden="true"></i>' : '';
+    return (
+      `<button class="nl nlf ${on ? 'open' : ''}" data-g="${esc(g)}" aria-expanded="${on}" ${onClick('navFold', g)}><span>${esc(gl)}</span>${badge}${svg(ICONS.chevron)}</button>` +
+      `<div class="nfold ${on ? 'open' : ''}"><div>${on ? items : items.replace(/<button class="nav /g, '<button tabindex="-1" class="nav ')}</div></div>`
+    );
   }).join('');
 }
 /** go to another page, asking first ("Go to Deliveries?"): used wherever a click would otherwise take the person
