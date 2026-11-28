@@ -772,3 +772,18 @@ page, page build times and a CPU profile). Findings and fixes:
   44px). Full delivery cards first; on a short screen where the month still does not fit, each delivery shows on one
   line (`.dcal-g.tight`, supplier only; details on hover and when opened). It refits when the window is resized
   (`watchDelCalSize`). Test: tests/e2e/round-1918.spec.js checks 1440×900, 1920×1080 and 1366×768 do not scroll.
+
+## v19.18.10: What's New window like Discord's; Settings says when an update is ready
+
+- New Version window (ui/shell/update-card.js, CSS at the end of 09-consistency.css): the owner liked it but asked
+  for Discord's What's New look without the ticks. Header: the sun, "What's New", "Version x · 28 November 2026" and a
+  cross (same as Remind Me Later). Body (scrolls if long): sections, each with an uppercase heading in blue, green,
+  amber or purple with a line running after it, then a paragraph. Footer: "A New Version Is Ready", Restart Now,
+  Remind Me In 10 Minutes.
+- src/whats-new.json now takes `{ "date": "YYYY-MM-DD", "notes": [{ "t": heading, "d": paragraph }] }` (up to five; a
+  plain string is a paragraph). The build writes version.json with `sections` (for this window), `date`, and `notes`
+  as plain lines for copies older than v19.18.10 (they would otherwise show "[object Object]").
+- Settings, Version row: once a check has found a newer version it says "Version x is ready · you have y" with Update
+  Now (restarts); otherwise "This is version y, the latest" with Check Again (`updWaiting`, `updChecked` in
+  features/app/desktop-app.js; Settings redraws when an update is found).
+- Tests: tests/e2e/desktop-app.spec.js (v19.18.10 and the Settings test).

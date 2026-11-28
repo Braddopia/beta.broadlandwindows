@@ -282,3 +282,28 @@ body.upd-going .updw-card{opacity:.7}
 .dcal-g.tight .dcal-n{min-width:1.35rem;height:1.35rem;font-size:.74rem}
 .dcal-g.tight .dcal-c{padding:.12rem .35rem}
 .dcal-g.tight .dcal-c span{display:none}
+
+/* New Version window as a What's New (v19.18.10, like Discord's, in the app's colours): a header with the date, then
+   sections with a coloured heading and a line running after it, a paragraph each, no ticks; Restart Now underneath */
+.updw-card{width:min(31rem,100%);max-height:min(44rem,calc(100dvh - 2rem));display:flex;flex-direction:column;padding:0;text-align:left;overflow:hidden}
+.updw-card::before{height:5.5rem}
+.updw-x{position:absolute;top:.8rem;right:.8rem;z-index:1;width:2.2rem;height:2.2rem;border:0;border-radius:10px;background:none;color:var(--muted);font-size:1.5rem;line-height:1;cursor:pointer}
+.updw-x:hover{background:var(--card2);color:var(--ink)}
+.updw-h{position:relative;display:flex;align-items:center;gap:.9rem;padding:1.4rem 3.2rem 1.1rem 1.5rem;border-bottom:1px solid var(--line)}
+.updw-h .updw-ic{width:3rem;height:3rem;margin:0;flex:0 0 auto;box-shadow:0 0 0 4px rgba(255,208,2,.18),0 8px 18px -8px rgba(1,20,45,.4)}
+.updw-h .updw-ic img{width:2.5rem;height:2.5rem}
+.updw-h h2{margin:0 0 .15rem;font-size:1.35rem}
+.updw-h .updw-v{padding:0;background:none;color:var(--muted);font:500 .85rem var(--body);letter-spacing:0}
+.updw-b{flex:1;min-height:0;overflow:auto;padding:.4rem 1.5rem 1rem}
+.updw-s{margin-top:1rem}
+.updw-s h3{display:flex;align-items:center;gap:.6rem;margin:0 0 .4rem;font:700 .8rem var(--body);letter-spacing:.06em;text-transform:uppercase;color:var(--blue)}
+.updw-s h3::after{content:"";flex:1;height:1px;background:currentColor;opacity:.55}
+.updw-s.c1 h3{color:#12794c}.updw-s.c2 h3{color:#a06a00}.updw-s.c3 h3{color:#7a3fb0}
+body[data-theme=dark] .updw-s.c1 h3{color:#5fd39b}body[data-theme=dark] .updw-s.c2 h3{color:#f2c14e}body[data-theme=dark] .updw-s.c3 h3{color:#c39af0}
+.updw-s p{margin:0;font-size:.92rem;line-height:1.55;color:var(--ink)}
+.updw-f{padding:1rem 1.5rem 1.1rem;border-top:1px solid var(--line);text-align:center;background:var(--card2)}
+.updw-f>p{margin:0 0 .2rem;color:var(--muted);font-size:.84rem}
+.updw-f .updw-go{margin-top:.7rem}
+.set-r .upd-new{color:#12794c}
+body[data-theme=dark] .set-r .upd-new{color:#5fd39b}
+.updw-r{display:block;margin-bottom:.15rem;color:var(--navy);font-size:.95rem}body[data-theme=dark] .updw-r{color:var(--ink)}

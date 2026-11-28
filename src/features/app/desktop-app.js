@@ -34,7 +34,12 @@ export async function installApp() {
 }
 
 let seen = '',
-  lastCheck = 0;
+  lastCheck = 0,
+  waiting = '',
+  checked = false;
+/** (v19.18.10) a newer version found by the last check ('' when none), and whether a check has answered yet */
+export const updWaiting = () => waiting;
+export const updChecked = () => checked || !!waiting;
 /** the version running now (the build writes it into the page) */
 export const appVersion = () => (typeof APP_BUILD == 'string' ? APP_BUILD : '');
 /** look for a newer version in version.json: 'new' (the window is shown), 'latest', or 'error' */
@@ -48,14 +53,24 @@ export async function checkVersion(force, asked) {
       v = String(j.version || '');
     if (!seen) seen = appVersion() || v;
     if (v && v != seen) {
+      waiting = v;
       emit('update-ready', {
         version: v,
-        notes: (Array.isArray(j.notes) ? j.notes : []).slice(0, 3).map(String),
+        date: /^\d{4}-\d{2}-\d{2}$/.test(j.date || '') ? j.date : '',
+        notes: (Array.isArray(j.sections) ? j.sections : Array.isArray(j.notes) ? j.notes : [])
+          .slice(0, 5)
+          .map((n) =>
+            n && typeof n == 'object'
+              ? { t: String(n.t || '').slice(0, 60), d: String(n.d || '').slice(0, 400) }
+              : String(n).slice(0, 400)
+          ),
         app: appState() == 'installed',
         force: !!asked,
       });
       return 'new';
     }
+    waiting = '';
+    checked = true;
     return 'latest';
   } catch (e) {
     /* offline: try again later */
@@ -69,6 +84,7 @@ export async function updCheck() {
     return;
   }
   const r = await checkVersion(true, true);
+  if (document.body.dataset.view == 'settings') emit('data-replaced');
   if (r == 'latest') toast('You have the latest version (' + appVersion() + ')');
   else if (r == 'error') toast('Could not check for updates. Check the internet connection and try again.');
 }

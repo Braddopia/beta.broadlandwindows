@@ -160,12 +160,24 @@ for (const f of readdirSync(join(SRC, 'app'))) {
   if (f == 'sw.js') writeFileSync(join(ROOT, f), read(from).replace('@@VERSION@@', pkg.version));
   else writeFileSync(join(ROOT, f), readFileSync(from));
 }
-/* what is new in this version, shown in the "Update ready" pop-up (src/whats-new.json, three short lines at most) */
-let notes = [];
+/* what is new in this version, shown in the New Version window (src/whats-new.json). v19.18.10: like Discord's What's
+   New, each note is a section { "t": heading, "d": a short paragraph } (a plain string is a paragraph on its own), up to
+   five; "date" is the release date shown under the title (today's date when it is not given). */
+let notes = [],
+  date = new Date().toISOString().slice(0, 10);
 try {
-  notes = (JSON.parse(read(join(SRC, 'whats-new.json'))).notes || []).slice(0, 3).map(String);
+  const W = JSON.parse(read(join(SRC, 'whats-new.json')));
+  notes = (W.notes || [])
+    .slice(0, 5)
+    .map((n) => (n && typeof n == 'object' ? { t: String(n.t || ''), d: String(n.d || '') } : String(n)));
+  if (/^\d{4}-\d{2}-\d{2}$/.test(W.date || '')) date = W.date;
 } catch {
   /* no notes this time */
 }
-writeFileSync(join(ROOT, 'version.json'), JSON.stringify({ version: pkg.version, notes }) + '\n');
+/* `notes` stays plain lines for copies older than v19.18.10 (they show each as a line); newer ones read `sections` */
+const lines = notes.map((n) => (typeof n == 'object' ? [n.t, n.d].filter(Boolean).join(': ') : n)).slice(0, 3);
+writeFileSync(
+  join(ROOT, 'version.json'),
+  JSON.stringify({ version: pkg.version, date, notes: lines, sections: notes }) + '\n'
+);
 console.log(`Built ${relative(ROOT, out)} and index.html (${Math.round(statSync(out).size / 1024)} KB)`);

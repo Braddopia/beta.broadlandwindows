@@ -20,7 +20,11 @@ async function serve(app, version) {
     if (p == '/version.json' && version.now)
       return r.fulfill({
         contentType: 'application/json',
-        body: JSON.stringify({ version: version.now, notes: version.notes || [] }),
+        body: JSON.stringify({
+          version: version.now,
+          notes: version.notes || [],
+          ...(version.sections ? { sections: version.sections, date: version.date } : {}),
+        }),
       });
     const f = path.join(ROOT, p);
     if (!f.startsWith(ROOT) || !fs.existsSync(f)) return r.fulfill({ status: 404, body: '' });
@@ -131,16 +135,48 @@ test('v19.18.7: Settings shows the version for every account, and Check For Upda
   await app.go('settings');
   const row = app.page.locator('#main .set-r', { hasText: 'Version' });
   await expect(row).toContainText('This is version ' + v);
-  // nothing newer: it says so
+  // nothing newer: it says so, and the row says it is the latest
   await row.locator('[data-act=updCheck]').click();
   await expect(app.page.locator('#toast')).toContainText('You have the latest version (' + v + ')');
+  await expect(row).toContainText('the latest');
   // a newer one: the New Version window, even after Remind Me Later
   version.now = '99.1.0';
   await row.locator('[data-act=updCheck]').click();
   await expect(app.page.locator('#updWin')).toContainText('Version 99.1.0');
   await app.page.locator('#updWin .updw-l').click();
   await expect(app.page.locator('#updWin')).toHaveCount(0);
-  await row.locator('[data-act=updCheck]').click();
-  await expect(app.page.locator('#updWin')).toContainText('Version 99.1.0');
+  // (v19.18.10) Settings now says a new version is ready, with Update Now
+  await expect(row).toContainText('Version 99.1.0 is ready');
+  await expect(row.locator('[data-act=updRestart]')).toHaveText('Update Now');
+  expect(app.errors).toEqual([]);
+});
+
+test("v19.18.10: the New Version window reads like a What's New: date, sections with headings, no ticks", async ({
+  app,
+}) => {
+  const version = {};
+  await serve(app, version);
+  Object.assign(version, {
+    now: '99.2.0',
+    date: '2026-11-28',
+    notes: ['Old copies read this line'],
+    sections: [
+      { t: 'Deliveries Calendar', d: 'The whole month fits on the screen.' },
+      { t: 'Settings', d: 'The Version row says when a new version is ready.' },
+    ],
+  });
+  await app.page.waitForTimeout(3100);
+  await app.page.evaluate(() => document.dispatchEvent(new Event('visibilitychange')));
+  const win = app.page.locator('#updWin');
+  await expect(win.locator('h2')).toHaveText("What's New");
+  await expect(win.locator('.updw-v')).toHaveText('Version 99.2.0 · 28 November 2026');
+  await expect(win.locator('.updw-s h3')).toHaveText(['Deliveries Calendar', 'Settings']);
+  await expect(win.locator('.updw-s p').first()).toHaveText('The whole month fits on the screen.');
+  await expect(win.locator('li')).toHaveCount(0);
+  await expect(win.locator('.updw-go')).toBeFocused();
+  // the cross puts it away like Remind Me In 10 Minutes
+  await win.locator('.updw-x').click();
+  await expect(win).toHaveCount(0);
+  await expect(app.page.locator('#updChip')).toContainText('Version 99.2.0 is ready');
   expect(app.errors).toEqual([]);
 });

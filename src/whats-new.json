@@ -1,5 +1,8 @@
 {
+  "date": "2026-11-28",
   "notes": [
-    "Deliveries: the month calendar fits the screen exactly, with nothing left to scroll, and refits when the window changes size"
+    { "t": "A Fresh What's New", "d": "This window now reads like a proper What's New: the date at the top, and each change in its own section with a heading." },
+    { "t": "Settings", "d": "The Version row tells you when a new version is ready, with an Update Now button. When you are up to date it says so." },
+    { "t": "Deliveries Calendar", "d": "The whole month fits on the screen with nothing to scroll, and it fits again when you resize the window." }
   ]
 }

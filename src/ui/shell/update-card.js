@@ -10,6 +10,9 @@ import { html } from '../../core/html.js';
 import { LOGO_SRC } from '../../core/assets.js';
 
 const LATER_MS = 10 * 60 * 1000;
+/** "28 November 2026" */
+const longDate = (d) =>
+  new Date(d + 'T00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
 let laterUntil = 0,
   last = null,
   retryT = 0;
@@ -30,20 +33,27 @@ export function showUpdate(u) {
     return;
   }
   const where = u.app ? 'app' : 'page',
-    notes = (u.notes || []).filter(Boolean);
+    notes = (u.notes || []).filter((n) => n && (typeof n != 'object' || n.t || n.d));
   $('#updChip')?.remove();
   const e = document.createElement('div');
   e.id = 'updWin';
   e.className = 'updw';
   e.innerHTML = String(
     html`<div class="updw-card" role="dialog" aria-modal="true" aria-labelledby="updT" aria-describedby="updS">
-      <div class="updw-ic"><img src="${LOGO_SRC.icon}" alt=""></div>
-      <span class="updw-v">Version ${u.version}</span>
-      <h2 id="updT">A New Version Is Ready</h2>
-      <p id="updS">Restart the ${where} to start using it. Everything you have done is saved.</p>
-      ${notes.length ? html`<div class="updw-n"><b>What's New</b><ul>${notes.map((n) => html`<li>${n}</li>`)}</ul></div>` : ''}
+      <button type="button" class="updw-x" data-act="updLater" aria-label="Remind me in 10 minutes">&times;</button>
+      <div class="updw-h"><div class="updw-ic"><img src="${LOGO_SRC.icon}" alt=""></div><div><h2 id="updT">What's New</h2><span class="updw-v">Version ${u.version}${u.date ? ' · ' + longDate(u.date) : ''}</span></div></div>
+      <div class="updw-b">${
+        notes.length
+          ? notes.map((n, k) =>
+              typeof n == 'object'
+                ? html`<section class="updw-s c${k % 4}">${n.t ? html`<h3>${n.t}</h3>` : ''}<p>${n.d}</p></section>`
+                : html`<section class="updw-s"><p>${n}</p></section>`
+            )
+          : html`<section class="updw-s"><p>Small fixes and improvements.</p></section>`
+      }</div>
+      <div class="updw-f"><b class="updw-r">A New Version Is Ready</b><p id="updS">Restart the ${where} to start using it. Everything you have done is saved.</p>
       <button type="button" class="btn updw-go" data-act="updRestart">Restart Now</button>
-      <button type="button" class="updw-l" data-act="updLater">Remind Me In 10 Minutes</button>
+      <button type="button" class="updw-l" data-act="updLater">Remind Me In 10 Minutes</button></div>
     </div>`
   );
   document.body.appendChild(e);
