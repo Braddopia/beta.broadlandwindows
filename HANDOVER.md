@@ -753,3 +753,14 @@ page, page build times and a CPU profile). Findings and fixes:
 - (v19.18.7 follow-up) Settings buttons are all 9.2rem wide (were 6.8rem) so Check For Updates fits and every button in
   My Settings stays the same size (tests/e2e/round-1917.spec.js checks this; a first fix that widened only the one
   button failed it on GitHub).
+
+## v19.18.8: Lead and Contract windows given more room
+
+- The owner found the tabs "too crowded, not spaced enough, overwhelming". CSS only (end of
+  src/css/05h-record-adminbase.css, "v19.18.8: more room"): gaps between heading, toolbar (with a line under it),
+  stage path and tabs; tabs with more padding; rows 2.85rem tall; group headings on a light band with their rows in
+  a bordered block; more space between the two halves and inside panels; roomier products grid and Info For FENSA.
+- Laptop widths (761px to 1400px): the first and last arrows hide (Page Up / Page Down still work), the search box
+  is narrower, and the Details halves stack, with the left list in two columns. 761px to 1560px: the search box is
+  9rem so the toolbar fits on one line.
+- The owner offered to show AdminBase; asked for screenshots (names blanked out) to match its spacing further.

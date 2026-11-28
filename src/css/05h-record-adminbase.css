@@ -263,3 +263,57 @@ body:has(#modal.open .mb.ab:not(.fp)) #main{visibility:hidden}
 .mb.ab .abgrid input[data-f=rate]{width:5.2rem}
 .mb.ab .abgrid input[data-f=code]{width:4.6rem}
 @media(max-width:1000px){.mb.ab .abd{grid-template-columns:1fr}}
+
+/* ===== v19.18.8: more room (the owner: "too crowded, not spaced enough, overwhelming") =====
+   The same layout with a calmer rhythm: clear gaps between the heading, the toolbar, the stage path and the tabs;
+   taller rows; group headings that stand apart; more space between the two halves and inside every panel. */
+.mb.ab .rw-h{padding-bottom:1.1rem}
+.mb.ab .rw-h h2{margin-top:.15rem}
+.mb.ab .rw-hc{margin-top:.5rem;gap:.4rem 1.3rem}
+.mb.ab .rw-bar{padding:.2rem 0 1.1rem;gap:.5rem;border-bottom:1px solid var(--line);margin-bottom:1.1rem}
+.mb.ab .rw-div{margin:.25rem .45rem}
+.mb.ab .rw-wide{gap:.5rem}
+.mb.ab .rw-path{padding:0 0 1.1rem;gap:1.4rem}
+.mb.ab .rw-path .path{gap:6px}
+.mb.ab .rw-path .path button{min-height:1.9rem;font-size:.78rem}
+.mb.ab .ab-tabs{gap:.4rem;margin-bottom:1.4rem}
+.mb.ab .ab-tabs button{padding:.75rem 1.1rem .7rem;font-size:.93rem}
+.mb.ab .abd{gap:1.8rem}
+.mb.ab .abd-r{gap:1.1rem}
+.mb.ab .ab-sp.on{gap:1.1rem}
+/* the label / value lists */
+.mb.ab .abl{padding:.45rem 1.25rem .55rem;border-radius:14px}
+.mb.ab .abl .rf{min-height:2.85rem;padding:.3rem 0;gap:.8rem;grid-template-columns:minmax(8rem,42%) minmax(0,1fr)}
+.mb.ab .abl .rf>span{font-size:.88rem}
+.mb.ab .abl .rf input,.mb.ab .abl .rf select,.mb.ab .abl .rf textarea{font-size:.93rem;padding:.4rem .6rem}
+.mb.ab .abg{border-bottom:0;margin:.55rem 0}
+.mb.ab .abl>.abg:first-child{margin-top:.2rem}
+.mb.ab .abg-h{min-height:2.7rem;padding:0 .7rem;border-radius:10px;background:var(--card2)}
+.mb.ab .abg-t{font-size:.9rem}
+.mb.ab .abg.open>.abg-h{border-radius:10px 10px 0 0}
+.mb.ab .abg-b{padding:0 .7rem 0 1.4rem;border:1px solid var(--line);border-top:0;border-radius:0 0 10px 10px}
+.mb.ab .abl>.rf+.abg,.mb.ab .abl>.abg+.rf{margin-top:.55rem}
+/* products and FENSA */
+.mb.ab .abt{padding:.6rem .75rem;gap:.4rem}
+.mb.ab .abgrid td{padding:.35rem .3rem}
+.mb.ab .abgrid th{padding:.65rem .5rem}
+.mb.ab .abfensa{padding:.9rem 1.25rem 1rem}
+.mb.ab .abfensa h4{margin-bottom:.5rem;font-size:.92rem}
+.mb.ab .abfensa-g{grid-template-columns:repeat(auto-fit,minmax(16rem,1fr));column-gap:2.2rem}
+.mb.ab .abfensa-g .rf{min-height:2.6rem}
+@media(max-width:760px){
+  .mb.ab .rw-bar{padding-bottom:.8rem;margin-bottom:.8rem}
+  .mb.ab .abl{padding:.35rem .8rem .45rem}
+  .mb.ab .abl .rf{grid-template-columns:minmax(6.5rem,44%) minmax(0,1fr);gap:.5rem}
+  .mb.ab .abg-b{padding-left:.7rem}
+}
+@media(min-width:761px) and (max-width:1560px){.mb.ab .rw-find input{width:9rem}.mb.ab .rw-find input:focus{width:12rem}.mb.ab .rw-bar{gap:.4rem}.mb.ab .rw-wide{gap:.4rem}}
+@media(min-width:761px) and (max-width:1400px){
+  .mb.ab .rw-nav .rb1:first-child,.mb.ab .rw-nav .rb1:last-child{display:none}
+  .mb.ab .rw-find input{width:7.5rem}
+  .mb.ab .abd{grid-template-columns:1fr}
+}
+@media(min-width:900px) and (max-width:1400px){
+  .mb.ab .abd-l>.abl{columns:2 20rem;column-gap:2rem}
+  .mb.ab .abd-l>.abl>*{break-inside:avoid}
+}
