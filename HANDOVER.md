@@ -750,3 +750,6 @@ page, page build times and a CPU profile). Findings and fixes:
   check someone asked for shows the New Version window even after "Remind Me In 10 Minutes" (`force` in the
   update-ready payload, ui/shell/update-card.js). From a file on the computer it explains that the website has the
   newest version. Test: tests/e2e/desktop-app.spec.js (v19.18.7).
+- (v19.18.7 follow-up) Settings buttons are all 9.2rem wide (were 6.8rem) so Check For Updates fits and every button in
+  My Settings stays the same size (tests/e2e/round-1917.spec.js checks this; a first fix that widened only the one
+  button failed it on GitHub).
