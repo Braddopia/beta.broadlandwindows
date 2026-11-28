@@ -198,12 +198,14 @@ export function delCalFit() {
     const free = [...g.querySelectorAll('.dcal-d')].filter((d, j) => j % 7 == 0 && d.offsetHeight <= h + 1).length,
       nh = Math.max(44, h + diff / Math.max(1, free));
     g.style.setProperty('--rowh', nh + 'px');
-    if (m.scrollHeight - m.clientHeight > 1) {
+    if (m.scrollHeight > m.clientHeight) {
       g.style.setProperty('--rowh', h + 'px');
       break;
     }
     h = nh;
   }
+  /* last check: if the page would still scroll (a busy week a pixel too tall), use one line per delivery */
+  if (m.scrollHeight > m.clientHeight && !g.classList.contains('tight')) fit(true);
 }
 /* 'Received' opens the delivery on its arrival checks: who checked it, QC, anything damaged */
 export function recvD(id) {

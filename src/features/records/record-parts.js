@@ -16,7 +16,8 @@ export function addrTab(W) {
     html`<div class="abh2"><div>${raw(
       abList(
         C.filter((f) => !f.g || LEFT.has(f.g)),
-        W.v
+        W.v,
+        'Customer'
       )
     )}</div><div>${raw(abList([...C.filter((f) => f.g && !LEFT.has(f.g)), ...G], W.v))}</div></div>`
   );
@@ -38,9 +39,9 @@ export function detailsTab(W, fs, products) {
           fact('Photos', count(v.photos)),
         ]
       : [fact('Openings surveyed', count(v.openings)), fact('Visits booked', count(v.appts))];
-  const other = html`${raw(abList(R, v))}<div class="abl abfacts">${facts}</div>`;
+  const other = html`${raw(abList(R, v))}<div class="abl abfacts"><section class="abg open abg-plain"><div class="abg-h"><span class="abg-t"><b>At A Glance</b></span></div><div class="abg-b">${facts}</div></section></div>`;
   return String(
-    html`<div class="abd"><div class="abd-l">${raw(abList(L, v))}</div><div class="abd-r">${
+    html`<div class="abd"><div class="abd-l">${raw(abList(L, v, W.kind == 'contract' ? 'Contract' : W.kind == 'lead' ? 'Lead' : 'Details'))}</div><div class="abd-r">${
       products
         ? html`<div class="ab-sub" role="tablist" aria-label="Products or other information"><button type="button" role="tab" class="on" aria-selected="true" data-s="prod" ${raw(onClick('recSub', 'prod'))}>Products</button><button type="button" role="tab" aria-selected="false" data-s="other" ${raw(onClick('recSub', 'other'))}>Other Info</button></div><div class="ab-sp on" data-s="prod">${raw(products)}</div><div class="ab-sp" data-s="other">${other}</div>`
         : other

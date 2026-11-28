@@ -833,3 +833,18 @@ page, page build times and a CPU profile). Findings and fixes:
 - Job Stock Tags: Change moves the cursor into the Warning box 30ms later; it now leaves it alone when the person has
   already clicked into another box (`tagWording`). That race made round-1917-3's tag test fail on GitHub and once
   locally (the typing went into the wrong box). The test also waits for the box to unlock before typing.
+
+## v19.18.14: Lead, Contract and Supplier windows laid out like Inventory
+
+- The owner disliked the label / value list ("lots of info in one, spaced, looks traumatising") and asked for the
+  Inventory window's layout. features/records/ab-list.js `abList(fs, v, title)`: every row with no group goes into one
+  card headed `title` (Contract, Lead, Customer; default Details), placed where the first of them was; groups whose
+  heading is a tick box (Supply Only, On Hold, Cancelled) sit side by side in one card (`.abg-ticks`).
+- CSS at the end of 05h-record-adminbase.css ("v19.18.14"): each group is a card like Inventory's fieldsets (border,
+  card2 background, number in a blue circle from a CSS counter, heading line), boxes have their label above and sit in
+  an auto-fill grid (12.5rem columns); textareas take the full width; read-only values have a dashed box. Groups still
+  fold and remember it. Info For FENSA and the new At A Glance card (Other Info facts) match.
+- This replaces the AdminBase-style list for now; the owner's AdminBase screenshots are no longer needed for spacing.
+- Tests: round-191814.spec.js.
+- Deliveries (`delCalFit`): a last check switches to one line per delivery if the page would still scroll by a pixel
+  after fitting (a busy week at 1366×768 could leave 1px over and fail round-1918's no-scroll test).

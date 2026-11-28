@@ -84,23 +84,48 @@ export function abRow(f, v) {
   }
   return rfH(f, v);
 }
-/** the whole list: rows with no group stand alone; rows sharing a group fold together under its heading */
-export function abList(fs, v) {
-  const out = [];
+/** the whole list: rows sharing a group fold together under its heading; (v19.18.14) rows with no group are kept
+    together in a card of their own, headed `title`, so every part of the window is a numbered card like Inventory's */
+export function abList(fs, v, title = 'Details') {
+  const out = [],
+    plain = fs.filter((f) => !f.g);
+  let plainDone = false,
+    ticks = [];
+  /* groups that are a tick box on their heading (Supply Only, On Hold, Cancelled) sit side by side on one line */
+  const flush = () => {
+    if (ticks.length) out.push(ticks.length > 1 ? `<div class="abg-ticks">${ticks.join('')}</div>` : ticks[0]);
+    ticks = [];
+  };
   for (let i = 0; i < fs.length; ) {
     const g = fs[i].g;
     if (!g) {
-      out.push(abRow(fs[i], v));
+      /* every row with no group goes in the one card, where the first of them is */
+      if (!plainDone) {
+        flush();
+        out.push(abPlain(title, plain, v));
+        plainDone = true;
+      }
       i++;
       continue;
     }
     let j = i;
     while (j < fs.length && fs[j].g == g) j++;
-    out.push(abGroup(g, fs.slice(i, j), v));
+    const G = fs.slice(i, j);
+    if (G.some((f) => f.head)) ticks.push(abGroup(g, G, v));
+    else {
+      flush();
+      out.push(abGroup(g, G, v));
+    }
     i = j;
   }
+  flush();
   return `<div class="abl">${out.join('')}</div>`;
 }
+/* a card for rows with no group of their own: always open, nothing to fold */
+const abPlain = (t, fs, v) =>
+  String(
+    html`<section class="abg open abg-plain"><div class="abg-h"><span class="abg-t"><b>${t}</b></span></div><div class="abg-b">${raw(fs.map((f) => abRow(f, v)).join(''))}</div></section>`
+  );
 /* the fields of each group drawn, so a group folded later can show its summary */
 const ABF = {};
 export function abGroup(g, fs, v) {

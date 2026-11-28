@@ -317,3 +317,71 @@ body:has(#modal.open .mb.ab:not(.fp)) #main{visibility:hidden}
   .mb.ab .abd-l>.abl{columns:2 20rem;column-gap:2rem}
   .mb.ab .abd-l>.abl>*{break-inside:avoid}
 }
+/* ---- v19.18.14: Lead, Contract and Supplier windows laid out like the Inventory window. The owner found the long
+   label / value list "traumatising". Every part is now a numbered card (the same card, number and heading as
+   Inventory's), and inside it each box has its label above it, the boxes set out in even columns. Groups still fold
+   from their heading and remember it; a folded card shows its summary. ---- */
+.mb.ab .abd,.mb.ab .abh2,.mb.ab .rw-p{counter-reset:abs}
+.mb.ab .abl,.mb.ab .abfacts{background:none;border:0;border-radius:0;padding:0;columns:auto!important;display:flex;flex-direction:column;gap:.9rem;min-width:0}
+.mb.ab .abl+.abl{margin-top:.9rem}
+.mb.ab .abl>.abg,.mb.ab .abl>.abg:first-child{margin:0;border:1px solid var(--line);border-radius:14px;background:var(--card2);padding:.75rem 1rem .9rem;break-inside:auto}
+.mb.ab .abl>.abg:not(.open){padding-bottom:.75rem}
+/* the heading: number in a blue circle, then the name; folding chevron on the right */
+.mb.ab .abg-h,.mb.ab .abg.open>.abg-h{min-height:1.9rem;padding:0;border-radius:0;background:none;gap:.55rem}
+.mb.ab .abg-t{order:0;gap:.55rem;padding:0;font:600 .95rem var(--head);color:var(--navy)}
+body[data-theme=dark] .mb.ab .abg-t{color:#e8eef8}
+.mb.ab .abg-t b{display:flex;align-items:center;gap:.55rem;font-weight:600}
+.mb.ab .abg-t b::before{counter-increment:abs;content:counter(abs);display:grid;place-items:center;flex:0 0 auto;width:1.45rem;height:1.45rem;border-radius:50%;background:var(--blue);color:#fff;font:700 .74rem var(--body)}
+.mb.ab .abg-t svg{order:2;margin-left:.1rem;color:var(--muted)}
+.mb.ab .abg-sum{max-width:50%}
+/* the boxes: label above, even columns, no lines between rows */
+.mb.ab .abg-b,.mb.ab .abg.open>.abg-b{border:0;border-radius:0;padding:0}
+.mb.ab .abg.open>.abg-b{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,12.5rem),1fr));gap:.75rem 1rem;margin-top:.7rem;padding-top:.85rem;border-top:1px solid var(--line)}
+.mb.ab .abl .rf,.mb.ab .abfacts .rf{display:flex;flex-direction:column;align-items:stretch;gap:.35rem;min-height:0;padding:0;border:0;min-width:0}
+.mb.ab .abl .rf[hidden]{display:none}
+.mb.ab .abl .rf>span,.mb.ab .abfacts .rf>span{font:600 .8rem var(--body);color:var(--ink)}
+.mb.ab .abl .rf input:not([type=checkbox]):not([type=radio]),.mb.ab .abl .rf select,.mb.ab .abl .rf textarea{width:100%;min-height:2.45rem;padding:.45rem .7rem;border:1px solid var(--line);border-radius:9px;background:var(--card);font-size:.9rem}
+.mb.ab .abl .rf textarea{min-height:4.5rem}
+.mb.ab .abl .rf.ta{grid-column:1/-1}
+.mb.ab .abl .rf.calc output,.mb.ab .abfacts .rf.calc output{display:flex;align-items:center;min-height:2.45rem;padding:.45rem .7rem;border:1px dashed var(--line);border-radius:9px;background:transparent;font-size:.9rem;color:var(--ink)}
+/* a tick box sits beside its words, on the line where a box would be */
+.mb.ab .abl .rf.tk{flex-direction:row;align-items:center;gap:.6rem;align-self:end;min-height:2.45rem}
+.mb.ab .abl .rf.tk>span{order:2;font-weight:500}
+.mb.ab .abl .rf.tk input{margin:0}
+/* Contract Colour keeps its swatch inside the row */
+.mb.ab .abl .rf:has(.ccsw){display:grid;grid-template-columns:1.1rem minmax(0,1fr);column-gap:.5rem}
+.mb.ab .abl .rf:has(.ccsw)>span{grid-column:1/-1}
+/* At A Glance: four short facts in a row */
+.mb.ab .abfacts .abg-b{grid-template-columns:repeat(auto-fill,minmax(min(100%,9rem),1fr))}
+.mb.ab .abfacts .rf.calc output{font-weight:600}
+/* the two halves of Details: the cards side by side need a little more room on the left */
+.mb.ab .abd{grid-template-columns:minmax(0,1fr) minmax(0,1.25fr)}
+@media(min-width:900px) and (max-width:1400px){.mb.ab .abd-l>.abl{columns:auto}}
+@media(max-width:1400px){.mb.ab .abd{grid-template-columns:1fr}}
+@media(max-width:760px){
+  .mb.ab .abl>.abg{padding:.65rem .75rem .8rem}
+  .mb.ab .abg.open>.abg-b{grid-template-columns:1fr}
+}
+/* tick-box groups (Supply Only, On Hold, Cancelled) share one card, side by side with no numbers; one that is
+   ticked opens below with its own boxes */
+.mb.ab .abg-ticks{display:flex;flex-wrap:wrap;align-items:flex-start;gap:.4rem 1.6rem;border:1px solid var(--line);border-radius:14px;background:var(--card2);padding:.7rem 1rem}
+.mb.ab .abg-ticks>.abg{margin:0;border:0;border-radius:0;background:none;padding:0;min-width:0}
+.mb.ab .abg-ticks>.abg.open{flex-basis:100%}
+.mb.ab .abg-ticks .abg-t b{white-space:nowrap;font-size:.9rem}
+.mb.ab .abg-ticks .abg-t b::before{display:none}
+.mb.ab .abg-ticks .abg-sum{display:none}
+.mb.ab .abg-ticks .abg-h{min-height:1.9rem}
+.mb.ab .abl .rf:has(.ccsw){align-items:center}
+.mb.ab .abl .rf:has(.ccsw) .ccsw{width:1.1rem;height:1.1rem;border-radius:50%;border:1px solid var(--line)}
+.mb.ab .abd{grid-template-columns:minmax(0,.9fr) minmax(0,1.5fr)}
+/* Info For FENSA: the same card and the same label-above boxes */
+.mb.ab .abfensa{border:1px solid var(--line);border-radius:14px;background:var(--card2);padding:.75rem 1rem .9rem}
+.mb.ab .abfensa h4{margin:0 0 .7rem;padding-bottom:.6rem;border-bottom:1px solid var(--line);font:600 .95rem var(--head);color:var(--navy)}
+body[data-theme=dark] .mb.ab .abfensa h4{color:#e8eef8}
+.mb.ab .abfensa-g{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,11rem),1fr));gap:.75rem 1rem}
+.mb.ab .abfensa-g .rf{display:flex;flex-direction:column;align-items:stretch;gap:.35rem;min-height:0;padding:0;border:0}
+.mb.ab .abfensa-g .rf>span{font:600 .8rem var(--body);color:var(--ink)}
+.mb.ab .abfensa-g .rf input:not([type=checkbox]){width:100%;min-height:2.45rem;padding:.45rem .7rem;border:1px solid var(--line);border-radius:9px;background:var(--card)}
+.mb.ab .abfensa-g .rf.tk{flex-direction:row;align-items:center;gap:.6rem;align-self:end;min-height:2.45rem}
+.mb.ab .abfensa-g .rf.tk>span{order:2;font-weight:500}
+.mb.ab .abfensa-g .rf.tk input{margin:0;width:auto}
