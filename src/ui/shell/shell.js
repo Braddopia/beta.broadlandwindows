@@ -139,3 +139,18 @@ export function shell() {
     }
   });
 }
+
+/** (v19.18.11) marks the page as scrolled (#main.scrolled) once it has moved, so sticky bars fill in behind them */
+export function watchPageScroll() {
+  const m = $('#main');
+  if (!m) return;
+  let on = false;
+  m.addEventListener(
+    'scroll',
+    () => {
+      const s = m.scrollTop > 4;
+      if (s != on) m.classList.toggle('scrolled', (on = s));
+    },
+    { passive: true }
+  );
+}

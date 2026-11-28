@@ -110,12 +110,12 @@ body[data-theme=dark] .rv-feed.off{background:#3a3220;color:#ffd98a}
 /* ---- v19.17 ---- */
 /* Settings: every button in a settings row is the same size; switches (Light/Dark, Screen Saver) are the same height */
 .set-r .set-a{display:flex;align-items:center;justify-content:flex-end;gap:.5rem;flex-wrap:wrap}
-.set-r .set-a>.btn,.set-r .set-a>label.btn{width:9.2rem;height:2.3rem;padding:0 .6rem;justify-content:center;font-size:.82rem}
+.set-r .set-a>.btn,.set-r .set-a>label.btn{width:auto;height:2.3rem;padding:0 1.1rem;justify-content:center;font-size:.82rem;white-space:nowrap}
 .set-r .set-a .seg2{height:2.3rem}.set-r .set-a .seg2 button{height:100%;padding:0 .8rem}
-.set-r .set-a>.tag{min-width:9.2rem;height:2.3rem;display:inline-flex;align-items:center;justify-content:center}
-.set-r .set-a>.tsw{width:9.2rem;display:flex;justify-content:center}
+.set-r .set-a>.tag{padding:0 1.1rem;height:2.3rem;display:inline-flex;align-items:center;justify-content:center}
+.set-r .set-a>.tsw{display:flex;justify-content:center}
 /* Screen Saver: a drop-down the size of the buttons, Preview as a link after the description (v19.17.6) */
-.set-r .sv-sel select{width:9.2rem;height:2.3rem;padding:0 .6rem;border:1px solid var(--line);border-radius:10px;background-color:var(--card);color:var(--blue);font-size:.82rem;font-weight:600}
+.set-r .sv-sel select{width:auto;padding-right:2rem!important;height:2.3rem;padding:0 .6rem;border:1px solid var(--line);border-radius:10px;background-color:var(--card);color:var(--blue);font-size:.82rem;font-weight:600}
 .set-r .sv-pv{display:inline;padding:0;border:0;background:none;color:var(--blue);font:inherit;font-weight:600;cursor:pointer}
 .set-r .sv-pv:hover{text-decoration:underline}
 .set-r>span:first-child{min-width:0}
@@ -276,7 +276,7 @@ body.upd-going .updw-card{opacity:.7}
 #pkpop .pk-none{margin:.4rem .6rem;color:var(--muted);font-size:.85rem}
 /* the faint (A) / (B) note under colour boxes */
 .bar-f .hint,.cut-r .hint{display:block;margin-top:.15rem;font-size:.7rem;color:var(--muted);font-weight:400}
-/* (v19.18.7) the Settings buttons are all 9.2rem wide (was 6.8rem) so Check For Updates fits and every button stays the same size */
+/* (v19.18.11) the Settings buttons fit their words again (the owner preferred that to one width for all), same height */
 /* Deliveries calendar on a short screen (v19.18.9): one line per delivery so the month still fits */
 .dcal-g.tight .dcal-d{padding:.2rem .3rem .3rem;gap:.15rem}
 .dcal-g.tight .dcal-n{min-width:1.35rem;height:1.35rem;font-size:.74rem}
@@ -307,3 +307,17 @@ body[data-theme=dark] .updw-s.c1 h3{color:#5fd39b}body[data-theme=dark] .updw-s.
 .set-r .upd-new{color:#12794c}
 body[data-theme=dark] .set-r .upd-new{color:#5fd39b}
 .updw-r{display:block;margin-bottom:.15rem;color:var(--navy);font-size:.95rem}body[data-theme=dark] .updw-r{color:var(--ink)}
+
+/* (v19.18.11) Floor Boards: pointing at a clickable row shades it instead of turning its dividing line blue (the
+   owner read the blue line as an underline) */
+.nrow.clk-r{border-radius:10px;transition:background-color .15s var(--e-out)}
+.nrow.clk-r:hover{border-color:var(--line);background:var(--hover)}
+
+/* (v19.18.11) Sticky bars (Contact Book's Show and A-Z bars, and the same bars on other pages) are see-through at the
+   top of the page; once the page scrolls and cards pass underneath, they fill in so the cards do not show through */
+.subbar,.azbar{transition:background-color .2s var(--e-out),box-shadow .2s var(--e-out)}
+.main.scrolled .subbar,.main.scrolled .azbar{background:color-mix(in srgb,var(--card) 94%,var(--blue) 6%)!important;box-shadow:0 8px 22px -12px rgba(1,43,89,.45)!important}
+body[data-theme=dark] .main.scrolled .subbar,body[data-theme=dark] .main.scrolled .azbar{background:color-mix(in srgb,var(--card) 92%,#000)!important}
+/* (v19.18.11) Deliveries calendar runs to the bottom of the screen: no spare room kept under it for the Report A
+   Problem button (the calendar's last row has room for it) */
+body[data-view=deliveries] .main:has(.dcal-g)::after{display:none}

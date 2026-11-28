@@ -155,3 +155,44 @@ test('v19.18.6 performance: a still page runs no animations and page surfaces ar
   ]);
   expect(app.errors).toEqual([]);
 });
+
+test('v19.18.11: Contact Book bars fill in once the page scrolls; Floor Boards rows shade (no blue line) when pointed at', async ({
+  app,
+}) => {
+  await app.page.setViewportSize({ width: 1440, height: 900 });
+  await app.go('contacts');
+  const bg = () => app.run(() => getComputedStyle(document.querySelector('#main .azbar')).boxShadow);
+  const still = await bg();
+  await app.run(() => (document.querySelector('#main').scrollTop = 600));
+  await expect(app.page.locator('#main')).toHaveClass(/scrolled/);
+  expect(await bg()).not.toBe(still);
+  await app.run(() => (document.querySelector('#main').scrollTop = 0));
+  await expect(app.page.locator('#main')).not.toHaveClass(/scrolled/);
+  await app.go('live');
+  const row = app.page.locator('#main .nrow.clk-r').first();
+  const line = () => row.evaluate((e) => getComputedStyle(e).borderBottomColor);
+  const before = await line();
+  await row.hover();
+  expect(await line()).toBe(before);
+  expect(app.errors).toEqual([]);
+});
+
+test('v19.18.11: the Deliveries calendar runs to the bottom of the screen', async ({ app }) => {
+  for (const [w, h] of [
+    [1440, 900],
+    [1920, 1080],
+  ]) {
+    await app.page.setViewportSize({ width: w, height: h });
+    await app.go('deliveries');
+    await expect
+      .poll(() =>
+        app.run(() => {
+          const m = document.querySelector('#main'),
+            p = document.querySelector('#main .panel.dcal');
+          return Math.round(m.getBoundingClientRect().bottom - p.getBoundingClientRect().bottom);
+        })
+      )
+      .toBeLessThanOrEqual(40);
+  }
+  expect(app.errors).toEqual([]);
+});

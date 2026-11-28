@@ -787,3 +787,16 @@ page, page build times and a CPU profile). Findings and fixes:
   Now (restarts); otherwise "This is version y, the latest" with Check Again (`updWaiting`, `updChecked` in
   features/app/desktop-app.js; Settings redraws when an update is found).
 - Tests: tests/e2e/desktop-app.spec.js (v19.18.10 and the Settings test).
+
+## v19.18.11: Contact Book bars fill in on scroll, Deliveries calendar full height, Floor Boards hover, Settings buttons fit
+
+- `watchPageScroll()` (ui/shell/shell.js, called from main.js after `shell()`) puts `.scrolled` on `#main` once the page
+  has scrolled; the sticky `.subbar` and `.azbar` then take a near-solid card colour and a shadow (09-consistency.css),
+  so cards no longer show through them (Contact Book, and the same bars on other pages).
+- Floor Boards: a clickable `.nrow` used to turn its bottom divider blue when pointed at (the owner read it as an
+  underline); it now shades the row instead.
+- Deliveries calendar: `delCalFit` no longer keeps 40px spare, and the page's bottom spacer (`.main::after`, room for the
+  Report A Problem button) is hidden on the calendar, so the month runs to the bottom of the screen.
+- Settings buttons fit their words again (auto width, same 2.3rem height); the round-1917 test checks one height and no
+  clipped words.
+- Tests: round-1918.spec.js (two v19.18.11 tests), round-1917.spec.js (Settings).

@@ -73,14 +73,21 @@ test('Fewer Animations calms the page but the screen saver still moves', async (
   expect(['0s', '1e-05s']).toContain(page);
 });
 
-test('Settings: every button in My Settings is the same size; the screen saver note is short', async ({ app }) => {
+test('Settings: the buttons in My Settings are one height and fit their words; the screen saver note is short', async ({
+  app,
+}) => {
   await app.go('settings');
-  const sizes = await app.run(() =>
-    [...document.querySelectorAll('#main .set-c')[0].querySelectorAll('.set-a .btn')].map(
-      (b) => b.offsetWidth + 'x' + b.offsetHeight
-    )
+  const B = await app.run(() =>
+    [...document.querySelectorAll('#main .set-c')[0].querySelectorAll('.set-a .btn')].map((b) => ({
+      w: b.offsetWidth,
+      h: b.offsetHeight,
+      fits: b.scrollWidth <= b.offsetWidth,
+    }))
   );
-  expect(new Set(sizes).size).toBe(1);
+  // (v19.18.11) the owner asked for buttons that fit their words rather than one width for all
+  expect(new Set(B.map((b) => b.h)).size).toBe(1);
+  expect(new Set(B.map((b) => b.w)).size).toBeGreaterThan(1);
+  expect(B.every((b) => b.fits)).toBe(true);
   await expect(app.page.locator('#main .set-r', { hasText: 'Screen Saver' })).toContainText(
     'Starts when this computer is left idle'
   );

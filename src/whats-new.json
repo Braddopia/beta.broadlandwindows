@@ -1,8 +1,1 @@
-{
-  "date": "2026-11-28",
-  "notes": [
-    { "t": "A Fresh What's New", "d": "This window now reads like a proper What's New: the date at the top, and each change in its own section with a heading." },
-    { "t": "Settings", "d": "The Version row tells you when a new version is ready, with an Update Now button. When you are up to date it says so." },
-    { "t": "Deliveries Calendar", "d": "The whole month fits on the screen with nothing to scroll, and it fits again when you resize the window." }
-  ]
-}
+{"date":"2026-11-28","notes":[{"t":"Contact Book","d":"The Show and A to Z bars at the top fill in as you scroll, so the cards no longer show through them."},{"t":"Deliveries Calendar","d":"The month now runs right to the bottom of the screen, like the Calendar page."},{"t":"Floor Boards","d":"Pointing at a delivery shades the whole row instead of drawing a blue line under it."},{"t":"Settings","d":"Each button is as wide as its words again."}]}

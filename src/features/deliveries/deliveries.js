@@ -143,7 +143,8 @@ export function watchDelCalSize() {
   });
 }
 /** (v19.18.4) the calendar's weeks share the height left on the screen, so the whole month shows without scrolling
-    (never smaller than 4rem a week; a busy day can still grow) */
+    (never smaller than 4rem a week; a busy day can still grow). (v19.18.11) it fills the screen to the bottom, like
+    the Calendar page, instead of leaving a gap */
 export function delCalFit() {
   const g = document.querySelector('#main .dcal-g'),
     m = document.querySelector('#main');
@@ -151,7 +152,7 @@ export function delCalFit() {
   const wk = +getComputedStyle(g).getPropertyValue('--wk') || 6,
     head = g.querySelector('.dcal-w'),
     top = g.getBoundingClientRect().top - m.getBoundingClientRect().top + m.scrollTop + (head ? head.offsetHeight : 0);
-  const base = Math.floor((m.clientHeight - top - 40) / wk);
+  const base = Math.floor((m.clientHeight - top) / wk);
   /* (v19.18.9) shrink the weeks until nothing overflows (the page's padding, a busy day's extra height), so the page
      does not scroll at all; full delivery cards first, and one line each only if the month still does not fit */
   const fit = (tight) => {

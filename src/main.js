@@ -318,6 +318,7 @@ featuresDeliveriesDeliveries.watchDelCalSize();
 uiModal.listenForBackdropClicks();
 uiComponentsPopover.listenForOutsideClicks();
 uiShellShell.shell();
+uiShellShell.watchPageScroll();
 featuresLiveBoardsLiveBoards.listenForTvKeys();
 featuresLiveBoardsLiveBoards.startBoardTimers();
 startMigrations.supCon();
