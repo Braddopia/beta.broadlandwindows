@@ -76,6 +76,25 @@ test('Deliveries: the month fits on one screen; the Hallmark Feed bar is on the 
   await expect(app.page.locator('#main')).not.toContainText('Hallmark Feed');
   const bottom = await app.run(() => document.querySelector('#main .dcal-g').getBoundingClientRect().bottom);
   expect(bottom).toBeLessThanOrEqual(900);
+  // (v19.18.9) and the page does not scroll at all, at the usual screen sizes
+  for (const [w, h] of [
+    [1440, 900],
+    [1920, 1080],
+    [1366, 768],
+  ]) {
+    await app.page.setViewportSize({ width: w, height: h });
+    await expect
+      .poll(
+        () =>
+          app.run(() => {
+            const m = document.querySelector('#main');
+            return m.scrollHeight - m.clientHeight;
+          }),
+        { message: w + 'x' + h }
+      )
+      .toBeLessThanOrEqual(0);
+  }
+  await app.page.setViewportSize({ width: 1440, height: 900 });
   await app.run(() => setUI('del.v', 'list'));
   await expect(app.page.locator('#main')).toContainText('Hallmark Feed');
   expect(app.errors).toEqual([]);

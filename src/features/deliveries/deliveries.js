@@ -129,16 +129,44 @@ export function delCal(list) {
       ''
     )}</div>${nodate.length ? `<div class="dcal-nd"><b>No due date yet</b>${nodate.map(chip).join('')}</div>` : ''}</div>`;
 }
+/* start-up step (run once by main.js): the month fits again when the window changes size */
+export function watchDelCalSize() {
+  let t = 0;
+  addEventListener('resize', () => {
+    clearTimeout(t);
+    t = setTimeout(() => {
+      if (document.body.dataset.view != 'deliveries') return;
+      delCalFit();
+      /* once more after the page has settled at its new size */
+      setTimeout(delCalFit, 80);
+    }, 100);
+  });
+}
 /** (v19.18.4) the calendar's weeks share the height left on the screen, so the whole month shows without scrolling
     (never smaller than 4rem a week; a busy day can still grow) */
 export function delCalFit() {
-  const g = document.querySelector('#main .dcal-g');
-  if (!g) return;
+  const g = document.querySelector('#main .dcal-g'),
+    m = document.querySelector('#main');
+  if (!g || !m) return;
   const wk = +getComputedStyle(g).getPropertyValue('--wk') || 6,
     head = g.querySelector('.dcal-w'),
-    top = g.getBoundingClientRect().top + scrollY + (head ? head.offsetHeight : 0),
-    h = Math.floor((innerHeight - top - 40) / wk);
-  g.style.setProperty('--rowh', Math.max(64, h) + 'px');
+    top = g.getBoundingClientRect().top - m.getBoundingClientRect().top + m.scrollTop + (head ? head.offsetHeight : 0);
+  const base = Math.floor((m.clientHeight - top - 40) / wk);
+  /* (v19.18.9) shrink the weeks until nothing overflows (the page's padding, a busy day's extra height), so the page
+     does not scroll at all; full delivery cards first, and one line each only if the month still does not fit */
+  const fit = (tight) => {
+    g.classList.toggle('tight', tight);
+    let h = base,
+      over = 0;
+    for (let i = 0; i < 6; i++) {
+      g.style.setProperty('--rowh', Math.max(44, h) + 'px');
+      over = m.scrollHeight - m.clientHeight;
+      if (over <= 0 || h <= 44) break;
+      h -= Math.ceil(over / wk);
+    }
+    return over;
+  };
+  if (fit(false) > 0) fit(true);
 }
 /* 'Received' opens the delivery on its arrival checks: who checked it, QC, anything damaged */
 export function recvD(id) {

@@ -764,3 +764,11 @@ page, page build times and a CPU profile). Findings and fixes:
   is narrower, and the Details halves stack, with the left list in two columns. 761px to 1560px: the search box is
   9rem so the toolbar fits on one line.
 - The owner offered to show AdminBase; asked for screenshots (names blanked out) to match its spacing further.
+
+## v19.18.9: Deliveries calendar never scrolls
+
+- `delCalFit` (features/deliveries/deliveries.js) now measures what still overflows after sizing the weeks (the page's
+  padding, a busy day's extra height) and takes it off the weeks until #main does not scroll (weeks never under
+  44px). Full delivery cards first; on a short screen where the month still does not fit, each delivery shows on one
+  line (`.dcal-g.tight`, supplier only; details on hover and when opened). It refits when the window is resized
+  (`watchDelCalSize`). Test: tests/e2e/round-1918.spec.js checks 1440×900, 1920×1080 and 1366×768 do not scroll.

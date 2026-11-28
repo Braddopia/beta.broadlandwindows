@@ -277,3 +277,8 @@ body.upd-going .updw-card{opacity:.7}
 /* the faint (A) / (B) note under colour boxes */
 .bar-f .hint,.cut-r .hint{display:block;margin-top:.15rem;font-size:.7rem;color:var(--muted);font-weight:400}
 /* (v19.18.7) the Settings buttons are all 9.2rem wide (was 6.8rem) so Check For Updates fits and every button stays the same size */
+/* Deliveries calendar on a short screen (v19.18.9): one line per delivery so the month still fits */
+.dcal-g.tight .dcal-d{padding:.2rem .3rem .3rem;gap:.15rem}
+.dcal-g.tight .dcal-n{min-width:1.35rem;height:1.35rem;font-size:.74rem}
+.dcal-g.tight .dcal-c{padding:.12rem .35rem}
+.dcal-g.tight .dcal-c span{display:none}

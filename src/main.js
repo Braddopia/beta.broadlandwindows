@@ -314,6 +314,7 @@ featuresSuppliersSuppliers.plugSuppliersIn();
 featuresTagsTags.plugTagsIn();
 featuresRecordsRecordPage.startRecordPage();
 featuresSearchSiteIndex.warmSiteIndex();
+featuresDeliveriesDeliveries.watchDelCalSize();
 uiModal.listenForBackdropClicks();
 uiComponentsPopover.listenForOutsideClicks();
 uiShellShell.shell();
