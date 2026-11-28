@@ -5,7 +5,8 @@
    on the contract, and lists can be saved and opened again. Profiles can come from Inventory once they
    are marked in their Inventory window (Cutting: "Cut from full bars?"). */
 import { plugInCombo } from '../../ui/components/pickers.js';
-import { onClick, onEvent } from '../../core/actions.js';
+import { closeFpop, openFpop } from '../../ui/components/popover.js';
+import { actJson, onClick, onEvent } from '../../core/actions.js';
 import { fd, today } from '../../core/dates.js';
 import { $ } from '../../core/dom.js';
 import { html, raw } from '../../core/html.js';
@@ -179,7 +180,7 @@ export function vBars() {
     k = barContract(D),
     L = barProducts();
   return String(html`<div class="head"><div><h1 id="barTitle">${barTitle(D)}</h1><span class="muted">Cut lengths of profile from full bars with the least waste</span></div>
-    <div class="tools"><button class="mini" ${raw(onClick('barJobs'))}>Saved Lists (${D.jobs.length})</button><button class="mini" ${raw(onClick('barNew'))}>New List</button><button class="mini" ${raw(onClick('barSave'))}>Save</button><button class="mini" ${raw(onClick('barSettings'))}>Saw Settings</button><button class="mini" id="barBookB" ${raw(onClick('barBook'))} ${L.some((x) => D.profiles.some((p) => String(p.code).toUpperCase() == String(x.r.item).toUpperCase())) ? '' : raw('hidden')}>Book Into Stock</button><button class="mini pri" id="barToC" ${raw(onClick('barToContract'))} ${k && canSee('contracts') ? '' : raw('hidden')}>Save To Contract</button><button class="btn" ${raw(onClick('barPrint'))}>Print Cutting List</button></div></div>
+    <div class="tools"><button class="mini" ${raw(onClick('barNew'))}>Reset</button><button class="mini" ${raw(onClick('barSave'))}>Save</button><button class="mini bar-more" id="barMoreB" aria-haspopup="true" data-act="barMore" data-args="${raw(actJson(['this'], 1))}">More<span aria-hidden="true" class="svc-chev">▾</span></button><button class="mini pri" id="barToC" ${raw(onClick('barToContract'))} ${k && canSee('contracts') ? '' : raw('hidden')}>Save To Contract</button><button class="btn" ${raw(onClick('barPrint'))}>Print Cutting List</button></div></div>
   <div class="cut-in bar-in" ${raw(onEvent('oninput', 'barEdit', 'event'))} ${raw(onEvent('onchange', 'barEdit', 'event'))}>
     <div class="panel cut-job"><h2><span>Job</span><small class="muted nocap" id="barJobHint">${k ? 'Contract ' + k.id + ' found: Save To Contract keeps the list with its documents' : 'Type the contract number to link the list to it'}</small></h2><div class="cut-og cut-eq">
       <div class="ff"><label for="bar_job_no">Job Number</label><input id="bar_job_no" maxlength="30" data-combo="jobs" value="${D.jobNo || ''}" autocomplete="off"></div>
@@ -263,10 +264,12 @@ export function barEdit(e) {
       /* a profile linked in Inventory fills in its description, colour and bar length */
       const lp = findProd(p.code);
       if (lp) {
-        p.desc = p.desc || lp.r.desc || '';
+        /* (v19.18.13) always the product's details as they are now in Inventory, so a colour changed there comes
+           through when the code is typed again */
         const col = (v) => (v && v != '-' ? v : '');
-        p.cIn = p.cIn || col(lp.r.cInName);
-        p.cOut = p.cOut || col(lp.r.cOutName);
+        p.desc = lp.r.desc || p.desc || '';
+        p.cIn = col(lp.r.cInName);
+        p.cOut = col(lp.r.cOutName);
         p.bar = lp.bar;
         const set = (k, v) => {
           const e = $('#bar_p_' + pi + '_' + k);
@@ -278,8 +281,6 @@ export function barEdit(e) {
         set('bar', p.bar);
       }
     }
-    const bk = $('#barBookB');
-    if (bk) bk.hidden = !D.profiles.some((x) => findProd(x.code));
     return refresh(pi);
   }
   const pi = +m[2],
@@ -328,11 +329,27 @@ export function barProfDel(pi) {
     render(true);
   });
 }
+/** (v19.18.13) the less used buttons, under More: saved lists, saw settings, booking offcuts into stock */
+export function barMore(btn) {
+  if (!btn) return;
+  const D = barData(),
+    book = D.profiles.some((p) => findProd(p.code)),
+    item = (fn, t) => String(html`<button type="button" class="pm-i" ${raw(onClick('barMenu', fn))}>${t}</button>`);
+  openFpop(
+    btn,
+    `<div class="pm" role="menu">${item('barJobs', 'Saved Lists (' + D.jobs.length + ')')}${item('barSettings', 'Saw Settings')}${book ? item('barBook', 'Book Into Stock') : ''}</div>`
+  );
+}
+export function barMenu(fn) {
+  closeFpop();
+  ({ barJobs, barSettings, barBook })[fn]();
+}
+/** Reset: clear the list on screen and start again (saved lists are kept) */
 export function barNew() {
   askIn(
-    'Start a new cutting list?',
-    'The list on screen is cleared. Save it first if you want to keep it.',
-    'Start New',
+    'Reset the cutting list?',
+    'Everything on screen is cleared so you can start again. Save it first if you want to keep it; your saved lists are kept.',
+    'Reset',
     () => {
       const jobs = barData().jobs;
       state.bars = { ...BLANK(), jobs, trimV2: 1, kerfV2: 1 };

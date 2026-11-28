@@ -817,3 +817,19 @@ page, page build times and a CPU profile). Findings and fixes:
   is shown. Folded items take tabindex -1. CSS `.nlf` / `.nfold` at the end of 09-consistency.css (grid-rows animation,
   .3s `--e-out`).
 - Tests: round-191812.spec.js (four tests); round-1917.spec.js reads the Processing items inside `.nfold`.
+
+## v19.18.13: Cutting Optimiser colours from Inventory, fewer buttons and Reset; Settings buttons the site's size
+
+- Cutting Optimiser (features/bars/bars.js `barEdit`): typing a linked profile code now always takes the product's
+  description and colours as they are in Inventory now (it used to keep whatever the boxes already held, so a colour
+  changed in Inventory never came through).
+- Toolbar: Reset (was New List; same confirm, now "Reset the cutting list?"), Save, More (▾), Save To Contract (only
+  with a contract), Print Cutting List. More (`barMore`, the shared `#fpop` menu) holds Saved Lists, Saw Settings and
+  Book Into Stock (only when a profile is linked). `#barBookB` is gone. The Panel Optimiser is unchanged.
+- Settings: row buttons, the Light/Dark switch, tags and the Screen Saver drop-down are 1.9rem, the size of the small
+  outlined buttons elsewhere (were 2.3rem, taller than the rest of the site). End of 09-consistency.css.
+- The owner works in the Standard User account for now: check pages in that account (`app.role('staff')`).
+- Tests: round-191813.spec.js; cutting-map and top-half open Saw Settings / Book Into Stock from More.
+- Job Stock Tags: Change moves the cursor into the Warning box 30ms later; it now leaves it alone when the person has
+  already clicked into another box (`tagWording`). That race made round-1917-3's tag test fail on GitHub and once
+  locally (the typing went into the wrong box). The test also waits for the box to unlock before typing.

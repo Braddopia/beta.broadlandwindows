@@ -338,3 +338,9 @@ body[data-theme=dark] .msn-t{background-color:color-mix(in srgb,var(--card) 70%,
 .nfold{display:grid;grid-template-rows:0fr;flex-shrink:0;transition:grid-template-rows .3s var(--e-out)}
 .nfold.open{grid-template-rows:1fr}
 .nfold>div{min-height:0;overflow:hidden;display:flex;flex-direction:column;gap:1px}
+/* (v19.18.13) Settings buttons the same size as the small outlined buttons on every other page (they were 2.3rem,
+   taller than the rest of the site); the Light/Dark switch, tags and the Screen Saver drop-down match them */
+.set-r .set-a>.btn,.set-r .set-a>label.btn{box-sizing:border-box;height:1.9rem;min-height:0;padding:0 .8rem;font-size:.78rem}
+.set-r .set-a .seg,.set-r .set-a .seg2,.set-r .set-a>.tag,.set-r .sv-sel select{box-sizing:border-box;height:1.9rem}
+.set-r .set-a .seg button{height:100%;padding-top:0;padding-bottom:0}
+.set-r .sv-sel select{font-size:.78rem}

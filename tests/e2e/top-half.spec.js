@@ -165,7 +165,8 @@ test('a new lead puts its customer in the Contact Book, a success tick shows, an
 test('a pop-up never moves the cursor out of a box you have already started typing in', async ({ app }) => {
   await app.role('beta');
   await app.go('bars');
-  await app.page.click('#main .tools >> text=Saw Settings');
+  await app.page.click('#barMoreB');
+  await app.page.click('#fpop >> text=Saw Settings');
   /* straight into the second box before the window has settled */
   await app.page.click('#f_trim');
   await app.page.keyboard.type('12');

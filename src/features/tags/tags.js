@@ -110,7 +110,13 @@ const LOCK = 'M7 11V8a5 5 0 0110 0v3M5 11h14v10H5z';
 export function tagWording() {
   unlocked = !unlocked;
   render(true);
-  if (unlocked) setTimeout(() => $('#tag_warn') && $('#tag_warn').focus(), 30);
+  /* into the Warning box, unless the person has already clicked into another box (never move a cursor that is in use) */
+  if (unlocked)
+    setTimeout(() => {
+      const a = document.activeElement;
+      if (a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)) return;
+      if ($('#tag_warn')) $('#tag_warn').focus();
+    }, 30);
 }
 /* start-up step (run once by main.js): the colour boxes offer the app's own list of colours as you type */
 export function plugTagsIn() {

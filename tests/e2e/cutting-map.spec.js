@@ -310,7 +310,8 @@ test('Cutting Optimiser: cuts with angles plan into bars as you type, print as a
   await expect(app.page.locator('#main h1')).toHaveText('Cutting Optimiser');
   // a new list: 10mm saw blade, 50mm off each end, offcuts kept only from 1M; the saw sheet this test copies used 4 and 10
   expect(await app.run(() => [state.bars.kerf, state.bars.trim, state.bars.keep])).toEqual([10, 50, 1000]);
-  await app.page.click('#main .tools >> text=Saw Settings');
+  await app.page.click('#barMoreB');
+  await app.page.click('#fpop >> text=Saw Settings');
   await expect(app.page.locator('#f_kerf')).toHaveValue('10');
   await app.page.fill('#f_kerf', '4');
   await app.page.fill('#f_trim', '10');
@@ -373,7 +374,8 @@ test('Cutting Optimiser: cuts with angles plan into bars as you type, print as a
   await expect(app.page.locator('.toast')).toContainText('Saved to contract 1023421');
   // Book Into Stock: the 2 full bars come out, and the 1,624mm offcut goes back in as its own stock line
   const before = await app.run((p) => prod(p).stock, pid);
-  await app.page.click('#barBookB');
+  await app.page.click('#barMoreB');
+  await app.page.click('#fpop >> text=Book Into Stock');
   await expect(app.page.locator('#mbox')).toContainText('1,624mm');
   await app.page.click('#mbox .mact >> text=Book Into Stock');
   expect(await app.run((p) => prod(p).stock, pid)).toBe(before - 2);

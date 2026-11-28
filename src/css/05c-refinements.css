@@ -801,7 +801,6 @@ body[data-theme=dark] .ie-f legend{color:#e8eef8}
 .bar-r input::-webkit-calendar-picker-indicator{display:none!important}
 .bar-r{grid-template-columns:.7rem minmax(0,1fr) 7.5rem 7.5rem 5.5rem 5.8rem 5.8rem 2rem}
 .bar-ref input{text-align:center}
-#barBookB[hidden]{display:none!important}
 .bar-link td.od{color:var(--red);font-weight:700}
 .bar-link small.sub{display:block;color:var(--muted);font-size:.74rem}
 /* optimiser rows on a phone: the name on its own line with the remove button, the sizes in a row underneath */
